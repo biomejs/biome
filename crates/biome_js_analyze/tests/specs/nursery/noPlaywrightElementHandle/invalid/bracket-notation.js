@@ -1,0 +1,12 @@
+// Test bracket notation for element handles
+const handle1 = await page["$"]("button");
+
+const handle2 = await page[`$`]("button");
+
+const handles1 = await page["$$"]("a");
+
+const handles2 = await page[`$$`]("a");
+
+await this.page["$"]("input");
+
+await this.page[`$$`]("div");

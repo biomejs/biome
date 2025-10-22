@@ -1,0 +1,154 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: all-methods.js
+---
+# Input
+```js
+// Test all methods that support networkidle option
+page.waitForLoadState("networkidle");
+
+page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+
+page.goto("http://example.com", { waitUntil: "networkidle" });
+
+page.reload({ waitUntil: "networkidle" });
+
+page.setContent("<html></html>", { waitUntil: "networkidle" });
+
+page.goBack({ waitUntil: "networkidle" });
+
+page.goForward({ waitUntil: "networkidle" });
+
+```
+
+# Diagnostics
+```
+all-methods.js:2:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    1 │ // Test all methods that support networkidle option
+  > 2 │ page.waitForLoadState("networkidle");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:4:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    2 │ page.waitForLoadState("networkidle");
+    3 │ 
+  > 4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:6:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+    5 │ 
+  > 6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ page.reload({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:8:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+     6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+     7 │ 
+   > 8 │ page.reload({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:10:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+     8 │ page.reload({ waitUntil: "networkidle" });
+     9 │ 
+  > 10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ page.goBack({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:12:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+    11 │ 
+  > 12 │ page.goBack({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ page.goForward({ waitUntil: "networkidle" });
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```
+
+```
+all-methods.js:14:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+    12 │ page.goBack({ waitUntil: "networkidle" });
+    13 │ 
+  > 14 │ page.goForward({ waitUntil: "networkidle" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```

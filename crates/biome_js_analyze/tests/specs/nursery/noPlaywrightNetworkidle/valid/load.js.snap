@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: load.js
+---
+# Input
+```js
+await page.waitForLoadState('load');
+await page.goto('https://example.com');
+await page.locator('.content').waitFor();
+
+
+
+```

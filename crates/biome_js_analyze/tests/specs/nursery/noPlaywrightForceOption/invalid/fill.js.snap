@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: fill.js
+---
+# Input
+```js
+await page.locator('input').fill('text', { force: true });
+
+
+
+```
+
+# Diagnostics
+```
+fill.js:1:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of { force: true } option.
+  
+  > 1 │ await page.locator('input').fill('text', { force: true });
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i The force option bypasses actionability checks and can lead to unreliable tests.
+  
+  i Fix the underlying issue instead of forcing the action.
+  
+
+```

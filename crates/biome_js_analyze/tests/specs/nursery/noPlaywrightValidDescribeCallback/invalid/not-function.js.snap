@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: not-function.js
+---
+# Input
+```js
+// Test non-function callbacks
+test.describe("foo", "foo2");
+
+test.describe("bar", 42);
+
+test.describe("baz", { tag: ["@slow"] });
+
+describe("qux", null);
+
+describe("suite", undefined);
+
+test.describe("another", someVariable);
+
+```
+
+# Diagnostics
+```
+not-function.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    1 │ // Test non-function callbacks
+  > 2 │ test.describe("foo", "foo2");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ test.describe("bar", 42);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+not-function.js:4:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    2 │ test.describe("foo", "foo2");
+    3 │ 
+  > 4 │ test.describe("bar", 42);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ test.describe("baz", { tag: ["@slow"] });
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+not-function.js:6:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    4 │ test.describe("bar", 42);
+    5 │ 
+  > 6 │ test.describe("baz", { tag: ["@slow"] });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ describe("qux", null);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+not-function.js:8:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+     6 │ test.describe("baz", { tag: ["@slow"] });
+     7 │ 
+   > 8 │ describe("qux", null);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ describe("suite", undefined);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+not-function.js:10:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+     8 │ describe("qux", null);
+     9 │ 
+  > 10 │ describe("suite", undefined);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ test.describe("another", someVariable);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+not-function.js:12:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    10 │ describe("suite", undefined);
+    11 │ 
+  > 12 │ test.describe("another", someVariable);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```

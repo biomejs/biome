@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bracket-notation.js
+---
+# Input
+```js
+// Test bracket notation for networkidle option
+page["waitForLoadState"]("networkidle");
+
+page[`waitForLoadState`]("networkidle");
+
+page["waitForURL"](url, { waitUntil: "networkidle" });
+
+page[`goto`](url, { waitUntil: "networkidle" });
+
+page["reload"](url, { waitUntil: "networkidle" });
+
+```

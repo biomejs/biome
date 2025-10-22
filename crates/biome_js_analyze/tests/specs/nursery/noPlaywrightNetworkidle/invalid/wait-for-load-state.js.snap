@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: wait-for-load-state.js
+---
+# Input
+```js
+await page.waitForLoadState('networkidle');
+
+
+
+```
+
+# Diagnostics
+```
+wait-for-load-state.js:1:7 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of networkidle option.
+  
+  > 1 │ await page.waitForLoadState('networkidle');
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i The networkidle event is unreliable and can lead to flaky tests.
+  
+  i Use web-first assertions or wait for specific elements instead.
+  
+
+```

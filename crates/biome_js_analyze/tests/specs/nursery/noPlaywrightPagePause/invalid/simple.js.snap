@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: simple.js
+---
+# Input
+```js
+await page.pause();
+
+
+```
+
+# Diagnostics
+```
+simple.js:1:7 lint/nursery/noPlaywrightPagePause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.pause().
+  
+  > 1 │ await page.pause();
+      │       ^^^^^^^^^^^^
+    2 │ 
+  
+  i page.pause() is a debugging utility and should not be committed to version control.
+  
+  i Remove the pause() call or use a proper debugging strategy.
+  
+
+```

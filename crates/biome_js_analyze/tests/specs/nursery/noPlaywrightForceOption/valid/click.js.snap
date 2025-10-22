@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: click.js
+---
+# Input
+```js
+await page.locator('button').click();
+await page.locator('check').check();
+await page.locator('input').fill('text');
+
+
+
+```

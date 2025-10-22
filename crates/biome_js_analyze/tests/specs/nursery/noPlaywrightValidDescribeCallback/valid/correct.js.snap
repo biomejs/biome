@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: correct.js
+---
+# Input
+```js
+test.describe('suite', () => {
+    test('one', async ({ page }) => {});
+    test('two', async ({ page }) => {});
+});
+
+describe('suite', function() {
+    test('one', async ({ page }) => {});
+});
+
+
+
+```

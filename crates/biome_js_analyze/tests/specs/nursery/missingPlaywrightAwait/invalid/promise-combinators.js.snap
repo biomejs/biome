@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promise-combinators.js
+---
+# Input
+```js
+test('Promise.allSettled', async ({ page }) => {
+    Promise.allSettled([
+        expect(page).toBeVisible(),
+        expect(page).toHaveText('foo')
+    ]);
+});
+
+test('Promise.race', async ({ page }) => {
+    Promise.race([
+        expect(page).toBeVisible(),
+        expect(page).toHaveText('foo')
+    ]);
+});
+
+test('Promise.any', async ({ page }) => {
+    Promise.any([
+        expect(page).toBeVisible(),
+        expect(page).toHaveText('foo')
+    ]);
+});
+
+```
+
+# Diagnostics
+```
+promise-combinators.js:3:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ test('Promise.allSettled', async ({ page }) => {
+    2 │     Promise.allSettled([
+  > 3 │         expect(page).toBeVisible(),
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │         expect(page).toHaveText('foo')
+    5 │     ]);
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+     1  1 │   test('Promise.allSettled', async ({ page }) => {
+     2    │ - ····Promise.allSettled([
+        2 │ + ····await
+        3 │ + ····Promise.allSettled([
+     3  4 │           expect(page).toBeVisible(),
+     4  5 │           expect(page).toHaveText('foo')
+  
+
+```
+
+```
+promise-combinators.js:4:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    2 │     Promise.allSettled([
+    3 │         expect(page).toBeVisible(),
+  > 4 │         expect(page).toHaveText('foo')
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     ]);
+    6 │ });
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+     1  1 │   test('Promise.allSettled', async ({ page }) => {
+     2    │ - ····Promise.allSettled([
+        2 │ + ····await
+        3 │ + ····Promise.allSettled([
+     3  4 │           expect(page).toBeVisible(),
+     4  5 │           expect(page).toHaveText('foo')
+  
+
+```
+
+```
+promise-combinators.js:10:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+     8 │ test('Promise.race', async ({ page }) => {
+     9 │     Promise.race([
+  > 10 │         expect(page).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │         expect(page).toHaveText('foo')
+    12 │     ]);
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+     7  7 │   
+     8  8 │   test('Promise.race', async ({ page }) => {
+     9    │ - ····Promise.race([
+        9 │ + ····await
+       10 │ + ····Promise.race([
+    10 11 │           expect(page).toBeVisible(),
+    11 12 │           expect(page).toHaveText('foo')
+  
+
+```
+
+```
+promise-combinators.js:11:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+     9 │     Promise.race([
+    10 │         expect(page).toBeVisible(),
+  > 11 │         expect(page).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │     ]);
+    13 │ });
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+     7  7 │   
+     8  8 │   test('Promise.race', async ({ page }) => {
+     9    │ - ····Promise.race([
+        9 │ + ····await
+       10 │ + ····Promise.race([
+    10 11 │           expect(page).toBeVisible(),
+    11 12 │           expect(page).toHaveText('foo')
+  
+
+```
+
+```
+promise-combinators.js:17:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    15 │ test('Promise.any', async ({ page }) => {
+    16 │     Promise.any([
+  > 17 │         expect(page).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │         expect(page).toHaveText('foo')
+    19 │     ]);
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+    14 14 │   
+    15 15 │   test('Promise.any', async ({ page }) => {
+    16    │ - ····Promise.any([
+       16 │ + ····await
+       17 │ + ····Promise.any([
+    17 18 │           expect(page).toBeVisible(),
+    18 19 │           expect(page).toHaveText('foo')
+  
+
+```
+
+```
+promise-combinators.js:18:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    16 │     Promise.any([
+    17 │         expect(page).toBeVisible(),
+  > 18 │         expect(page).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │     ]);
+    20 │ });
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await to Promise combinator
+  
+    14 14 │   
+    15 15 │   test('Promise.any', async ({ page }) => {
+    16    │ - ····Promise.any([
+       16 │ + ····await
+       17 │ + ····Promise.any([
+    17 18 │           expect(page).toBeVisible(),
+    18 19 │           expect(page).toHaveText('foo')
+  
+
+```

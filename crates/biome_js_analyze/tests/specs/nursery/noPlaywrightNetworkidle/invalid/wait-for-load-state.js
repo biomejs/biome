@@ -1,0 +1,3 @@
+await page.waitForLoadState('networkidle');
+
+

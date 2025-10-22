@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nested-calls.js
+---
+# Input
+```js
+// Test nested element handle calls
+const button1 = await (await page.$("button"));
+
+const button2 = await page.$("#foo");
+
+await (await page.$$("div"));
+
+let handle;
+handle = await page.$("input");
+
+```
+
+# Diagnostics
+```
+nested-calls.js:2:30 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+    1 │ // Test nested element handle calls
+  > 2 │ const button1 = await (await page.$("button"));
+      │                              ^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const button2 = await page.$("#foo");
+  
+  i Element handles like page.$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+
+```
+
+```
+nested-calls.js:4:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+    2 │ const button1 = await (await page.$("button"));
+    3 │ 
+  > 4 │ const button2 = await page.$("#foo");
+      │                       ^^^^^^^^^^^^^^
+    5 │ 
+    6 │ await (await page.$$("div"));
+  
+  i Element handles like page.$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+
+```
+
+```
+nested-calls.js:6:14 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+    4 │ const button2 = await page.$("#foo");
+    5 │ 
+  > 6 │ await (await page.$$("div"));
+      │              ^^^^^^^^^^^^^^
+    7 │ 
+    8 │ let handle;
+  
+  i Element handles like page.$$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+
+```
+
+```
+nested-calls.js:9:16 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+     8 │ let handle;
+   > 9 │ handle = await page.$("input");
+       │                ^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Element handles like page.$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+
+```

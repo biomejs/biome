@@ -163,6 +163,8 @@ pub enum RuleSource {
     EslintPackageJson(&'static str),
     /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
     EslintPackageJsonDependencies(&'static str),
+    /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
+    EslintPlaywright(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -213,6 +215,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintPackageJsonDependencies(_) => {
                 write!(f, "eslint-plugin-package-json-dependencies")
             }
+            Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
         }
     }
 }
@@ -268,6 +271,7 @@ impl RuleSource {
             | Self::EslintJsxA11y(rule_name)
             | Self::EslintJsDoc(rule_name)
             | Self::EslintPerfectionist(rule_name)
+            | Self::EslintPlaywright(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
@@ -337,6 +341,7 @@ impl RuleSource {
             Self::EslintPackageJsonDependencies(rule_name) => {
                 format!("package-json-dependencies/{rule_name}")
             }
+            Self::EslintPlaywright(rule_name) => format!("playwright/{rule_name}"),
         }
     }
 
@@ -377,6 +382,7 @@ impl RuleSource {
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
             Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
         }
     }
 
@@ -447,6 +453,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Playwright testing library rules
+    Playwright,
     /// Qwik framework rules
     Qwik,
     /// Vue.js framework rules
@@ -465,6 +473,7 @@ impl Display for RuleDomain {
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
+            Self::Playwright => fmt.write_str("playwright"),
             Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
@@ -501,6 +510,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
+            Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Qwik => &[
                 &("@builder.io/qwik", ">=1.0.0"),
                 &("@qwik.dev/core", ">=2.0.0"),
@@ -529,6 +539,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[],
             Self::Next => &[],
+            Self::Playwright => &["test", "expect"],
             Self::Qwik => &[],
             Self::Vue => &[],
             Self::Project => &[],

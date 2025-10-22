@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: describe-skip.js
+---
+# Input
+```js
+test.describe.skip('skip suite', () => {
+    test('one', async ({ page }) => {});
+    test('two', async ({ page }) => {});
+});
+
+
+```
+
+# Diagnostics
+```
+describe-skip.js:1:1 lint/nursery/noPlaywrightSkippedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected skipped test using .skip annotation.
+  
+  > 1 │ test.describe.skip('skip suite', () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     test('one', async ({ page }) => {});
+  > 3 │     test('two', async ({ page }) => {});
+  > 4 │ });
+      │ ^^
+    5 │ 
+  
+  i Skipped tests should not be committed to version control.
+  
+  i Either remove the test or complete the implementation and remove the .skip annotation.
+  
+
+```

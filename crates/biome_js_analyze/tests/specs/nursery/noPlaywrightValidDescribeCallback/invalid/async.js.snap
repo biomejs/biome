@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: async.js
+---
+# Input
+```js
+test.describe('suite', async () => {
+    test('one', async ({ page }) => {});
+});
+
+
+
+```
+
+# Diagnostics
+```
+async.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not be async.
+  
+  > 1 │ test.describe('suite', async () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     test('one', async ({ page }) => {});
+  > 3 │ });
+      │ ^^
+    4 │ 
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+
+```
