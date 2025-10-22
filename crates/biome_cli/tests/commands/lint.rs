@@ -2322,6 +2322,30 @@ fn should_error_if_changed_flag_is_used_without_since_or_default_branch_config()
 }
 
 #[test]
+fn should_skip_missing_changed_files() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_changed_files(Box::new(|| vec![String::from("missing.js")]));
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--changed", "--since=main"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_skip_missing_changed_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_process_changed_files_if_changed_flag_is_set_and_default_branch_is_configured() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
