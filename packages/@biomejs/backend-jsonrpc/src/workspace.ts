@@ -9074,7 +9074,6 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
-	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
