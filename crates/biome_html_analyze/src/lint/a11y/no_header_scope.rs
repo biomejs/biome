@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// - [WCAG 4.1.1](https://www.w3.org/WAI/WCAG21/Understanding/parsing)
     ///
     pub NoHeaderScope {
-        version: "next",
+        version: "2.3.0",
         name: "noHeaderScope",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("scope").same()],

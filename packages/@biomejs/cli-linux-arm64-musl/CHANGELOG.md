@@ -1,5 +1,7 @@
 # @biomejs/cli-linux-arm64-musl
 
+## 2.3.0
+
 ## 2.2.7
 
 ## 2.2.6

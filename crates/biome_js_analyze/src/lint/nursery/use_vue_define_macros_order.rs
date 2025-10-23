@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueDefineMacrosOrder {
-        version: "next",
+        version: "2.3.0",
         name: "useVueDefineMacrosOrder",
         language: "js",
         sources: &[RuleSource::EslintVueJs("define-macros-order").same()],
