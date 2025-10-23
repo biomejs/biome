@@ -11,6 +11,7 @@ use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
+use biome_diagnostics::Severity;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
@@ -36,6 +37,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_linter: Option<JsonLinterConfiguration>,
     pub(crate) css_linter: Option<CssLinterConfiguration>,
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
+    pub(crate) fix_level: Severity,
 }
 
 impl CommandRunner for LintCommandPayload {
@@ -143,6 +145,7 @@ impl CommandRunner for LintCommandPayload {
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
             skip_parse_errors: cli_options.skip_parse_errors,
+            fix_level: self.fix_level,
         })
         .set_report(cli_options))
     }

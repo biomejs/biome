@@ -111,6 +111,9 @@ pub enum TraversalMode {
 
         /// It skips parse errors
         skip_parse_errors: bool,
+
+        /// The minimum level of diagnostics to fix
+        fix_level: biome_diagnostics::Severity,
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
@@ -139,6 +142,9 @@ pub enum TraversalMode {
 
         /// It skips parse errors
         skip_parse_errors: bool,
+
+        /// The minimum level of diagnostics to fix
+        fix_level: biome_diagnostics::Severity,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -508,6 +514,14 @@ impl Execution {
             TraversalMode::CI { enforce_assist, .. } => enforce_assist,
             TraversalMode::Check { enforce_assist, .. } => enforce_assist,
             _ => false,
+        }
+    }
+
+    pub(crate) fn get_fix_level(&self) -> biome_diagnostics::Severity {
+        match &self.traversal_mode {
+            TraversalMode::Check { fix_level, .. } => *fix_level,
+            TraversalMode::Lint { fix_level, .. } => *fix_level,
+            _ => biome_diagnostics::Severity::default(),
         }
     }
 }

@@ -554,7 +554,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
             if let Some(diagnostic) = current_diagnostic.as_ref() {
                 // Check if we should skip this diagnostic based on its level
-                if let Some(min_level) = params.diagnostic_level {
+                if let Some(min_level) = params.fix_level {
                     let diagnostic_severity =
                         get_diagnostic_severity(diagnostic, rules.as_deref());
                     if diagnostic_severity < min_level {

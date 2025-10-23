@@ -172,7 +172,7 @@ pub(crate) fn run<'a>(
                 suppression_reason: None,
                 enabled_rules: vec![],
                 rule_categories: rule_categories.build(),
-                diagnostic_level: Some(cli_options.diagnostic_level),
+                fix_level: Some(mode.get_fix_level()),
             })?;
             let code = fix_file_result.code;
             let output = match biome_path.extension() {

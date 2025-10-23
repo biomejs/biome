@@ -415,7 +415,7 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     /// The minimum diagnostic level to fix
-    pub(crate) diagnostic_level: Option<biome_diagnostics::Severity>,
+    pub(crate) fix_level: Option<biome_diagnostics::Severity>,
 }
 
 #[derive(Default)]

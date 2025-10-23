@@ -352,7 +352,7 @@ fn fix_all(
         enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: categories.build(),
-        diagnostic_level: None,
+        fix_level: None,
     })?;
 
     let output = match path.as_path().extension() {

@@ -72,7 +72,7 @@ pub(crate) fn analyze_with_guard<'ctx>(
                 only.clone(),
                 skip.clone(),
                 Some(suppression_explanation.to_string()),
-                Some(ctx.diagnostic_level),
+                Some(ctx.fix_level),
             )
             .with_file_path_and_code(
                 workspace_file.path.to_string(),

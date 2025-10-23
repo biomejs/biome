@@ -8,6 +8,7 @@ use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
+use biome_diagnostics::Severity;
 use biome_fs::FileSystem;
 use biome_service::{Workspace, WorkspaceError, configuration::LoadedConfiguration};
 use std::ffi::OsString;
@@ -26,6 +27,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) fix_level: Severity,
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
@@ -144,6 +146,7 @@ impl CommandRunner for CheckCommandPayload {
             vcs_targeted: (self.staged, self.changed).into(),
             enforce_assist: self.enforce_assist,
             skip_parse_errors: cli_options.skip_parse_errors,
+            fix_level: self.fix_level,
         })
         .set_report(cli_options))
     }

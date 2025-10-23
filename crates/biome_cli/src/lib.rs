@@ -91,6 +91,7 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
+                fix_level,
             } => run_command(
                 self,
                 &cli_options,
@@ -108,6 +109,7 @@ impl<'app> CliSession<'app> {
                     staged,
                     changed,
                     since,
+                    fix_level,
                 },
             ),
             BiomeCommand::Lint {
@@ -131,6 +133,7 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
+                fix_level,
             } => run_command(
                 self,
                 &cli_options,
@@ -154,6 +157,7 @@ impl<'app> CliSession<'app> {
                     javascript_linter,
                     json_linter,
                     graphql_linter,
+                    fix_level,
                 },
             ),
             BiomeCommand::Ci {

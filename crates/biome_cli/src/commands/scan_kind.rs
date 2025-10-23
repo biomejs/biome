@@ -94,6 +94,7 @@ mod tests {
             suppress: false,
             suppression_reason: None,
             skip_parse_errors: false,
+            fix_level: biome_diagnostics::Severity::default(),
         });
 
         let root_dir = Utf8Path::new("/");
@@ -125,6 +126,7 @@ mod tests {
             vcs_targeted: VcsTargeted::default(),
             skip_parse_errors: false,
             enforce_assist: true,
+            fix_level: biome_diagnostics::Severity::default(),
         });
 
         let config = Configuration {

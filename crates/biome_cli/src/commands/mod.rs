@@ -126,6 +126,15 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
+        /// The level of diagnostics to fix. In order, from the lowest to the most important: info, warn, error. Passing `--fix-level=error` will cause Biome only to fix error-level diagnostics contain only errors.
+        #[bpaf(
+            long("fix-level"),
+            argument("info|warn|error"),
+            fallback(Severity::default()),
+            display_fallback
+        )]
+        fix_level: Severity,
+
         /// Allow enabling or disabling the formatter check.
         #[bpaf(
             long("formatter-enabled"),
@@ -273,6 +282,15 @@ pub enum BiomeCommand {
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
+
+        /// The level of diagnostics to fix. In order, from the lowest to the most important: info, warn, error. Passing `--fix-level=error` will cause Biome only to fix error-level diagnostics contain only errors.
+        #[bpaf(
+            long("fix-level"),
+            argument("info|warn|error"),
+            fallback(Severity::default()),
+            display_fallback
+        )]
+        fix_level: Severity,
     },
     /// Run the formatter on a set of files.
     #[bpaf(command)]

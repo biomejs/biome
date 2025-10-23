@@ -966,7 +966,7 @@ export const squash = function squash() {};
 }
 
 #[test]
-fn diagnostic_level_respects_fix_filtering() {
+fn fix_level_respects_fix_filtering() {
     use biome_analyze::RuleCategoriesBuilder;
     use biome_diagnostics::Severity;
     use crate::workspace::{FixFileMode, FixFileParams};
@@ -1019,7 +1019,7 @@ if (x == 1) {
 
     let rule_categories = RuleCategoriesBuilder::default().with_lint().build();
 
-    // Test 1: With diagnostic_level=error, should only fix error-level violations
+    // Test 1: With fix_level=error, should only fix error-level violations
     let result_error_level = workspace
         .fix_file(FixFileParams {
             project_key,
@@ -1031,7 +1031,7 @@ if (x == 1) {
             enabled_rules: vec![],
             rule_categories,
             suppression_reason: None,
-            diagnostic_level: Some(Severity::Error),
+            fix_level: Some(Severity::Error),
         })
         .unwrap();
 
@@ -1043,7 +1043,7 @@ if (x === 1) {
 "#;
     assert_eq!(result_error_level.code, expected_error_only);
 
-    // Test 2: With diagnostic_level=information, should fix both info and error level violations
+    // Test 2: With fix_level=information, should fix both info and error level violations
     let result_info_level = workspace
         .fix_file(FixFileParams {
             project_key,
@@ -1055,7 +1055,7 @@ if (x === 1) {
             enabled_rules: vec![],
             rule_categories,
             suppression_reason: None,
-            diagnostic_level: Some(Severity::Information),
+            fix_level: Some(Severity::Information),
         })
         .unwrap();
 
@@ -1067,7 +1067,7 @@ if (x === 1) {
 "#;
     assert_eq!(result_info_level.code, expected_both_fixed);
 
-    // Test 3: With diagnostic_level=None (default), should fix all violations
+    // Test 3: With fix_level=None (default), should fix all violations
     let result_no_level = workspace
         .fix_file(FixFileParams {
             project_key,
@@ -1079,7 +1079,7 @@ if (x === 1) {
             enabled_rules: vec![],
             rule_categories,
             suppression_reason: None,
-            diagnostic_level: None,
+            fix_level: None,
         })
         .unwrap();
 

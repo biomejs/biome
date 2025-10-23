@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "noUselessUndefinedInitialization": "info"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.ts`
+
+```ts
+let x: number | undefined = undefined;
+if (x === 1) {
+  console.log(x);
+}
+
+```
+
+# Emitted Messages
+
+```block
+test.ts:1:27 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i It's not necessary to initialize x to undefined.
+  
+  > 1 │ let x: number | undefined = undefined;
+      │                           ^^^^^^^^^^^
+    2 │ if (x === 1) {
+    3 │   console.log(x);
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    1 │ let·x:·number·|·undefined·=·undefined;
+      │                           ----------- 
+
+```
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

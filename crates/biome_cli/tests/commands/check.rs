@@ -3277,7 +3277,7 @@ fn check_does_not_enable_assist() {
 }
 
 #[test]
-fn diagnostic_level_error_only_fixes_error_level() {
+fn fix_level_error_only_fixes_error_level() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3292,7 +3292,7 @@ fn diagnostic_level_error_only_fixes_error_level() {
         &mut console,
         Args::from([
             "check",
-            "--diagnostic-level=error",
+            "--fix-level=error",
             "--fix",
             "--unsafe",
             file_path.as_str(),
@@ -3316,7 +3316,7 @@ fn diagnostic_level_error_only_fixes_error_level() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "diagnostic_level_error_only_fixes_error_level",
+        "fix_level_error_only_fixes_error_level",
         fs,
         console,
         result,
@@ -3324,7 +3324,7 @@ fn diagnostic_level_error_only_fixes_error_level() {
 }
 
 #[test]
-fn diagnostic_level_info_fixes_all_levels() {
+fn fix_level_info_fixes_all_levels() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3339,7 +3339,7 @@ fn diagnostic_level_info_fixes_all_levels() {
         &mut console,
         Args::from([
             "check",
-            "--diagnostic-level=info",
+            "--fix-level=info",
             "--fix",
             "--unsafe",
             file_path.as_str(),
@@ -3363,7 +3363,7 @@ fn diagnostic_level_info_fixes_all_levels() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "diagnostic_level_info_fixes_all_levels",
+        "fix_level_info_fixes_all_levels",
         fs,
         console,
         result,
@@ -3371,7 +3371,7 @@ fn diagnostic_level_info_fixes_all_levels() {
 }
 
 #[test]
-fn diagnostic_level_warn_fixes_warn_and_error_levels() {
+fn fix_level_warn_fixes_warn_and_error_levels() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3386,7 +3386,7 @@ fn diagnostic_level_warn_fixes_warn_and_error_levels() {
         &mut console,
         Args::from([
             "check",
-            "--diagnostic-level=warn",
+            "--fix-level=warn",
             "--fix",
             "--unsafe",
             file_path.as_str(),
@@ -3410,7 +3410,7 @@ fn diagnostic_level_warn_fixes_warn_and_error_levels() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "diagnostic_level_warn_fixes_warn_and_error_levels",
+        "fix_level_warn_fixes_warn_and_error_levels",
         fs,
         console,
         result,

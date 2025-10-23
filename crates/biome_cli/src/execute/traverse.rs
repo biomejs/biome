@@ -84,7 +84,7 @@ pub(crate) fn traverse(
                 skipped: &skipped,
                 messages: sender,
                 evaluated_paths: RwLock::default(),
-                diagnostic_level: cli_options.diagnostic_level,
+                fix_level: execution.get_fix_level(),
             },
         );
         // wait for the main thread to finish
@@ -449,7 +449,7 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     /// List of paths that should be processed
     pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
     /// The minimum diagnostic level to fix
-    pub(crate) diagnostic_level: biome_diagnostics::Severity,
+    pub(crate) fix_level: biome_diagnostics::Severity,
 }
 
 impl TraversalOptions<'_, '_> {

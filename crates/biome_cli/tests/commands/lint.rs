@@ -4364,7 +4364,7 @@ fn should_not_choke_on_recursive_function_call() {
 }
 
 #[test]
-fn lint_diagnostic_level_error_only_fixes_error_level() {
+fn lint_fix_level_error_only_fixes_error_level() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -4379,7 +4379,7 @@ fn lint_diagnostic_level_error_only_fixes_error_level() {
         &mut console,
         Args::from([
             "lint",
-            "--diagnostic-level=error",
+            "--fix-level=error",
             "--fix",
             "--unsafe",
             file_path.as_str(),
@@ -4403,7 +4403,7 @@ fn lint_diagnostic_level_error_only_fixes_error_level() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_diagnostic_level_error_only_fixes_error_level",
+        "lint_fix_level_error_only_fixes_error_level",
         fs,
         console,
         result,
@@ -4411,7 +4411,7 @@ fn lint_diagnostic_level_error_only_fixes_error_level() {
 }
 
 #[test]
-fn lint_diagnostic_level_info_fixes_all_levels() {
+fn lint_fix_level_info_fixes_all_levels() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -4426,7 +4426,7 @@ fn lint_diagnostic_level_info_fixes_all_levels() {
         &mut console,
         Args::from([
             "lint",
-            "--diagnostic-level=info",
+            "--fix-level=info",
             "--fix",
             "--unsafe",
             file_path.as_str(),
@@ -4450,7 +4450,7 @@ fn lint_diagnostic_level_info_fixes_all_levels() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_diagnostic_level_info_fixes_all_levels",
+        "lint_fix_level_info_fixes_all_levels",
         fs,
         console,
         result,
