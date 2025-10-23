@@ -1520,6 +1520,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             rule_categories,
             suppression_reason,
+            diagnostic_level,
         } = params;
         let capabilities = self.get_file_capabilities(&path);
 
@@ -1559,6 +1560,7 @@ impl Workspace for WorkspaceServer {
             } else {
                 Vec::new()
             },
+            diagnostic_level,
         })
     }
 
