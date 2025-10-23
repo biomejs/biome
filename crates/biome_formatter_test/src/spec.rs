@@ -231,8 +231,8 @@ where
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// # use crate::SpecSnapshot;
+    /// ```rs,ignore
+    /// # use biome_formatter_test::spec::SpecSnapshot;
     /// # fn run_example<L: crate::TestFormatLanguage>(snapshot: SpecSnapshot<'_, L>) {
     /// snapshot.test();
     /// # }
