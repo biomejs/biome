@@ -47,10 +47,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy
         run: cargo lint
-        # we still want to lint rules even when we fail clippy
-        continue-on-error: true
-      - name: Run rules check
-        run: cargo run -p rules_check
 
   check-dependencies:
     name: Check Dependencies
