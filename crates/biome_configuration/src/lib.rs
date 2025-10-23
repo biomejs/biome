@@ -536,7 +536,7 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
-    /// Tells Biome to not emit diagnostics when handling files that doesn't know
+    /// Tells Biome to not emit diagnostics when handling files that it doesn't know
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
