@@ -28,7 +28,7 @@ The configuration of the filesystem
                               above this limit will be ignored for performance reasons. Defaults to
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
-                              that doesn't know
+                              that it doesn't know
 
 Linter options specific to the JavaScript linter
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super

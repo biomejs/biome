@@ -1491,7 +1491,7 @@
 					"items": { "type": "string" }
 				},
 				"ignoreUnknown": {
-					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
+					"description": "Tells Biome to not emit diagnostics when handling files that it doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {

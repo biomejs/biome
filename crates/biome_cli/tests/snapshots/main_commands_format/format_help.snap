@@ -94,7 +94,7 @@ The configuration of the filesystem
                               above this limit will be ignored for performance reasons. Defaults to
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
-                              that doesn't know
+                              that it doesn't know
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain

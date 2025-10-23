@@ -159,7 +159,7 @@ Please be aware that rules relying on the module graph or type inference informa
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
-	 * Tells Biome to not emit diagnostics when handling files that doesn't know
+	 * Tells Biome to not emit diagnostics when handling files that it doesn't know
 	 */
 	ignoreUnknown?: Bool;
 	/**

@@ -26,7 +26,7 @@ The configuration that is contained inside the file `biome.json`
                               above this limit will be ignored for performance reasons. Defaults to
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
-                              that doesn't know
+                              that it doesn't know
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
