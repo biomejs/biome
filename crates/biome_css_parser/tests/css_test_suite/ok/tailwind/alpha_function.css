@@ -1,0 +1,7 @@
+.test-alpha-basic {
+	color: --alpha(rgb(255 0 0) / 50%);
+}
+
+.my-element {
+	color: --alpha(var(--color-lime-300) / 50%);
+}

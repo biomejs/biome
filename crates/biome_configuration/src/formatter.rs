@@ -23,9 +23,9 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<FormatterEnabled>,
 
-    /// Stores whether formatting should be allowed to proceed if a given file
+    /// Whether formatting should be allowed to proceed if a given file
     /// has syntax errors
-    #[bpaf(hide)]
+    #[bpaf(long("format-with-errors"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
@@ -40,7 +40,7 @@ pub struct FormatterConfiguration {
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr"))]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 

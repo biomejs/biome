@@ -7,8 +7,13 @@ expression: redactor(content)
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE>]... [--skip=
-<GROUP|RULE>]... [--staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN>]... [
+--skip=<GROUP|RULE|DOMAIN>]... [--staged] [--changed] [--since=REF] [PATH]...
+
+Options that changes how the JSON parser behaves
+        --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
+        --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
+                              files
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -59,8 +64,8 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary|gitlab>  Allows to change how diagnostics
-                              and summary are reported.
+        --reporter=<json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson>  Allows to
+                              change how diagnostics and summary are reported.
         --log-file=ARG        Optional path to redirect log messages to.
                               If omitted, logs are printed to stdout.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
@@ -85,15 +90,18 @@ Available options:
         --suppress            Fixes lint rule violations with comment suppressions instead of using
                               a rule code action (fix)
         --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
-        --only=<GROUP|RULE>   Run only the given rule or group of rules. If the severity level of a
-                              rule is `off`, then the severity level of the rule is set to `error`
-                              if it is a recommended rule or `warn` otherwise.
-                              Example: `biome lint --only=correctness/noUnusedVariables
-                              --only=suspicious`
-        --skip=<GROUP|RULE>   Skip the given rule or group of rules by setting the severity level of
-                              the rules to `off`. This option takes precedence over `--only`.
-                              Example: `biome lint --skip=correctness/noUnusedVariables
-                              --skip=suspicious`
+        --only=<GROUP|RULE|DOMAIN>  Run only the given rule, group of rules or domain. If the
+                              severity level of a rule is `off`, then the severity level of the rule
+                              is set to `error` if it is a recommended rule or `warn` otherwise.
+                              Example:
+                              ```shell biome lint --only=correctness/noUnusedVariables
+                              --only=suspicious --only=test ```
+        --skip=<GROUP|RULE|DOMAIN>  Skip the given rule, group of rules or domain by setting the
+                              severity level of the rules to `off`. This option takes precedence
+                              over `--only`.
+                              Example:
+                              ```shell biome lint --skip=correctness/noUnusedVariables
+                              --skip=suspicious --skip=project ```
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension

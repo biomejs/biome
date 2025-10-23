@@ -1,0 +1,95 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false
+    },
+    "domains": {
+      "test": "all"
+    }
+  }
+}
+```
+
+## `test1.js`
+
+```js
+describe.only("bar", () => {});
+
+```
+
+## `test2.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+  > 1 │ describe.only("bar", () => {});
+      │          ^^^^
+    2 │ 
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    1 │ describe.only("bar",·()·=>·{});
+      │         -----                  
+
+```
+
+```block
+test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The test hook beforeEach is used multiple times in the same test block.
+  
+    2 │ describe("foo", () => {
+    3 │ 	beforeEach(() => {});
+  > 4 │     beforeEach(() => {});
+      │     ^^^^^^^^^^^^^^^^^^^^
+    5 │     test("bar", () => {
+    6 │         someFn();
+  
+  i The presence of the same hook more than once in the same test block can create unexpected errors inside tests. Remove one of them.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+Found 1 warning.
+```

@@ -23,12 +23,6 @@ const hello  :      string      = "world";
 </script>
 <div></div>"#;
 
-const SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED: &str = r#"<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-const hello: string = "world";
-</script>
-<div></div>"#;
-
 const SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<div></div>";
 
@@ -176,12 +170,6 @@ fn format_svelte_ts_context_module_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        svelte_file_path,
-        SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED,
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_context_module_files_write",
@@ -219,6 +207,107 @@ fn format_svelte_carriage_return_line_feed_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_carriage_return_line_feed_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<script>
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+let schema = z.object().optional();
+schema + sure()
+</script>
+
+<html><head><title>Svelte</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_ts() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<script lang="ts">
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+interface Props {
+    title: string;
+}
+
+let schema = z.object().optional();
+schema + sure();
+const props: Props = { title: "Hello" };
+</script>
+
+<html><head><title>Svelte</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_ts",
         fs,
         console,
         result,

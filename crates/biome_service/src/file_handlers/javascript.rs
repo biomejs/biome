@@ -173,13 +173,38 @@ impl From<JsxRuntime> for JsEnvironmentSettings {
 impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
+    type AssistSettings = JsAssistSettings;
     type FormatOptions = JsFormatOptions;
     type ParserSettings = JsParserSettings;
+    type ParserOptions = JsParserOptions;
+
     type EnvironmentSettings = JsEnvironmentSettings;
-    type AssistSettings = JsAssistSettings;
 
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
+    }
+
+    fn resolve_environment(global: &Settings) -> Option<&Self::EnvironmentSettings> {
+        Some(&global.languages.javascript.environment)
+    }
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        let mut options = JsParserOptions {
+            grit_metavariables: false,
+            parse_class_parameter_decorators: language
+                .parse_class_parameter_decorators
+                .unwrap_or_default()
+                .into(),
+        };
+
+        overrides.apply_override_js_parser_options(path, &mut options);
+
+        options
     }
 
     fn resolve_format_options(
@@ -369,6 +394,33 @@ impl ServiceLanguage for JsLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.javascript.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.javascript.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -422,37 +474,6 @@ impl ServiceLanguage for JsLanguage {
             .unwrap_or_default()
             .into()
     }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.javascript.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.javascript.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(global: &Settings) -> Option<&Self::EnvironmentSettings> {
-        Some(&global.languages.javascript.environment)
-    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -467,7 +488,10 @@ impl ExtensionHandler for JsFileHandler {
                 assist: Some(assist_enabled),
                 search: Some(search_enabled),
             },
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: Some(debug_control_flow),
@@ -481,11 +505,13 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities {
                 search: Some(search),
@@ -517,20 +543,7 @@ fn parse(
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = JsParserOptions {
-        grit_metavariables: false,
-        parse_class_parameter_decorators: settings
-            .languages
-            .javascript
-            .parser
-            .parse_class_parameter_decorators
-            .unwrap_or_default()
-            .into(),
-    };
-
-    settings
-        .override_settings
-        .apply_override_js_parser_options(biome_path, &mut options);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
 
     let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
@@ -732,10 +745,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -758,7 +771,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(params.parse.into_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(
+        params
+            .parse
+            .into_serde_diagnostics(params.diagnostic_offset),
+        analyze_diagnostics,
+    )
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -777,6 +795,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -786,10 +805,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings, analyzer_options)
-            .with_only(&only)
-            .with_skip(&skip)
+            .with_only(only)
+            .with_skip(skip)
             .with_path(path.as_path())
-            .with_enabled_rules(&rules)
+            .with_enabled_selectors(rules)
             .with_project_layout(project_layout.clone())
             .finish();
     let filter = AnalysisFilter {
@@ -824,6 +843,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                         .rule_name
                         .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                     suggestion: item.suggestion,
+                    offset: action_offset,
                 }
             }));
 
@@ -847,10 +867,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_rules)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -905,6 +925,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::SafeFixes => {
+                            // suppression actions should not be part of safe fixes
                             if action.is_suppression() {
                                 continue;
                             }

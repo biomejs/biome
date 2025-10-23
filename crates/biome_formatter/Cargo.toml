@@ -29,7 +29,6 @@ indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
-tracing                  = { workspace = true }
 unicode-width            = { workspace = true }
 
 [dev-dependencies]

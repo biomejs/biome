@@ -19,8 +19,8 @@ declare_lint_rule! {
     ///
     /// ```
     ///
-    /// ```graphql,expect_diagnostic
-    /// # Only comments
+    /// ```graphql,ignore
+    /// # Invalid comment
     /// ```
     ///
     /// ### Valid
@@ -59,8 +59,8 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// ```graphql,ignore,use_options
-    /// # Only comments
+    /// ```graphql,ignore
+    /// # Valid comment
     /// ```
     ///
     pub NoEmptySource {
@@ -84,7 +84,10 @@ impl Rule for NoEmptySource {
             return None;
         }
 
-        if ctx.options().allow_comments && node.syntax().has_comments_direct() {
+        if ctx.options().allow_comments
+            && (node.syntax().has_comments_direct()
+                || node.eof_token().ok()?.has_leading_comments())
+        {
             return None;
         }
 

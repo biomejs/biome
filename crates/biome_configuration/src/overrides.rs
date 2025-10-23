@@ -142,7 +142,7 @@ pub struct OverrideFormatterConfiguration {
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr"))]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.

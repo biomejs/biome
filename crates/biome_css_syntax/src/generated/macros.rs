@@ -713,6 +713,54 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssViewTransitionAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwApplyAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_CONFIG_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwConfigAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_CUSTOM_VARIANT_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwCustomVariantAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_CUSTOM_VARIANT_SHORTHAND => {
+                    let $pattern = unsafe { $crate::TwCustomVariantShorthand::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_FUNCTIONAL_UTILITY_NAME => {
+                    let $pattern = unsafe { $crate::TwFunctionalUtilityName::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_PLUGIN_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwPluginAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_REFERENCE_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwReferenceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_SOURCE_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwSourceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_THEME_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwThemeAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_UTILITY_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwUtilityAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_VALUE_THEME_REFERENCE => {
+                    let $pattern = unsafe { $crate::TwValueThemeReference::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_VARIANT_AT_RULE => {
+                    let $pattern = unsafe { $crate::TwVariantAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS => {
                     let $pattern = unsafe { $crate::CssBogus::new_unchecked(node) };
                     $body
@@ -957,6 +1005,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::TW_APPLY_CLASS_LIST => {
+                    let $pattern = unsafe { $crate::TwApplyClassList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

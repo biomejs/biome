@@ -16,11 +16,10 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, SupportsFeatureParams,
+    FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
+    SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -451,17 +450,6 @@ impl Session {
                 pull_code_actions: false,
             })?;
 
-            let content = self.workspace.get_file_content(GetFileContentParams {
-                project_key: doc.project_key,
-                path: biome_path.clone(),
-            })?;
-            let offset = match biome_path.extension() {
-                Some("vue") => VueFileHandler::start(content.as_str()),
-                Some("astro") => AstroFileHandler::start(content.as_str()),
-                Some("svelte") => SvelteFileHandler::start(content.as_str()),
-                _ => None,
-            };
-
             result
                 .diagnostics
                 .into_iter()
@@ -471,7 +459,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
-                        offset,
+                        None,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {

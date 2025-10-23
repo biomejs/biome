@@ -204,6 +204,18 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "CssViewTransitionAtRule" => lang::CssViewTransitionAtRule::KIND_SET.iter().next(),
+        "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
+        "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),
+        "TwCustomVariantAtRule" => lang::TwCustomVariantAtRule::KIND_SET.iter().next(),
+        "TwCustomVariantShorthand" => lang::TwCustomVariantShorthand::KIND_SET.iter().next(),
+        "TwFunctionalUtilityName" => lang::TwFunctionalUtilityName::KIND_SET.iter().next(),
+        "TwPluginAtRule" => lang::TwPluginAtRule::KIND_SET.iter().next(),
+        "TwReferenceAtRule" => lang::TwReferenceAtRule::KIND_SET.iter().next(),
+        "TwSourceAtRule" => lang::TwSourceAtRule::KIND_SET.iter().next(),
+        "TwThemeAtRule" => lang::TwThemeAtRule::KIND_SET.iter().next(),
+        "TwUtilityAtRule" => lang::TwUtilityAtRule::KIND_SET.iter().next(),
+        "TwValueThemeReference" => lang::TwValueThemeReference::KIND_SET.iter().next(),
+        "TwVariantAtRule" => lang::TwVariantAtRule::KIND_SET.iter().next(),
         _ => None,
     }
 }

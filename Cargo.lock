@@ -204,6 +204,7 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_analyze",
  "biome_html_formatter",
  "biome_js_analyze",
  "biome_js_formatter",
@@ -518,7 +519,6 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
- "tracing",
  "unicode-width 0.1.12",
 ]
 
@@ -773,6 +773,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_html_analyze"
+version = "0.5.7"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_html_factory",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_rowan",
+ "biome_string_case",
+ "biome_suppression",
+ "biome_test_utils",
+ "camino",
+ "insta",
+ "schemars",
+ "serde",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_html_factory"
 version = "0.5.7"
 dependencies = [
@@ -836,6 +859,8 @@ dependencies = [
 name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_html_factory",
+ "biome_html_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -1474,6 +1499,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_ruledoc_utils"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "biome_analyze",
+ "biome_configuration",
+ "biome_fs",
+ "biome_js_analyze",
+ "biome_js_parser",
+ "biome_json_parser",
+ "biome_module_graph",
+ "biome_project_layout",
+ "biome_service",
+ "biome_test_utils",
+ "camino",
+]
+
+[[package]]
 name = "biome_service"
 version = "0.0.0"
 dependencies = [
@@ -1499,6 +1542,8 @@ dependencies = [
  "biome_grit_parser",
  "biome_grit_patterns",
  "biome_grit_syntax",
+ "biome_html_analyze",
+ "biome_html_factory",
  "biome_html_formatter",
  "biome_html_parser",
  "biome_html_syntax",
@@ -4177,6 +4222,9 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_parser",
  "biome_js_syntax",
@@ -4187,8 +4235,8 @@ dependencies = [
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
+ "biome_ruledoc_utils",
  "biome_service",
- "biome_test_utils",
  "camino",
  "pulldown-cmark",
 ]
@@ -5889,6 +5937,9 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",

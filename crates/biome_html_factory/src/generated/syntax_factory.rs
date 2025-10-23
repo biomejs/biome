@@ -21,6 +21,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             | HTML_BOGUS_TEXT_EXPRESSION => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
+            ASTRO_EMBEDDED_CONTENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_EMBEDDED_CONTENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_EMBEDDED_CONTENT, children)
+            }
             ASTRO_FRONTMATTER_ELEMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -33,7 +52,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
+                    && AstroEmbeddedContent::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -350,6 +369,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(HTML_ELEMENT, children)
+            }
+            HTML_EMBEDDED_CONTENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_EMBEDDED_CONTENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_EMBEDDED_CONTENT, children)
             }
             HTML_OPENING_ELEMENT => {
                 let mut elements = (&children).into_iter();

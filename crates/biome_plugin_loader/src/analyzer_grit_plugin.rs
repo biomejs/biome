@@ -10,7 +10,7 @@ use biome_grit_patterns::{
     compile_pattern_with_options,
 };
 use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
-use biome_parser::AnyParse;
+use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
@@ -74,7 +74,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 .and_then(|node| node.as_send()),
         };
 
-        let parse = AnyParse::new(root.unwrap(), vec![]);
+        let parse = AnyParse::Node(NodeParse::new(root.unwrap(), vec![]));
         let file = GritTargetFile { parse, path };
 
         match self.grit_query.execute(file) {

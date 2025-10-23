@@ -974,6 +974,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssignments": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -1204,6 +1211,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportExtensions": {
 					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
@@ -1236,6 +1250,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1350,7 +1371,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"description": "The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -1381,11 +1402,14 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"tailwindDirectives": {
+					"description": "Enables parsing of Tailwind CSS 4.0 directives and functions.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
@@ -1486,7 +1510,7 @@
 			"type": "object",
 			"properties": {
 				"experimentalScannerIgnores": {
-					"description": "Set of file and folder names that should be unconditionally ignored by Biome's scanner.\n\nBiome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.\n\nThis is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.\n\nEntries must be file or folder *names*. Specific paths and globs are not supported.\n\nExamples where this may be useful:\n\n```jsonc { \"files\": { \"experimentalScannerIgnores\": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: \".git\",\n\n// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: \"node_modules\",\n\n// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: \"RedisCommander.d.ts\", ], } } ```\n\nPlease be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned.",
+					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
@@ -1569,7 +1593,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"description": "Whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1668,7 +1692,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to GraphQL files.",
+					"description": "The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
@@ -1839,14 +1863,42 @@
 			},
 			"additionalProperties": false
 		},
+		"HtmlAssistConfiguration": {
+			"description": "Options that changes how the HTML assist behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assist for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"HtmlConfiguration": {
 			"description": "Options applied to HTML files",
 			"type": "object",
 			"properties": {
+				"assist": {
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"experimentalFullSupportEnabled": {
+					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "HTML formatter options",
 					"anyOf": [
 						{ "$ref": "#/definitions/HtmlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "HTML linter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1898,7 +1950,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to HTML (and its super languages) files.",
+					"description": "The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -1918,6 +1970,17 @@
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlLinterConfiguration": {
+			"description": "Options that changes how the HTML linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2080,7 +2143,7 @@
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
+					"description": "The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2150,7 +2213,7 @@
 			"additionalProperties": false
 		},
 		"JsonAssistConfiguration": {
-			"description": "Linter options specific to the JSON linter",
+			"description": "Assist options specific to the JSON linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
@@ -2222,7 +2285,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files.",
+					"description": "The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2399,6 +2462,11 @@
 					"description": "Carriage Return character only (\\r), used very rarely",
 					"type": "string",
 					"enum": ["cr"]
+				},
+				{
+					"description": "Automatically use CRLF on Windows and LF on other platforms",
+					"type": "string",
+					"enum": ["auto"]
 				}
 			]
 		},
@@ -4440,6 +4508,13 @@
 		},
 		"NoUnknownAtRulesOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown at-rule names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
@@ -5062,33 +5137,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noNonNullAssertedOptionalChain": {
-					"description": "Disallow non-null assertions after optional chaining expressions.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"noQwikUseVisibleTask": {
-					"description": "Disallow useVisibleTask$() functions in Qwik components.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noReactForwardRef": {
 					"description": "Replaces usages of forwardRef with passing ref as a prop.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSecrets": {
-					"description": "Disallow usage of sensitive data such as API keys and tokens.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5166,26 +5218,10 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAnchorHref": {
-					"description": "Enforces href attribute for \\<a> elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentArrowReturn": {
 					"description": "Enforce consistent arrow function bodies.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentTypeDefinitions": {
-					"description": "Enforce type definitions to consistently use either interface or type.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
-						},
 						{ "type": "null" }
 					]
 				},
@@ -5210,24 +5246,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useImageSize": {
-					"description": "Enforces that \\<img> elements have both width and height attributes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseMaxParamsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useQwikClasslist": {
-					"description": "Prefer using the class prop as a classlist over the classnames helper.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5242,13 +5264,6 @@
 					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useReactFunctionComponents": {
-					"description": "Enforce that components are defined as functions and never as classes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9999,21 +10014,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseAnchorHrefOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -12184,6 +12184,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -12640,6 +12647,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are only assigned once.",
 					"anyOf": [
@@ -12791,6 +12807,13 @@
 					"description": "Prefer object spread over Object.assign() when constructing new objects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseObjectSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13307,6 +13330,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
@@ -13640,13 +13672,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseAnchorHrefConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
-			]
-		},
-		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

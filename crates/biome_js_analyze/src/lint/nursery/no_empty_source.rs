@@ -133,7 +133,10 @@ impl Rule for NoEmptySource {
             return None;
         }
 
-        if ctx.options().allow_comments && node.syntax().has_comments_direct() {
+        if ctx.options().allow_comments
+            && (node.syntax().has_comments_direct()
+                || node.eof_token().ok()?.has_leading_comments())
+        {
             return None;
         }
 

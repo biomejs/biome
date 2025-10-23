@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "indentScriptAndStyle": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<script>
+	function lorem() {
+		return 'ipsum';
+	}
+</script>
+<style>
+	#id .class div > p {
+		background-color: red;
+		align: center;
+		padding: 0;
+	}
+</style>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

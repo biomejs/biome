@@ -148,7 +148,8 @@ pub struct JsFileSource {
     variant: LanguageVariant,
     module_kind: ModuleKind,
     version: LanguageVersion,
-    /// Used to mark if the source is being used for an Astro, Svelte or Vue file
+    /// Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
+    /// For example, if inside an Astro file, a top-level return statement is allowed.
     embedding_kind: EmbeddingKind,
 }
 
@@ -199,7 +200,6 @@ impl JsFileSource {
         }
     }
 
-    /// Astro file definition
     pub fn astro() -> Self {
         Self::ts().with_embedding_kind(EmbeddingKind::Astro)
     }
@@ -343,6 +343,7 @@ impl JsFileSource {
             "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -372,7 +373,7 @@ impl JsFileSource {
             // TODO: Remove once we have full support of astro files
             "astro" => Ok(Self::astro()),
             // TODO: Remove once we have full support of vue files
-            "vue" => Ok(Self::vue()),
+            "vue" | "vuejs" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownLanguageId),

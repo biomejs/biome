@@ -1,0 +1,178 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.my-element {
+	background: white;
+
+	@variant hover {
+		background: black;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..12 "my-element" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@12..13 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@13..25 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@27..32 "white" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@32..33 ";" [] [],
+                    },
+                    CssAtRule {
+                        at_token: AT@33..37 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                        rule: CssBogusAtRule {
+                            items: [
+                                VARIANT_KW@37..45 "variant" [] [Whitespace(" ")],
+                                CssIdentifier {
+                                    value_token: IDENT@45..51 "hover" [] [Whitespace(" ")],
+                                },
+                                CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@51..52 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@52..65 "background" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    },
+                                                    colon_token: COLON@65..67 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@67..72 "black" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@72..73 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@73..76 "}" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                            ],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..79
+  0: (empty)
+  1: CSS_RULE_LIST@0..78
+    0: CSS_QUALIFIED_RULE@0..78
+      0: CSS_SELECTOR_LIST@0..12
+        0: CSS_COMPOUND_SELECTOR@0..12
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..12
+            0: CSS_CLASS_SELECTOR@0..12
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..12
+                0: IDENT@1..12 "my-element" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@12..78
+        0: L_CURLY@12..13 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@13..76
+          0: CSS_DECLARATION_WITH_SEMICOLON@13..33
+            0: CSS_DECLARATION@13..32
+              0: CSS_GENERIC_PROPERTY@13..32
+                0: CSS_IDENTIFIER@13..25
+                  0: IDENT@13..25 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@25..27 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@27..32
+                  0: CSS_IDENTIFIER@27..32
+                    0: IDENT@27..32 "white" [] []
+              1: (empty)
+            1: SEMICOLON@32..33 ";" [] []
+          1: CSS_AT_RULE@33..76
+            0: AT@33..37 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            1: CSS_BOGUS_AT_RULE@37..76
+              0: VARIANT_KW@37..45 "variant" [] [Whitespace(" ")]
+              1: CSS_IDENTIFIER@45..51
+                0: IDENT@45..51 "hover" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_RULE_BLOCK@51..76
+                0: L_CURLY@51..52 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@52..73
+                  0: CSS_DECLARATION_WITH_SEMICOLON@52..73
+                    0: CSS_DECLARATION@52..72
+                      0: CSS_GENERIC_PROPERTY@52..72
+                        0: CSS_IDENTIFIER@52..65
+                          0: IDENT@52..65 "background" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@65..67 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@67..72
+                          0: CSS_IDENTIFIER@67..72
+                            0: IDENT@67..72 "black" [] []
+                      1: (empty)
+                    1: SEMICOLON@72..73 ";" [] []
+                2: R_CURLY@73..76 "}" [Newline("\n"), Whitespace("\t")] []
+        2: R_CURLY@76..78 "}" [Newline("\n")] []
+  2: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+variant.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    2 │ 	background: white;
+    3 │ 
+  > 4 │ 	@variant hover {
+      │ 	 ^^^^^^^^^^^^^^^
+  > 5 │ 		background: black;
+  > 6 │ 	}
+      │ 	^
+    7 │ }
+    8 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

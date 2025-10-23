@@ -3466,7 +3466,7 @@ export function bar() {
                 categories: RuleCategories::all(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3496,7 +3496,7 @@ export function bar() {
                 categories: RuleCategories::empty(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3522,7 +3522,7 @@ export function bar() {
                 categories: RuleCategories::all(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3552,7 +3552,7 @@ export function bar() {
                 categories: RuleCategories::all(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3676,7 +3676,7 @@ export function bar() {
                 categories: RuleCategories::all(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3710,7 +3710,7 @@ export function bar() {
                 categories: RuleCategories::empty(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -3741,7 +3741,7 @@ export function bar() {
                 categories: RuleCategories::all(),
                 only: Vec::new(),
                 skip: Vec::new(),
-                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
             },
         )
@@ -4040,7 +4040,8 @@ let useConst = "Astro Test";
                 r#"---
 const useConst = "Astro Test";
 ---
-<!doctype html>"#,
+<!doctype html>
+"#,
             ),
         }],
     );
