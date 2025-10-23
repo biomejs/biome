@@ -1,4 +1,5 @@
 use crate::analyzers::all::RulesAll;
+use crate::analyzers::ignore_scanner::IgnoreScanner;
 use crate::analyzers::includes::Includes;
 use crate::analyzers::monorepo::Monorepo;
 use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
@@ -11,6 +12,7 @@ use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
 mod all;
+mod ignore_scanner;
 mod includes;
 mod monorepo;
 mod no_restriected_globals;
@@ -41,6 +43,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<UseNamingConventionEnumMemberCase>();
         registry.record_rule::<NoRestrictedGlobals>();
         registry.record_rule::<Monorepo>();
+        registry.record_rule::<IgnoreScanner>();
     }
 }
 

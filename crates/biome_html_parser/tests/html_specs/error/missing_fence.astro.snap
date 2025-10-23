@@ -19,7 +19,7 @@ HtmlRoot {
     bom_token: missing (optional),
     frontmatter: AstroFrontmatterElement {
         l_fence_token: FENCE@0..3 "---" [] [],
-        content_token: missing (optional),
+        content: missing (required),
         r_fence_token: missing (required),
     },
     directive: missing (optional),

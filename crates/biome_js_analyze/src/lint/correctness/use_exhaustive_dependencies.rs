@@ -48,6 +48,7 @@ declare_lint_rule! {
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
+    /// - `useEffectEvent`
     ///
     /// If you want to add more hooks to the rule, check the [options](#options).
     ///
@@ -303,6 +304,7 @@ impl Default for HookConfigMaps {
                 true,
             ),
             StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+            StableReactHookConfiguration::new("useEffectEvent", StableHookResult::Identity, true),
         ]);
 
         Self {
@@ -399,18 +401,6 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
         })
         .last()?
         .parent()?;
-
-    // If the parent node is a call expression, drop the last part of the member expression to
-    // avoid breaking the prototype chain.
-    if let Some(parent) = root.parent()
-        && JsCallExpression::can_cast(parent.kind())
-    {
-        return AnyJsMemberExpression::cast(root)?
-            .object()
-            .ok()?
-            .into_syntax()
-            .cast();
-    }
 
     root.cast()
 }

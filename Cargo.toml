@@ -128,6 +128,7 @@ biome_grit_formatter         = { version = "0.0.0", path = "./crates/biome_grit_
 biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_parser" }
 biome_grit_patterns          = { version = "0.0.1", path = "./crates/biome_grit_patterns" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }
+biome_html_analyze           = { version = "0.5.7", path = "./crates/biome_html_analyze" }
 biome_html_factory           = { version = "0.5.7", path = "./crates/biome_html_factory" }
 biome_html_formatter         = { version = "0.0.0", path = "./crates/biome_html_formatter" }
 biome_html_parser            = { version = "0.0.1", path = "./crates/biome_html_parser" }
@@ -183,6 +184,7 @@ biome_flags          = { path = "./crates/biome_flags" }
 biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
+biome_ruledoc_utils  = { path = "./crates/biome_ruledoc_utils" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
@@ -192,14 +194,14 @@ anyhow               = "1.0.100"
 boa_engine           = "0.20.0"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
 camino               = "1.2.1"
-cfg-if               = "1.0.3"
+cfg-if               = "1.0.4"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
 dashmap              = "6.1.0"
 dirs                 = "6.0.0"
 enumflags2           = "0.7.12"
 getrandom            = "0.2.15"
-globset              = "0.4.16"
+globset              = "0.4.17"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }

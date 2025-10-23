@@ -2380,6 +2380,194 @@ pub fn css_view_transition_at_rule(
         ],
     ))
 }
+pub fn tw_apply_at_rule(
+    apply_token: SyntaxToken,
+    classes: TwApplyClassList,
+    semicolon_token: SyntaxToken,
+) -> TwApplyAtRule {
+    TwApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(apply_token)),
+            Some(SyntaxElement::Node(classes.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_config_at_rule(
+    config_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwConfigAtRule {
+    TwConfigAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CONFIG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(config_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_custom_variant_at_rule(
+    custom_variant_token: SyntaxToken,
+    name: CssIdentifier,
+    selector: AnyTwCustomVariantSelector,
+) -> TwCustomVariantAtRule {
+    TwCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(custom_variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_custom_variant_shorthand(
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+    semicolon_token: SyntaxToken,
+) -> TwCustomVariantShorthand {
+    TwCustomVariantShorthand::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_functional_utility_name(
+    identifier: CssIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwFunctionalUtilityName {
+    TwFunctionalUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_FUNCTIONAL_UTILITY_NAME,
+        [
+            Some(SyntaxElement::Node(identifier.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_plugin_at_rule(
+    plugin_token: SyntaxToken,
+    name: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwPluginAtRule {
+    TwPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_PLUGIN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(plugin_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_reference_at_rule(
+    reference_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwReferenceAtRule {
+    TwReferenceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_REFERENCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(reference_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_source_at_rule(
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwSourceAtRule {
+    TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SOURCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(source_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_theme_at_rule(
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwThemeAtRuleBuilder {
+    TwThemeAtRuleBuilder {
+        theme_token,
+        block,
+        name: None,
+    }
+}
+pub struct TwThemeAtRuleBuilder {
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+    name: Option<CssIdentifier>,
+}
+impl TwThemeAtRuleBuilder {
+    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> TwThemeAtRule {
+        TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_THEME_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.theme_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn tw_utility_at_rule(
+    utility_token: SyntaxToken,
+    name: AnyTwUtilityName,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwUtilityAtRule {
+    TwUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_UTILITY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(utility_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_value_theme_reference(
+    reference: CssDashedIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwValueThemeReference {
+    TwValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_THEME_REFERENCE,
+        [
+            Some(SyntaxElement::Node(reference.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_variant_at_rule(
+    variant_token: SyntaxToken,
+    name: CssIdentifier,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwVariantAtRule {
+    TwVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
     I: IntoIterator<Item = AnyCssCustomIdentifier>,
@@ -2881,6 +3069,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn tw_apply_class_list<I>(items: I) -> TwApplyClassList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwApplyClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_bogus<I>(slots: I) -> CssBogus

@@ -131,7 +131,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_code.as_str()
         };
 
-        // if source_type.
         analyze_and_snap(
             &mut snapshot,
             input_code,
@@ -177,7 +176,7 @@ pub(crate) fn analyze_and_snap(
         source_type.set_module_kind(ModuleKind::Script)
     }
 
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
@@ -202,7 +201,7 @@ pub(crate) fn analyze_and_snap(
                                 input_code,
                                 source_type,
                                 &action,
-                                parser_options.clone(),
+                                parser_options,
                                 &root,
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -213,7 +212,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -232,7 +231,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
@@ -243,7 +242,7 @@ pub(crate) fn analyze_and_snap(
                         input_code,
                         source_type,
                         &action,
-                        parser_options.clone(),
+                        parser_options,
                         &root,
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));

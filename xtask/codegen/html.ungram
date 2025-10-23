@@ -76,6 +76,7 @@ AnyHtmlElement =
 
 AnyHtmlContent =
 	HtmlContent
+	| HtmlEmbeddedContent
 	| AnyHtmlTextExpression
 
 AnyHtmlTextExpression =
@@ -143,8 +144,11 @@ AnyAstroFrontmatterElement =
 
 AstroFrontmatterElement =
 	l_fence: '---'
-	content: 'html_literal'?
+	content: AstroEmbeddedContent
 	r_fence: '---'
+
+AstroEmbeddedContent =
+	content: 'html_literal'?
 
 // ==================================
 // Attributes
@@ -181,3 +185,4 @@ HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
+HtmlEmbeddedContent = value: 'html_literal'

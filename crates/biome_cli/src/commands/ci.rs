@@ -4,8 +4,12 @@ use crate::commands::{CommandRunner, LoadEditorConfig};
 use crate::{CliDiagnostic, Execution};
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
-use biome_configuration::formatter::FormatterEnabled;
-use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
+use biome_configuration::css::CssParserConfiguration;
+use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+use biome_configuration::json::JsonParserConfiguration;
+use biome_configuration::{
+    Configuration, CssConfiguration, FormatterConfiguration, JsonConfiguration, LinterConfiguration,
+};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
@@ -22,6 +26,9 @@ pub(crate) struct CiCommandPayload {
     pub(crate) configuration: Option<Configuration>,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
+    pub(crate) json_parser: Option<JsonParserConfiguration>,
+    pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
 impl LoadEditorConfig for CiCommandPayload {
@@ -56,6 +63,7 @@ impl CommandRunner for CiCommandPayload {
 
         if self.formatter_enabled.is_some() {
             formatter.enabled = self.formatter_enabled;
+            formatter.format_with_errors = self.format_with_errors;
         }
 
         let linter = configuration
@@ -64,6 +72,20 @@ impl CommandRunner for CiCommandPayload {
 
         if self.linter_enabled.is_some() {
             linter.enabled = self.linter_enabled;
+        }
+
+        let json = configuration
+            .json
+            .get_or_insert_with(JsonConfiguration::default);
+        if self.json_parser.is_some() {
+            json.parser.clone_from(&self.json_parser)
+        }
+
+        let css = configuration
+            .css
+            .get_or_insert_with(CssConfiguration::default);
+        if self.css_parser.is_some() {
+            css.parser.clone_from(&self.css_parser);
         }
 
         let assist = configuration

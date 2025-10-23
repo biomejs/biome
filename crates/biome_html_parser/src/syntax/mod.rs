@@ -153,17 +153,30 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             },
         );
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
-        loop {
-            ElementList.parse_list(p);
-            if let Some(mut closing) =
-                parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
-                && !closing.text(p).contains(opening_tag_name.as_str())
-            {
-                p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
-                closing.change_to_bogus(p);
-                continue;
+        if is_embedded_language_tag {
+            // embedded language tags always have 1 element as content
+            let list = p.start();
+            if p.at(HTML_LITERAL) {
+                let m = p.start();
+                p.bump(HTML_LITERAL);
+                m.complete(p, HTML_EMBEDDED_CONTENT);
             }
-            break;
+            list.complete(p, HTML_ELEMENT_LIST);
+
+            parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag);
+        } else {
+            loop {
+                ElementList.parse_list(p);
+                if let Some(mut closing) =
+                    parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
+                    && !closing.text(p).contains(opening_tag_name.as_str())
+                {
+                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                    closing.change_to_bogus(p);
+                    continue;
+                }
+                break;
+            }
         }
         let previous = opening.precede(p);
 

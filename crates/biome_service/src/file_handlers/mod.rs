@@ -4,13 +4,15 @@ use self::{
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
+pub use crate::file_handlers::astro::AstroFileHandler;
 use crate::file_handlers::graphql::GraphqlFileHandler;
-pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
-pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
+use crate::file_handlers::ignore::IgnoreFileHandler;
+pub use crate::file_handlers::svelte::SvelteFileHandler;
+pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::Settings;
 use crate::workspace::{
-    FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
+    AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    RenameResult,
 };
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
@@ -18,7 +20,8 @@ use biome_analyze::{
     RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
+use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
 use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -29,7 +32,7 @@ use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
-use biome_html_syntax::HtmlFileSource;
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
@@ -38,14 +41,11 @@ use biome_js_syntax::{
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::ModuleGraph;
+use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache};
+use biome_rowan::{FileSourceError, NodeCache, SendNode};
 use biome_string_case::StrLikeExtension;
-
-use crate::file_handlers::ignore::IgnoreFileHandler;
-use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
-use biome_package::PackageJson;
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -55,7 +55,7 @@ use std::borrow::Cow;
 use std::sync::Arc;
 use tracing::instrument;
 
-mod astro;
+pub mod astro;
 pub(crate) mod css;
 pub(crate) mod graphql;
 pub(crate) mod grit;
@@ -63,9 +63,9 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-mod svelte;
+pub mod svelte;
 mod unknown;
-mod vue;
+pub mod vue;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -122,18 +122,34 @@ impl From<GritFileSource> for DocumentFileSource {
 
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
-        Self::from_path(path)
+        Self::from_path(path, false)
     }
 }
 
 impl DocumentFileSource {
-    fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+    fn try_from_well_known(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
         }
+
         if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
@@ -145,15 +161,33 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(path: &Utf8Path) -> Self {
-        Self::try_from_well_known(path).unwrap_or(Self::Unknown)
+    pub fn from_well_known(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_well_known(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
-    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
+    fn try_from_extension(
+        extension: &str,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        // Order here is important
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
         }
-        if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+
+        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
@@ -162,9 +196,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -172,8 +204,8 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension).unwrap_or(Self::Unknown)
+    pub fn from_extension(extension: &str, experimental_full_html_support: bool) -> Self {
+        Self::try_from_extension(extension, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -209,8 +241,11 @@ impl DocumentFileSource {
         Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
     }
 
-    pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = Self::try_from_well_known(path) {
+    pub(crate) fn try_from_path(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = Self::try_from_well_known(path, experimental_full_html_support) {
             return Ok(file_source);
         }
 
@@ -241,12 +276,12 @@ impl DocumentFileSource {
                 .ok_or(FileSourceError::MissingFileExtension)?,
         };
 
-        Self::try_from_extension(extension.as_ref())
+        Self::try_from_extension(extension.as_ref(), experimental_full_html_support)
     }
 
     /// Returns the document file source corresponding to the file path
-    pub fn from_path(path: &Utf8Path) -> Self {
-        Self::try_from_path(path).unwrap_or(Self::Unknown)
+    pub fn from_path(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_path(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -335,8 +370,12 @@ impl DocumentFileSource {
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
         match file_source {
-            Self::Js(_) => true,
-            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) | Self::Grit(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -354,6 +393,21 @@ impl DocumentFileSource {
             | Self::Grit(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
+        }
+    }
+
+    /// Whether this file can contain embedded nodes
+    pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
+        let file_source = Self::from_path(path, experimental_full_html_support);
+        match file_source {
+            Self::Html(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Grit(_)
+            | Self::Ignore
+            | Self::Unknown => false,
         }
     }
 }
@@ -408,11 +462,11 @@ pub struct FixAllParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
 }
 
@@ -433,12 +487,19 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
+pub struct ParseEmbedResult {
+    pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
+}
 
+type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes =
+    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
+
+    pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
@@ -472,15 +533,16 @@ pub(crate) struct LintParams<'a> {
     pub(crate) settings: &'a Settings,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
+    pub(crate) diagnostic_offset: Option<TextSize>,
 }
 
 pub(crate) struct LintResults {
@@ -496,6 +558,7 @@ pub(crate) struct ProcessLint<'a> {
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
+    diagnostic_offset: Option<TextSize>,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -511,6 +574,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.only.is_empty(),
             rules: params.settings.as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
+            diagnostic_offset: params.diagnostic_offset,
         }
     }
 
@@ -550,6 +614,9 @@ impl<'a> ProcessLint<'a> {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
+            }
+            if let Some(offset) = &self.diagnostic_offset {
+                diagnostic.add_diagnostic_offset(*offset);
             }
 
             let error = diagnostic.with_severity(severity);
@@ -600,18 +667,25 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
+    pub(crate) action_offset: Option<TextSize>,
+}
+
+pub(crate) struct UpdateSnippetsNodes {
+    pub(crate) range: TextRange,
+    pub(crate) new_code: String,
 }
 
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -623,6 +697,8 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
+    /// It updates the snippets contained in the original root
+    pub(crate) update_snippets: Option<UpdateSnippets>,
 }
 
 type Format =
@@ -642,6 +718,21 @@ type FormatOnType = fn(
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
+type FormatEmbedded = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &Settings,
+    Vec<FormatEmbedNode>,
+) -> Result<Printed, WorkspaceError>;
+
+#[derive(Debug)]
+pub(crate) struct FormatEmbedNode {
+    pub(crate) range: TextRange,
+    pub(crate) node: AnyParse,
+    pub(crate) source: DocumentFileSource,
+}
+
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
     /// It formats a file
@@ -650,6 +741,8 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_range: Option<FormatRange>,
     /// It formats a file while typing
     pub(crate) format_on_type: Option<FormatOnType>,
+    /// It formats a file with embedded nodes
+    pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
 type Enabled = fn(&Utf8Path, &Settings) -> bool;
@@ -706,8 +799,8 @@ impl Features {
             json: JsonFileHandler {},
             css: CssFileHandler {},
             astro: AstroFileHandler {},
-            vue: VueFileHandler {},
             svelte: SvelteFileHandler {},
+            vue: VueFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
@@ -719,6 +812,7 @@ impl Features {
     /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
+            // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
@@ -839,36 +933,6 @@ pub(crate) fn search(
     Ok(matches)
 }
 
-#[test]
-fn test_svelte_script_lang() {
-    const SVELTE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const SVELTE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG: &str = r#"<script context="module">"#;
-    const SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG: &str =
-        r#"<script context="module" lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-}
-
 /// Type meant to register all the syntax rules for each language supported by Biome
 ///
 /// When a new language is introduced, it must be implemented it. Syntax rules aren't negotiable via configuration, so it's safe
@@ -953,6 +1017,25 @@ impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
+}
+
 /// Type meant to register all the lint rules for each language supported by Biome
 ///
 #[derive(Debug)]
@@ -960,8 +1043,8 @@ struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
     settings: &'b Settings,
     path: Option<&'b Utf8Path>,
     package_json: Option<PackageJson>,
@@ -970,8 +1053,8 @@ struct LintVisitor<'a, 'b> {
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
         settings: &'b Settings,
         path: Option<&'b Utf8Path>,
         package_json: Option<PackageJson>,
@@ -1006,8 +1089,9 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         let path = self.path.expect("File path");
 
+        let is_recommended = R::METADATA.recommended;
         let recommended_enabled = self.settings.linter_recommended_enabled();
-        if !recommended_enabled {
+        if !is_recommended || !recommended_enabled {
             return;
         }
 
@@ -1137,17 +1221,35 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.enabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.enabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.enabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.disabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.disabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.disabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1248,19 +1350,43 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = HtmlLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            biome_html_analyze::METADATA
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
 struct AssistsVisitor<'a, 'b> {
     settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
     path: Option<&'b Utf8Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
         settings: &'b Settings,
         path: Option<&'b Utf8Path>,
     ) -> Self {
@@ -1288,18 +1414,36 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.enabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.enabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.enabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
 
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.disabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.disabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.disabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1382,12 +1526,28 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
+    }
+}
+
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: &'a Settings,
-    only: Option<&'a [RuleSelector]>,
-    skip: Option<&'a [RuleSelector]>,
+    only: Option<&'a [AnalyzerSelector]>,
+    skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
-    enabled_rules: Option<&'a [RuleSelector]>,
+    enabled_selectors: Option<&'a [AnalyzerSelector]>,
     project_layout: Arc<ProjectLayout>,
     analyzer_options: AnalyzerOptions,
 }
@@ -1399,20 +1559,20 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             only: None,
             skip: None,
             path: None,
-            enabled_rules: None,
+            enabled_selectors: None,
             project_layout: Default::default(),
             analyzer_options,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_only(mut self, only: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_only(mut self, only: &'b [AnalyzerSelector]) -> Self {
         self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_skip(mut self, skip: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_skip(mut self, skip: &'b [AnalyzerSelector]) -> Self {
         self.skip = Some(skip);
         self
     }
@@ -1424,8 +1584,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_enabled_rules(mut self, enabled_rules: &'b [RuleSelector]) -> Self {
-        self.enabled_rules = Some(enabled_rules);
+    pub(crate) fn with_enabled_selectors(mut self, enabled_rules: &'b [AnalyzerSelector]) -> Self {
+        self.enabled_selectors = Some(enabled_rules);
         self
     }
 
@@ -1439,21 +1599,27 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
-        let mut enabled_rules: Vec<_> = self
-            .enabled_rules
-            .map(|enabled_rules| {
-                enabled_rules
-                    .iter()
-                    .map(RuleFilter::from)
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
+        let mut enabled_rules = vec![];
+
+        if let Some(enabled_selectors) = self.enabled_selectors {
+            for selector in enabled_selectors {
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        enabled_rules.push(RuleFilter::from(rule));
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        enabled_rules.extend(domain.as_rule_filters())
+                    }
+                }
+            }
+        }
         let mut syntax = SyntaxVisitor::default();
 
         biome_js_analyze::visit_registry(&mut syntax);
         biome_css_analyze::visit_registry(&mut syntax);
         biome_json_analyze::visit_registry(&mut syntax);
         biome_graphql_analyze::visit_registry(&mut syntax);
+        biome_html_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
         let package_json = self
@@ -1474,6 +1640,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_css_analyze::visit_registry(&mut lint);
         biome_json_analyze::visit_registry(&mut lint);
         biome_graphql_analyze::visit_registry(&mut lint);
+        biome_html_analyze::visit_registry(&mut lint);
         let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
         disabled_rules.extend(linter_disabled_rules);
@@ -1484,66 +1651,11 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_css_analyze::visit_registry(&mut assist);
         biome_json_analyze::visit_registry(&mut assist);
         biome_graphql_analyze::visit_registry(&mut assist);
+        biome_html_analyze::visit_registry(&mut assist);
         let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules, analyzer_options)
     }
-}
-
-#[test]
-fn test_vue_script_lang() {
-    const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
-    const VUE_JSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="jsx">"#;
-    const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
-    const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .1
-            .is_jsx()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
 }

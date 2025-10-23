@@ -43,6 +43,10 @@ pub enum CssLexContext {
     /// support U+0-9A-F? U+0-9A-F{1,6} U+0-9A-F{1,6}?
     /// https://drafts.csswg.org/css-fonts/#unicode-range-desc
     UnicodeRange,
+
+    /// Applied when lexing Tailwind CSS utility classes.
+    /// Currently, only applicable to when we encounter a `@apply` rule.
+    TailwindUtility,
 }
 
 impl LexContext for CssLexContext {
@@ -132,6 +136,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+                CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
             },
             None => EOF,
         };
@@ -924,6 +929,16 @@ impl<'src> CssLexer<'src> {
             b"composes" => COMPOSES_KW,
             b"position-try" => POSITION_TRY_KW,
             b"view-transition" => VIEW_TRANSITION_KW,
+            // Tailwind CSS 4.0 keywords
+            b"theme" => THEME_KW,
+            b"utility" => UTILITY_KW,
+            b"variant" => VARIANT_KW,
+            b"custom-variant" => CUSTOM_VARIANT_KW,
+            b"apply" => APPLY_KW,
+            b"source" => SOURCE_KW,
+            b"reference" => REFERENCE_KW,
+            b"config" => CONFIG_KW,
+            b"plugin" => PLUGIN_KW,
             _ => IDENT,
         }
     }
@@ -992,6 +1007,13 @@ impl<'src> CssLexer<'src> {
     /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
     /// and `None` if it is not.
     fn consume_ident_part(&mut self, current: u8) -> Option<char> {
+        if self.options.is_tailwind_directives_enabled()
+            && current == b'-'
+            && self.peek_byte() == Some(b'*')
+        {
+            return None;
+        }
+
         let chr = match lookup_byte(current) {
             IDT | MIN | DIG | ZER => {
                 self.advance(1);
@@ -1304,6 +1326,38 @@ impl<'src> CssLexer<'src> {
             BSL => self.is_valid_escape_at(1),
             _ => false,
         }
+    }
+
+    fn consume_token_tailwind_utility(&mut self, current: u8) -> CssSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => {
+                let kind = self.consume_newline_or_whitespaces();
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
+                kind
+            }
+            SEM => self.consume_byte(T![;]),
+            _ => self.consume_tailwind_utility(),
+        }
+    }
+
+    /// Consume a single tailwind utility as a css identifier.
+    ///
+    /// This is intentionally very loose, and pretty much considers anything that isn't whitespace or semicolon.
+    fn consume_tailwind_utility(&mut self) -> CssSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            let dispatched = lookup_byte(current);
+            match dispatched {
+                WHS | SEM => break,
+                _ => {}
+            }
+            self.advance(1);
+        }
+
+        T![ident]
     }
 }
 

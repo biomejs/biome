@@ -43,7 +43,7 @@ fn commonjs_file_rejects_import_statement() {
 
     match workspace.get_parse("/project/a.js".into()) {
         Ok(parse) => {
-            insta::assert_debug_snapshot!(parse.diagnostics(), @r###"
+            insta::assert_debug_snapshot!(parse.diagnostics(), @r#"
             [
                 ParseDiagnostic {
                     span: Some(
@@ -57,9 +57,10 @@ fn commonjs_file_rejects_import_statement() {
                             ),
                         ],
                     },
+                    advice_offset: None,
                 },
             ]
-            "###);
+            "#);
         }
         Err(error) => panic!("File not available: {error}"),
     }
@@ -99,17 +100,94 @@ fn store_embedded_nodes_with_current_ranges() {
     assert!(document.is_some());
 
     let document = document.unwrap();
-    assert_eq!(document._embedded_scripts.len(), 1);
-    assert_eq!(document._embedded_styles.len(), 1);
+    let scripts: Vec<_> = document
+        .embedded_snippets
+        .iter()
+        .filter_map(|node| node.as_js_embedded_snippet())
+        .collect();
+    let styles: Vec<_> = document
+        .embedded_snippets
+        .iter()
+        .filter_map(|node| node.as_css_embedded_snippet())
+        .collect();
+    assert_eq!(scripts.len(), 1);
+    assert_eq!(styles.len(), 1);
 
-    let script = document._embedded_scripts.first().unwrap();
-    let style = document._embedded_styles.first().unwrap();
+    let script = scripts.first().unwrap();
+    let style = styles.first().unwrap();
 
     let script_node = script.node();
     assert!(script_node.text_range_with_trivia().start() > TextSize::from(0));
 
     let style_node = style.node();
     assert!(style_node.text_range_with_trivia().start() > TextSize::from(0));
+}
+
+#[test]
+fn format_html_with_scripts_and_css() {
+    const FILE_CONTENT: &str = r#"<html>
+    <head>
+        <style>
+            #id { background-color: red; }
+        </style>
+        <script type="importmap">
+            { "imports":{"circle": "https://example.com/shapes/circle.js","square":"./modules/shapes/square.js"} }
+        </script>
+        <script>
+            const foo = "bar";
+            function bar() { const object = { ["literal"]: "SOME OTHER STRING" }; return 1; }
+        </script>
+    </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from("/project/file.html").into(),
+            project_key,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    <html>
+    	<head>
+    		<style>
+    		#id {
+    			background-color: red;
+    		}
+    		</style>
+    		<script type="importmap">
+    		{
+    			"imports": {
+    				"circle": "https://example.com/shapes/circle.js",
+    				"square": "./modules/shapes/square.js"
+    			}
+    		}
+    		</script>
+    		<script>
+    		const foo = "bar";
+    		function bar() {
+    			const object = { ["literal"]: "SOME OTHER STRING" };
+    			return 1;
+    		}
+    		</script>
+    	</head>
+    </html>
+    "#);
 }
 
 #[test]
@@ -193,7 +271,7 @@ function Foo({cond}) {
         })
         .unwrap();
 
-    let ts_file_source = workspace.get_file_source("/project/a.ts".into());
+    let ts_file_source = workspace.get_file_source("/project/a.ts".into(), false);
     let ts = ts_file_source.to_js_file_source().expect("JS file source");
     assert!(ts.is_typescript());
     assert!(!ts.is_jsx());
@@ -202,7 +280,7 @@ function Foo({cond}) {
         Err(error) => panic!("File not available: {error}"),
     }
 
-    let js_file_source = workspace.get_file_source("/project/a.js".into());
+    let js_file_source = workspace.get_file_source("/project/a.js".into(), false);
     let js = js_file_source.to_js_file_source().expect("JS file source");
     assert!(!js.is_typescript());
     assert!(js.is_jsx());
@@ -305,7 +383,7 @@ function Foo({cond}) {
         })
         .unwrap();
 
-    let js_file_source = workspace.get_file_source("/project/a.js".into());
+    let js_file_source = workspace.get_file_source("/project/a.js".into(), false);
     let js = js_file_source.to_js_file_source().expect("JS file source");
     assert!(!js.is_typescript());
     assert!(!js.is_jsx());
@@ -314,7 +392,7 @@ function Foo({cond}) {
         Err(error) => panic!("File not available: {error}"),
     }
 
-    let jsx_file_source = workspace.get_file_source("/project/a.jsx".into());
+    let jsx_file_source = workspace.get_file_source("/project/a.jsx".into(), false);
     let jsx = jsx_file_source.to_js_file_source().expect("JS file source");
     assert!(!jsx.is_typescript());
     assert!(jsx.is_jsx());

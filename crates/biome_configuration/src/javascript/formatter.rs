@@ -74,10 +74,10 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to JavaScript (and its super languages) files.
+    /// The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
     #[bpaf(
         long("javascript-formatter-line-ending"),
-        argument("lf|crlf|cr"),
+        argument("lf|crlf|cr|auto"),
         optional
     )]
     #[serde(skip_serializing_if = "Option::is_none")]

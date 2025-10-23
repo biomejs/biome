@@ -60,25 +60,30 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       25 │ + → → → "bracketSpacing":·true
       26 │ + → → }
       27 │ + → },
-      28 │ + → "html":·{·"formatter":·{·"selfCloseVoidElements":·"always"·}·},
-      29 │ + → "overrides":·[
-      30 │ + → → {·"includes":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
-      31 │ + → → {
-      32 │ + → → → "includes":·["**/*.spec.js"],
-      33 │ + → → → "javascript":·{
-      34 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
-      35 │ + → → → }
-      36 │ + → → },
-      37 │ + → → {
-      38 │ + → → → "includes":·["**/*.ts"],
-      39 │ + → → → "javascript":·{
-      40 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
-      41 │ + → → → },
-      42 │ + → → → "formatter":·{·"indentStyle":·"space"·}
-      43 │ + → → }
-      44 │ + → ]
-      45 │ + }
-      46 │ + 
+      28 │ + → "html":·{
+      29 │ + → → "formatter":·{
+      30 │ + → → → "indentScriptAndStyle":·false,
+      31 │ + → → → "selfCloseVoidElements":·"always"
+      32 │ + → → }
+      33 │ + → },
+      34 │ + → "overrides":·[
+      35 │ + → → {·"includes":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
+      36 │ + → → {
+      37 │ + → → → "includes":·["**/*.spec.js"],
+      38 │ + → → → "javascript":·{
+      39 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
+      40 │ + → → → }
+      41 │ + → → },
+      42 │ + → → {
+      43 │ + → → → "includes":·["**/*.ts"],
+      44 │ + → → → "javascript":·{
+      45 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
+      46 │ + → → → },
+      47 │ + → → → "formatter":·{·"indentStyle":·"space"·}
+      48 │ + → → }
+      49 │ + → ]
+      50 │ + }
+      51 │ + 
   
 
 ```

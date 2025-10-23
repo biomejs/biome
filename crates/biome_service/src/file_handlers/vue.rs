@@ -1,3 +1,4 @@
+use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -8,15 +9,15 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_html_syntax::HtmlLanguage;
+use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
-use tracing::debug;
-
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use tracing::{debug, error};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct VueFileHandler;
@@ -88,7 +89,10 @@ impl ExtensionHandler for VueFileHandler {
                 assist: Some(javascript::assist_enabled),
                 linter: Some(javascript::linter_enabled),
             },
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
                 debug_control_flow: None,
@@ -102,11 +106,13 @@ impl ExtensionHandler for VueFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
@@ -141,7 +147,22 @@ fn format(
     parse: AnyParse,
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, document_file_source, parse, settings)
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let indent_amount = if *html_options.indent_script_and_style() {
+        1
+    } else {
+        0
+    };
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+    match formatted.print_with_indent(indent_amount) {
+        Ok(printed) => Ok(printed),
+        Err(error) => {
+            error!("The file {} couldn't be formatted", biome_path.as_str());
+            Err(WorkspaceError::FormatError(error.into()))
+        }
+    }
 }
 
 pub(crate) fn format_range(

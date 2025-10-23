@@ -43,7 +43,7 @@ pub mod trivia;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
-use crate::prelude::TagKind;
+use crate::prelude::{Tag, TagKind};
 use std::fmt;
 use std::fmt::{Debug, Display};
 
@@ -51,6 +51,7 @@ use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
 use crate::format_element::document::Document;
+use crate::format_element::{Interned, LineMode};
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -63,8 +64,8 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
 use biome_rowan::{
-    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
-    TextLen, TextRange, TextSize, TokenAtOffset,
+    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxNodeWithOffset, SyntaxResult,
+    SyntaxToken, SyntaxTriviaPiece, TextLen, TextRange, TextSize, TokenAtOffset,
 };
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
@@ -147,15 +148,39 @@ pub enum LineEnding {
 
     /// Carriage Return character only (\r), used very rarely
     Cr,
+
+    /// Automatically use CRLF on Windows and LF on other platforms
+    Auto,
 }
 
 impl LineEnding {
+    /// Get the string representation of this line ending variant.
+    ///
+    /// For `LineEnding::Auto`, this returns `"\r\n"` on Windows and `"\n"` on other platforms.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_formatter::LineEnding;
+    ///
+    /// assert_eq!(LineEnding::Lf.as_str(), "\n");
+    /// ```
     #[inline]
-    pub const fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             Self::Lf => "\n",
             Self::Crlf => "\r\n",
             Self::Cr => "\r",
+            Self::Auto => {
+                #[cfg(windows)]
+                {
+                    "\r\n"
+                }
+                #[cfg(not(windows))]
+                {
+                    "\n"
+                }
+            }
         }
     }
 
@@ -169,20 +194,66 @@ impl LineEnding {
         matches!(self, Self::Crlf)
     }
 
-    /// Returns `true` if this is a [LineEnding::Cr].
+    /// Checks whether the line ending is a carriage return (CR).
+    ///
+    /// Returns `true` if the variant is `LineEnding::Cr`, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_formatter::LineEnding;
+    ///
+    /// let cr = LineEnding::Cr;
+    /// assert!(cr.is_carriage_return());
+    ///
+    /// let lf = LineEnding::Lf;
+    /// assert!(!lf.is_carriage_return());
+    /// ```
     pub const fn is_carriage_return(&self) -> bool {
         matches!(self, Self::Cr)
+    }
+
+    /// Checks whether the line ending is set to automatic selection.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_formatter::LineEnding;
+    ///
+    /// assert!(LineEnding::Auto.is_auto());
+    /// assert!(!LineEnding::Lf.is_auto());
+    /// ```
+    ///
+    /// @returns `true` if the variant is `LineEnding::Auto`, `false` otherwise.
+    pub const fn is_auto(&self) -> bool {
+        matches!(self, Self::Auto)
     }
 }
 
 impl FromStr for LineEnding {
     type Err = &'static str;
 
+    /// Parses a textual representation of a line ending into a `LineEnding`.
+    ///
+    /// Accepts the exact, lowercase strings: `"lf"`, `"crlf"`, `"cr"`, and `"auto"`.
+    /// The input is case-sensitive; other values produce an error.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err("Value not supported for LineEnding")` when the input does not match any supported value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let e: biome_formatter::LineEnding = "auto".parse().unwrap();
+    /// assert_eq!(e, biome_formatter::LineEnding::Auto);
+    /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "lf" => Ok(Self::Lf),
             "crlf" => Ok(Self::Crlf),
             "cr" => Ok(Self::Cr),
+            "auto" => Ok(Self::Auto),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for LineEnding"),
         }
@@ -190,11 +261,23 @@ impl FromStr for LineEnding {
 }
 
 impl std::fmt::Display for LineEnding {
+    /// Formats the `LineEnding` as its uppercase identifier.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_formatter::LineEnding;
+    /// assert_eq!(format!("{}", LineEnding::Lf), "LF");
+    /// assert_eq!(format!("{}", LineEnding::Crlf), "CRLF");
+    /// assert_eq!(format!("{}", LineEnding::Cr), "CR");
+    /// assert_eq!(format!("{}", LineEnding::Auto), "AUTO");
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lf => std::write!(f, "LF"),
             Self::Crlf => std::write!(f, "CRLF"),
             Self::Cr => std::write!(f, "CR"),
+            Self::Auto => std::write!(f, "AUTO"),
         }
     }
 }
@@ -888,6 +971,24 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
+    /// Visits each embedded element and replaces it with elements contained inside the [Document]
+    /// emitted by `fn_format_embedded`
+    pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
+    where
+        F: FnMut(TextRange) -> Option<Document>,
+    {
+        self.document.transform(move |element| match element {
+            FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
+                .map(|document| FormatElement::Interned(Interned::new(document.into_elements()))),
+            FormatElement::Tag(Tag::EndEmbedded) => {
+                // FIXME: this might not play well for all cases, so we need to figure out
+                // a nicer way to replace the tag
+                Some(FormatElement::Line(LineMode::Hard))
+            }
+            _ => None,
+        });
+    }
+
     /// Returns the formatted document.
     pub fn document(&self) -> &Document {
         &self.document
@@ -896,6 +997,10 @@ impl<Context> Formatted<Context> {
     /// Consumes `self` and returns the formatted document.
     pub fn into_document(self) -> Document {
         self.document
+    }
+
+    pub fn swap_document(&mut self, document: Document) {
+        self.document = document;
     }
 }
 
@@ -969,8 +1074,8 @@ impl Printed {
         }
     }
 
-    /// Range of the input source file covered by this formatted code,
-    /// or None if the entire file is covered in this instance
+    /// [TextRange] of the input source file covered by this formatted code,
+    /// or [None] if the entire file is covered in this instance
     pub fn range(&self) -> Option<TextRange> {
         self.range
     }
@@ -1416,18 +1521,22 @@ pub trait FormatLanguage {
         self,
         root: &SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<TransformSourceMap>,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context;
 }
 
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
+///
+/// When `skip_embedded_nodes` is `true`, the content of `<script>` and `<style` is formatted
+/// verbatim.
 pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
-    let _ = tracing::trace_span!("format_node").entered();
-    let (root, source_map) = match language.transform(&root.clone()) {
+    let (root, source_map) = match language.transform(root) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
             if &transformed == root {
@@ -1471,7 +1580,82 @@ pub fn format_node<L: FormatLanguage>(
         None => (root.clone(), None),
     };
 
-    let context = language.create_context(&root, source_map);
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
+    let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
+
+    let mut state = FormatState::new(context);
+    let mut buffer = VecBuffer::new(&mut state);
+
+    write!(buffer, [format_node])?;
+
+    let mut document = Document::from(buffer.into_vec());
+    document.propagate_expand();
+
+    state.assert_formatted_all_tokens(&root);
+
+    let context = state.into_context();
+    let comments = context.comments();
+
+    comments.assert_checked_all_suppressions(&root);
+    comments.assert_formatted_all_comments();
+
+    Ok(Formatted::new(document, context))
+}
+
+/// Formats a syntax node file based on its features.
+///
+/// It returns a [Formatted] result, which the user can use to override a file.
+pub fn format_node_with_offset<L: FormatLanguage>(
+    root: &SyntaxNodeWithOffset<L::SyntaxLanguage>,
+    language: L,
+    delegate_fmt_embedded_nodes: bool,
+) -> FormatResult<Formatted<L::Context>> {
+    let (root, source_map) = match language.transform(&root.node) {
+        Some((transformed, source_map)) => {
+            // we don't need to insert the node back if it has the same offset
+            if transformed == root.node {
+                (transformed, Some(source_map))
+            } else {
+                match root
+                    .node
+                    .ancestors()
+                    // ancestors() always returns self as the first element of the iterator.
+                    .skip(1)
+                    .last()
+                {
+                    // current root node is the topmost node we don't need to insert the transformed node back
+                    None => (transformed, Some(source_map)),
+                    Some(top_root) => {
+                        // we have to return transformed node back into subtree
+                        let transformed_range = transformed.text_range_with_trivia();
+                        let root_range = root.text_range_with_trivia();
+
+                        let transformed_root = top_root
+                            .replace_child(root.node.clone().into(), transformed.into())
+                            // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
+                            .unwrap();
+                        let transformed = transformed_root.covering_element(TextRange::new(
+                            root_range.start(),
+                            root_range.start() + transformed_range.len(),
+                        ));
+
+                        let node = match transformed {
+                            NodeOrToken::Node(node) => node,
+                            NodeOrToken::Token(token) => {
+                                // if we get a token we need to get the parent node
+                                token.parent().unwrap_or(transformed_root)
+                            }
+                        };
+
+                        (node, Some(source_map))
+                    }
+                }
+            }
+        }
+        None => (root.node.clone(), None),
+    };
+
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
     let mut state = FormatState::new(context);
@@ -1860,7 +2044,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
         None => 0,
     };
 
-    let formatted = format_node(root, language)?;
+    let formatted = format_node(root, language, false)?;
     let mut printed = formatted.print_with_indent(initial_indent)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();

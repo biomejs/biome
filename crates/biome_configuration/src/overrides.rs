@@ -3,7 +3,6 @@ use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::plugins::Plugins;
 use crate::{
     CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     Rules,
@@ -13,6 +12,7 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
     LineEnding, LineWidth,
 };
+use biome_plugin_loader::Plugins;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -142,7 +142,7 @@ pub struct OverrideFormatterConfiguration {
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr"))]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.

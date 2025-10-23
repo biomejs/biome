@@ -75,6 +75,9 @@ pub(crate) async fn did_open(
                 "Loading configuration from text_document {:?}",
                 &project_path
             );
+            if !session.has_initialized() {
+                session.load_extension_settings().await;
+            }
             let status = session
                 .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
                 .await;

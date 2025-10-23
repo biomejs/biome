@@ -261,7 +261,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import { export1 } 'import-foo';
+    /// import { export1 } from 'import-foo';
     /// ```
     ///
     /// ### `paths.<import>.importNames`

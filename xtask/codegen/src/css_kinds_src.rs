@@ -118,6 +118,16 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "ridge",
         "inset",
         "outset",
+        // Tailwind CSS 4.0 keywords
+        "theme",
+        "utility",
+        "variant",
+        "custom-variant",
+        "apply",
+        "source",
+        "reference",
+        "config",
+        "plugin",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -488,6 +498,21 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
         "CSS_VIEW_TRANSITION_AT_RULE",
+        // Tailwind CSS 4.0 nodes
+        "TW_THEME_AT_RULE",
+        "TW_UTILITY_AT_RULE",
+        "TW_VARIANT_AT_RULE",
+        "TW_CUSTOM_VARIANT_AT_RULE",
+        "TW_APPLY_AT_RULE",
+        "TW_APPLY_CLASS_LIST",
+        "TW_SOURCE_AT_RULE",
+        "TW_REFERENCE_AT_RULE",
+        "TW_CONFIG_AT_RULE",
+        "TW_PLUGIN_AT_RULE",
+        "TW_VALUE_THEME_REFERENCE",
+        "TW_FUNCTIONAL_UTILITY_NAME",
+        "TW_CUSTOM_VARIANT_SHORTHAND",
+        // Unknowns
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",

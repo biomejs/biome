@@ -43,13 +43,13 @@ pub type JsonAllowTrailingCommasEnabled = Bool<false>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonParserConfiguration {
-    #[bpaf(hide)]
+    #[bpaf(long("json-parse-allow-comments"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing comments in `.json` files
     pub allow_comments: Option<JsonAllowCommentsEnabled>,
 
-    #[bpaf(hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("json-parse-allow-trailing-commas"), argument("true|false"))]
     /// Allow parsing trailing commas in `.json` files
     pub allow_trailing_commas: Option<JsonAllowTrailingCommasEnabled>,
 }
@@ -77,8 +77,8 @@ pub struct JsonFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to JSON (and its super languages) files.
-    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"))]
+    /// The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
@@ -134,7 +134,7 @@ pub struct JsonLinterConfiguration {
 }
 
 pub type JsonAssistEnabled = Bool<true>;
-/// Linter options specific to the JSON linter
+/// Assist options specific to the JSON linter
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
 )]

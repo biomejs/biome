@@ -6,36 +6,39 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn astro_frontmatter_element(
-    l_fence_token: SyntaxToken,
-    r_fence_token: SyntaxToken,
-) -> AstroFrontmatterElementBuilder {
-    AstroFrontmatterElementBuilder {
-        l_fence_token,
-        r_fence_token,
+pub fn astro_embedded_content() -> AstroEmbeddedContentBuilder {
+    AstroEmbeddedContentBuilder {
         content_token: None,
     }
 }
-pub struct AstroFrontmatterElementBuilder {
-    l_fence_token: SyntaxToken,
-    r_fence_token: SyntaxToken,
+pub struct AstroEmbeddedContentBuilder {
     content_token: Option<SyntaxToken>,
 }
-impl AstroFrontmatterElementBuilder {
+impl AstroEmbeddedContentBuilder {
     pub fn with_content_token(mut self, content_token: SyntaxToken) -> Self {
         self.content_token = Some(content_token);
         self
     }
-    pub fn build(self) -> AstroFrontmatterElement {
-        AstroFrontmatterElement::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT,
-            [
-                Some(SyntaxElement::Token(self.l_fence_token)),
-                self.content_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.r_fence_token)),
-            ],
+    pub fn build(self) -> AstroEmbeddedContent {
+        AstroEmbeddedContent::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ASTRO_EMBEDDED_CONTENT,
+            [self.content_token.map(|token| SyntaxElement::Token(token))],
         ))
     }
+}
+pub fn astro_frontmatter_element(
+    l_fence_token: SyntaxToken,
+    content: AstroEmbeddedContent,
+    r_fence_token: SyntaxToken,
+) -> AstroFrontmatterElement {
+    AstroFrontmatterElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
 }
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
@@ -205,6 +208,12 @@ pub fn html_element(
             Some(SyntaxElement::Node(children.into_syntax())),
             Some(SyntaxElement::Node(closing_element.into_syntax())),
         ],
+    ))
+}
+pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
+    HtmlEmbeddedContent::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_EMBEDDED_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn html_opening_element(

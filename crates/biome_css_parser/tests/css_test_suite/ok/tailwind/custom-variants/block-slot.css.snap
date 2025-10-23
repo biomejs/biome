@@ -1,0 +1,193 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@custom-variant theme-midnight {
+	&:where([data-theme="midnight"] *) {
+		@slot;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@16..31 "theme-midnight" [] [Whitespace(" ")],
+                },
+                selector: CssRuleBlock {
+                    l_curly_token: L_CURLY@31..32 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        CssNestedSelector {
+                                            amp_token: AMP@32..35 "&" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@35..36 ":" [] [],
+                                            class: CssPseudoClassFunctionSelectorList {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@36..41 "where" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@41..42 "(" [] [],
+                                                selectors: CssSelectorList [
+                                                    CssComplexSelector {
+                                                        left: CssCompoundSelector {
+                                                            nesting_selectors: CssNestedSelectorList [],
+                                                            simple_selector: missing (optional),
+                                                            sub_selectors: CssSubSelectorList [
+                                                                CssAttributeSelector {
+                                                                    l_brack_token: L_BRACK@42..43 "[" [] [],
+                                                                    name: CssAttributeName {
+                                                                        namespace: missing (optional),
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@43..53 "data-theme" [] [],
+                                                                        },
+                                                                    },
+                                                                    matcher: CssAttributeMatcher {
+                                                                        operator: EQ@53..54 "=" [] [],
+                                                                        value: CssAttributeMatcherValue {
+                                                                            name: CssString {
+                                                                                value_token: CSS_STRING_LITERAL@54..64 "\"midnight\"" [] [],
+                                                                            },
+                                                                        },
+                                                                        modifier: missing (optional),
+                                                                    },
+                                                                    r_brack_token: R_BRACK@64..65 "]" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        combinator: CSS_SPACE_LITERAL@65..66 " " [] [],
+                                                        right: CssCompoundSelector {
+                                                            nesting_selectors: CssNestedSelectorList [],
+                                                            simple_selector: CssUniversalSelector {
+                                                                namespace: missing (optional),
+                                                                star_token: STAR@66..67 "*" [] [],
+                                                            },
+                                                            sub_selectors: CssSubSelectorList [],
+                                                        },
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@67..69 ")" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@69..70 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssAtRule {
+                                        at_token: AT@70..74 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssUnknownValueAtRule {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@74..78 "slot" [] [],
+                                            },
+                                            components: CssUnknownAtRuleComponentList {
+                                                items: [],
+                                            },
+                                            semicolon_token: SEMICOLON@78..79 ";" [] [],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@79..82 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@82..84 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@84..85 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..85
+  0: (empty)
+  1: CSS_RULE_LIST@0..84
+    0: CSS_AT_RULE@0..84
+      0: AT@0..1 "@" [] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..84
+        0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@16..31
+          0: IDENT@16..31 "theme-midnight" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@31..84
+          0: L_CURLY@31..32 "{" [] []
+          1: CSS_RULE_LIST@32..82
+            0: CSS_QUALIFIED_RULE@32..82
+              0: CSS_SELECTOR_LIST@32..69
+                0: CSS_COMPOUND_SELECTOR@32..69
+                  0: CSS_NESTED_SELECTOR_LIST@32..35
+                    0: CSS_NESTED_SELECTOR@32..35
+                      0: AMP@32..35 "&" [Newline("\n"), Whitespace("\t")] []
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@35..69
+                    0: CSS_PSEUDO_CLASS_SELECTOR@35..69
+                      0: COLON@35..36 ":" [] []
+                      1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@36..69
+                        0: CSS_IDENTIFIER@36..41
+                          0: IDENT@36..41 "where" [] []
+                        1: L_PAREN@41..42 "(" [] []
+                        2: CSS_SELECTOR_LIST@42..67
+                          0: CSS_COMPLEX_SELECTOR@42..67
+                            0: CSS_COMPOUND_SELECTOR@42..65
+                              0: CSS_NESTED_SELECTOR_LIST@42..42
+                              1: (empty)
+                              2: CSS_SUB_SELECTOR_LIST@42..65
+                                0: CSS_ATTRIBUTE_SELECTOR@42..65
+                                  0: L_BRACK@42..43 "[" [] []
+                                  1: CSS_ATTRIBUTE_NAME@43..53
+                                    0: (empty)
+                                    1: CSS_IDENTIFIER@43..53
+                                      0: IDENT@43..53 "data-theme" [] []
+                                  2: CSS_ATTRIBUTE_MATCHER@53..64
+                                    0: EQ@53..54 "=" [] []
+                                    1: CSS_ATTRIBUTE_MATCHER_VALUE@54..64
+                                      0: CSS_STRING@54..64
+                                        0: CSS_STRING_LITERAL@54..64 "\"midnight\"" [] []
+                                    2: (empty)
+                                  3: R_BRACK@64..65 "]" [] []
+                            1: CSS_SPACE_LITERAL@65..66 " " [] []
+                            2: CSS_COMPOUND_SELECTOR@66..67
+                              0: CSS_NESTED_SELECTOR_LIST@66..66
+                              1: CSS_UNIVERSAL_SELECTOR@66..67
+                                0: (empty)
+                                1: STAR@66..67 "*" [] []
+                              2: CSS_SUB_SELECTOR_LIST@67..67
+                        3: R_PAREN@67..69 ")" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@69..82
+                0: L_CURLY@69..70 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@70..79
+                  0: CSS_AT_RULE@70..79
+                    0: AT@70..74 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_UNKNOWN_VALUE_AT_RULE@74..79
+                      0: CSS_IDENTIFIER@74..78
+                        0: IDENT@74..78 "slot" [] []
+                      1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@78..78
+                      2: SEMICOLON@78..79 ";" [] []
+                2: R_CURLY@79..82 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@82..84 "}" [Newline("\n")] []
+  2: EOF@84..85 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,27 @@
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "warn",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": {
+                  "kind": "variable"
+                },
+                "formats": [
+                  "camelCase",
+                  "CONSTANT_CASE",
+                  "PascalCase"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

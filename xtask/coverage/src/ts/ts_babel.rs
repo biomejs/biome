@@ -51,7 +51,7 @@ impl TestCase for BabelTypescriptTestCase {
             self.name().to_string(),
             self.code.clone(),
             source_type,
-            options.clone(),
+            options,
         );
 
         let result = biome_js_parser::parse(&self.code, source_type, options);
