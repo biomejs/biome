@@ -4040,8 +4040,7 @@ let useConst = "Astro Test";
                 r#"---
 const useConst = "Astro Test";
 ---
-<!doctype html>
-"#,
+<!doctype html>"#,
             ),
         }],
     );
