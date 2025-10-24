@@ -368,3 +368,4 @@ pub mod use_vue_define_macros_order;
 pub mod use_vue_multi_word_component_names;
 pub mod use_while;
 pub mod use_yield;
+pub mod no_continue;
