@@ -1941,6 +1941,7 @@ TwApplyClassList = CssIdentifier*
 // @source "../node_modules/@my-company/ui-lib";
 TwSourceAtRule =
   'source'
+  'not'?
   path: CssString
   ';'
 

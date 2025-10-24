@@ -2484,15 +2484,36 @@ pub fn tw_source_at_rule(
     source_token: SyntaxToken,
     path: CssString,
     semicolon_token: SyntaxToken,
-) -> TwSourceAtRule {
-    TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_SOURCE_AT_RULE,
-        [
-            Some(SyntaxElement::Token(source_token)),
-            Some(SyntaxElement::Node(path.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> TwSourceAtRuleBuilder {
+    TwSourceAtRuleBuilder {
+        source_token,
+        path,
+        semicolon_token,
+        not_token: None,
+    }
+}
+pub struct TwSourceAtRuleBuilder {
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+    not_token: Option<SyntaxToken>,
+}
+impl TwSourceAtRuleBuilder {
+    pub fn with_not_token(mut self, not_token: SyntaxToken) -> Self {
+        self.not_token = Some(not_token);
+        self
+    }
+    pub fn build(self) -> TwSourceAtRule {
+        TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_SOURCE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.source_token)),
+                self.not_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.path.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,

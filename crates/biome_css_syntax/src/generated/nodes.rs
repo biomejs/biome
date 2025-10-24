@@ -7219,6 +7219,7 @@ impl TwSourceAtRule {
     pub fn as_fields(&self) -> TwSourceAtRuleFields {
         TwSourceAtRuleFields {
             source_token: self.source_token(),
+            not_token: self.not_token(),
             path: self.path(),
             semicolon_token: self.semicolon_token(),
         }
@@ -7226,11 +7227,14 @@ impl TwSourceAtRule {
     pub fn source_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn not_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn path(&self) -> SyntaxResult<CssString> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwSourceAtRule {
@@ -7244,6 +7248,7 @@ impl Serialize for TwSourceAtRule {
 #[derive(Serialize)]
 pub struct TwSourceAtRuleFields {
     pub source_token: SyntaxResult<SyntaxToken>,
+    pub not_token: Option<SyntaxToken>,
     pub path: SyntaxResult<CssString>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -18460,6 +18465,10 @@ impl std::fmt::Debug for TwSourceAtRule {
                 .field(
                     "source_token",
                     &support::DebugSyntaxResult(self.source_token()),
+                )
+                .field(
+                    "not_token",
+                    &support::DebugOptionalElement(self.not_token()),
                 )
                 .field("path", &support::DebugSyntaxResult(self.path()))
                 .field(
