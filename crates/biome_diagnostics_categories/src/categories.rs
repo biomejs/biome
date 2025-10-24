@@ -178,6 +178,7 @@ define_categories! {
     "lint/nursery/noSecrets": "https://biomejs.dev/linter/rules/no-secrets",
     "lint/nursery/noShadow": "https://biomejs.dev/linter/rules/no-shadow",
     "lint/nursery/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",
+    "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
     "lint/nursery/noUnresolvedImports": "https://biomejs.dev/linter/rules/no-unresolved-imports",
     "lint/nursery/noUnusedExpressions": "https://biomejs.dev/linter/rules/no-unused-expressions",

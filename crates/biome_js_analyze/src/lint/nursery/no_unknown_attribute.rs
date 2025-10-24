@@ -62,7 +62,7 @@ declare_lint_rule! {
     ///
     /// ```json
     /// {
-    ///   "noUnknownProperty": {
+    ///   "noUnknownAttribute": {
     ///     "options": {
     ///       "ignore": ["custom-attribute", "non-standard-prop"]
     ///     }
@@ -79,7 +79,7 @@ declare_lint_rule! {
     ///
     /// ```json
     /// {
-    ///   "noUnknownProperty": {
+    ///   "noUnknownAttribute": {
     ///     "options": {
     ///       "requireDataLowercase": true
     ///     }
@@ -87,9 +87,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoUnknownProperty {
+    pub NoUnknownAttribute {
         version: "next",
-        name: "noUnknownProperty",
+        name: "noUnknownAttribute",
         language: "jsx",
         domains: &[RuleDomain::React],
         sources: &[
@@ -1018,7 +1018,7 @@ fn has_uppercase(name: &str) -> bool {
     name.contains(char::is_uppercase)
 }
 
-pub enum NoUnknownPropertyState {
+pub enum NoUnknownAttributeState {
     UnknownProp {
         name: Box<str>,
     },
@@ -1051,9 +1051,9 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
         .copied()
 }
 
-impl Rule for NoUnknownProperty {
+impl Rule for NoUnknownAttribute {
     type Query = Manifest<JsxAttribute>;
-    type State = NoUnknownPropertyState;
+    type State = NoUnknownAttributeState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownPropertyOptions;
 
@@ -1092,7 +1092,7 @@ impl Rule for NoUnknownProperty {
         // Handle data-* attributes
         if is_valid_data_attribute(name) {
             if options.require_data_lowercase && has_uppercase(&name) {
-                return Some(NoUnknownPropertyState::DataLowercaseRequired { name: name.into() });
+                return Some(NoUnknownAttributeState::DataLowercaseRequired { name: name.into() });
             }
             return None;
         }
@@ -1118,7 +1118,7 @@ impl Rule for NoUnknownProperty {
 
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&tag_name.trim()) {
-                return Some(NoUnknownPropertyState::InvalidPropOnTag {
+                return Some(NoUnknownAttributeState::InvalidPropOnTag {
                     name: name.into(),
                     tag_name,
                     allowed_tags,
@@ -1129,7 +1129,7 @@ impl Rule for NoUnknownProperty {
 
         if let Some(standard_name) = get_standard_name(name) {
             if standard_name != name {
-                return Some(NoUnknownPropertyState::UnknownPropWithStandardName {
+                return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
                     name: name.into(),
                     standard_name: standard_name.into(),
                 });
@@ -1137,13 +1137,13 @@ impl Rule for NoUnknownProperty {
             return None;
         }
 
-        Some(NoUnknownPropertyState::UnknownProp { name: name.into() })
+        Some(NoUnknownAttributeState::UnknownProp { name: name.into() })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         match state {
-            NoUnknownPropertyState::UnknownProp { name } => Some(
+            NoUnknownAttributeState::UnknownProp { name } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     node.range(),
@@ -1158,7 +1158,7 @@ impl Rule for NoUnknownProperty {
                     "Check the spelling or consider using a valid data-* attribute for custom properties."
                 }),
             ),
-            NoUnknownPropertyState::UnknownPropWithStandardName {
+            NoUnknownAttributeState::UnknownPropWithStandardName {
                 name,
                 standard_name,
             } => Some(
@@ -1176,7 +1176,7 @@ impl Rule for NoUnknownProperty {
                         "Use '"{standard_name}"' instead of '"{name}"' for React components."
                 }),
             ),
-            NoUnknownPropertyState::InvalidPropOnTag {
+            NoUnknownAttributeState::InvalidPropOnTag {
                 name,
                 tag_name,
                 allowed_tags,
@@ -1195,7 +1195,7 @@ impl Rule for NoUnknownProperty {
                        "This attribute is only allowed on: "{allowed_tags.join(",")}
                 }),
             ),
-            NoUnknownPropertyState::DataLowercaseRequired {
+            NoUnknownAttributeState::DataLowercaseRequired {
                 name,
             } => Some(
                 RuleDiagnostic::new(
