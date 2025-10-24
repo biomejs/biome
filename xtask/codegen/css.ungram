@@ -1873,9 +1873,14 @@ CssMetavariable = value: 'grit_metavariable'
 // Tailwind
 
 // --value(--tab-size-*)
+//         ^^^^^^^^^^^^
+// --color-*: initial;
+// ^^^^^^^^^
+// --*: initial;
+// ^^^
 TwValueThemeReference =
 	reference: CssDashedIdentifier
-	'-'
+	'-'?
 	'*'
 
 // Enhanced @utility directive to support functional utilities
