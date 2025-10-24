@@ -116,6 +116,24 @@ impl TsConfigJson {
                 })
         })
     }
+
+    /// Returns the base identifier from the JSX factory function name.
+    /// For example, "React.createElement" returns "React", "h" returns "h".
+    pub fn jsx_factory_identifier(&self) -> Option<&str> {
+        self.compiler_options
+            .jsx_factory
+            .as_ref()
+            .map(|factory| factory.split('.').next().unwrap_or(factory.as_str()))
+    }
+
+    /// Returns the base identifier from the JSX fragment factory function name.
+    /// For example, "React.Fragment" returns "React", "Fragment" returns "Fragment".
+    pub fn jsx_fragment_factory_identifier(&self) -> Option<&str> {
+        self.compiler_options
+            .jsx_fragment_factory
+            .as_ref()
+            .map(|factory| factory.split('.').next().unwrap_or(factory.as_str()))
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserializable)]
@@ -137,6 +155,16 @@ pub struct CompilerOptions {
     /// See: https://www.typescriptlang.org/tsconfig/#typeRoots
     #[deserializable(rename = "typeRoots")]
     pub type_roots: Option<Vec<String>>,
+
+    /// See: https://www.typescriptlang.org/tsconfig/#jsxFactory
+    /// Specifies the JSX factory function to use when targeting react JSX emit
+    #[deserializable(rename = "jsxFactory")]
+    pub jsx_factory: Option<String>,
+
+    /// See: https://www.typescriptlang.org/tsconfig/#jsxFragmentFactory
+    /// Specifies the JSX fragment factory function to use when targeting react JSX emit
+    #[deserializable(rename = "jsxFragmentFactory")]
+    pub jsx_fragment_factory: Option<String>,
 }
 
 pub type CompilerOptionsPathsMap = IndexMap<String, Vec<String>, BuildHasherDefault<FxHasher>>;

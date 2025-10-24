@@ -44,6 +44,20 @@ pub struct JsConfiguration {
     #[bpaf(hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_runtime: Option<JsxRuntime>,
+
+    /// The JSX factory function to use when using the classic JSX runtime.
+    /// This is read from tsconfig.json's compilerOptions.jsxFactory.
+    /// Only relevant when jsx_runtime is ReactClassic.
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jsx_factory: Option<String>,
+
+    /// The JSX fragment factory function to use when using the classic JSX runtime.
+    /// This is read from tsconfig.json's compilerOptions.jsxFragmentFactory.
+    /// Only relevant when jsx_runtime is ReactClassic.
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jsx_fragment_factory: Option<String>,
 }
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
