@@ -1,15 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeParameter.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
 export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
-
-type Mapped<T> = {
-    [k in keyof T]: T
-}
 ```
 
 # Diagnostics
@@ -20,8 +15,6 @@ invalidTypeParameter.ts:1:23 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                       ^
-    2 │ 
-    3 │ type Mapped<T> = {
   
 
 ```
@@ -33,8 +26,6 @@ invalidTypeParameter.ts:1:26 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                          ^^
-    2 │ 
-    3 │ type Mapped<T> = {
   
 
 ```
@@ -46,8 +37,6 @@ invalidTypeParameter.ts:1:30 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                              ^^^^^^^^^
-    2 │ 
-    3 │ type Mapped<T> = {
   
 
 ```
@@ -59,8 +48,6 @@ invalidTypeParameter.ts:1:41 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                                         ^^^^^^^^^^^^^
-    2 │ 
-    3 │ type Mapped<T> = {
   
 
 ```
@@ -72,8 +59,6 @@ invalidTypeParameter.ts:1:56 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                                                        ^^^^^^^^^^
-    2 │ 
-    3 │ type Mapped<T> = {
   
 
 ```
@@ -85,21 +70,6 @@ invalidTypeParameter.ts:1:68 lint/style/useNamingConvention ━━━━━━�
   
   > 1 │ export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
       │                                                                    ^^^^^^^^^^^^^
-    2 │ 
-    3 │ type Mapped<T> = {
-  
-
-```
-
-```
-invalidTypeParameter.ts:4:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This type parameter name should be in PascalCase.
-  
-    3 │ type Mapped<T> = {
-  > 4 │     [k in keyof T]: T
-      │      ^
-    5 │ }
   
 
 ```

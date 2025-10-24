@@ -1143,7 +1143,29 @@ fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
             }
         }
         AnyIdentifierBindingLike::TsLiteralEnumMemberName(_) => Some(Kind::EnumMember.into()),
-        AnyIdentifierBindingLike::TsTypeParameterName(_) => Some(Kind::TypeParameter.into()),
+        AnyIdentifierBindingLike::TsTypeParameterName(type_param_name) => {
+            // Check if this is a mapped type index parameter
+            let is_mapped_type = type_param_name.syntax().parent().is_some_and(|parent| {
+                // Check if the parent is TsTypeParameter
+                if let Some(type_param) = biome_js_syntax::TsTypeParameter::cast(parent.clone()) {
+                    // Check if the TsTypeParameter's parent is TsMappedType
+                    type_param.syntax().parent().is_some_and(|grandparent| {
+                        biome_js_syntax::TsMappedType::cast(grandparent).is_some()
+                    })
+                } else {
+                    // Check if the direct parent is TsMappedType
+                    biome_js_syntax::TsMappedType::cast(parent).is_some()
+                }
+            });
+
+            if is_mapped_type {
+                // Mapped type index parameters should use camelCase like index signatures
+                Some(Kind::IndexParameter.into())
+            } else {
+                // Regular type parameters should use PascalCase
+                Some(Kind::TypeParameter.into())
+            }
+        }
     }
 }
 
