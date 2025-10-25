@@ -6,6 +6,8 @@ use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
 use biome_string_case::StrOnlyExtension;
+use rustc_hash::FxHashMap;
+use std::sync::LazyLock;
 
 use crate::services::manifest::Manifest;
 
@@ -223,12 +225,8 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("webkitDirectory", &["input"]),
 ];
 
-pub fn get_allowed_tags(attribute: &str) -> Option<&'static [&'static str]> {
-    ATTRIBUTE_TAGS_MAP
-        .binary_search_by_key(&attribute, |&(key, _)| key)
-        .ok()
-        .map(|idx| ATTRIBUTE_TAGS_MAP[idx].1)
-}
+static ATTRIBUTE_TAGS_LOOKUP: LazyLock<FxHashMap<&'static str, &'static [&'static str]>> =
+    LazyLock::new(|| ATTRIBUTE_TAGS_MAP.iter().copied().collect());
 
 const ARIA_PROPERTIES: [&str; 53] = [
     // See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes
@@ -300,25 +298,19 @@ const DOM_PROPERTIES_IGNORE_CASE: [&str; 5] = [
 
 const DOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
     ("accept-charset", "acceptCharset"),
-    ("class", "className"),
-    ("crossorigin", "crossOrigin"),
-    ("for", "htmlFor"),
-    ("http-equiv", "httpEquiv"),
-    ("nomodule", "noModule"),
-];
-
-const SVGDOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
     ("accent-height", "accentHeight"),
     ("alignment-baseline", "alignmentBaseline"),
     ("arabic-form", "arabicForm"),
     ("baseline-shift", "baselineShift"),
     ("cap-height", "capHeight"),
+    ("class", "className"),
     ("clip-path", "clipPath"),
     ("clip-rule", "clipRule"),
     ("color-interpolation", "colorInterpolation"),
     ("color-interpolation-filters", "colorInterpolationFilters"),
     ("color-profile", "colorProfile"),
     ("color-rendering", "colorRendering"),
+    ("crossorigin", "crossOrigin"),
     ("dominant-baseline", "dominantBaseline"),
     ("enable-background", "enableBackground"),
     ("fill-opacity", "fillOpacity"),
@@ -332,17 +324,20 @@ const SVGDOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
     ("font-style", "fontStyle"),
     ("font-variant", "fontVariant"),
     ("font-weight", "fontWeight"),
+    ("for", "htmlFor"),
     ("glyph-name", "glyphName"),
     ("glyph-orientation-horizontal", "glyphOrientationHorizontal"),
     ("glyph-orientation-vertical", "glyphOrientationVertical"),
     ("horiz-adv-x", "horizAdvX"),
     ("horiz-origin-x", "horizOriginX"),
+    ("http-equiv", "httpEquiv"),
     ("image-rendering", "imageRendering"),
     ("letter-spacing", "letterSpacing"),
     ("lighting-color", "lightingColor"),
     ("marker-end", "markerEnd"),
     ("marker-mid", "markerMid"),
     ("marker-start", "markerStart"),
+    ("nomodule", "noModule"),
     ("overline-position", "overlinePosition"),
     ("overline-thickness", "overlineThickness"),
     ("paint-order", "paintOrder"),
@@ -391,6 +386,9 @@ const SVGDOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
     ("xml:lang", "xmlLang"),
     ("xml:space", "xmlSpace"),
 ];
+
+static DOM_ATTRIBUTE_LOOKUP: LazyLock<FxHashMap<&'static str, &'static str>> =
+    LazyLock::new(|| DOM_ATTRIBUTE_NAMES.iter().copied().collect());
 
 const DOM_PROPERTY_NAMES: &[&str] = &[
     // Single word properties
@@ -1036,12 +1034,8 @@ pub enum NoUnknownAttributeState {
 }
 
 fn get_standard_name(name: &str) -> Option<&'static str> {
-    if let Ok(idx) = DOM_ATTRIBUTE_NAMES.binary_search_by_key(&name, |&(key, _)| key) {
-        return Some(DOM_ATTRIBUTE_NAMES[idx].1);
-    }
-
-    if let Ok(idx) = SVGDOM_ATTRIBUTE_NAMES.binary_search_by_key(&name, |&(key, _)| key) {
-        return Some(SVGDOM_ATTRIBUTE_NAMES[idx].1);
+    if let Some(&standard_name) = DOM_ATTRIBUTE_LOOKUP.get(name) {
+        return Some(standard_name);
     }
 
     DOM_PROPERTY_NAMES
@@ -1113,7 +1107,7 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
-        let allowed_tags = get_allowed_tags(&name);
+        let allowed_tags = ATTRIBUTE_TAGS_LOOKUP.get(name).copied();
 
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&tag_name.trim()) {
