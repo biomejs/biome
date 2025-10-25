@@ -7130,6 +7130,7 @@ impl TwPluginAtRule {
         TwPluginAtRuleFields {
             plugin_token: self.plugin_token(),
             name: self.name(),
+            block: self.block(),
             semicolon_token: self.semicolon_token(),
         }
     }
@@ -7139,8 +7140,11 @@ impl TwPluginAtRule {
     pub fn name(&self) -> SyntaxResult<CssString> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn block(&self) -> Option<AnyCssDeclarationBlock> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwPluginAtRule {
@@ -7155,7 +7159,8 @@ impl Serialize for TwPluginAtRule {
 pub struct TwPluginAtRuleFields {
     pub plugin_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssString>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub block: Option<AnyCssDeclarationBlock>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwReferenceAtRule {
@@ -18357,9 +18362,10 @@ impl std::fmt::Debug for TwPluginAtRule {
                     &support::DebugSyntaxResult(self.plugin_token()),
                 )
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugOptionalElement(self.block()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {

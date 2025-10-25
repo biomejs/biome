@@ -182,6 +182,7 @@ CssRoot {
                 name: CssString {
                     value_token: CSS_STRING_LITERAL@32..53 "\"tailwindcss-animate\"" [] [],
                 },
+                block: missing (optional),
                 semicolon_token: SEMICOLON@53..54 ";" [] [],
             },
         },
@@ -4457,7 +4458,8 @@ CssRoot {
         0: PLUGIN_KW@25..32 "plugin" [] [Whitespace(" ")]
         1: CSS_STRING@32..53
           0: CSS_STRING_LITERAL@32..53 "\"tailwindcss-animate\"" [] []
-        2: SEMICOLON@53..54 ";" [] []
+        2: (empty)
+        3: SEMICOLON@53..54 ";" [] []
     2: CSS_AT_RULE@54..93
       0: AT@54..57 "@" [Newline("\n"), Newline("\n")] []
       1: TW_CUSTOM_VARIANT_AT_RULE@57..93
