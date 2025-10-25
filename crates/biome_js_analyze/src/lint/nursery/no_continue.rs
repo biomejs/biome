@@ -7,7 +7,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_continue::NoContinueOptions;
 
 declare_lint_rule! {
-    /// Disallow continue statements
+    /// Disallow continue statements.
     ///
     /// The continue statement terminates execution of the statements in the current iteration of the current or labeled loop, and continues execution of the loop with the next iteration.
     /// When used incorrectly it makes code less testable, less readable and less maintainable.
