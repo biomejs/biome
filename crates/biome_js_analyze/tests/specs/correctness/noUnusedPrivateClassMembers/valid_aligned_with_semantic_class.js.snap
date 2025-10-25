@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: valid_aligned_with_semantic_class.js
+---
+# Input
+```js
+
+/* should not generate diagnostics */
+
+class Foo {
+	#usedOnlyInWriteStatement = 5;
+	method() {
+		this.#usedOnlyInWriteStatement += 42;
+	}
+}
+
+```
