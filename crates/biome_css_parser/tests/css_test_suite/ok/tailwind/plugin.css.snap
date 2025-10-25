@@ -23,6 +23,7 @@ CssRoot {
                 name: CssString {
                     value_token: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] [],
                 },
+                block: missing (optional),
                 semicolon_token: SEMICOLON@33..34 ";" [] [],
             },
         },
@@ -43,7 +44,8 @@ CssRoot {
         0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
         1: CSS_STRING@8..33
           0: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] []
-        2: SEMICOLON@33..34 ";" [] []
+        2: (empty)
+        3: SEMICOLON@33..34 ";" [] []
   2: EOF@34..35 "" [Newline("\n")] []
 
 ```

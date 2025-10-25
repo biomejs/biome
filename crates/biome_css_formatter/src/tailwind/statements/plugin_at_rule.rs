@@ -9,17 +9,14 @@ impl FormatNodeRule<TwPluginAtRule> for FormatTwPluginAtRule {
         let TwPluginAtRuleFields {
             plugin_token,
             name,
+            block,
             semicolon_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                plugin_token.format(),
-                space(),
-                name.format(),
-                semicolon_token.format()
-            ]
-        )
+        write!(f, [plugin_token.format(), space(), name.format()])?;
+        if let Some(block) = block {
+            write!(f, [space(), block.format()])?;
+        }
+        write!(f, [semicolon_token.format()])
     }
 }
