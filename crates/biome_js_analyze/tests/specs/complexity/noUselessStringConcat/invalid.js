@@ -13,3 +13,9 @@ const a = 1 + '1'
 const a = 1 + `1`
 const a = `1` + 1
 const a = 1 + 1 + ""
+const multilineBefore = 1
+    + 1 // comment
+    + "bar"
+const multilineAfter = 12 +
+    2 +
+    "foo"

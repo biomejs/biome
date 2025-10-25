@@ -13,3 +13,8 @@ const stylisticConcat = 'foo' +
 const stylisticConcat = `foo` +
                         'bar' +
                         `baz`
+const stylisticConcatLeading = 'foo'
+                        + 'bar'
+const stylisticConcatLeading = `foo`
+                        + 'bar'
+                        + `baz`
