@@ -1069,7 +1069,7 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "camino",
- "hashbrown 0.15.5",
+ "hashbrown 0.16.0",
  "insta",
  "rustc-hash 2.1.1",
 ]
@@ -1466,7 +1466,7 @@ dependencies = [
  "biome_text_edit",
  "biome_text_size",
  "countme",
- "hashbrown 0.15.5",
+ "hashbrown 0.16.0",
  "iai",
  "quickcheck",
  "quickcheck_macros",
@@ -2961,6 +2961,12 @@ dependencies = [
  "equivalent",
  "foldhash",
 ]
+
+[[package]]
+name = "hashbrown"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d"
 
 [[package]]
 name = "hermit-abi"
