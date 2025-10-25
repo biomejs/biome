@@ -7361,8 +7361,8 @@ impl TwValueThemeReference {
     pub fn reference(&self) -> SyntaxResult<CssDashedIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn minus_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
     pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -7379,7 +7379,7 @@ impl Serialize for TwValueThemeReference {
 #[derive(Serialize)]
 pub struct TwValueThemeReferenceFields {
     pub reference: SyntaxResult<CssDashedIdentifier>,
-    pub minus_token: SyntaxResult<SyntaxToken>,
+    pub minus_token: Option<SyntaxToken>,
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -18619,7 +18619,7 @@ impl std::fmt::Debug for TwValueThemeReference {
                 .field("reference", &support::DebugSyntaxResult(self.reference()))
                 .field(
                     "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
+                    &support::DebugOptionalElement(self.minus_token()),
                 )
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()
