@@ -1,12 +1,13 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "<DESCRIPTION>"
+description          = "Biome's HTML/Astro/Svelte parser"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_html_parser"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 

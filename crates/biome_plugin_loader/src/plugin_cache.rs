@@ -1,9 +1,9 @@
 use biome_analyze::AnalyzerPluginVec;
-use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashSet};
 
+use crate::configuration::{PluginConfiguration, Plugins};
 use crate::{BiomePlugin, PluginDiagnostic};
 
 /// Cache for storing loaded plugins in memory.

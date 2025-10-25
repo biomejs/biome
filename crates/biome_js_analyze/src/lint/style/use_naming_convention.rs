@@ -977,7 +977,7 @@ impl Rule for UseNamingConvention {
             new_name.push_str(&name[..(name_range.start as _)]);
             new_name.push_str(&new_name_part);
             new_name.push_str(&name[(name_range.end as _)..]);
-            if name == new_name {
+            if name == new_name || new_name.is_empty() {
                 return None;
             }
             let mut mutation = ctx.root().begin();

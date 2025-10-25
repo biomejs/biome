@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, TokenText};
-use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
+use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
 use biome_string_case::StrOnlyExtension;
 
 use crate::services::manifest::Manifest;
@@ -93,8 +93,7 @@ declare_lint_rule! {
         language: "jsx",
         domains: &[RuleDomain::React],
         sources: &[
-            RuleSource::EslintReactX("no-unknown-property").same(),
-            RuleSource::EslintReactXyz("no-unknown-property").same(),
+            RuleSource::EslintReact("no-unknown-property").same(),
         ],
         recommended: false,
     }

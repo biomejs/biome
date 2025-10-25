@@ -1,5 +1,17 @@
 # @biomejs/biome
 
+## 2.2.7
+
+### Patch Changes
+
+- [#7715](https://github.com/biomejs/biome/pull/7715) [`b622425`](https://github.com/biomejs/biome/commit/b6224257e43b1ffda9f4a80564d83616ecfb27c4) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noEmptySource`](https://biomejs.dev/linter/rules/no-empty-source/), disallowing meaningless js, css, json & graphql files to prevent codebase clutter.
+
+- [#7714](https://github.com/biomejs/biome/pull/7714) [`c7e5a14`](https://github.com/biomejs/biome/commit/c7e5a1424441b09cf505cff31b93fcd1bcc4fd3e) Thanks [@MeGaNeKoS](https://github.com/MeGaNeKoS)! - Increased the maximum line limit for [noExcessiveLinesPerFunction](https://biomejs.dev/linter/rules/no-excessive-lines-per-function/) from 255 to 65,535 to better support large JSX/front-end components.
+
+- [#5868](https://github.com/biomejs/biome/pull/5868) [`2db73ae`](https://github.com/biomejs/biome/commit/2db73aefb3d526041338d7174978524c4677b47e) Thanks [@bushuai](https://github.com/bushuai)! - Fixed [#5856](https://github.com/biomejs/biome/issues/5856), `noRedundantUseStrict` now keeps leading trivia
+
+- [#7756](https://github.com/biomejs/biome/pull/7756) [`d665c97`](https://github.com/biomejs/biome/commit/d665c970338d8b334381e68eae4a26c5da0ac9a5) Thanks [@ematipico](https://github.com/ematipico)! - Improved the diagnostic message of the rule [`noDuplicateTestHooks`](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/).
+
 ## 2.2.6
 
 ### Patch Changes

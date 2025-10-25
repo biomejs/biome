@@ -45,7 +45,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × The test hook beforeEach is used multiple times in the same test block.
   
     3 │ 	beforeEach(() => {
     4 │ 	});
@@ -56,7 +56,7 @@ test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━�
     7 │ 	test("bar", () => {
     8 │ 		someFn();
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i The presence of the same hook more than once in the same test block can create unexpected errors inside tests. Remove one of them.
   
 
 ```

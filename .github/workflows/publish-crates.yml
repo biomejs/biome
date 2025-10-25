@@ -1,0 +1,17 @@
+name: Publish to crates.io
+on:
+  workflow_dispatch:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: crate-publish
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo publish --workspace --token ${{ secrets.CRATES_IO_TOKEN }}

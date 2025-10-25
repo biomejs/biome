@@ -20,7 +20,6 @@ pub mod javascript;
 pub mod json;
 pub mod max_size;
 mod overrides;
-pub mod plugins;
 pub mod vcs;
 
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
@@ -63,7 +62,6 @@ pub use overrides::{
     OverrideAssistConfiguration, OverrideFilesConfiguration, OverrideFormatterConfiguration,
     OverrideGlobs, OverrideLinterConfiguration, OverridePattern, Overrides,
 };
-use plugins::Plugins;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
@@ -176,7 +174,7 @@ pub struct Configuration {
     /// List of plugins to load.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub plugins: Option<Plugins>,
+    pub plugins: Option<biome_plugin_loader::Plugins>,
 
     /// Specific configuration for assists
     #[bpaf(external(assist_configuration), optional)]
@@ -550,7 +548,7 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
-    /// Tells Biome to not emit diagnostics when handling files that doesn't know
+    /// Tells Biome to not emit diagnostics when handling files that it doesn't know
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,

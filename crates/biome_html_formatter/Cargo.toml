@@ -6,6 +6,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_html_formatter"
+publish              = true
 repository.workspace = true
 version              = "0.0.0"
 
