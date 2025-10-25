@@ -31,29 +31,21 @@ use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
-struct Errors(String);
-
+struct Errors {
+    message: String,
+}
 impl Errors {
-    fn style_rule_error(rule_name: impl Display) -> Self {
-        Self(format!(
-            "The rule '{rule_name}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
-        ))
-    }
-
-    fn action_error(rule_name: impl Display) -> Self {
-        Self(format!(
-            "The rule '{rule_name}' is an action, and it must have Severity::Information. Lower down the severity.",
-        ))
+    const fn new(message: String) -> Self {
+        Self { message }
     }
 }
-
+impl std::error::Error for Errors {}
 impl Display for Errors {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.0.as_str())
+        let Self { message } = self;
+        f.write_str(message)
     }
 }
-
-impl std::error::Error for Errors {}
 
 type Data = BTreeMap<&'static str, (RuleMetadata, RuleCategory)>;
 pub fn check_rules() -> anyhow::Result<()> {
@@ -72,12 +64,74 @@ pub fn check_rules() -> anyhow::Result<()> {
             if !matches!(category, RuleCategory::Lint | RuleCategory::Action) {
                 return;
             }
-            if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
-                self.errors.push(Errors::style_rule_error(R::METADATA.name))
-            } else if <R::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Action
-                && R::METADATA.severity != Severity::Information
+            let group = R::Group::NAME;
+            let rule_name = R::METADATA.name;
+            let rule_severity = R::METADATA.severity;
+            if matches!(group, "a11y" | "correctness" | "security")
+                && rule_severity != Severity::Error
+                && !matches!(
+                    rule_name,
+                    // TODO: remove these exceptions in Biome 3.0
+                    "noNodejsModules"
+                        | "noPrivateImports"
+                        | "noUnusedFunctionParameters"
+                        | "noUnusedImports"
+                        | "noUnusedLabels"
+                        | "noUnusedPrivateClassMembers"
+                        | "noUnusedVariables"
+                        | "useImportExtensions"
+                        | "noNoninteractiveElementInteractions"
+                        | "noGlobalDirnameFilename"
+                        | "noProcessGlobal"
+                        | "noReactPropAssignments"
+                        | "noRestrictedElements"
+                        | "noSolidDestructuredProps"
+                        | "useJsonImportAttributes"
+                        | "useParseIntRadix"
+                        | "useSingleJsDocAsterisk"
+                )
             {
-                self.errors.push(Errors::action_error(R::METADATA.name));
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the group '{group}' and has a severity set to '{rule_severity}'. Rules that belong to the group {group} must have a severity set to 'error'. Set the severity to 'error' or change the group of the rule."
+                )));
+            } else if matches!(group, "complexity" | "style") && rule_severity == Severity::Error {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the group '{group}' and has a severity set to '{rule_severity}'. Rules that belong to the group '{group}' must not have a severity set to 'error'. Lower down the severity or change the group of the rule."
+                )));
+            } else if group == "performance"
+                && rule_severity != Severity::Warning
+                && !matches!(
+                    rule_name,
+                    // TODO: remove these exceptions in Biome 3.0
+                    "noAwaitInLoops" | "useGoogleFontPreconnect" | "useSolidForComponent"
+                )
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the group '{group}' and has a severity set to '{rule_severity}'. Rules that belong to the group '{group}' must have a severity set to 'warn'. Set the severity to 'warn' or change the group of the rule."
+                )));
+            } else if group == "suspicious"
+                && rule_severity == Severity::Information
+                && !matches!(
+                    rule_name,
+                    // TODO: remove these exceptions in Biome 3.0
+                    "noAlert"
+                        | "noBitwiseOperators"
+                        | "noConstantBinaryExpressions"
+                        | "noUnassignedVariables"
+                        | "useStaticResponseMethods"
+                        | "noQuickfixBiome"
+                        | "noDuplicateFields"
+                )
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the group '{group}' and has a severity set to '{rule_severity}'. Rules that belong to the group '{group}' must have a severity set to 'warn' or 'error'. Change the severity or change the group of the rule."
+                )));
+            } else if <R::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Action
+                && rule_severity != Severity::Information
+            {
+                self.errors.push(Errors::new(format!(
+                    "The action '{rule_name}' has a severity set to '{rule_severity}'. Actions must have a severity set to 'info'. Set the severity of the rule to 'info'."
+                )));
             } else {
                 self.groups
                     .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
