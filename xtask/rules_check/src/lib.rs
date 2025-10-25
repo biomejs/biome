@@ -85,6 +85,7 @@ pub fn check_rules() -> anyhow::Result<()> {
                         | "noProcessGlobal"
                         | "noReactPropAssignments"
                         | "noRestrictedElements"
+                        | "noSecrets"
                         | "noSolidDestructuredProps"
                         | "useJsonImportAttributes"
                         | "useParseIntRadix"

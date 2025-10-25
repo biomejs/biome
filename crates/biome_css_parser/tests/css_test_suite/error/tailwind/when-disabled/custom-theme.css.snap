@@ -1,0 +1,126 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* Negative test for crates/biome_css_parser/tests/css_test_suite/ok/tailwind/theme/custom-theme.css */
+
+.reset {
+	--*: initial;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..106 "." [Comments("/* Negative test for  ..."), Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@106..112 "reset" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@112..113 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssBogusSupportsCondition {
+                                        items: [
+                                            CssDashedIdentifier {
+                                                value_token: IDENT@113..117 "--" [Newline("\n"), Whitespace("\t")] [],
+                                            },
+                                            STAR@117..118 "*" [] [],
+                                        ],
+                                    },
+                                    COLON@118..120 ":" [] [Whitespace(" ")],
+                                    CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@120..127 "initial" [] [],
+                                        },
+                                    ],
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@127..128 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@128..130 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@130..131 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..131
+  0: (empty)
+  1: CSS_RULE_LIST@0..130
+    0: CSS_QUALIFIED_RULE@0..130
+      0: CSS_SELECTOR_LIST@0..112
+        0: CSS_COMPOUND_SELECTOR@0..112
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..112
+            0: CSS_CLASS_SELECTOR@0..112
+              0: DOT@0..106 "." [Comments("/* Negative test for  ..."), Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@106..112
+                0: IDENT@106..112 "reset" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@112..130
+        0: L_CURLY@112..113 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@113..128
+          0: CSS_DECLARATION_WITH_SEMICOLON@113..128
+            0: CSS_DECLARATION@113..127
+              0: CSS_BOGUS_PROPERTY@113..127
+                0: CSS_BOGUS_SUPPORTS_CONDITION@113..118
+                  0: CSS_DASHED_IDENTIFIER@113..117
+                    0: IDENT@113..117 "--" [Newline("\n"), Whitespace("\t")] []
+                  1: STAR@117..118 "*" [] []
+                1: COLON@118..120 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@120..127
+                  0: CSS_IDENTIFIER@120..127
+                    0: IDENT@120..127 "initial" [] []
+              1: (empty)
+            1: SEMICOLON@127..128 ";" [] []
+        2: R_CURLY@128..130 "}" [Newline("\n")] []
+  2: EOF@130..131 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+custom-theme.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    3 │ .reset {
+  > 4 │ 	--*: initial;
+      │ 	^^^
+    5 │ }
+    6 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

@@ -1,0 +1,5 @@
+/* From tailwind docs: https://tailwindcss.com/docs/theme#using-a-custom-theme */
+
+@theme {
+	--*: initial;
+}

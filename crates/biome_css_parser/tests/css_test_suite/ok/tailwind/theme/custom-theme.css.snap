@@ -1,0 +1,93 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* From tailwind docs: https://tailwindcss.com/docs/theme#using-a-custom-theme */
+
+@theme {
+	--*: initial;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..84 "@" [Comments("/* From tailwind docs ..."), Newline("\n"), Newline("\n")] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@84..90 "theme" [] [Whitespace(" ")],
+                name: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@90..91 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: TwValueThemeReference {
+                                        reference: CssDashedIdentifier {
+                                            value_token: IDENT@91..95 "--" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        minus_token: missing (optional),
+                                        star_token: STAR@95..96 "*" [] [],
+                                    },
+                                    colon_token: COLON@96..98 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@98..105 "initial" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@105..106 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@106..108 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@108..109 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..109
+  0: (empty)
+  1: CSS_RULE_LIST@0..108
+    0: CSS_AT_RULE@0..108
+      0: AT@0..84 "@" [Comments("/* From tailwind docs ..."), Newline("\n"), Newline("\n")] []
+      1: TW_THEME_AT_RULE@84..108
+        0: THEME_KW@84..90 "theme" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@90..108
+          0: L_CURLY@90..91 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@91..106
+            0: CSS_DECLARATION_WITH_SEMICOLON@91..106
+              0: CSS_DECLARATION@91..105
+                0: CSS_GENERIC_PROPERTY@91..105
+                  0: TW_VALUE_THEME_REFERENCE@91..96
+                    0: CSS_DASHED_IDENTIFIER@91..95
+                      0: IDENT@91..95 "--" [Newline("\n"), Whitespace("\t")] []
+                    1: (empty)
+                    2: STAR@95..96 "*" [] []
+                  1: COLON@96..98 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@98..105
+                    0: CSS_IDENTIFIER@98..105
+                      0: IDENT@98..105 "initial" [] []
+                1: (empty)
+              1: SEMICOLON@105..106 ";" [] []
+          2: R_CURLY@106..108 "}" [Newline("\n")] []
+  2: EOF@108..109 "" [Newline("\n")] []
+
+```

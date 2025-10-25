@@ -7219,6 +7219,7 @@ impl TwSourceAtRule {
     pub fn as_fields(&self) -> TwSourceAtRuleFields {
         TwSourceAtRuleFields {
             source_token: self.source_token(),
+            not_token: self.not_token(),
             path: self.path(),
             semicolon_token: self.semicolon_token(),
         }
@@ -7226,11 +7227,14 @@ impl TwSourceAtRule {
     pub fn source_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn not_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn path(&self) -> SyntaxResult<CssString> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwSourceAtRule {
@@ -7244,6 +7248,7 @@ impl Serialize for TwSourceAtRule {
 #[derive(Serialize)]
 pub struct TwSourceAtRuleFields {
     pub source_token: SyntaxResult<SyntaxToken>,
+    pub not_token: Option<SyntaxToken>,
     pub path: SyntaxResult<CssString>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -7361,8 +7366,8 @@ impl TwValueThemeReference {
     pub fn reference(&self) -> SyntaxResult<CssDashedIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn minus_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
     pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -7379,7 +7384,7 @@ impl Serialize for TwValueThemeReference {
 #[derive(Serialize)]
 pub struct TwValueThemeReferenceFields {
     pub reference: SyntaxResult<CssDashedIdentifier>,
-    pub minus_token: SyntaxResult<SyntaxToken>,
+    pub minus_token: Option<SyntaxToken>,
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -18461,6 +18466,10 @@ impl std::fmt::Debug for TwSourceAtRule {
                     "source_token",
                     &support::DebugSyntaxResult(self.source_token()),
                 )
+                .field(
+                    "not_token",
+                    &support::DebugOptionalElement(self.not_token()),
+                )
                 .field("path", &support::DebugSyntaxResult(self.path()))
                 .field(
                     "semicolon_token",
@@ -18619,7 +18628,7 @@ impl std::fmt::Debug for TwValueThemeReference {
                 .field("reference", &support::DebugSyntaxResult(self.reference()))
                 .field(
                     "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
+                    &support::DebugOptionalElement(self.minus_token()),
                 )
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()

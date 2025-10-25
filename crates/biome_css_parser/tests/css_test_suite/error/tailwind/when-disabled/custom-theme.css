@@ -1,0 +1,5 @@
+/* Negative test for crates/biome_css_parser/tests/css_test_suite/ok/tailwind/theme/custom-theme.css */
+
+.reset {
+	--*: initial;
+}

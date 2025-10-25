@@ -215,6 +215,9 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![source]);
+    if p.at(T![not]) {
+        p.bump(T![not]);
+    }
     parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
