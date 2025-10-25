@@ -297,7 +297,7 @@ fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<Tex
     };
     let range_end = right.map(|right| right.range().end());
 
-    return match (range_start, range_end) {
+    match (range_start, range_end) {
         (Some(range_start), Some(range_end)) => Some(TextRange::new(range_start, range_end)),
         _ => None,
     };
