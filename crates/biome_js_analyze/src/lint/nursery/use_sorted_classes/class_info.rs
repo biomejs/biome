@@ -17,7 +17,7 @@ use bitvec::{order::Lsb0, vec::BitVec};
 
 use super::{
     class_lexer::{ClassSegmentStructure, tokenize_class},
-    sort_config::{SortConfig, VariantsConfig, build_variant_weight},
+    sort_config::{SortConfig, UtilityLayerOwned, VariantsConfig, build_variant_weight},
 };
 use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
@@ -102,15 +102,56 @@ mod utility_match_tests {
 #[derive(Debug, Eq, PartialEq)]
 struct UtilityInfo {
     /// The layer the utility belongs to.
-    layer: &'static str,
+    layer: String,
     /// The index of the utility within the layer.
     index: usize,
 }
 
+/// Trait for abstracting over static and owned utility layer types.
+trait UtilityLayerLike {
+    fn name(&self) -> &str;
+    fn class_at(&self, index: usize) -> Option<&str>;
+    fn classes_len(&self) -> usize;
+}
+
+impl UtilityLayerLike for UtilityLayer {
+    #[inline]
+    fn name(&self) -> &str {
+        self.name
+    }
+
+    #[inline]
+    fn class_at(&self, index: usize) -> Option<&str> {
+        self.classes.get(index).copied()
+    }
+
+    #[inline]
+    fn classes_len(&self) -> usize {
+        self.classes.len()
+    }
+}
+
+impl UtilityLayerLike for UtilityLayerOwned {
+    #[inline]
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    #[inline]
+    fn class_at(&self, index: usize) -> Option<&str> {
+        self.classes.get(index).map(String::as_str)
+    }
+
+    #[inline]
+    fn classes_len(&self) -> usize {
+        self.classes.len()
+    }
+}
+
 /// Computes sort-related information about a CSS utility. If the utility is not recognized,
 /// `None` is returned.
-fn get_utility_info(
-    utility_config: &[UtilityLayer],
+fn get_utility_info_impl<L: UtilityLayerLike>(
+    utility_config: &[L],
     utility_data: &ClassSegmentStructure,
 ) -> Option<UtilityInfo> {
     // Arbitrary CSS utilities always go in the "arbitrary" layer, at index 0.
@@ -118,25 +159,30 @@ fn get_utility_info(
     // determined at this point, so they all have the same index.
     if utility_data.arbitrary {
         return Some(UtilityInfo {
-            layer: "arbitrary",
+            layer: "arbitrary".to_string(),
             index: 0,
         });
     }
 
     let utility_text = utility_data.text.as_ref();
-    let mut layer: Option<&str> = None;
-    let mut match_index: usize = 0;
-    let mut last_size: usize = 0;
+    let mut best_match: Option<(&str, usize)> = None;
+    let mut longest_prefix = 0;
 
     // Iterate over each layer, looking for a match.
-    for layer_data in utility_config.iter() {
+    for layer in utility_config {
+        let layer_name = layer.name();
+
         // Iterate over each target in the layer, looking for a match.
-        for (index, &target) in layer_data.classes.iter().enumerate() {
+        for index in 0..layer.classes_len() {
+            let Some(target) = layer.class_at(index) else {
+                continue;
+            };
+
             match UtilityMatch::from((target, utility_text)) {
                 UtilityMatch::Exact => {
                     // Exact matches can be returned immediately.
                     return Some(UtilityInfo {
-                        layer: layer_data.name,
+                        layer: layer_name.to_string(),
                         index,
                     });
                 }
@@ -146,24 +192,42 @@ fn get_utility_info(
                     // `gap-x-4`, and there are targets like `gap-` and `gap-x-`, we want to
                     // make sure that the `gap-x-` target is matched as it is more specific,
                     // regardless of the order in which the targets are defined.
-                    let target_size = target.len();
-                    if target_size > last_size {
-                        layer = Some(layer_data.name);
-                        match_index = index;
-                        last_size = target_size;
+                    //
+                    // When multiple targets have the same length (tie), the first encountered
+                    // match wins. This effectively uses layer order as the tie-breaker.
+                    let target_len = target.len();
+                    if target_len > longest_prefix {
+                        best_match = Some((layer_name, index));
+                        longest_prefix = target_len;
                     }
                 }
                 UtilityMatch::None => {}
             }
         }
     }
-    if let Some(layer_match) = layer {
-        return Some(UtilityInfo {
-            layer: layer_match,
-            index: match_index,
-        });
-    }
-    None
+
+    best_match.map(|(layer_name, index)| UtilityInfo {
+        layer: layer_name.to_string(),
+        index,
+    })
+}
+
+/// Computes sort-related information about a CSS utility using static utility layers.
+#[inline]
+fn get_utility_info(
+    utility_config: &[UtilityLayer],
+    utility_data: &ClassSegmentStructure,
+) -> Option<UtilityInfo> {
+    get_utility_info_impl(utility_config, utility_data)
+}
+
+/// Computes sort-related information about a CSS utility using owned utility layers.
+#[inline]
+fn get_utility_info_owned(
+    utility_config: &[UtilityLayerOwned],
+    utility_data: &ClassSegmentStructure,
+) -> Option<UtilityInfo> {
+    get_utility_info_impl(utility_config, utility_data)
 }
 
 #[cfg(test)]
@@ -184,7 +248,7 @@ mod get_utility_info_tests {
         assert_eq!(
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer",
+                layer: "layer".to_string(),
                 index: 0,
             })
         );
@@ -211,7 +275,7 @@ mod get_utility_info_tests {
         assert_eq!(
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer",
+                layer: "layer".to_string(),
                 index: 0,
             })
         );
@@ -238,7 +302,7 @@ mod get_utility_info_tests {
         assert_eq!(
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer",
+                layer: "layer".to_string(),
                 index: 1,
             })
         );
@@ -257,7 +321,7 @@ mod get_utility_info_tests {
         assert_eq!(
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer",
+                layer: "layer".to_string(),
                 index: 0,
             })
         );
@@ -276,7 +340,35 @@ mod get_utility_info_tests {
         assert_eq!(
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "arbitrary",
+                layer: "arbitrary".to_string(),
+                index: 0,
+            })
+        );
+    }
+
+    #[test]
+    fn test_equal_length_tie_across_layers() {
+        // When two partial matches have the same length across different layers,
+        // the first encountered layer wins (layer order as tie-breaker).
+        let utility_config = vec![
+            UtilityLayer {
+                name: "layer1",
+                classes: &["btn-"],
+            },
+            UtilityLayer {
+                name: "layer2",
+                classes: &["btn-"],
+            },
+        ];
+        let utility_data = ClassSegmentStructure {
+            text: "btn-primary".into(),
+            arbitrary: false,
+        };
+        // Should match layer1 because it comes first
+        assert_eq!(
+            get_utility_info(utility_config.as_slice(), &utility_data),
+            Some(UtilityInfo {
+                layer: "layer1".to_string(),
                 index: 0,
             })
         );
@@ -499,7 +591,25 @@ pub struct ClassInfo {
 /// it is considered a custom class instead and `None` is returned.
 pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<ClassInfo> {
     let utility_data = tokenize_class(class_name)?;
-    let utility_info = get_utility_info(sort_config.utilities, &utility_data.utility);
+
+    // Use utilities_owned if available, otherwise use static utilities.
+    // Both owned fields must be set/unset together.
+    debug_assert_eq!(
+        sort_config.utilities_owned.is_some(),
+        sort_config.layer_index_map_owned.is_some(),
+        "inconsistent SortConfig: utilities_owned and layer_index_map_owned must be set together"
+    );
+    let using_owned = sort_config.utilities_owned.is_some();
+
+    let utility_info = if using_owned {
+        get_utility_info_owned(
+            // Safe due to the debug_assert above
+            sort_config.utilities_owned.as_ref().unwrap(),
+            &utility_data.utility,
+        )
+    } else {
+        get_utility_info(sort_config.utilities, &utility_data.utility)
+    };
 
     // Split up variants into arbitrary and known variants.
     let (arbitrary_variants, current_variants): (
@@ -513,10 +623,23 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
         .collect();
 
     if let Some(utility_info) = utility_info {
+        // Use the matching layer index map consistently with the utilities set
+        let layer_index = if using_owned {
+            *sort_config
+                .layer_index_map_owned
+                .as_ref()
+                .unwrap()
+                .get(utility_info.layer.as_str())?
+        } else {
+            *sort_config
+                .layer_index_map
+                .get(utility_info.layer.as_str())?
+        };
+
         return Some(ClassInfo {
             text: class_name.into(),
             variant_weight: compute_variants_weight(sort_config.variants, &current_variants),
-            layer_index: *sort_config.layer_index_map.get(&utility_info.layer)?,
+            layer_index,
             utility_index: utility_info.index,
             arbitrary_variants: if arbitrary_variants.is_empty() {
                 None

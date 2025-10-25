@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: customClasses.jsx
+---
+# Input
+```jsx
+// Valid (already sorted)
+<div class="container btn-primary px-2 text-red-500 custom-utility" />;
+
+// Invalid (needs sorting - custom classes should go after their layer's classes)
+<div class="custom-utility px-2 container text-red-500" />;
+
+// Invalid (utilities need sorting with custom class)
+<div class="text-red-500 custom-utility px-2" />;
+
+// Custom component class
+<div class="card container block" />;
+
+// Multiple custom classes
+<div class="text-lg custom-spacing px-4 custom-layout" />;
+
+```
+
+# Diagnostics
+```
+customClasses.jsx:5:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    4 │ // Invalid (needs sorting - custom classes should go after their layer's classes)
+  > 5 │ <div class="custom-utility px-2 container text-red-500" />;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Invalid (utilities need sorting with custom class)
+  
+  i Unsafe fix: Sort the classes.
+  
+     3  3 │   
+     4  4 │   // Invalid (needs sorting - custom classes should go after their layer's classes)
+     5    │ - <div·class="custom-utility·px-2·container·text-red-500"·/>;
+        5 │ + <div·class="container·px-2·text-red-500·custom-utility"·/>;
+     6  6 │   
+     7  7 │   // Invalid (utilities need sorting with custom class)
+  
+
+```
+
+```
+customClasses.jsx:8:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     7 │ // Invalid (utilities need sorting with custom class)
+   > 8 │ <div class="text-red-500 custom-utility px-2" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Custom component class
+  
+  i Unsafe fix: Sort the classes.
+  
+     6  6 │   
+     7  7 │   // Invalid (utilities need sorting with custom class)
+     8    │ - <div·class="text-red-500·custom-utility·px-2"·/>;
+        8 │ + <div·class="px-2·text-red-500·custom-utility"·/>;
+     9  9 │   
+    10 10 │   // Custom component class
+  
+
+```
+
+```
+customClasses.jsx:11:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    10 │ // Custom component class
+  > 11 │ <div class="card container block" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Multiple custom classes
+  
+  i Unsafe fix: Sort the classes.
+  
+     9  9 │   
+    10 10 │   // Custom component class
+    11    │ - <div·class="card·container·block"·/>;
+       11 │ + <div·class="container·card·block"·/>;
+    12 12 │   
+    13 13 │   // Multiple custom classes
+  
+
+```
+
+```
+customClasses.jsx:14:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    13 │ // Multiple custom classes
+  > 14 │ <div class="text-lg custom-spacing px-4 custom-layout" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    12 12 │   
+    13 13 │   // Multiple custom classes
+    14    │ - <div·class="text-lg·custom-spacing·px-4·custom-layout"·/>;
+       14 │ + <div·class="px-4·text-lg·custom-layout·custom-spacing"·/>;
+    15 15 │   
+  
+
+```
