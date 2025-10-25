@@ -18,7 +18,8 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         let self_close_void_elements = f.options().self_close_void_elements();
         let name = name?;
-        let is_canonical_html_tag = is_canonical_html_tag(&name);
+        let file_source = f.options().file_source();
+        let is_canonical_html_tag = is_canonical_html_tag(&name, file_source);
 
         write!(f, [l_angle_token.format(), name.format()])?;
 

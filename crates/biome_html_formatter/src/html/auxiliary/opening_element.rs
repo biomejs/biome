@@ -48,7 +48,8 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         let l_angle_token = l_angle_token?;
         let name = name?;
         let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
-        let is_canonical_html_tag = is_canonical_html_tag(&name);
+        let file_source = f.options().file_source();
+        let is_canonical_html_tag = is_canonical_html_tag(&name, file_source);
 
         let bracket_same_line = f.options().bracket_same_line().value();
 

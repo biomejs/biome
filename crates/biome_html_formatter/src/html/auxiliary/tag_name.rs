@@ -9,7 +9,8 @@ pub(crate) struct FormatHtmlTagName;
 impl FormatNodeRule<HtmlTagName> for FormatHtmlTagName {
     fn fmt_fields(&self, node: &HtmlTagName, f: &mut HtmlFormatter) -> FormatResult<()> {
         // TODO: maybe move this check to a parent node so we aren't checking this twice per tag?
-        let is_canonical_html_tag = is_canonical_html_tag(node);
+        let file_source = f.options().file_source();
+        let is_canonical_html_tag = is_canonical_html_tag(node, file_source);
         let HtmlTagNameFields { value_token } = node.as_fields();
 
         if is_canonical_html_tag {
