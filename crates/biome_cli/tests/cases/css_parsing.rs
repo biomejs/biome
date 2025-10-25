@@ -220,6 +220,60 @@ fn format_css_parse_tailwind_directives_true() {
 }
 
 #[test]
+fn ci_css_parse_css_modules_true() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.module.css");
+    // CSS Modules specific syntax
+    fs.insert(
+        file_path.into(),
+        ".className { composes: other from './other.module.css'; }".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--css-parse-css-modules=true", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_css_parse_css_modules_true",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ci_css_parse_css_modules_false() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.module.css");
+    // CSS Modules specific syntax
+    fs.insert(
+        file_path.into(),
+        ".className { composes: other from './other.module.css'; }".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--css-parse-css-modules=false", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_css_parse_css_modules_false",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn ci_css_parse_tailwind_directives_true() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -247,6 +301,76 @@ fn ci_css_parse_tailwind_directives_true() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_css_parse_tailwind_directives_true",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ci_css_parse_tailwind_directives_false() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.css");
+    // Tailwind CSS 4.0 directive
+    fs.insert(
+        file_path.into(),
+        "@import 'tailwindcss';\n.foo { color: red; }".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--css-parse-tailwind-directives=false",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_css_parse_tailwind_directives_false",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ci_combined_css_parser_flags() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.module.css");
+    // CSS Modules with Tailwind directives
+    fs.insert(
+        file_path.into(),
+        "@import 'tailwindcss';\n.className { composes: other from './other.module.css'; }"
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--css-parse-css-modules=true",
+                "--css-parse-tailwind-directives=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_combined_css_parser_flags",
         fs,
         console,
         result,

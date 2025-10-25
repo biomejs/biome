@@ -2484,15 +2484,36 @@ pub fn tw_source_at_rule(
     source_token: SyntaxToken,
     path: CssString,
     semicolon_token: SyntaxToken,
-) -> TwSourceAtRule {
-    TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_SOURCE_AT_RULE,
-        [
-            Some(SyntaxElement::Token(source_token)),
-            Some(SyntaxElement::Node(path.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> TwSourceAtRuleBuilder {
+    TwSourceAtRuleBuilder {
+        source_token,
+        path,
+        semicolon_token,
+        not_token: None,
+    }
+}
+pub struct TwSourceAtRuleBuilder {
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+    not_token: Option<SyntaxToken>,
+}
+impl TwSourceAtRuleBuilder {
+    pub fn with_not_token(mut self, not_token: SyntaxToken) -> Self {
+        self.not_token = Some(not_token);
+        self
+    }
+    pub fn build(self) -> TwSourceAtRule {
+        TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_SOURCE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.source_token)),
+                self.not_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.path.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,
@@ -2542,17 +2563,34 @@ pub fn tw_utility_at_rule(
 }
 pub fn tw_value_theme_reference(
     reference: CssDashedIdentifier,
-    minus_token: SyntaxToken,
     star_token: SyntaxToken,
-) -> TwValueThemeReference {
-    TwValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_VALUE_THEME_REFERENCE,
-        [
-            Some(SyntaxElement::Node(reference.into_syntax())),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Token(star_token)),
-        ],
-    ))
+) -> TwValueThemeReferenceBuilder {
+    TwValueThemeReferenceBuilder {
+        reference,
+        star_token,
+        minus_token: None,
+    }
+}
+pub struct TwValueThemeReferenceBuilder {
+    reference: CssDashedIdentifier,
+    star_token: SyntaxToken,
+    minus_token: Option<SyntaxToken>,
+}
+impl TwValueThemeReferenceBuilder {
+    pub fn with_minus_token(mut self, minus_token: SyntaxToken) -> Self {
+        self.minus_token = Some(minus_token);
+        self
+    }
+    pub fn build(self) -> TwValueThemeReference {
+        TwValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_VALUE_THEME_REFERENCE,
+            [
+                Some(SyntaxElement::Node(self.reference.into_syntax())),
+                self.minus_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.star_token)),
+            ],
+        ))
+    }
 }
 pub fn tw_variant_at_rule(
     variant_token: SyntaxToken,
