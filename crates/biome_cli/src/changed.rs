@@ -1,6 +1,7 @@
 use crate::CliDiagnostic;
 use biome_configuration::Configuration;
 use biome_fs::FileSystem;
+use camino::Utf8Path;
 use std::ffi::OsString;
 
 pub(crate) fn get_changed_files(
@@ -25,8 +26,27 @@ pub(crate) fn get_changed_files(
     };
 
     let changed_files = fs.get_changed_files(base)?;
+    let working_directory = fs.working_directory();
 
-    let filtered_changed_files = changed_files.iter().map(OsString::from).collect::<Vec<_>>();
+    let filtered_changed_files = changed_files
+        .into_iter()
+        .filter_map(|path| {
+            if path.is_empty() {
+                return None;
+            }
+
+            let candidate = Utf8Path::new(path.as_str());
+
+            let exists = fs.path_exists(candidate)
+                || (!candidate.is_absolute()
+                    && working_directory.as_ref().is_some_and(|dir| {
+                        let absolute = dir.join(candidate);
+                        fs.path_exists(absolute.as_path())
+                    }));
+
+            exists.then(|| OsString::from(path))
+        })
+        .collect::<Vec<_>>();
 
     Ok(filtered_changed_files)
 }
