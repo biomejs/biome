@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+let foo = 0;
+foo += 1;
+
+let bar = 42;
+bar -= 1;
+
+for (let i = 0; i < 10; i += 1) {
+	doSomething(i);
+}
+
+for (let i = 0; i < 10;) {
+	doSomething(i);
+
+	i += 1;
+}
