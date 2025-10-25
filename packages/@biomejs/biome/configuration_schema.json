@@ -5089,7 +5089,7 @@
 			"type": "object",
 			"properties": {
 				"noContinue": {
-					"description": "Disallow continue statements",
+					"description": "Disallow continue statements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoContinueConfiguration" },
 						{ "type": "null" }

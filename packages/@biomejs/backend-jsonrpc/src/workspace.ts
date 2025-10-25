@@ -1661,7 +1661,7 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * Disallow continue statements
+	 * Disallow continue statements.
 	 */
 	noContinue?: RuleConfiguration_for_NoContinueOptions;
 	/**
