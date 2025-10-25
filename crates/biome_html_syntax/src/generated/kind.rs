@@ -25,6 +25,11 @@ pub enum HtmlSyntaxKind {
     R_CURLY,
     L_DOUBLE_CURLY,
     R_DOUBLE_CURLY,
+    COLON,
+    AT,
+    DOT,
+    L_BRACKET,
+    R_BRACKET,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -60,6 +65,14 @@ pub enum HtmlSyntaxKind {
     HTML_DOUBLE_TEXT_EXPRESSION,
     HTML_SINGLE_TEXT_EXPRESSION,
     HTML_TEXT_EXPRESSION,
+    VUE_DIRECTIVE,
+    VUE_DIRECTIVE_ARGUMENT,
+    VUE_V_BIND_SHORTHAND_DIRECTIVE,
+    VUE_V_ON_SHORTHAND_DIRECTIVE,
+    VUE_STATIC_ARGUMENT,
+    VUE_DYNAMIC_ARGUMENT,
+    VUE_MODIFIER_LIST,
+    VUE_MODIFIER,
     HTML_BOGUS,
     HTML_BOGUS_ELEMENT,
     HTML_BOGUS_ATTRIBUTE,
@@ -86,13 +99,21 @@ impl HtmlSyntaxKind {
                 | R_CURLY
                 | L_DOUBLE_CURLY
                 | R_DOUBLE_CURLY
+                | COLON
+                | AT
+                | DOT
+                | L_BRACKET
+                | R_BRACKET
         )
     }
     pub const fn is_literal(self) -> bool {
         matches!(self, HTML_STRING_LITERAL | HTML_LITERAL)
     }
     pub const fn is_list(self) -> bool {
-        matches!(self, HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST)
+        matches!(
+            self,
+            HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST | VUE_MODIFIER_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
@@ -120,6 +141,11 @@ impl HtmlSyntaxKind {
             R_CURLY => "}",
             L_DOUBLE_CURLY => "{{",
             R_DOUBLE_CURLY => "}}",
+            COLON => ":",
+            AT => "@",
+            DOT => ".",
+            L_BRACKET => "[",
+            R_BRACKET => "]",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -134,4 +160,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [.] => { $ crate :: HtmlSyntaxKind :: DOT } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACKET } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
