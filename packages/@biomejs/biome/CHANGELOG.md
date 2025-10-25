@@ -1,5 +1,17 @@
 # @biomejs/biome
 
+## 2.3.1
+
+### Patch Changes
+
+- [#7840](https://github.com/biomejs/biome/pull/7840) [`72afdfa`](https://github.com/biomejs/biome/commit/72afdfa3451eb02d499c1a2a7dc826b37e3d5f8d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7838](https://github.com/biomejs/biome/issues/7838), which caused the new `--css-parse-*` arguments not being recognised by the `ci` command.
+
+- [#7789](https://github.com/biomejs/biome/pull/7789) [`d5b416e`](https://github.com/biomejs/biome/commit/d5b416eae710f062fe96a4c774b3bf885857ffa8) Thanks [@fronterior](https://github.com/fronterior)! - Fixed the LSP method `workspace/didChangeWorkspaceFolders` to perform incremental updates instead of replacing the entire folder list.
+
+- [#7852](https://github.com/biomejs/biome/pull/7852) [`bd254c7`](https://github.com/biomejs/biome/commit/bd254c7a4c8de8fa0a2cd9ae05591b6ee881a622) Thanks [@dyc3](https://github.com/dyc3)! - Fixed #7843: The CSS parser, when `tailwindDirectives` is enabled, correctly parses `--*: initial;`.
+
+- [#7853](https://github.com/biomejs/biome/pull/7853) [`fe90c78`](https://github.com/biomejs/biome/commit/fe90c785e244b2a17ba8650972fb7eb6ddc6907f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed #7848: The css parser with `tailwindDirectives` enabled will now correctly parse tailwind's source exclude syntax: `@source not "foo.css";`
+
 ## 2.3.0
 
 ### Minor Changes
