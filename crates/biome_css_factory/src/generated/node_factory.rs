@@ -2452,19 +2452,42 @@ pub fn tw_functional_utility_name(
         ],
     ))
 }
-pub fn tw_plugin_at_rule(
+pub fn tw_plugin_at_rule(plugin_token: SyntaxToken, name: CssString) -> TwPluginAtRuleBuilder {
+    TwPluginAtRuleBuilder {
+        plugin_token,
+        name,
+        block: None,
+        semicolon_token: None,
+    }
+}
+pub struct TwPluginAtRuleBuilder {
     plugin_token: SyntaxToken,
     name: CssString,
-    semicolon_token: SyntaxToken,
-) -> TwPluginAtRule {
-    TwPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_PLUGIN_AT_RULE,
-        [
-            Some(SyntaxElement::Token(plugin_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+    block: Option<AnyCssDeclarationBlock>,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl TwPluginAtRuleBuilder {
+    pub fn with_block(mut self, block: AnyCssDeclarationBlock) -> Self {
+        self.block = Some(block);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> TwPluginAtRule {
+        TwPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_PLUGIN_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.plugin_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn tw_reference_at_rule(
     reference_token: SyntaxToken,
