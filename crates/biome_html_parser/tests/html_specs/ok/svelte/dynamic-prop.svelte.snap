@@ -1,0 +1,101 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+<button disabled={false}>Click me</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@8..16 "disabled" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@16..17 "=" [] [],
+                            value: HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@17..18 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@18..23 "false" [] [],
+                                },
+                                r_curly_token: R_CURLY@23..24 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@25..33 "Click me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@33..34 "<" [] [],
+                slash_token: SLASH@34..35 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@35..41 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@41..42 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@42..43 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..43
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..42
+    0: HTML_ELEMENT@0..42
+      0: HTML_OPENING_ELEMENT@0..25
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..24
+          0: HTML_ATTRIBUTE@8..24
+            0: HTML_ATTRIBUTE_NAME@8..16
+              0: HTML_LITERAL@8..16 "disabled" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..24
+              0: EQ@16..17 "=" [] []
+              1: HTML_SINGLE_TEXT_EXPRESSION@17..24
+                0: L_CURLY@17..18 "{" [] []
+                1: HTML_TEXT_EXPRESSION@18..23
+                  0: HTML_LITERAL@18..23 "false" [] []
+                2: R_CURLY@23..24 "}" [] []
+        3: R_ANGLE@24..25 ">" [] []
+      1: HTML_ELEMENT_LIST@25..33
+        0: HTML_CONTENT@25..33
+          0: HTML_LITERAL@25..33 "Click me" [] []
+      2: HTML_CLOSING_ELEMENT@33..42
+        0: L_ANGLE@33..34 "<" [] []
+        1: SLASH@34..35 "/" [] []
+        2: HTML_TAG_NAME@35..41
+          0: HTML_LITERAL@35..41 "button" [] []
+        3: R_ANGLE@41..42 ">" [] []
+  4: EOF@42..43 "" [Newline("\n")] []
+
+```
