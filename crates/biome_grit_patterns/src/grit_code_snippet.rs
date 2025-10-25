@@ -1,13 +1,14 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_node::GritTargetSyntaxKind;
+use biome_js_syntax::JsSyntaxKind;
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::pattern::{
     CodeSnippet, DynamicPattern, Matcher, Pattern, PatternName, ResolvedPattern, State,
 };
-use grit_util::AnalysisLogs;
 use grit_util::error::GritResult;
+use grit_util::{AnalysisLogs, AstNode};
 
 #[derive(Clone, Debug)]
 pub struct GritCodeSnippet {
@@ -42,11 +43,28 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
             return Ok(false);
         };
 
-        if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind()) {
-            pattern.execute(resolved, state, context, logs)
-        } else {
-            Ok(false)
+        // First, try to match with the exact kind (fast path)
+        if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind())
+            && pattern.execute(resolved, state, context, logs)?
+        {
+            return Ok(true);
         }
+
+        // If node has a single child, try matching against the child
+        // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
+        if node.kind() == GritTargetSyntaxKind::JsSyntaxKind(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION)
+            && let Some(child) = node.first_child()
+            && child.next_sibling().is_none()
+        {
+            let child_binding = GritResolvedPattern::from_node_binding(child);
+            for (_, pattern) in &self.patterns {
+                if pattern.execute(&child_binding, state, context, logs)? {
+                    return Ok(true);
+                }
+            }
+        }
+
+        Ok(false)
     }
 }
 
