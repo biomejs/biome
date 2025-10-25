@@ -17,9 +17,10 @@ use crate::JsRuleAction;
 declare_lint_rule! {
     /// Disallow unnecessary concatenation of string or template literals.
     ///
-    /// This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.
+    /// This rule aims to flag concatenation of string or template literals when they could be combined into a single literal.
+    /// Notably, this also includes concatenating a string with a number (unlike the derivative ESLint rule).
     ///
-    /// Concatenation of multiple strings is allowed when the strings are spread over multiple lines in order to prevent exceeding the maximum line width.
+    /// Concatenation of multiple strings is allowed for multi-line strings (such as ones used to prevent exceeding the maximum line width).
     ///
     /// ## Examples
     ///
@@ -27,6 +28,10 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const a = "a" + "b";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = "string" + 123;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -59,8 +64,10 @@ declare_lint_rule! {
     /// const a = 'foo' + bar;
     /// ```
     ///
+    /// Multi-line strings are ignored:
+    ///
     /// ```js
-    /// const multiline = 'foo' +
+    /// const multiline = 'foo' + // formatting
     ///           'bar'
     /// ```
     ///
@@ -92,7 +99,7 @@ impl Rule for NoUselessStringConcat {
 
         // Prevent duplicated error reportings when the parent is a useless concatenation too, i.e.: "a" + "b" + "c"
         if parent_binary_expression.is_some()
-            && get_concatenation_range(&parent_binary_expression?).is_some()
+            && get_concatenation_range(&parent_binary_expression).is_some()
         {
             return None;
         }
@@ -303,9 +310,11 @@ fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<Tex
     }
 }
 
-/// Returns if the passed `JsBinaryExpression` has a multiline string concatenation.
-/// Assumes the expression is known to be a string concatenation (as opposed to a numeric one)
+/// Returns if the passed `JsBinaryExpression` is a multiline string concatenation,
+/// meaning either the operator or RHS have a leading newline.
+/// Assumes the expression is known to be a valid concatenation that will otherwise trigger the rule.
 fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+    // TODO: Review desired rule behavior if the first operand is a number
     let has_newline_in_operator = binary_expression
         .operator_token()
         .is_ok_and(|operator| operator.has_leading_newline());

@@ -8,12 +8,12 @@ const a = foo + 'a' + 'b'
 const a = foo + `a` + `b`
 const a = (number + 1) + 'px'
 const a = (1 + +2) + `b`
-const stylisticConcat = 'foo' +
+const stylisticConcat = 'foo' + // formatting
                         'bar'
 const stylisticConcat = `foo` +
                         'bar' +
                         `baz`
-const stylisticConcatLeading = 'foo'
+const stylisticConcatLeading = 'foo' // formatting
                         + 'bar'
 const stylisticConcatLeading = `foo`
                         + 'bar'

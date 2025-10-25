@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#7230](https://github.com/biomejs/biome/issues/7230) - [`noUselessStringConcat`](https://biomejs.dev/linter/rules/no-useless-string-concat/) now correctly detectes multiline strings with leading `+` operators (such as those from `operatorLinebreak="before"`).
+Fixed [#7230](https://github.com/biomejs/biome/issues/7230): [`noUselessStringConcat`](https://biomejs.dev/linter/rules/no-useless-string-concat/) now correctly detects multiline strings with leading `+` operators (such as those from `operatorLinebreak="before"`).
 
 #### Example
 ```ts
