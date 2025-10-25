@@ -300,7 +300,7 @@ fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<Tex
     match (range_start, range_end) {
         (Some(range_start), Some(range_end)) => Some(TextRange::new(range_start, range_end)),
         _ => None,
-    };
+    }
 }
 
 /// Returns if the passed `JsBinaryExpression` has a multiline string concatenation.
