@@ -498,7 +498,15 @@ impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
         }
 
         if let Some(jsx_runtime) = javascript.jsx_runtime {
-            language_setting.environment = jsx_runtime.into();
+            language_setting.environment.jsx_runtime = Some(jsx_runtime);
+        }
+
+        if let Some(jsx_factory) = javascript.jsx_factory {
+            language_setting.environment.jsx_factory = Some(jsx_factory);
+        }
+
+        if let Some(jsx_fragment_factory) = javascript.jsx_fragment_factory {
+            language_setting.environment.jsx_fragment_factory = Some(jsx_fragment_factory);
         }
 
         if let Some(globals) = javascript.globals {

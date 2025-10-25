@@ -160,12 +160,16 @@ impl From<JsAssistConfiguration> for JsAssistSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsEnvironmentSettings {
     pub jsx_runtime: Option<JsxRuntime>,
+    pub jsx_factory: Option<String>,
+    pub jsx_fragment_factory: Option<String>,
 }
 
 impl From<JsxRuntime> for JsEnvironmentSettings {
     fn from(jsx_runtime: JsxRuntime) -> Self {
         Self {
             jsx_runtime: Some(jsx_runtime),
+            jsx_factory: None,
+            jsx_fragment_factory: None,
         }
     }
 }
@@ -338,6 +342,20 @@ impl ServiceLanguage for JsLanguage {
             JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
         };
         configuration = configuration.with_jsx_runtime(jsx_runtime);
+
+        // Extract JSX factory identifiers from environment settings
+        let jsx_factory = environment
+            .and_then(|env| env.jsx_factory.as_ref())
+            .and_then(|factory| factory.split('.').next())
+            .map(|s| s.into());
+        let jsx_fragment_factory = environment
+            .and_then(|env| env.jsx_fragment_factory.as_ref())
+            .and_then(|factory| factory.split('.').next())
+            .map(|s| s.into());
+
+        configuration = configuration
+            .with_jsx_factory(jsx_factory)
+            .with_jsx_fragment_factory(jsx_fragment_factory);
 
         globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 

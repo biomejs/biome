@@ -20,6 +20,8 @@ pub struct RuleContext<'a, R: Rule> {
     preferred_jsx_quote: PreferredQuote,
     preferred_indentation: PreferredIndentation,
     jsx_runtime: Option<JsxRuntime>,
+    jsx_factory: Option<&'a str>,
+    jsx_fragment_factory: Option<&'a str>,
     css_modules: bool,
 }
 
@@ -39,6 +41,8 @@ where
         preferred_jsx_quote: PreferredQuote,
         preferred_indentation: PreferredIndentation,
         jsx_runtime: Option<JsxRuntime>,
+        jsx_factory: Option<&'a str>,
+        jsx_fragment_factory: Option<&'a str>,
         css_modules: bool,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
@@ -54,6 +58,8 @@ where
             preferred_jsx_quote,
             preferred_indentation,
             jsx_runtime,
+            jsx_factory,
+            jsx_fragment_factory,
             css_modules,
         })
     }
@@ -153,6 +159,16 @@ where
     /// Returns the JSX runtime in use.
     pub fn jsx_runtime(&self) -> JsxRuntime {
         self.jsx_runtime.expect("jsx_runtime should be provided")
+    }
+
+    /// Returns the JSX factory identifier (e.g., "h" or "React")
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.jsx_factory
+    }
+
+    /// Returns the JSX fragment factory identifier (e.g., "Fragment")
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.jsx_fragment_factory
     }
 
     /// Checks whether the provided text belongs to globals
