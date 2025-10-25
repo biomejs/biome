@@ -49,7 +49,7 @@ file.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━
       │      ^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 
 ```

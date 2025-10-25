@@ -10,7 +10,7 @@ pub(crate) fn expected_attribute(p: &HtmlParser, range: TextRange) -> ParseDiagn
 }
 
 pub(crate) fn disabled_interpolation(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.textExpression"</Emphasis>" option."))
+    p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.interpolation"</Emphasis>" option."))
 }
 
 pub(crate) fn expected_text_expression(
