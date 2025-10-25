@@ -98,9 +98,9 @@ impl Rule for NoUselessStringConcat {
         let parent_binary_expression = get_parent_binary_expression(node);
 
         // Prevent duplicated error reportings when the parent is a useless concatenation too, i.e.: "a" + "b" + "c"
-        if parent_binary_expression.is_some()
-            && get_concatenation_range(&parent_binary_expression).is_some()
-        {
+        if parent_binary_expression.is_some_and(|parent_expression| {
+            get_concatenation_range(&parent_expression).is_some()
+        }) {
             return None;
         }
 
