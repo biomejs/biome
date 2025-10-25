@@ -18,7 +18,7 @@ declare_lint_rule! {
     /// Disallow unnecessary concatenation of string or template literals.
     ///
     /// This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.
-    /// 
+    ///
     /// Concatenation of multiple strings is allowed when the strings are spread over multiple lines in order to prevent exceeding the maximum line width.
     ///
     /// ## Examples
