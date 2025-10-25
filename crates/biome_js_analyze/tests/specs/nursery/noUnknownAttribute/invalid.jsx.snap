@@ -62,7 +62,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'allowTransparency' is not a valid DOM attribute.
   
@@ -80,7 +80,7 @@ invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'hasOwnProperty' is not a valid DOM attribute.
   
@@ -99,7 +99,7 @@ invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:4:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'abc' is not a valid DOM attribute.
   
@@ -118,7 +118,7 @@ invalid.jsx:4:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:5:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'aria-fake' is not a valid DOM attribute.
   
@@ -137,7 +137,7 @@ invalid.jsx:5:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:6:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'someProp' is not a valid DOM attribute.
   
@@ -156,7 +156,7 @@ invalid.jsx:6:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:7:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'class' is not a valid React prop name.
   
@@ -175,7 +175,7 @@ invalid.jsx:7:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:8:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'for' is not a valid React prop name.
   
@@ -194,7 +194,7 @@ invalid.jsx:8:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:9:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'accept-charset' is not a valid React prop name.
   
@@ -213,7 +213,7 @@ invalid.jsx:9:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:10:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'http-equiv' is not a valid React prop name.
   
@@ -232,7 +232,7 @@ invalid.jsx:10:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'accesskey' is not a valid React prop name.
   
@@ -251,7 +251,7 @@ invalid.jsx:11:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onclick' is not a valid React prop name.
   
@@ -270,7 +270,7 @@ invalid.jsx:12:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:13:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onmousedown' is not a valid React prop name.
   
@@ -289,7 +289,7 @@ invalid.jsx:13:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:14:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onMousedown' is not a valid React prop name.
   
@@ -308,7 +308,7 @@ invalid.jsx:14:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:15:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'xlink:href' is not a valid React prop name.
   
@@ -327,7 +327,7 @@ invalid.jsx:15:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:16:8 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:8 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'clip-path' is not a valid React prop name.
   
@@ -346,7 +346,7 @@ invalid.jsx:16:8 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:17:10 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:10 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'crossorigin' is not a valid React prop name.
   
@@ -365,7 +365,7 @@ invalid.jsx:17:10 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:17:22 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:22 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'nomodule' is not a valid React prop name.
   
@@ -384,7 +384,7 @@ invalid.jsx:17:22 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:18:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:18:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'crossorigin' is not a valid React prop name.
   
@@ -403,7 +403,7 @@ invalid.jsx:18:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:19:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'crossOrigin' is not valid on a <div> element.
   
@@ -422,7 +422,7 @@ invalid.jsx:19:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:20:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'as' is not valid on a <div> element.
   
@@ -441,7 +441,7 @@ invalid.jsx:20:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:22:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onAbort' is not valid on a <div> element.
   
@@ -460,7 +460,7 @@ invalid.jsx:22:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:23:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onDurationChange' is not valid on a <div> element.
   
@@ -479,7 +479,7 @@ invalid.jsx:23:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:24:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:24:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onEmptied' is not valid on a <div> element.
   
@@ -498,7 +498,7 @@ invalid.jsx:24:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:25:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onEnded' is not valid on a <div> element.
   
@@ -517,7 +517,7 @@ invalid.jsx:25:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:26:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onResize' is not valid on a <div> element.
   
@@ -536,7 +536,7 @@ invalid.jsx:26:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:27:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onError' is not valid on a <div> element.
   
@@ -555,7 +555,7 @@ invalid.jsx:27:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:29:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:29:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'onLoad' is not valid on a <div> element.
   
@@ -574,7 +574,7 @@ invalid.jsx:29:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:30:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:30:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'fill' is not valid on a <div> element.
   
@@ -593,7 +593,7 @@ invalid.jsx:30:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:32:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:32:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'controls' is not valid on a <div> element.
   
@@ -612,7 +612,7 @@ invalid.jsx:32:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:33:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'loop' is not valid on a <div> element.
   
@@ -631,7 +631,7 @@ invalid.jsx:33:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:34:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:34:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'muted' is not valid on a <div> element.
   
@@ -650,7 +650,7 @@ invalid.jsx:34:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:36:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:36:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'playsInline' is not valid on a <div> element.
   
@@ -669,7 +669,7 @@ invalid.jsx:36:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:37:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'allowFullScreen' is not valid on a <div> element.
   
@@ -688,7 +688,7 @@ invalid.jsx:37:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:39:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'download' is not valid on a <div> element.
   
@@ -707,7 +707,7 @@ invalid.jsx:39:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:40:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:40:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'imageSrcSet' is not valid on a <div> element.
   
@@ -726,7 +726,7 @@ invalid.jsx:40:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:41:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'imageSizes' is not valid on a <div> element.
   
@@ -745,7 +745,7 @@ invalid.jsx:41:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:42:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:42:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'data-xml-anything' is not a valid DOM attribute.
   
@@ -764,7 +764,7 @@ invalid.jsx:42:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:43:48 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:43:48 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'dataNotAnDataAttribute' is not a valid DOM attribute.
   
@@ -783,7 +783,7 @@ invalid.jsx:43:48 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:44:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:44:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'abbr' is not valid on a <div> element.
   
@@ -802,7 +802,7 @@ invalid.jsx:44:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:45:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:45:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'webkitDirectory' is not valid on a <div> element.
   
@@ -821,7 +821,7 @@ invalid.jsx:45:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:46:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:46:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Property 'webkitDirectory' is not valid on a <div> element.
   
@@ -840,7 +840,7 @@ invalid.jsx:46:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:49:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:49:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c' is not a valid DOM attribute.
   

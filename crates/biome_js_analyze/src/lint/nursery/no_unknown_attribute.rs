@@ -1054,7 +1054,7 @@ impl Rule for NoUnknownAttribute {
     type Query = Manifest<JsxAttribute>;
     type State = NoUnknownAttributeState;
     type Signals = Option<Self::State>;
-    type Options = NoUnknownPropertyOptions;
+    type Options = NoUnknownAttributeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

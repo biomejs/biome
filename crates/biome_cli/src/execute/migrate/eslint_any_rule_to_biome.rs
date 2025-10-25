@@ -37,18 +37,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@eslint-react/no-unknown-property" => {
-            if !options.include_nursery {
-                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group
-                .unwrap_group_as_mut()
-                .no_unknown_attribute
-                .get_or_insert(Default::default());
-            rule.set_level(rule.level().max(rule_severity.into()));
-        }
         "@eslint-react/no-useless-fragment" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -2297,18 +2285,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "react-x/no-unknown-property" => {
-            if !options.include_nursery {
-                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group
-                .unwrap_group_as_mut()
-                .no_unknown_attribute
-                .get_or_insert(Default::default());
-            rule.set_level(rule.level().max(rule_severity.into()));
-        }
         "react-x/no-useless-fragment" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -2450,6 +2426,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_dangerously_set_inner_html_with_children
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "react/no-unknown-property" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unknown_attribute
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

@@ -8175,10 +8175,7 @@ export interface NoUndeclaredVariablesOptions {
 }
 export interface NoUnknownFunctionOptions {}
 export interface NoUnknownMediaFeatureNameOptions {}
-export interface NoUnknownPropertyOptions {
-	ignore: string[];
-	requireDataLowercase?: boolean;
-}
+export interface NoUnknownPropertyOptions {}
 export interface NoUnknownPseudoClassOptions {}
 export interface NoUnknownPseudoElementOptions {}
 export interface NoUnknownTypeSelectorOptions {}
@@ -8281,7 +8278,10 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
-export interface NoUnknownAttributeOptions {}
+export interface NoUnknownAttributeOptions {
+	ignore: string[];
+	requireDataLowercase?: boolean;
+}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
@@ -9056,7 +9056,6 @@ export type Category =
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
-	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"

@@ -13,7 +13,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i data-* attribute 'data-testID' should use lowercase naming.
   
@@ -31,7 +31,7 @@ invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:2:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:25 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i data-* attribute 'data-under_sCoRe' should use lowercase naming.
   
@@ -49,7 +49,7 @@ invalid.jsx:2:25 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:2:48 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:48 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'dataNotAnDataAttribute' is not a valid DOM attribute.
   
@@ -67,7 +67,7 @@ invalid.jsx:2:48 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i data-* attribute 'data-testID' should use lowercase naming.
   
@@ -86,7 +86,7 @@ invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:3:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:25 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i data-* attribute 'data-under_sCoRe' should use lowercase naming.
   

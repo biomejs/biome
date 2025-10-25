@@ -4525,6 +4525,10 @@
 		},
 		"NoUnknownAttributeOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": { "type": "array", "items": { "type": "string" } },
+				"requireDataLowercase": { "default": false, "type": "boolean" }
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
@@ -4555,10 +4559,6 @@
 		},
 		"NoUnknownPropertyOptions": {
 			"type": "object",
-			"properties": {
-				"ignore": { "type": "array", "items": { "type": "string" } },
-				"requireDataLowercase": { "default": false, "type": "boolean" }
-			},
 			"additionalProperties": false
 		},
 		"NoUnknownPseudoClassConfiguration": {
