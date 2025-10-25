@@ -6,7 +6,7 @@ Fixed [#7864](https://github.com/biomejs/biome/issues/7864): Biome now preserves
 
 Previously, the HTML formatter incorrectly lowercased component names like `<Button>` to `<button>` when those names matched HTML element tag names. This broke imports from UI component libraries.
 
-Now, tag casing is preserved in component framework files while maintaining the lowercasing behavior for pure HTML files:
+Now, tag casing is preserved in component framework files while maintaining the lowercasing behavior for pure HTML files.
 
 **Svelte/Astro/Vue files:**
 ```svelte
