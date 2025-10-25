@@ -3577,6 +3577,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoIncrementDecrementConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoIncrementDecrementOptions" }
+			]
+		},
+		"NoIncrementDecrementOptions": {
+			"type": "object",
+			"properties": {
+				"allowForLoopAfterthoughts": {
+					"description": "Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoInferrableTypesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5113,6 +5130,13 @@
 					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIncrementDecrement": {
+					"description": "Disallows the usage of the unary operators ++ and --.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoIncrementDecrementConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7582,6 +7606,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoImportantStylesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoIncrementDecrementOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoIncrementDecrementOptions" }]
 				}
 			},
 			"additionalProperties": false
