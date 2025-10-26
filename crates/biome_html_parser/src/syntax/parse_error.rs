@@ -13,6 +13,10 @@ pub(crate) fn disabled_interpolation(p: &HtmlParser, range: TextRange) -> ParseD
     p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.interpolation"</Emphasis>" option."))
 }
 
+pub(crate) fn disabled_svelte_prop(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("This looks like Svelte syntax, but this is not a Svelte file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".svelte"</Emphasis>" file extension."))
+}
+
 pub(crate) fn expected_text_expression(
     p: &HtmlParser,
     curr_range: TextRange,
