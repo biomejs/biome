@@ -1,9 +1,13 @@
 mod astro;
 mod parse_error;
+mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
+use crate::syntax::vue::{
+    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
+};
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -21,6 +25,8 @@ pub(crate) enum HtmlSyntaxFeatures {
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
     SingleTextExpressions,
+    /// Exclusive to those documents that support Vue
+    Vue,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -35,6 +41,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             Self::SingleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Single)
             }
+            Self::Vue => p.options().vue,
         }
     }
 }
@@ -42,6 +49,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
     token_set!(T![<], T![>], T!['}'], T!["}}"]);
+const VUE_DIRECTIVE_CHARS: TokenSet<HtmlSyntaxKind> = token_set![T![@], T![.], T![:]];
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
@@ -301,8 +309,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
+    let chpt = p.checkpoint();
     if p.at(T!["{{"]) {
+        let m = p.start();
         HtmlSyntaxFeatures::DoubleTextExpressions
             .parse_exclusive_syntax(
                 p,
@@ -312,8 +321,33 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             .ok();
 
         Present(m.complete(p, HTML_ATTRIBUTE))
+    } else if p.at(T![:]) {
+        HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
+            p,
+            parse_vue_v_bind_shorthand_directive,
+            |p, m| disabled_vue(p, m.range(p)),
+        )
+    } else if p.at(T![@]) {
+        HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
+            p,
+            parse_vue_v_on_shorthand_directive,
+            |p, m| disabled_vue(p, m.range(p)),
+        )
     } else {
+        let m = p.start();
         parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+        // Here we harness cases where we parse an attribute like: <i class.bind="icon">
+        // The parser correctly reads class, but then we find `.`, which we know to be a Vue syntax
+        if p.at_ts(VUE_DIRECTIVE_CHARS) {
+            m.abandon(p);
+            p.rewind(chpt);
+            return HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
+                p,
+                parse_vue_directive,
+                |p, m| disabled_vue(p, m.range(p)),
+            );
+        }
+
         if p.at(T![=]) {
             parse_attribute_initializer(p).ok();
             Present(m.complete(p, HTML_ATTRIBUTE))
@@ -324,7 +358,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!['{'])
+    p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!['{']) || p.at(T![:]) || p.at(T![@])
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
