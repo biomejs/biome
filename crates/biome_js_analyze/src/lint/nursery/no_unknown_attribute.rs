@@ -958,13 +958,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "zoomAndPan",
 ];
 
-fn normalize_attribute_case(name: &str) -> &str {
-    DOM_PROPERTIES_IGNORE_CASE
-        .iter()
-        .find(|element| element.eq_ignore_ascii_case(name))
-        .unwrap_or(&name)
-}
-
 fn is_valid_data_attribute(name: &str) -> bool {
     use biome_string_case::StrOnlyExtension;
     if !name.starts_with("data-") {
@@ -1056,24 +1049,23 @@ impl Rule for NoUnknownAttribute {
         let options = ctx.options();
 
         let node_name = match node.name().ok()? {
-            AnyJsxAttributeName::JsxName(name) => {
-                name.value_token().ok()?.text_trimmed().to_string()
-            }
-            AnyJsxAttributeName::JsxNamespaceName(name) => {
-                let namespace = name.namespace().ok()?.value_token().ok()?;
-                let name = &name.name().ok()?.value_token().ok()?;
-                // There could be better way, but i couldn't extract namespaced attributes
-                // For e.g xlink:href
-                // without manually concatenating with ':'
-                namespace.text_trimmed().to_string() + ":" + name.text_trimmed()
-            }
+            AnyJsxAttributeName::JsxName(name) => name.syntax().text_trimmed(),
+            AnyJsxAttributeName::JsxNamespaceName(name) => name.syntax().text_trimmed(),
         };
+        let node_name = node_name.to_string();
 
         if options.ignore.contains(&node_name) {
             return None;
         }
+        let name = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
+            .iter()
+            .find(|element| element.eq_ignore_ascii_case(&node_name))
+        {
+            element
+        } else {
+            &node_name.as_str()
+        };
 
-        let name = normalize_attribute_case(&node_name);
         let parent = node.syntax().parent()?.parent()?;
         let element = AnyJsxElement::cast_ref(&parent)?;
 
@@ -1085,7 +1077,9 @@ impl Rule for NoUnknownAttribute {
         // Handle data-* attributes
         if is_valid_data_attribute(name) {
             if options.require_data_lowercase && has_uppercase(&name) {
-                return Some(NoUnknownAttributeState::DataLowercaseRequired { name: name.into() });
+                return Some(NoUnknownAttributeState::DataLowercaseRequired {
+                    name: (*name).into(),
+                });
             }
             return None;
         }
@@ -1112,7 +1106,7 @@ impl Rule for NoUnknownAttribute {
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&tag_name.trim()) {
                 return Some(NoUnknownAttributeState::InvalidPropOnTag {
-                    name: name.into(),
+                    name: (*name).into(),
                     tag_name,
                     allowed_tags,
                 });
@@ -1121,16 +1115,18 @@ impl Rule for NoUnknownAttribute {
         }
 
         if let Some(standard_name) = get_standard_name(name) {
-            if standard_name != name {
+            if standard_name != *name {
                 return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
-                    name: name.into(),
+                    name: (*name).into(),
                     standard_name: standard_name.into(),
                 });
             }
             return None;
         }
 
-        Some(NoUnknownAttributeState::UnknownProp { name: name.into() })
+        Some(NoUnknownAttributeState::UnknownProp {
+            name: (*name).into(),
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
