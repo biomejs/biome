@@ -5,7 +5,6 @@ use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
-use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
 use std::sync::LazyLock;
 
@@ -1054,9 +1053,14 @@ impl Rule for NoUnknownAttribute {
             AnyJsxAttributeName::JsxName(name) => name.syntax().text_trimmed(),
             AnyJsxAttributeName::JsxNamespaceName(name) => name.syntax().text_trimmed(),
         };
-        let node_name = node_name.to_string();
 
-        if options.ignore.contains(&node_name) {
+        let node_name = node_name.into_text();
+
+        if options
+            .ignore
+            .iter()
+            .any(|ignored| ignored == node_name.text())
+        {
             return None;
         }
         let name = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
@@ -1065,7 +1069,7 @@ impl Rule for NoUnknownAttribute {
         {
             element
         } else {
-            &node_name.as_str()
+            &node_name.text()
         };
 
         let parent = node.syntax().parent()?.parent()?;
