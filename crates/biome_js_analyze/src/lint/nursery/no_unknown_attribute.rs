@@ -105,11 +105,11 @@ declare_lint_rule! {
  * Popover API properties added in React 19
  */
 // const POPOVER_API_PROPS: &[&str] = &[
+//     "onBeforeToggle",
+//     "onToggle",
 //     "popover",
 //     "popoverTarget",
 //     "popoverTargetAction",
-//     "onToggle",
-//     "onBeforeToggle",
 // ];
 
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
@@ -1004,10 +1004,6 @@ fn tag_name_has_dot(node: &AnyJsxElement) -> Option<bool> {
     ))
 }
 
-fn has_uppercase(name: &str) -> bool {
-    name.contains(char::is_uppercase)
-}
-
 pub enum NoUnknownAttributeState {
     UnknownProp {
         name: Box<str>,
@@ -1036,6 +1032,15 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
         .find(|&&element| element.eq_ignore_ascii_case(name))
         .copied()
 }
+
+// fn test_react_version(ctx: &RuleContext<NoUnknownAttribute>, version: &str) -> Option<bool> {
+//     ctx.get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
+//         .and_then(|manifest| {
+//             manifest
+//                 .as_ref()
+//                 .map(|(_, package_json)| package_json.matches_dependency("react", version))
+//         })
+// }
 
 impl Rule for NoUnknownAttribute {
     type Query = Manifest<JsxAttribute>;
@@ -1076,11 +1081,6 @@ impl Rule for NoUnknownAttribute {
 
         // Handle data-* attributes
         if is_valid_data_attribute(name) {
-            if options.require_data_lowercase && has_uppercase(&name) {
-                return Some(NoUnknownAttributeState::DataLowercaseRequired {
-                    name: (*name).into(),
-                });
-            }
             return None;
         }
 
