@@ -1098,7 +1098,7 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
-        let allowed_tags = ATTRIBUTE_TAGS_LOOKUP.get(name).copied();
+        let allowed_tags = ATTRIBUTE_TAGS_LOOKUP.get(name);
 
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&tag_name.trim()) {
