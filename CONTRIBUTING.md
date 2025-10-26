@@ -5,6 +5,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 ## Table of Contents
 
 - [🚀 Contributing](#-contributing)
+  * [AI assistance notice](#ai-assistance-notice)
   * [Asking questions, making proposals](#asking-questions-making-proposals)
   * [Reporting bugs](#reporting-bugs)
   * [Getting Started](#getting-started)
@@ -42,6 +43,32 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     + [Core Contributors team](#core-contributors-team)
     + [Maintainers team](#maintainers-team)
     + [Past Maintainers](#past-maintainers)
+
+## AI assistance notice
+
+> [!IMPORTANT]
+>
+> If you are using **any kind of AI assistance** to contribute to Biome,
+> it must be disclosed in the pull request.
+
+If you avail of AI assistance to make pull request, you must disclose it in the
+pull request, together with the extent of the usage. For example, if you used
+AI to generate docs or tests, you must say it.
+
+An example disclosure:
+
+> This PR was written primarily by Claude Code.
+
+> I consulted ChatGPT to understand the codebase but the solution
+> was fully authored manually by myself.
+
+Failure to disclose this is first and foremost rude to the human operators
+on the other end of the pull request, but it also makes it difficult to
+determine how much scrutiny to apply to the contribution.
+
+AI assistance isn't always perfect, even when used with the utmost care.
+
+Please be respectful to maintainers and disclose AI assistance.
 
 ## Asking questions, making proposals
 
