@@ -57,11 +57,9 @@ AI to generate docs or tests, you must say it.
 
 An example disclosure:
 
-> This PR was written primarily by Claude Code.
-
-Or
-> I consulted ChatGPT to understand the codebase but the solution
-> was fully authored manually by myself.
+- > This PR was written primarily by Claude Code.
+- > I consulted ChatGPT to understand the codebase but the solution
+  > was fully authored manually by myself.
 
 Failure to disclose this is first and foremost rude to the human operators
 on the other end of the pull request, but it also makes it difficult to
