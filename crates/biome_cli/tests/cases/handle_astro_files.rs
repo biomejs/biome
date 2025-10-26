@@ -56,6 +56,20 @@ const { some } = Astro.props
 ---
 <div>{some}</div>"#;
 
+const ASTRO_FILE_WITH_TS_SCRIPT_TAG: &str = r#"---
+const title = "My Page";
+---
+<html>
+<body>
+    <script>
+        const message:     string = "Hello TypeScript";
+        function greet(name:   string): void {
+            console.log(  message + ", " + name );
+        }
+    </script>
+</body>
+</html>"#;
+
 #[test]
 fn format_astro_files() {
     let fs = MemoryFileSystem::default();
@@ -615,6 +629,39 @@ fn astro_global_object() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_global",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_astro_with_typescript_script_tag() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_WITH_TS_SCRIPT_TAG.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_astro_with_typescript_script_tag",
         fs,
         console,
         result,

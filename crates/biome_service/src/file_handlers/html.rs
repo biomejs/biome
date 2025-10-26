@@ -488,6 +488,8 @@ pub(crate) fn parse_embedded_script(
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue);
             }
             file_source
+        } else if html_file_source.is_astro() {
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro)
         } else {
             let is_module = element.is_javascript_module().unwrap_or_default();
             if is_module {
