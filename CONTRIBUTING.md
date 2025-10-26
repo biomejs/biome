@@ -60,9 +60,9 @@ An example disclosure:
 - > I consulted ChatGPT to understand the codebase but the solution
   > was fully authored manually by myself.
 
-Failure to disclose this is first and foremost rude to the human operators
-on the other end of the pull request, but it also makes it difficult to
-determine how much scrutiny to apply to the contribution.
+Providing this information helps reviewers understand the context of the
+pull request and apply the right level of scrutiny, ensuring a smoother
+and more efficient review process.
 
 AI assistance isn't always perfect, even when used with the utmost care.
 
