@@ -51,7 +51,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 > If you are using **any kind of AI assistance** to contribute to Biome,
 > it must be disclosed in the pull request.
 
-If you avail of AI assistance to make a pull request, you must disclose it in the
+If you relied on AI assistance to make a pull request, you must disclose it in the
 pull request, together with the extent of the usage. For example, if you used
 AI to generate docs or tests, you must say it.
 An example disclosure:
