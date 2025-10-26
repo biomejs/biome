@@ -59,6 +59,7 @@ An example disclosure:
 
 > This PR was written primarily by Claude Code.
 
+Or
 > I consulted ChatGPT to understand the codebase but the solution
 > was fully authored manually by myself.
 
