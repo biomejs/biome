@@ -1,6 +1,8 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::block::{parse_declaration_or_rule_list_block, parse_rule_block};
+use crate::syntax::block::{
+    parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
+};
 use crate::syntax::parse_error::{expected_identifier, expected_selector, expected_string};
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
@@ -194,6 +196,11 @@ pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
 }
 
 // @plugin "@tailwindcss/typography";
+// OR
+// @plugin "my-plugin" {
+//  debug: false;
+//  threshold: 0.5;
+// }
 pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![plugin]) {
         return Absent;
@@ -202,7 +209,10 @@ pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![plugin]);
     parse_string(p).or_add_diagnostic(p, expected_string);
-    p.expect(T![;]);
+    if !p.eat(T![;]) {
+        parse_declaration_block(p);
+        p.eat(T![;]);
+    }
 
     Present(m.complete(p, TW_PLUGIN_AT_RULE))
 }

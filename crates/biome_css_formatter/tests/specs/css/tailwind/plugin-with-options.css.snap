@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/tailwind/plugin-with-options.css
+---
+# Input
+
+```css
+@plugin    "my-plugin"     {
+	debug:   false;
+	threshold:0.5;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@plugin "my-plugin" {
+	debug: false;
+	threshold: 0.5;
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@plugin "my-plugin" {
+	debug: false;
+	threshold: 0.5;
+}
+```
