@@ -1017,9 +1017,6 @@ pub enum NoUnknownAttributeState {
         tag_name: TokenText,
         allowed_tags: &'static [&'static str],
     },
-    DataLowercaseRequired {
-        name: Box<str>,
-    },
 }
 
 fn get_standard_name(name: &str) -> Option<&'static str> {
@@ -1182,23 +1179,6 @@ impl Rule for NoUnknownAttribute {
                 })
                 .note(markup! {
                        "This attribute is only allowed on: "{allowed_tags.join(",")}
-                }),
-            ),
-            NoUnknownAttributeState::DataLowercaseRequired {
-                name,
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.range(),
-                    markup! {
-                        "data-* attribute '"{name}"' should use lowercase naming."
-                    },
-                )
-                .note(markup! {
-                    "HTML data-* attributes must use lowercase letters to be valid."
-                })
-                .note(markup! {
-                    "Change '"{name}"' to '"{name.to_lowercase_cow()}"' to follow HTML standards."
                 }),
             ),
         }
