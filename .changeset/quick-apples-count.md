@@ -12,7 +12,7 @@ Now, the rule correctly detects and ignores multi-line concatenations with leadi
 **Example**
 ```ts
 // The following code used to error if the `+` operators were at the start of lines (as opposed to the end).
-// Now, the rule correctly flags this as a stylistic concatenation and ignores it.
+// Now, the rule correctly recognizes this as a stylistic concatenation and ignores it.
 const reallyLongStringThatShouldNotError =
   "Lorem ipsum dolor sit amet consectetur adipiscing elit."
   + "Quisque faucibus ex sapien vitae pellentesque sem placerat."
