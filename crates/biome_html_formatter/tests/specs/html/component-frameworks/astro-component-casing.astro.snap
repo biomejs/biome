@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: component-frameworks/astro-component-casing.astro
+---
+# Input
+
+```astro
+---
+import Button from './Button.astro';
+import TextInput from './TextInput.astro';
+---
+
+<Button label="test button" />
+<TextInput placeholder="enter text" />
+<button>native button</button>
+<input type="text" />
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+---
+import Button from './Button.astro';
+import TextInput from './TextInput.astro';
+---
+<Button label="test button"/>
+<TextInput placeholder="enter text"/>
+<button>native button</button>
+<input type="text">
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"import Button from './Button.astro';\nimport TextInput from './TextInput.astro';\n-" => 4..85

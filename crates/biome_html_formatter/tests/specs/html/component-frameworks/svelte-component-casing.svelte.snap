@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: component-frameworks/svelte-component-casing.svelte
+---
+# Input
+
+```svelte
+<script lang="ts">
+  import Button from './Button.svelte';
+  import TextInput from './TextInput.svelte';
+  import Select from './Select.svelte';
+</script>
+
+<Button label="test button" />
+<TextInput placeholder="enter text" />
+<Select options={['a', 'b']} />
+<button>native button</button>
+<input type="text" />
+<select><option>native</option></select>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+<script lang="ts">
+  import Button from './Button.svelte';
+  import TextInput from './TextInput.svelte';
+  import Select from './Select.svelte';
+</script>
+
+<Button label="test button"/>
+<TextInput placeholder="enter text"/>
+<Select options={['a', 'b']}/>
+<button>native button</button>
+<input type="text">
+<select>
+	<option>native</option>
+</select>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n  import Button from './Button.svelte';\n  import TextInput from './TextInput.svelte';\n  import Select from './Select.svelte';\n" => 18..145
+"['a', 'b']" => 241..251
