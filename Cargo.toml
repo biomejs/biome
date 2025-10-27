@@ -201,7 +201,7 @@ dashmap              = "6.1.0"
 dirs                 = "6.0.0"
 enumflags2           = "0.7.12"
 getrandom            = "0.2.15"
-globset              = "0.4.17"
+globset              = "0.4.18"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }
