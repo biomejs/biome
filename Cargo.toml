@@ -205,7 +205,7 @@ globset              = "0.4.17"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }
-ignore               = "0.4.23"
+ignore               = "0.4.24"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.2"
 jiff                 = "0.2.15"
