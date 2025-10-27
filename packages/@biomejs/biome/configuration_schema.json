@@ -4526,8 +4526,7 @@
 		"NoUnknownAttributeOptions": {
 			"type": "object",
 			"properties": {
-				"ignore": { "type": "array", "items": { "type": "string" } },
-				"requireDataLowercase": { "default": false, "type": "boolean" }
+				"ignore": { "type": "array", "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},
