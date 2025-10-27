@@ -570,7 +570,7 @@ impl TextExpression {
                         HtmlLexContext::TextExpression(self.kind),
                     );
                 } else {
-                    p.bump_remap_any_with_context(HtmlLexContext::TextExpression(self.kind));
+                    p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
                 }
             }
             TextExpressionKind::Double => {

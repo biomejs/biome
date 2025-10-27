@@ -181,6 +181,21 @@ pub trait Lexer<'src> {
         debug_assert!(self.source().is_char_boundary(self.position()));
     }
 
+    #[inline]
+    /// Gets the previous byte.
+    ///
+    /// ## Panic
+    ///
+    /// In debug, it panics if the current position is zero
+    fn previous_byte(&self) -> Option<u8> {
+        debug_assert!(self.position() > 0, "Can't get previous byte at position 0");
+        if self.is_eof() {
+            None
+        } else {
+            self.source().as_bytes().get(self.position() - 1).copied()
+        }
+    }
+
     /// Gets the current byte.
     ///
     /// ## Returns

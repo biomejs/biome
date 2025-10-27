@@ -1,0 +1,232 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+import { Counter } from '@/components/counter'
+import PageLayout from '@/components/page-layout.astro'
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+<PageLayout>
+	<main class="flex h-screen w-screen flex-col items-center justify-center">
+		<Counter client:load>
+
+
+			<span>--</span>
+		</Counter>
+	</main>
+</PageLayout>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..356 "import { Counter } from '@/components/counter'\nimport PageLayout from '@/components/page-layout.astro'\n\n// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build\n// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@356..359 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@359..361 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@361..371 "PageLayout" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@371..372 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@372..375 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@375..380 "main" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@380..385 "class" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@385..386 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@386..447 "\"flex h-screen w-screen flex-col items-center justify-center\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@447..448 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@460..471 "client:load" [] [],
+                                        },
+                                        initializer: missing (optional),
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@471..472 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@472..479 "<" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@479..483 "span" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@483..484 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@484..486 "--" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@486..487 "<" [] [],
+                                        slash_token: SLASH@487..488 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@488..492 "span" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@492..493 ">" [] [],
+                                    },
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                slash_token: SLASH@497..498 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@498..505 "Counter" [] [],
+                                },
+                                r_angle_token: R_ANGLE@505..506 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@506..509 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@509..510 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@510..514 "main" [] [],
+                        },
+                        r_angle_token: R_ANGLE@514..515 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@515..517 "<" [Newline("\n")] [],
+                slash_token: SLASH@517..518 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@518..528 "PageLayout" [] [],
+                },
+                r_angle_token: R_ANGLE@528..529 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@529..530 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..530
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..359
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..356
+      0: HTML_LITERAL@3..356 "import { Counter } from '@/components/counter'\nimport PageLayout from '@/components/page-layout.astro'\n\n// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build\n// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.\n" [Newline("\n")] []
+    2: FENCE@356..359 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@359..529
+    0: HTML_ELEMENT@359..529
+      0: HTML_OPENING_ELEMENT@359..372
+        0: L_ANGLE@359..361 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@361..371
+          0: HTML_LITERAL@361..371 "PageLayout" [] []
+        2: HTML_ATTRIBUTE_LIST@371..371
+        3: R_ANGLE@371..372 ">" [] []
+      1: HTML_ELEMENT_LIST@372..515
+        0: HTML_ELEMENT@372..515
+          0: HTML_OPENING_ELEMENT@372..448
+            0: L_ANGLE@372..375 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@375..380
+              0: HTML_LITERAL@375..380 "main" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@380..447
+              0: HTML_ATTRIBUTE@380..447
+                0: HTML_ATTRIBUTE_NAME@380..385
+                  0: HTML_LITERAL@380..385 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@385..447
+                  0: EQ@385..386 "=" [] []
+                  1: HTML_STRING@386..447
+                    0: HTML_STRING_LITERAL@386..447 "\"flex h-screen w-screen flex-col items-center justify-center\"" [] []
+            3: R_ANGLE@447..448 ">" [] []
+          1: HTML_ELEMENT_LIST@448..506
+            0: HTML_ELEMENT@448..506
+              0: HTML_OPENING_ELEMENT@448..472
+                0: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@452..460
+                  0: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@460..471
+                  0: HTML_ATTRIBUTE@460..471
+                    0: HTML_ATTRIBUTE_NAME@460..471
+                      0: HTML_LITERAL@460..471 "client:load" [] []
+                    1: (empty)
+                3: R_ANGLE@471..472 ">" [] []
+              1: HTML_ELEMENT_LIST@472..493
+                0: HTML_ELEMENT@472..493
+                  0: HTML_OPENING_ELEMENT@472..484
+                    0: L_ANGLE@472..479 "<" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t\t\t")] []
+                    1: HTML_TAG_NAME@479..483
+                      0: HTML_LITERAL@479..483 "span" [] []
+                    2: HTML_ATTRIBUTE_LIST@483..483
+                    3: R_ANGLE@483..484 ">" [] []
+                  1: HTML_ELEMENT_LIST@484..486
+                    0: HTML_CONTENT@484..486
+                      0: HTML_LITERAL@484..486 "--" [] []
+                  2: HTML_CLOSING_ELEMENT@486..493
+                    0: L_ANGLE@486..487 "<" [] []
+                    1: SLASH@487..488 "/" [] []
+                    2: HTML_TAG_NAME@488..492
+                      0: HTML_LITERAL@488..492 "span" [] []
+                    3: R_ANGLE@492..493 ">" [] []
+              2: HTML_CLOSING_ELEMENT@493..506
+                0: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: SLASH@497..498 "/" [] []
+                2: HTML_TAG_NAME@498..505
+                  0: HTML_LITERAL@498..505 "Counter" [] []
+                3: R_ANGLE@505..506 ">" [] []
+          2: HTML_CLOSING_ELEMENT@506..515
+            0: L_ANGLE@506..509 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@509..510 "/" [] []
+            2: HTML_TAG_NAME@510..514
+              0: HTML_LITERAL@510..514 "main" [] []
+            3: R_ANGLE@514..515 ">" [] []
+      2: HTML_CLOSING_ELEMENT@515..529
+        0: L_ANGLE@515..517 "<" [Newline("\n")] []
+        1: SLASH@517..518 "/" [] []
+        2: HTML_TAG_NAME@518..528
+          0: HTML_LITERAL@518..528 "PageLayout" [] []
+        3: R_ANGLE@528..529 ">" [] []
+  4: EOF@529..530 "" [Newline("\n")] []
+
+```

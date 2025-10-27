@@ -32,7 +32,6 @@ pub(crate) async fn did_open(
 
     let path = session.file_path(&url)?;
 
-    eprintln!("Session id {:?}", session.key);
     let project_key = match session.project_for_path(&path) {
         Some(project_key) => project_key,
         None => {
