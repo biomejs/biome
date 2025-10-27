@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::FunctionObjectBuilder;
-use boa_engine::{Context, JsNativeError, JsString, JsValue, Module, NativeFunction, js_string};
+use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_string};
 
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};

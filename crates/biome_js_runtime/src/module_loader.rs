@@ -72,7 +72,7 @@ impl ModuleLoader for JsModuleLoader {
                             self.modules.borrow_mut().insert(path, module.clone());
                         }
 
-                        return module;
+                        module
                     }
                     Err(err) => Err(JsNativeError::error().with_message(err.to_string()).into()),
                 }
