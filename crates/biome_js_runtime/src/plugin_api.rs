@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::FunctionObjectBuilder;
-use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_string};
+use boa_engine::{Context, JsNativeError, JsString, JsValue, Module, NativeFunction, js_string};
 
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};
@@ -26,14 +26,14 @@ impl JsPluginApi {
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, _context| {
-                let [JsValue::String(severity), JsValue::String(message)] = args else {
+                let [severity, message] = args else {
                     return Err(JsNativeError::typ()
                         .with_message("registerDiagnostic() expects two string arguments")
                         .into());
                 };
 
                 let severity =
-                    match severity.to_std_string_lossy().as_str() {
+                    match severity.to_string(_context)?.to_std_string_lossy().as_str() {
                         "fatal" => Severity::Fatal,
                         "error" => Severity::Error,
                         "warning" => Severity::Warning,
@@ -49,7 +49,7 @@ impl JsPluginApi {
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
                     None::<TextRange>, // TODO: retrieve a span from the AST
-                    message.to_std_string_lossy(),
+                    message.to_string(_context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
 
