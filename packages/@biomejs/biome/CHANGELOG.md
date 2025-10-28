@@ -1,5 +1,36 @@
 # @biomejs/biome
 
+## 2.3.2
+
+### Patch Changes
+
+- [#7859](https://github.com/biomejs/biome/pull/7859) [`c600618`](https://github.com/biomejs/biome/commit/c6006184a860b42fea3f0ea5fe96c47087341a90) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noIncrementDecrement`](https://biomejs.dev/linter/rules/no-increment-decrement/), disallows the usage of the unary operators ++ and --.
+
+- [#7901](https://github.com/biomejs/biome/pull/7901) [`0d17b05`](https://github.com/biomejs/biome/commit/0d17b05477a537b6d652a2e56c50bb1db013ef06) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7837](https://github.com/biomejs/biome/issues/7837), where Biome couldn't properly parse text expressions that contained nested curly brackets. This was breaking parsing in Astro and Svelte files.
+
+- [#7874](https://github.com/biomejs/biome/pull/7874) [`e617d36`](https://github.com/biomejs/biome/commit/e617d363b9356bef007192a7f508e15d63f56e9b) Thanks [@Bertie690](https://github.com/Bertie690)! - Fixed [#7230](https://github.com/biomejs/biome/issues/7230): [`noUselessStringConcat`](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer emits false positives for multi-line strings with leading `+` operators.
+
+  Previously, the rule did not check for leading newlines on the `+` operator, emitting false positives if one occurred at the start of a line. \
+  Notably, formatting with `operatorLinebreak="before"` would move the `+` operators to the start of lines automatically, resulting in spurious errors whenever a multi-line string was used.
+
+  Now, the rule correctly detects and ignores multi-line concatenations with leading operators as well, working regardless of the setting of `operatorLinebreak`.
+
+  **Example**
+
+  ```ts
+  // The following code used to error if the `+` operators were at the start of lines (as opposed to the end).
+  // Now, the rule correctly recognizes this as a stylistic concatenation and ignores it.
+  const reallyLongStringThatShouldNotError =
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit." +
+    "Quisque faucibus ex sapien vitae pellentesque sem placerat." +
+    "In id cursus mi pretium tellus duis convallis." +
+    "Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla";
+  ```
+
+- [#7786](https://github.com/biomejs/biome/pull/7786) [`33ffcd5`](https://github.com/biomejs/biome/commit/33ffcd50a749ca0e188796a10b4ffffb59ead4b3) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#7601](https://github.com/biomejs/biome/issues/7601): Properly match Grit plugin's code snippet with only one child.
+
+- [#7901](https://github.com/biomejs/biome/pull/7901) [`0d17b05`](https://github.com/biomejs/biome/commit/0d17b05477a537b6d652a2e56c50bb1db013ef06) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7837](https://github.com/biomejs/biome/issues/7837), where Biome Language Server panicked when opening HTML-ish files when the experimental full support is enabled.
+
 ## 2.3.1
 
 ### Patch Changes
