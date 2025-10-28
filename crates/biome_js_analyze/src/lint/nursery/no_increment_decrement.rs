@@ -131,7 +131,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIncrementDecrement {
-        version: "next",
+        version: "2.3.2",
         name: "noIncrementDecrement",
         language: "js",
         recommended: false,
