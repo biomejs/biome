@@ -2,8 +2,8 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{JsForStatement, JsPostUpdateExpression, JsPreUpdateExpression};
-use biome_rowan::{AstNode, declare_node_union};
+use biome_js_syntax::{JsLanguage, JsPostUpdateExpression, JsPreUpdateExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, SyntaxNode, declare_node_union};
 use biome_rule_options::no_increment_decrement::NoIncrementDecrementOptions;
 
 declare_lint_rule! {
@@ -152,11 +152,7 @@ impl Rule for NoIncrementDecrement {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if ctx.options().allow_for_loop_afterthoughts
-            && let Some(parent) = node.parent::<JsForStatement>()
-            && let Some(update) = parent.update()
-            && update.syntax().eq(node.syntax())
-        {
+        if ctx.options().allow_for_loop_afterthoughts && is_for_loop_afterthought(node.syntax()) {
             return None;
         }
 
@@ -177,5 +173,26 @@ impl Rule for NoIncrementDecrement {
                 "The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=."
             }),
         )
+    }
+}
+
+fn is_for_loop_afterthought(node: &SyntaxNode<JsLanguage>) -> bool {
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+
+    match parent.kind() {
+        JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION | JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+            is_for_loop_afterthought(&parent)
+        }
+        JsSyntaxKind::JS_FOR_STATEMENT => {
+            if let Some(for_stmt) = biome_js_syntax::JsForStatement::cast(parent.clone())
+                && let Some(update) = for_stmt.update()
+            {
+                return update.syntax().eq(node);
+            }
+            false
+        }
+        _ => false,
     }
 }
