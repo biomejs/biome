@@ -222,22 +222,22 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
-        let mut brackets_stack = Vec::<()>::new();
-        if self.previous_byte() == Some(b'{') {
-            brackets_stack.push(());
+        let mut brackets_stack = 0;
+        if self.prev_byte() == Some(b'{') {
+            brackets_stack += 1;
         }
         while let Some(current) = self.current_byte() {
             match current {
                 b'}' => {
-                    brackets_stack.pop();
-                    if brackets_stack.is_empty() {
+                    brackets_stack -= 1;
+                    if brackets_stack == 0 {
                         break;
                     } else {
                         self.advance(1);
                     }
                 }
                 b'{' => {
-                    brackets_stack.push(());
+                    brackets_stack += 1;
                     self.advance(1);
                 }
 
