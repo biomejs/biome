@@ -1,0 +1,17 @@
+---
+import { Counter } from '@/components/counter'
+
+const show = false
+---
+<div>
+	<!-- expect -->
+	<span />
+	<Counter />
+
+	<!-- errors -->
+	<!-- 1. if brace in brace, got unexpect format -->
+	{show &&<Counter value={show} onAbort={()=>{}}onClick={()=>{}}
+									 className="flex"/>}
+	<!-- 2. not format -->
+	{show&& <span/>}
+</div>

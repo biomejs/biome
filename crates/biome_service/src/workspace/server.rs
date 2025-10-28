@@ -305,10 +305,23 @@ impl WorkspaceServer {
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(
-            &path,
-            settings.experimental_full_html_support_enabled(),
-        ));
+        let mut source = if let Some(document_file_source) = document_file_source {
+            // TODO: remove once HTML full support is stable
+            // document_file_source is given by the LSP, and we have to change it if full support is enabled.
+            // The workspace knows that, but the LSP doesn't, so we have to do the modification here
+            if document_file_source.is_javascript_like()
+                && matches!(path.extension(), Some("astro" | "vue" | "svelte" | "html"))
+            {
+                DocumentFileSource::from_path(
+                    &path,
+                    settings.experimental_full_html_support_enabled(),
+                )
+            } else {
+                document_file_source
+            }
+        } else {
+            DocumentFileSource::from_path(&path, settings.experimental_full_html_support_enabled())
+        };
 
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
@@ -385,6 +398,7 @@ impl WorkspaceServer {
         {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
 
+            debug!("{:#?}", &any_parse);
             let mut node_cache = NodeCache::default();
             self.parse_embedded_language_snippets(
                 &biome_path,
