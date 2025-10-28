@@ -1,0 +1,16 @@
+@plugin '../custom-plugin' {
+	is-null: null;
+	is-true: true;
+	is-false: false;
+	is-int: 1234567;
+	is-float: 1.35;
+	is-sci: 0.0000135;
+	is-str-null: 'null';
+	is-str-true: 'true';
+	is-str-false: 'false';
+	is-str-int: '1234567';
+	is-str-float: '1.35';
+	is-str-sci: '1.35e-5';
+	is-arr: 'foo', 'bar';
+	is-arr-mixed: null, true, false, 1234567, 1.35, 'foo', 'bar', 'true';
+}

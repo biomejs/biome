@@ -1685,6 +1685,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
+	 * Disallows the usage of the unary operators ++ and --.
+	 */
+	noIncrementDecrement?: RuleConfiguration_for_NoIncrementDecrementOptions;
+	/**
 	 * Disallow string literals inside JSX elements.
 	 */
 	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
@@ -3064,6 +3068,9 @@ export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
+export type RuleConfiguration_for_NoIncrementDecrementOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoIncrementDecrementOptions;
 export type RuleConfiguration_for_NoJsxLiteralsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoJsxLiteralsOptions;
@@ -5526,6 +5533,16 @@ export interface RuleWithOptions_for_NoImportCyclesOptions {
 	 * Rule's options
 	 */
 	options: NoImportCyclesOptions;
+}
+export interface RuleWithOptions_for_NoIncrementDecrementOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoIncrementDecrementOptions;
 }
 export interface RuleWithOptions_for_NoJsxLiteralsOptions {
 	/**
@@ -8261,6 +8278,12 @@ export interface NoImportCyclesOptions {
 	 */
 	ignoreTypes?: boolean;
 }
+export interface NoIncrementDecrementOptions {
+	/**
+	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
+	 */
+	allowForLoopAfterthoughts?: boolean;
+}
 export interface NoJsxLiteralsOptions {
 	/**
 	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
@@ -9048,6 +9071,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"

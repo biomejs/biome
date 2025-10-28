@@ -159,6 +159,7 @@ HtmlAttributeList = AnyHtmlAttribute*
 AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
+	| HtmlSingleTextExpression
 	| HtmlBogusAttribute
 
 // <a href="">

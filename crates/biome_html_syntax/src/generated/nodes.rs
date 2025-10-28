@@ -873,6 +873,7 @@ pub enum AnyHtmlAttribute {
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
+    HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlAttribute {
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
@@ -890,6 +891,12 @@ impl AnyHtmlAttribute {
     pub fn as_html_double_text_expression(&self) -> Option<&HtmlDoubleTextExpression> {
         match &self {
             Self::HtmlDoubleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
+        match &self {
+            Self::HtmlSingleTextExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -2121,15 +2128,24 @@ impl From<HtmlDoubleTextExpression> for AnyHtmlAttribute {
         Self::HtmlDoubleTextExpression(node)
     }
 }
+impl From<HtmlSingleTextExpression> for AnyHtmlAttribute {
+    fn from(node: HtmlSingleTextExpression) -> Self {
+        Self::HtmlSingleTextExpression(node)
+    }
+}
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = HtmlAttribute::KIND_SET
         .union(HtmlBogusAttribute::KIND_SET)
-        .union(HtmlDoubleTextExpression::KIND_SET);
+        .union(HtmlDoubleTextExpression::KIND_SET)
+        .union(HtmlSingleTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            HTML_ATTRIBUTE | HTML_BOGUS_ATTRIBUTE | HTML_DOUBLE_TEXT_EXPRESSION
+            HTML_ATTRIBUTE
+                | HTML_BOGUS_ATTRIBUTE
+                | HTML_DOUBLE_TEXT_EXPRESSION
+                | HTML_SINGLE_TEXT_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -2138,6 +2154,9 @@ impl AstNode for AnyHtmlAttribute {
             HTML_BOGUS_ATTRIBUTE => Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax }),
             HTML_DOUBLE_TEXT_EXPRESSION => {
                 Self::HtmlDoubleTextExpression(HtmlDoubleTextExpression { syntax })
+            }
+            HTML_SINGLE_TEXT_EXPRESSION => {
+                Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
             }
             _ => return None,
         };
@@ -2148,6 +2167,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => &it.syntax,
             Self::HtmlBogusAttribute(it) => &it.syntax,
             Self::HtmlDoubleTextExpression(it) => &it.syntax,
+            Self::HtmlSingleTextExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -2155,6 +2175,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => it.syntax,
             Self::HtmlBogusAttribute(it) => it.syntax,
             Self::HtmlDoubleTextExpression(it) => it.syntax,
+            Self::HtmlSingleTextExpression(it) => it.syntax,
         }
     }
 }
@@ -2164,6 +2185,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -2173,6 +2195,7 @@ impl From<AnyHtmlAttribute> for SyntaxNode {
             AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into(),
+            AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into(),
         }
     }
 }

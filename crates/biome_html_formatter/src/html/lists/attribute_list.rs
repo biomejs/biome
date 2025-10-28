@@ -63,6 +63,9 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::HtmlDoubleTextExpression(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::HtmlSingleTextExpression(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                     AnyHtmlAttribute::HtmlBogusAttribute(attr) => {
                                         attr.format().fmt(f)
                                     }

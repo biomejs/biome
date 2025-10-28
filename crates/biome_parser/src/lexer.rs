@@ -210,6 +210,15 @@ pub trait Lexer<'src> {
     }
 
     #[inline]
+    fn prev_byte(&self) -> Option<u8> {
+        if self.position() == 0 {
+            None
+        } else {
+            self.source().as_bytes().get(self.position() - 1).copied()
+        }
+    }
+
+    #[inline]
     fn text_position(&self) -> TextSize {
         TextSize::try_from(self.position()).expect("Input to be smaller than 4 GB")
     }

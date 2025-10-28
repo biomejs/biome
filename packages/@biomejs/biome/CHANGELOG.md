@@ -1,5 +1,29 @@
 # @biomejs/biome
 
+## 2.3.1
+
+### Patch Changes
+
+- [#7840](https://github.com/biomejs/biome/pull/7840) [`72afdfa`](https://github.com/biomejs/biome/commit/72afdfa3451eb02d499c1a2a7dc826b37e3d5f8d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7838](https://github.com/biomejs/biome/issues/7838), which caused the new `--css-parse-*` arguments not being recognised by the `ci` command.
+
+- [#7789](https://github.com/biomejs/biome/pull/7789) [`d5b416e`](https://github.com/biomejs/biome/commit/d5b416eae710f062fe96a4c774b3bf885857ffa8) Thanks [@fronterior](https://github.com/fronterior)! - Fixed the LSP method `workspace/didChangeWorkspaceFolders` to perform incremental updates instead of replacing the entire folder list.
+
+- [#7852](https://github.com/biomejs/biome/pull/7852) [`bd254c7`](https://github.com/biomejs/biome/commit/bd254c7a4c8de8fa0a2cd9ae05591b6ee881a622) Thanks [@dyc3](https://github.com/dyc3)! - Fixed #7843: The CSS parser, when `tailwindDirectives` is enabled, correctly parses `--*: initial;`.
+
+- [#7872](https://github.com/biomejs/biome/pull/7872) [`0fe13fe`](https://github.com/biomejs/biome/commit/0fe13fea24f0c955fc0f98cf75d249b65532a192) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7861](https://github.com/biomejs/biome/issues/7861): The HTML parser will now accept Svelte attribute shorthand syntax in `.svelte` files.
+
+- [#7866](https://github.com/biomejs/biome/pull/7866) [`7b2600b`](https://github.com/biomejs/biome/commit/7b2600b6826002311bdb5fcd89fd309496e993b2) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7860](https://github.com/biomejs/biome/issues/7860): The css parser, with `tailwindDirectives` enabled, will now accept `@plugin` options.
+
+- [#7853](https://github.com/biomejs/biome/pull/7853) [`fe90c78`](https://github.com/biomejs/biome/commit/fe90c785e244b2a17ba8650972fb7eb6ddc6907f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed #7848: The css parser with `tailwindDirectives` enabled will now correctly parse tailwind's source exclude syntax: `@source not "foo.css";`
+
+- [#7878](https://github.com/biomejs/biome/pull/7878) [`c9f7fe5`](https://github.com/biomejs/biome/commit/c9f7fe5473fad55b888dedf03d06deee777397a8) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7857](https://github.com/biomejs/biome/issues/7857): Biome now parses `<script>` tags as TypeScript when analysing `.astro` files.
+
+- [#7867](https://github.com/biomejs/biome/pull/7867) [`b42b718`](https://github.com/biomejs/biome/commit/b42b7189e772a876fe8053a8129dbfa93ecf8255) Thanks [@smorimoto](https://github.com/smorimoto)! - Fixed incorrect option name in HTML parser error message.
+
+  The error message for disabled text expressions incorrectly referred
+  to the `html.parser.textExpression` option, which does not exist.
+  Updated it to reference the correct `html.parser.interpolation` option.
+
 ## 2.3.0
 
 ### Minor Changes
