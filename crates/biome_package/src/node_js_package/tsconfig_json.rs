@@ -221,7 +221,7 @@ impl Deserializable for JsxFactoryIdentifier {
     ) -> Option<Self> {
         let full_name = String::deserialize(ctx, value, name)?;
         // Extract the base identifier (everything before the first dot)
-        let base_identifier = full_name.split('.').next().unwrap_or(&full_name).trim();
+        let base_identifier = full_name.split('.').next().unwrap().trim();
 
         // Return None if the identifier is empty or whitespace-only
         // to avoid "configured but unusable" states downstream
@@ -361,10 +361,8 @@ mod tests {
 
         let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
 
-        // Access multiple times - should not re-normalize
-        for _ in 0..100 {
-            assert_eq!(tsconfig.jsx_factory_identifier(), Some("React"));
-        }
+        assert_eq!(tsconfig.jsx_factory_identifier(), Some("React"));
+        assert_eq!(tsconfig.jsx_factory_identifier(), Some("React")); // consistency
     }
 
     #[test]
