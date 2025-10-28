@@ -179,7 +179,31 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+
+    // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
+    // and the factory settings are not already set
+    use biome_analyze::options::JsxRuntime;
+    if options.jsx_runtime() == Some(JsxRuntime::ReactClassic) {
+        if options.jsx_factory().is_none() {
+            let factory = project_layout
+                .query_tsconfig_for_path(input_file, |tsconfig| {
+                    tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                })
+                .flatten();
+            options.set_jsx_factory(factory.map(|s| s.into()));
+        }
+        if options.jsx_fragment_factory().is_none() {
+            let fragment_factory = project_layout
+                .query_tsconfig_for_path(input_file, |tsconfig| {
+                    tsconfig
+                        .jsx_fragment_factory_identifier()
+                        .map(|s| s.to_string())
+                })
+                .flatten();
+            options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+        }
+    }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
