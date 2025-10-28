@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+let foo = 0;
+foo++;
+
+let bar = 42;
+bar--;
+
+let baz = 0;
+++baz;
+
+let quz = 42;
+--quz;
+
+for (let i = 0; i < 10; i++) {
+	doSomething(i);
+}
+
+for (let i = 0; i < 10;) {
+	doSomething(i);
+
+	i++;
+}
+
+for (i = 0; i < l; foo, i++) {
+	doSomething(i);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    1 │ let foo = 0;
+  > 2 │ foo++;
+      │ ^^^^^
+    3 │ 
+    4 │ let bar = 42;
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    4 │ let bar = 42;
+  > 5 │ bar--;
+      │ ^^^^^
+    6 │ 
+    7 │ let baz = 0;
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+     7 │ let baz = 0;
+   > 8 │ ++baz;
+       │ ^^^^^
+     9 │ 
+    10 │ let quz = 42;
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    10 │ let quz = 42;
+  > 11 │ --quz;
+       │ ^^^^^
+    12 │ 
+    13 │ for (let i = 0; i < 10; i++) {
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:13:25 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    11 │ --quz;
+    12 │ 
+  > 13 │ for (let i = 0; i < 10; i++) {
+       │                         ^^^
+    14 │ 	doSomething(i);
+    15 │ }
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:20:2 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    18 │ 	doSomething(i);
+    19 │ 
+  > 20 │ 	i++;
+       │ 	^^^
+    21 │ }
+    22 │ 
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
+
+```
+invalid.js:23:25 lint/nursery/noIncrementDecrement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of increment/decrement unary operator.
+  
+    21 │ }
+    22 │ 
+  > 23 │ for (i = 0; i < l; foo, i++) {
+       │                         ^^^
+    24 │ 	doSomething(i);
+    25 │ }
+  
+  i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+
+```
