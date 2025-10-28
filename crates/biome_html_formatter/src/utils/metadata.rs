@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlFileSource, HtmlTagName};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::HtmlFormatter;
@@ -716,23 +716,23 @@ pub(crate) fn is_canonical_html_tag_name(tag_name: &str) -> bool {
     }
 }
 
-/// Determines if a tag name should be lowercased as a canonical HTML tag.
-///
-/// Only returns true for pure HTML files (.html). For component framework files
-/// (Svelte, Astro, Vue), this always returns false to preserve component name casing.
-///
-/// This ensures that component names like `<Button>` are not lowercased to `<button>`
-/// in component files, while maintaining the lowercasing behavior for HTML files.
-pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName, file_source: &HtmlFileSource) -> bool {
-    // Only lowercase tags in pure HTML files, not in component frameworks
-    if !file_source.is_html() {
-        return false;
-    }
-
+/// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
+pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
     let Ok(tag_name) = tag_name.value_token() else {
         return false;
     };
     is_canonical_html_tag_name(tag_name.text_trimmed())
+}
+
+/// Whether a tag should be lowercased in the current formatting context.
+///
+/// Returns true only for canonical HTML tags in pure HTML files (.html).
+/// Component frameworks (Svelte, Astro, Vue) preserve tag name casing.
+///
+/// This combines file source checking with canonicality checking to provide
+/// a single decision point for tag lowercasing behavior.
+pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
+    f.options().file_source().is_html() && is_canonical_html_tag(tag_name)
 }
 
 /// Whether the given attribute name is a known HTML attribute for the given tag name.
