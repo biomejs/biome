@@ -1,6 +1,6 @@
 use self::{
-    css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
-    unknown::UnknownFileHandler,
+    css::CssFileHandler, glimmer::GlimmerFileHandler, javascript::JsFileHandler,
+    json::JsonFileHandler, unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
@@ -57,6 +57,7 @@ use tracing::instrument;
 
 pub mod astro;
 pub(crate) mod css;
+pub mod glimmer;
 pub(crate) mod graphql;
 pub(crate) mod grit;
 pub(crate) mod html;
@@ -785,6 +786,7 @@ pub(crate) struct Features {
     astro: AstroFileHandler,
     vue: VueFileHandler,
     svelte: SvelteFileHandler,
+    glimmer: GlimmerFileHandler,
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
@@ -801,6 +803,7 @@ impl Features {
             astro: AstroFileHandler {},
             svelte: SvelteFileHandler {},
             vue: VueFileHandler {},
+            glimmer: GlimmerFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
@@ -817,6 +820,7 @@ impl Features {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
+                EmbeddingKind::Glimmer => self.glimmer.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),

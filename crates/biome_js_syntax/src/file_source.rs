@@ -123,6 +123,7 @@ pub enum EmbeddingKind {
     Astro,
     Vue,
     Svelte,
+    Glimmer,
     #[default]
     None,
 }
@@ -136,6 +137,9 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte)
+    }
+    pub const fn is_glimmer(&self) -> bool {
+        matches!(self, Self::Glimmer)
     }
 }
 
@@ -212,6 +216,16 @@ impl JsFileSource {
     /// Svelte file definition
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(EmbeddingKind::Svelte)
+    }
+
+    /// GJS file definition (JavaScript + Glimmer templates)
+    pub fn gjs() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Glimmer)
+    }
+
+    /// GTS file definition (TypeScript + Glimmer templates)
+    pub fn gts() -> Self {
+        Self::ts().with_embedding_kind(EmbeddingKind::Glimmer)
     }
 
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
@@ -343,6 +357,9 @@ impl JsFileSource {
             "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            // Glimmer.js files
+            "gjs" => Ok(Self::gjs()),
+            "gts" => Ok(Self::gts()),
 
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -376,6 +393,9 @@ impl JsFileSource {
             "vue" | "vuejs" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            // Glimmer.js files
+            "glimmer-js" | "gjs" => Ok(Self::gjs()),
+            "glimmer-ts" | "gts" => Ok(Self::gts()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
