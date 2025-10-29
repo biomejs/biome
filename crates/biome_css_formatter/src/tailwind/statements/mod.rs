@@ -5,6 +5,7 @@ pub(crate) mod config_at_rule;
 pub(crate) mod custom_variant_at_rule;
 pub(crate) mod plugin_at_rule;
 pub(crate) mod reference_at_rule;
+pub(crate) mod slot_at_rule;
 pub(crate) mod source_at_rule;
 pub(crate) mod theme_at_rule;
 pub(crate) mod utility_at_rule;

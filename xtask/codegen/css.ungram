@@ -660,6 +660,7 @@ AnyCssAtRule =
 	| TwReferenceAtRule
 	| TwConfigAtRule
 	| TwPluginAtRule
+	| TwSlotAtRule
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
@@ -1975,3 +1976,8 @@ TwPluginAtRule =
   name: CssString
   block: AnyCssDeclarationBlock?
   ';'?
+
+// Tailwind 4.0 @slot directive
+TwSlotAtRule =
+	'slot'
+	';'

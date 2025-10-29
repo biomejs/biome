@@ -939,6 +939,7 @@ impl<'src> CssLexer<'src> {
             b"reference" => REFERENCE_KW,
             b"config" => CONFIG_KW,
             b"plugin" => PLUGIN_KW,
+            b"slot" => SLOT_KW,
             _ => IDENT,
         }
     }

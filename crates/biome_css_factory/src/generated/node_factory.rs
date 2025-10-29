@@ -2503,6 +2503,15 @@ pub fn tw_reference_at_rule(
         ],
     ))
 }
+pub fn tw_slot_at_rule(slot_token: SyntaxToken, semicolon_token: SyntaxToken) -> TwSlotAtRule {
+    TwSlotAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SLOT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(slot_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn tw_source_at_rule(
     source_token: SyntaxToken,
     path: CssString,
