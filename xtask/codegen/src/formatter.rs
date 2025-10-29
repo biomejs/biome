@@ -565,6 +565,7 @@ enum NodeDialect {
     Graphql,
     Html,
     Astro,
+    Glimmer,
     Svelte,
     Tailwind,
 }
@@ -598,6 +599,7 @@ impl NodeDialect {
             Self::Graphql => "graphql",
             Self::Html => "html",
             Self::Astro => "astro",
+            Self::Glimmer => "glimmer",
             Self::Svelte => "svelte",
             Self::Tailwind => "tailwind",
         }
@@ -614,6 +616,7 @@ impl NodeDialect {
             "Graphql" => Self::Graphql,
             "Html" => Self::Html,
             "Astro" => Self::Astro,
+            "Glimmer" => Self::Glimmer,
             "Svelte" => Self::Svelte,
             "Tw" => Self::Tailwind,
             _ => {
