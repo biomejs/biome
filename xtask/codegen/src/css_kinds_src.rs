@@ -129,6 +129,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "config",
         "plugin",
         "slot",
+        "inline",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -514,6 +515,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_VALUE_THEME_REFERENCE",
         "TW_FUNCTIONAL_UTILITY_NAME",
         "TW_CUSTOM_VARIANT_SHORTHAND",
+        "TW_SOURCE_INLINE",
         // Unknowns
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",

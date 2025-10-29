@@ -213,6 +213,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "TwReferenceAtRule" => lang::TwReferenceAtRule::KIND_SET.iter().next(),
         "TwSlotAtRule" => lang::TwSlotAtRule::KIND_SET.iter().next(),
         "TwSourceAtRule" => lang::TwSourceAtRule::KIND_SET.iter().next(),
+        "TwSourceInline" => lang::TwSourceInline::KIND_SET.iter().next(),
         "TwThemeAtRule" => lang::TwThemeAtRule::KIND_SET.iter().next(),
         "TwUtilityAtRule" => lang::TwUtilityAtRule::KIND_SET.iter().next(),
         "TwValueThemeReference" => lang::TwValueThemeReference::KIND_SET.iter().next(),
