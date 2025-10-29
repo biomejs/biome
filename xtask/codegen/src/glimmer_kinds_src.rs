@@ -4,9 +4,9 @@ pub const GLIMMER_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[
         ("{{", "L_CURLY2"),
         ("}}", "R_CURLY2"),
+        ("/>", "SELF_CLOSING"),
         ("<", "L_ANGLE"),
         (">", "R_ANGLE"),
-        ("/>", "SELF_CLOSING"),
         ("/", "SLASH"),
         ("#", "HASH"),
         ("@", "AT"),
@@ -45,10 +45,12 @@ pub const GLIMMER_KINDS_SRC: KindsSrc = KindsSrc {
         "GLIMMER_OPENING_ELEMENT",
         "GLIMMER_CLOSING_ELEMENT",
         "GLIMMER_ATTRIBUTE",
+        "GLIMMER_NAMED_ARGUMENT",
         "GLIMMER_ATTRIBUTE_LIST",
         "GLIMMER_ELEMENT_MODIFIER_STATEMENT",
         "GLIMMER_MODIFIER_LIST",
         "GLIMMER_CONCAT_STATEMENT",
+        "GLIMMER_CONCAT_PART_LIST",
         // Block parts
         "GLIMMER_BLOCK_OPENING",
         "GLIMMER_BLOCK",

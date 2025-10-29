@@ -80,11 +80,22 @@ GlimmerClosingElement =
 	name: GlimmerPathExpression
 	'>'
 
-GlimmerAttributeList = GlimmerAttribute*
+GlimmerAttributeList = AnyGlimmerAttribute*
 
-// @arg={{value}} or class="foo"
+AnyGlimmerAttribute =
+	GlimmerAttribute
+	| GlimmerNamedArgument
+
+// class="foo"
 GlimmerAttribute =
-	name: (GlimmerIdentifier | '@' GlimmerIdentifier)
+	name: GlimmerIdentifier
+	'='
+	value: AnyGlimmerAttributeValue
+
+// @arg={{value}}
+GlimmerNamedArgument =
+	'@'
+	name: GlimmerIdentifier
 	'='
 	value: AnyGlimmerAttributeValue
 
@@ -96,7 +107,13 @@ AnyGlimmerAttributeValue =
 
 // class="foo {{bar}}"
 GlimmerConcatStatement =
-	parts: (GlimmerTextNode | GlimmerMustacheStatement)+
+	parts: GlimmerConcatPartList
+
+GlimmerConcatPartList = AnyGlimmerConcatPart*
+
+AnyGlimmerConcatPart =
+	GlimmerTextNode
+	| GlimmerMustacheStatement
 
 ///////////////
 // MUSTACHE STATEMENTS
@@ -131,13 +148,11 @@ GlimmerBlockOpening =
 
 // Block of statements (inside {{#if}} etc)
 GlimmerBlock =
-	params: GlimmerBlockParamList?
+	block_params: GlimmerBlockParamList
 	statements: GlimmerStatementList
 
-GlimmerBlockParamList =
-	'|'
-	params: (GlimmerIdentifier (',' GlimmerIdentifier)*)?
-	'|'
+// |item|
+GlimmerBlockParamList = GlimmerIdentifier*
 
 // {{else}} or {{else if}}
 GlimmerBlockInverse =
@@ -188,7 +203,7 @@ AnyGlimmerCallable =
 // this.count or @arg or someHelper
 GlimmerPathExpression =
 	head: AnyGlimmerPathHead
-	tail: GlimmerPathTail?
+	tail: GlimmerPathTail
 
 AnyGlimmerPathHead =
 	GlimmerThisHead
@@ -196,7 +211,7 @@ AnyGlimmerPathHead =
 	| GlimmerVarHead
 
 // 'this'
-GlimmerThisHead = 'this'
+GlimmerThisHead = value: 'this'
 
 // '@arg'
 GlimmerAtHead = '@' name: GlimmerIdentifier
@@ -204,8 +219,8 @@ GlimmerAtHead = '@' name: GlimmerIdentifier
 // 'someVar'
 GlimmerVarHead = name: GlimmerIdentifier
 
-// .foo.bar.baz
-GlimmerPathTail = ('.' GlimmerIdentifier)+
+// .foo.bar.baz (the .foo .bar .baz part)
+GlimmerPathTail = GlimmerIdentifier*
 
 // (helper arg1 arg2 key=value)
 GlimmerSubExpression =
@@ -223,7 +238,7 @@ GlimmerSubExpression =
 GlimmerHash =
 	pairs: GlimmerHashPairList
 
-GlimmerHashPairList = GlimmerHashPair+
+GlimmerHashPairList = GlimmerHashPair*
 
 GlimmerHashPair =
 	key: GlimmerIdentifier
