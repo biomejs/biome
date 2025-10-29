@@ -11,7 +11,7 @@ use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
 #[derive(Debug, Clone)]
 pub struct HtmlFormatOptions {
-    /// The file source (HTML, Svelte, Astro, or Vue).
+    /// The file source.
     file_source: HtmlFileSource,
 
     /// The indent style.

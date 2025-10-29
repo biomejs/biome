@@ -726,11 +726,8 @@ pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
 
 /// Whether a tag should be lowercased in the current formatting context.
 ///
-/// Returns true only for canonical HTML tags in pure HTML files (.html).
-/// Component frameworks (Svelte, Astro, Vue) preserve tag name casing.
-///
-/// This combines file source checking with canonicality checking to provide
-/// a single decision point for tag lowercasing behavior.
+/// Returns `true` only for canonical HTML tags in pure HTML files (.html).
+/// Component frameworks preserve tag name casing.
 pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
     f.options().file_source().is_html() && is_canonical_html_tag(tag_name)
 }
