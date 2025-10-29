@@ -846,13 +846,6 @@ fn get_node_concept(
                 "TW_CANDIDATE" => NodeConcept::Expression,
                 _ => NodeConcept::Auxiliary,
             },
-
-            LanguageKind::Glimmer => match name {
-                _ if name.ends_with("Statement") => NodeConcept::Statement,
-                _ if name.ends_with("Expression") => NodeConcept::Expression,
-                _ if name.ends_with("Literal") => NodeConcept::Value,
-                _ => NodeConcept::Auxiliary,
-            },
         }
     }
 }
@@ -920,7 +913,6 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatter",
             Self::Markdown => "DemoFormatter",
             Self::Tailwind => "TailwindFormatter",
-            Self::Glimmer => "GlimmerFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -937,7 +929,6 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatContext",
             Self::Markdown => "DemoFormatterContext",
             Self::Tailwind => "TailwindFormatContext",
-            Self::Glimmer => "GlimmerFormatContext",
         };
 
         Ident::new(name, Span::call_site())

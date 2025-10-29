@@ -227,21 +227,6 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 }
             }
         }
-        LanguageKind::Glimmer => {
-            quote! {
-                pub const fn to_string(&self) -> Option<&'static str> {
-                    let tok = match self {
-                        #(#punctuation => #punctuation_strings,)*
-                        #(#full_keywords => #all_keyword_to_strings,)*
-                        GLIMMER_STRING_LITERAL => "string literal",
-                        GLIMMER_NUMBER_LITERAL => "number literal",
-                        GLIMMER_TEXT => "text",
-                        _ => return None,
-                    };
-                    Some(tok)
-                }
-            }
-        }
     };
 
     let keyword_impl = if all_keywords.is_empty() {
