@@ -247,3 +247,16 @@ pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, TW_REFERENCE_AT_RULE))
 }
+
+// @slot;
+pub(crate) fn parse_slot_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![slot]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![slot]);
+    p.expect(T![;]);
+
+    Present(m.complete(p, TW_SLOT_AT_RULE))
+}
