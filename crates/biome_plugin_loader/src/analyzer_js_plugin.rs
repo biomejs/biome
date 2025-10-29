@@ -108,7 +108,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .call_function(
                 &plugin.entrypoint,
                 &JsValue::undefined(),
-                &[JsValue::String(JsString::from(path.as_str()))],
+                &[JsValue::from(JsString::from(path.as_str()))],
             )
             .map_or_else(
                 |err| {

@@ -11,7 +11,7 @@ use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlag
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
 use biome_unicode_table::lookup_byte;
-use std::ops::Add;
+use std::ops::{Add, AddAssign};
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -166,7 +166,9 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume an embedded language in its entirety. Stops immediately before the closing tag.
+    /// Consume an embedded language in its entirety. Stops immediately:
+    /// - before the closing tag
+    /// - before the Astro fence, if applicable
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
@@ -175,8 +177,14 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let end_tag = lang.end_tag();
+        // double, single, template
+        let mut quotes_seen = QuotesSeen::new();
         self.assert_current_char_boundary();
         while let Some(byte) = self.current_byte() {
+            if context == HtmlLexContext::AstroFencedCodeBlock {
+                quotes_seen.check_byte(byte);
+            }
+
             let end = self.position + end_tag.len();
             let both_ends_at_char_boundaries =
                 self.source.is_char_boundary(self.position) && self.source.is_char_boundary(end);
@@ -187,7 +195,10 @@ impl<'src> HtmlLexer<'src> {
             }
             self.advance_byte_or_char(byte);
 
-            if context == HtmlLexContext::AstroFencedCodeBlock && self.at_frontmatter_edge() {
+            if context == HtmlLexContext::AstroFencedCodeBlock
+                && self.at_frontmatter_edge()
+                && quotes_seen.is_empty()
+            {
                 return HTML_LITERAL;
             }
         }
@@ -221,22 +232,33 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_single_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'}' if !self.at_closing_double_text_expression() => self.consume_byte(T!['}']),
-            b'<' => self.consume_byte(T![<]),
-            _ => {
-                while let Some(current) = self.current_byte() {
-                    match current {
-                        b'}' if !self.at_closing_double_text_expression() => break,
-                        _ => {
-                            self.advance(1);
-                        }
+    fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
+        let mut brackets_stack = 0;
+        if self.prev_byte() == Some(b'{') {
+            brackets_stack += 1;
+        }
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'}' => {
+                    brackets_stack -= 1;
+                    if brackets_stack == 0 {
+                        break;
+                    } else {
+                        self.advance(1);
                     }
                 }
-                HTML_LITERAL
+                b'{' => {
+                    brackets_stack += 1;
+                    self.advance(1);
+                }
+
+                _ => {
+                    self.advance(1);
+                }
             }
         }
+
+        HTML_LITERAL
     }
 
     fn consume_comment(&mut self) -> HtmlSyntaxKind {
@@ -767,7 +789,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     }
                     HtmlLexContext::TextExpression(kind) => match kind {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
-                        TextExpressionKind::Single => self.consume_single_text_expression(current),
+                        TextExpressionKind::Single => self.consume_single_text_expression(),
                     },
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {
@@ -886,5 +908,90 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
+    }
+}
+
+struct QuotesSeen(u16, u16, u16);
+
+impl QuotesSeen {
+    fn new() -> Self {
+        Self(0, 0, 0)
+    }
+
+    /// It checks the given byte. If it's a quote, it's tracked
+    fn check_byte(&mut self, byte: u8) {
+        match byte {
+            b'"' => self.track_double(),
+            b'\'' => self.track_single(),
+            b'`' => self.track_template(),
+            _ => {}
+        }
+    }
+
+    /// It adds a single quote if single quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_single(&mut self) {
+        if (self.0 == 0 && (self.1 > 0 || self.2 > 0))
+            || (self.0 == 0 && self.1 == 0 && self.2 == 0)
+        {
+            self.0.add_assign(1);
+        } else {
+            self.0 = self.0.saturating_sub(1);
+        }
+    }
+    /// It adds a double quote if double quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_double(&mut self) {
+        if (self.1 == 0 && (self.0 > 0 || self.2 > 0))
+            || (self.1 == 0 && self.0 == 0 && self.2 == 0)
+        {
+            self.1.add_assign(1);
+        } else {
+            self.1 = self.1.saturating_sub(1);
+        }
+    }
+
+    /// It adds a template quote if template quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_template(&mut self) {
+        if (self.2 == 0 && (self.0 > 0 || self.1 > 0))
+            || (self.2 == 0 && self.0 == 0 && self.1 == 0)
+        {
+            self.2.add_assign(1);
+        } else {
+            self.2 = self.2.saturating_sub(1);
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.0 == 0 && self.1 == 0 && self.2 == 0
+    }
+}
+
+#[cfg(test)]
+mod quotes_seen {
+    use crate::lexer::QuotesSeen;
+
+    fn track(source: &str, quotes_seen: &mut QuotesSeen) {
+        for char in source.as_bytes() {
+            quotes_seen.check_byte(*char);
+        }
+    }
+
+    #[test]
+    fn is_not_empty() {
+        let source = r#"'"`"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(!quotes_seen.is_empty());
+
+        let source = r#"`'""'"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(!quotes_seen.is_empty());
+    }
+    #[test]
+    fn is_empty() {
+        let source = r#" '"``"' "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
     }
 }

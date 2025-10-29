@@ -312,6 +312,13 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             .ok();
 
         Present(m.complete(p, HTML_ATTRIBUTE))
+    } else if p.at(T!['{']) {
+        m.abandon(p);
+        HtmlSyntaxFeatures::SingleTextExpressions.parse_exclusive_syntax(
+            p,
+            |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+        )
     } else {
         parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
         if p.at(T![=]) {
@@ -324,7 +331,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!['{'])
+    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{']])
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -563,7 +570,7 @@ impl TextExpression {
                         HtmlLexContext::TextExpression(self.kind),
                     );
                 } else {
-                    p.bump_remap_any_with_context(HtmlLexContext::TextExpression(self.kind));
+                    p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
                 }
             }
             TextExpressionKind::Double => {
