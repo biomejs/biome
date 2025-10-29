@@ -12,9 +12,37 @@ use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
+use regex::Regex;
+use std::sync::LazyLock;
+
+/// Regex to match Glimmer <template> tags
+/// Simple pattern: <template> never has attributes and never nests
+pub static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"<template>[\s\S]*?</template>")
+        .expect("Invalid Glimmer template regex")
+});
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct GlimmerFileHandler;
+
+impl GlimmerFileHandler {
+    /// Extract the JavaScript/TypeScript code with <template> blocks removed
+    ///
+    /// This allows us to parse the JS/TS part of GJS/GTS files without
+    /// the template syntax interfering. Templates are replaced with whitespace
+    /// to maintain correct offsets.
+    pub fn extract_js_content(text: &str) -> String {
+        GLIMMER_TEMPLATE.replace_all(text, |caps: &regex::Captures| {
+            // Replace template content with equivalent whitespace to maintain offsets
+            " ".repeat(caps.get(0).unwrap().as_str().len())
+        }).to_string()
+    }
+
+    /// Check if the file contains any <template> blocks
+    pub fn has_templates(text: &str) -> bool {
+        GLIMMER_TEMPLATE.is_match(text)
+    }
+}
 
 impl ExtensionHandler for GlimmerFileHandler {
     fn capabilities(&self) -> Capabilities {
@@ -57,6 +85,9 @@ impl ExtensionHandler for GlimmerFileHandler {
 }
 
 /// Parse GJS/GTS file as JavaScript/TypeScript
+/// 
+/// Templates are stripped out before parsing to avoid syntax errors.
+/// In the future, templates will be parsed separately with the HTML parser.
 fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
@@ -76,8 +107,11 @@ fn parse(
             JsFileSource::gjs()
         });
 
+    // Extract JS content with templates replaced by whitespace
+    let js_content = GlimmerFileHandler::extract_js_content(text);
+
     let parse = parse_js_with_cache(
-        text,
+        &js_content,
         js_file_source,
         JsParserOptions::default(),
         cache,

@@ -154,6 +154,10 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();
             }
+            HtmlVariant::Glimmer => {
+                // Glimmer uses double curlies: {{expression}}
+                options = options.with_double_text_expression();
+            }
         }
 
         options
