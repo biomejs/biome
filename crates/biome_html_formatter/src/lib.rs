@@ -18,6 +18,7 @@ mod comments;
 pub mod context;
 mod cst;
 mod generated;
+mod glimmer;
 mod html;
 pub(crate) mod prelude;
 pub(crate) mod separated;
