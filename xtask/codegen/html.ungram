@@ -208,3 +208,25 @@ HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
 HtmlEmbeddedContent = value: 'html_literal'
+
+// ==================================
+// Glimmer Template Syntax
+// ==================================
+
+// Glimmer mustache expression: {{this.count}}
+GlimmerMustacheExpression =
+'{{'
+path: GlimmerPath
+'}}'
+
+// Glimmer path: this.foo, @arg, or helper
+GlimmerPath =
+segments: GlimmerPathSegmentList
+
+GlimmerPathSegmentList = GlimmerPathSegment*
+
+GlimmerPathSegment =
+'this'
+| '@'
+| 'ident'
+| '.'

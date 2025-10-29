@@ -15,13 +15,21 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("}", "R_CURLY"),
         ("{{", "L_DOUBLE_CURLY"),
         ("}}", "R_DOUBLE_CURLY"),
+        // Svelte-specific tokens
         ("{@", "SV_CURLY_AT"),
         ("{#", "SV_CURLY_HASH"),
         ("{/", "SV_CURLY_SLASH"),
         ("{:", "SV_CURLY_COLON"),
+        // Glimmer-specific tokens
+        ("#", "HASH"),
+        ("@", "AT"),
+        (".", "DOT"),
+        ("(", "L_PAREN"),
+        (")", "R_PAREN"),
+        ("|", "PIPE"),
         (",", "COMMA"),
     ],
-    keywords: &["null", "true", "false", "doctype", "html", "debug"],
+    keywords: &["null", "true", "false", "doctype", "html", "debug", "this", "undefined", "else"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
         "ERROR_TOKEN",
@@ -60,6 +68,11 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_DEBUG_BLOCK",
         "SVELTE_BINDING_LIST",
         "SVELTE_NAME",
+        // Glimmer nodes
+        "GLIMMER_MUSTACHE_EXPRESSION",
+        "GLIMMER_PATH",
+        "GLIMMER_PATH_SEGMENT_LIST",
+        "GLIMMER_PATH_SEGMENT",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

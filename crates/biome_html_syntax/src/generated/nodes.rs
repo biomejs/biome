@@ -100,6 +100,136 @@ pub struct AstroFrontmatterElementFields {
     pub r_fence_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerMustacheExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerMustacheExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerMustacheExpressionFields {
+        GlimmerMustacheExpressionFields {
+            l_double_curly_token: self.l_double_curly_token(),
+            path: self.path(),
+            r_double_curly_token: self.r_double_curly_token(),
+        }
+    }
+    pub fn l_double_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn path(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_double_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GlimmerMustacheExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerMustacheExpressionFields {
+    pub l_double_curly_token: SyntaxResult<SyntaxToken>,
+    pub path: SyntaxResult<GlimmerPath>,
+    pub r_double_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerPath {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerPath {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerPathFields {
+        GlimmerPathFields {
+            segments: self.segments(),
+        }
+    }
+    pub fn segments(&self) -> GlimmerPathSegmentList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerPath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerPathFields {
+    pub segments: GlimmerPathSegmentList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerPathSegment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerPathSegment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerPathSegmentFields {
+        GlimmerPathSegmentFields {
+            this_token: self.this_token(),
+            at_token: self.at_token(),
+            ident_token: self.ident_token(),
+            dot_token: self.dot_token(),
+        }
+    }
+    pub fn this_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn ident_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn dot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerPathSegment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerPathSegmentFields {
+    pub this_token: SyntaxResult<SyntaxToken>,
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub ident_token: SyntaxResult<SyntaxToken>,
+    pub dot_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1225,6 +1355,161 @@ impl From<AstroFrontmatterElement> for SyntaxNode {
 }
 impl From<AstroFrontmatterElement> for SyntaxElement {
     fn from(n: AstroFrontmatterElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerMustacheExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_MUSTACHE_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_MUSTACHE_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerMustacheExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerMustacheExpression")
+                .field(
+                    "l_double_curly_token",
+                    &support::DebugSyntaxResult(self.l_double_curly_token()),
+                )
+                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field(
+                    "r_double_curly_token",
+                    &support::DebugSyntaxResult(self.r_double_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerMustacheExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerMustacheExpression> for SyntaxNode {
+    fn from(n: GlimmerMustacheExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerMustacheExpression> for SyntaxElement {
+    fn from(n: GlimmerMustacheExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerPath {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerPath")
+                .field("segments", &self.segments())
+                .finish()
+        } else {
+            f.debug_struct("GlimmerPath").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerPath> for SyntaxNode {
+    fn from(n: GlimmerPath) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerPath> for SyntaxElement {
+    fn from(n: GlimmerPath) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerPathSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH_SEGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH_SEGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerPathSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerPathSegment")
+                .field("this_token", &support::DebugSyntaxResult(self.this_token()))
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "ident_token",
+                    &support::DebugSyntaxResult(self.ident_token()),
+                )
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .finish()
+        } else {
+            f.debug_struct("GlimmerPathSegment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerPathSegment> for SyntaxNode {
+    fn from(n: GlimmerPathSegment) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerPathSegment> for SyntaxElement {
+    fn from(n: GlimmerPathSegment) -> Self {
         n.syntax.into()
     }
 }
@@ -2859,6 +3144,21 @@ impl std::fmt::Display for AstroFrontmatterElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for GlimmerMustacheExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerPathSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for HtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -3291,6 +3591,88 @@ impl From<SvelteBogusBlock> for SyntaxElement {
     }
 }
 biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock }
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GlimmerPathSegmentList {
+    syntax_list: SyntaxList,
+}
+impl GlimmerPathSegmentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GlimmerPathSegmentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH_SEGMENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH_SEGMENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GlimmerPathSegmentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for GlimmerPathSegmentList {
+    type Language = Language;
+    type Node = GlimmerPathSegment;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GlimmerPathSegmentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GlimmerPathSegmentList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &GlimmerPathSegmentList {
+    type Item = GlimmerPathSegment;
+    type IntoIter = AstNodeListIterator<Language, GlimmerPathSegment>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for GlimmerPathSegmentList {
+    type Item = GlimmerPathSegment;
+    type IntoIter = AstNodeListIterator<Language, GlimmerPathSegment>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,

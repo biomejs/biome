@@ -24,6 +24,19 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerMustacheExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH => {
+                    let $pattern = unsafe { $crate::GlimmerPath::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT => {
+                    let $pattern = unsafe { $crate::GlimmerPathSegment::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::HtmlAttribute::new_unchecked(node) };
                     $body
@@ -123,6 +136,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteBogusBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerPathSegmentList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

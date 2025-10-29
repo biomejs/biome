@@ -40,6 +40,42 @@ pub fn astro_frontmatter_element(
         ],
     ))
 }
+pub fn glimmer_mustache_expression(
+    l_double_curly_token: SyntaxToken,
+    path: GlimmerPath,
+    r_double_curly_token: SyntaxToken,
+) -> GlimmerMustacheExpression {
+    GlimmerMustacheExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
+    ))
+}
+pub fn glimmer_path(segments: GlimmerPathSegmentList) -> GlimmerPath {
+    GlimmerPath::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_PATH,
+        [Some(SyntaxElement::Node(segments.into_syntax()))],
+    ))
+}
+pub fn glimmer_path_segment(
+    this_token: SyntaxToken,
+    at_token: SyntaxToken,
+    ident_token: SyntaxToken,
+    dot_token: SyntaxToken,
+) -> GlimmerPathSegment {
+    GlimmerPathSegment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_PATH_SEGMENT,
+        [
+            Some(SyntaxElement::Token(this_token)),
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(ident_token)),
+            Some(SyntaxElement::Token(dot_token)),
+        ],
+    ))
+}
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
         name,
@@ -367,6 +403,18 @@ pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
         [Some(SyntaxElement::Token(svelte_ident_token))],
+    ))
+}
+pub fn glimmer_path_segment_list<I>(items: I) -> GlimmerPathSegmentList
+where
+    I: IntoIterator<Item = GlimmerPathSegment>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GlimmerPathSegmentList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList

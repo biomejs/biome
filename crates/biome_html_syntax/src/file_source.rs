@@ -31,6 +31,8 @@ pub enum HtmlVariant {
     Vue,
     /// Use this variant to parse a Svelte file
     Svelte,
+    /// Use this variant to parse Glimmer templates (from GJS/GTS files)
+    Glimmer,
 }
 
 impl Default for HtmlVariant {
@@ -43,6 +45,12 @@ impl HtmlFileSource {
     pub fn html() -> Self {
         Self {
             variant: HtmlVariant::default(),
+        }
+    }
+
+    pub fn glimmer() -> Self {
+        Self {
+            variant: HtmlVariant::Glimmer,
         }
     }
 
@@ -62,6 +70,10 @@ impl HtmlFileSource {
 
     pub const fn is_astro(&self) -> bool {
         matches!(self.variant, HtmlVariant::Astro)
+    }
+
+    pub const fn is_glimmer(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Glimmer)
     }
 
     pub fn variant(&self) -> &HtmlVariant {
