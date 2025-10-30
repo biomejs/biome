@@ -22,22 +22,43 @@ pub static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
         .expect("Invalid Glimmer template regex")
 });
 
+/// Information about a template's position and context in the original source
+#[derive(Debug)]
+struct TemplateInfo {
+    template_text: String,
+    /// Whether this template had a semicolon after it in the original source
+    has_trailing_semicolon: bool,
+}
+
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct GlimmerFileHandler;
 
 impl GlimmerFileHandler {
+
     /// Extract the JavaScript/TypeScript code with <template> blocks replaced by markers
     ///
     /// Templates are replaced with markers that work in their specific contexts.
     /// We use a simple identifier-based approach that's valid everywhere.
-    pub fn extract_js_content(text: &str) -> String {
+    /// Returns the extracted JS and info about each template.
+    fn extract_js_content_with_info(text: &str) -> (String, Vec<TemplateInfo>) {
         let mut result = String::new();
         let mut last_end = 0;
         let mut template_index = 0;
+        let mut template_infos = Vec::new();
         
         for template_match in GLIMMER_TEMPLATE.find_iter(text) {
             // Add JS before this template
             result.push_str(&text[last_end..template_match.start()]);
+            
+            // Check if there's a semicolon after this template in the original
+            let after_template_pos = template_match.end();
+            let has_trailing_semicolon = after_template_pos < text.len() 
+                && text[after_template_pos..].trim_start().starts_with(';');
+            
+            template_infos.push(TemplateInfo {
+                template_text: template_match.as_str().to_string(),
+                has_trailing_semicolon,
+            });
             
             // Use an identifier that will be treated as:
             // - In class body: field declaration `__BIOME_GLIMMER_TEMPLATE_0__;`
@@ -50,29 +71,41 @@ impl GlimmerFileHandler {
         
         // Add remaining JS after last template
         result.push_str(&text[last_end..]);
-        result
+        (result, template_infos)
+    }
+
+    /// Extract the JavaScript/TypeScript code with <template> blocks replaced by markers
+    ///
+    /// Templates are replaced with markers that work in their specific contexts.
+    /// We use a simple identifier-based approach that's valid everywhere.
+    pub fn extract_js_content(text: &str) -> String {
+        Self::extract_js_content_with_info(text).0
     }
 
     /// Reconstruct the file with formatted JS and original templates
     ///
     /// Replaces the identifier markers with the original template blocks.
+    /// Uses original source info to determine if semicolons should be kept.
     pub fn output(input: &str, formatted_js: &str) -> String {
-        let mut templates: Vec<String> = Vec::new();
+        let (_, template_infos) = Self::extract_js_content_with_info(input);
         
-        // Extract all templates in order
-        for template_match in GLIMMER_TEMPLATE.find_iter(input) {
-            templates.push(template_match.as_str().to_string());
-        }
-        
-        if templates.is_empty() {
+        if template_infos.is_empty() {
             return formatted_js.to_string();
         }
         
         // Replace markers with templates
         let mut result = formatted_js.to_string();
-        for (idx, template) in templates.iter().enumerate() {
+        for (idx, template_info) in template_infos.iter().enumerate() {
             let marker = format!("__BIOME_GLIMMER_TEMPLATE_{idx}__");
-            result = result.replace(&marker, template);
+            let marker_with_semi = format!("{marker};");
+            
+            // If the formatted output has a semicolon but original didn't, remove it
+            if result.contains(&marker_with_semi) && !template_info.has_trailing_semicolon {
+                result = result.replace(&marker_with_semi, &template_info.template_text);
+            } else {
+                // Otherwise just replace the marker (keeps semicolons if they were there)
+                result = result.replace(&marker, &template_info.template_text);
+            }
         }
         
         result

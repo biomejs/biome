@@ -19,5 +19,5 @@ export default class MyComponent extends Component {
       <main>Content here</main>
       <Footer />
     </div>
-  </template>;
+  </template>
 }
