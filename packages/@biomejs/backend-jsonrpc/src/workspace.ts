@@ -1661,6 +1661,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow continue statements.
+	 */
+	noContinue?: RuleConfiguration_for_NoContinueOptions;
+	/**
 	 * Restrict imports of deprecated exports.
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
@@ -3046,6 +3050,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoContinueOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoContinueOptions;
 export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDeprecatedImportsOptions;
@@ -5462,6 +5469,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 * Rule's options
 	 */
 	options: UseYieldOptions;
+}
+export interface RuleWithOptions_for_NoContinueOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoContinueOptions;
 }
 export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
 	/**
@@ -8245,6 +8262,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptySourceOptions {
@@ -9046,6 +9064,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
