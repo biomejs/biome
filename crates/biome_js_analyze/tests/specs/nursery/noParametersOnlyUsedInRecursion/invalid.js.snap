@@ -110,6 +110,38 @@ function fnCondNested(n, acc) {
     return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
 }
 
+// Optional chaining in class method
+class CounterOptional {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.count(n - 1, acc);
+    }
+}
+
+// Optional chaining in object method
+const objOptional = {
+    count(n, step) {
+        if (n === 0) return 0;
+        return this?.count(n - step, step);
+    }
+};
+
+// Computed member with string literal
+class CounterComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this["count"](n - 1, acc);
+    }
+}
+
+// Optional chaining with computed member
+class CounterOptionalComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.["count"](n - 1, acc);
+    }
+}
+
 ```
 
 # Diagnostics
@@ -650,6 +682,130 @@ invalid.js:102:26 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
         104 │ + ····return·fnCondNested(n·-·1,·n·>·5·?·(n·>·10·?·_acc·:·0)·:·0);
     105 105 │   }
     106 106 │   
+  
+
+```
+
+```
+invalid.js:109:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    107 │ // Optional chaining in class method
+    108 │ class CounterOptional {
+  > 109 │     count(n, acc) {
+        │              ^^^
+    110 │         if (n === 0) return 0;
+    111 │         return this?.count(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    107 107 │   // Optional chaining in class method
+    108 108 │   class CounterOptional {
+    109     │ - ····count(n,·acc)·{
+        109 │ + ····count(n,·_acc)·{
+    110 110 │           if (n === 0) return 0;
+    111     │ - ········return·this?.count(n·-·1,·acc);
+        111 │ + ········return·this?.count(n·-·1,·_acc);
+    112 112 │       }
+    113 113 │   }
+  
+
+```
+
+```
+invalid.js:117:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    115 │ // Optional chaining in object method
+    116 │ const objOptional = {
+  > 117 │     count(n, step) {
+        │              ^^^^
+    118 │         if (n === 0) return 0;
+    119 │         return this?.count(n - step, step);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend step with an underscore.
+  
+    115 115 │   // Optional chaining in object method
+    116 116 │   const objOptional = {
+    117     │ - ····count(n,·step)·{
+        117 │ + ····count(n,·_step)·{
+    118 118 │           if (n === 0) return 0;
+    119     │ - ········return·this?.count(n·-·step,·step);
+        119 │ + ········return·this?.count(n·-·_step,·_step);
+    120 120 │       }
+    121 121 │   };
+  
+
+```
+
+```
+invalid.js:125:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    123 │ // Computed member with string literal
+    124 │ class CounterComputed {
+  > 125 │     count(n, acc) {
+        │              ^^^
+    126 │         if (n === 0) return 0;
+    127 │         return this["count"](n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    123 123 │   // Computed member with string literal
+    124 124 │   class CounterComputed {
+    125     │ - ····count(n,·acc)·{
+        125 │ + ····count(n,·_acc)·{
+    126 126 │           if (n === 0) return 0;
+    127     │ - ········return·this["count"](n·-·1,·acc);
+        127 │ + ········return·this["count"](n·-·1,·_acc);
+    128 128 │       }
+    129 129 │   }
+  
+
+```
+
+```
+invalid.js:133:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    131 │ // Optional chaining with computed member
+    132 │ class CounterOptionalComputed {
+  > 133 │     count(n, acc) {
+        │              ^^^
+    134 │         if (n === 0) return 0;
+    135 │         return this?.["count"](n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    131 131 │   // Optional chaining with computed member
+    132 132 │   class CounterOptionalComputed {
+    133     │ - ····count(n,·acc)·{
+        133 │ + ····count(n,·_acc)·{
+    134 134 │           if (n === 0) return 0;
+    135     │ - ········return·this?.["count"](n·-·1,·acc);
+        135 │ + ········return·this?.["count"](n·-·1,·_acc);
+    136 136 │       }
+    137 137 │   }
   
 
 ```

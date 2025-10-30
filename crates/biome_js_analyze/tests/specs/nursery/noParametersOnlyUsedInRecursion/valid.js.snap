@@ -73,4 +73,22 @@ function fnValidCondReturn(n, acc) {
     return fnValidCondReturn(n - 1, acc * 2);
 }
 
+// Optional chaining with parameter used elsewhere
+class CounterValidOptional {
+    count(n, acc) {
+        console.log(acc);
+        if (n === 0) return 0;
+        return this?.count(n - 1, acc);
+    }
+}
+
+// Computed member with non-literal (should not match)
+class CounterNonLiteral {
+    count(n, acc) {
+        const methodName = "count";
+        if (n === 0) return 0;
+        return this[methodName](n - 1, acc);  // Won't be recognized as recursive
+    }
+}
+
 ```

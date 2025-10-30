@@ -335,7 +335,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
         return ref_id.name().ok().is_some_and(|n| n.text() == name.text());
     }
 
-    // Member expression: this.foo() or obj.foo()
+    // Member expression: this.foo() or this?.foo()
     if let Some(member) = expr.as_js_static_member_expression() {
         // Check if object is 'this' (for method calls)
         let is_this_call = member
@@ -355,6 +355,32 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
         });
 
         return member_name_matches;
+    }
+
+    // Computed member expression: this["foo"]() or this?.["foo"]()
+    if let Some(computed) = expr.as_js_computed_member_expression() {
+        // Check if object is 'this' (for method calls)
+        let is_this_call = computed
+            .object()
+            .ok()
+            .is_some_and(|obj| obj.as_js_this_expression().is_some());
+
+        if !is_this_call {
+            return false;
+        }
+
+        // Conservative approach: only handle string literal members
+        if let Ok(member_expr) = computed.member() {
+            if let Some(lit) = member_expr.as_any_js_literal_expression() {
+                if let Some(string_lit) = lit.as_js_string_literal_expression() {
+                    if let Ok(text) = string_lit.inner_string_text() {
+                        return text.text() == name.text();
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     false

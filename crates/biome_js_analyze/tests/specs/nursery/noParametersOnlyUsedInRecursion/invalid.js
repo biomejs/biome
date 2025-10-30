@@ -103,3 +103,35 @@ function fnCondNested(n, acc) {
     if (n === 0) return 0;
     return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
 }
+
+// Optional chaining in class method
+class CounterOptional {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.count(n - 1, acc);
+    }
+}
+
+// Optional chaining in object method
+const objOptional = {
+    count(n, step) {
+        if (n === 0) return 0;
+        return this?.count(n - step, step);
+    }
+};
+
+// Computed member with string literal
+class CounterComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this["count"](n - 1, acc);
+    }
+}
+
+// Optional chaining with computed member
+class CounterOptionalComputed {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this?.["count"](n - 1, acc);
+    }
+}
