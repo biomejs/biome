@@ -431,6 +431,18 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
             continue;
         }
 
+        // Logical operations: a && b, a || b, a ?? b
+        // Add both sides to worklist
+        if let Some(logical_expr) = current_expr.as_js_logical_expression() {
+            if let Ok(left) = logical_expr.left() {
+                to_check.push(left);
+            }
+            if let Ok(right) = logical_expr.right() {
+                to_check.push(right);
+            }
+            continue;
+        }
+
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {

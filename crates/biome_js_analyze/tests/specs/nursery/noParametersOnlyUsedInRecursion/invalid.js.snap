@@ -62,6 +62,30 @@ foo = (n, acc) => {
     return foo(n - 1, acc);
 };
 
+// Logical AND operator
+function fnAnd(n, acc) {
+    if (n === 0) return 0;
+    return fnAnd(n - 1, acc && true);
+}
+
+// Logical OR operator
+function fnOr(n, acc) {
+    if (n === 0) return 0;
+    return fnOr(n - 1, acc || 0);
+}
+
+// Nullish coalescing operator
+function fnNullish(n, acc) {
+    if (n === 0) return 0;
+    return fnNullish(n - 1, acc ?? 0);
+}
+
+// Nested logical operators
+function fnNested(n, acc) {
+    if (n === 0) return 0;
+    return fnNested(n - 1, (acc || 0) && true);
+}
+
 ```
 
 # Diagnostics
@@ -362,6 +386,126 @@ invalid.js:54:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
        56 │ + ····return·foo(n·-·1,·_acc);
     57 57 │   };
     58 58 │   
+  
+
+```
+
+```
+invalid.js:60:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    59 │ // Logical AND operator
+  > 60 │ function fnAnd(n, acc) {
+       │                   ^^^
+    61 │     if (n === 0) return 0;
+    62 │     return fnAnd(n - 1, acc && true);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    58 58 │   
+    59 59 │   // Logical AND operator
+    60    │ - function·fnAnd(n,·acc)·{
+       60 │ + function·fnAnd(n,·_acc)·{
+    61 61 │       if (n === 0) return 0;
+    62    │ - ····return·fnAnd(n·-·1,·acc·&&·true);
+       62 │ + ····return·fnAnd(n·-·1,·_acc·&&·true);
+    63 63 │   }
+    64 64 │   
+  
+
+```
+
+```
+invalid.js:66:18 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    65 │ // Logical OR operator
+  > 66 │ function fnOr(n, acc) {
+       │                  ^^^
+    67 │     if (n === 0) return 0;
+    68 │     return fnOr(n - 1, acc || 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    64 64 │   
+    65 65 │   // Logical OR operator
+    66    │ - function·fnOr(n,·acc)·{
+       66 │ + function·fnOr(n,·_acc)·{
+    67 67 │       if (n === 0) return 0;
+    68    │ - ····return·fnOr(n·-·1,·acc·||·0);
+       68 │ + ····return·fnOr(n·-·1,·_acc·||·0);
+    69 69 │   }
+    70 70 │   
+  
+
+```
+
+```
+invalid.js:72:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    71 │ // Nullish coalescing operator
+  > 72 │ function fnNullish(n, acc) {
+       │                       ^^^
+    73 │     if (n === 0) return 0;
+    74 │     return fnNullish(n - 1, acc ?? 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    70 70 │   
+    71 71 │   // Nullish coalescing operator
+    72    │ - function·fnNullish(n,·acc)·{
+       72 │ + function·fnNullish(n,·_acc)·{
+    73 73 │       if (n === 0) return 0;
+    74    │ - ····return·fnNullish(n·-·1,·acc·??·0);
+       74 │ + ····return·fnNullish(n·-·1,·_acc·??·0);
+    75 75 │   }
+    76 76 │   
+  
+
+```
+
+```
+invalid.js:78:22 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    77 │ // Nested logical operators
+  > 78 │ function fnNested(n, acc) {
+       │                      ^^^
+    79 │     if (n === 0) return 0;
+    80 │     return fnNested(n - 1, (acc || 0) && true);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    76 76 │   
+    77 77 │   // Nested logical operators
+    78    │ - function·fnNested(n,·acc)·{
+       78 │ + function·fnNested(n,·_acc)·{
+    79 79 │       if (n === 0) return 0;
+    80    │ - ····return·fnNested(n·-·1,·(acc·||·0)·&&·true);
+       80 │ + ····return·fnNested(n·-·1,·(_acc·||·0)·&&·true);
+    81 81 │   }
+    82 82 │   
   
 
 ```

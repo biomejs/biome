@@ -42,3 +42,15 @@ bar = (n, threshold) => {
     if (n > threshold) return threshold;
     return bar(n + 1, threshold);
 };
+
+// Parameter used in condition with logical operator
+function fnValidLogical(n, threshold) {
+    if (n && threshold) return n;
+    return fnValidLogical(n + 1, threshold);
+}
+
+// Parameter used in return with logical operator
+function fnValidReturn(n, acc) {
+    if (n === 0) return acc || 0;
+    return fnValidReturn(n - 1, acc);
+}

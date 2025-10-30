@@ -55,3 +55,27 @@ foo = (n, acc) => {
     if (n === 0) return 0;
     return foo(n - 1, acc);
 };
+
+// Logical AND operator
+function fnAnd(n, acc) {
+    if (n === 0) return 0;
+    return fnAnd(n - 1, acc && true);
+}
+
+// Logical OR operator
+function fnOr(n, acc) {
+    if (n === 0) return 0;
+    return fnOr(n - 1, acc || 0);
+}
+
+// Nullish coalescing operator
+function fnNullish(n, acc) {
+    if (n === 0) return 0;
+    return fnNullish(n - 1, acc ?? 0);
+}
+
+// Nested logical operators
+function fnNested(n, acc) {
+    if (n === 0) return 0;
+    return fnNested(n - 1, (acc || 0) && true);
+}
