@@ -386,14 +386,12 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
         }
 
         // Conservative approach: only handle string literal members
-        if let Ok(member_expr) = computed.member() {
-            if let Some(lit) = member_expr.as_any_js_literal_expression() {
-                if let Some(string_lit) = lit.as_js_string_literal_expression() {
-                    if let Ok(text) = string_lit.inner_string_text() {
-                        return text.text() == name.text();
-                    }
-                }
-            }
+        if let Ok(member_expr) = computed.member()
+            && let Some(lit) = member_expr.as_any_js_literal_expression()
+            && let Some(string_lit) = lit.as_js_string_literal_expression()
+            && let Ok(text) = string_lit.inner_string_text()
+        {
+            return text.text() == name.text();
         }
 
         return false;
