@@ -141,6 +141,7 @@ pub mod no_nonoctal_decimal_escape;
 pub mod no_octal_escape;
 pub mod no_parameter_assign;
 pub mod no_parameter_properties;
+pub mod no_parameters_only_used_in_recursion;
 pub mod no_positive_tabindex;
 pub mod no_precision_loss;
 pub mod no_private_imports;
