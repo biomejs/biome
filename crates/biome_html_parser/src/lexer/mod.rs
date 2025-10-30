@@ -910,58 +910,92 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
         }
     }
 }
-
-struct QuotesSeen(u16, u16, u16);
+struct QuotesSeen {
+    single: u16,
+    double: u16,
+    template: u16,
+    inside_comment: bool,
+    prev_byte: Option<u8>,
+}
 
 impl QuotesSeen {
     fn new() -> Self {
-        Self(0, 0, 0)
+        Self {
+            single: 0,
+            double: 0,
+            template: 0,
+            inside_comment: false,
+            prev_byte: None,
+        }
     }
 
     /// It checks the given byte. If it's a quote, it's tracked
     fn check_byte(&mut self, byte: u8) {
+        // Check for comment exit first
+        if self.inside_comment {
+            if byte == b'\n' {
+                // Exit single-line comment
+                self.inside_comment = false;
+            } else if self.prev_byte == Some(b'*') && byte == b'/' {
+                // Exit multi-line comment
+                self.inside_comment = false;
+            }
+            self.prev_byte = Some(byte);
+            return; // Don't track quotes inside comments
+        }
+
+        // Check for comment entry
+        if self.prev_byte == Some(b'/') && (byte == b'/' || byte == b'*') {
+            self.inside_comment = true;
+            self.prev_byte = Some(byte);
+            return;
+        }
+
+        // Normal quote tracking
         match byte {
             b'"' => self.track_double(),
             b'\'' => self.track_single(),
             b'`' => self.track_template(),
             _ => {}
         }
+
+        self.prev_byte = Some(byte);
     }
 
     /// It adds a single quote if single quotes are zero and the others are greater than zero. It removes it otherwise
     fn track_single(&mut self) {
-        if (self.0 == 0 && (self.1 > 0 || self.2 > 0))
-            || (self.0 == 0 && self.1 == 0 && self.2 == 0)
+        if (self.single == 0 && (self.double > 0 || self.template > 0))
+            || (self.single == 0 && self.double == 0 && self.template == 0)
         {
-            self.0.add_assign(1);
+            self.single.add_assign(1);
         } else {
-            self.0 = self.0.saturating_sub(1);
+            self.single = self.single.saturating_sub(1);
         }
     }
     /// It adds a double quote if double quotes are zero and the others are greater than zero. It removes it otherwise
     fn track_double(&mut self) {
-        if (self.1 == 0 && (self.0 > 0 || self.2 > 0))
-            || (self.1 == 0 && self.0 == 0 && self.2 == 0)
+        if (self.double == 0 && (self.single > 0 || self.template > 0))
+            || (self.double == 0 && self.single == 0 && self.template == 0)
         {
-            self.1.add_assign(1);
+            self.double.add_assign(1);
         } else {
-            self.1 = self.1.saturating_sub(1);
+            self.double = self.double.saturating_sub(1);
         }
     }
 
     /// It adds a template quote if template quotes are zero and the others are greater than zero. It removes it otherwise
     fn track_template(&mut self) {
-        if (self.2 == 0 && (self.0 > 0 || self.1 > 0))
-            || (self.2 == 0 && self.0 == 0 && self.1 == 0)
+        if (self.template == 0 && (self.single > 0 || self.double > 0))
+            || (self.template == 0 && self.single == 0 && self.double == 0)
         {
-            self.2.add_assign(1);
+            self.template.add_assign(1);
         } else {
-            self.2 = self.2.saturating_sub(1);
+            self.template = self.template.saturating_sub(1);
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.0 == 0 && self.1 == 0 && self.2 == 0
+        self.single == 0 && self.double == 0 && self.template == 0
     }
 }
 
@@ -990,6 +1024,48 @@ mod quotes_seen {
     #[test]
     fn is_empty() {
         let source = r#" '"``"' "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_inside_comments() {
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_1() {
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const f = "something" "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_2() {
+        let source = r#"/* Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh. */
+const f = "something" "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_3() {
+        let source = r#"/* "safe"
+ 'safe'
+ `safe`*/
+const f = "something" "#;
         let mut quotes_seen = QuotesSeen::new();
         track(source, &mut quotes_seen);
         assert!(quotes_seen.is_empty());
