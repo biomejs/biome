@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsIdentifierBinding,
+    AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsVariableDeclarator,
     binding_ext::AnyJsParameterParentFunction,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -226,10 +226,67 @@ fn get_function_name(parent_function: &AnyJsParameterParentFunction) -> Option<S
             .and_then(|name| name.as_js_literal_member_name().cloned())
             .and_then(|lit| lit.value().ok())
             .map(|t| t.text_trimmed().to_string()),
-        // Arrow functions don't have names, use None
-        AnyJsParameterParentFunction::JsArrowFunctionExpression(_) => None,
+        // Arrow functions: extract name from surrounding variable declarator or assignment
+        AnyJsParameterParentFunction::JsArrowFunctionExpression(arrow) => {
+            get_arrow_function_name(arrow)
+        }
         _ => None,
     }
+}
+
+/// Extracts the name of an arrow function from its surrounding context.
+/// Handles cases like:
+/// - `const foo = () => ...` (variable declarator)
+/// - `foo = () => ...` (assignment expression)
+///
+/// Returns `None` for anonymous arrow functions that cannot be recursively called.
+fn get_arrow_function_name(
+    arrow_fn: &biome_js_syntax::JsArrowFunctionExpression,
+) -> Option<String> {
+    let arrow_syntax = arrow_fn.syntax();
+
+    // Walk up the syntax tree to find a variable declarator or assignment
+    for ancestor in arrow_syntax.ancestors() {
+        // Skip the arrow function node itself
+        if ancestor == *arrow_syntax {
+            continue;
+        }
+
+        // Check for variable declarator: const foo = () => ...
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
+            return declarator
+                .id()
+                .ok()?
+                .as_any_js_binding()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()
+                .map(|t| t.text_trimmed().to_string());
+        }
+
+        // Stop searching if we hit a function boundary
+        // (prevents extracting wrong name from outer scope)
+        if is_function_like(&ancestor) {
+            break;
+        }
+    }
+
+    None
+}
+
+/// Checks if a syntax node is a function-like boundary
+/// (we should stop searching for names beyond these)
+fn is_function_like(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
+    use biome_js_syntax::JsSyntaxKind::*;
+    matches!(
+        node.kind(),
+        JS_FUNCTION_DECLARATION
+            | JS_FUNCTION_EXPRESSION
+            | JS_ARROW_FUNCTION_EXPRESSION
+            | JS_METHOD_CLASS_MEMBER
+            | JS_METHOD_OBJECT_MEMBER
+            | JS_CONSTRUCTOR_CLASS_MEMBER
+    )
 }
 
 fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool {

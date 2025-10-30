@@ -149,6 +149,36 @@ invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
 ```
 
 ```
+invalid.js:14:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    13 │ // Arrow function with recursion
+  > 14 │ const countdown = (n, acc) => {
+       │                       ^^^
+    15 │     if (n === 0) return 0;
+    16 │     return countdown(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    12 12 │   
+    13 13 │   // Arrow function with recursion
+    14    │ - const·countdown·=·(n,·acc)·=>·{
+       14 │ + const·countdown·=·(n,·_acc)·=>·{
+    15 15 │       if (n === 0) return 0;
+    16    │ - ····return·countdown(n·-·1,·acc);
+       16 │ + ····return·countdown(n·-·1,·_acc);
+    17 17 │   };
+    18 18 │   
+  
+
+```
+
+```
 invalid.js:21:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is only used in recursive calls.
