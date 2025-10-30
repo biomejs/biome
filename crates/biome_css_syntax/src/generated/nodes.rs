@@ -1808,10 +1808,10 @@ pub struct CssDocumentCustomMatcherFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssElse {
+pub struct CssElseKeyword {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssElse {
+impl CssElseKeyword {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1821,8 +1821,8 @@ impl CssElse {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssElseFields {
-        CssElseFields {
+    pub fn as_fields(&self) -> CssElseKeywordFields {
+        CssElseKeywordFields {
             else_token: self.else_token(),
         }
     }
@@ -1830,7 +1830,7 @@ impl CssElse {
         support::required_token(&self.syntax, 0usize)
     }
 }
-impl Serialize for CssElse {
+impl Serialize for CssElseKeyword {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1839,7 +1839,7 @@ impl Serialize for CssElse {
     }
 }
 #[derive(Serialize)]
-pub struct CssElseFields {
+pub struct CssElseKeywordFields {
     pub else_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2826,6 +2826,51 @@ impl Serialize for CssIfTestBooleanNotExpr {
 pub struct CssIfTestBooleanNotExprFields {
     pub not_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyCssIfTestBooleanExprGroup>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfTestBooleanOrExpr {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfTestBooleanOrExpr {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfTestBooleanOrExprFields {
+        CssIfTestBooleanOrExprFields {
+            left: self.left(),
+            or_token: self.or_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssIfTestBooleanExprGroup> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssIfTestBooleanOrCombinableExpr> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssIfTestBooleanOrExpr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfTestBooleanOrExprFields {
+    pub left: SyntaxResult<AnyCssIfTestBooleanExprGroup>,
+    pub or_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssIfTestBooleanOrCombinableExpr>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssImportAnonymousLayer {
@@ -9465,7 +9510,7 @@ impl AnyCssIfBranch {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfCondition {
     AnyCssIfTestBooleanExpr(AnyCssIfTestBooleanExpr),
-    CssElse(CssElse),
+    CssElseKeyword(CssElseKeyword),
 }
 impl AnyCssIfCondition {
     pub fn as_any_css_if_test_boolean_expr(&self) -> Option<&AnyCssIfTestBooleanExpr> {
@@ -9474,9 +9519,9 @@ impl AnyCssIfCondition {
             _ => None,
         }
     }
-    pub fn as_css_else(&self) -> Option<&CssElse> {
+    pub fn as_css_else_keyword(&self) -> Option<&CssElseKeyword> {
         match &self {
-            Self::CssElse(item) => Some(item),
+            Self::CssElseKeyword(item) => Some(item),
             _ => None,
         }
     }
@@ -9574,6 +9619,7 @@ impl AnyCssIfTestBooleanAndCombinableExpr {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfTestBooleanExpr {
     AnyCssIfTestBooleanAndCombinableExpr(AnyCssIfTestBooleanAndCombinableExpr),
+    AnyCssIfTestBooleanOrCombinableExpr(AnyCssIfTestBooleanOrCombinableExpr),
     CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr),
 }
 impl AnyCssIfTestBooleanExpr {
@@ -9582,6 +9628,14 @@ impl AnyCssIfTestBooleanExpr {
     ) -> Option<&AnyCssIfTestBooleanAndCombinableExpr> {
         match &self {
             Self::AnyCssIfTestBooleanAndCombinableExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_css_if_test_boolean_or_combinable_expr(
+        &self,
+    ) -> Option<&AnyCssIfTestBooleanOrCombinableExpr> {
+        match &self {
+            Self::AnyCssIfTestBooleanOrCombinableExpr(item) => Some(item),
             _ => None,
         }
     }
@@ -9607,6 +9661,25 @@ impl AnyCssIfTestBooleanExprGroup {
     pub fn as_css_if_test_boolean_expr_in_parens(&self) -> Option<&CssIfTestBooleanExprInParens> {
         match &self {
             Self::CssIfTestBooleanExprInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfTestBooleanOrCombinableExpr {
+    AnyCssIfTestBooleanExprGroup(AnyCssIfTestBooleanExprGroup),
+    CssIfTestBooleanOrExpr(CssIfTestBooleanOrExpr),
+}
+impl AnyCssIfTestBooleanOrCombinableExpr {
+    pub fn as_any_css_if_test_boolean_expr_group(&self) -> Option<&AnyCssIfTestBooleanExprGroup> {
+        match &self {
+            Self::AnyCssIfTestBooleanExprGroup(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_test_boolean_or_expr(&self) -> Option<&CssIfTestBooleanOrExpr> {
+        match &self {
+            Self::CssIfTestBooleanOrExpr(item) => Some(item),
             _ => None,
         }
     }
@@ -13236,12 +13309,12 @@ impl From<CssDocumentCustomMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssElse {
+impl AstNode for CssElseKeyword {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ELSE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ELSE_KEYWORD as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ELSE
+        kind == CSS_ELSE_KEYWORD
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -13257,29 +13330,29 @@ impl AstNode for CssElse {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssElse {
+impl std::fmt::Debug for CssElseKeyword {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("CssElse")
+            f.debug_struct("CssElseKeyword")
                 .field("else_token", &support::DebugSyntaxResult(self.else_token()))
                 .finish()
         } else {
-            f.debug_struct("CssElse").finish()
+            f.debug_struct("CssElseKeyword").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<CssElse> for SyntaxNode {
-    fn from(n: CssElse) -> Self {
+impl From<CssElseKeyword> for SyntaxNode {
+    fn from(n: CssElseKeyword) -> Self {
         n.syntax
     }
 }
-impl From<CssElse> for SyntaxElement {
-    fn from(n: CssElse) -> Self {
+impl From<CssElseKeyword> for SyntaxElement {
+    fn from(n: CssElseKeyword) -> Self {
         n.syntax.into()
     }
 }
@@ -14474,6 +14547,55 @@ impl From<CssIfTestBooleanNotExpr> for SyntaxNode {
 }
 impl From<CssIfTestBooleanNotExpr> for SyntaxElement {
     fn from(n: CssIfTestBooleanNotExpr) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfTestBooleanOrExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_TEST_BOOLEAN_OR_EXPR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_TEST_BOOLEAN_OR_EXPR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfTestBooleanOrExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfTestBooleanOrExpr")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssIfTestBooleanOrExpr").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfTestBooleanOrExpr> for SyntaxNode {
+    fn from(n: CssIfTestBooleanOrExpr) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfTestBooleanOrExpr> for SyntaxElement {
+    fn from(n: CssIfTestBooleanOrExpr) -> Self {
         n.syntax.into()
     }
 }
@@ -24038,25 +24160,25 @@ impl From<AnyCssIfBranch> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssElse> for AnyCssIfCondition {
-    fn from(node: CssElse) -> Self {
-        Self::CssElse(node)
+impl From<CssElseKeyword> for AnyCssIfCondition {
+    fn from(node: CssElseKeyword) -> Self {
+        Self::CssElseKeyword(node)
     }
 }
 impl AstNode for AnyCssIfCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssIfTestBooleanExpr::KIND_SET.union(CssElse::KIND_SET);
+        AnyCssIfTestBooleanExpr::KIND_SET.union(CssElseKeyword::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_ELSE => true,
+            CSS_ELSE_KEYWORD => true,
             k if AnyCssIfTestBooleanExpr::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_ELSE => Self::CssElse(CssElse { syntax }),
+            CSS_ELSE_KEYWORD => Self::CssElseKeyword(CssElseKeyword { syntax }),
             _ => {
                 if let Some(any_css_if_test_boolean_expr) = AnyCssIfTestBooleanExpr::cast(syntax) {
                     return Some(Self::AnyCssIfTestBooleanExpr(any_css_if_test_boolean_expr));
@@ -24068,13 +24190,13 @@ impl AstNode for AnyCssIfCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssElse(it) => it.syntax(),
+            Self::CssElseKeyword(it) => it.syntax(),
             Self::AnyCssIfTestBooleanExpr(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssElse(it) => it.into_syntax(),
+            Self::CssElseKeyword(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanExpr(it) => it.into_syntax(),
         }
     }
@@ -24083,7 +24205,7 @@ impl std::fmt::Debug for AnyCssIfCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssIfTestBooleanExpr(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssElse(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssElseKeyword(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -24091,7 +24213,7 @@ impl From<AnyCssIfCondition> for SyntaxNode {
     fn from(n: AnyCssIfCondition) -> Self {
         match n {
             AnyCssIfCondition::AnyCssIfTestBooleanExpr(it) => it.into_syntax(),
-            AnyCssIfCondition::CssElse(it) => it.into_syntax(),
+            AnyCssIfCondition::CssElseKeyword(it) => it.into_syntax(),
         }
     }
 }
@@ -24391,12 +24513,14 @@ impl From<CssIfTestBooleanNotExpr> for AnyCssIfTestBooleanExpr {
 }
 impl AstNode for AnyCssIfTestBooleanExpr {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssIfTestBooleanAndCombinableExpr::KIND_SET.union(CssIfTestBooleanNotExpr::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssIfTestBooleanAndCombinableExpr::KIND_SET
+        .union(AnyCssIfTestBooleanOrCombinableExpr::KIND_SET)
+        .union(CssIfTestBooleanNotExpr::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
             k if AnyCssIfTestBooleanAndCombinableExpr::can_cast(k) => true,
+            k if AnyCssIfTestBooleanOrCombinableExpr::can_cast(k) => true,
             _ => false,
         }
     }
@@ -24406,11 +24530,19 @@ impl AstNode for AnyCssIfTestBooleanExpr {
                 Self::CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr { syntax })
             }
             _ => {
-                if let Some(any_css_if_test_boolean_and_combinable_expr) =
-                    AnyCssIfTestBooleanAndCombinableExpr::cast(syntax)
+                let syntax = match AnyCssIfTestBooleanAndCombinableExpr::try_cast(syntax) {
+                    Ok(any_css_if_test_boolean_and_combinable_expr) => {
+                        return Some(Self::AnyCssIfTestBooleanAndCombinableExpr(
+                            any_css_if_test_boolean_and_combinable_expr,
+                        ));
+                    }
+                    Err(syntax) => syntax,
+                };
+                if let Some(any_css_if_test_boolean_or_combinable_expr) =
+                    AnyCssIfTestBooleanOrCombinableExpr::cast(syntax)
                 {
-                    return Some(Self::AnyCssIfTestBooleanAndCombinableExpr(
-                        any_css_if_test_boolean_and_combinable_expr,
+                    return Some(Self::AnyCssIfTestBooleanOrCombinableExpr(
+                        any_css_if_test_boolean_or_combinable_expr,
                     ));
                 }
                 return None;
@@ -24422,12 +24554,14 @@ impl AstNode for AnyCssIfTestBooleanExpr {
         match self {
             Self::CssIfTestBooleanNotExpr(it) => it.syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.syntax(),
+            Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
+            Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
         }
     }
 }
@@ -24435,6 +24569,7 @@ impl std::fmt::Debug for AnyCssIfTestBooleanExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssIfTestBooleanOrCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfTestBooleanNotExpr(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -24443,6 +24578,7 @@ impl From<AnyCssIfTestBooleanExpr> for SyntaxNode {
     fn from(n: AnyCssIfTestBooleanExpr) -> Self {
         match n {
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
             AnyCssIfTestBooleanExpr::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
         }
     }
@@ -24514,6 +24650,77 @@ impl From<AnyCssIfTestBooleanExprGroup> for SyntaxNode {
 }
 impl From<AnyCssIfTestBooleanExprGroup> for SyntaxElement {
     fn from(n: AnyCssIfTestBooleanExprGroup) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIfTestBooleanOrExpr> for AnyCssIfTestBooleanOrCombinableExpr {
+    fn from(node: CssIfTestBooleanOrExpr) -> Self {
+        Self::CssIfTestBooleanOrExpr(node)
+    }
+}
+impl AstNode for AnyCssIfTestBooleanOrCombinableExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssIfTestBooleanExprGroup::KIND_SET.union(CssIfTestBooleanOrExpr::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IF_TEST_BOOLEAN_OR_EXPR => true,
+            k if AnyCssIfTestBooleanExprGroup::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IF_TEST_BOOLEAN_OR_EXPR => {
+                Self::CssIfTestBooleanOrExpr(CssIfTestBooleanOrExpr { syntax })
+            }
+            _ => {
+                if let Some(any_css_if_test_boolean_expr_group) =
+                    AnyCssIfTestBooleanExprGroup::cast(syntax)
+                {
+                    return Some(Self::AnyCssIfTestBooleanExprGroup(
+                        any_css_if_test_boolean_expr_group,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanOrExpr(it) => it.syntax(),
+            Self::AnyCssIfTestBooleanExprGroup(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanOrExpr(it) => it.into_syntax(),
+            Self::AnyCssIfTestBooleanExprGroup(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfTestBooleanOrCombinableExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssIfTestBooleanExprGroup(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfTestBooleanOrExpr(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanOrCombinableExpr> for SyntaxNode {
+    fn from(n: AnyCssIfTestBooleanOrCombinableExpr) -> Self {
+        match n {
+            AnyCssIfTestBooleanOrCombinableExpr::AnyCssIfTestBooleanExprGroup(it) => {
+                it.into_syntax()
+            }
+            AnyCssIfTestBooleanOrCombinableExpr::CssIfTestBooleanOrExpr(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanOrCombinableExpr> for SyntaxElement {
+    fn from(n: AnyCssIfTestBooleanOrCombinableExpr) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -28898,6 +29105,11 @@ impl std::fmt::Display for AnyCssIfTestBooleanExprGroup {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssIfTestBooleanOrCombinableExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssImportLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -29378,7 +29590,7 @@ impl std::fmt::Display for CssDocumentCustomMatcher {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssElse {
+impl std::fmt::Display for CssElseKeyword {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -29494,6 +29706,11 @@ impl std::fmt::Display for CssIfTestBooleanExprInParens {
     }
 }
 impl std::fmt::Display for CssIfTestBooleanNotExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfTestBooleanOrExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

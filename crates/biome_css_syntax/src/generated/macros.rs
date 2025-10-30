@@ -197,8 +197,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDocumentCustomMatcher::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ELSE => {
-                    let $pattern = unsafe { $crate::CssElse::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_ELSE_KEYWORD => {
+                    let $pattern = unsafe { $crate::CssElseKeyword::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_EMPTY_DECLARATION => {
@@ -299,6 +299,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_IF_TEST_BOOLEAN_NOT_EXPR => {
                     let $pattern = unsafe { $crate::CssIfTestBooleanNotExpr::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_TEST_BOOLEAN_OR_EXPR => {
+                    let $pattern = unsafe { $crate::CssIfTestBooleanOrExpr::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_IMPORT_ANONYMOUS_LAYER => {

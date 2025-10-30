@@ -686,9 +686,9 @@ impl CssDocumentCustomMatcherBuilder {
         ))
     }
 }
-pub fn css_else(else_token: SyntaxToken) -> CssElse {
-    CssElse::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ELSE,
+pub fn css_else_keyword(else_token: SyntaxToken) -> CssElseKeyword {
+    CssElseKeyword::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ELSE_KEYWORD,
         [Some(SyntaxElement::Token(else_token))],
     ))
 }
@@ -970,6 +970,20 @@ pub fn css_if_test_boolean_not_expr(
         [
             Some(SyntaxElement::Token(not_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn css_if_test_boolean_or_expr(
+    left: AnyCssIfTestBooleanExprGroup,
+    or_token: SyntaxToken,
+    right: AnyCssIfTestBooleanOrCombinableExpr,
+) -> CssIfTestBooleanOrExpr {
+    CssIfTestBooleanOrExpr::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_TEST_BOOLEAN_OR_EXPR,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
 }

@@ -723,7 +723,7 @@ impl CssDocumentCustomMatcher {
         )
     }
 }
-impl CssElse {
+impl CssElseKeyword {
     pub fn with_else_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -1128,6 +1128,26 @@ impl CssIfTestBooleanNotExpr {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssIfTestBooleanOrExpr {
+    pub fn with_left(self, element: AnyCssIfTestBooleanExprGroup) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_or_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_right(self, element: AnyCssIfTestBooleanOrCombinableExpr) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

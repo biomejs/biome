@@ -61,7 +61,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssDeclarationWithSemicolon" => lang::CssDeclarationWithSemicolon::KIND_SET.iter().next(),
         "CssDocumentAtRule" => lang::CssDocumentAtRule::KIND_SET.iter().next(),
         "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
-        "CssElse" => lang::CssElse::KIND_SET.iter().next(),
+        "CssElseKeyword" => lang::CssElseKeyword::KIND_SET.iter().next(),
         "CssEmptyDeclaration" => lang::CssEmptyDeclaration::KIND_SET.iter().next(),
         "CssFontFaceAtRule" => lang::CssFontFaceAtRule::KIND_SET.iter().next(),
         "CssFontFaceAtRuleDeclarator" => lang::CssFontFaceAtRuleDeclarator::KIND_SET.iter().next(),
@@ -91,6 +91,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             lang::CssIfTestBooleanExprInParens::KIND_SET.iter().next()
         }
         "CssIfTestBooleanNotExpr" => lang::CssIfTestBooleanNotExpr::KIND_SET.iter().next(),
+        "CssIfTestBooleanOrExpr" => lang::CssIfTestBooleanOrExpr::KIND_SET.iter().next(),
         "CssImportAnonymousLayer" => lang::CssImportAnonymousLayer::KIND_SET.iter().next(),
         "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
         "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),

@@ -1871,7 +1871,7 @@ CssIfBranchList = AnyCssIfBranch (';' AnyCssIfBranch)* ';'?
 AnyCssIfTestBooleanExpr =
 	CssIfTestBooleanNotExpr
 	| AnyCssIfTestBooleanAndCombinableExpr
-// | CssIfTestOrBoolExprGroup
+	| AnyCssIfTestBooleanOrCombinableExpr
 
 // not <boolean-expr-group>
 CssIfTestBooleanNotExpr =
@@ -1887,6 +1887,15 @@ CssIfTestBooleanAndExpr =
 	'and'
 	right: AnyCssIfTestBooleanAndCombinableExpr
 
+AnyCssIfTestBooleanOrCombinableExpr =
+	AnyCssIfTestBooleanExprGroup
+	| CssIfTestBooleanOrExpr
+
+CssIfTestBooleanOrExpr =
+	left: AnyCssIfTestBooleanExprGroup
+	'or'
+	right: AnyCssIfTestBooleanOrCombinableExpr
+
 // <boolean-expr-group> = <if-test> | ( <boolean-expr> )
 AnyCssIfTestBooleanExprGroup =
 	AnyCssIfTest
@@ -1899,9 +1908,9 @@ CssIfTestBooleanExprInParens =
 	expression: AnyCssIfTestBooleanExpr
 	')'
 
-CssElse = 'else'
+CssElseKeyword = 'else'
 
-AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElse
+AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
 
 CssIfBranch =
 	condition: AnyCssIfCondition

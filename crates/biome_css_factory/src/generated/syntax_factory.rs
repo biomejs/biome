@@ -1300,7 +1300,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_DOCUMENT_CUSTOM_MATCHER, children)
             }
-            CSS_ELSE => {
+            CSS_ELSE_KEYWORD => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1312,9 +1312,12 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if current_element.is_some() {
-                    return RawSyntaxNode::new(CSS_ELSE.to_bogus(), children.into_iter().map(Some));
+                    return RawSyntaxNode::new(
+                        CSS_ELSE_KEYWORD.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
                 }
-                slots.into_node(CSS_ELSE, children)
+                slots.into_node(CSS_ELSE_KEYWORD, children)
             }
             CSS_EMPTY_DECLARATION => {
                 let mut elements = (&children).into_iter();
@@ -2013,6 +2016,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_IF_TEST_BOOLEAN_NOT_EXPR, children)
+            }
+            CSS_IF_TEST_BOOLEAN_OR_EXPR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyCssIfTestBooleanExprGroup::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![or]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyCssIfTestBooleanOrCombinableExpr::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_IF_TEST_BOOLEAN_OR_EXPR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_IF_TEST_BOOLEAN_OR_EXPR, children)
             }
             CSS_IMPORT_ANONYMOUS_LAYER => {
                 let mut elements = (&children).into_iter();

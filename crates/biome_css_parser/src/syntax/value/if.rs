@@ -16,9 +16,7 @@ use crate::syntax::at_rule::media::is_at_any_media_condition;
 use crate::syntax::at_rule::media::parse_any_media_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::is_at_declaration;
-use crate::syntax::is_at_identifier;
 use crate::syntax::parse_declaration;
-use crate::syntax::parse_identifier;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::property::parse_generic_component_value;
@@ -72,21 +70,6 @@ fn parse_if_supports_test(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![')']);
 
     Present(m.complete(p, CSS_IF_SUPPORTS_TEST))
-}
-
-#[inline]
-fn parse_if_supports_identifier_test(p: &mut CssParser) -> ParsedSyntax {
-    // if !is_at_if_supports_identifier_test(p) {
-    //     return Absent;
-    // }
-
-    let m = p.start();
-
-    parse_regular_identifier(p).ok();
-    p.bump(T![:]);
-    parse_generic_component_value(p).ok();
-
-    Present(m.complete(p, CSS_IF_SUPPORTS_IDENTIFIER_TEST))
 }
 
 #[inline]
@@ -250,7 +233,7 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![else]) {
         let m = p.start();
         p.bump(T![else]);
-        return Present(m.complete(p, CSS_ELSE));
+        return Present(m.complete(p, CSS_ELSE_KEYWORD));
     }
 
     parse_any_if_test_boolean_expr(p)
@@ -293,12 +276,6 @@ impl ParseSeparatedList for CssIfBranchList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        // handle trailing semicolons
-        if p.at(T![;]) && p.nth_at(1, T![')']) {
-            p.bump(T![;]);
-            return true;
-        }
-
         p.at(T![')'])
     }
 
@@ -313,5 +290,9 @@ impl ParseSeparatedList for CssIfBranchList {
 
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![;]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 }
