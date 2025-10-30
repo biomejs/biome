@@ -1808,6 +1808,41 @@ pub struct CssDocumentCustomMatcherFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssElse {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssElse {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssElseFields {
+        CssElseFields {
+            else_token: self.else_token(),
+        }
+    }
+    pub fn else_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssElse {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssElseFields {
+    pub else_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssEmptyDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2371,6 +2406,426 @@ impl Serialize for CssIdentifier {
 #[derive(Serialize)]
 pub struct CssIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfBranch {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfBranch {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfBranchFields {
+        CssIfBranchFields {
+            condition: self.condition(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn condition(&self) -> SyntaxResult<AnyCssIfCondition> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> CssGenericComponentValueList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssIfBranch {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfBranchFields {
+    pub condition: SyntaxResult<AnyCssIfCondition>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: CssGenericComponentValueList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfFunctionFields {
+        CssIfFunctionFields {
+            if_token: self.if_token(),
+            l_paren_token: self.l_paren_token(),
+            css_if_branch_list: self.css_if_branch_list(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn if_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn css_if_branch_list(&self) -> CssIfBranchList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssIfFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfFunctionFields {
+    pub if_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub css_if_branch_list: CssIfBranchList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfMediaTest {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfMediaTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfMediaTestFields {
+        CssIfMediaTestFields {
+            media_token: self.media_token(),
+            l_paren_token: self.l_paren_token(),
+            test: self.test(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn media_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn test(&self) -> SyntaxResult<AnyCssIfMediaTestQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssIfMediaTest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfMediaTestFields {
+    pub media_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub test: SyntaxResult<AnyCssIfMediaTestQuery>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfStyleTest {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfStyleTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfStyleTestFields {
+        CssIfStyleTestFields {
+            style_token: self.style_token(),
+            l_paren_token: self.l_paren_token(),
+            test: self.test(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn test(&self) -> SyntaxResult<AnyCssContainerStyleQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssIfStyleTest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfStyleTestFields {
+    pub style_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub test: SyntaxResult<AnyCssContainerStyleQuery>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfSupportsIdentifierTest {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfSupportsIdentifierTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfSupportsIdentifierTestFields {
+        CssIfSupportsIdentifierTestFields {
+            ident: self.ident(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn ident(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyCssGenericComponentValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssIfSupportsIdentifierTest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfSupportsIdentifierTestFields {
+    pub ident: SyntaxResult<CssIdentifier>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyCssGenericComponentValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfSupportsTest {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfSupportsTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfSupportsTestFields {
+        CssIfSupportsTestFields {
+            supports_token: self.supports_token(),
+            l_paren_token: self.l_paren_token(),
+            test: self.test(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn supports_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn test(&self) -> SyntaxResult<AnyCssIfSupportsTestCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssIfSupportsTest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfSupportsTestFields {
+    pub supports_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub test: SyntaxResult<AnyCssIfSupportsTestCondition>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfTestBooleanAndExpr {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfTestBooleanAndExpr {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfTestBooleanAndExprFields {
+        CssIfTestBooleanAndExprFields {
+            left: self.left(),
+            and_token: self.and_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssIfTestBooleanExprGroup> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssIfTestBooleanAndCombinableExpr> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssIfTestBooleanAndExpr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfTestBooleanAndExprFields {
+    pub left: SyntaxResult<AnyCssIfTestBooleanExprGroup>,
+    pub and_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssIfTestBooleanAndCombinableExpr>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfTestBooleanExprInParens {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfTestBooleanExprInParens {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfTestBooleanExprInParensFields {
+        CssIfTestBooleanExprInParensFields {
+            l_paren_token: self.l_paren_token(),
+            expression: self.expression(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<AnyCssIfTestBooleanExpr> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssIfTestBooleanExprInParens {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfTestBooleanExprInParensFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<AnyCssIfTestBooleanExpr>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfTestBooleanNotExpr {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfTestBooleanNotExpr {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfTestBooleanNotExprFields {
+        CssIfTestBooleanNotExprFields {
+            not_token: self.not_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<AnyCssIfTestBooleanExprGroup> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssIfTestBooleanNotExpr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfTestBooleanNotExprFields {
+    pub not_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<AnyCssIfTestBooleanExprGroup>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssImportAnonymousLayer {
@@ -8946,12 +9401,19 @@ impl AnyCssFontFeatureValuesItem {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFunction {
     CssFunction(CssFunction),
+    CssIfFunction(CssIfFunction),
     CssUrlFunction(CssUrlFunction),
 }
 impl AnyCssFunction {
     pub fn as_css_function(&self) -> Option<&CssFunction> {
         match &self {
             Self::CssFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_function(&self) -> Option<&CssIfFunction> {
+        match &self {
+            Self::CssIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -8977,6 +9439,174 @@ impl AnyCssGenericComponentValue {
     pub fn as_css_generic_delimiter(&self) -> Option<&CssGenericDelimiter> {
         match &self {
             Self::CssGenericDelimiter(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfBranch {
+    CssBogusIfBranch(CssBogusIfBranch),
+    CssIfBranch(CssIfBranch),
+}
+impl AnyCssIfBranch {
+    pub fn as_css_bogus_if_branch(&self) -> Option<&CssBogusIfBranch> {
+        match &self {
+            Self::CssBogusIfBranch(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_branch(&self) -> Option<&CssIfBranch> {
+        match &self {
+            Self::CssIfBranch(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfCondition {
+    AnyCssIfTestBooleanExpr(AnyCssIfTestBooleanExpr),
+    CssElse(CssElse),
+}
+impl AnyCssIfCondition {
+    pub fn as_any_css_if_test_boolean_expr(&self) -> Option<&AnyCssIfTestBooleanExpr> {
+        match &self {
+            Self::AnyCssIfTestBooleanExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_else(&self) -> Option<&CssElse> {
+        match &self {
+            Self::CssElse(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfMediaTestQuery {
+    AnyCssMediaCondition(AnyCssMediaCondition),
+    AnyCssQueryFeature(AnyCssQueryFeature),
+}
+impl AnyCssIfMediaTestQuery {
+    pub fn as_any_css_media_condition(&self) -> Option<&AnyCssMediaCondition> {
+        match &self {
+            Self::AnyCssMediaCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_css_query_feature(&self) -> Option<&AnyCssQueryFeature> {
+        match &self {
+            Self::AnyCssQueryFeature(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfSupportsTestCondition {
+    AnyCssImportSupportsCondition(AnyCssImportSupportsCondition),
+    CssIfSupportsIdentifierTest(CssIfSupportsIdentifierTest),
+}
+impl AnyCssIfSupportsTestCondition {
+    pub fn as_any_css_import_supports_condition(&self) -> Option<&AnyCssImportSupportsCondition> {
+        match &self {
+            Self::AnyCssImportSupportsCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_supports_identifier_test(&self) -> Option<&CssIfSupportsIdentifierTest> {
+        match &self {
+            Self::CssIfSupportsIdentifierTest(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfTest {
+    CssBogusIfTest(CssBogusIfTest),
+    CssIfMediaTest(CssIfMediaTest),
+    CssIfStyleTest(CssIfStyleTest),
+    CssIfSupportsTest(CssIfSupportsTest),
+}
+impl AnyCssIfTest {
+    pub fn as_css_bogus_if_test(&self) -> Option<&CssBogusIfTest> {
+        match &self {
+            Self::CssBogusIfTest(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_media_test(&self) -> Option<&CssIfMediaTest> {
+        match &self {
+            Self::CssIfMediaTest(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_style_test(&self) -> Option<&CssIfStyleTest> {
+        match &self {
+            Self::CssIfStyleTest(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_supports_test(&self) -> Option<&CssIfSupportsTest> {
+        match &self {
+            Self::CssIfSupportsTest(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfTestBooleanAndCombinableExpr {
+    AnyCssIfTestBooleanExprGroup(AnyCssIfTestBooleanExprGroup),
+    CssIfTestBooleanAndExpr(CssIfTestBooleanAndExpr),
+}
+impl AnyCssIfTestBooleanAndCombinableExpr {
+    pub fn as_any_css_if_test_boolean_expr_group(&self) -> Option<&AnyCssIfTestBooleanExprGroup> {
+        match &self {
+            Self::AnyCssIfTestBooleanExprGroup(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_test_boolean_and_expr(&self) -> Option<&CssIfTestBooleanAndExpr> {
+        match &self {
+            Self::CssIfTestBooleanAndExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfTestBooleanExpr {
+    AnyCssIfTestBooleanAndCombinableExpr(AnyCssIfTestBooleanAndCombinableExpr),
+    CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr),
+}
+impl AnyCssIfTestBooleanExpr {
+    pub fn as_any_css_if_test_boolean_and_combinable_expr(
+        &self,
+    ) -> Option<&AnyCssIfTestBooleanAndCombinableExpr> {
+        match &self {
+            Self::AnyCssIfTestBooleanAndCombinableExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_test_boolean_not_expr(&self) -> Option<&CssIfTestBooleanNotExpr> {
+        match &self {
+            Self::CssIfTestBooleanNotExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssIfTestBooleanExprGroup {
+    AnyCssIfTest(AnyCssIfTest),
+    CssIfTestBooleanExprInParens(CssIfTestBooleanExprInParens),
+}
+impl AnyCssIfTestBooleanExprGroup {
+    pub fn as_any_css_if_test(&self) -> Option<&AnyCssIfTest> {
+        match &self {
+            Self::AnyCssIfTest(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_test_boolean_expr_in_parens(&self) -> Option<&CssIfTestBooleanExprInParens> {
+        match &self {
+            Self::CssIfTestBooleanExprInParens(item) => Some(item),
             _ => None,
         }
     }
@@ -12606,6 +13236,53 @@ impl From<CssDocumentCustomMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssElse {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ELSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_ELSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssElse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssElse")
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssElse").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssElse> for SyntaxNode {
+    fn from(n: CssElse) -> Self {
+        n.syntax
+    }
+}
+impl From<CssElse> for SyntaxElement {
+    fn from(n: CssElse) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssEmptyDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13308,6 +13985,495 @@ impl From<CssIdentifier> for SyntaxNode {
 }
 impl From<CssIdentifier> for SyntaxElement {
     fn from(n: CssIdentifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfBranch {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_BRANCH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_BRANCH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfBranch")
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &self.value())
+                .finish()
+        } else {
+            f.debug_struct("CssIfBranch").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfBranch> for SyntaxNode {
+    fn from(n: CssIfBranch) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfBranch> for SyntaxElement {
+    fn from(n: CssIfBranch) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfFunction")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("css_if_branch_list", &self.css_if_branch_list())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfFunction> for SyntaxNode {
+    fn from(n: CssIfFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfFunction> for SyntaxElement {
+    fn from(n: CssIfFunction) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfMediaTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_MEDIA_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_MEDIA_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfMediaTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfMediaTest")
+                .field(
+                    "media_token",
+                    &support::DebugSyntaxResult(self.media_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfMediaTest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfMediaTest> for SyntaxNode {
+    fn from(n: CssIfMediaTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfMediaTest> for SyntaxElement {
+    fn from(n: CssIfMediaTest) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfStyleTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_STYLE_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_STYLE_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfStyleTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfStyleTest")
+                .field(
+                    "style_token",
+                    &support::DebugSyntaxResult(self.style_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfStyleTest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfStyleTest> for SyntaxNode {
+    fn from(n: CssIfStyleTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfStyleTest> for SyntaxElement {
+    fn from(n: CssIfStyleTest) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfSupportsIdentifierTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_SUPPORTS_IDENTIFIER_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_SUPPORTS_IDENTIFIER_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfSupportsIdentifierTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfSupportsIdentifierTest")
+                .field("ident", &support::DebugSyntaxResult(self.ident()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssIfSupportsIdentifierTest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfSupportsIdentifierTest> for SyntaxNode {
+    fn from(n: CssIfSupportsIdentifierTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfSupportsIdentifierTest> for SyntaxElement {
+    fn from(n: CssIfSupportsIdentifierTest) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfSupportsTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_SUPPORTS_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_SUPPORTS_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfSupportsTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfSupportsTest")
+                .field(
+                    "supports_token",
+                    &support::DebugSyntaxResult(self.supports_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfSupportsTest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfSupportsTest> for SyntaxNode {
+    fn from(n: CssIfSupportsTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfSupportsTest> for SyntaxElement {
+    fn from(n: CssIfSupportsTest) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfTestBooleanAndExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_TEST_BOOLEAN_AND_EXPR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_TEST_BOOLEAN_AND_EXPR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfTestBooleanAndExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfTestBooleanAndExpr")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssIfTestBooleanAndExpr").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfTestBooleanAndExpr> for SyntaxNode {
+    fn from(n: CssIfTestBooleanAndExpr) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfTestBooleanAndExpr> for SyntaxElement {
+    fn from(n: CssIfTestBooleanAndExpr) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfTestBooleanExprInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfTestBooleanExprInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfTestBooleanExprInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfTestBooleanExprInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfTestBooleanExprInParens> for SyntaxNode {
+    fn from(n: CssIfTestBooleanExprInParens) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfTestBooleanExprInParens> for SyntaxElement {
+    fn from(n: CssIfTestBooleanExprInParens) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfTestBooleanNotExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_TEST_BOOLEAN_NOT_EXPR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_TEST_BOOLEAN_NOT_EXPR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfTestBooleanNotExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfTestBooleanNotExpr")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("CssIfTestBooleanNotExpr").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfTestBooleanNotExpr> for SyntaxNode {
+    fn from(n: CssIfTestBooleanNotExpr) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfTestBooleanNotExpr> for SyntaxElement {
+    fn from(n: CssIfTestBooleanNotExpr) -> Self {
         n.syntax.into()
     }
 }
@@ -22683,6 +23849,11 @@ impl From<CssFunction> for AnyCssFunction {
         Self::CssFunction(node)
     }
 }
+impl From<CssIfFunction> for AnyCssFunction {
+    fn from(node: CssIfFunction) -> Self {
+        Self::CssIfFunction(node)
+    }
+}
 impl From<CssUrlFunction> for AnyCssFunction {
     fn from(node: CssUrlFunction) -> Self {
         Self::CssUrlFunction(node)
@@ -22690,13 +23861,16 @@ impl From<CssUrlFunction> for AnyCssFunction {
 }
 impl AstNode for AnyCssFunction {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET.union(CssUrlFunction::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET
+        .union(CssIfFunction::KIND_SET)
+        .union(CssUrlFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_FUNCTION | CSS_URL_FUNCTION)
+        matches!(kind, CSS_FUNCTION | CSS_IF_FUNCTION | CSS_URL_FUNCTION)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
+            CSS_IF_FUNCTION => Self::CssIfFunction(CssIfFunction { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
             _ => return None,
         };
@@ -22705,12 +23879,14 @@ impl AstNode for AnyCssFunction {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssFunction(it) => it.syntax(),
+            Self::CssIfFunction(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssFunction(it) => it.into_syntax(),
+            Self::CssIfFunction(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
         }
     }
@@ -22719,6 +23895,7 @@ impl std::fmt::Debug for AnyCssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -22727,6 +23904,7 @@ impl From<AnyCssFunction> for SyntaxNode {
     fn from(n: AnyCssFunction) -> Self {
         match n {
             AnyCssFunction::CssFunction(it) => it.into_syntax(),
+            AnyCssFunction::CssIfFunction(it) => it.into_syntax(),
             AnyCssFunction::CssUrlFunction(it) => it.into_syntax(),
         }
     }
@@ -22796,6 +23974,546 @@ impl From<AnyCssGenericComponentValue> for SyntaxNode {
 }
 impl From<AnyCssGenericComponentValue> for SyntaxElement {
     fn from(n: AnyCssGenericComponentValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusIfBranch> for AnyCssIfBranch {
+    fn from(node: CssBogusIfBranch) -> Self {
+        Self::CssBogusIfBranch(node)
+    }
+}
+impl From<CssIfBranch> for AnyCssIfBranch {
+    fn from(node: CssIfBranch) -> Self {
+        Self::CssIfBranch(node)
+    }
+}
+impl AstNode for AnyCssIfBranch {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusIfBranch::KIND_SET.union(CssIfBranch::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS_IF_BRANCH | CSS_IF_BRANCH)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_IF_BRANCH => Self::CssBogusIfBranch(CssBogusIfBranch { syntax }),
+            CSS_IF_BRANCH => Self::CssIfBranch(CssIfBranch { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusIfBranch(it) => it.syntax(),
+            Self::CssIfBranch(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusIfBranch(it) => it.into_syntax(),
+            Self::CssIfBranch(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusIfBranch(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfBranch(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfBranch> for SyntaxNode {
+    fn from(n: AnyCssIfBranch) -> Self {
+        match n {
+            AnyCssIfBranch::CssBogusIfBranch(it) => it.into_syntax(),
+            AnyCssIfBranch::CssIfBranch(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfBranch> for SyntaxElement {
+    fn from(n: AnyCssIfBranch) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssElse> for AnyCssIfCondition {
+    fn from(node: CssElse) -> Self {
+        Self::CssElse(node)
+    }
+}
+impl AstNode for AnyCssIfCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssIfTestBooleanExpr::KIND_SET.union(CssElse::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_ELSE => true,
+            k if AnyCssIfTestBooleanExpr::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_ELSE => Self::CssElse(CssElse { syntax }),
+            _ => {
+                if let Some(any_css_if_test_boolean_expr) = AnyCssIfTestBooleanExpr::cast(syntax) {
+                    return Some(Self::AnyCssIfTestBooleanExpr(any_css_if_test_boolean_expr));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssElse(it) => it.syntax(),
+            Self::AnyCssIfTestBooleanExpr(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssElse(it) => it.into_syntax(),
+            Self::AnyCssIfTestBooleanExpr(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssIfTestBooleanExpr(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssElse(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfCondition> for SyntaxNode {
+    fn from(n: AnyCssIfCondition) -> Self {
+        match n {
+            AnyCssIfCondition::AnyCssIfTestBooleanExpr(it) => it.into_syntax(),
+            AnyCssIfCondition::CssElse(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfCondition> for SyntaxElement {
+    fn from(n: AnyCssIfCondition) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl AstNode for AnyCssIfMediaTestQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssMediaCondition::KIND_SET.union(AnyCssQueryFeature::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            k if AnyCssMediaCondition::can_cast(k) => true,
+            k if AnyCssQueryFeature::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let syntax = match AnyCssMediaCondition::try_cast(syntax) {
+            Ok(any_css_media_condition) => {
+                return Some(Self::AnyCssMediaCondition(any_css_media_condition));
+            }
+            Err(syntax) => syntax,
+        };
+        if let Some(any_css_query_feature) = AnyCssQueryFeature::cast(syntax) {
+            return Some(Self::AnyCssQueryFeature(any_css_query_feature));
+        }
+        None
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AnyCssMediaCondition(it) => it.syntax(),
+            Self::AnyCssQueryFeature(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AnyCssMediaCondition(it) => it.into_syntax(),
+            Self::AnyCssQueryFeature(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfMediaTestQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssMediaCondition(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssQueryFeature(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfMediaTestQuery> for SyntaxNode {
+    fn from(n: AnyCssIfMediaTestQuery) -> Self {
+        match n {
+            AnyCssIfMediaTestQuery::AnyCssMediaCondition(it) => it.into_syntax(),
+            AnyCssIfMediaTestQuery::AnyCssQueryFeature(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfMediaTestQuery> for SyntaxElement {
+    fn from(n: AnyCssIfMediaTestQuery) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIfSupportsIdentifierTest> for AnyCssIfSupportsTestCondition {
+    fn from(node: CssIfSupportsIdentifierTest) -> Self {
+        Self::CssIfSupportsIdentifierTest(node)
+    }
+}
+impl AstNode for AnyCssIfSupportsTestCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssImportSupportsCondition::KIND_SET.union(CssIfSupportsIdentifierTest::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IF_SUPPORTS_IDENTIFIER_TEST => true,
+            k if AnyCssImportSupportsCondition::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IF_SUPPORTS_IDENTIFIER_TEST => {
+                Self::CssIfSupportsIdentifierTest(CssIfSupportsIdentifierTest { syntax })
+            }
+            _ => {
+                if let Some(any_css_import_supports_condition) =
+                    AnyCssImportSupportsCondition::cast(syntax)
+                {
+                    return Some(Self::AnyCssImportSupportsCondition(
+                        any_css_import_supports_condition,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIfSupportsIdentifierTest(it) => it.syntax(),
+            Self::AnyCssImportSupportsCondition(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIfSupportsIdentifierTest(it) => it.into_syntax(),
+            Self::AnyCssImportSupportsCondition(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfSupportsTestCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssImportSupportsCondition(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfSupportsIdentifierTest(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfSupportsTestCondition> for SyntaxNode {
+    fn from(n: AnyCssIfSupportsTestCondition) -> Self {
+        match n {
+            AnyCssIfSupportsTestCondition::AnyCssImportSupportsCondition(it) => it.into_syntax(),
+            AnyCssIfSupportsTestCondition::CssIfSupportsIdentifierTest(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfSupportsTestCondition> for SyntaxElement {
+    fn from(n: AnyCssIfSupportsTestCondition) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusIfTest> for AnyCssIfTest {
+    fn from(node: CssBogusIfTest) -> Self {
+        Self::CssBogusIfTest(node)
+    }
+}
+impl From<CssIfMediaTest> for AnyCssIfTest {
+    fn from(node: CssIfMediaTest) -> Self {
+        Self::CssIfMediaTest(node)
+    }
+}
+impl From<CssIfStyleTest> for AnyCssIfTest {
+    fn from(node: CssIfStyleTest) -> Self {
+        Self::CssIfStyleTest(node)
+    }
+}
+impl From<CssIfSupportsTest> for AnyCssIfTest {
+    fn from(node: CssIfSupportsTest) -> Self {
+        Self::CssIfSupportsTest(node)
+    }
+}
+impl AstNode for AnyCssIfTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusIfTest::KIND_SET
+        .union(CssIfMediaTest::KIND_SET)
+        .union(CssIfStyleTest::KIND_SET)
+        .union(CssIfSupportsTest::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_IF_TEST | CSS_IF_MEDIA_TEST | CSS_IF_STYLE_TEST | CSS_IF_SUPPORTS_TEST
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_IF_TEST => Self::CssBogusIfTest(CssBogusIfTest { syntax }),
+            CSS_IF_MEDIA_TEST => Self::CssIfMediaTest(CssIfMediaTest { syntax }),
+            CSS_IF_STYLE_TEST => Self::CssIfStyleTest(CssIfStyleTest { syntax }),
+            CSS_IF_SUPPORTS_TEST => Self::CssIfSupportsTest(CssIfSupportsTest { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusIfTest(it) => it.syntax(),
+            Self::CssIfMediaTest(it) => it.syntax(),
+            Self::CssIfStyleTest(it) => it.syntax(),
+            Self::CssIfSupportsTest(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusIfTest(it) => it.into_syntax(),
+            Self::CssIfMediaTest(it) => it.into_syntax(),
+            Self::CssIfStyleTest(it) => it.into_syntax(),
+            Self::CssIfSupportsTest(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusIfTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfMediaTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfStyleTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfSupportsTest(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfTest> for SyntaxNode {
+    fn from(n: AnyCssIfTest) -> Self {
+        match n {
+            AnyCssIfTest::CssBogusIfTest(it) => it.into_syntax(),
+            AnyCssIfTest::CssIfMediaTest(it) => it.into_syntax(),
+            AnyCssIfTest::CssIfStyleTest(it) => it.into_syntax(),
+            AnyCssIfTest::CssIfSupportsTest(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfTest> for SyntaxElement {
+    fn from(n: AnyCssIfTest) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIfTestBooleanAndExpr> for AnyCssIfTestBooleanAndCombinableExpr {
+    fn from(node: CssIfTestBooleanAndExpr) -> Self {
+        Self::CssIfTestBooleanAndExpr(node)
+    }
+}
+impl AstNode for AnyCssIfTestBooleanAndCombinableExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssIfTestBooleanExprGroup::KIND_SET.union(CssIfTestBooleanAndExpr::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IF_TEST_BOOLEAN_AND_EXPR => true,
+            k if AnyCssIfTestBooleanExprGroup::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IF_TEST_BOOLEAN_AND_EXPR => {
+                Self::CssIfTestBooleanAndExpr(CssIfTestBooleanAndExpr { syntax })
+            }
+            _ => {
+                if let Some(any_css_if_test_boolean_expr_group) =
+                    AnyCssIfTestBooleanExprGroup::cast(syntax)
+                {
+                    return Some(Self::AnyCssIfTestBooleanExprGroup(
+                        any_css_if_test_boolean_expr_group,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanAndExpr(it) => it.syntax(),
+            Self::AnyCssIfTestBooleanExprGroup(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanAndExpr(it) => it.into_syntax(),
+            Self::AnyCssIfTestBooleanExprGroup(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfTestBooleanAndCombinableExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssIfTestBooleanExprGroup(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfTestBooleanAndExpr(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanAndCombinableExpr> for SyntaxNode {
+    fn from(n: AnyCssIfTestBooleanAndCombinableExpr) -> Self {
+        match n {
+            AnyCssIfTestBooleanAndCombinableExpr::AnyCssIfTestBooleanExprGroup(it) => {
+                it.into_syntax()
+            }
+            AnyCssIfTestBooleanAndCombinableExpr::CssIfTestBooleanAndExpr(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanAndCombinableExpr> for SyntaxElement {
+    fn from(n: AnyCssIfTestBooleanAndCombinableExpr) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIfTestBooleanNotExpr> for AnyCssIfTestBooleanExpr {
+    fn from(node: CssIfTestBooleanNotExpr) -> Self {
+        Self::CssIfTestBooleanNotExpr(node)
+    }
+}
+impl AstNode for AnyCssIfTestBooleanExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssIfTestBooleanAndCombinableExpr::KIND_SET.union(CssIfTestBooleanNotExpr::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
+            k if AnyCssIfTestBooleanAndCombinableExpr::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IF_TEST_BOOLEAN_NOT_EXPR => {
+                Self::CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr { syntax })
+            }
+            _ => {
+                if let Some(any_css_if_test_boolean_and_combinable_expr) =
+                    AnyCssIfTestBooleanAndCombinableExpr::cast(syntax)
+                {
+                    return Some(Self::AnyCssIfTestBooleanAndCombinableExpr(
+                        any_css_if_test_boolean_and_combinable_expr,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanNotExpr(it) => it.syntax(),
+            Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
+            Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfTestBooleanExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssIfTestBooleanAndCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfTestBooleanNotExpr(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanExpr> for SyntaxNode {
+    fn from(n: AnyCssIfTestBooleanExpr) -> Self {
+        match n {
+            AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExpr::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanExpr> for SyntaxElement {
+    fn from(n: AnyCssIfTestBooleanExpr) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIfTestBooleanExprInParens> for AnyCssIfTestBooleanExprGroup {
+    fn from(node: CssIfTestBooleanExprInParens) -> Self {
+        Self::CssIfTestBooleanExprInParens(node)
+    }
+}
+impl AstNode for AnyCssIfTestBooleanExprGroup {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssIfTest::KIND_SET.union(CssIfTestBooleanExprInParens::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS => true,
+            k if AnyCssIfTest::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS => {
+                Self::CssIfTestBooleanExprInParens(CssIfTestBooleanExprInParens { syntax })
+            }
+            _ => {
+                if let Some(any_css_if_test) = AnyCssIfTest::cast(syntax) {
+                    return Some(Self::AnyCssIfTest(any_css_if_test));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanExprInParens(it) => it.syntax(),
+            Self::AnyCssIfTest(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIfTestBooleanExprInParens(it) => it.into_syntax(),
+            Self::AnyCssIfTest(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssIfTestBooleanExprGroup {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssIfTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfTestBooleanExprInParens(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanExprGroup> for SyntaxNode {
+    fn from(n: AnyCssIfTestBooleanExprGroup) -> Self {
+        match n {
+            AnyCssIfTestBooleanExprGroup::AnyCssIfTest(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExprGroup::CssIfTestBooleanExprInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssIfTestBooleanExprGroup> for SyntaxElement {
+    fn from(n: AnyCssIfTestBooleanExprGroup) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -27140,6 +28858,46 @@ impl std::fmt::Display for AnyCssGenericComponentValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssIfBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfMediaTestQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfSupportsTestCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfTestBooleanAndCombinableExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfTestBooleanExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssIfTestBooleanExprGroup {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssImportLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -27620,6 +29378,11 @@ impl std::fmt::Display for CssDocumentCustomMatcher {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssElse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssEmptyDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -27686,6 +29449,51 @@ impl std::fmt::Display for CssIdSelector {
     }
 }
 impl std::fmt::Display for CssIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfMediaTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfStyleTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfSupportsIdentifierTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfSupportsTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfTestBooleanAndExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfTestBooleanExprInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfTestBooleanNotExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -28799,6 +30607,118 @@ impl From<CssBogusFontFeatureValuesItem> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssBogusIfBranch {
+    syntax: SyntaxNode,
+}
+impl CssBogusIfBranch {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusIfBranch {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_BRANCH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_IF_BRANCH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusIfBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusIfBranch")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusIfBranch> for SyntaxNode {
+    fn from(n: CssBogusIfBranch) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBogusIfBranch> for SyntaxElement {
+    fn from(n: CssBogusIfBranch) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssBogusIfTest {
+    syntax: SyntaxNode,
+}
+impl CssBogusIfTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusIfTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_IF_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusIfTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusIfTest")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusIfTest> for SyntaxNode {
+    fn from(n: CssBogusIfTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBogusIfTest> for SyntaxElement {
+    fn from(n: CssBogusIfTest) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusKeyframesItem {
     syntax: SyntaxNode,
 }
@@ -29862,7 +31782,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssBracketedValueList {
     syntax_list: SyntaxList,
@@ -30843,6 +32763,88 @@ impl IntoIterator for &CssGenericComponentValueList {
 impl IntoIterator for CssGenericComponentValueList {
     type Item = AnyCssGenericComponentValue;
     type IntoIter = AstNodeListIterator<Language, AnyCssGenericComponentValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssIfBranchList {
+    syntax_list: SyntaxList,
+}
+impl CssIfBranchList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssIfBranchList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_BRANCH_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_BRANCH_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssIfBranchList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssIfBranchList {
+    type Language = Language;
+    type Node = AnyCssIfBranch;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssIfBranchList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssIfBranchList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssIfBranchList {
+    type Item = SyntaxResult<AnyCssIfBranch>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssIfBranch>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssIfBranchList {
+    type Item = SyntaxResult<AnyCssIfBranch>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssIfBranch>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

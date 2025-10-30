@@ -226,7 +226,7 @@ fn parse_container_not_query(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_container_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
     if is_at_container_style_query_in_parens(p) {
         parse_container_style_query_in_parens(p)
     } else if is_at_container_query_in_parens(p) {
@@ -308,7 +308,7 @@ fn is_at_container_style_query_in_parens(p: &mut CssParser) -> bool {
 /// @container style(--my-prop: some-value) { }
 /// ```
 #[inline]
-fn parse_container_style_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_container_style_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_container_style_query_in_parens(p) {
         return Absent;
     }
@@ -330,7 +330,7 @@ fn parse_container_style_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_any_container_style_query(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_container_style_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_declaration(p) {
         parse_declaration(p)
     } else if is_at_container_style_not_query(p) {

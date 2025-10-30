@@ -1910,6 +1910,78 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIdentifier {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssIfBranch>
+    for crate::css::auxiliary::if_branch::FormatCssIfBranch
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_css_syntax::CssIfBranch, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssIfBranch>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfBranch {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssIfBranch,
+        crate::css::auxiliary::if_branch::FormatCssIfBranch,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::if_branch::FormatCssIfBranch::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfBranch {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssIfBranch,
+        crate::css::auxiliary::if_branch::FormatCssIfBranch,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::if_branch::FormatCssIfBranch::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssIfFunction>
+    for crate::css::auxiliary::if_function::FormatCssIfFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssIfFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssIfFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssIfFunction,
+        crate::css::auxiliary::if_function::FormatCssIfFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::if_function::FormatCssIfFunction::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssIfFunction,
+        crate::css::auxiliary::if_function::FormatCssIfFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::if_function::FormatCssIfFunction::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssImportAnonymousLayer>
     for crate::css::auxiliary::import_anonymous_layer::FormatCssImportAnonymousLayer
 {
@@ -6614,6 +6686,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssGenericComponentValue
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: lists :: generic_component_value_list :: FormatCssGenericComponentValueList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfBranchList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssIfBranchList,
+        crate::css::lists::if_branch_list::FormatCssIfBranchList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::if_branch_list::FormatCssIfBranchList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfBranchList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssIfBranchList,
+        crate::css::lists::if_branch_list::FormatCssIfBranchList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::if_branch_list::FormatCssIfBranchList::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssKeyframesItemList {

@@ -61,6 +61,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssDeclarationWithSemicolon" => lang::CssDeclarationWithSemicolon::KIND_SET.iter().next(),
         "CssDocumentAtRule" => lang::CssDocumentAtRule::KIND_SET.iter().next(),
         "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
+        "CssElse" => lang::CssElse::KIND_SET.iter().next(),
         "CssEmptyDeclaration" => lang::CssEmptyDeclaration::KIND_SET.iter().next(),
         "CssFontFaceAtRule" => lang::CssFontFaceAtRule::KIND_SET.iter().next(),
         "CssFontFaceAtRuleDeclarator" => lang::CssFontFaceAtRuleDeclarator::KIND_SET.iter().next(),
@@ -79,6 +80,17 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
         "CssIdSelector" => lang::CssIdSelector::KIND_SET.iter().next(),
         "CssIdentifier" => lang::CssIdentifier::KIND_SET.iter().next(),
+        "CssIfBranch" => lang::CssIfBranch::KIND_SET.iter().next(),
+        "CssIfFunction" => lang::CssIfFunction::KIND_SET.iter().next(),
+        "CssIfMediaTest" => lang::CssIfMediaTest::KIND_SET.iter().next(),
+        "CssIfStyleTest" => lang::CssIfStyleTest::KIND_SET.iter().next(),
+        "CssIfSupportsIdentifierTest" => lang::CssIfSupportsIdentifierTest::KIND_SET.iter().next(),
+        "CssIfSupportsTest" => lang::CssIfSupportsTest::KIND_SET.iter().next(),
+        "CssIfTestBooleanAndExpr" => lang::CssIfTestBooleanAndExpr::KIND_SET.iter().next(),
+        "CssIfTestBooleanExprInParens" => {
+            lang::CssIfTestBooleanExprInParens::KIND_SET.iter().next()
+        }
+        "CssIfTestBooleanNotExpr" => lang::CssIfTestBooleanNotExpr::KIND_SET.iter().next(),
         "CssImportAnonymousLayer" => lang::CssImportAnonymousLayer::KIND_SET.iter().next(),
         "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
         "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),

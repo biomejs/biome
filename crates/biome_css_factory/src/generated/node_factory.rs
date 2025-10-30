@@ -686,6 +686,12 @@ impl CssDocumentCustomMatcherBuilder {
         ))
     }
 }
+pub fn css_else(else_token: SyntaxToken) -> CssElse {
+    CssElse::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ELSE,
+        [Some(SyntaxElement::Token(else_token))],
+    ))
+}
 pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaration {
     CssEmptyDeclaration::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_EMPTY_DECLARATION,
@@ -833,6 +839,138 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
     CssIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_IDENTIFIER,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_if_branch(
+    condition: AnyCssIfCondition,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+) -> CssIfBranch {
+    CssIfBranch::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_BRANCH,
+        [
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_if_function(
+    if_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    css_if_branch_list: CssIfBranchList,
+    r_paren_token: SyntaxToken,
+) -> CssIfFunction {
+    CssIfFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_FUNCTION,
+        [
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(css_if_branch_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_if_media_test(
+    media_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    test: AnyCssIfMediaTestQuery,
+    r_paren_token: SyntaxToken,
+) -> CssIfMediaTest {
+    CssIfMediaTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_MEDIA_TEST,
+        [
+            Some(SyntaxElement::Token(media_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(test.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_if_style_test(
+    style_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    test: AnyCssContainerStyleQuery,
+    r_paren_token: SyntaxToken,
+) -> CssIfStyleTest {
+    CssIfStyleTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_STYLE_TEST,
+        [
+            Some(SyntaxElement::Token(style_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(test.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_if_supports_identifier_test(
+    ident: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssGenericComponentValue,
+) -> CssIfSupportsIdentifierTest {
+    CssIfSupportsIdentifierTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_SUPPORTS_IDENTIFIER_TEST,
+        [
+            Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_if_supports_test(
+    supports_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    test: AnyCssIfSupportsTestCondition,
+    r_paren_token: SyntaxToken,
+) -> CssIfSupportsTest {
+    CssIfSupportsTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_SUPPORTS_TEST,
+        [
+            Some(SyntaxElement::Token(supports_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(test.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_if_test_boolean_and_expr(
+    left: AnyCssIfTestBooleanExprGroup,
+    and_token: SyntaxToken,
+    right: AnyCssIfTestBooleanAndCombinableExpr,
+) -> CssIfTestBooleanAndExpr {
+    CssIfTestBooleanAndExpr::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_TEST_BOOLEAN_AND_EXPR,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_if_test_boolean_expr_in_parens(
+    l_paren_token: SyntaxToken,
+    expression: AnyCssIfTestBooleanExpr,
+    r_paren_token: SyntaxToken,
+) -> CssIfTestBooleanExprInParens {
+    CssIfTestBooleanExprInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_if_test_boolean_not_expr(
+    not_token: SyntaxToken,
+    expression: AnyCssIfTestBooleanExprGroup,
+) -> CssIfTestBooleanNotExpr {
+    CssIfTestBooleanNotExpr::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_TEST_BOOLEAN_NOT_EXPR,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
     ))
 }
 pub fn css_import_anonymous_layer(layer_token: SyntaxToken) -> CssImportAnonymousLayer {
@@ -2945,6 +3083,27 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_if_branch_list<I, S>(items: I, separators: S) -> CssIfBranchList
+where
+    I: IntoIterator<Item = AnyCssIfBranch>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssIfBranchList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_BRANCH_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_keyframes_item_list<I>(items: I) -> CssKeyframesItemList
 where
     I: IntoIterator<Item = AnyCssKeyframesItem>,
@@ -3363,6 +3522,26 @@ where
 {
     CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_if_branch<I>(slots: I) -> CssBogusIfBranch
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusIfBranch::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_IF_BRANCH,
+        slots,
+    ))
+}
+pub fn css_bogus_if_test<I>(slots: I) -> CssBogusIfTest
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusIfTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_IF_TEST,
         slots,
     ))
 }

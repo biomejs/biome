@@ -197,6 +197,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDocumentCustomMatcher::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_ELSE => {
+                    let $pattern = unsafe { $crate::CssElse::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_EMPTY_DECLARATION => {
                     let $pattern = unsafe { $crate::CssEmptyDeclaration::new_unchecked(node) };
                     $body
@@ -257,6 +261,44 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_IDENTIFIER => {
                     let $pattern = unsafe { $crate::CssIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_BRANCH => {
+                    let $pattern = unsafe { $crate::CssIfBranch::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssIfFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_MEDIA_TEST => {
+                    let $pattern = unsafe { $crate::CssIfMediaTest::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_STYLE_TEST => {
+                    let $pattern = unsafe { $crate::CssIfStyleTest::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_SUPPORTS_IDENTIFIER_TEST => {
+                    let $pattern =
+                        unsafe { $crate::CssIfSupportsIdentifierTest::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_SUPPORTS_TEST => {
+                    let $pattern = unsafe { $crate::CssIfSupportsTest::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_TEST_BOOLEAN_AND_EXPR => {
+                    let $pattern = unsafe { $crate::CssIfTestBooleanAndExpr::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS => {
+                    let $pattern =
+                        unsafe { $crate::CssIfTestBooleanExprInParens::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_TEST_BOOLEAN_NOT_EXPR => {
+                    let $pattern = unsafe { $crate::CssIfTestBooleanNotExpr::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_IMPORT_ANONYMOUS_LAYER => {
@@ -865,6 +907,14 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssBogusFontFeatureValuesItem::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_IF_BRANCH => {
+                    let $pattern = unsafe { $crate::CssBogusIfBranch::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_IF_TEST => {
+                    let $pattern = unsafe { $crate::CssBogusIfTest::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
@@ -995,6 +1045,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {
                     let $pattern =
                         unsafe { $crate::CssGenericComponentValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IF_BRANCH_LIST => {
+                    let $pattern = unsafe { $crate::CssIfBranchList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_ITEM_LIST => {

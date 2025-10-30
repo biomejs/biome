@@ -61,6 +61,8 @@ CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
+CssBogusIfBranch = SyntaxElement*
+CssBogusIfTest = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -1799,6 +1801,7 @@ CssRatio =
 AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
+	| CssIfFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1843,6 +1846,109 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
 CssParameter = AnyCssExpression
+
+// https://drafts.csswg.org/css-values-5/#if-notation
+// <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )
+// <if-branch> = <if-condition> : <declaration-value>?
+// <if-condition> = <boolean-expr[ <if-test> ]> | else
+// <if-test> =
+//  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
+//  media( <media-feature> | <media-condition> ) |
+//  style( <style-query> )
+CssIfFunction =
+	'if'
+	'('
+	CssIfBranchList
+	')'
+
+CssIfBranchList = AnyCssIfBranch (';' AnyCssIfBranch)* ';'?
+
+// https://drafts.csswg.org/css-values-5/#typedef-boolean-expr
+
+// <boolean-expr[ <if-test> ]> =
+//   not <boolean-expr-group>
+//   | <boolean-expr-group> [ [ and <boolean-expr-group> ]* | [ or <boolean-expr-group> ]* ]
+AnyCssIfTestBooleanExpr =
+	CssIfTestBooleanNotExpr
+	| AnyCssIfTestBooleanAndCombinableExpr
+// | CssIfTestOrBoolExprGroup
+
+// not <boolean-expr-group>
+CssIfTestBooleanNotExpr =
+	'not'
+	expression: AnyCssIfTestBooleanExprGroup
+
+AnyCssIfTestBooleanAndCombinableExpr =
+	AnyCssIfTestBooleanExprGroup
+	| CssIfTestBooleanAndExpr
+
+CssIfTestBooleanAndExpr =
+	left: AnyCssIfTestBooleanExprGroup
+	'and'
+	right: AnyCssIfTestBooleanAndCombinableExpr
+
+// <boolean-expr-group> = <if-test> | ( <boolean-expr> )
+AnyCssIfTestBooleanExprGroup =
+	AnyCssIfTest
+	| CssIfTestBooleanExprInParens
+	// TODO: <general-enclosed>
+
+// ( <boolean-expr> )
+CssIfTestBooleanExprInParens =
+	'('
+	expression: AnyCssIfTestBooleanExpr
+	')'
+
+CssElse = 'else'
+
+AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElse
+
+CssIfBranch =
+	condition: AnyCssIfCondition
+	':'
+	value: CssGenericComponentValueList
+
+AnyCssIfBranch =
+	CssIfBranch
+	| CssBogusIfBranch
+
+CssIfSupportsIdentifierTest =
+	ident: CssIdentifier
+	':'
+	value: AnyCssGenericComponentValue
+
+AnyCssIfSupportsTestCondition =
+	CssIfSupportsIdentifierTest
+	| AnyCssImportSupportsCondition
+
+CssIfSupportsTest =
+	'supports'
+	'('
+	test: AnyCssIfSupportsTestCondition
+	')'
+
+AnyCssIfMediaTestQuery =
+	AnyCssMediaCondition
+	| AnyCssQueryFeature
+
+CssIfMediaTest =
+	'media'
+	'('
+	test: AnyCssIfMediaTestQuery
+	')'
+
+CssIfStyleTest =
+	'style'
+	'('
+	test: AnyCssContainerStyleQuery
+	')'
+
+AnyCssIfTest =
+	CssIfSupportsTest
+	| CssIfMediaTest
+	| CssIfStyleTest
+	| CssBogusIfTest
+
 
 AnyCssExpression =
 	CssBinaryExpression
