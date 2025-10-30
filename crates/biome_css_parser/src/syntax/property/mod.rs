@@ -209,7 +209,7 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
 }
 const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T!['}'], T![;]);
 
-struct GenericComponentValueList;
+pub(crate) struct GenericComponentValueList;
 
 impl ParseNodeList for GenericComponentValueList {
     type Kind = CssSyntaxKind;
@@ -244,7 +244,7 @@ fn is_at_generic_component_value(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_generic_component_value(p) {
         return Absent;
     }

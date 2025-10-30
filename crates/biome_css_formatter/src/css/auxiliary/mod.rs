@@ -30,6 +30,8 @@ pub(crate) mod font_feature_values_block;
 pub(crate) mod font_feature_values_item;
 pub(crate) mod function;
 pub(crate) mod generic_delimiter;
+pub(crate) mod if_branch;
+pub(crate) mod if_function;
 pub(crate) mod import_anonymous_layer;
 pub(crate) mod import_named_layer;
 pub(crate) mod import_supports;
