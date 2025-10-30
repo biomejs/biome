@@ -128,7 +128,8 @@ impl ExtensionHandler for GlimmerFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                // TODO: Implement parse_embedded_nodes to extract <template> blocks
+                // Templates are embedded HTML, but we don't parse them separately yet
+                // since we preserve them as-is for now
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
