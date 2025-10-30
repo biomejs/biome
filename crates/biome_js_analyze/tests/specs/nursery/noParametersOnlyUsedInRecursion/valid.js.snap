@@ -43,4 +43,10 @@ function clamp(n, max) {
     return clamp(n + 1, max);
 }
 
+// Assignment expression where parameter is used outside recursion
+bar = (n, threshold) => {
+    if (n > threshold) return threshold;
+    return bar(n + 1, threshold);
+};
+
 ```

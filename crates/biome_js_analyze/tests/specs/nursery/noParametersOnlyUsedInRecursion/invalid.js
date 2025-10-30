@@ -49,3 +49,9 @@ const obj = {
         return this.count(n - step, step);
     }
 };
+
+// Assignment expression with recursive arrow function
+foo = (n, acc) => {
+    if (n === 0) return 0;
+    return foo(n - 1, acc);
+};

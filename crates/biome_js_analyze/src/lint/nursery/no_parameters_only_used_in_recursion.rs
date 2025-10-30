@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsVariableDeclarator,
-    binding_ext::AnyJsParameterParentFunction,
+    AnyJsExpression, JsAssignmentExpression, JsCallExpression, JsIdentifierBinding,
+    JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
@@ -259,6 +259,18 @@ fn get_arrow_function_name(
                 .ok()?
                 .as_any_js_binding()?
                 .as_js_identifier_binding()?
+                .name_token()
+                .ok()
+                .map(|t| t.token_text_trimmed());
+        }
+
+        // Check for assignment expression: foo = () => ...
+        if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor) {
+            return assignment
+                .left()
+                .ok()?
+                .as_any_js_assignment()?
+                .as_js_identifier_assignment()?
                 .name_token()
                 .ok()
                 .map(|t| t.token_text_trimmed());

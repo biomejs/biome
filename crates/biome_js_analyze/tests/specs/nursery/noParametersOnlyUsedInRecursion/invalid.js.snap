@@ -56,6 +56,12 @@ const obj = {
     }
 };
 
+// Assignment expression with recursive arrow function
+foo = (n, acc) => {
+    if (n === 0) return 0;
+    return foo(n - 1, acc);
+};
+
 ```
 
 # Diagnostics
@@ -326,6 +332,36 @@ invalid.js:47:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
        49 │ + ········return·this.count(n·-·_step,·_step);
     50 50 │       }
     51 51 │   };
+  
+
+```
+
+```
+invalid.js:54:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    53 │ // Assignment expression with recursive arrow function
+  > 54 │ foo = (n, acc) => {
+       │           ^^^
+    55 │     if (n === 0) return 0;
+    56 │     return foo(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    52 52 │   
+    53 53 │   // Assignment expression with recursive arrow function
+    54    │ - foo·=·(n,·acc)·=>·{
+       54 │ + foo·=·(n,·_acc)·=>·{
+    55 55 │       if (n === 0) return 0;
+    56    │ - ····return·foo(n·-·1,·acc);
+       56 │ + ····return·foo(n·-·1,·_acc);
+    57 57 │   };
+    58 58 │   
   
 
 ```

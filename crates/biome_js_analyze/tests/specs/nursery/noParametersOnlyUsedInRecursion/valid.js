@@ -36,3 +36,9 @@ function clamp(n, max) {
     if (n > max) return max;  // max used in comparison
     return clamp(n + 1, max);
 }
+
+// Assignment expression where parameter is used outside recursion
+bar = (n, threshold) => {
+    if (n > threshold) return threshold;
+    return bar(n + 1, threshold);
+};
