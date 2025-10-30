@@ -23,3 +23,21 @@ class Counter {
         return this.count(n - 1, acc);
     }
 }
+
+// Parameter with arithmetic in recursion
+function countdown(n, step) {
+    if (n === 0) return 0;
+    return countdown(n - step, step);
+}
+
+// Multiple operations
+function compute(a, b) {
+    if (a === 0) return 0;
+    return compute(a - 1, b * 2 + 1);
+}
+
+// Unary operations
+function negate(n, flag) {
+    if (n === 0) return 0;
+    return negate(n - 1, !flag);
+}

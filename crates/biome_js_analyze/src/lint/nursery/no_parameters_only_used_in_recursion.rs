@@ -1,9 +1,12 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::{binding_ext::AnyJsParameterParentFunction, JsCallExpression, JsIdentifierBinding};
+use biome_js_syntax::{
+    AnyJsExpression, JsCallExpression, JsIdentifierBinding,
+    binding_ext::AnyJsParameterParentFunction,
+};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -84,8 +87,12 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         let mut refs_elsewhere = 0;
 
         for reference in all_refs {
-            if is_reference_in_recursive_call(&reference, function_name.as_deref(), &parent_function)
-            {
+            if is_reference_in_recursive_call(
+                &reference,
+                function_name.as_deref(),
+                &parent_function,
+                name_text,
+            ) {
                 refs_in_recursion += 1;
             } else {
                 refs_elsewhere += 1;
@@ -205,6 +212,7 @@ fn is_reference_in_recursive_call(
     reference: &biome_js_semantic::Reference,
     function_name: Option<&str>,
     parent_function: &AnyJsParameterParentFunction,
+    param_name: &str,
 ) -> bool {
     let ref_node = reference.syntax();
 
@@ -213,8 +221,8 @@ fn is_reference_in_recursive_call(
     while let Some(node) = current {
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
-            // Check if this call is recursive
-            if is_recursive_call(&call_expr, function_name) {
+            // Check if this call is recursive AND uses our parameter
+            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name) {
                 return true;
             }
         }
@@ -236,4 +244,95 @@ fn is_function_boundary(
 ) -> bool {
     // Check if this node matches our parent function by comparing text ranges
     node.text_trimmed_range() == parent_function.syntax().text_trimmed_range()
+}
+
+/// Checks if an expression traces back to a specific parameter
+/// through "safe" operations (arithmetic, unary, field access)
+fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
+    // Direct parameter reference
+    if let Some(ref_id) = expr.as_js_reference_identifier() {
+        return ref_id
+            .name()
+            .ok()
+            .map(|n| n.text() == param_name)
+            .unwrap_or(false);
+    }
+
+    // Binary operations: a + 1, a - b
+    if let Some(bin_expr) = expr.as_js_binary_expression() {
+        let left = bin_expr.left().ok();
+        let right = bin_expr.right().ok();
+
+        return left
+            .map(|l| traces_to_parameter(&l, param_name))
+            .unwrap_or(false)
+            || right
+                .map(|r| traces_to_parameter(&r, param_name))
+                .unwrap_or(false);
+    }
+
+    // Unary operations: -a, !flag
+    if let Some(unary_expr) = expr.as_js_unary_expression() {
+        return unary_expr
+            .argument()
+            .ok()
+            .map(|arg| traces_to_parameter(&arg, param_name))
+            .unwrap_or(false);
+    }
+
+    // Parenthesized: (a + 1)
+    if let Some(paren_expr) = expr.as_js_parenthesized_expression() {
+        return paren_expr
+            .expression()
+            .ok()
+            .map(|e| traces_to_parameter(&e, param_name))
+            .unwrap_or(false);
+    }
+
+    // Static member access: obj.field (conservative: only trace if primitive)
+    if let Some(member_expr) = expr.as_js_static_member_expression() {
+        return member_expr
+            .object()
+            .ok()
+            .map(|obj| traces_to_parameter(&obj, param_name))
+            .unwrap_or(false);
+    }
+
+    // Any other expression (function calls, etc.) - not safe to trace
+    false
+}
+
+/// Enhanced version that checks if any argument traces to parameters
+fn is_recursive_call_with_param_usage(
+    call: &JsCallExpression,
+    function_name: Option<&str>,
+    param_name: &str,
+) -> bool {
+    // First check if this is a recursive call at all
+    if !is_recursive_call(call, function_name) {
+        return false;
+    }
+
+    // Check if any argument uses the parameter
+    let Ok(arguments) = call.arguments() else {
+        return false;
+    };
+
+    for arg in arguments.args() {
+        let Ok(arg_node) = arg else { continue };
+
+        // Skip spread arguments (conservative)
+        if arg_node.as_js_spread().is_some() {
+            continue;
+        }
+
+        // Check if argument expression uses the parameter
+        if let Some(expr) = arg_node.as_any_js_expression() {
+            if traces_to_parameter(expr, param_name) {
+                return true;
+            }
+        }
+    }
+
+    false
 }

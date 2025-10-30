@@ -24,3 +24,15 @@ function fn2(n, logger) {
     if (n === 0) return 0;
     return fn2(n - 1, logger);
 }
+
+// Parameter used in return value
+function factorial2(n, acc) {
+    if (n === 0) return acc;  // acc used here, not just recursion
+    return factorial2(n - 1, acc * n);
+}
+
+// Parameter in condition with arithmetic
+function clamp(n, max) {
+    if (n > max) return max;  // max used in comparison
+    return clamp(n + 1, max);
+}

@@ -5174,7 +5174,7 @@
 					]
 				},
 				"noParametersOnlyUsedInRecursion": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow function parameters that are only used in recursive calls.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/NoParametersOnlyUsedInRecursionConfiguration"

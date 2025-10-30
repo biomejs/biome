@@ -30,6 +30,24 @@ class Counter {
     }
 }
 
+// Parameter with arithmetic in recursion
+function countdown(n, step) {
+    if (n === 0) return 0;
+    return countdown(n - step, step);
+}
+
+// Multiple operations
+function compute(a, b) {
+    if (a === 0) return 0;
+    return compute(a - 1, b * 2 + 1);
+}
+
+// Unary operations
+function negate(n, flag) {
+    if (n === 0) return 0;
+    return negate(n - 1, !flag);
+}
+
 ```
 
 # Diagnostics
@@ -75,6 +93,54 @@ invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━�
        │                   ^
      9 │     if (a === 0) return 0;
     10 │     return fn(a - 1, b, c);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```
+
+```
+invalid.js:28:23 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    27 │ // Parameter with arithmetic in recursion
+  > 28 │ function countdown(n, step) {
+       │                       ^^^^
+    29 │     if (n === 0) return 0;
+    30 │     return countdown(n - step, step);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```
+
+```
+invalid.js:34:21 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    33 │ // Multiple operations
+  > 34 │ function compute(a, b) {
+       │                     ^
+    35 │     if (a === 0) return 0;
+    36 │     return compute(a - 1, b * 2 + 1);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```
+
+```
+invalid.js:40:20 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    39 │ // Unary operations
+  > 40 │ function negate(n, flag) {
+       │                    ^^^^
+    41 │     if (n === 0) return 0;
+    42 │     return negate(n - 1, !flag);
   
   i Parameters only used in recursion can be removed to simplify the function.
   
