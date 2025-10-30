@@ -26,37 +26,53 @@ pub static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
 pub struct GlimmerFileHandler;
 
 impl GlimmerFileHandler {
-    /// Extract the JavaScript/TypeScript code with <template> blocks removed
+    /// Extract the JavaScript/TypeScript code with <template> blocks replaced by markers
     ///
-    /// This allows us to parse the JS/TS part of GJS/GTS files without
-    /// the template syntax interfering. Templates are replaced with whitespace
-    /// to maintain correct offsets.
+    /// Templates are replaced with markers that work in their specific contexts.
+    /// We use a simple identifier-based approach that's valid everywhere.
     pub fn extract_js_content(text: &str) -> String {
-        GLIMMER_TEMPLATE.replace_all(text, |caps: &regex::Captures| {
-            // Replace template content with equivalent whitespace to maintain offsets
-            " ".repeat(caps.get(0).unwrap().as_str().len())
-        }).to_string()
+        let mut result = String::new();
+        let mut last_end = 0;
+        let mut template_index = 0;
+        
+        for template_match in GLIMMER_TEMPLATE.find_iter(text) {
+            // Add JS before this template
+            result.push_str(&text[last_end..template_match.start()]);
+            
+            // Use an identifier that will be treated as:
+            // - In class body: field declaration `__BIOME_GLIMMER_TEMPLATE_0__;`
+            // - In expression context: identifier reference
+            result.push_str(&format!("__BIOME_GLIMMER_TEMPLATE_{index}__", index = template_index));
+            
+            last_end = template_match.end();
+            template_index += 1;
+        }
+        
+        // Add remaining JS after last template
+        result.push_str(&text[last_end..]);
+        result
     }
 
     /// Reconstruct the file with formatted JS and original templates
     ///
-    /// Takes the original file content and formatted JS (which has whitespace
-    /// where templates were), and reconstructs by replacing the whitespace
-    /// placeholders with the original template blocks.
+    /// Replaces the identifier markers with the original template blocks.
     pub fn output(input: &str, formatted_js: &str) -> String {
-        let mut result = formatted_js.to_string();
+        let mut templates: Vec<String> = Vec::new();
         
-        // For each template in the original input, find its placeholder
-        // in the formatted output and replace it with the original template
+        // Extract all templates in order
         for template_match in GLIMMER_TEMPLATE.find_iter(input) {
-            let template_text = template_match.as_str();
-            let template_len = template_text.len();
-            let whitespace_placeholder = " ".repeat(template_len);
-            
-            // Replace the first occurrence of the whitespace placeholder
-            if let Some(pos) = result.find(&whitespace_placeholder) {
-                result.replace_range(pos..pos + template_len, template_text);
-            }
+            templates.push(template_match.as_str().to_string());
+        }
+        
+        if templates.is_empty() {
+            return formatted_js.to_string();
+        }
+        
+        // Replace markers with templates
+        let mut result = formatted_js.to_string();
+        for (idx, template) in templates.iter().enumerate() {
+            let marker = format!("__BIOME_GLIMMER_TEMPLATE_{idx}__");
+            result = result.replace(&marker, template);
         }
         
         result
