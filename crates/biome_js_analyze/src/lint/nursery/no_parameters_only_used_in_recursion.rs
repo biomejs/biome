@@ -263,11 +263,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&str>) -> bo
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id
-            .name()
-            .ok()
-            .map(|n| n.text() == name)
-            .unwrap_or(false);
+        return ref_id.name().ok().is_some_and(|n| n.text() == name);
     }
 
     // Member expression: this.foo() or obj.foo()
@@ -338,11 +334,7 @@ fn is_function_boundary(
 fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
     // Direct parameter reference
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id
-            .name()
-            .ok()
-            .map(|n| n.text() == param_name)
-            .unwrap_or(false);
+        return ref_id.name().ok().is_some_and(|n| n.text() == param_name);
     }
 
     // Binary operations: a + 1, a - b
@@ -350,12 +342,8 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         let left = bin_expr.left().ok();
         let right = bin_expr.right().ok();
 
-        return left
-            .map(|l| traces_to_parameter(&l, param_name))
-            .unwrap_or(false)
-            || right
-                .map(|r| traces_to_parameter(&r, param_name))
-                .unwrap_or(false);
+        return left.is_some_and(|l| traces_to_parameter(&l, param_name))
+            || right.is_some_and(|r| traces_to_parameter(&r, param_name));
     }
 
     // Unary operations: -a, !flag
@@ -363,8 +351,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         return unary_expr
             .argument()
             .ok()
-            .map(|arg| traces_to_parameter(&arg, param_name))
-            .unwrap_or(false);
+            .is_some_and(|arg| traces_to_parameter(&arg, param_name));
     }
 
     // Parenthesized: (a + 1)
@@ -372,8 +359,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         return paren_expr
             .expression()
             .ok()
-            .map(|e| traces_to_parameter(&e, param_name))
-            .unwrap_or(false);
+            .is_some_and(|e| traces_to_parameter(&e, param_name));
     }
 
     // Static member access: obj.field (conservative: only trace if primitive)
@@ -381,8 +367,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         return member_expr
             .object()
             .ok()
-            .map(|obj| traces_to_parameter(&obj, param_name))
-            .unwrap_or(false);
+            .is_some_and(|obj| traces_to_parameter(&obj, param_name));
     }
 
     // Any other expression (function calls, etc.) - not safe to trace
@@ -414,10 +399,10 @@ fn is_recursive_call_with_param_usage(
         }
 
         // Check if argument expression uses the parameter
-        if let Some(expr) = arg_node.as_any_js_expression() {
-            if traces_to_parameter(expr, param_name) {
-                return true;
-            }
+        if let Some(expr) = arg_node.as_any_js_expression()
+            && traces_to_parameter(expr, param_name)
+        {
+            return true;
         }
     }
 
