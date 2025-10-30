@@ -83,7 +83,7 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroFrontmatterElemen
     }
 }
 impl FormatRule<biome_html_syntax::GlimmerMustacheExpression>
-    for crate::glimmer::auxiliary::glimmer_mustache_expression::FormatGlimmerMustacheExpression
+    for crate::glimmer::auxiliary::mustache_expression::FormatGlimmerMustacheExpression
 {
     type Context = HtmlFormatContext;
     #[inline(always)]
@@ -99,28 +99,24 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerMustacheExpressio
     type Format<'a> = FormatRefWithRule<
         'a,
         biome_html_syntax::GlimmerMustacheExpression,
-        crate::glimmer::auxiliary::glimmer_mustache_expression::FormatGlimmerMustacheExpression,
+        crate::glimmer::auxiliary::mustache_expression::FormatGlimmerMustacheExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::glimmer::auxiliary::glimmer_mustache_expression::FormatGlimmerMustacheExpression::default(),
-        )
+        FormatRefWithRule :: new (self , crate :: glimmer :: auxiliary :: mustache_expression :: FormatGlimmerMustacheExpression :: default ())
     }
 }
 impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerMustacheExpression {
     type Format = FormatOwnedWithRule<
         biome_html_syntax::GlimmerMustacheExpression,
-        crate::glimmer::auxiliary::glimmer_mustache_expression::FormatGlimmerMustacheExpression,
+        crate::glimmer::auxiliary::mustache_expression::FormatGlimmerMustacheExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::glimmer::auxiliary::glimmer_mustache_expression::FormatGlimmerMustacheExpression::default(),
-        )
+        FormatOwnedWithRule :: new (self , crate :: glimmer :: auxiliary :: mustache_expression :: FormatGlimmerMustacheExpression :: default ())
     }
 }
-impl FormatRule<biome_html_syntax::GlimmerPath> for crate::glimmer::auxiliary::glimmer_path::FormatGlimmerPath {
+impl FormatRule<biome_html_syntax::GlimmerPath>
+    for crate::glimmer::auxiliary::path::FormatGlimmerPath
+{
     type Context = HtmlFormatContext;
     #[inline(always)]
     fn fmt(
@@ -135,29 +131,29 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPath {
     type Format<'a> = FormatRefWithRule<
         'a,
         biome_html_syntax::GlimmerPath,
-        crate::glimmer::auxiliary::glimmer_path::FormatGlimmerPath,
+        crate::glimmer::auxiliary::path::FormatGlimmerPath,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path::FormatGlimmerPath::default(),
+            crate::glimmer::auxiliary::path::FormatGlimmerPath::default(),
         )
     }
 }
 impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPath {
     type Format = FormatOwnedWithRule<
         biome_html_syntax::GlimmerPath,
-        crate::glimmer::auxiliary::glimmer_path::FormatGlimmerPath,
+        crate::glimmer::auxiliary::path::FormatGlimmerPath,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path::FormatGlimmerPath::default(),
+            crate::glimmer::auxiliary::path::FormatGlimmerPath::default(),
         )
     }
 }
 impl FormatRule<biome_html_syntax::GlimmerPathSegment>
-    for crate::glimmer::auxiliary::glimmer_path_segment::FormatGlimmerPathSegment
+    for crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment
 {
     type Context = HtmlFormatContext;
     #[inline(always)]
@@ -173,24 +169,24 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegment {
     type Format<'a> = FormatRefWithRule<
         'a,
         biome_html_syntax::GlimmerPathSegment,
-        crate::glimmer::auxiliary::glimmer_path_segment::FormatGlimmerPathSegment,
+        crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path_segment::FormatGlimmerPathSegment::default(),
+            crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment::default(),
         )
     }
 }
 impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegment {
     type Format = FormatOwnedWithRule<
         biome_html_syntax::GlimmerPathSegment,
-        crate::glimmer::auxiliary::glimmer_path_segment::FormatGlimmerPathSegment,
+        crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path_segment::FormatGlimmerPathSegment::default(),
+            crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment::default(),
         )
     }
 }
@@ -904,24 +900,24 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegmentList {
     type Format<'a> = FormatRefWithRule<
         'a,
         biome_html_syntax::GlimmerPathSegmentList,
-        crate::glimmer::auxiliary::glimmer_path_segment_list::FormatGlimmerPathSegmentList,
+        crate::glimmer::lists::path_segment_list::FormatGlimmerPathSegmentList,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path_segment_list::FormatGlimmerPathSegmentList::default(),
+            crate::glimmer::lists::path_segment_list::FormatGlimmerPathSegmentList::default(),
         )
     }
 }
 impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegmentList {
     type Format = FormatOwnedWithRule<
         biome_html_syntax::GlimmerPathSegmentList,
-        crate::glimmer::auxiliary::glimmer_path_segment_list::FormatGlimmerPathSegmentList,
+        crate::glimmer::lists::path_segment_list::FormatGlimmerPathSegmentList,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::glimmer::auxiliary::glimmer_path_segment_list::FormatGlimmerPathSegmentList::default(),
+            crate::glimmer::lists::path_segment_list::FormatGlimmerPathSegmentList::default(),
         )
     }
 }

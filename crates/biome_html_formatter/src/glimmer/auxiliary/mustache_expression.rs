@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::verbatim::format_html_verbatim_node;
 use biome_html_syntax::GlimmerMustacheExpression;
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
@@ -9,6 +10,6 @@ impl FormatNodeRule<GlimmerMustacheExpression> for FormatGlimmerMustacheExpressi
         node: &GlimmerMustacheExpression,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        format_html_verbatim_node(node.syntax()).fmt(f)
     }
 }

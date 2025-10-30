@@ -1,7 +1,5 @@
-// Glimmer template formatters
-// These are stubs for now - full formatting will be implemented in Phase 4
+//! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
-pub(crate) mod glimmer_mustache_expression;
-pub(crate) mod glimmer_path;
-pub(crate) mod glimmer_path_segment;
-pub(crate) mod glimmer_path_segment_list;
+pub(crate) mod mustache_expression;
+pub(crate) mod path;
+pub(crate) mod path_segment;
