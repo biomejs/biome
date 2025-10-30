@@ -38,6 +38,30 @@ impl GlimmerFileHandler {
         }).to_string()
     }
 
+    /// Reconstruct the file with formatted JS and original templates
+    ///
+    /// Takes the original file content and formatted JS (which has whitespace
+    /// where templates were), and reconstructs by replacing the whitespace
+    /// placeholders with the original template blocks.
+    pub fn output(input: &str, formatted_js: &str) -> String {
+        let mut result = formatted_js.to_string();
+        
+        // For each template in the original input, find its placeholder
+        // in the formatted output and replace it with the original template
+        for template_match in GLIMMER_TEMPLATE.find_iter(input) {
+            let template_text = template_match.as_str();
+            let template_len = template_text.len();
+            let whitespace_placeholder = " ".repeat(template_len);
+            
+            // Replace the first occurrence of the whitespace placeholder
+            if let Some(pos) = result.find(&whitespace_placeholder) {
+                result.replace_range(pos..pos + template_len, template_text);
+            }
+        }
+        
+        result
+    }
+
     /// Check if the file contains any <template> blocks
     pub fn has_templates(text: &str) -> bool {
         GLIMMER_TEMPLATE.is_match(text)
