@@ -86,6 +86,30 @@ function fnNested(n, acc) {
     return fnNested(n - 1, (acc || 0) && true);
 }
 
+// Conditional expression with parameter in consequent
+function fnCondConsequent(n, acc) {
+    if (n === 0) return 0;
+    return fnCondConsequent(n - 1, n > 5 ? acc : 0);
+}
+
+// Conditional expression with parameter in alternate
+function fnCondAlternate(n, acc) {
+    if (n === 0) return 0;
+    return fnCondAlternate(n - 1, n > 5 ? 0 : acc);
+}
+
+// Conditional expression with parameter in test
+function fnCondTest(n, flag) {
+    if (n === 0) return 0;
+    return fnCondTest(n - 1, flag ? true : false);
+}
+
+// Nested conditional expressions
+function fnCondNested(n, acc) {
+    if (n === 0) return 0;
+    return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
+}
+
 ```
 
 # Diagnostics
@@ -106,14 +130,14 @@ invalid.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-     1  1 │   // Simple case: parameter only used in recursion
-     2    │ - function·factorial(n,·acc)·{
-        2 │ + function·factorial(n,·_acc)·{
-     3  3 │       if (n === 0) return 1;
-     4    │ - ····return·factorial(n·-·1,·acc);
-        4 │ + ····return·factorial(n·-·1,·_acc);
-     5  5 │   }
-     6  6 │   
+      1   1 │   // Simple case: parameter only used in recursion
+      2     │ - function·factorial(n,·acc)·{
+          2 │ + function·factorial(n,·_acc)·{
+      3   3 │       if (n === 0) return 1;
+      4     │ - ····return·factorial(n·-·1,·acc);
+          4 │ + ····return·factorial(n·-·1,·_acc);
+      5   5 │   }
+      6   6 │   
   
 
 ```
@@ -135,15 +159,15 @@ invalid.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   
   i Unsafe fix: If this is intentional, prepend b with an underscore.
   
-     6  6 │   
-     7  7 │   // Multiple parameters only in recursion
-     8    │ - function·fn(a,·b,·c)·{
-        8 │ + function·fn(a,·_b,·c)·{
-     9  9 │       if (a === 0) return 0;
-    10    │ - ····return·fn(a·-·1,·b,·c);
-       10 │ + ····return·fn(a·-·1,·_b,·c);
-    11 11 │   }
-    12 12 │   
+      6   6 │   
+      7   7 │   // Multiple parameters only in recursion
+      8     │ - function·fn(a,·b,·c)·{
+          8 │ + function·fn(a,·_b,·c)·{
+      9   9 │       if (a === 0) return 0;
+     10     │ - ····return·fn(a·-·1,·b,·c);
+         10 │ + ····return·fn(a·-·1,·_b,·c);
+     11  11 │   }
+     12  12 │   
   
 
 ```
@@ -165,15 +189,15 @@ invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━
   
   i Unsafe fix: If this is intentional, prepend c with an underscore.
   
-     6  6 │   
-     7  7 │   // Multiple parameters only in recursion
-     8    │ - function·fn(a,·b,·c)·{
-        8 │ + function·fn(a,·b,·_c)·{
-     9  9 │       if (a === 0) return 0;
-    10    │ - ····return·fn(a·-·1,·b,·c);
-       10 │ + ····return·fn(a·-·1,·b,·_c);
-    11 11 │   }
-    12 12 │   
+      6   6 │   
+      7   7 │   // Multiple parameters only in recursion
+      8     │ - function·fn(a,·b,·c)·{
+          8 │ + function·fn(a,·b,·_c)·{
+      9   9 │       if (a === 0) return 0;
+     10     │ - ····return·fn(a·-·1,·b,·c);
+         10 │ + ····return·fn(a·-·1,·b,·_c);
+     11  11 │   }
+     12  12 │   
   
 
 ```
@@ -195,15 +219,15 @@ invalid.js:14:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    12 12 │   
-    13 13 │   // Arrow function with recursion
-    14    │ - const·countdown·=·(n,·acc)·=>·{
-       14 │ + const·countdown·=·(n,·_acc)·=>·{
-    15 15 │       if (n === 0) return 0;
-    16    │ - ····return·countdown(n·-·1,·acc);
-       16 │ + ····return·countdown(n·-·1,·_acc);
-    17 17 │   };
-    18 18 │   
+     12  12 │   
+     13  13 │   // Arrow function with recursion
+     14     │ - const·countdown·=·(n,·acc)·=>·{
+         14 │ + const·countdown·=·(n,·_acc)·=>·{
+     15  15 │       if (n === 0) return 0;
+     16     │ - ····return·countdown(n·-·1,·acc);
+         16 │ + ····return·countdown(n·-·1,·_acc);
+     17  17 │   };
+     18  18 │   
   
 
 ```
@@ -226,15 +250,15 @@ invalid.js:21:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    19 19 │   // Method in class
-    20 20 │   class Counter {
-    21    │ - ····count(n,·acc)·{
-       21 │ + ····count(n,·_acc)·{
-    22 22 │           if (n === 0) return 0;
-    23    │ - ········return·this.count(n·-·1,·acc);
-       23 │ + ········return·this.count(n·-·1,·_acc);
-    24 24 │       }
-    25 25 │   }
+     19  19 │   // Method in class
+     20  20 │   class Counter {
+     21     │ - ····count(n,·acc)·{
+         21 │ + ····count(n,·_acc)·{
+     22  22 │           if (n === 0) return 0;
+     23     │ - ········return·this.count(n·-·1,·acc);
+         23 │ + ········return·this.count(n·-·1,·_acc);
+     24  24 │       }
+     25  25 │   }
   
 
 ```
@@ -256,15 +280,15 @@ invalid.js:28:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend step with an underscore.
   
-    26 26 │   
-    27 27 │   // Parameter with arithmetic in recursion
-    28    │ - function·countdown(n,·step)·{
-       28 │ + function·countdown(n,·_step)·{
-    29 29 │       if (n === 0) return 0;
-    30    │ - ····return·countdown(n·-·step,·step);
-       30 │ + ····return·countdown(n·-·_step,·_step);
-    31 31 │   }
-    32 32 │   
+     26  26 │   
+     27  27 │   // Parameter with arithmetic in recursion
+     28     │ - function·countdown(n,·step)·{
+         28 │ + function·countdown(n,·_step)·{
+     29  29 │       if (n === 0) return 0;
+     30     │ - ····return·countdown(n·-·step,·step);
+         30 │ + ····return·countdown(n·-·_step,·_step);
+     31  31 │   }
+     32  32 │   
   
 
 ```
@@ -286,15 +310,15 @@ invalid.js:34:21 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend b with an underscore.
   
-    32 32 │   
-    33 33 │   // Multiple operations
-    34    │ - function·compute(a,·b)·{
-       34 │ + function·compute(a,·_b)·{
-    35 35 │       if (a === 0) return 0;
-    36    │ - ····return·compute(a·-·1,·b·*·2·+·1);
-       36 │ + ····return·compute(a·-·1,·_b·*·2·+·1);
-    37 37 │   }
-    38 38 │   
+     32  32 │   
+     33  33 │   // Multiple operations
+     34     │ - function·compute(a,·b)·{
+         34 │ + function·compute(a,·_b)·{
+     35  35 │       if (a === 0) return 0;
+     36     │ - ····return·compute(a·-·1,·b·*·2·+·1);
+         36 │ + ····return·compute(a·-·1,·_b·*·2·+·1);
+     37  37 │   }
+     38  38 │   
   
 
 ```
@@ -316,15 +340,15 @@ invalid.js:40:20 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend flag with an underscore.
   
-    38 38 │   
-    39 39 │   // Unary operations
-    40    │ - function·negate(n,·flag)·{
-       40 │ + function·negate(n,·_flag)·{
-    41 41 │       if (n === 0) return 0;
-    42    │ - ····return·negate(n·-·1,·!flag);
-       42 │ + ····return·negate(n·-·1,·!_flag);
-    43 43 │   }
-    44 44 │   
+     38  38 │   
+     39  39 │   // Unary operations
+     40     │ - function·negate(n,·flag)·{
+         40 │ + function·negate(n,·_flag)·{
+     41  41 │       if (n === 0) return 0;
+     42     │ - ····return·negate(n·-·1,·!flag);
+         42 │ + ····return·negate(n·-·1,·!_flag);
+     43  43 │   }
+     44  44 │   
   
 
 ```
@@ -347,15 +371,15 @@ invalid.js:47:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend step with an underscore.
   
-    45 45 │   // Object method
-    46 46 │   const obj = {
-    47    │ - ····count(n,·step)·{
-       47 │ + ····count(n,·_step)·{
-    48 48 │           if (n === 0) return 0;
-    49    │ - ········return·this.count(n·-·step,·step);
-       49 │ + ········return·this.count(n·-·_step,·_step);
-    50 50 │       }
-    51 51 │   };
+     45  45 │   // Object method
+     46  46 │   const obj = {
+     47     │ - ····count(n,·step)·{
+         47 │ + ····count(n,·_step)·{
+     48  48 │           if (n === 0) return 0;
+     49     │ - ········return·this.count(n·-·step,·step);
+         49 │ + ········return·this.count(n·-·_step,·_step);
+     50  50 │       }
+     51  51 │   };
   
 
 ```
@@ -377,15 +401,15 @@ invalid.js:54:11 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    52 52 │   
-    53 53 │   // Assignment expression with recursive arrow function
-    54    │ - foo·=·(n,·acc)·=>·{
-       54 │ + foo·=·(n,·_acc)·=>·{
-    55 55 │       if (n === 0) return 0;
-    56    │ - ····return·foo(n·-·1,·acc);
-       56 │ + ····return·foo(n·-·1,·_acc);
-    57 57 │   };
-    58 58 │   
+     52  52 │   
+     53  53 │   // Assignment expression with recursive arrow function
+     54     │ - foo·=·(n,·acc)·=>·{
+         54 │ + foo·=·(n,·_acc)·=>·{
+     55  55 │       if (n === 0) return 0;
+     56     │ - ····return·foo(n·-·1,·acc);
+         56 │ + ····return·foo(n·-·1,·_acc);
+     57  57 │   };
+     58  58 │   
   
 
 ```
@@ -407,15 +431,15 @@ invalid.js:60:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    58 58 │   
-    59 59 │   // Logical AND operator
-    60    │ - function·fnAnd(n,·acc)·{
-       60 │ + function·fnAnd(n,·_acc)·{
-    61 61 │       if (n === 0) return 0;
-    62    │ - ····return·fnAnd(n·-·1,·acc·&&·true);
-       62 │ + ····return·fnAnd(n·-·1,·_acc·&&·true);
-    63 63 │   }
-    64 64 │   
+     58  58 │   
+     59  59 │   // Logical AND operator
+     60     │ - function·fnAnd(n,·acc)·{
+         60 │ + function·fnAnd(n,·_acc)·{
+     61  61 │       if (n === 0) return 0;
+     62     │ - ····return·fnAnd(n·-·1,·acc·&&·true);
+         62 │ + ····return·fnAnd(n·-·1,·_acc·&&·true);
+     63  63 │   }
+     64  64 │   
   
 
 ```
@@ -437,15 +461,15 @@ invalid.js:66:18 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    64 64 │   
-    65 65 │   // Logical OR operator
-    66    │ - function·fnOr(n,·acc)·{
-       66 │ + function·fnOr(n,·_acc)·{
-    67 67 │       if (n === 0) return 0;
-    68    │ - ····return·fnOr(n·-·1,·acc·||·0);
-       68 │ + ····return·fnOr(n·-·1,·_acc·||·0);
-    69 69 │   }
-    70 70 │   
+     64  64 │   
+     65  65 │   // Logical OR operator
+     66     │ - function·fnOr(n,·acc)·{
+         66 │ + function·fnOr(n,·_acc)·{
+     67  67 │       if (n === 0) return 0;
+     68     │ - ····return·fnOr(n·-·1,·acc·||·0);
+         68 │ + ····return·fnOr(n·-·1,·_acc·||·0);
+     69  69 │   }
+     70  70 │   
   
 
 ```
@@ -467,15 +491,15 @@ invalid.js:72:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    70 70 │   
-    71 71 │   // Nullish coalescing operator
-    72    │ - function·fnNullish(n,·acc)·{
-       72 │ + function·fnNullish(n,·_acc)·{
-    73 73 │       if (n === 0) return 0;
-    74    │ - ····return·fnNullish(n·-·1,·acc·??·0);
-       74 │ + ····return·fnNullish(n·-·1,·_acc·??·0);
-    75 75 │   }
-    76 76 │   
+     70  70 │   
+     71  71 │   // Nullish coalescing operator
+     72     │ - function·fnNullish(n,·acc)·{
+         72 │ + function·fnNullish(n,·_acc)·{
+     73  73 │       if (n === 0) return 0;
+     74     │ - ····return·fnNullish(n·-·1,·acc·??·0);
+         74 │ + ····return·fnNullish(n·-·1,·_acc·??·0);
+     75  75 │   }
+     76  76 │   
   
 
 ```
@@ -497,15 +521,135 @@ invalid.js:78:22 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━�
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
-    76 76 │   
-    77 77 │   // Nested logical operators
-    78    │ - function·fnNested(n,·acc)·{
-       78 │ + function·fnNested(n,·_acc)·{
-    79 79 │       if (n === 0) return 0;
-    80    │ - ····return·fnNested(n·-·1,·(acc·||·0)·&&·true);
-       80 │ + ····return·fnNested(n·-·1,·(_acc·||·0)·&&·true);
-    81 81 │   }
-    82 82 │   
+     76  76 │   
+     77  77 │   // Nested logical operators
+     78     │ - function·fnNested(n,·acc)·{
+         78 │ + function·fnNested(n,·_acc)·{
+     79  79 │       if (n === 0) return 0;
+     80     │ - ····return·fnNested(n·-·1,·(acc·||·0)·&&·true);
+         80 │ + ····return·fnNested(n·-·1,·(_acc·||·0)·&&·true);
+     81  81 │   }
+     82  82 │   
+  
+
+```
+
+```
+invalid.js:84:30 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    83 │ // Conditional expression with parameter in consequent
+  > 84 │ function fnCondConsequent(n, acc) {
+       │                              ^^^
+    85 │     if (n === 0) return 0;
+    86 │     return fnCondConsequent(n - 1, n > 5 ? acc : 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     82  82 │   
+     83  83 │   // Conditional expression with parameter in consequent
+     84     │ - function·fnCondConsequent(n,·acc)·{
+         84 │ + function·fnCondConsequent(n,·_acc)·{
+     85  85 │       if (n === 0) return 0;
+     86     │ - ····return·fnCondConsequent(n·-·1,·n·>·5·?·acc·:·0);
+         86 │ + ····return·fnCondConsequent(n·-·1,·n·>·5·?·_acc·:·0);
+     87  87 │   }
+     88  88 │   
+  
+
+```
+
+```
+invalid.js:90:29 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    89 │ // Conditional expression with parameter in alternate
+  > 90 │ function fnCondAlternate(n, acc) {
+       │                             ^^^
+    91 │     if (n === 0) return 0;
+    92 │     return fnCondAlternate(n - 1, n > 5 ? 0 : acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     88  88 │   
+     89  89 │   // Conditional expression with parameter in alternate
+     90     │ - function·fnCondAlternate(n,·acc)·{
+         90 │ + function·fnCondAlternate(n,·_acc)·{
+     91  91 │       if (n === 0) return 0;
+     92     │ - ····return·fnCondAlternate(n·-·1,·n·>·5·?·0·:·acc);
+         92 │ + ····return·fnCondAlternate(n·-·1,·n·>·5·?·0·:·_acc);
+     93  93 │   }
+     94  94 │   
+  
+
+```
+
+```
+invalid.js:96:24 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    95 │ // Conditional expression with parameter in test
+  > 96 │ function fnCondTest(n, flag) {
+       │                        ^^^^
+    97 │     if (n === 0) return 0;
+    98 │     return fnCondTest(n - 1, flag ? true : false);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend flag with an underscore.
+  
+     94  94 │   
+     95  95 │   // Conditional expression with parameter in test
+     96     │ - function·fnCondTest(n,·flag)·{
+         96 │ + function·fnCondTest(n,·_flag)·{
+     97  97 │       if (n === 0) return 0;
+     98     │ - ····return·fnCondTest(n·-·1,·flag·?·true·:·false);
+         98 │ + ····return·fnCondTest(n·-·1,·_flag·?·true·:·false);
+     99  99 │   }
+    100 100 │   
+  
+
+```
+
+```
+invalid.js:102:26 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    101 │ // Nested conditional expressions
+  > 102 │ function fnCondNested(n, acc) {
+        │                          ^^^
+    103 │     if (n === 0) return 0;
+    104 │     return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    100 100 │   
+    101 101 │   // Nested conditional expressions
+    102     │ - function·fnCondNested(n,·acc)·{
+        102 │ + function·fnCondNested(n,·_acc)·{
+    103 103 │       if (n === 0) return 0;
+    104     │ - ····return·fnCondNested(n·-·1,·n·>·5·?·(n·>·10·?·acc·:·0)·:·0);
+        104 │ + ····return·fnCondNested(n·-·1,·n·>·5·?·(n·>·10·?·_acc·:·0)·:·0);
+    105 105 │   }
+    106 106 │   
   
 
 ```

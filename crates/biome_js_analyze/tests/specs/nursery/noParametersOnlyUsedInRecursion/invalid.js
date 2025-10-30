@@ -79,3 +79,27 @@ function fnNested(n, acc) {
     if (n === 0) return 0;
     return fnNested(n - 1, (acc || 0) && true);
 }
+
+// Conditional expression with parameter in consequent
+function fnCondConsequent(n, acc) {
+    if (n === 0) return 0;
+    return fnCondConsequent(n - 1, n > 5 ? acc : 0);
+}
+
+// Conditional expression with parameter in alternate
+function fnCondAlternate(n, acc) {
+    if (n === 0) return 0;
+    return fnCondAlternate(n - 1, n > 5 ? 0 : acc);
+}
+
+// Conditional expression with parameter in test
+function fnCondTest(n, flag) {
+    if (n === 0) return 0;
+    return fnCondTest(n - 1, flag ? true : false);
+}
+
+// Nested conditional expressions
+function fnCondNested(n, acc) {
+    if (n === 0) return 0;
+    return fnCondNested(n - 1, n > 5 ? (n > 10 ? acc : 0) : 0);
+}

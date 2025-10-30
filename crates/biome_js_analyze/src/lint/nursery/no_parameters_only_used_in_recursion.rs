@@ -443,6 +443,21 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
             continue;
         }
 
+        // Conditional expression: cond ? a : b
+        // Add all three parts to worklist (test, consequent, alternate)
+        if let Some(cond_expr) = current_expr.as_js_conditional_expression() {
+            if let Ok(test) = cond_expr.test() {
+                to_check.push(test);
+            }
+            if let Ok(consequent) = cond_expr.consequent() {
+                to_check.push(consequent);
+            }
+            if let Ok(alternate) = cond_expr.alternate() {
+                to_check.push(alternate);
+            }
+            continue;
+        }
+
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {

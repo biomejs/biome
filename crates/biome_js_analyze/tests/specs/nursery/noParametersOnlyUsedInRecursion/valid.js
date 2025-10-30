@@ -54,3 +54,15 @@ function fnValidReturn(n, acc) {
     if (n === 0) return acc || 0;
     return fnValidReturn(n - 1, acc);
 }
+
+// Parameter used in condition that affects control flow
+function fnValidCond(n, threshold) {
+    if (n > threshold) return threshold;  // Used outside recursion
+    return fnValidCond(n + 1, threshold);
+}
+
+// Parameter used in return value of conditional expression
+function fnValidCondReturn(n, acc) {
+    if (n === 0) return n > 5 ? acc : 0;
+    return fnValidCondReturn(n - 1, acc * 2);
+}
