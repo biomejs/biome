@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsVariableDeclarator,
     binding_ext::AnyJsParameterParentFunction,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 declare_lint_rule! {
     /// Disallow function parameters that are only used in recursive calls.
@@ -125,7 +125,7 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         for reference in all_refs {
             if is_reference_in_recursive_call(
                 &reference,
-                function_name.as_deref(),
+                function_name.as_ref(),
                 &parent_function,
                 name_text,
             ) {
@@ -201,31 +201,31 @@ fn get_parent_function(binding: &JsIdentifierBinding) -> Option<AnyJsParameterPa
     }
 }
 
-fn get_function_name(parent_function: &AnyJsParameterParentFunction) -> Option<String> {
+fn get_function_name(parent_function: &AnyJsParameterParentFunction) -> Option<TokenText> {
     match parent_function {
         AnyJsParameterParentFunction::JsFunctionDeclaration(decl) => decl
             .id()
             .ok()
             .and_then(|any_binding| any_binding.as_js_identifier_binding().cloned())
             .and_then(|id| id.name_token().ok())
-            .map(|t| t.text_trimmed().to_string()),
+            .map(|t| t.token_text_trimmed()),
         AnyJsParameterParentFunction::JsFunctionExpression(expr) => expr
             .id()
             .and_then(|any_binding| any_binding.as_js_identifier_binding().cloned())
             .and_then(|id| id.name_token().ok())
-            .map(|t| t.text_trimmed().to_string()),
+            .map(|t| t.token_text_trimmed()),
         AnyJsParameterParentFunction::JsMethodClassMember(method) => method
             .name()
             .ok()
             .and_then(|name| name.as_js_literal_member_name().cloned())
             .and_then(|lit| lit.value().ok())
-            .map(|t| t.text_trimmed().to_string()),
+            .map(|t| t.token_text_trimmed()),
         AnyJsParameterParentFunction::JsMethodObjectMember(method) => method
             .name()
             .ok()
             .and_then(|name| name.as_js_literal_member_name().cloned())
             .and_then(|lit| lit.value().ok())
-            .map(|t| t.text_trimmed().to_string()),
+            .map(|t| t.token_text_trimmed()),
         // Arrow functions: extract name from surrounding variable declarator or assignment
         AnyJsParameterParentFunction::JsArrowFunctionExpression(arrow) => {
             get_arrow_function_name(arrow)
@@ -242,7 +242,7 @@ fn get_function_name(parent_function: &AnyJsParameterParentFunction) -> Option<S
 /// Returns `None` for anonymous arrow functions that cannot be recursively called.
 fn get_arrow_function_name(
     arrow_fn: &biome_js_syntax::JsArrowFunctionExpression,
-) -> Option<String> {
+) -> Option<TokenText> {
     let arrow_syntax = arrow_fn.syntax();
 
     // Walk up the syntax tree to find a variable declarator or assignment
@@ -261,7 +261,7 @@ fn get_arrow_function_name(
                 .as_js_identifier_binding()?
                 .name_token()
                 .ok()
-                .map(|t| t.text_trimmed().to_string());
+                .map(|t| t.token_text_trimmed());
         }
 
         // Stop searching if we hit a function boundary
@@ -307,7 +307,7 @@ fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool
     )
 }
 
-fn is_recursive_call(call: &JsCallExpression, function_name: Option<&str>) -> bool {
+fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
     };
@@ -320,7 +320,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&str>) -> bo
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id.name().ok().is_some_and(|n| n.text() == name);
+        return ref_id.name().ok().is_some_and(|n| n.text() == name.text());
     }
 
     // Member expression: this.foo() or obj.foo()
@@ -339,7 +339,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&str>) -> bo
         let member_name_matches = member.member().ok().is_some_and(|m| {
             m.as_js_name()
                 .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed() == name)
+                .is_some_and(|t| t.text_trimmed() == name.text())
         });
 
         return member_name_matches;
@@ -350,7 +350,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&str>) -> bo
 
 fn is_reference_in_recursive_call(
     reference: &biome_js_semantic::Reference,
-    function_name: Option<&str>,
+    function_name: Option<&TokenText>,
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
 ) -> bool {
@@ -382,59 +382,72 @@ fn is_function_boundary(
     node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
     parent_function: &AnyJsParameterParentFunction,
 ) -> bool {
-    // Check if this node matches our parent function by comparing text ranges
-    node.text_trimmed_range() == parent_function.syntax().text_trimmed_range()
+    // Direct syntax node comparison
+    node == parent_function.syntax()
 }
 
 /// Checks if an expression traces back to a specific parameter
 /// through "safe" operations (arithmetic, unary, field access)
+///
+/// Uses an iterative approach with a worklist to avoid stack overflow
+/// on deeply nested expressions.
 fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
-    // Direct parameter reference
-    if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id.name().ok().is_some_and(|n| n.text() == param_name);
+    // Worklist of expressions to examine
+    let mut to_check = vec![expr.clone()];
+
+    while let Some(current_expr) = to_check.pop() {
+        // Omit parentheses
+        let current_expr = current_expr.omit_parentheses();
+
+        // Direct parameter reference - found it!
+        if let Some(ref_id) = current_expr.as_js_reference_identifier() {
+            if ref_id.name().ok().is_some_and(|n| n.text() == param_name) {
+                return true;
+            }
+            continue;
+        }
+
+        // Binary operations: a + 1, a - b
+        // Add both sides to worklist
+        if let Some(bin_expr) = current_expr.as_js_binary_expression() {
+            if let Ok(left) = bin_expr.left() {
+                to_check.push(left);
+            }
+            if let Ok(right) = bin_expr.right() {
+                to_check.push(right);
+            }
+            continue;
+        }
+
+        // Unary operations: -a, !flag
+        // Add argument to worklist
+        if let Some(unary_expr) = current_expr.as_js_unary_expression() {
+            if let Ok(arg) = unary_expr.argument() {
+                to_check.push(arg);
+            }
+            continue;
+        }
+
+        // Static member access: obj.field
+        // Add object to worklist
+        if let Some(member_expr) = current_expr.as_js_static_member_expression()
+            && let Ok(obj) = member_expr.object()
+        {
+            to_check.push(obj);
+        }
+
+        // Any other expression - not safe to trace
+        // Just continue to next item in worklist
     }
 
-    // Binary operations: a + 1, a - b
-    if let Some(bin_expr) = expr.as_js_binary_expression() {
-        let left = bin_expr.left().ok();
-        let right = bin_expr.right().ok();
-
-        return left.is_some_and(|l| traces_to_parameter(&l, param_name))
-            || right.is_some_and(|r| traces_to_parameter(&r, param_name));
-    }
-
-    // Unary operations: -a, !flag
-    if let Some(unary_expr) = expr.as_js_unary_expression() {
-        return unary_expr
-            .argument()
-            .ok()
-            .is_some_and(|arg| traces_to_parameter(&arg, param_name));
-    }
-
-    // Parenthesized: (a + 1)
-    if let Some(paren_expr) = expr.as_js_parenthesized_expression() {
-        return paren_expr
-            .expression()
-            .ok()
-            .is_some_and(|e| traces_to_parameter(&e, param_name));
-    }
-
-    // Static member access: obj.field (conservative: only trace if primitive)
-    if let Some(member_expr) = expr.as_js_static_member_expression() {
-        return member_expr
-            .object()
-            .ok()
-            .is_some_and(|obj| traces_to_parameter(&obj, param_name));
-    }
-
-    // Any other expression (function calls, etc.) - not safe to trace
+    // Didn't find the parameter anywhere
     false
 }
 
 /// Enhanced version that checks if any argument traces to parameters
 fn is_recursive_call_with_param_usage(
     call: &JsCallExpression,
-    function_name: Option<&str>,
+    function_name: Option<&TokenText>,
     param_name: &str,
 ) -> bool {
     // First check if this is a recursive call at all
