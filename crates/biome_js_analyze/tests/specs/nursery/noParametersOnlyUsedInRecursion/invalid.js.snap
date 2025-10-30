@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Simple case: parameter only used in recursion
+function factorial(n, acc) {
+    if (n === 0) return 1;
+    return factorial(n - 1, acc);
+}
+
+// Multiple parameters only in recursion
+function fn(a, b, c) {
+    if (a === 0) return 0;
+    return fn(a - 1, b, c);
+}
+
+// Arrow function with recursion
+const countdown = (n, acc) => {
+    if (n === 0) return 0;
+    return countdown(n - 1, acc);
+};
+
+// Method in class
+class Counter {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this.count(n - 1, acc);
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    1 │ // Simple case: parameter only used in recursion
+  > 2 │ function factorial(n, acc) {
+      │                       ^^^
+    3 │     if (n === 0) return 1;
+    4 │     return factorial(n - 1, acc);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```
+
+```
+invalid.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters only in recursion
+   > 8 │ function fn(a, b, c) {
+       │                ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```
+
+```
+invalid.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters only in recursion
+   > 8 │ function fn(a, b, c) {
+       │                   ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters only used in recursion can be removed to simplify the function.
+  
+
+```

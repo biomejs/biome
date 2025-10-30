@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
 /* should not generate diagnostics */
 
 // Parameter used outside recursion
@@ -24,3 +30,5 @@ function fn2(n, logger) {
     if (n === 0) return 0;
     return fn2(n - 1, logger);
 }
+
+```
