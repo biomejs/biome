@@ -1699,7 +1699,7 @@ export interface Nursery {
 	/**
 	 * Disallow function parameters that are only used in recursive calls.
 	 */
-	noParametersOnlyUsedInRecursion?: RuleConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
+	noParametersOnlyUsedInRecursion?: RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
 	/**
 	 * Replaces usages of forwardRef with passing ref as a prop.
 	 */
@@ -3077,9 +3077,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
-export type RuleConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
+export type RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoParametersOnlyUsedInRecursionOptions;
+	| RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions;
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
@@ -5568,7 +5568,11 @@ export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	 */
 	options: NoNextAsyncClientComponentOptions;
 }
-export interface RuleWithOptions_for_NoParametersOnlyUsedInRecursionOptions {
+export interface RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */

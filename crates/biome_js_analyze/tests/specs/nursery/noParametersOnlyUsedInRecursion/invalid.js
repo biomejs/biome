@@ -41,3 +41,11 @@ function negate(n, flag) {
     if (n === 0) return 0;
     return negate(n - 1, !flag);
 }
+
+// Object method
+const obj = {
+    count(n, step) {
+        if (n === 0) return 0;
+        return this.count(n - step, step);
+    }
+};
