@@ -95,12 +95,23 @@ impl Rule for NoExtraNonNullAssertion {
                 // - JsCallExpression[optional] > TsNonNullAssertionExpression
                 // - JsStaticMemberExpression[optional] > TsNonNullAssertionExpression
                 let has_extra_non_assertion = match parent {
-                    AnyJsExpression::JsAssignmentExpression(expr) => expr
-                        .left()
-                        .ok()?
-                        .as_any_js_assignment()?
-                        .as_ts_non_null_assertion_assignment()
-                        .is_some(),
+                    AnyJsExpression::JsAssignmentExpression(expr) => {
+                        // Only flag if the non-null assertion is nested within the left side,
+                        // not if it's on the right side of the assignment
+                        let left = expr.left().ok()?;
+                        let left_syntax = left.syntax();
+                        let current_syntax = node.syntax();
+                        
+                        // Check if current node is nested within the left side
+                        if left_syntax.descendants().any(|desc| desc == *current_syntax) {
+                            left.as_any_js_assignment()?
+                                .as_ts_non_null_assertion_assignment()
+                                .is_some()
+                        } else {
+                            // Current node is on the right side, don't flag it
+                            false
+                        }
+                    },
                     AnyJsExpression::TsNonNullAssertionExpression(_) => true,
                     AnyJsExpression::JsStaticMemberExpression(expr) => expr.is_optional(),
                     AnyJsExpression::JsCallExpression(expr) => expr.is_optional(),
