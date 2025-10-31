@@ -1580,6 +1580,8 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
+ "biome_glimmer_parser",
+ "biome_glimmer_syntax",
  "biome_glob",
  "biome_graphql_analyze",
  "biome_graphql_formatter",

@@ -15,5 +15,5 @@ version              = "0.0.1"
 workspace = true
 
 [dependencies]
-biome_glimmer_syntax = { path = "../biome_glimmer_syntax" }
+biome_glimmer_syntax = { workspace = true }
 biome_rowan          = { workspace = true, features = ["serde"] }

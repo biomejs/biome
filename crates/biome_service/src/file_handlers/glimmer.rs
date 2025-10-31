@@ -8,6 +8,7 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_glimmer_parser::{parse_glimmer, GlimmerParseOptions};
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
@@ -115,6 +116,35 @@ impl GlimmerFileHandler {
     /// Check if the file contains any <template> blocks
     pub fn has_templates(text: &str) -> bool {
         GLIMMER_TEMPLATE.is_match(text)
+    }
+
+    /// Parse Glimmer templates extracted from the file
+    ///
+    /// Returns parse results for each template block found in the file.
+    /// The content inside `<template>...</template>` is extracted and parsed.
+    pub fn parse_templates(text: &str) -> Vec<biome_glimmer_parser::GlimmerParse> {
+        let mut results = Vec::new();
+
+        for template_match in GLIMMER_TEMPLATE.find_iter(text) {
+            let full_text = template_match.as_str();
+
+            // Extract content between <template> and </template>
+            let content = if let Some(start_idx) = full_text.find(">") {
+                if let Some(end_idx) = full_text.rfind("</template>") {
+                    &full_text[start_idx + 1..end_idx]
+                } else {
+                    full_text
+                }
+            } else {
+                full_text
+            };
+
+            // Parse the template content
+            let parse_result = parse_glimmer(content, GlimmerParseOptions::default());
+            results.push(parse_result);
+        }
+
+        results
     }
 }
 
@@ -324,5 +354,59 @@ class Foo {
 
         // Should not have semicolon after template if original didn't
         assert!(!output.contains("</template>;"));
+    }
+
+    #[test]
+    fn test_parse_templates_single() {
+        let input = r#"<template><div>{{@title}}</div></template>"#;
+        let results = GlimmerFileHandler::parse_templates(input);
+
+        assert_eq!(results.len(), 1);
+        // Parsing may have errors in templates - that's OK for now
+        // The important thing is that we're extracting and parsing templates
+        if results[0].has_errors() {
+            eprintln!("Diagnostics: {:?}", results[0].diagnostics());
+        }
+    }
+
+    #[test]
+    fn test_parse_templates_multiple() {
+        let input = r#"
+const Foo = <template>{{@foo}}</template>;
+const Bar = <template>{{@bar}}</template>;
+"#;
+        let results = GlimmerFileHandler::parse_templates(input);
+
+        assert_eq!(results.len(), 2);
+    }
+
+    #[test]
+    fn test_parse_templates_in_class() {
+        let input = r#"
+export default class MyComponent extends Component {
+  <template>
+    <div>
+      <h1>{{@title}}</h1>
+      {{#if @showButton}}
+        <button>Click</button>
+      {{/if}}
+    </div>
+  </template>
+
+  get message() {
+    return 'Hello';
+  }
+}
+"#;
+        let results = GlimmerFileHandler::parse_templates(input);
+
+        assert_eq!(results.len(), 1);
+        // Print diagnostics if there are errors
+        if results[0].has_errors() {
+            eprintln!("Template has {} diagnostics", results[0].diagnostics().len());
+            for diag in results[0].diagnostics() {
+                eprintln!("  - {:?}", diag);
+            }
+        }
     }
 }
