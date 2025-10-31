@@ -255,9 +255,9 @@ helper: GlimmerPath
 // Block parameters: as |item index|
 GlimmerBlockParams =
 'as'
-'|'
+l_pipe_token: '|'
 params: GlimmerBlockParamList
-'|'
+r_pipe_token: '|'
 
 GlimmerBlockParamList = (GlimmerBlockParam (',' GlimmerBlockParam)*)
 
@@ -293,8 +293,14 @@ value: AnyGlimmerArgumentValue
 
 AnyGlimmerArgumentValue =
   GlimmerPath
-  | 'html_string_literal'
-  | 'html_literal'
+  | GlimmerStringLiteral
+  | GlimmerLiteral
+
+// String literal for Glimmer arguments: "string"
+GlimmerStringLiteral = value: 'html_string_literal'
+
+// Bare literal for Glimmer arguments: 123, true, identifier
+GlimmerLiteral = value: 'html_literal'
 
 // Splattribute: ...attrs
 GlimmerSplattribute =

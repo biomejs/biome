@@ -19,51 +19,8 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             | HTML_BOGUS
             | HTML_BOGUS_ATTRIBUTE
             | HTML_BOGUS_ELEMENT
-<<<<<<< HEAD
             | HTML_BOGUS_TEXT_EXPRESSION
             | SVELTE_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
-||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
-            | HTML_BOGUS_TEXT_EXPRESSION => {
-                RawSyntaxNode::new(kind, children.into_iter().map(Some))
-            }
-=======
-            | HTML_BOGUS_TEXT_EXPRESSION => {
-                RawSyntaxNode::new(kind, children.into_iter().map(Some))
-            }
-            ANY_GLIMMER_ARGUMENT_VALUE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && GlimmerPath::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == HTML_STRING_LITERAL
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        ANY_GLIMMER_ARGUMENT_VALUE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(ANY_GLIMMER_ARGUMENT_VALUE, children)
-            }
->>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
             ASTRO_EMBEDDED_CONTENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -302,6 +259,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(GLIMMER_BLOCK_PARAMS, children)
             }
+            GLIMMER_LITERAL => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_LITERAL.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_LITERAL, children)
+            }
             GLIMMER_MUSTACHE_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -478,6 +454,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(GLIMMER_SPLATTRIBUTE, children)
+            }
+            GLIMMER_STRING_LITERAL => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_STRING_LITERAL.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_STRING_LITERAL, children)
             }
             HTML_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();
@@ -1019,7 +1014,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_TEXT_EXPRESSION, children)
             }
-<<<<<<< HEAD
             SVELTE_DEBUG_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -1079,8 +1073,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_NAME, children)
             }
-||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
-=======
             GLIMMER_ARGUMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyGlimmerArgument::can_cast)
             }
@@ -1091,7 +1083,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 T ! [,],
                 false,
             ),
->>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
             GLIMMER_PATH_SEGMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, GlimmerPathSegment::can_cast)
             }

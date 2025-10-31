@@ -6,20 +6,6 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn any_glimmer_argument_value(
-    glimmer_path: GlimmerPath,
-    html_string_literal_token: SyntaxToken,
-    html_literal_token: SyntaxToken,
-) -> AnyGlimmerArgumentValue {
-    AnyGlimmerArgumentValue::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::ANY_GLIMMER_ARGUMENT_VALUE,
-        [
-            Some(SyntaxElement::Node(glimmer_path.into_syntax())),
-            Some(SyntaxElement::Token(html_string_literal_token)),
-            Some(SyntaxElement::Token(html_literal_token)),
-        ],
-    ))
-}
 pub fn astro_embedded_content() -> AstroEmbeddedContentBuilder {
     AstroEmbeddedContentBuilder {
         content_token: None,
@@ -136,18 +122,24 @@ pub fn glimmer_block_param(ident_token: SyntaxToken) -> GlimmerBlockParam {
 }
 pub fn glimmer_block_params(
     as_token: SyntaxToken,
-    bitwise_or_token: SyntaxToken,
+    l_pipe_token_token: SyntaxToken,
     params: GlimmerBlockParamList,
-    bitwise_or_token: SyntaxToken,
+    r_pipe_token_token: SyntaxToken,
 ) -> GlimmerBlockParams {
     GlimmerBlockParams::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::GLIMMER_BLOCK_PARAMS,
         [
             Some(SyntaxElement::Token(as_token)),
-            Some(SyntaxElement::Token(bitwise_or_token)),
+            Some(SyntaxElement::Token(l_pipe_token_token)),
             Some(SyntaxElement::Node(params.into_syntax())),
-            Some(SyntaxElement::Token(bitwise_or_token)),
+            Some(SyntaxElement::Token(r_pipe_token_token)),
         ],
+    ))
+}
+pub fn glimmer_literal(value_token: SyntaxToken) -> GlimmerLiteral {
+    GlimmerLiteral::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn glimmer_mustache_expression(
@@ -218,6 +210,12 @@ pub fn glimmer_splattribute(
             Some(SyntaxElement::Token(dotdotdot_token)),
             Some(SyntaxElement::Token(name_token)),
         ],
+    ))
+}
+pub fn glimmer_string_literal(value_token: SyntaxToken) -> GlimmerStringLiteral {
+    GlimmerStringLiteral::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_STRING_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
@@ -527,7 +525,6 @@ pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpressi
         [Some(SyntaxElement::Token(html_literal_token))],
     ))
 }
-<<<<<<< HEAD
 pub fn svelte_debug_block(
     sv_curly_at_token: SyntaxToken,
     debug_token: SyntaxToken,
@@ -548,8 +545,8 @@ pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
         [Some(SyntaxElement::Token(svelte_ident_token))],
-||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
-=======
+    ))
+}
 pub fn glimmer_argument_list<I>(items: I) -> GlimmerArgumentList
 where
     I: IntoIterator<Item = AnyGlimmerArgument>,
@@ -581,7 +578,6 @@ where
                 Some(separators.next()?.into())
             }
         }),
->>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
     ))
 }
 pub fn glimmer_path_segment_list<I>(items: I) -> GlimmerPathSegmentList

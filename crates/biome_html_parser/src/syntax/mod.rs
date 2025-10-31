@@ -23,6 +23,9 @@ pub(crate) enum HtmlSyntaxFeatures {
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
     SingleTextExpressions,
+    /// Exclusive to those documents that support Glimmer syntax
+    /// (block helpers, splattributes, etc.)
+    Glimmer,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -37,6 +40,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             Self::SingleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Single)
             }
+            Self::Glimmer => p.options().glimmer,
         }
     }
 }
