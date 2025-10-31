@@ -82,6 +82,222 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroFrontmatterElemen
         )
     }
 }
+impl FormatRule<biome_html_syntax::GlimmerBlockHelper>
+    for crate::glimmer::auxiliary::block_helper::FormatGlimmerBlockHelper
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBlockHelper,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerBlockHelper>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelper {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockHelper,
+        crate::glimmer::auxiliary::block_helper::FormatGlimmerBlockHelper,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_helper::FormatGlimmerBlockHelper::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelper {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockHelper,
+        crate::glimmer::auxiliary::block_helper::FormatGlimmerBlockHelper,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_helper::FormatGlimmerBlockHelper::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerBlockHelperClosing>
+    for crate::glimmer::auxiliary::block_helper_closing::FormatGlimmerBlockHelperClosing
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBlockHelperClosing,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerBlockHelperClosing>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelperClosing {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockHelperClosing,
+        crate::glimmer::auxiliary::block_helper_closing::FormatGlimmerBlockHelperClosing,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: glimmer :: auxiliary :: block_helper_closing :: FormatGlimmerBlockHelperClosing :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelperClosing {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockHelperClosing,
+        crate::glimmer::auxiliary::block_helper_closing::FormatGlimmerBlockHelperClosing,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: glimmer :: auxiliary :: block_helper_closing :: FormatGlimmerBlockHelperClosing :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerBlockHelperOpening>
+    for crate::glimmer::auxiliary::block_helper_opening::FormatGlimmerBlockHelperOpening
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBlockHelperOpening,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerBlockHelperOpening>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelperOpening {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockHelperOpening,
+        crate::glimmer::auxiliary::block_helper_opening::FormatGlimmerBlockHelperOpening,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: glimmer :: auxiliary :: block_helper_opening :: FormatGlimmerBlockHelperOpening :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockHelperOpening {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockHelperOpening,
+        crate::glimmer::auxiliary::block_helper_opening::FormatGlimmerBlockHelperOpening,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: glimmer :: auxiliary :: block_helper_opening :: FormatGlimmerBlockHelperOpening :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerBlockParam>
+    for crate::glimmer::auxiliary::block_param::FormatGlimmerBlockParam
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBlockParam,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerBlockParam>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParam {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockParam,
+        crate::glimmer::auxiliary::block_param::FormatGlimmerBlockParam,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_param::FormatGlimmerBlockParam::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParam {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockParam,
+        crate::glimmer::auxiliary::block_param::FormatGlimmerBlockParam,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_param::FormatGlimmerBlockParam::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerBlockParams>
+    for crate::glimmer::auxiliary::block_params::FormatGlimmerBlockParams
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBlockParams,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerBlockParams>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParams {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockParams,
+        crate::glimmer::auxiliary::block_params::FormatGlimmerBlockParams,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_params::FormatGlimmerBlockParams::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParams {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockParams,
+        crate::glimmer::auxiliary::block_params::FormatGlimmerBlockParams,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::block_params::FormatGlimmerBlockParams::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerLiteral>
+    for crate::glimmer::auxiliary::literal::FormatGlimmerLiteral
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerLiteral,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerLiteral>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerLiteral {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerLiteral,
+        crate::glimmer::auxiliary::literal::FormatGlimmerLiteral,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::literal::FormatGlimmerLiteral::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerLiteral {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerLiteral,
+        crate::glimmer::auxiliary::literal::FormatGlimmerLiteral,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::literal::FormatGlimmerLiteral::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::GlimmerMustacheExpression>
     for crate::glimmer::auxiliary::mustache_expression::FormatGlimmerMustacheExpression
 {
@@ -112,6 +328,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerMustacheExpress
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: glimmer :: auxiliary :: mustache_expression :: FormatGlimmerMustacheExpression :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerNamedArgument>
+    for crate::glimmer::auxiliary::named_argument::FormatGlimmerNamedArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerNamedArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerNamedArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerNamedArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerNamedArgument,
+        crate::glimmer::auxiliary::named_argument::FormatGlimmerNamedArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::named_argument::FormatGlimmerNamedArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerNamedArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerNamedArgument,
+        crate::glimmer::auxiliary::named_argument::FormatGlimmerNamedArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::named_argument::FormatGlimmerNamedArgument::default(),
+        )
     }
 }
 impl FormatRule<biome_html_syntax::GlimmerPath>
@@ -187,6 +441,114 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegment {
         FormatOwnedWithRule::new(
             self,
             crate::glimmer::auxiliary::path_segment::FormatGlimmerPathSegment::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerPositionalArgument>
+    for crate::glimmer::auxiliary::positional_argument::FormatGlimmerPositionalArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerPositionalArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerPositionalArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPositionalArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerPositionalArgument,
+        crate::glimmer::auxiliary::positional_argument::FormatGlimmerPositionalArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: glimmer :: auxiliary :: positional_argument :: FormatGlimmerPositionalArgument :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPositionalArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerPositionalArgument,
+        crate::glimmer::auxiliary::positional_argument::FormatGlimmerPositionalArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: glimmer :: auxiliary :: positional_argument :: FormatGlimmerPositionalArgument :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerSplattribute>
+    for crate::glimmer::auxiliary::splattribute::FormatGlimmerSplattribute
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerSplattribute,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerSplattribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerSplattribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerSplattribute,
+        crate::glimmer::auxiliary::splattribute::FormatGlimmerSplattribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::splattribute::FormatGlimmerSplattribute::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerSplattribute {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerSplattribute,
+        crate::glimmer::auxiliary::splattribute::FormatGlimmerSplattribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::splattribute::FormatGlimmerSplattribute::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerStringLiteral>
+    for crate::glimmer::auxiliary::string_literal::FormatGlimmerStringLiteral
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerStringLiteral,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::GlimmerStringLiteral>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerStringLiteral {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerStringLiteral,
+        crate::glimmer::auxiliary::string_literal::FormatGlimmerStringLiteral,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::auxiliary::string_literal::FormatGlimmerStringLiteral::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerStringLiteral {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerStringLiteral,
+        crate::glimmer::auxiliary::string_literal::FormatGlimmerStringLiteral,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::auxiliary::string_literal::FormatGlimmerStringLiteral::default(),
         )
     }
 }
@@ -896,6 +1258,56 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteName {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerArgumentList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerArgumentList,
+        crate::glimmer::lists::argument_list::FormatGlimmerArgumentList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::lists::argument_list::FormatGlimmerArgumentList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerArgumentList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerArgumentList,
+        crate::glimmer::lists::argument_list::FormatGlimmerArgumentList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::lists::argument_list::FormatGlimmerArgumentList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParamList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBlockParamList,
+        crate::glimmer::lists::block_param_list::FormatGlimmerBlockParamList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::lists::block_param_list::FormatGlimmerBlockParamList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBlockParamList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBlockParamList,
+        crate::glimmer::lists::block_param_list::FormatGlimmerBlockParamList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::lists::block_param_list::FormatGlimmerBlockParamList::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerPathSegmentList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -1031,6 +1443,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroBogusFrontmatter 
         FormatOwnedWithRule::new(
             self,
             crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::GlimmerBogusExpression>
+    for crate::glimmer::bogus::bogus_expression::FormatGlimmerBogusExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::GlimmerBogusExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_html_syntax::GlimmerBogusExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBogusExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::GlimmerBogusExpression,
+        crate::glimmer::bogus::bogus_expression::FormatGlimmerBogusExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::bogus::bogus_expression::FormatGlimmerBogusExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::GlimmerBogusExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::GlimmerBogusExpression,
+        crate::glimmer::bogus::bogus_expression::FormatGlimmerBogusExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::bogus::bogus_expression::FormatGlimmerBogusExpression::default(),
         )
     }
 }
@@ -1234,6 +1684,81 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAstroFrontmatterEle
         FormatOwnedWithRule::new(
             self,
             crate::astro::any::frontmatter_element::FormatAnyAstroFrontmatterElement::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyGlimmerArgument,
+        crate::glimmer::any::argument::FormatAnyGlimmerArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::any::argument::FormatAnyGlimmerArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyGlimmerArgument,
+        crate::glimmer::any::argument::FormatAnyGlimmerArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::any::argument::FormatAnyGlimmerArgument::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerArgumentValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyGlimmerArgumentValue,
+        crate::glimmer::any::argument_value::FormatAnyGlimmerArgumentValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::any::argument_value::FormatAnyGlimmerArgumentValue::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerArgumentValue {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyGlimmerArgumentValue,
+        crate::glimmer::any::argument_value::FormatAnyGlimmerArgumentValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::any::argument_value::FormatAnyGlimmerArgumentValue::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyGlimmerExpression,
+        crate::glimmer::any::expression::FormatAnyGlimmerExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::glimmer::any::expression::FormatAnyGlimmerExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyGlimmerExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyGlimmerExpression,
+        crate::glimmer::any::expression::FormatAnyGlimmerExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::glimmer::any::expression::FormatAnyGlimmerExpression::default(),
         )
     }
 }
