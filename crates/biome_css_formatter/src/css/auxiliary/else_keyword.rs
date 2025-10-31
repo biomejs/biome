@@ -4,6 +4,7 @@ use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssElseKeyword;
+
 impl FormatNodeRule<CssElseKeyword> for FormatCssElseKeyword {
     fn fmt_fields(&self, node: &CssElseKeyword, f: &mut CssFormatter) -> FormatResult<()> {
         let CssElseKeywordFields { else_token } = node.as_fields();
