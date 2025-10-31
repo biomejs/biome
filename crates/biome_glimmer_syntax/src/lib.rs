@@ -1,9 +1,10 @@
 #![deny(clippy::use_self)]
 
-mod generated;
+pub mod generated;
 mod syntax_node;
 
-pub use self::generated::*;
+pub use self::generated::kind::*;
+pub use self::generated::nodes::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };

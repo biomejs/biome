@@ -1,19 +1,19 @@
 [package]
 authors.workspace    = true
-description          = "Utilities to create Glimmer AST for biome_glimmer_parser"
-documentation        = "https://docs.rs/biome_glimmer_factory"
+categories.workspace = true
+description          = "Factory functions for creating Glimmer AST nodes"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_glimmer_factory"
 publish              = true
 repository.workspace = true
-version              = "0.5.7"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-biome_glimmer_syntax = { workspace = true }
-biome_rowan          = { workspace = true }
+version              = "0.0.1"
 
 [lints]
 workspace = true
+
+[dependencies]
+biome_glimmer_syntax = { path = "../biome_glimmer_syntax" }
+biome_rowan          = { workspace = true, features = ["serde"] }
