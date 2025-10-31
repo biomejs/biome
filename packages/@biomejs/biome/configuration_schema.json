@@ -414,8 +414,7 @@
 				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/NormalizedGlob" }
+					"anyOf": [{ "$ref": "#/definitions/GlobList" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1520,8 +1519,7 @@
 				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/NormalizedGlob" }
+					"anyOf": [{ "$ref": "#/definitions/GlobList" }, { "type": "null" }]
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1598,8 +1596,7 @@
 				},
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/NormalizedGlob" }
+					"anyOf": [{ "$ref": "#/definitions/GlobList" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1625,6 +1622,11 @@
 			"additionalProperties": false
 		},
 		"Glob": { "type": "string" },
+		"GlobList": {
+			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
+			"type": "array",
+			"items": { "$ref": "#/definitions/NormalizedGlob" }
+		},
 		"GraphqlAssistConfiguration": {
 			"description": "Options that changes how the GraphQL linter behaves",
 			"type": "object",
@@ -2489,8 +2491,7 @@
 				},
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/NormalizedGlob" }
+					"anyOf": [{ "$ref": "#/definitions/GlobList" }, { "type": "null" }]
 				},
 				"rules": {
 					"description": "List of rules",

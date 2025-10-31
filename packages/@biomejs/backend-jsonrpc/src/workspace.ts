@@ -375,6 +375,9 @@ export interface Actions {
 	recommended?: boolean;
 	source?: Source;
 }
+/**
+ * Normalized Biome glob pattern that strips `./` from the pattern.
+ */
 export type GlobList = NormalizedGlob[];
 /**
  * Options that changes how the CSS assist behaves
