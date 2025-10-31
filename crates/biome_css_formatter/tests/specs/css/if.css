@@ -418,3 +418,12 @@ else:"";
 }
 
 .multiple-inline{color:if(style(--a: 1):red;else:blue;);background:if(media(print):white;else:black;);border:1px solid if(style(--b: 2):green;else:yellow;);}
+
+.complex-logic {
+      	background:if(
+		style(    --foo: bar) and
+(style(--fiz: buzz) or style(--baz: qux)): red;
+					else: blue  ;
+
+)
+}

@@ -3,7 +3,7 @@ mod color_profile;
 pub(crate) mod container;
 mod counter_style;
 mod document;
-mod error;
+pub(crate) mod error;
 pub(crate) mod feature;
 mod font_face;
 mod font_feature_values;

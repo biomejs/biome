@@ -1,4 +1,4 @@
-mod error;
+pub(crate) mod error;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;

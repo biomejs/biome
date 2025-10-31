@@ -9,8 +9,7 @@ impl FormatRule<CssSyntaxNode> for FormatCssSyntaxNode {
     type Context = CssFormatContext;
 
     fn fmt(&self, node: &CssSyntaxNode, f: &mut CssFormatter) -> FormatResult<()> {
-        todo!();
-        // map_syntax_node!(node.clone(), node => node.format().fmt(f))
+        map_syntax_node!(node.clone(), node => node.format().fmt(f))
     }
 }
 

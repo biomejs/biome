@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -63,7 +62,7 @@ CssRoot {
                         COLON@51..52 ":" [] [],
                         LOCAL_KW@52..57 "local" [] [],
                         L_PAREN@57..58 "(" [] [],
-                        IDENT@58..62 "test" [] [],
+                        TEST_KW@58..62 "test" [] [],
                         R_PAREN@62..64 ")" [] [Whitespace(" ")],
                     ],
                 },
@@ -102,7 +101,7 @@ CssRoot {
                     items: [
                         COLON@107..108 ":" [] [],
                         LOCAL_KW@108..114 "local" [] [Whitespace(" ")],
-                        IDENT@114..119 "test" [] [Whitespace(" ")],
+                        TEST_KW@114..119 "test" [] [Whitespace(" ")],
                     ],
                 },
                 block: CssKeyframesBlock {
@@ -139,7 +138,7 @@ CssRoot {
                         COLON@161..162 ":" [] [],
                         GLOBAL_KW@162..168 "global" [] [],
                         L_PAREN@168..169 "(" [] [],
-                        IDENT@169..173 "test" [] [],
+                        TEST_KW@169..173 "test" [] [],
                         R_PAREN@173..175 ")" [] [Whitespace(" ")],
                     ],
                 },
@@ -178,7 +177,7 @@ CssRoot {
                     items: [
                         COLON@219..220 ":" [] [],
                         GLOBAL_KW@220..227 "global" [] [Whitespace(" ")],
-                        IDENT@227..232 "test" [] [Whitespace(" ")],
+                        TEST_KW@227..232 "test" [] [Whitespace(" ")],
                     ],
                 },
                 block: CssKeyframesBlock {
@@ -245,7 +244,7 @@ CssRoot {
           0: COLON@51..52 ":" [] []
           1: LOCAL_KW@52..57 "local" [] []
           2: L_PAREN@57..58 "(" [] []
-          3: IDENT@58..62 "test" [] []
+          3: TEST_KW@58..62 "test" [] []
           4: R_PAREN@62..64 ")" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@64..66
           0: L_CURLY@64..65 "{" [] []
@@ -272,7 +271,7 @@ CssRoot {
         1: CSS_BOGUS_KEYFRAMES_NAME@107..119
           0: COLON@107..108 ":" [] []
           1: LOCAL_KW@108..114 "local" [] [Whitespace(" ")]
-          2: IDENT@114..119 "test" [] [Whitespace(" ")]
+          2: TEST_KW@114..119 "test" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@119..121
           0: L_CURLY@119..120 "{" [] []
           1: CSS_KEYFRAMES_ITEM_LIST@120..120
@@ -297,7 +296,7 @@ CssRoot {
           0: COLON@161..162 ":" [] []
           1: GLOBAL_KW@162..168 "global" [] []
           2: L_PAREN@168..169 "(" [] []
-          3: IDENT@169..173 "test" [] []
+          3: TEST_KW@169..173 "test" [] []
           4: R_PAREN@173..175 ")" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@175..177
           0: L_CURLY@175..176 "{" [] []
@@ -324,7 +323,7 @@ CssRoot {
         1: CSS_BOGUS_KEYFRAMES_NAME@219..232
           0: COLON@219..220 ":" [] []
           1: GLOBAL_KW@220..227 "global" [] [Whitespace(" ")]
-          2: IDENT@227..232 "test" [] [Whitespace(" ")]
+          2: TEST_KW@227..232 "test" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@232..234
           0: L_CURLY@232..233 "{" [] []
           1: CSS_KEYFRAMES_ITEM_LIST@233..233
