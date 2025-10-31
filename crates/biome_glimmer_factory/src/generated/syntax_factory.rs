@@ -147,7 +147,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<12usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -182,7 +182,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -203,7 +203,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -224,7 +224,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -307,7 +307,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -335,7 +335,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -387,7 +387,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -415,7 +415,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -552,14 +552,14 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![l_curly2]
+                    && element.kind() == T!["{{"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -573,14 +573,14 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![r_curly2]
+                    && element.kind() == T!["}}"]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -618,7 +618,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![number_literal]
+                    && element.kind() == NUMBER_LITERAL
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -802,7 +802,7 @@ impl SyntaxFactory for GlimmerSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T![string_literal]
+                    && element.kind() == STRING_LITERAL
                 {
                     slots.mark_present();
                     current_element = elements.next();

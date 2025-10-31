@@ -162,21 +162,21 @@ impl GlimmerBlockParams {
     pub fn as_fields(&self) -> GlimmerBlockParamsFields {
         GlimmerBlockParamsFields {
             as_token: self.as_token(),
-            bitwise_or_token: self.bitwise_or_token(),
+            opening_pipe_token: self.opening_pipe_token(),
             params: self.params(),
-            bitwise_or_token: self.bitwise_or_token(),
+            closing_pipe_token: self.closing_pipe_token(),
         }
     }
     pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn bitwise_or_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_pipe_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
     pub fn params(&self) -> GlimmerParamNameList {
         support::list(&self.syntax, 2usize)
     }
-    pub fn bitwise_or_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_pipe_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
 }
@@ -191,9 +191,9 @@ impl Serialize for GlimmerBlockParams {
 #[derive(Serialize)]
 pub struct GlimmerBlockParamsFields {
     pub as_token: SyntaxResult<SyntaxToken>,
-    pub bitwise_or_token: SyntaxResult<SyntaxToken>,
+    pub opening_pipe_token: SyntaxResult<SyntaxToken>,
     pub params: GlimmerParamNameList,
-    pub bitwise_or_token: SyntaxResult<SyntaxToken>,
+    pub closing_pipe_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerBlockStatement {
@@ -211,21 +211,21 @@ impl GlimmerBlockStatement {
     }
     pub fn as_fields(&self) -> GlimmerBlockStatementFields {
         GlimmerBlockStatementFields {
-            l_curly2_token: self.l_curly2_token(),
+            opening_curly_token: self.opening_curly_token(),
             hash_token: self.hash_token(),
             path: self.path(),
             params: self.params(),
             hash: self.hash(),
-            r_curly2_token: self.r_curly2_token(),
+            opening_curly_end_token: self.opening_curly_end_token(),
             block: self.block(),
             else_block: self.else_block(),
-            l_curly2_token: self.l_curly2_token(),
+            closing_curly_token: self.closing_curly_token(),
             slash_token: self.slash_token(),
             close_path: self.close_path(),
-            r_curly2_token: self.r_curly2_token(),
+            closing_curly_end_token: self.closing_curly_end_token(),
         }
     }
-    pub fn l_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -240,7 +240,7 @@ impl GlimmerBlockStatement {
     pub fn hash(&self) -> SyntaxResult<GlimmerHash> {
         support::required_node(&self.syntax, 4usize)
     }
-    pub fn r_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_curly_end_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
     }
     pub fn block(&self) -> SyntaxResult<GlimmerBlock> {
@@ -249,7 +249,7 @@ impl GlimmerBlockStatement {
     pub fn else_block(&self) -> Option<GlimmerElseBlock> {
         support::node(&self.syntax, 7usize)
     }
-    pub fn l_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 8usize)
     }
     pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -258,7 +258,7 @@ impl GlimmerBlockStatement {
     pub fn close_path(&self) -> SyntaxResult<GlimmerPathExpression> {
         support::required_node(&self.syntax, 10usize)
     }
-    pub fn r_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_curly_end_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 11usize)
     }
 }
@@ -272,18 +272,18 @@ impl Serialize for GlimmerBlockStatement {
 }
 #[derive(Serialize)]
 pub struct GlimmerBlockStatementFields {
-    pub l_curly2_token: SyntaxResult<SyntaxToken>,
+    pub opening_curly_token: SyntaxResult<SyntaxToken>,
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub path: SyntaxResult<GlimmerPathExpression>,
     pub params: GlimmerParamsList,
     pub hash: SyntaxResult<GlimmerHash>,
-    pub r_curly2_token: SyntaxResult<SyntaxToken>,
+    pub opening_curly_end_token: SyntaxResult<SyntaxToken>,
     pub block: SyntaxResult<GlimmerBlock>,
     pub else_block: Option<GlimmerElseBlock>,
-    pub l_curly2_token: SyntaxResult<SyntaxToken>,
+    pub closing_curly_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
     pub close_path: SyntaxResult<GlimmerPathExpression>,
-    pub r_curly2_token: SyntaxResult<SyntaxToken>,
+    pub closing_curly_end_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerBooleanLiteral {
@@ -411,14 +411,14 @@ impl GlimmerElementModifier {
     }
     pub fn as_fields(&self) -> GlimmerElementModifierFields {
         GlimmerElementModifierFields {
-            l_curly2_token: self.l_curly2_token(),
+            opening_token: self.opening_token(),
             path: self.path(),
             params: self.params(),
             hash: self.hash(),
-            r_curly2_token: self.r_curly2_token(),
+            closing_token: self.closing_token(),
         }
     }
-    pub fn l_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn path(&self) -> SyntaxResult<GlimmerPathExpression> {
@@ -430,7 +430,7 @@ impl GlimmerElementModifier {
     pub fn hash(&self) -> SyntaxResult<GlimmerHash> {
         support::required_node(&self.syntax, 3usize)
     }
-    pub fn r_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
 }
@@ -444,11 +444,11 @@ impl Serialize for GlimmerElementModifier {
 }
 #[derive(Serialize)]
 pub struct GlimmerElementModifierFields {
-    pub l_curly2_token: SyntaxResult<SyntaxToken>,
+    pub opening_token: SyntaxResult<SyntaxToken>,
     pub path: SyntaxResult<GlimmerPathExpression>,
     pub params: GlimmerParamsList,
     pub hash: SyntaxResult<GlimmerHash>,
-    pub r_curly2_token: SyntaxResult<SyntaxToken>,
+    pub closing_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerElementNode {
@@ -511,15 +511,15 @@ impl GlimmerElseBlock {
     }
     pub fn as_fields(&self) -> GlimmerElseBlockFields {
         GlimmerElseBlockFields {
-            l_curly2_token: self.l_curly2_token(),
+            opening_token: self.opening_token(),
             else_token: self.else_token(),
             if_token: self.if_token(),
             condition: self.condition(),
-            r_curly2_token: self.r_curly2_token(),
+            closing_token: self.closing_token(),
             block: self.block(),
         }
     }
-    pub fn l_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn else_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -531,7 +531,7 @@ impl GlimmerElseBlock {
     pub fn condition(&self) -> Option<Expression> {
         support::node(&self.syntax, 3usize)
     }
-    pub fn r_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
     pub fn block(&self) -> SyntaxResult<GlimmerBlock> {
@@ -548,11 +548,11 @@ impl Serialize for GlimmerElseBlock {
 }
 #[derive(Serialize)]
 pub struct GlimmerElseBlockFields {
-    pub l_curly2_token: SyntaxResult<SyntaxToken>,
+    pub opening_token: SyntaxResult<SyntaxToken>,
     pub else_token: SyntaxResult<SyntaxToken>,
     pub if_token: Option<SyntaxToken>,
     pub condition: Option<Expression>,
-    pub r_curly2_token: SyntaxResult<SyntaxToken>,
+    pub closing_token: SyntaxResult<SyntaxToken>,
     pub block: SyntaxResult<GlimmerBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -736,26 +736,26 @@ impl GlimmerMustacheStatement {
     }
     pub fn as_fields(&self) -> GlimmerMustacheStatementFields {
         GlimmerMustacheStatementFields {
-            l_curly2_token: self.l_curly2_token(),
-            l_curly2_token: self.l_curly2_token(),
+            opening_token: self.opening_token(),
+            triple_open_token: self.triple_open_token(),
             expression: self.expression(),
-            r_curly2_token: self.r_curly2_token(),
-            r_curly2_token: self.r_curly2_token(),
+            closing_token: self.closing_token(),
+            triple_close_token: self.triple_close_token(),
         }
     }
-    pub fn l_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn opening_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn l_curly2_token(&self) -> Option<SyntaxToken> {
+    pub fn triple_open_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 1usize)
     }
     pub fn expression(&self) -> SyntaxResult<Expression> {
         support::required_node(&self.syntax, 2usize)
     }
-    pub fn r_curly2_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn r_curly2_token(&self) -> Option<SyntaxToken> {
+    pub fn triple_close_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 4usize)
     }
 }
@@ -769,11 +769,11 @@ impl Serialize for GlimmerMustacheStatement {
 }
 #[derive(Serialize)]
 pub struct GlimmerMustacheStatementFields {
-    pub l_curly2_token: SyntaxResult<SyntaxToken>,
-    pub l_curly2_token: Option<SyntaxToken>,
+    pub opening_token: SyntaxResult<SyntaxToken>,
+    pub triple_open_token: Option<SyntaxToken>,
     pub expression: SyntaxResult<Expression>,
-    pub r_curly2_token: SyntaxResult<SyntaxToken>,
-    pub r_curly2_token: Option<SyntaxToken>,
+    pub closing_token: SyntaxResult<SyntaxToken>,
+    pub triple_close_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerNullLiteral {
@@ -826,10 +826,10 @@ impl GlimmerNumberLiteral {
     }
     pub fn as_fields(&self) -> GlimmerNumberLiteralFields {
         GlimmerNumberLiteralFields {
-            number_literal_token: self.number_literal_token(),
+            NUMBER_LITERAL_token: self.NUMBER_LITERAL_token(),
         }
     }
-    pub fn number_literal_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn NUMBER_LITERAL_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
 }
@@ -843,7 +843,7 @@ impl Serialize for GlimmerNumberLiteral {
 }
 #[derive(Serialize)]
 pub struct GlimmerNumberLiteralFields {
-    pub number_literal_token: SyntaxResult<SyntaxToken>,
+    pub NUMBER_LITERAL_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerParamName {
@@ -1086,10 +1086,10 @@ impl GlimmerStringLiteral {
     }
     pub fn as_fields(&self) -> GlimmerStringLiteralFields {
         GlimmerStringLiteralFields {
-            string_literal_token: self.string_literal_token(),
+            STRING_LITERAL_token: self.STRING_LITERAL_token(),
         }
     }
-    pub fn string_literal_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn STRING_LITERAL_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
 }
@@ -1103,7 +1103,7 @@ impl Serialize for GlimmerStringLiteral {
 }
 #[derive(Serialize)]
 pub struct GlimmerStringLiteralFields {
-    pub string_literal_token: SyntaxResult<SyntaxToken>,
+    pub STRING_LITERAL_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GlimmerSubExpression {
@@ -1713,13 +1713,13 @@ impl std::fmt::Debug for GlimmerBlockParams {
             f.debug_struct("GlimmerBlockParams")
                 .field("as_token", &support::DebugSyntaxResult(self.as_token()))
                 .field(
-                    "bitwise_or_token",
-                    &support::DebugSyntaxResult(self.bitwise_or_token()),
+                    "opening_pipe_token",
+                    &support::DebugSyntaxResult(self.opening_pipe_token()),
                 )
                 .field("params", &self.params())
                 .field(
-                    "bitwise_or_token",
-                    &support::DebugSyntaxResult(self.bitwise_or_token()),
+                    "closing_pipe_token",
+                    &support::DebugSyntaxResult(self.closing_pipe_token()),
                 )
                 .finish()
         } else {
@@ -1768,16 +1768,16 @@ impl std::fmt::Debug for GlimmerBlockStatement {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerBlockStatement")
                 .field(
-                    "l_curly2_token",
-                    &support::DebugSyntaxResult(self.l_curly2_token()),
+                    "opening_curly_token",
+                    &support::DebugSyntaxResult(self.opening_curly_token()),
                 )
                 .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
                 .field("path", &support::DebugSyntaxResult(self.path()))
                 .field("params", &self.params())
                 .field("hash", &support::DebugSyntaxResult(self.hash()))
                 .field(
-                    "r_curly2_token",
-                    &support::DebugSyntaxResult(self.r_curly2_token()),
+                    "opening_curly_end_token",
+                    &support::DebugSyntaxResult(self.opening_curly_end_token()),
                 )
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .field(
@@ -1785,8 +1785,8 @@ impl std::fmt::Debug for GlimmerBlockStatement {
                     &support::DebugOptionalElement(self.else_block()),
                 )
                 .field(
-                    "l_curly2_token",
-                    &support::DebugSyntaxResult(self.l_curly2_token()),
+                    "closing_curly_token",
+                    &support::DebugSyntaxResult(self.closing_curly_token()),
                 )
                 .field(
                     "slash_token",
@@ -1794,8 +1794,8 @@ impl std::fmt::Debug for GlimmerBlockStatement {
                 )
                 .field("close_path", &support::DebugSyntaxResult(self.close_path()))
                 .field(
-                    "r_curly2_token",
-                    &support::DebugSyntaxResult(self.r_curly2_token()),
+                    "closing_curly_end_token",
+                    &support::DebugSyntaxResult(self.closing_curly_end_token()),
                 )
                 .finish()
         } else {
@@ -1992,15 +1992,15 @@ impl std::fmt::Debug for GlimmerElementModifier {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerElementModifier")
                 .field(
-                    "l_curly2_token",
-                    &support::DebugSyntaxResult(self.l_curly2_token()),
+                    "opening_token",
+                    &support::DebugSyntaxResult(self.opening_token()),
                 )
                 .field("path", &support::DebugSyntaxResult(self.path()))
                 .field("params", &self.params())
                 .field("hash", &support::DebugSyntaxResult(self.hash()))
                 .field(
-                    "r_curly2_token",
-                    &support::DebugSyntaxResult(self.r_curly2_token()),
+                    "closing_token",
+                    &support::DebugSyntaxResult(self.closing_token()),
                 )
                 .finish()
         } else {
@@ -2098,8 +2098,8 @@ impl std::fmt::Debug for GlimmerElseBlock {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerElseBlock")
                 .field(
-                    "l_curly2_token",
-                    &support::DebugSyntaxResult(self.l_curly2_token()),
+                    "opening_token",
+                    &support::DebugSyntaxResult(self.opening_token()),
                 )
                 .field("else_token", &support::DebugSyntaxResult(self.else_token()))
                 .field("if_token", &support::DebugOptionalElement(self.if_token()))
@@ -2108,8 +2108,8 @@ impl std::fmt::Debug for GlimmerElseBlock {
                     &support::DebugOptionalElement(self.condition()),
                 )
                 .field(
-                    "r_curly2_token",
-                    &support::DebugSyntaxResult(self.r_curly2_token()),
+                    "closing_token",
+                    &support::DebugSyntaxResult(self.closing_token()),
                 )
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
@@ -2364,21 +2364,21 @@ impl std::fmt::Debug for GlimmerMustacheStatement {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerMustacheStatement")
                 .field(
-                    "l_curly2_token",
-                    &support::DebugSyntaxResult(self.l_curly2_token()),
+                    "opening_token",
+                    &support::DebugSyntaxResult(self.opening_token()),
                 )
                 .field(
-                    "l_curly2_token",
-                    &support::DebugOptionalElement(self.l_curly2_token()),
+                    "triple_open_token",
+                    &support::DebugOptionalElement(self.triple_open_token()),
                 )
                 .field("expression", &support::DebugSyntaxResult(self.expression()))
                 .field(
-                    "r_curly2_token",
-                    &support::DebugSyntaxResult(self.r_curly2_token()),
+                    "closing_token",
+                    &support::DebugSyntaxResult(self.closing_token()),
                 )
                 .field(
-                    "r_curly2_token",
-                    &support::DebugOptionalElement(self.r_curly2_token()),
+                    "triple_close_token",
+                    &support::DebugOptionalElement(self.triple_close_token()),
                 )
                 .finish()
         } else {
@@ -2474,8 +2474,8 @@ impl std::fmt::Debug for GlimmerNumberLiteral {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerNumberLiteral")
                 .field(
-                    "number_literal_token",
-                    &support::DebugSyntaxResult(self.number_literal_token()),
+                    "NUMBER_LITERAL_token",
+                    &support::DebugSyntaxResult(self.NUMBER_LITERAL_token()),
                 )
                 .finish()
         } else {
@@ -2787,8 +2787,8 @@ impl std::fmt::Debug for GlimmerStringLiteral {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerStringLiteral")
                 .field(
-                    "string_literal_token",
-                    &support::DebugSyntaxResult(self.string_literal_token()),
+                    "STRING_LITERAL_token",
+                    &support::DebugSyntaxResult(self.STRING_LITERAL_token()),
                 )
                 .finish()
         } else {

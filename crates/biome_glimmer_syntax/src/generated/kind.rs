@@ -35,8 +35,8 @@ pub enum GlimmerSyntaxKind {
     FALSE_KW,
     NULL_KW,
     UNDEFINED_KW,
-    GLIMMER_STRING_LITERAL,
-    GLIMMER_NUMBER_LITERAL,
+    STRING_LITERAL,
+    NUMBER_LITERAL,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -109,7 +109,7 @@ impl GlimmerSyntaxKind {
         )
     }
     pub const fn is_literal(self) -> bool {
-        matches!(self, GLIMMER_STRING_LITERAL | GLIMMER_NUMBER_LITERAL)
+        matches!(self, STRING_LITERAL | NUMBER_LITERAL)
     }
     pub const fn is_list(self) -> bool {
         matches!(

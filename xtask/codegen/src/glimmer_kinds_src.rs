@@ -28,7 +28,7 @@ pub const GLIMMER_KINDS_SRC: KindsSrc = KindsSrc {
         "null",
         "undefined",
     ],
-    literals: &["GLIMMER_STRING_LITERAL", "GLIMMER_NUMBER_LITERAL"],
+    literals: &["STRING_LITERAL", "NUMBER_LITERAL"],
     tokens: &[
         "ERROR_TOKEN",
         "NEWLINE",

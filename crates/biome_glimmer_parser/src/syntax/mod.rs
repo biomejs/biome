@@ -5,8 +5,8 @@
 use crate::parser::GlimmerParser;
 use crate::token_source::GlimmerLexContext;
 use biome_glimmer_syntax::GlimmerSyntaxKind::*;
-use biome_parser::prelude::*;
 use biome_parser::Parser;
+use biome_parser::prelude::*;
 
 /// Parse the root of a Glimmer template
 pub(crate) fn parse_root(p: &mut GlimmerParser) {

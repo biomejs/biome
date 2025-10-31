@@ -1,7 +1,7 @@
 use crate::token_source::{GlimmerTokenSource, GlimmerTokenSourceCheckpoint};
 use biome_glimmer_factory::GlimmerSyntaxFactory;
 use biome_glimmer_syntax::{GlimmerLanguage, GlimmerSyntaxKind};
-use biome_parser::diagnostic::{merge_diagnostics, ParseDiagnostic};
+use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;

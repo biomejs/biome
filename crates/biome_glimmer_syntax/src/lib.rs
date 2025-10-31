@@ -3,6 +3,9 @@
 pub mod generated;
 mod syntax_node;
 
+// Re-export macros at crate root for generated code
+pub(crate) use generated::macros;
+
 pub use self::generated::kind::*;
 pub use self::generated::nodes::*;
 pub use biome_rowan::{
@@ -46,24 +49,6 @@ impl GlimmerSyntaxKind {
 
     pub const fn is_trivia(self) -> bool {
         matches!(self, WHITESPACE | NEWLINE | COMMENT)
-    }
-
-    pub const fn is_punct(self) -> bool {
-        matches!(
-            self,
-            L_CURLY2
-                | R_CURLY2
-                | L_PAREN
-                | R_PAREN
-                | L_ANGLE
-                | R_ANGLE
-                | SLASH
-                | DOT
-                | PIPE
-                | EQ
-                | HASH
-                | AT
-        )
     }
 }
 

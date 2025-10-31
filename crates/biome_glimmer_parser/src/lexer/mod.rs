@@ -6,9 +6,11 @@
 //! - HTML tags and attributes
 //! - Glimmer-specific syntax (@args, #blocks, etc.)
 
-use biome_glimmer_syntax::{GlimmerSyntaxKind, GlimmerSyntaxKind::*, TextLen, TextRange, TextSize, T};
+use biome_glimmer_syntax::{
+    GlimmerSyntaxKind, GlimmerSyntaxKind::*, T, TextLen, TextRange, TextSize,
+};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{Lexer as LexerTrait, LexContext};
+use biome_parser::lexer::{LexContext, Lexer as LexerTrait};
 
 use crate::token_source::GlimmerLexContext;
 
@@ -136,9 +138,7 @@ impl<'src> GlimmerLexer<'src> {
             Some(b'|') => self.consume_byte(T![|]),
             Some(b'"') => self.lex_string_literal(),
             Some(b'0'..=b'9') => self.lex_number_literal(),
-            Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => {
-                self.lex_whitespace()
-            }
+            Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => self.lex_whitespace(),
             Some(_) => self.lex_identifier_or_keyword(),
             None => EOF,
         }
@@ -155,9 +155,7 @@ impl<'src> GlimmerLexer<'src> {
                 self.advance(2);
                 L_CURLY2
             }
-            Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => {
-                self.lex_whitespace()
-            }
+            Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => self.lex_whitespace(),
             Some(_) => self.lex_identifier_or_keyword(),
             None => EOF,
         }
@@ -236,7 +234,7 @@ impl<'src> GlimmerLexer<'src> {
             match byte {
                 b'"' => {
                     self.advance(1);
-                    return GLIMMER_STRING_LITERAL;
+                    return STRING_LITERAL;
                 }
                 b'\\' => {
                     // Skip escaped character
@@ -249,7 +247,7 @@ impl<'src> GlimmerLexer<'src> {
         }
 
         // Unterminated string
-        GLIMMER_STRING_LITERAL
+        STRING_LITERAL
     }
 
     fn lex_number_literal(&mut self) -> GlimmerSyntaxKind {
@@ -261,7 +259,7 @@ impl<'src> GlimmerLexer<'src> {
                 _ => break,
             }
         }
-        GLIMMER_NUMBER_LITERAL
+        NUMBER_LITERAL
     }
 }
 

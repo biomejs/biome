@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use biome_glimmer_parser::{parse_glimmer, GlimmerParseOptions};
+    use biome_glimmer_parser::{GlimmerParseOptions, parse_glimmer};
 
     #[test]
     fn test_parse_empty() {

@@ -57,60 +57,60 @@ impl GlimmerBlockBuilder {
 }
 pub fn glimmer_block_params(
     as_token: SyntaxToken,
-    bitwise_or_token: SyntaxToken,
+    opening_pipe_token: SyntaxToken,
     params: GlimmerParamNameList,
-    bitwise_or_token: SyntaxToken,
+    closing_pipe_token: SyntaxToken,
 ) -> GlimmerBlockParams {
     GlimmerBlockParams::unwrap_cast(SyntaxNode::new_detached(
         GlimmerSyntaxKind::GLIMMER_BLOCK_PARAMS,
         [
             Some(SyntaxElement::Token(as_token)),
-            Some(SyntaxElement::Token(bitwise_or_token)),
+            Some(SyntaxElement::Token(opening_pipe_token)),
             Some(SyntaxElement::Node(params.into_syntax())),
-            Some(SyntaxElement::Token(bitwise_or_token)),
+            Some(SyntaxElement::Token(closing_pipe_token)),
         ],
     ))
 }
 pub fn glimmer_block_statement(
-    l_curly2_token: SyntaxToken,
+    opening_curly_token: SyntaxToken,
     hash_token: SyntaxToken,
     path: GlimmerPathExpression,
     params: GlimmerParamsList,
     hash: GlimmerHash,
-    r_curly2_token: SyntaxToken,
+    opening_curly_end_token: SyntaxToken,
     block: GlimmerBlock,
-    l_curly2_token: SyntaxToken,
+    closing_curly_token: SyntaxToken,
     slash_token: SyntaxToken,
     close_path: GlimmerPathExpression,
-    r_curly2_token: SyntaxToken,
+    closing_curly_end_token: SyntaxToken,
 ) -> GlimmerBlockStatementBuilder {
     GlimmerBlockStatementBuilder {
-        l_curly2_token,
+        opening_curly_token,
         hash_token,
         path,
         params,
         hash,
-        r_curly2_token,
+        opening_curly_end_token,
         block,
-        l_curly2_token,
+        closing_curly_token,
         slash_token,
         close_path,
-        r_curly2_token,
+        closing_curly_end_token,
         else_block: None,
     }
 }
 pub struct GlimmerBlockStatementBuilder {
-    l_curly2_token: SyntaxToken,
+    opening_curly_token: SyntaxToken,
     hash_token: SyntaxToken,
     path: GlimmerPathExpression,
     params: GlimmerParamsList,
     hash: GlimmerHash,
-    r_curly2_token: SyntaxToken,
+    opening_curly_end_token: SyntaxToken,
     block: GlimmerBlock,
-    l_curly2_token: SyntaxToken,
+    closing_curly_token: SyntaxToken,
     slash_token: SyntaxToken,
     close_path: GlimmerPathExpression,
-    r_curly2_token: SyntaxToken,
+    closing_curly_end_token: SyntaxToken,
     else_block: Option<GlimmerElseBlock>,
 }
 impl GlimmerBlockStatementBuilder {
@@ -122,19 +122,19 @@ impl GlimmerBlockStatementBuilder {
         GlimmerBlockStatement::unwrap_cast(SyntaxNode::new_detached(
             GlimmerSyntaxKind::GLIMMER_BLOCK_STATEMENT,
             [
-                Some(SyntaxElement::Token(self.l_curly2_token)),
+                Some(SyntaxElement::Token(self.opening_curly_token)),
                 Some(SyntaxElement::Token(self.hash_token)),
                 Some(SyntaxElement::Node(self.path.into_syntax())),
                 Some(SyntaxElement::Node(self.params.into_syntax())),
                 Some(SyntaxElement::Node(self.hash.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly2_token)),
+                Some(SyntaxElement::Token(self.opening_curly_end_token)),
                 Some(SyntaxElement::Node(self.block.into_syntax())),
                 self.else_block
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.l_curly2_token)),
+                Some(SyntaxElement::Token(self.closing_curly_token)),
                 Some(SyntaxElement::Token(self.slash_token)),
                 Some(SyntaxElement::Node(self.close_path.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly2_token)),
+                Some(SyntaxElement::Token(self.closing_curly_end_token)),
             ],
         ))
     }
@@ -164,20 +164,20 @@ pub fn glimmer_concat_statement(parts: GlimmerConcatPartList) -> GlimmerConcatSt
     ))
 }
 pub fn glimmer_element_modifier(
-    l_curly2_token: SyntaxToken,
+    opening_token: SyntaxToken,
     path: GlimmerPathExpression,
     params: GlimmerParamsList,
     hash: GlimmerHash,
-    r_curly2_token: SyntaxToken,
+    closing_token: SyntaxToken,
 ) -> GlimmerElementModifier {
     GlimmerElementModifier::unwrap_cast(SyntaxNode::new_detached(
         GlimmerSyntaxKind::GLIMMER_ELEMENT_MODIFIER,
         [
-            Some(SyntaxElement::Token(l_curly2_token)),
+            Some(SyntaxElement::Token(opening_token)),
             Some(SyntaxElement::Node(path.into_syntax())),
             Some(SyntaxElement::Node(params.into_syntax())),
             Some(SyntaxElement::Node(hash.into_syntax())),
-            Some(SyntaxElement::Token(r_curly2_token)),
+            Some(SyntaxElement::Token(closing_token)),
         ],
     ))
 }
@@ -214,24 +214,24 @@ impl GlimmerElementNodeBuilder {
     }
 }
 pub fn glimmer_else_block(
-    l_curly2_token: SyntaxToken,
+    opening_token: SyntaxToken,
     else_token: SyntaxToken,
-    r_curly2_token: SyntaxToken,
+    closing_token: SyntaxToken,
     block: GlimmerBlock,
 ) -> GlimmerElseBlockBuilder {
     GlimmerElseBlockBuilder {
-        l_curly2_token,
+        opening_token,
         else_token,
-        r_curly2_token,
+        closing_token,
         block,
         if_token: None,
         condition: None,
     }
 }
 pub struct GlimmerElseBlockBuilder {
-    l_curly2_token: SyntaxToken,
+    opening_token: SyntaxToken,
     else_token: SyntaxToken,
-    r_curly2_token: SyntaxToken,
+    closing_token: SyntaxToken,
     block: GlimmerBlock,
     if_token: Option<SyntaxToken>,
     condition: Option<Expression>,
@@ -249,12 +249,12 @@ impl GlimmerElseBlockBuilder {
         GlimmerElseBlock::unwrap_cast(SyntaxNode::new_detached(
             GlimmerSyntaxKind::GLIMMER_ELSE_BLOCK,
             [
-                Some(SyntaxElement::Token(self.l_curly2_token)),
+                Some(SyntaxElement::Token(self.opening_token)),
                 Some(SyntaxElement::Token(self.else_token)),
                 self.if_token.map(|token| SyntaxElement::Token(token)),
                 self.condition
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly2_token)),
+                Some(SyntaxElement::Token(self.closing_token)),
                 Some(SyntaxElement::Node(self.block.into_syntax())),
             ],
         ))
@@ -305,43 +305,45 @@ pub fn glimmer_mustache_comment_statement(
     ))
 }
 pub fn glimmer_mustache_statement(
-    l_curly2_token: SyntaxToken,
+    opening_token: SyntaxToken,
     expression: Expression,
-    r_curly2_token: SyntaxToken,
+    closing_token: SyntaxToken,
 ) -> GlimmerMustacheStatementBuilder {
     GlimmerMustacheStatementBuilder {
-        l_curly2_token,
+        opening_token,
         expression,
-        r_curly2_token,
-        l_curly2_token: None,
-        r_curly2_token: None,
+        closing_token,
+        triple_open_token: None,
+        triple_close_token: None,
     }
 }
 pub struct GlimmerMustacheStatementBuilder {
-    l_curly2_token: SyntaxToken,
+    opening_token: SyntaxToken,
     expression: Expression,
-    r_curly2_token: SyntaxToken,
-    l_curly2_token: Option<SyntaxToken>,
-    r_curly2_token: Option<SyntaxToken>,
+    closing_token: SyntaxToken,
+    triple_open_token: Option<SyntaxToken>,
+    triple_close_token: Option<SyntaxToken>,
 }
 impl GlimmerMustacheStatementBuilder {
-    pub fn with_l_curly2_token(mut self, l_curly2_token: SyntaxToken) -> Self {
-        self.l_curly2_token = Some(l_curly2_token);
+    pub fn with_triple_open_token(mut self, triple_open_token: SyntaxToken) -> Self {
+        self.triple_open_token = Some(triple_open_token);
         self
     }
-    pub fn with_r_curly2_token(mut self, r_curly2_token: SyntaxToken) -> Self {
-        self.r_curly2_token = Some(r_curly2_token);
+    pub fn with_triple_close_token(mut self, triple_close_token: SyntaxToken) -> Self {
+        self.triple_close_token = Some(triple_close_token);
         self
     }
     pub fn build(self) -> GlimmerMustacheStatement {
         GlimmerMustacheStatement::unwrap_cast(SyntaxNode::new_detached(
             GlimmerSyntaxKind::GLIMMER_MUSTACHE_STATEMENT,
             [
-                Some(SyntaxElement::Token(self.l_curly2_token)),
-                self.l_curly2_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.opening_token)),
+                self.triple_open_token
+                    .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.expression.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly2_token)),
-                self.r_curly2_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.closing_token)),
+                self.triple_close_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -352,10 +354,10 @@ pub fn glimmer_null_literal(null_token: SyntaxToken) -> GlimmerNullLiteral {
         [Some(SyntaxElement::Token(null_token))],
     ))
 }
-pub fn glimmer_number_literal(number_literal_token: SyntaxToken) -> GlimmerNumberLiteral {
+pub fn glimmer_number_literal(NUMBER_LITERAL_token: SyntaxToken) -> GlimmerNumberLiteral {
     GlimmerNumberLiteral::unwrap_cast(SyntaxNode::new_detached(
         GlimmerSyntaxKind::GLIMMER_NUMBER_LITERAL,
-        [Some(SyntaxElement::Token(number_literal_token))],
+        [Some(SyntaxElement::Token(NUMBER_LITERAL_token))],
     ))
 }
 pub fn glimmer_param_name(name_token: SyntaxToken) -> GlimmerParamName {
@@ -471,10 +473,10 @@ impl GlimmerStartTagBuilder {
         ))
     }
 }
-pub fn glimmer_string_literal(string_literal_token: SyntaxToken) -> GlimmerStringLiteral {
+pub fn glimmer_string_literal(STRING_LITERAL_token: SyntaxToken) -> GlimmerStringLiteral {
     GlimmerStringLiteral::unwrap_cast(SyntaxNode::new_detached(
         GlimmerSyntaxKind::GLIMMER_STRING_LITERAL,
-        [Some(SyntaxElement::Token(string_literal_token))],
+        [Some(SyntaxElement::Token(STRING_LITERAL_token))],
     ))
 }
 pub fn glimmer_sub_expression(

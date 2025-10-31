@@ -47,19 +47,19 @@ GlimmerMustacheCommentStatement = 'mustache_comment'
 
 // {{expression}} or {{{expression}}}
 GlimmerMustacheStatement =
-  'l_curly2' 'l_curly2'?
+  opening: 'l_curly2' triple_open: 'l_curly2'?
   Expression
-  'r_curly2' 'r_curly2'?
+  closing: 'r_curly2' triple_close: 'r_curly2'?
 
 // {{#if foo}}...{{else}}...{{/if}}
 GlimmerBlockStatement =
-  'l_curly2' '#' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash 'r_curly2'
+  opening_curly: 'l_curly2' '#' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash opening_curly_end: 'r_curly2'
   block: GlimmerBlock
   else_block: GlimmerElseBlock?
-  'l_curly2' '/' close_path: GlimmerPathExpression 'r_curly2'
+  closing_curly: 'l_curly2' '/' close_path: GlimmerPathExpression closing_curly_end: 'r_curly2'
 
 GlimmerElseBlock =
-  'l_curly2' 'else' ('if' condition: Expression)? 'r_curly2'
+  opening: 'l_curly2' 'else' ('if' condition: Expression)? closing: 'r_curly2'
   block: GlimmerBlock
 
 // HTML-like element or Glimmer component
@@ -103,11 +103,11 @@ GlimmerElementModifierList = GlimmerElementModifier*
 
 // {{on "click" this.handler}}
 GlimmerElementModifier =
-  'l_curly2' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash 'r_curly2'
+  opening: 'l_curly2' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash closing: 'r_curly2'
 
 // as |item index|
 GlimmerBlockParams =
-  'as' '|' params: GlimmerParamNameList '|'
+  'as' opening_pipe: '|' params: GlimmerParamNameList closing_pipe: '|'
 
 GlimmerParamNameList = GlimmerParamName*
 
@@ -168,9 +168,9 @@ GlimmerLiteral =
 | GlimmerNullLiteral
 | GlimmerUndefinedLiteral
 
-GlimmerStringLiteral = 'string_literal'
+GlimmerStringLiteral = 'STRING_LITERAL'
 
-GlimmerNumberLiteral = 'number_literal'
+GlimmerNumberLiteral = 'NUMBER_LITERAL'
 
 GlimmerBooleanLiteral = 'true' | 'false'
 

@@ -58,7 +58,7 @@ impl GlimmerBlockParams {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_bitwise_or_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_pipe_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
@@ -70,7 +70,7 @@ impl GlimmerBlockParams {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_bitwise_or_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_pipe_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
@@ -78,7 +78,7 @@ impl GlimmerBlockParams {
     }
 }
 impl GlimmerBlockStatement {
-    pub fn with_l_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -108,7 +108,7 @@ impl GlimmerBlockStatement {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_curly_end_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(5usize..=5usize, once(Some(element.into()))),
@@ -126,7 +126,7 @@ impl GlimmerBlockStatement {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_l_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(8usize..=8usize, once(Some(element.into()))),
@@ -144,7 +144,7 @@ impl GlimmerBlockStatement {
                 .splice_slots(10usize..=10usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_curly_end_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(11usize..=11usize, once(Some(element.into()))),
@@ -182,7 +182,7 @@ impl GlimmerConcatStatement {
     }
 }
 impl GlimmerElementModifier {
-    pub fn with_l_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -206,7 +206,7 @@ impl GlimmerElementModifier {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(4usize..=4usize, once(Some(element.into()))),
@@ -234,7 +234,7 @@ impl GlimmerElementNode {
     }
 }
 impl GlimmerElseBlock {
-    pub fn with_l_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -258,7 +258,7 @@ impl GlimmerElseBlock {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_r_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(4usize..=4usize, once(Some(element.into()))),
@@ -334,13 +334,13 @@ impl GlimmerMustacheCommentStatement {
     }
 }
 impl GlimmerMustacheStatement {
-    pub fn with_l_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_opening_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_l_curly2_token(self, element: Option<SyntaxToken>) -> Self {
+    pub fn with_triple_open_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
@@ -352,13 +352,13 @@ impl GlimmerMustacheStatement {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_r_curly2_token(self, element: SyntaxToken) -> Self {
+    pub fn with_closing_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
-    pub fn with_r_curly2_token(self, element: Option<SyntaxToken>) -> Self {
+    pub fn with_triple_close_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
@@ -374,7 +374,7 @@ impl GlimmerNullLiteral {
     }
 }
 impl GlimmerNumberLiteral {
-    pub fn with_number_literal_token(self, element: SyntaxToken) -> Self {
+    pub fn with_NUMBER_LITERAL_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -482,7 +482,7 @@ impl GlimmerStartTag {
     }
 }
 impl GlimmerStringLiteral {
-    pub fn with_string_literal_token(self, element: SyntaxToken) -> Self {
+    pub fn with_STRING_LITERAL_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
