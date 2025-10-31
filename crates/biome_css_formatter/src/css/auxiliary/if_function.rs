@@ -27,9 +27,3 @@ impl FormatNodeRule<CssIfFunction> for FormatCssIfFunction {
         )
     }
 }
-
-// group(&format_args![
-//     l_paren_token.format(),
-//     soft_block_indent(&selector.format()),
-//     r_paren_token.format()
-// ])

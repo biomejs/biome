@@ -4,6 +4,7 @@ use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssIfSupportsIdentifierTest;
+
 impl FormatNodeRule<CssIfSupportsIdentifierTest> for FormatCssIfSupportsIdentifierTest {
     fn fmt_fields(
         &self,

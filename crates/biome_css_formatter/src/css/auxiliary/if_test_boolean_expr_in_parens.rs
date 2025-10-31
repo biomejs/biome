@@ -4,6 +4,7 @@ use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssIfTestBooleanExprInParens;
+
 impl FormatNodeRule<CssIfTestBooleanExprInParens> for FormatCssIfTestBooleanExprInParens {
     fn fmt_fields(
         &self,

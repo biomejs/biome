@@ -95,7 +95,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "url",
         "if",
         "else",
-        "test", // TODO - temporary
         "src",
         "font-palette-values",
         "font-feature-values",

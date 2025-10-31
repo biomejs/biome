@@ -4,6 +4,7 @@ use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssIfBranch;
+
 impl FormatNodeRule<CssIfBranch> for FormatCssIfBranch {
     fn fmt_fields(&self, node: &CssIfBranch, f: &mut CssFormatter) -> FormatResult<()> {
         let CssIfBranchFields {
