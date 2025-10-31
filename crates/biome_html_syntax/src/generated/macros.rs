@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ANY_GLIMMER_ARGUMENT_VALUE => {
+                    let $pattern = unsafe { $crate::AnyGlimmerArgumentValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_EMBEDDED_CONTENT => {
                     let $pattern = unsafe { $crate::AstroEmbeddedContent::new_unchecked(node) };
                     $body
@@ -24,9 +28,35 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER => {
+                    let $pattern = unsafe { $crate::GlimmerBlockHelper::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_CLOSING => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerBlockHelperClosing::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_OPENING => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerBlockHelperOpening::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAM => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParam::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAMS => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParams::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION => {
                     let $pattern =
                         unsafe { $crate::GlimmerMustacheExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_ARGUMENT => {
+                    let $pattern = unsafe { $crate::GlimmerNamedArgument::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_PATH => {
@@ -35,6 +65,15 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT => {
                     let $pattern = unsafe { $crate::GlimmerPathSegment::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_POSITIONAL_ARGUMENT => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerPositionalArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_SPLATTRIBUTE => {
+                    let $pattern = unsafe { $crate::GlimmerSplattribute::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
@@ -118,6 +157,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_BOGUS_EXPRESSION => {
+                    let $pattern = unsafe { $crate::GlimmerBogusExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
                     let $pattern = unsafe { $crate::HtmlBogus::new_unchecked(node) };
                     $body
@@ -134,8 +177,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlBogusTextExpression::new_unchecked(node) };
                     $body
                 }
+<<<<<<< HEAD
                 $crate::HtmlSyntaxKind::SVELTE_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteBogusBlock::new_unchecked(node) };
+||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
+=======
+                $crate::HtmlSyntaxKind::GLIMMER_ARGUMENT_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerArgumentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAM_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParamList::new_unchecked(node) };
+>>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
                     $body
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST => {

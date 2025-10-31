@@ -79,6 +79,7 @@ AnyHtmlContent =
 	HtmlContent
 	| HtmlEmbeddedContent
 	| AnyHtmlTextExpression
+	| AnyGlimmerExpression
 
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
@@ -162,6 +163,7 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| GlimmerSplattribute
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -213,11 +215,53 @@ HtmlEmbeddedContent = value: 'html_literal'
 // Glimmer Template Syntax
 // ==================================
 
-// Glimmer mustache expression: {{this.count}}
+GlimmerBogusExpression = SyntaxElement*
+
+// Any Glimmer expression that can appear in content
+AnyGlimmerExpression =
+  GlimmerMustacheExpression
+  | GlimmerBlockHelper
+  | GlimmerBogusExpression
+
+// Simple mustache expression: {{this.count}}, {{@arg}}, {{helper}}
 GlimmerMustacheExpression =
 '{{'
 path: GlimmerPath
+arguments: GlimmerArgumentList
 '}}'
+
+// Block helper: {{#if condition}}...{{/if}}, {{#each items as |item|}}...{{/each}}
+GlimmerBlockHelper =
+opening: GlimmerBlockHelperOpening
+body: HtmlElementList
+closing: GlimmerBlockHelperClosing
+
+// Opening block helper: {{#if condition}} or {{#each items as |item|}}
+GlimmerBlockHelperOpening =
+'{{'
+'#'
+helper: GlimmerPath
+arguments: GlimmerArgumentList
+block_params: GlimmerBlockParams?
+'}}'
+
+// Closing block helper: {{/if}}, {{/each}}
+GlimmerBlockHelperClosing =
+'{{'
+'/'
+helper: GlimmerPath
+'}}'
+
+// Block parameters: as |item index|
+GlimmerBlockParams =
+'as'
+'|'
+params: GlimmerBlockParamList
+'|'
+
+GlimmerBlockParamList = (GlimmerBlockParam (',' GlimmerBlockParam)*)
+
+GlimmerBlockParam = 'ident'
 
 // Glimmer path: this.foo, @arg, or helper
 GlimmerPath =
@@ -230,3 +274,29 @@ GlimmerPathSegment =
 | '@'
 | 'ident'
 | '.'
+
+// Argument list for helpers: arg1 arg2 key=value
+GlimmerArgumentList = AnyGlimmerArgument*
+
+AnyGlimmerArgument =
+  GlimmerPositionalArgument
+  | GlimmerNamedArgument
+
+// Positional argument: {{helper "string" 123 @arg}}
+GlimmerPositionalArgument = value: AnyGlimmerArgumentValue
+
+// Named argument: {{helper key=value}}
+GlimmerNamedArgument =
+name: 'ident'
+'='
+value: AnyGlimmerArgumentValue
+
+AnyGlimmerArgumentValue =
+  GlimmerPath
+  | 'html_string_literal'
+  | 'html_literal'
+
+// Splattribute: ...attrs
+GlimmerSplattribute =
+'...'
+name: 'ident'

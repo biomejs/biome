@@ -15,11 +15,55 @@ impl SyntaxFactory for HtmlSyntaxFactory {
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
             ASTRO_BOGUS_FRONTMATTER
+            | GLIMMER_BOGUS_EXPRESSION
             | HTML_BOGUS
             | HTML_BOGUS_ATTRIBUTE
             | HTML_BOGUS_ELEMENT
+<<<<<<< HEAD
             | HTML_BOGUS_TEXT_EXPRESSION
             | SVELTE_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
+            | HTML_BOGUS_TEXT_EXPRESSION => {
+                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            }
+=======
+            | HTML_BOGUS_TEXT_EXPRESSION => {
+                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            }
+            ANY_GLIMMER_ARGUMENT_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && GlimmerPath::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANY_GLIMMER_ARGUMENT_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANY_GLIMMER_ARGUMENT_VALUE, children)
+            }
+>>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
             ASTRO_EMBEDDED_CONTENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -72,12 +116,52 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(ASTRO_FRONTMATTER_ELEMENT, children)
             }
-            GLIMMER_MUSTACHE_EXPRESSION => {
+            GLIMMER_BLOCK_HELPER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
+                    && GlimmerBlockHelperOpening::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerBlockHelperClosing::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_BLOCK_HELPER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_BLOCK_HELPER, children)
+            }
+            GLIMMER_BLOCK_HELPER_CLOSING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
                     && element.kind() == T!["{{"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [/]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -99,11 +183,197 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
+                        GLIMMER_BLOCK_HELPER_CLOSING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_BLOCK_HELPER_CLOSING, children)
+            }
+            GLIMMER_BLOCK_HELPER_OPENING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["{{"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [#]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerPath::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerArgumentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerBlockParams::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["}}"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_BLOCK_HELPER_OPENING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_BLOCK_HELPER_OPENING, children)
+            }
+            GLIMMER_BLOCK_PARAM => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_BLOCK_PARAM.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_BLOCK_PARAM, children)
+            }
+            GLIMMER_BLOCK_PARAMS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![as]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerBlockParamList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_BLOCK_PARAMS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_BLOCK_PARAMS, children)
+            }
+            GLIMMER_MUSTACHE_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["{{"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerPath::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GlimmerArgumentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["}}"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
                         GLIMMER_MUSTACHE_EXPRESSION.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
                 slots.into_node(GLIMMER_MUSTACHE_EXPRESSION, children)
+            }
+            GLIMMER_NAMED_ARGUMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyGlimmerArgumentValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_NAMED_ARGUMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_NAMED_ARGUMENT, children)
             }
             GLIMMER_PATH => {
                 let mut elements = (&children).into_iter();
@@ -163,6 +433,51 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(GLIMMER_PATH_SEGMENT, children)
+            }
+            GLIMMER_POSITIONAL_ARGUMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyGlimmerArgumentValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_POSITIONAL_ARGUMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_POSITIONAL_ARGUMENT, children)
+            }
+            GLIMMER_SPLATTRIBUTE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [...]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GLIMMER_SPLATTRIBUTE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GLIMMER_SPLATTRIBUTE, children)
             }
             HTML_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();
@@ -704,6 +1019,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_TEXT_EXPRESSION, children)
             }
+<<<<<<< HEAD
             SVELTE_DEBUG_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -763,6 +1079,19 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_NAME, children)
             }
+||||||| parent of f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
+=======
+            GLIMMER_ARGUMENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyGlimmerArgument::can_cast)
+            }
+            GLIMMER_BLOCK_PARAM_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                GlimmerBlockParam::can_cast,
+                T ! [,],
+                false,
+            ),
+>>>>>>> f3bc07f9fc (feat(glimmer): add Glimmer syntax nodes to HTML grammar (Phase 2))
             GLIMMER_PATH_SEGMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, GlimmerPathSegment::can_cast)
             }
