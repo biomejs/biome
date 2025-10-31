@@ -10,6 +10,8 @@ use biome_glimmer_syntax::{GlimmerSyntaxKind, GlimmerSyntaxKind::*, T, TextRange
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 
+use crate::token_source::GlimmerLexContext;
+
 /// The Glimmer lexer
 pub(crate) struct GlimmerLexer<'src> {
     /// Source text
