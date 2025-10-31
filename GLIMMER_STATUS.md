@@ -26,29 +26,39 @@
 - ✅ Added Glimmer support to formatter and syntax_kinds codegen
 - ✅ Successfully ran `cargo run -p xtask_codegen -- grammar glimmer`
 
-## Phase 2: Parser Implementation (IN PROGRESS)
+## Phase 2: Parser Implementation ✅ (Infrastructure Complete)
 
 ### COMPLETED:
-- ✅ Created `biome_glimmer_parser` crate skeleton
+- ✅ Created `biome_glimmer_parser` crate with all necessary infrastructure
   - ✅ `Cargo.toml` with all necessary dependencies
   - ✅ `src/lib.rs` with public `parse_glimmer()` API
-  - ✅ `src/lexer/mod.rs` for tokenization (800+ lines)
-  - ✅ `src/parser.rs` for parser context
-  - ✅ `src/token_source.rs` for token management
-  - ✅ `src/syntax/mod.rs` for parsing rules
+  - ✅ `src/lexer/mod.rs` implementing `Lexer<'src>` and `LexerWithCheckpoint<'src>` traits
+  - ✅ `src/parser.rs` implementing proper `Parser` trait
+  - ✅ `src/token_source.rs` implementing `BumpWithContext` trait
+  - ✅ `src/syntax/mod.rs` with parsing rule skeleton
   - ✅ Basic test infrastructure
+  - ✅ **ALL COMPILATION ERRORS RESOLVED** - crate builds successfully!
 
-### TODO:
-- [ ] Implement lexer for Glimmer tokens:
-  - Text content
-  - Mustache delimiters (`{{`, `}}`)
-  - HTML tags (`<`, `>`, `/`)
-  - Special characters (`@`, `#`, `.`, `|`)
-  - Keywords (`this`, `as`, `if`, `else`, etc.)
-- [ ] Implement parser based on generated AST:
-  - Parse GlimmerRoot
-  - Parse statements (Text, Mustache, Block, Element, Comments)
-  - Parse expressions (Paths, SubExpressions, Literals)
+### Lexer Features Implemented:
+- ✅ Context-aware lexing with `GlimmerLexContext` enum
+- ✅ Text content tokenization
+- ✅ Mustache delimiters (`{{`, `}}`, `{{{`, `}}}`)
+- ✅ HTML tags (`<`, `>`, `/`)
+- ✅ Special characters (`@`, `#`, `.`, `|`, `=`)
+- ✅ Keywords (`this`, `as`, `if`, `else`, `each`, `let`, etc.)
+- ✅ String and number literals
+- ✅ Identifiers and path expressions
+- ✅ Comments (HTML and Mustache style)
+
+### TODO (Implementation Details):
+- [ ] Complete parser logic for all node types:
+  - Basic statement parsing exists but needs full implementation
+  - Parse mustache expressions with proper nesting
+  - Parse block statements (#if, #each, #let)
+  - Parse element/component with attributes and modifiers
+  - Parse path expressions (this.foo, @arg, helper)
+  - Parse sub-expressions
+  - Parse block params (as |item index|)
   - Error recovery and bogus node handling
 - [ ] Add comprehensive parser tests:
   - Test fixtures in `tests/` directory
@@ -124,29 +134,45 @@ Key AST nodes:
 - Parser needs correct `Parser` trait implementation
 - Currently has 23 compilation errors related to trait implementations
 
-## Recent Session: Token/Grammar Fixes ✅
+## Recent Session: Parser Infrastructure Complete ✅
 
-Successfully fixed critical grammar and codegen issues:
+Successfully completed all infrastructure setup and fixed compilation errors:
 
-### Grammar Fixes:
+### Session 1: Grammar & Token Fixes
 - ✅ Separated STRING_LITERAL/NUMBER_LITERAL tokens from node types
 - ✅ Renamed duplicate token fields (opening/closing, opening_pipe/closing_pipe)
 - ✅ Fixed GlimmerBlockStatement to have distinct open/close token names
 - ✅ Manually fixed factory T! macro calls to use `T!["{{"]` instead of `T![l_curly2]`
 
-### Build Status:
-- ✅ `biome_glimmer_syntax`: Builds successfully (minor snake_case warnings)
+### Session 2: Trait Implementation Rewrite
+- ✅ Rewrote lexer to implement `Lexer<'src>` and `LexerWithCheckpoint<'src>` traits
+- ✅ Added missing lexer fields: current_kind, current_start, current_flags, unicode_bom_length
+- ✅ Fixed token source `BumpWithContext` and `TokenSourceWithBufferedLexer` implementations
+- ✅ Fixed checkpoint/rewind functionality with proper generic parameters
+- ✅ Replaced non-existent `to_trivia()` with `is_trivia()` check
+- ✅ Fixed parser method calls (`p.current()` → `p.cur()`)
+- ✅ Added missing `T` macro import
+
+### Final Build Status:
+- ✅ `biome_glimmer_syntax`: Builds successfully
 - ✅ `biome_glimmer_factory`: Builds successfully
-- ⚠️ `biome_glimmer_parser`: 23 compilation errors (trait implementation issues)
+- ✅ `biome_glimmer_parser`: **Builds successfully with zero errors!**
+
+### Commits Made:
+1. `b77cbe4534`: Grammar and token handling fixes
+2. `02580de7cb`: Status documentation update
+3. `432192a57a`: Lexer and token source trait implementations
+4. `5242f92ceb`: T macro import fix
 
 ## Next Steps
 
 1. ✅ ~~Run codegen to generate full syntax tree~~ **DONE!**
-2. ⚠️ **Fix parser trait implementations** (IN PROGRESS):
-   - Rewrite lexer to implement `Lexer<'src>` + `LexerWithCheckpoint<'src>` traits
-   - Add missing lexer fields: current_kind, current_start, current_flags, unicode_bom_length
-   - Implement all required trait methods properly
-   - Reference: `biome_html_parser` as template
-3. Implement parser to build the AST using generated node types
+2. ✅ ~~Fix parser trait implementations~~ **DONE!**
+3. **Implement complete parser logic** (NEXT):
+   - Expand statement parsing beyond skeleton
+   - Full mustache/block expression parsing
+   - Element/component parsing with attributes
+   - Path expression parsing
+   - Error recovery with bogus nodes
 4. Write comprehensive parser tests with snapshots
 5. Integrate with JS parser for GJS/GTS file handling
