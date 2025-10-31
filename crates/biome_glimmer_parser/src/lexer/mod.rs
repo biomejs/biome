@@ -6,13 +6,9 @@
 //! - HTML tags and attributes
 //! - Glimmer-specific syntax (@args, #blocks, etc.)
 
-use biome_glimmer_syntax::{
-    GlimmerSyntaxKind, GlimmerSyntaxKind::*, T, TextLen, TextRange, TextSize,
-};
+use biome_glimmer_syntax::{GlimmerSyntaxKind, GlimmerSyntaxKind::*, T, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
-
-use crate::token_source::GlimmerLexContext;
+use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 
 /// The Glimmer lexer
 pub(crate) struct GlimmerLexer<'src> {
@@ -125,7 +121,6 @@ impl<'src> GlimmerLexer<'src> {
             }
             Some(_) => {
                 // Consume text until we hit a special character
-                let start = self.position;
                 while let Some(byte) = self.current_byte() {
                     match byte {
                         b'{' | b'<' | b'\n' | b'\r' => break,

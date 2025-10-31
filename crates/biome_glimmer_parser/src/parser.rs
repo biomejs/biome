@@ -25,6 +25,7 @@ impl<'source> GlimmerParser<'source> {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn options(&self) -> &GlimmerParseOptions {
         &self.options
     }
@@ -44,6 +45,7 @@ impl<'source> GlimmerParser<'source> {
         (events, diagnostics, trivia)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn checkpoint(&mut self) -> GlimmerParserCheckpoint {
         GlimmerParserCheckpoint {
             context: self.context.checkpoint(),
@@ -51,6 +53,7 @@ impl<'source> GlimmerParser<'source> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn rewind(&mut self, checkpoint: GlimmerParserCheckpoint) {
         let GlimmerParserCheckpoint { context, source } = checkpoint;
 
@@ -59,6 +62,7 @@ impl<'source> GlimmerParser<'source> {
     }
 }
 
+#[allow(dead_code)]
 pub struct GlimmerParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: GlimmerTokenSourceCheckpoint,

@@ -3,7 +3,6 @@
 //! This module contains the parsing logic for Glimmer templates.
 
 use crate::parser::GlimmerParser;
-use crate::token_source::GlimmerLexContext;
 use biome_glimmer_syntax::GlimmerSyntaxKind::*;
 use biome_glimmer_syntax::T;
 use biome_parser::Parser;

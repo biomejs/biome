@@ -17,6 +17,7 @@ pub(crate) struct GlimmerTokenSource<'source> {
 
 /// Lex context for the Glimmer lexer
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+#[allow(dead_code)]
 pub(crate) enum GlimmerLexContext {
     /// Regular template content (text nodes)
     #[default]
@@ -35,6 +36,7 @@ impl LexContext for GlimmerLexContext {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) type GlimmerTokenSourceCheckpoint = TokenSourceCheckpoint<GlimmerSyntaxKind>;
 
 impl<'source> GlimmerTokenSource<'source> {
@@ -63,6 +65,7 @@ impl<'source> GlimmerTokenSource<'source> {
     }
 
     /// Creates a checkpoint to which the token source can be rewound to at a later point
+    #[allow(dead_code)]
     pub fn checkpoint(&self) -> TokenSourceCheckpoint<GlimmerSyntaxKind> {
         TokenSourceCheckpoint {
             lexer_checkpoint: self.lexer.checkpoint(),
@@ -71,6 +74,7 @@ impl<'source> GlimmerTokenSource<'source> {
     }
 
     /// Restores the lexer and trivia list to the state they were in when the checkpoint was created
+    #[allow(dead_code)]
     pub fn rewind(&mut self, checkpoint: TokenSourceCheckpoint<GlimmerSyntaxKind>) {
         self.lexer.rewind(checkpoint.lexer_checkpoint);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
