@@ -8,7 +8,6 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_glimmer_parser::{parse_glimmer, GlimmerParseOptions};
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
@@ -116,35 +115,6 @@ impl GlimmerFileHandler {
     /// Check if the file contains any <template> blocks
     pub fn has_templates(text: &str) -> bool {
         GLIMMER_TEMPLATE.is_match(text)
-    }
-
-    /// Parse Glimmer templates extracted from the file
-    ///
-    /// Returns parse results for each template block found in the file.
-    /// The content inside `<template>...</template>` is extracted and parsed.
-    pub fn parse_templates(text: &str) -> Vec<biome_glimmer_parser::GlimmerParse> {
-        let mut results = Vec::new();
-
-        for template_match in GLIMMER_TEMPLATE.find_iter(text) {
-            let full_text = template_match.as_str();
-
-            // Extract content between <template> and </template>
-            let content = if let Some(start_idx) = full_text.find(">") {
-                if let Some(end_idx) = full_text.rfind("</template>") {
-                    &full_text[start_idx + 1..end_idx]
-                } else {
-                    full_text
-                }
-            } else {
-                full_text
-            };
-
-            // Parse the template content
-            let parse_result = parse_glimmer(content, GlimmerParseOptions::default());
-            results.push(parse_result);
-        }
-
-        results
     }
 }
 

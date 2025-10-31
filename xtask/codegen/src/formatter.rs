@@ -849,9 +849,6 @@ fn get_node_concept(
                 "TW_CANDIDATE" => NodeConcept::Expression,
                 _ => NodeConcept::Auxiliary,
             },
-
-            // TODO: implement formatter
-            LanguageKind::Glimmer => NodeConcept::Auxiliary,
         }
     }
 }
@@ -919,7 +916,6 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatter",
             Self::Markdown => "DemoFormatter",
             Self::Tailwind => "TailwindFormatter",
-            Self::Glimmer => "GlimmerFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -936,7 +932,6 @@ impl LanguageKind {
             Self::Yaml => "YamlFormatContext",
             Self::Markdown => "DemoFormatterContext",
             Self::Tailwind => "TailwindFormatContext",
-            Self::Glimmer => "GlimmerFormatContext",
         };
 
         Ident::new(name, Span::call_site())

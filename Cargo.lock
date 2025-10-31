@@ -574,44 +574,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_glimmer_factory"
-version = "0.0.1"
-dependencies = [
- "biome_glimmer_syntax",
- "biome_rowan",
-]
-
-[[package]]
-name = "biome_glimmer_parser"
-version = "0.0.1"
-dependencies = [
- "biome_console",
- "biome_diagnostics",
- "biome_glimmer_factory",
- "biome_glimmer_syntax",
- "biome_parser",
- "biome_rowan",
- "biome_test_utils",
- "biome_unicode_table",
- "insta",
- "mimalloc",
- "quickcheck",
- "quickcheck_macros",
- "tests_macros",
- "tikv-jemallocator",
- "tracing",
-]
-
-[[package]]
-name = "biome_glimmer_syntax"
-version = "0.5.7"
-dependencies = [
- "biome_rowan",
- "schemars",
- "serde",
-]
-
-[[package]]
 name = "biome_glob"
 version = "0.1.0"
 dependencies = [
@@ -1580,8 +1542,6 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
- "biome_glimmer_parser",
- "biome_glimmer_syntax",
  "biome_glob",
  "biome_graphql_analyze",
  "biome_graphql_formatter",
