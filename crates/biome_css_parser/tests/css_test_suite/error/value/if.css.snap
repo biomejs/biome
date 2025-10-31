@@ -894,7 +894,7 @@ if.css:8:30 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:18:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an any if branch, or an any if test boolean expression but instead found ':'.
+  × Expected an if branch, or an if test boolean expression but instead found ':'.
   
     16 │ /* Empty condition */
     17 │ .empty-condition {
@@ -903,7 +903,7 @@ if.css:18:12 parse ━━━━━━━━━━━━━━━━━━━━�
     19 │ }
     20 │ 
   
-  i Expected an any if branch, or an any if test boolean expression here.
+  i Expected an if branch, or an if test boolean expression here.
   
     16 │ /* Empty condition */
     17 │ .empty-condition {
