@@ -1,6 +1,6 @@
 use crate::lexer::GlimmerLexer;
-use biome_glimmer_syntax::GlimmerSyntaxKind::{self, EOF};
-use biome_glimmer_syntax::TextRange;
+use biome_glimmer_syntax::GlimmerSyntaxKind::{self, *};
+use biome_glimmer_syntax::{TextRange, TriviaPieceKind};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
 use biome_parser::prelude::BumpWithContext;
@@ -61,6 +61,20 @@ impl<'source> GlimmerTokenSource<'source> {
     pub fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
         (self.trivia_list, self.lexer.finish())
     }
+
+    /// Creates a checkpoint to which the token source can be rewound to at a later point
+    pub fn checkpoint(&self) -> TokenSourceCheckpoint {
+        TokenSourceCheckpoint {
+            lexer: self.lexer.checkpoint(),
+            trivia_len: self.trivia_list.len() as u32,
+        }
+    }
+
+    /// Restores the lexer and trivia list to the state they were in when the checkpoint was created
+    pub fn rewind(&mut self, checkpoint: TokenSourceCheckpoint) {
+        self.lexer.rewind(checkpoint.lexer);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+    }
 }
 
 impl<'source> BumpWithContext for GlimmerTokenSource<'source> {
@@ -68,6 +82,10 @@ impl<'source> BumpWithContext for GlimmerTokenSource<'source> {
 
     fn bump_with_context(&mut self, context: Self::Context) {
         self.next_non_trivia_token(context, false);
+    }
+
+    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
+        self.next_non_trivia_token(context, true);
     }
 }
 
@@ -107,30 +125,32 @@ impl<'source> TokenSourceWithBufferedLexer<GlimmerLexer<'source>> for GlimmerTok
     fn lexer(&mut self) -> &mut BufferedLexer<GlimmerSyntaxKind, GlimmerLexer<'source>> {
         &mut self.lexer
     }
+}
 
-    fn trivia(&mut self) -> &mut Vec<Trivia> {
-        &mut self.trivia_list
-    }
-
-    fn skip_as_trivia_with_context(&mut self, context: GlimmerLexContext) {
-        self.next_non_trivia_token(context, true)
-    }
-
+impl<'source> GlimmerTokenSource<'source> {
     fn next_non_trivia_token(&mut self, context: GlimmerLexContext, skip_as_trivia: bool) {
         let mut trailing = !skip_as_trivia;
 
         loop {
             let kind = self.lexer.next_token(context);
 
-            let trivia_kind = kind.to_trivia();
+            if kind.is_trivia() {
+                let trivia_kind = match kind {
+                    NEWLINE => TriviaPieceKind::Newline,
+                    WHITESPACE => TriviaPieceKind::Whitespace,
+                    COMMENT | MUSTACHE_COMMENT => TriviaPieceKind::SingleLineComment,
+                    _ => TriviaPieceKind::Skipped,
+                };
 
-            if let Some(trivia_kind) = trivia_kind {
                 if !trailing {
                     trailing = trivia_kind.is_newline();
                 }
 
-                self.trivia_list
-                    .push(Trivia::new(trivia_kind, self.current_range(), trailing));
+                self.trivia_list.push(Trivia::new(
+                    trivia_kind,
+                    self.lexer.current_range(),
+                    trailing,
+                ));
             } else {
                 // Not trivia
                 break;

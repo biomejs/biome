@@ -10,7 +10,7 @@ use biome_glimmer_syntax::{
     GlimmerSyntaxKind, GlimmerSyntaxKind::*, T, TextLen, TextRange, TextSize,
 };
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer as LexerTrait};
+use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 
 use crate::token_source::GlimmerLexContext;
 
@@ -22,11 +22,23 @@ pub(crate) struct GlimmerLexer<'src> {
     /// The start byte position in the source text of the next token.
     position: usize,
 
+    /// The kind of the current token
+    current_kind: GlimmerSyntaxKind,
+
+    /// The start position of the current token
+    current_start: TextSize,
+
     /// Accumulated diagnostics
     diagnostics: Vec<ParseDiagnostic>,
 
+    /// Flags for the current token
+    current_flags: TokenFlags,
+
     /// Whether we just parsed a line break
     after_newline: bool,
+
+    /// Length of unicode BOM if present
+    unicode_bom_length: usize,
 }
 
 impl<'src> GlimmerLexer<'src> {
@@ -35,8 +47,12 @@ impl<'src> GlimmerLexer<'src> {
         Self {
             source,
             position: 0,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
             diagnostics: vec![],
+            current_flags: TokenFlags::empty(),
             after_newline: false,
+            unicode_bom_length: 0,
         }
     }
 
@@ -263,29 +279,36 @@ impl<'src> GlimmerLexer<'src> {
     }
 }
 
-impl<'src> LexerTrait for GlimmerLexer<'src> {
+impl<'src> Lexer<'src> for GlimmerLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
+    const WHITESPACE: Self::Kind = WHITESPACE;
+
     type Kind = GlimmerSyntaxKind;
     type LexContext = GlimmerLexContext;
-    type ReLexContext = GlimmerLexContext;
+    type ReLexContext = ();
 
-    fn source(&self) -> &str {
+    fn source(&self) -> &'src str {
         self.source
     }
 
     fn current(&self) -> Self::Kind {
-        // This will be called after next_token
-        // For now, return a placeholder
-        EOF
+        self.current_kind
     }
 
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+        self.current_start = TextSize::from(self.position as u32);
+        self.current_flags = TokenFlags::empty();
+
         self.after_newline = false;
 
         if self.position >= self.source.len() {
+            self.current_kind = EOF;
             return EOF;
         }
 
-        self.lex_token(context)
+        let kind = self.lex_token(context);
+        self.current_kind = kind;
+        kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
@@ -293,11 +316,17 @@ impl<'src> LexerTrait for GlimmerLexer<'src> {
     }
 
     fn has_unicode_escape(&self) -> bool {
-        false
+        self.current_flags.has_unicode_escape()
     }
 
-    fn rewind(&mut self, _checkpoint: biome_parser::lexer::LexerCheckpoint<Self::Kind>) {
-        // TODO: Implement rewinding if needed
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
+        self.position = checkpoint.position.into();
+        self.current_start = checkpoint.current_start;
+        self.current_kind = checkpoint.current_kind;
+        self.current_flags = checkpoint.current_flags;
+        self.after_newline = checkpoint.after_line_break;
+        self.unicode_bom_length = checkpoint.unicode_bom_length;
+        self.diagnostics.truncate(checkpoint.diagnostics_pos as usize);
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -305,18 +334,47 @@ impl<'src> LexerTrait for GlimmerLexer<'src> {
     }
 
     fn current_range(&self) -> TextRange {
-        TextRange::empty(self.text_position())
-    }
-
-    fn checkpoint(&self) -> biome_parser::lexer::LexerCheckpoint<Self::Kind> {
-        todo!()
-    }
-
-    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
-        self.current()
+        TextRange::new(
+            self.current_start,
+            TextSize::from(self.position as u32),
+        )
     }
 
     fn position(&self) -> usize {
         self.position
+    }
+
+    fn current_start(&self) -> TextSize {
+        self.current_start
+    }
+
+    fn current_flags(&self) -> TokenFlags {
+        self.current_flags
+    }
+
+    fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
+        self.diagnostics.push(diagnostic);
+    }
+
+    fn advance(&mut self, n: usize) {
+        self.position += n;
+    }
+
+    fn advance_char_unchecked(&mut self) {
+        self.position += self.current_byte().map_or(0, |_| 1);
+    }
+}
+
+impl<'src> LexerWithCheckpoint<'src> for GlimmerLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
     }
 }
