@@ -112,7 +112,7 @@ export interface AssistConfiguration {
 	/**
 	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
 	 */
-	includes?: NormalizedGlob[];
+	includes?: GlobList;
 }
 /**
  * Options applied to CSS files
@@ -157,7 +157,7 @@ Set of file and folder names that should be unconditionally ignored by Biome's s
 	/**
 	 * A list of glob patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
-	includes?: NormalizedGlob[];
+	includes?: GlobList;
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -191,7 +191,7 @@ export interface FormatterConfiguration {
 	/**
 	 * A list of glob patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	includes?: NormalizedGlob[];
+	includes?: GlobList;
 	/**
 	 * The indent style.
 	 */
@@ -332,7 +332,7 @@ export interface LinterConfiguration {
 	/**
 	 * A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.
 	 */
-	includes?: NormalizedGlob[];
+	includes?: GlobList;
 	/**
 	 * List of rules
 	 */
@@ -375,10 +375,7 @@ export interface Actions {
 	recommended?: boolean;
 	source?: Source;
 }
-/**
- * Normalized Biome glob pattern that strips `./` from the pattern.
- */
-export type NormalizedGlob = Glob;
+export type GlobList = NormalizedGlob[];
 /**
  * Options that changes how the CSS assist behaves
  */
@@ -886,7 +883,10 @@ export interface Source {
 	 */
 	useSortedProperties?: RuleAssistConfiguration_for_UseSortedPropertiesOptions;
 }
-export type Glob = string;
+/**
+ * Normalized Biome glob pattern that strips `./` from the pattern.
+ */
+export type NormalizedGlob = Glob;
 export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
@@ -1036,6 +1036,7 @@ export type RuleAssistConfiguration_for_UseSortedKeysOptions =
 export type RuleAssistConfiguration_for_UseSortedPropertiesOptions =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOptions_for_UseSortedPropertiesOptions;
+export type Glob = string;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group

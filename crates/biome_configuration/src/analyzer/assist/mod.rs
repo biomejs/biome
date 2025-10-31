@@ -2,6 +2,7 @@ mod actions;
 
 pub use crate::analyzer::assist::actions::*;
 use crate::bool::Bool;
+use crate::glob_list::GlobList;
 use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -26,7 +27,7 @@ pub struct AssistConfiguration {
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
+    pub includes: Option<GlobList>,
 }
 
 impl AssistConfiguration {

@@ -13,6 +13,7 @@ use biome_formatter::{
     AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
+use biome_glob::NormalizedGlob;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
@@ -316,12 +317,13 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = Error;
     fn try_from(Override { files, options }: Override) -> anyhow::Result<Self> {
         let mut result = Self {
-            includes: Some(biome_configuration::OverrideGlobs::Globs(
+            includes: Some(biome_configuration::OverrideGlobs::Globs(Box::new(
                 files
                     .into_iter()
                     .filter_map(|glob| glob.parse().ok())
-                    .collect(),
-            )),
+                    .collect::<Vec<NormalizedGlob>>()
+                    .into(),
+            ))),
             ..Default::default()
         };
         if options.print_width.is_some()

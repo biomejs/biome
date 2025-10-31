@@ -6,6 +6,7 @@ use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+use biome_configuration::glob_list::GlobList;
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
@@ -926,22 +927,14 @@ pub struct Includes {
     working_directory: Option<Utf8PathBuf>,
     /// If `None`, then all files are included
     /// Otherwise this filtered out all files that doesn't match.
-    globs: Option<Vec<biome_glob::NormalizedGlob>>,
+    globs: Option<GlobList>,
 }
 impl Includes {
-    fn new(
-        working_directory: Option<Utf8PathBuf>,
-        globs: Option<Vec<biome_glob::NormalizedGlob>>,
-    ) -> Self {
+    fn new(working_directory: Option<Utf8PathBuf>, globs: Option<GlobList>) -> Self {
         Self {
             working_directory,
             globs,
         }
-    }
-
-    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::NormalizedGlob]>>) {
-        let current_globs = self.globs.get_or_insert_default();
-        current_globs.extend(globs.into());
     }
 
     /// Returns whether the given `file_path` is included.
@@ -974,7 +967,7 @@ impl Includes {
             path
         };
         let candidate_path = biome_glob::CandidatePath::new(path);
-        candidate_path.matches_forced_negation(globs)
+        candidate_path.matches_forced_negation(globs.as_slice())
     }
 
     /// Returns `true` is no globs are set.
@@ -994,7 +987,7 @@ impl Includes {
             path
         };
         let candidate_path = biome_glob::CandidatePath::new(path);
-        candidate_path.matches_with_exceptions(globs)
+        candidate_path.matches_with_exceptions(globs.as_slice())
     }
 
     /// Normalize `path` and match it against the list of globs.
@@ -1008,7 +1001,7 @@ impl Includes {
             path
         };
         let candidate_path = biome_glob::CandidatePath::new(path);
-        candidate_path.matches_directory_with_exceptions(globs)
+        candidate_path.matches_directory_with_exceptions(globs.as_slice())
     }
 }
 

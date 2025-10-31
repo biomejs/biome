@@ -698,18 +698,19 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 )])),
                 overrides: Some(Overrides(vec![
                     OverridePattern {
-                        includes: Some(OverrideGlobs::Globs(Box::new([
-                            biome_glob::NormalizedGlob::from_str("./lib/**").unwrap(),
-                        ]))),
+                        includes: Some(OverrideGlobs::Globs(Box::new(
+                            vec![biome_glob::NormalizedGlob::from_str("./lib/**").unwrap()].into(),
+                        ))),
                         plugins: Some(Plugins(vec![PluginConfiguration::Path(
                             "./plugin_b.grit".to_string(),
                         )])),
                         ..OverridePattern::default()
                     },
                     OverridePattern {
-                        includes: Some(OverrideGlobs::Globs(Box::new([
-                            biome_glob::NormalizedGlob::from_str("./utils/**").unwrap(),
-                        ]))),
+                        includes: Some(OverrideGlobs::Globs(Box::new(
+                            vec![biome_glob::NormalizedGlob::from_str("./utils/**").unwrap()]
+                                .into(),
+                        ))),
                         plugins: Some(Plugins(vec![PluginConfiguration::Path(
                             "./plugin_c.grit".to_string(),
                         )])),

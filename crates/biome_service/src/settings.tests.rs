@@ -96,9 +96,9 @@ fn merge_override_linter_group_rule() {
             ..LinterConfiguration::default()
         }),
         overrides: Some(Overrides(vec![OverridePattern {
-            includes: Some(OverrideGlobs::Globs(Box::new([
-                biome_glob::NormalizedGlob::from_str("**/*").unwrap(),
-            ]))),
+            includes: Some(OverrideGlobs::Globs(Box::new(
+                vec![biome_glob::NormalizedGlob::from_str("**/*").unwrap()].into(),
+            ))),
             linter: Some(OverrideLinterConfiguration {
                 rules: Some(Rules {
                     nursery: Some(SeverityOrGroup::Group(Nursery {

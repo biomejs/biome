@@ -143,10 +143,13 @@
 
 #![deny(clippy::use_self)]
 
+use std::cmp::Ordering;
+use std::str::FromStr;
+
 pub mod editorconfig;
 
 /// Normalized Biome glob pattern that strips `./` from the pattern.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "biome_deserialize",
     derive(biome_deserialize_macros::Deserializable)
@@ -196,6 +199,24 @@ impl TryFrom<String> for NormalizedGlob {
 impl AsRef<Glob> for NormalizedGlob {
     fn as_ref(&self) -> &Glob {
         &self.0
+    }
+}
+impl PartialOrd for NormalizedGlob {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for NormalizedGlob {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // SAFETY: "**" is a valid pattern
+        let self_is_double_star = self.0 == Glob::from_str("**").unwrap();
+        let other_is_double_star = other.0 == Glob::from_str("**").unwrap();
+
+        match (self_is_double_star, other_is_double_star) {
+            (true, false) => Ordering::Less,    // ** comes first
+            (false, true) => Ordering::Greater, // ** comes first
+            _ => Ordering::Equal,               // keep ordering as is
+        }
     }
 }
 
@@ -279,6 +300,11 @@ impl Glob {
     /// Tests whether the given path matches this pattern, ignoring the negation.
     fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
         self.glob.is_match_candidate(&path.0)
+    }
+
+    /// Returns a string representation of the glob pattern.
+    pub fn as_str(&self) -> &str {
+        self.glob.glob().glob()
     }
 }
 impl AsRef<Self> for Glob {
