@@ -46,6 +46,7 @@ pub(crate) mod if_supports_test;
 pub(crate) mod if_test_boolean_and_expr;
 pub(crate) mod if_test_boolean_expr_in_parens;
 pub(crate) mod if_test_boolean_not_expr;
+pub(crate) mod if_test_boolean_or_expr;
 pub(crate) mod import_anonymous_layer;
 pub(crate) mod import_named_layer;
 pub(crate) mod import_supports;

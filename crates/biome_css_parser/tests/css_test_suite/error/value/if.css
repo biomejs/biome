@@ -1,0 +1,34 @@
+/* Missing closing paren */
+.missing-paren {
+	color: if(style(--foo: bar): black;
+}
+
+/* Missing colon after condition */
+.missing-colon {
+	color: if(style(--foo: bar) black);
+}
+
+/* Missing value after colon */
+.missing-value {
+	color: if(style(--foo: bar):);
+}
+
+/* Empty condition */
+.empty-condition {
+	color: if(: black);
+}
+
+/* Missing else value */
+.missing-else-value {
+	color: if(style(--foo: bar): black; else:);
+}
+
+/* Unclosed style test */
+.unclosed-style {
+	color: if(style(--foo: bar: black);
+}
+
+/* Invalid style query */
+.invalid-style-query {
+	color: if(style(not a valid query): black);
+}

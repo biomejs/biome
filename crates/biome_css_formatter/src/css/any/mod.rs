@@ -38,6 +38,7 @@ pub(crate) mod if_test;
 pub(crate) mod if_test_boolean_and_combinable_expr;
 pub(crate) mod if_test_boolean_expr;
 pub(crate) mod if_test_boolean_expr_group;
+pub(crate) mod if_test_boolean_or_combinable_expr;
 pub(crate) mod import_layer;
 pub(crate) mod import_supports_condition;
 pub(crate) mod import_url;

@@ -63,6 +63,7 @@ CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
+CssBogusIfTestBooleanExpr = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
