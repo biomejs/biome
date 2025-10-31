@@ -1697,6 +1697,10 @@ export interface Nursery {
 	 */
 	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
 	/**
+	 * Disallow function parameters that are only used in recursive calls.
+	 */
+	noParametersOnlyUsedInRecursion?: RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
+	/**
 	 * Replaces usages of forwardRef with passing ref as a prop.
 	 */
 	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
@@ -3073,6 +3077,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
+export type RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions;
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
@@ -5560,6 +5567,20 @@ export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	 * Rule's options
 	 */
 	options: NoNextAsyncClientComponentOptions;
+}
+export interface RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoParametersOnlyUsedInRecursionOptions;
 }
 export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	/**
@@ -8282,6 +8303,7 @@ export interface NoJsxLiteralsOptions {
 }
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
+export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
@@ -9057,6 +9079,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
