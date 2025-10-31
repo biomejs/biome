@@ -5,6 +5,7 @@
 use crate::parser::GlimmerParser;
 use crate::token_source::GlimmerLexContext;
 use biome_glimmer_syntax::GlimmerSyntaxKind::*;
+use biome_glimmer_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::*;
 
@@ -42,7 +43,7 @@ fn parse_statement_list(p: &mut GlimmerParser) {
 ///
 /// Returns true if a statement was successfully parsed
 fn parse_statement(p: &mut GlimmerParser) -> bool {
-    match p.current() {
+    match p.cur() {
         TEXT => {
             parse_text_node(p);
             true

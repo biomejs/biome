@@ -63,16 +63,16 @@ impl<'source> GlimmerTokenSource<'source> {
     }
 
     /// Creates a checkpoint to which the token source can be rewound to at a later point
-    pub fn checkpoint(&self) -> TokenSourceCheckpoint {
+    pub fn checkpoint(&self) -> TokenSourceCheckpoint<GlimmerSyntaxKind> {
         TokenSourceCheckpoint {
-            lexer: self.lexer.checkpoint(),
+            lexer_checkpoint: self.lexer.checkpoint(),
             trivia_len: self.trivia_list.len() as u32,
         }
     }
 
     /// Restores the lexer and trivia list to the state they were in when the checkpoint was created
-    pub fn rewind(&mut self, checkpoint: TokenSourceCheckpoint) {
-        self.lexer.rewind(checkpoint.lexer);
+    pub fn rewind(&mut self, checkpoint: TokenSourceCheckpoint<GlimmerSyntaxKind>) {
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
     }
 }
