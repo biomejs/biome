@@ -8,6 +8,8 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_html_parser::{parse_html, HtmlParseOptions};
+use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
@@ -115,6 +117,28 @@ impl GlimmerFileHandler {
     /// Check if the file contains any <template> blocks
     pub fn has_templates(text: &str) -> bool {
         GLIMMER_TEMPLATE.is_match(text)
+    }
+
+    /// Parse all <template> blocks in the file using the HTML parser with Glimmer mode
+    ///
+    /// This extracts each template and parses it independently. The resulting parse
+    /// objects can be used for linting, formatting, or other analysis.
+    #[cfg(test)]
+    pub fn parse_templates(text: &str) -> Vec<AnyParse> {
+        let mut results = Vec::new();
+
+        for template_match in GLIMMER_TEMPLATE.find_iter(text) {
+            let template_content = template_match.as_str();
+
+            // Parse with Glimmer-enabled HTML parser
+            let file_source = HtmlFileSource::glimmer();
+            let options = HtmlParseOptions::from(&file_source);
+            let parse = parse_html(template_content, options);
+
+            results.push(parse.into());
+        }
+
+        results
     }
 }
 
