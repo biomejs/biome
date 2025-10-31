@@ -203,7 +203,8 @@ fn format(
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     // For now, delegate to JavaScript formatter
-    // TODO: Extract and format <template> blocks separately
+    // The reconstruction happens at the workspace level, not here
+    // TODO: Format <template> blocks separately with Glimmer formatter
     javascript::format(biome_path, document_file_source, parse, settings)
 }
 
@@ -239,4 +240,89 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     javascript::fix_all(params)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GlimmerFileHandler;
+
+    #[test]
+    fn test_extract_js_content_basic() {
+        let input = r#"
+import Component from '@glimmer/component';
+
+export default class MyComponent extends Component {
+  <template>
+    <div>{{@title}}</div>
+  </template>
+
+  get title() {
+    return 'Hello';
+  }
+}
+"#;
+
+        let output = GlimmerFileHandler::extract_js_content(input);
+
+        // Should replace template with marker
+        assert!(output.contains("__BIOME_GLIMMER_TEMPLATE_0__"));
+        assert!(!output.contains("<template>"));
+        assert!(output.contains("import Component"));
+        assert!(output.contains("get title"));
+    }
+
+    #[test]
+    fn test_extract_js_content_multiple_templates() {
+        let input = r#"
+const Foo = <template>{{@foo}}</template>;
+const Bar = <template>{{@bar}}</template>;
+"#;
+
+        let output = GlimmerFileHandler::extract_js_content(input);
+
+        assert!(output.contains("__BIOME_GLIMMER_TEMPLATE_0__"));
+        assert!(output.contains("__BIOME_GLIMMER_TEMPLATE_1__"));
+        assert!(!output.contains("<template>"));
+    }
+
+    #[test]
+    fn test_output_reconstruction() {
+        let input = r#"const Foo = <template>{{@foo}}</template>;"#;
+        let extracted = GlimmerFileHandler::extract_js_content(input);
+
+        // Simulate formatting (just adding spaces)
+        let formatted = extracted.replace("const", "const ");
+
+        let output = GlimmerFileHandler::output(input, &formatted);
+
+        // Should have template back
+        assert!(output.contains("<template>{{@foo}}</template>"));
+        assert!(!output.contains("__BIOME_GLIMMER_TEMPLATE"));
+    }
+
+    #[test]
+    fn test_has_templates() {
+        assert!(GlimmerFileHandler::has_templates("<template>test</template>"));
+        assert!(GlimmerFileHandler::has_templates("foo <template>test</template> bar"));
+        assert!(!GlimmerFileHandler::has_templates("no templates here"));
+        assert!(!GlimmerFileHandler::has_templates(""));
+    }
+
+    #[test]
+    fn test_semicolon_handling() {
+        let input = r#"
+class Foo {
+  <template>
+    <div></div>
+  </template>
+}
+"#;
+        let extracted = GlimmerFileHandler::extract_js_content(input);
+        let formatted = format!("{};", extracted.trim()); // Formatter might add semicolon
+
+        let output = GlimmerFileHandler::output(input, &formatted);
+
+        // Should not have semicolon after template if original didn't
+        assert!(!output.contains("</template>;"));
+    }
 }
