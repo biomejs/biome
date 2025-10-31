@@ -24,7 +24,6 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
             | CSS_BOGUS_IF_BRANCH
             | CSS_BOGUS_IF_TEST
-            | CSS_BOGUS_IF_TEST_BOOLEAN_EXPR
             | CSS_BOGUS_KEYFRAMES_ITEM
             | CSS_BOGUS_KEYFRAMES_NAME
             | CSS_BOGUS_LAYER
