@@ -3559,16 +3559,6 @@ where
         slots,
     ))
 }
-pub fn css_bogus_if_test_boolean_expr<I>(slots: I) -> CssBogusIfTestBooleanExpr
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusIfTestBooleanExpr::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_IF_TEST_BOOLEAN_EXPR,
-        slots,
-    ))
-}
 pub fn css_bogus_keyframes_item<I>(slots: I) -> CssBogusKeyframesItem
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

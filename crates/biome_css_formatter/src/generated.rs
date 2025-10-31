@@ -7874,46 +7874,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusIfTest {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssBogusIfTestBooleanExpr>
-    for crate::css::bogus::bogus_if_test_boolean_expr::FormatCssBogusIfTestBooleanExpr
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssBogusIfTestBooleanExpr,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_css_syntax::CssBogusIfTestBooleanExpr>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusIfTestBooleanExpr {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssBogusIfTestBooleanExpr,
-        crate::css::bogus::bogus_if_test_boolean_expr::FormatCssBogusIfTestBooleanExpr,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::bogus::bogus_if_test_boolean_expr::FormatCssBogusIfTestBooleanExpr::default(
-            ),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusIfTestBooleanExpr {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssBogusIfTestBooleanExpr,
-        crate::css::bogus::bogus_if_test_boolean_expr::FormatCssBogusIfTestBooleanExpr,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::bogus::bogus_if_test_boolean_expr::FormatCssBogusIfTestBooleanExpr::default(
-            ),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssBogusKeyframesItem>
     for crate::css::bogus::bogus_keyframes_item::FormatCssBogusKeyframesItem
 {

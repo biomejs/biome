@@ -389,7 +389,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_IF_FUNCTION",
         "CSS_IF_BRANCH_LIST",
         "CSS_IF_BRANCH",
-        "CSS_IF_BOOLgAN_EXPR",
         "CSS_ELSE_KEYWORD",
         "CSS_IF_SUPPORTS_TEST",
         "CSS_IF_STYLE_TEST",
