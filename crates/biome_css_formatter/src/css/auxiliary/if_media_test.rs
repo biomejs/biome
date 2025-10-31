@@ -3,8 +3,8 @@ use biome_css_syntax::{CssIfMediaTest, CssIfMediaTestFields};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
-
 pub(crate) struct FormatCssIfMediaTest;
+
 impl FormatNodeRule<CssIfMediaTest> for FormatCssIfMediaTest {
     fn fmt_fields(&self, node: &CssIfMediaTest, f: &mut CssFormatter) -> FormatResult<()> {
         let CssIfMediaTestFields {

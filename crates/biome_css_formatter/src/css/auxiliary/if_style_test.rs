@@ -4,6 +4,7 @@ use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssIfStyleTest;
+
 impl FormatNodeRule<CssIfStyleTest> for FormatCssIfStyleTest {
     fn fmt_fields(&self, node: &CssIfStyleTest, f: &mut CssFormatter) -> FormatResult<()> {
         let CssIfStyleTestFields {
