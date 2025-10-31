@@ -106,7 +106,7 @@ Key AST nodes:
 6. Successfully generated complete AST with 1000+ lines of type-safe Rust code
 7. Auto-created `biome_glimmer_factory` crate with factory functions
 
-### Phase 2 Started ✅
+### Phase 2 Started ⚠️ (Needs Rework)
 1. Created `biome_glimmer_parser` crate structure with all modules
 2. Implemented context-aware lexer (800+ lines) supporting:
    - Regular template content (text nodes)
@@ -118,11 +118,35 @@ Key AST nodes:
 5. Added test infrastructure with spec_test.rs
 6. Fixed module organization for biome_glimmer_syntax and biome_glimmer_factory
 
+**Parser Status**: Parser skeleton needs to properly implement Biome's parser traits:
+- Lexer should implement `Lexer<'src>` and `LexerWithCheckpoint<'src>` (not `LexerTrait`)
+- Token source needs proper `BumpWithContext` implementation
+- Parser needs correct `Parser` trait implementation
+- Currently has 23 compilation errors related to trait implementations
+
+## Recent Session: Token/Grammar Fixes ✅
+
+Successfully fixed critical grammar and codegen issues:
+
+### Grammar Fixes:
+- ✅ Separated STRING_LITERAL/NUMBER_LITERAL tokens from node types
+- ✅ Renamed duplicate token fields (opening/closing, opening_pipe/closing_pipe)
+- ✅ Fixed GlimmerBlockStatement to have distinct open/close token names
+- ✅ Manually fixed factory T! macro calls to use `T!["{{"]` instead of `T![l_curly2]`
+
+### Build Status:
+- ✅ `biome_glimmer_syntax`: Builds successfully (minor snake_case warnings)
+- ✅ `biome_glimmer_factory`: Builds successfully
+- ⚠️ `biome_glimmer_parser`: 23 compilation errors (trait implementation issues)
+
 ## Next Steps
 
 1. ✅ ~~Run codegen to generate full syntax tree~~ **DONE!**
-2. Create `biome_glimmer_parser` crate skeleton (Cargo.toml, lib.rs, lexer.rs, parser.rs)
-3. Implement lexer to tokenize Glimmer template syntax
-4. Implement parser to build the AST using generated node types
-5. Write comprehensive parser tests with snapshots
-6. Integrate with JS parser for GJS/GTS file handling
+2. ⚠️ **Fix parser trait implementations** (IN PROGRESS):
+   - Rewrite lexer to implement `Lexer<'src>` + `LexerWithCheckpoint<'src>` traits
+   - Add missing lexer fields: current_kind, current_start, current_flags, unicode_bom_length
+   - Implement all required trait methods properly
+   - Reference: `biome_html_parser` as template
+3. Implement parser to build the AST using generated node types
+4. Write comprehensive parser tests with snapshots
+5. Integrate with JS parser for GJS/GTS file handling
