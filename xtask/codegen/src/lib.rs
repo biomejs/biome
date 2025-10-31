@@ -14,20 +14,20 @@ mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
 mod generate_target_language_constants;
+mod glimmer_kinds_src;
 mod graphql_kind_src;
 mod grit_kinds_src;
+mod html_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
-mod markdown_kinds_src;
-mod tailwind_kinds_src;
-mod yaml_kinds_src;
-
-mod html_kinds_src;
 mod kind_src;
 mod language_kind;
+mod markdown_kinds_src;
 pub mod move_rule;
+mod tailwind_kinds_src;
 mod termcolorful;
 mod unicode;
+mod yaml_kinds_src;
 
 use bpaf::Bpaf;
 use std::path::Path;

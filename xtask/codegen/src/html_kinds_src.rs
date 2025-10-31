@@ -29,7 +29,17 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("|", "PIPE"),
         (",", "COMMA"),
     ],
-    keywords: &["null", "true", "false", "doctype", "html", "debug", "this", "undefined", "else"],
+    keywords: &[
+        "null",
+        "true",
+        "false",
+        "doctype",
+        "html",
+        "debug",
+        "this",
+        "undefined",
+        "else",
+    ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
         "ERROR_TOKEN",

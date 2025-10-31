@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::verbatim::format_html_verbatim_node;
-use biome_html_syntax::GlimmerPath;
 use biome_formatter::write;
+use biome_html_syntax::GlimmerPath;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGlimmerPath;

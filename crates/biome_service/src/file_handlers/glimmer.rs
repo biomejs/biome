@@ -1,3 +1,4 @@
+use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
@@ -5,10 +6,9 @@ use crate::file_handlers::{
 };
 use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -18,8 +18,7 @@ use std::sync::LazyLock;
 /// Regex to match Glimmer <template> tags
 /// Simple pattern: <template> never has attributes and never nests
 pub static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"<template>[\s\S]*?</template>")
-        .expect("Invalid Glimmer template regex")
+    Regex::new(r"<template>[\s\S]*?</template>").expect("Invalid Glimmer template regex")
 });
 
 /// Information about a template's position and context in the original source
@@ -34,7 +33,6 @@ struct TemplateInfo {
 pub struct GlimmerFileHandler;
 
 impl GlimmerFileHandler {
-
     /// Extract the JavaScript/TypeScript code with <template> blocks replaced by markers
     ///
     /// Templates are replaced with markers that work in their specific contexts.
@@ -45,30 +43,33 @@ impl GlimmerFileHandler {
         let mut last_end = 0;
         let mut template_index = 0;
         let mut template_infos = Vec::new();
-        
+
         for template_match in GLIMMER_TEMPLATE.find_iter(text) {
             // Add JS before this template
             result.push_str(&text[last_end..template_match.start()]);
-            
+
             // Check if there's a semicolon after this template in the original
             let after_template_pos = template_match.end();
-            let has_trailing_semicolon = after_template_pos < text.len() 
+            let has_trailing_semicolon = after_template_pos < text.len()
                 && text[after_template_pos..].trim_start().starts_with(';');
-            
+
             template_infos.push(TemplateInfo {
                 template_text: template_match.as_str().to_string(),
                 has_trailing_semicolon,
             });
-            
+
             // Use an identifier that will be treated as:
             // - In class body: field declaration `__BIOME_GLIMMER_TEMPLATE_0__;`
             // - In expression context: identifier reference
-            result.push_str(&format!("__BIOME_GLIMMER_TEMPLATE_{index}__", index = template_index));
-            
+            result.push_str(&format!(
+                "__BIOME_GLIMMER_TEMPLATE_{index}__",
+                index = template_index
+            ));
+
             last_end = template_match.end();
             template_index += 1;
         }
-        
+
         // Add remaining JS after last template
         result.push_str(&text[last_end..]);
         (result, template_infos)
@@ -88,17 +89,17 @@ impl GlimmerFileHandler {
     /// Uses original source info to determine if semicolons should be kept.
     pub fn output(input: &str, formatted_js: &str) -> String {
         let (_, template_infos) = Self::extract_js_content_with_info(input);
-        
+
         if template_infos.is_empty() {
             return formatted_js.to_string();
         }
-        
+
         // Replace markers with templates
         let mut result = formatted_js.to_string();
         for (idx, template_info) in template_infos.iter().enumerate() {
             let marker = format!("__BIOME_GLIMMER_TEMPLATE_{idx}__");
             let marker_with_semi = format!("{marker};");
-            
+
             // If the formatted output has a semicolon but original didn't, remove it
             if result.contains(&marker_with_semi) && !template_info.has_trailing_semicolon {
                 result = result.replace(&marker_with_semi, &template_info.template_text);
@@ -107,7 +108,7 @@ impl GlimmerFileHandler {
                 result = result.replace(&marker, &template_info.template_text);
             }
         }
-        
+
         result
     }
 
@@ -159,7 +160,7 @@ impl ExtensionHandler for GlimmerFileHandler {
 }
 
 /// Parse GJS/GTS file as JavaScript/TypeScript
-/// 
+///
 /// Templates are stripped out before parsing to avoid syntax errors.
 /// In the future, templates will be parsed separately with the HTML parser.
 fn parse(
@@ -169,17 +170,15 @@ fn parse(
     _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let js_file_source = file_source
-        .to_js_file_source()
-        .unwrap_or_else(|| {
-            // Determine if this is GJS or GTS based on extension
-            if let Some(ext) = biome_path.extension() {
-                if ext == "gts" {
-                    return JsFileSource::gts();
-                }
+    let js_file_source = file_source.to_js_file_source().unwrap_or_else(|| {
+        // Determine if this is GJS or GTS based on extension
+        if let Some(ext) = biome_path.extension() {
+            if ext == "gts" {
+                return JsFileSource::gts();
             }
-            JsFileSource::gjs()
-        });
+        }
+        JsFileSource::gjs()
+    });
 
     // Extract JS content with templates replaced by whitespace
     let js_content = GlimmerFileHandler::extract_js_content(text);

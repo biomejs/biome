@@ -574,6 +574,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_glimmer_syntax"
+version = "0.5.7"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_glob"
 version = "0.1.0"
 dependencies = [

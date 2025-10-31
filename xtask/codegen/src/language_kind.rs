@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::glimmer_kinds_src::GLIMMER_KINDS_SRC;
 use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
@@ -39,6 +40,7 @@ pub enum LanguageKind {
     Yaml,
     Markdown,
     Tailwind,
+    Glimmer,
 }
 
 impl std::fmt::Display for LanguageKind {
@@ -53,11 +55,12 @@ impl std::fmt::Display for LanguageKind {
             Self::Yaml => write!(f, "yaml"),
             Self::Markdown => write!(f, "markdown"),
             Self::Tailwind => write!(f, "tailwind"),
+            Self::Glimmer => write!(f, "glimmer"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 9] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 10] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
@@ -67,6 +70,7 @@ pub const ALL_LANGUAGE_KIND: [LanguageKind; 9] = [
     LanguageKind::Yaml,
     LanguageKind::Markdown,
     LanguageKind::Tailwind,
+    LanguageKind::Glimmer,
 ];
 
 impl FromStr for LanguageKind {
@@ -83,6 +87,7 @@ impl FromStr for LanguageKind {
             "yaml" => Ok(Self::Yaml),
             "markdown" => Ok(Self::Markdown),
             "tailwind" => Ok(Self::Tailwind),
+            "glimmer" => Ok(Self::Glimmer),
             _ => Err(format!(
                 "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml`, `markdown`, `tailwind`, or `glimmer`"
             )),
@@ -120,7 +125,9 @@ macro_rules! define_language_kind_functions {
 }
 
 impl LanguageKind {
-    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown, Tailwind]);
+    define_language_kind_functions!([
+        Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown, Tailwind, Glimmer
+    ]);
 
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
         Ident::new(self.syntax_crate_name().as_str(), Span::call_site())
@@ -153,6 +160,7 @@ impl LanguageKind {
             Self::Yaml => YAML_KINDS_SRC,
             Self::Markdown => MARKDOWN_KINDS_SRC,
             Self::Tailwind => TAILWIND_KINDS_SRC,
+            Self::Glimmer => GLIMMER_KINDS_SRC,
         }
     }
 
@@ -167,6 +175,7 @@ impl LanguageKind {
             Self::Yaml => include_str!("../yaml.ungram"),
             Self::Markdown => include_str!("../markdown.ungram"),
             Self::Tailwind => include_str!("../tailwind.ungram"),
+            Self::Glimmer => include_str!("../glimmer.ungram"),
         }
     }
 

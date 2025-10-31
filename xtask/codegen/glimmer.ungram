@@ -1,0 +1,179 @@
+// Glimmer Template Grammar
+// Based on https://github.com/glimmerjs/glimmer-vm AST
+
+///////////////
+// BOGUS NODES
+///////////////
+
+SyntaxElement = SyntaxElement
+
+GlimmerBogus = SyntaxElement*
+GlimmerBogusStatement = SyntaxElement*
+GlimmerBogusExpression = SyntaxElement*
+
+///////////////
+// Top Level //
+///////////////
+
+GlimmerRoot =
+  bom: 'UNICODE_BOM'?
+  statements: GlimmerStatementList
+  eof: 'EOF'
+
+GlimmerBlock =
+  block_params: GlimmerBlockParams?
+  statements: GlimmerStatementList
+
+GlimmerStatementList = Statement*
+
+//////////////
+// Statements //
+//////////////
+
+Statement =
+  GlimmerTextNode
+| GlimmerMustacheStatement
+| GlimmerBlockStatement
+| GlimmerElementNode
+| GlimmerCommentStatement
+| GlimmerMustacheCommentStatement
+| GlimmerBogusStatement
+
+GlimmerTextNode = 'text'
+
+GlimmerCommentStatement = 'comment'
+
+GlimmerMustacheCommentStatement = 'mustache_comment'
+
+// {{expression}} or {{{expression}}}
+GlimmerMustacheStatement =
+  'l_curly2' 'l_curly2'?
+  Expression
+  'r_curly2' 'r_curly2'?
+
+// {{#if foo}}...{{else}}...{{/if}}
+GlimmerBlockStatement =
+  'l_curly2' '#' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash 'r_curly2'
+  block: GlimmerBlock
+  else_block: GlimmerElseBlock?
+  'l_curly2' '/' close_path: GlimmerPathExpression 'r_curly2'
+
+GlimmerElseBlock =
+  'l_curly2' 'else' ('if' condition: Expression)? 'r_curly2'
+  block: GlimmerBlock
+
+// HTML-like element or Glimmer component
+GlimmerElementNode =
+  opening: GlimmerStartTag
+  children: GlimmerStatementList
+  closing: GlimmerEndTag?
+
+GlimmerStartTag =
+  '<' name: GlimmerPathExpression
+  attributes: GlimmerAttributeList
+  modifiers: GlimmerElementModifierList
+  block_params: GlimmerBlockParams?
+  self_closing: SelfClosing? '>'
+
+GlimmerEndTag = '<' '/' name: GlimmerPathExpression '>'
+
+SelfClosing = '/'
+
+GlimmerAttributeList = GlimmerAttributeNode*
+
+// name="value" or name={{value}}
+GlimmerAttributeNode =
+  name: 'ident' '=' value: GlimmerAttributeValue
+
+GlimmerAttributeValue =
+  GlimmerTextNode
+| GlimmerMustacheStatement  
+| GlimmerConcatStatement
+
+// "foo {{bar}} baz"
+GlimmerConcatStatement = parts: GlimmerConcatPartList
+
+GlimmerConcatPartList = AnyConcatPart*
+
+AnyConcatPart =
+  GlimmerTextNode
+| GlimmerMustacheStatement
+
+GlimmerElementModifierList = GlimmerElementModifier*
+
+// {{on "click" this.handler}}
+GlimmerElementModifier =
+  'l_curly2' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash 'r_curly2'
+
+// as |item index|
+GlimmerBlockParams =
+  'as' '|' params: GlimmerParamNameList '|'
+
+GlimmerParamNameList = GlimmerParamName*
+
+GlimmerParamName = name: 'ident'
+
+///////////////
+// Expressions //
+///////////////
+
+Expression =
+  GlimmerPathExpression
+| GlimmerSubExpression
+| GlimmerLiteral
+| GlimmerBogusExpression
+
+// (helper arg1 arg2 key=value)
+GlimmerSubExpression =
+  '(' path: GlimmerPathExpression params: GlimmerParamsList hash: GlimmerHash ')'
+
+// this, this.foo, @arg, foo, foo.bar
+GlimmerPathExpression =
+  head: PathHead tail: GlimmerPathSegmentList
+
+GlimmerPathSegmentList = GlimmerPathSegment*
+
+GlimmerPathSegment = '.' segment: 'ident'
+
+PathHead =
+  GlimmerThisHead
+| GlimmerAtHead
+| GlimmerVarHead
+
+GlimmerThisHead = 'this'
+
+// @argName
+GlimmerAtHead = '@' name: 'ident'
+
+// localVariable
+GlimmerVarHead = name: 'ident'
+
+GlimmerParamsList = Expression*
+
+// key=value pairs
+GlimmerHash = pairs: GlimmerHashPairList
+
+GlimmerHashPairList = GlimmerHashPair*
+
+GlimmerHashPair = key: 'ident' '=' value: Expression
+
+/////////////
+// Literals //
+/////////////
+
+GlimmerLiteral =
+  GlimmerStringLiteral
+| GlimmerNumberLiteral
+| GlimmerBooleanLiteral
+| GlimmerNullLiteral
+| GlimmerUndefinedLiteral
+
+GlimmerStringLiteral = 'string_literal'
+
+GlimmerNumberLiteral = 'number_literal'
+
+GlimmerBooleanLiteral = 'true' | 'false'
+
+GlimmerNullLiteral = 'null'
+
+GlimmerUndefinedLiteral = 'undefined'

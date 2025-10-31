@@ -9594,7 +9594,7 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "Glimmer" | "None";
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -9629,7 +9629,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Glimmer";
 export type GritVariant = "Standard";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
