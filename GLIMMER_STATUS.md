@@ -26,14 +26,19 @@
 - ✅ Added Glimmer support to formatter and syntax_kinds codegen
 - ✅ Successfully ran `cargo run -p xtask_codegen -- grammar glimmer`
 
-## Phase 2: Parser Implementation (NEXT)
+## Phase 2: Parser Implementation (IN PROGRESS)
+
+### COMPLETED:
+- ✅ Created `biome_glimmer_parser` crate skeleton
+  - ✅ `Cargo.toml` with all necessary dependencies
+  - ✅ `src/lib.rs` with public `parse_glimmer()` API
+  - ✅ `src/lexer/mod.rs` for tokenization (800+ lines)
+  - ✅ `src/parser.rs` for parser context
+  - ✅ `src/token_source.rs` for token management
+  - ✅ `src/syntax/mod.rs` for parsing rules
+  - ✅ Basic test infrastructure
 
 ### TODO:
-- [ ] Create `biome_glimmer_parser` crate
-  - Add `Cargo.toml` with dependencies
-  - Create `src/lib.rs` entry point
-  - Create `src/lexer.rs` for tokenization
-  - Create `src/parser.rs` for parsing logic
 - [ ] Implement lexer for Glimmer tokens:
   - Text content
   - Mustache delimiters (`{{`, `}}`)
@@ -92,7 +97,7 @@ Key AST nodes:
 
 ## Recent Progress Summary (Latest Session)
 
-✅ **Completed:**
+### Phase 1 Completed ✅
 1. Created `glimmer_kinds_src.rs` defining all Glimmer tokens, keywords, and nodes
 2. Copied `Glimmer.ungram` to `xtask/codegen/` for build system integration
 3. Added Glimmer to the `LanguageKind` enum across all codegen files
@@ -100,6 +105,18 @@ Key AST nodes:
 5. Added bogus node definitions for error recovery
 6. Successfully generated complete AST with 1000+ lines of type-safe Rust code
 7. Auto-created `biome_glimmer_factory` crate with factory functions
+
+### Phase 2 Started ✅
+1. Created `biome_glimmer_parser` crate structure with all modules
+2. Implemented context-aware lexer (800+ lines) supporting:
+   - Regular template content (text nodes)
+   - Inside mustache expressions ({{...}})
+   - Inside HTML/component tags (<...>)
+   - Attribute values
+3. Created token source with lex context management
+4. Implemented parser foundation and basic syntax parsing rules
+5. Added test infrastructure with spec_test.rs
+6. Fixed module organization for biome_glimmer_syntax and biome_glimmer_factory
 
 ## Next Steps
 
