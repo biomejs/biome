@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
 use biome_configuration::analyzer::SeverityOrGroup;
+use biome_configuration::glob_list::GlobList;
 use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
@@ -625,11 +626,8 @@ fn migrate_eslint_rule(
     }
 }
 
-fn to_biome_includes(
-    files: &[impl AsRef<str>],
-    ignores: &[impl AsRef<str>],
-) -> Vec<biome_glob::NormalizedGlob> {
-    let mut includes: Vec<biome_glob::NormalizedGlob> = Vec::new();
+fn to_biome_includes(files: &[impl AsRef<str>], ignores: &[impl AsRef<str>]) -> GlobList {
+    let mut includes = GlobList::new();
     if !files.is_empty() {
         includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
     }
@@ -687,7 +685,7 @@ mod tests {
         let linter = biome_config.linter.unwrap();
         assert_eq!(
             linter.includes.unwrap(),
-            ["*.js".parse().unwrap(), "!*.test.js".parse().unwrap()],
+            vec!["*.js".parse().unwrap(), "!*.test.js".parse().unwrap()].into(),
         );
         assert!(linter.rules.is_some());
     }
@@ -736,11 +734,12 @@ mod tests {
         let linter = biome_config.linter.unwrap();
         assert_eq!(
             linter.includes.unwrap(),
-            [
+            vec![
                 "**".parse().unwrap(),
                 "!*.test.js".parse().unwrap(),
                 "!*.spec.js".parse().unwrap()
             ]
+            .into()
         );
         assert_eq!(
             linter
@@ -759,7 +758,12 @@ mod tests {
         let override0 = overrides.0.into_iter().next().unwrap();
         assert_eq!(
             override0.includes.unwrap(),
-            OverrideGlobs::Globs(["*.ts".parse().unwrap()].into_iter().collect()),
+            OverrideGlobs::Globs(Box::new(
+                ["*.ts".parse().unwrap()]
+                    .into_iter()
+                    .collect::<Vec<_>>()
+                    .into()
+            )),
         );
         assert_eq!(
             override0

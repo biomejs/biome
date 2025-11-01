@@ -1,6 +1,7 @@
 mod rules;
 
 use crate::bool::Bool;
+use crate::glob_list::GlobList;
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
@@ -31,7 +32,7 @@ pub struct LinterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
+    pub includes: Option<GlobList>,
 
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
     #[bpaf(hide, pure(Default::default()))]

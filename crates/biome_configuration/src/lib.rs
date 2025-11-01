@@ -13,6 +13,7 @@ pub mod editorconfig;
 mod extends;
 pub mod formatter;
 pub mod generated;
+pub mod glob_list;
 pub mod graphql;
 pub mod grit;
 pub mod html;
@@ -30,6 +31,7 @@ pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 use crate::extends::Extends;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
+use crate::glob_list::GlobList;
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
@@ -557,7 +559,7 @@ pub struct FilesConfiguration {
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
+    pub includes: Option<GlobList>,
 
     /// **Deprecated:** Please use _force-ignore syntax_ in `files.includes`
     /// instead: https://biomejs.dev/reference/configuration/#filesincludes

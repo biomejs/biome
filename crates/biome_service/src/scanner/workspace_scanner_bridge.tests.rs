@@ -230,10 +230,13 @@ fn should_not_index_an_ignored_file_inside_file_includes() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("**").unwrap(),
-                        NormalizedGlob::from_str("!**/dist/**").unwrap(),
-                    ]),
+                    includes: Some(
+                        vec![
+                            NormalizedGlob::from_str("**").unwrap(),
+                            NormalizedGlob::from_str("!**/dist/**").unwrap(),
+                        ]
+                        .into(),
+                    ),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -270,10 +273,13 @@ fn should_index_an_ignored_file_if_it_is_a_dependency_of_a_non_ignored_file() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("**").unwrap(),
-                        NormalizedGlob::from_str("!**/a.js").unwrap(),
-                    ]),
+                    includes: Some(
+                        vec![
+                            NormalizedGlob::from_str("**").unwrap(),
+                            NormalizedGlob::from_str("!**/a.js").unwrap(),
+                        ]
+                        .into(),
+                    ),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -316,11 +322,14 @@ fn should_not_index_a_force_ignored_file_even_if_it_is_a_dependency() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("**").unwrap(),
-                        NormalizedGlob::from_str("!!**/b.js").unwrap(),
-                        NormalizedGlob::from_str("b.js").unwrap(),
-                    ]),
+                    includes: Some(
+                        vec![
+                            NormalizedGlob::from_str("**").unwrap(),
+                            NormalizedGlob::from_str("!!**/b.js").unwrap(),
+                            NormalizedGlob::from_str("b.js").unwrap(),
+                        ]
+                        .into(),
+                    ),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -359,10 +368,13 @@ fn should_not_index_dependency_with_scan_kind_known_files() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("**").unwrap(),
-                        NormalizedGlob::from_str("!**/a.js").unwrap(),
-                    ]),
+                    includes: Some(
+                        vec![
+                            NormalizedGlob::from_str("**").unwrap(),
+                            NormalizedGlob::from_str("!**/a.js").unwrap(),
+                        ]
+                        .into(),
+                    ),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -399,10 +411,13 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("**").unwrap(),
-                        NormalizedGlob::from_str("!**/dist").unwrap(),
-                    ]),
+                    includes: Some(
+                        vec![
+                            NormalizedGlob::from_str("**").unwrap(),
+                            NormalizedGlob::from_str("!**/dist").unwrap(),
+                        ]
+                        .into(),
+                    ),
                     ..Default::default()
                 }),
                 ..Default::default()

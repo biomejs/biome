@@ -23,10 +23,13 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
     if fs.path_exists(&working_directory.join("dist")) {
         dist_enabled = true;
         config.files = Some(FilesConfiguration {
-            includes: Some(vec![
-                "**".parse::<biome_glob::NormalizedGlob>().unwrap(),
-                "!!**/dist".parse::<biome_glob::NormalizedGlob>().unwrap(),
-            ]),
+            includes: Some(
+                vec![
+                    "**".parse::<biome_glob::NormalizedGlob>().unwrap(),
+                    "!!**/dist".parse::<biome_glob::NormalizedGlob>().unwrap(),
+                ]
+                .into(),
+            ),
             ignore_unknown: None,
             max_size: None,
             experimental_scanner_ignores: None,
