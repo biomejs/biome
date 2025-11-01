@@ -72,24 +72,6 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    ///
-    /// ### `requireDataLowercase`
-    ///
-    /// When set to `true`, requires `data-*` attributes to contain only lowercase characters.
-    /// React will issue a warning when `data-*` attributes contain uppercase characters.
-    ///
-    /// **Default**: `false`
-    ///
-    /// ```json
-    /// {
-    ///   "noUnknownAttribute": {
-    ///     "options": {
-    ///       "requireDataLowercase": true
-    ///     }
-    ///   }
-    /// }
-    /// ```
-    ///
     pub NoUnknownAttribute {
         version: "next",
         name: "noUnknownAttribute",
