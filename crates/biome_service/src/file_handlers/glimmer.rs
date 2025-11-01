@@ -8,7 +8,9 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+#[cfg(test)]
 use biome_html_parser::{HtmlParseOptions, parse_html};
+#[cfg(test)]
 use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
