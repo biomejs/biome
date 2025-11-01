@@ -121,9 +121,12 @@ impl Rule for NoExtraNonNullAssertion {
                         let left = expr.left().ok()?;
                         let left_syntax = left.syntax();
                         let current_syntax = node.syntax();
-                        
+
                         // Check if current node is nested within the left side
-                        if left_syntax.descendants().any(|desc| desc == *current_syntax) {
+                        if left_syntax
+                            .descendants()
+                            .any(|desc| desc == *current_syntax)
+                        {
                             left.as_any_js_assignment()?
                                 .as_ts_non_null_assertion_assignment()
                                 .is_some()
@@ -132,7 +135,7 @@ impl Rule for NoExtraNonNullAssertion {
                             // (nested assertions on right side are already handled above)
                             false
                         }
-                    },
+                    }
                     AnyJsExpression::TsNonNullAssertionExpression(_) => true,
                     AnyJsExpression::JsStaticMemberExpression(expr) => expr.is_optional(),
                     AnyJsExpression::JsCallExpression(expr) => expr.is_optional(),
