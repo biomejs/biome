@@ -1,6 +1,6 @@
 /* should not generate diagnostics */
 
-export class Sample {
+export class SampleAddRemove {
   private add: () => void;
 
   constructor(private remove: () => void) {
@@ -12,3 +12,15 @@ export class Sample {
     this[action]();
   }
 }
+
+type YesNo = "yes" | "no";
+
+export class SampleYesNo {
+	private yes: () => void;
+	private no: () => void;
+
+	on(action: YesNo): void {
+		this[action]();
+	}
+}
+
