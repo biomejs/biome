@@ -119,9 +119,7 @@ macro_rules! define_language_kind_functions {
 }
 
 impl LanguageKind {
-    define_language_kind_functions!([
-        Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown, Tailwind
-    ]);
+    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown, Tailwind]);
 
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
         Ident::new(self.syntax_crate_name().as_str(), Span::call_site())

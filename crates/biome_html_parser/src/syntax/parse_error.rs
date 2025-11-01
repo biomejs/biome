@@ -107,17 +107,11 @@ pub(crate) fn expected_glimmer_argument(p: &HtmlParser, range: TextRange) -> Par
     expected_node("argument", range, p).into_diagnostic(p)
 }
 
-pub(crate) fn expected_glimmer_argument_value(
-    p: &HtmlParser,
-    range: TextRange,
-) -> ParseDiagnostic {
+pub(crate) fn expected_glimmer_argument_value(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["path", "string", "literal"], range).into_diagnostic(p)
 }
 
-pub(crate) fn expected_glimmer_path_segment(
-    p: &HtmlParser,
-    range: TextRange,
-) -> ParseDiagnostic {
+pub(crate) fn expected_glimmer_path_segment(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["this", "@", ".", "identifier"], range).into_diagnostic(p)
 }
 
@@ -134,15 +128,9 @@ pub(crate) fn expected_closing_mustache(
         "Found a mustache expression that doesn't have the closing '}}':",
         curr_range,
     )
-    .with_detail(
-        opening_range,
-        "This is where the opening '{{' was found:",
-    )
+    .with_detail(opening_range, "This is where the opening '{{' was found:")
 }
 
-pub(crate) fn expected_block_helper_closing(
-    p: &HtmlParser,
-    range: TextRange,
-) -> ParseDiagnostic {
+pub(crate) fn expected_block_helper_closing(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("block helper closing tag ({{/helper}})", range, p).into_diagnostic(p)
 }

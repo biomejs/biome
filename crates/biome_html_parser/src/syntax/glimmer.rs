@@ -3,11 +3,11 @@ use crate::syntax::parse_error::*;
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_parser::Parser;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::Parser;
 
 const RECOVER_GLIMMER_EXPRESSION: TokenSet<HtmlSyntaxKind> = token_set!(T![<], T![>], T!["}}"]);
 

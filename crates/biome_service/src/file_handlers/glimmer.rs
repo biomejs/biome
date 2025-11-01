@@ -8,7 +8,7 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_html_parser::{parse_html, HtmlParseOptions};
+use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
@@ -326,8 +326,12 @@ const Bar = <template>{{@bar}}</template>;
 
     #[test]
     fn test_has_templates() {
-        assert!(GlimmerFileHandler::has_templates("<template>test</template>"));
-        assert!(GlimmerFileHandler::has_templates("foo <template>test</template> bar"));
+        assert!(GlimmerFileHandler::has_templates(
+            "<template>test</template>"
+        ));
+        assert!(GlimmerFileHandler::has_templates(
+            "foo <template>test</template> bar"
+        ));
         assert!(!GlimmerFileHandler::has_templates("no templates here"));
         assert!(!GlimmerFileHandler::has_templates(""));
     }
@@ -397,7 +401,10 @@ export default class MyComponent extends Component {
         assert_eq!(results.len(), 1);
         // Print diagnostics if there are errors
         if results[0].has_errors() {
-            eprintln!("Template has {} diagnostics", results[0].diagnostics().len());
+            eprintln!(
+                "Template has {} diagnostics",
+                results[0].diagnostics().len()
+            );
             for diag in results[0].diagnostics() {
                 eprintln!("  - {:?}", diag);
             }
