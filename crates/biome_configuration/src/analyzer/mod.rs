@@ -165,9 +165,10 @@ impl<T: Clone + Default + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
-            Self::WithOptions(options) => {
-                Some(RuleOptions::new(options.options.clone(), options.fix))
-            }
+            Self::WithOptions(options) => Some(RuleOptions::new(
+                options.options.clone().unwrap_or_default(),
+                options.fix,
+            )),
         }
     }
 }
@@ -403,14 +404,16 @@ pub struct RuleWithFixOptions<T: Default> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fix: Option<FixKind>,
     /// Rule's options
-    pub options: T,
+    pub options: Option<T>,
 }
 
 impl<T: Default> Merge for RuleWithFixOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
         self.fix = other.fix.or(self.fix);
-        self.options = other.options;
+        if other.options.is_some() {
+            self.options = other.options;
+        }
     }
 }
 

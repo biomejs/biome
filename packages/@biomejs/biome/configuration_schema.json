@@ -5906,7 +5906,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAccessKeyOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAccessKeyOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -5940,7 +5943,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAdjacentSpacesInRegexOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAdjacentSpacesInRegexOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -5974,8 +5980,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoApproximativeNumericConstantOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoApproximativeNumericConstantOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -6010,7 +6017,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAriaHiddenOnFocusableOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAriaHiddenOnFocusableOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6029,8 +6039,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoAriaUnsupportedElementsOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAriaUnsupportedElementsOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -6095,7 +6106,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAutofocusOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAutofocusOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6129,7 +6143,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoBannedTypesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBannedTypesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6163,7 +6180,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoBiomeFirstExceptionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBiomeFirstExceptionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6197,7 +6217,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoBlankTargetOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBlankTargetOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6276,7 +6299,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoCommentTextOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoCommentTextOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6310,7 +6336,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoCompareNegZeroOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoCompareNegZeroOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6344,7 +6373,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoConfusingVoidTypeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConfusingVoidTypeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6363,7 +6395,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoConsoleOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConsoleOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6382,7 +6417,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoConstAssignOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConstAssignOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6401,7 +6439,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoConstEnumOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConstEnumOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6452,8 +6493,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoConstantMathMinMaxClampOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConstantMathMinMaxClampOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -6541,7 +6583,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoDebuggerOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDebuggerOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6575,7 +6620,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoDeleteOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDeleteOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6624,7 +6672,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoDistractingElementsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDistractingElementsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6688,7 +6739,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDoubleEqualsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -6985,7 +7039,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoEmptyInterfaceOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptyInterfaceOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7175,7 +7232,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoExtraBooleanCastOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoExtraBooleanCastOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7194,7 +7254,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoExtraNonNullAssertionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoExtraNonNullAssertionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7230,7 +7293,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoFlatMapIdentityOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoFlatMapIdentityOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7249,7 +7315,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoFloatingPromisesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoFloatingPromisesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7268,7 +7337,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoFocusedTestsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoFocusedTestsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7332,7 +7404,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoGlobalDirnameFilenameOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoGlobalDirnameFilenameOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7366,7 +7441,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoGlobalIsFiniteOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoGlobalIsFiniteOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7385,7 +7463,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoGlobalIsNanOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoGlobalIsNanOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7449,7 +7530,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoHeaderScopeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoHeaderScopeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7498,7 +7582,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoImplicitBooleanOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoImplicitBooleanOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7517,7 +7604,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoImplicitCoercionsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoImplicitCoercionsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7581,7 +7671,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoImportantStylesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoImportantStylesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7600,7 +7693,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoInferrableTypesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoInferrableTypesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7634,10 +7730,11 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
+					"anyOf": [
 						{
 							"$ref": "#/definitions/NoInteractiveElementToNoninteractiveRoleOptions"
-						}
+						},
+						{ "type": "null" }
 					]
 				}
 			},
@@ -7657,8 +7754,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoInvalidBuiltinInstantiationOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoInvalidBuiltinInstantiationOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -7838,8 +7936,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoMisleadingCharacterClassOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMisleadingCharacterClassOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -7889,8 +7988,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoMisrefactoredShorthandAssignOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMisrefactoredShorthandAssignOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -7925,7 +8025,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoMisusedPromisesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMisusedPromisesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -7974,7 +8077,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoNegationElseOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNegationElseOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8074,7 +8180,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoNonNullAssertionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNonNullAssertionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8112,10 +8221,11 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
+					"anyOf": [
 						{
 							"$ref": "#/definitions/NoNoninteractiveElementToInteractiveRoleOptions"
-						}
+						},
+						{ "type": "null" }
 					]
 				}
 			},
@@ -8135,7 +8245,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoNoninteractiveTabindexOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNoninteractiveTabindexOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8154,7 +8267,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoNonoctalDecimalEscapeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNonoctalDecimalEscapeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8173,7 +8289,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoOctalEscapeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoOctalEscapeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8222,7 +8341,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoPositiveTabindexOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPositiveTabindexOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8286,7 +8408,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoProcessGlobalOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoProcessGlobalOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8305,7 +8430,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoPrototypeBuiltinsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPrototypeBuiltinsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8324,7 +8452,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoQuickfixBiomeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQuickfixBiomeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8373,7 +8504,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoReactForwardRefOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactForwardRefOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8407,7 +8541,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoReactSpecificPropsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactSpecificPropsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8456,7 +8593,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoRedundantRolesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRedundantRolesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8475,7 +8615,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoRedundantUseStrictOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRedundantUseStrictOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8554,7 +8697,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedTypesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8680,7 +8826,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoShoutyConstantsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoShoutyConstantsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8699,7 +8848,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoSkippedTestsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSkippedTestsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8733,7 +8885,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoSparseArrayOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSparseArrayOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8784,7 +8939,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoStringCaseMismatchOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoStringCaseMismatchOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8803,7 +8961,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoSubstrOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSubstrOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8854,7 +9015,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoSwitchDeclarationsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSwitchDeclarationsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8903,7 +9067,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoThisInStaticOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoThisInStaticOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -8922,7 +9089,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoTsIgnoreOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoTsIgnoreOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9215,7 +9385,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnsafeNegationOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnsafeNegationOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9264,8 +9437,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoUnusedFunctionParametersOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedFunctionParametersOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9285,7 +9459,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnusedImportsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedImportsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9304,7 +9481,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnusedLabelsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedLabelsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9323,8 +9503,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoUnusedPrivateClassMembersOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedPrivateClassMembersOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9344,7 +9525,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnusedTemplateLiteralOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedTemplateLiteralOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9363,7 +9547,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedVariablesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9397,7 +9584,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessCatchBindingOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessCatchBindingOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9416,7 +9606,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessCatchOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessCatchOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9435,7 +9628,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessConstructorOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessConstructorOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9454,7 +9650,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessContinueOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessContinueOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9473,7 +9672,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessElseOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessElseOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9492,7 +9694,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessEmptyExportOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessEmptyExportOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9511,7 +9716,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessEscapeInRegexOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessEscapeInRegexOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9530,7 +9738,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessEscapeInStringOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessEscapeInStringOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9549,7 +9760,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessFragmentsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessFragmentsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9568,7 +9782,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessLabelOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessLabelOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9587,8 +9804,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoUselessLoneBlockStatementsOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessLoneBlockStatementsOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9623,7 +9841,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessRenameOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessRenameOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9642,7 +9863,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessStringConcatOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessStringConcatOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9676,7 +9900,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessSwitchCaseOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessSwitchCaseOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9695,7 +9922,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessTernaryOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessTernaryOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9714,7 +9944,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessThisAliasOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessThisAliasOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9733,7 +9966,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessTypeConstraintOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessTypeConstraintOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9752,8 +9988,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoUselessUndefinedInitializationOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessUndefinedInitializationOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9773,7 +10010,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessUndefinedOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessUndefinedOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9807,7 +10047,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoVarOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVarOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9826,8 +10069,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoVoidElementsWithChildrenOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVoidElementsWithChildrenOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9877,8 +10121,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -9958,7 +10203,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoYodaExpressionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/NoYodaExpressionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10009,7 +10257,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAnchorContentOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAnchorContentOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10028,10 +10279,11 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
+					"anyOf": [
 						{
 							"$ref": "#/definitions/UseAriaActivedescendantWithTabindexOptions"
-						}
+						},
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10083,7 +10335,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseArrayLiteralsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseArrayLiteralsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10102,7 +10357,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseArrowFunctionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseArrowFunctionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10121,7 +10379,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAsConstAssertionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAsConstAssertionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10140,7 +10401,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAtIndexOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAtIndexOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10174,7 +10438,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseBiomeIgnoreFolderOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseBiomeIgnoreFolderOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10193,7 +10460,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseBlockStatementsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseBlockStatementsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10227,7 +10497,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseCollapsedElseIfOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseCollapsedElseIfOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10246,7 +10519,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseCollapsedIfOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseCollapsedIfOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10282,7 +10558,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseConsistentArrayTypeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrayTypeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10301,7 +10580,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10320,8 +10602,11 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseConsistentBuiltinInstantiationOptions" }
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentBuiltinInstantiationOptions"
+						},
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10341,7 +10626,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseConsistentCurlyBracesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentCurlyBracesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10377,8 +10665,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseConsistentObjectDefinitionsOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentObjectDefinitionsOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10398,8 +10687,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseConsistentTypeDefinitionsOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentTypeDefinitionsOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10419,7 +10709,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseConstOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConstOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10438,7 +10731,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseDateNowOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDateNowOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10457,7 +10753,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseDefaultParameterLastOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDefaultParameterLastOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10538,7 +10837,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseEnumInitializersOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseEnumInitializersOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10572,8 +10874,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseExhaustiveDependenciesOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExhaustiveDependenciesOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10593,7 +10896,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseExhaustiveSwitchCasesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExhaustiveSwitchCasesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10612,7 +10918,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseExplicitLengthCheckOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExplicitLengthCheckOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10646,8 +10955,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseExponentiationOperatorOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExponentiationOperatorOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10667,7 +10977,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseExportTypeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExportTypeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10716,7 +11029,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseFlatMapOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseFlatMapOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10765,7 +11081,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseFragmentSyntaxOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseFragmentSyntaxOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10829,7 +11148,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseGoogleFontPreconnectOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGoogleFontPreconnectOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10848,8 +11170,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseGraphqlNamedOperationsOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGraphqlNamedOperationsOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -10991,7 +11314,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImportExtensionsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11010,7 +11336,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseImportTypeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImportTypeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11029,7 +11358,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseIndexOfOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseIndexOfOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11048,7 +11380,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseIsArrayOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseIsArrayOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11067,7 +11402,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseIsNanOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseIsNanOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11103,7 +11441,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseJsonImportAttributesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsonImportAttributesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11182,7 +11523,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseLiteralKeysOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseLiteralKeysOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11231,7 +11575,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNamespaceKeywordOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNamespaceKeywordOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11250,7 +11597,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNamingConventionOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNamingConventionOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11269,7 +11619,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNodeAssertStrictOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNodeAssertStrictOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11288,7 +11641,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNodejsImportProtocolOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNodejsImportProtocolOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11307,7 +11663,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNumberNamespaceOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNumberNamespaceOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11326,8 +11685,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseNumberToFixedDigitsArgumentOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNumberToFixedDigitsArgumentOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -11347,7 +11707,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNumericLiteralsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNumericLiteralsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11366,7 +11729,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNumericSeparatorsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNumericSeparatorsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11385,7 +11751,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseObjectSpreadOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseObjectSpreadOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11404,7 +11773,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseOptionalChainOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseOptionalChainOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11423,7 +11795,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseParseIntRadixOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11504,8 +11879,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseReadonlyClassPropertiesOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReadonlyClassPropertiesOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -11525,7 +11901,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseRegexLiteralsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseRegexLiteralsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11544,7 +11923,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSelfClosingElementsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSelfClosingElementsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11578,7 +11960,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseShorthandAssignOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseShorthandAssignOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11597,7 +11982,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseShorthandFunctionTypeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseShorthandFunctionTypeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11616,7 +12004,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSimpleNumberKeysOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSimpleNumberKeysOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11635,8 +12026,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseSimplifiedLogicExpressionOptions" }
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSimplifiedLogicExpressionOptions" },
+						{ "type": "null" }
 					]
 				}
 			},
@@ -11656,7 +12048,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSingleJsDocAsteriskOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSingleJsDocAsteriskOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11675,7 +12070,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSingleVarDeclaratorOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSingleVarDeclaratorOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11709,7 +12107,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSortedClassesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSortedClassesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11728,7 +12129,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseStaticResponseMethodsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseStaticResponseMethodsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11747,7 +12151,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseStrictModeOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseStrictModeOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11781,7 +12188,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseTemplateOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseTemplateOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11800,7 +12210,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseThrowNewErrorOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseThrowNewErrorOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11849,7 +12262,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseTrimStartEndOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseTrimStartEndOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11868,7 +12284,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseUnifiedTypeSignaturesOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseUnifiedTypeSignaturesOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11917,7 +12336,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseValidAriaPropsOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAriaPropsOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11936,7 +12358,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseValidAriaRoleOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAriaRoleOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12015,7 +12440,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseValidTypeofOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidTypeofOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12034,7 +12462,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueDefineMacrosOrderOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueDefineMacrosOrderOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12070,7 +12501,10 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseWhileOptions" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseWhileOptions" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
