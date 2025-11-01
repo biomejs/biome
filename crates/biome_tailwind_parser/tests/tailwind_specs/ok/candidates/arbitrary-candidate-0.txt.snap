@@ -18,6 +18,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
                 property_token: TW_PROPERTY@1..6 "color" [] [],
@@ -46,7 +47,8 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..15
     0: TW_FULL_CANDIDATE@0..15
       0: TW_VARIANT_LIST@0..0
-      1: TW_ARBITRARY_CANDIDATE@0..15
+      1: (empty)
+      2: TW_ARBITRARY_CANDIDATE@0..15
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "color" [] []
         2: COLON@6..7 ":" [] []
@@ -56,7 +58,7 @@ TwRoot {
           0: SLASH@11..12 "/" [] []
           1: TW_NAMED_VALUE@12..15
             0: TW_VALUE@12..15 "50" [] [Newline("\n")]
-      2: (empty)
+      3: (empty)
   2: EOF@15..15 "" [] []
 
 ```

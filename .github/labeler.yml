@@ -110,3 +110,8 @@ L-Grit:
 - changed-files:
   - any-glob-to-any-file:
     - crates/biome_grit_*/**
+
+L-Tailwind:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_tailwind_*/**

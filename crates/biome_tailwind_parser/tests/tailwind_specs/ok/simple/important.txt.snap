@@ -18,6 +18,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..4 "text" [] [],
                 minus_token: DASH@4..5 "-" [] [],
@@ -41,13 +42,14 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..9
     0: TW_FULL_CANDIDATE@0..9
       0: TW_VARIANT_LIST@0..0
-      1: TW_FUNCTIONAL_CANDIDATE@0..7
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..7
         0: TW_BASE@0..4 "text" [] []
         1: DASH@4..5 "-" [] []
         2: TW_NAMED_VALUE@5..7
           0: TW_VALUE@5..7 "lg" [] []
         3: (empty)
-      2: BANG@7..9 "!" [] [Newline("\n")]
+      3: BANG@7..9 "!" [] [Newline("\n")]
   2: EOF@9..9 "" [] []
 
 ```

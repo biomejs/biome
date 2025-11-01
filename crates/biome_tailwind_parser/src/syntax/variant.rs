@@ -79,6 +79,10 @@ impl ParseSeparatedList for VariantList {
 }
 
 pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
+    if p.at(T![-]) {
+        // variants can't start with a negative sign
+        return Absent;
+    }
     if p.at(T!['[']) {
         return parse_arbitrary_variant(p);
     }

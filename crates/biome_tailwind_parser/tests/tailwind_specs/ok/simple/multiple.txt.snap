@@ -18,6 +18,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@0..6 "border" [] [],
             },
@@ -31,6 +32,7 @@ TwRoot {
                 },
                 COLON@12..13 ":" [] [],
             ],
+            negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@13..20 "outline" [] [],
                 minus_token: DASH@20..21 "-" [] [],
@@ -54,22 +56,24 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..26
     0: TW_FULL_CANDIDATE@0..6
       0: TW_VARIANT_LIST@0..0
-      1: TW_STATIC_CANDIDATE@0..6
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@0..6
         0: TW_BASE@0..6 "border" [] []
-      2: (empty)
+      3: (empty)
     1: WHITESPACE@6..7 " " [] []
     2: TW_FULL_CANDIDATE@7..26
       0: TW_VARIANT_LIST@7..13
         0: TW_STATIC_VARIANT@7..12
           0: TW_BASE@7..12 "focus" [] []
         1: COLON@12..13 ":" [] []
-      1: TW_FUNCTIONAL_CANDIDATE@13..26
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@13..26
         0: TW_BASE@13..20 "outline" [] []
         1: DASH@20..21 "-" [] []
         2: TW_NAMED_VALUE@21..26
           0: TW_VALUE@21..26 "none" [] [Newline("\n")]
         3: (empty)
-      2: (empty)
+      3: (empty)
   2: EOF@26..26 "" [] []
 
 ```
