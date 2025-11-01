@@ -3,10 +3,12 @@ use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
+use biome_package::PackageJson;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
+use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 use crate::services::manifest::Manifest;
 
@@ -103,14 +105,19 @@ declare_lint_rule! {
 /**
  * Popover API properties added in React 19
  */
-// const POPOVER_API_PROPS: &[&str] = &[
-//     "onBeforeToggle",
-//     "onToggle",
-//     "popover",
-//     "popoverTarget",
-//     "popoverTargetAction",
-// ];
+const POPOVER_API_PROPS: &[&str] = &[
+    "onBeforeToggle",
+    "popover",
+    "popoverTarget",
+    "popoverTargetAction",
+];
 
+const POPOVER_API_PROPS_LOWERCASE: &[&str] = &[
+    "onbeforetoggle",
+    "popover",
+    "popovertarget",
+    "popovertargetaction",
+];
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("abbr", &["th", "td"]),
     (
@@ -706,7 +713,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "onAuxClickCapture",
     "onBeforeInput",
     "onBeforeInputCapture",
-    "onbeforetoggle",
     "onBlur",
     "onBlurCapture",
     "onCanPlay",
@@ -841,7 +847,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "onTimeUpdate",
     "onTimeUpdateCapture",
     "onToggle",
-    "ontoggle",
     "onTouchCancel",
     "onTouchCancelCapture",
     "onTouchEnd",
@@ -871,8 +876,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "pointsAtY",
     "pointsAtZ",
     "popover",
-    "popovertarget",
-    "popovertargetaction",
     "preserveAlpha",
     "preserveAspectRatio",
     "primitiveUnits",
@@ -1018,9 +1021,33 @@ pub enum NoUnknownAttributeState {
     },
 }
 
-fn get_standard_name(name: &str) -> Option<&'static str> {
+fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Option<&'static str> {
     if let Some(&standard_name) = DOM_ATTRIBUTE_LOOKUP.get(name) {
         return Some(standard_name);
+    }
+    let is_react_19_or_later = ctx
+        .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
+        .and_then(|manifest| {
+            manifest
+                .as_ref()
+                .map(|(_, package_json)| package_json.matches_dependency("react", ">=19.0.0"))
+        })
+        .unwrap_or(false);
+
+    if is_react_19_or_later {
+        if let Some(&prop) = POPOVER_API_PROPS
+            .iter()
+            .find(|&&element| element.eq_ignore_ascii_case(name))
+        {
+            return Some(prop);
+        }
+    } else {
+        if let Some(&prop) = POPOVER_API_PROPS_LOWERCASE
+            .iter()
+            .find(|&&element| element.eq_ignore_ascii_case(name))
+        {
+            return Some(prop);
+        }
     }
 
     DOM_PROPERTY_NAMES
@@ -1028,15 +1055,6 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
         .find(|&&element| element.eq_ignore_ascii_case(name))
         .copied()
 }
-
-// fn test_react_version(ctx: &RuleContext<NoUnknownAttribute>, version: &str) -> Option<bool> {
-//     ctx.get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
-//         .and_then(|manifest| {
-//             manifest
-//                 .as_ref()
-//                 .map(|(_, package_json)| package_json.matches_dependency("react", version))
-//         })
-// }
 
 impl Rule for NoUnknownAttribute {
     type Query = Manifest<JsxAttribute>;
@@ -1115,7 +1133,7 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
-        if let Some(standard_name) = get_standard_name(name) {
+        if let Some(standard_name) = get_standard_name(ctx, name) {
             if standard_name != *name {
                 return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
                     name: (*name).into(),

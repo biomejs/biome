@@ -189,16 +189,4 @@
 			Greetings, one and all!
 		</div>
 	</div>
-
-	{/* This requires react 19 and we need to test it conditionally, which is not possible right now*/}
-
-	{/* <div>
-		<button popoverTarget="my-popover" popoverTargetAction="toggle">
-			Open Popover
-		</button>
-
-		<div popover id="my-popover">
-			Greetings, one and all!
-		</div>
-	</div>*/}
 </>;
