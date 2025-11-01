@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["shared.json"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noUnusedVariables": {
+          "level": "on",
+          "fix": "safe"
+        }
+      }
+    }
+  }
+}
+```
+
+## `shared.json`
+
+```json
+{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "correctness": {
+                        "noUnusedVariables": {
+                            "level": "on",
+                            "options": {
+                                "ignoreRestSiblings": false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+```
+
+## `test.js`
+
+```js
+const { a, ...rest } = { a: 1, b: 2}; export { rest }
+```
+
+# Emitted Messages
+
+```block
+test.js:1:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable a is unused.
+  
+  > 1 │ const { a, ...rest } = { a: 1, b: 2}; export { rest }
+      │         ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

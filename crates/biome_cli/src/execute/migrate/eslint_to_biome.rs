@@ -487,7 +487,7 @@ fn migrate_eslint_rule(
                         biome_config::RuleWithFixOptions {
                             level: severity.into(),
                             fix: None,
-                            options: *Box::new((*rule_options).into()),
+                            options: Some(*Box::new((*rule_options).into())),
                         },
                     ));
                 }
@@ -534,7 +534,7 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
-                                options: *Box::new((*rule_options).into()),
+                                options: Some(*Box::new((*rule_options).into())),
                             },
                         ));
                 }
@@ -551,7 +551,7 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
-                                options: rule_options.into(),
+                                options: Some(rule_options.into()),
                             },
                         ));
                 }
@@ -567,7 +567,7 @@ fn migrate_eslint_rule(
                         biome_config::RuleWithFixOptions {
                             level: severity.into(),
                             fix: None,
-                            options: rule_options.into(),
+                            options: Some(rule_options.into()),
                         },
                     ));
                 }
@@ -602,7 +602,7 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
-                                options: options.into(),
+                                options: Some(options.into()),
                             },
                         ));
                 }

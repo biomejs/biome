@@ -1,0 +1,12 @@
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedImports": {
+          "level": "on",
+          "fix": "safe"
+        }
+      }
+    }
+  }
+}

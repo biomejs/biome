@@ -3708,7 +3708,7 @@ export interface RuleWithFixOptions_for_NoAccessKeyOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAccessKeyOptions;
+	options?: NoAccessKeyOptions;
 }
 export interface RuleWithFixOptions_for_NoAriaHiddenOnFocusableOptions {
 	/**
@@ -3722,7 +3722,7 @@ export interface RuleWithFixOptions_for_NoAriaHiddenOnFocusableOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAriaHiddenOnFocusableOptions;
+	options?: NoAriaHiddenOnFocusableOptions;
 }
 export interface RuleWithFixOptions_for_NoAriaUnsupportedElementsOptions {
 	/**
@@ -3736,7 +3736,7 @@ export interface RuleWithFixOptions_for_NoAriaUnsupportedElementsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAriaUnsupportedElementsOptions;
+	options?: NoAriaUnsupportedElementsOptions;
 }
 export interface RuleWithFixOptions_for_NoAutofocusOptions {
 	/**
@@ -3750,7 +3750,7 @@ export interface RuleWithFixOptions_for_NoAutofocusOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAutofocusOptions;
+	options?: NoAutofocusOptions;
 }
 export interface RuleWithFixOptions_for_NoDistractingElementsOptions {
 	/**
@@ -3764,7 +3764,7 @@ export interface RuleWithFixOptions_for_NoDistractingElementsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoDistractingElementsOptions;
+	options?: NoDistractingElementsOptions;
 }
 export interface RuleWithFixOptions_for_NoHeaderScopeOptions {
 	/**
@@ -3778,7 +3778,7 @@ export interface RuleWithFixOptions_for_NoHeaderScopeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoHeaderScopeOptions;
+	options?: NoHeaderScopeOptions;
 }
 export interface RuleWithFixOptions_for_NoInteractiveElementToNoninteractiveRoleOptions {
 	/**
@@ -3792,7 +3792,7 @@ export interface RuleWithFixOptions_for_NoInteractiveElementToNoninteractiveRole
 	/**
 	 * Rule's options
 	 */
-	options: NoInteractiveElementToNoninteractiveRoleOptions;
+	options?: NoInteractiveElementToNoninteractiveRoleOptions;
 }
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
@@ -3826,7 +3826,7 @@ export interface RuleWithFixOptions_for_NoNoninteractiveElementToInteractiveRole
 	/**
 	 * Rule's options
 	 */
-	options: NoNoninteractiveElementToInteractiveRoleOptions;
+	options?: NoNoninteractiveElementToInteractiveRoleOptions;
 }
 export interface RuleWithFixOptions_for_NoNoninteractiveTabindexOptions {
 	/**
@@ -3840,7 +3840,7 @@ export interface RuleWithFixOptions_for_NoNoninteractiveTabindexOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoNoninteractiveTabindexOptions;
+	options?: NoNoninteractiveTabindexOptions;
 }
 export interface RuleWithFixOptions_for_NoPositiveTabindexOptions {
 	/**
@@ -3854,7 +3854,7 @@ export interface RuleWithFixOptions_for_NoPositiveTabindexOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoPositiveTabindexOptions;
+	options?: NoPositiveTabindexOptions;
 }
 export interface RuleWithOptions_for_NoRedundantAltOptions {
 	/**
@@ -3878,7 +3878,7 @@ export interface RuleWithFixOptions_for_NoRedundantRolesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoRedundantRolesOptions;
+	options?: NoRedundantRolesOptions;
 }
 export interface RuleWithOptions_for_NoStaticElementInteractionsOptions {
 	/**
@@ -3922,7 +3922,7 @@ export interface RuleWithFixOptions_for_UseAnchorContentOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseAnchorContentOptions;
+	options?: UseAnchorContentOptions;
 }
 export interface RuleWithFixOptions_for_UseAriaActivedescendantWithTabindexOptions {
 	/**
@@ -3936,7 +3936,7 @@ export interface RuleWithFixOptions_for_UseAriaActivedescendantWithTabindexOptio
 	/**
 	 * Rule's options
 	 */
-	options: UseAriaActivedescendantWithTabindexOptions;
+	options?: UseAriaActivedescendantWithTabindexOptions;
 }
 export interface RuleWithOptions_for_UseAriaPropsForRoleOptions {
 	/**
@@ -4080,7 +4080,7 @@ export interface RuleWithFixOptions_for_UseValidAriaPropsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseValidAriaPropsOptions;
+	options?: UseValidAriaPropsOptions;
 }
 export interface RuleWithFixOptions_for_UseValidAriaRoleOptions {
 	/**
@@ -4094,7 +4094,7 @@ export interface RuleWithFixOptions_for_UseValidAriaRoleOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseValidAriaRoleOptions;
+	options?: UseValidAriaRoleOptions;
 }
 export interface RuleWithOptions_for_UseValidAriaValuesOptions {
 	/**
@@ -4138,7 +4138,7 @@ export interface RuleWithFixOptions_for_NoAdjacentSpacesInRegexOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAdjacentSpacesInRegexOptions;
+	options?: NoAdjacentSpacesInRegexOptions;
 }
 export interface RuleWithOptions_for_NoArgumentsOptions {
 	/**
@@ -4162,7 +4162,7 @@ export interface RuleWithFixOptions_for_NoBannedTypesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoBannedTypesOptions;
+	options?: NoBannedTypesOptions;
 }
 export interface RuleWithOptions_for_NoCommaOperatorOptions {
 	/**
@@ -4226,7 +4226,7 @@ export interface RuleWithFixOptions_for_NoExtraBooleanCastOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoExtraBooleanCastOptions;
+	options?: NoExtraBooleanCastOptions;
 }
 export interface RuleWithFixOptions_for_NoFlatMapIdentityOptions {
 	/**
@@ -4240,7 +4240,7 @@ export interface RuleWithFixOptions_for_NoFlatMapIdentityOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoFlatMapIdentityOptions;
+	options?: NoFlatMapIdentityOptions;
 }
 export interface RuleWithOptions_for_NoForEachOptions {
 	/**
@@ -4264,7 +4264,7 @@ export interface RuleWithFixOptions_for_NoImplicitCoercionsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoImplicitCoercionsOptions;
+	options?: NoImplicitCoercionsOptions;
 }
 export interface RuleWithFixOptions_for_NoImportantStylesOptions {
 	/**
@@ -4278,7 +4278,7 @@ export interface RuleWithFixOptions_for_NoImportantStylesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoImportantStylesOptions;
+	options?: NoImportantStylesOptions;
 }
 export interface RuleWithOptions_for_NoStaticOnlyClassOptions {
 	/**
@@ -4302,7 +4302,7 @@ export interface RuleWithFixOptions_for_NoThisInStaticOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoThisInStaticOptions;
+	options?: NoThisInStaticOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchOptions {
 	/**
@@ -4316,7 +4316,7 @@ export interface RuleWithFixOptions_for_NoUselessCatchOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessCatchOptions;
+	options?: NoUselessCatchOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessConstructorOptions {
 	/**
@@ -4330,7 +4330,7 @@ export interface RuleWithFixOptions_for_NoUselessConstructorOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessConstructorOptions;
+	options?: NoUselessConstructorOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessContinueOptions {
 	/**
@@ -4344,7 +4344,7 @@ export interface RuleWithFixOptions_for_NoUselessContinueOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessContinueOptions;
+	options?: NoUselessContinueOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessEmptyExportOptions {
 	/**
@@ -4358,7 +4358,7 @@ export interface RuleWithFixOptions_for_NoUselessEmptyExportOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessEmptyExportOptions;
+	options?: NoUselessEmptyExportOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessEscapeInRegexOptions {
 	/**
@@ -4372,7 +4372,7 @@ export interface RuleWithFixOptions_for_NoUselessEscapeInRegexOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessEscapeInRegexOptions;
+	options?: NoUselessEscapeInRegexOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessFragmentsOptions {
 	/**
@@ -4386,7 +4386,7 @@ export interface RuleWithFixOptions_for_NoUselessFragmentsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessFragmentsOptions;
+	options?: NoUselessFragmentsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessLabelOptions {
 	/**
@@ -4400,7 +4400,7 @@ export interface RuleWithFixOptions_for_NoUselessLabelOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessLabelOptions;
+	options?: NoUselessLabelOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessLoneBlockStatementsOptions {
 	/**
@@ -4414,7 +4414,7 @@ export interface RuleWithFixOptions_for_NoUselessLoneBlockStatementsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessLoneBlockStatementsOptions;
+	options?: NoUselessLoneBlockStatementsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessRenameOptions {
 	/**
@@ -4428,7 +4428,7 @@ export interface RuleWithFixOptions_for_NoUselessRenameOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessRenameOptions;
+	options?: NoUselessRenameOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessStringConcatOptions {
 	/**
@@ -4442,7 +4442,7 @@ export interface RuleWithFixOptions_for_NoUselessStringConcatOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessStringConcatOptions;
+	options?: NoUselessStringConcatOptions;
 }
 export interface RuleWithOptions_for_NoUselessStringRawOptions {
 	/**
@@ -4466,7 +4466,7 @@ export interface RuleWithFixOptions_for_NoUselessSwitchCaseOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessSwitchCaseOptions;
+	options?: NoUselessSwitchCaseOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessTernaryOptions {
 	/**
@@ -4480,7 +4480,7 @@ export interface RuleWithFixOptions_for_NoUselessTernaryOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessTernaryOptions;
+	options?: NoUselessTernaryOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessThisAliasOptions {
 	/**
@@ -4494,7 +4494,7 @@ export interface RuleWithFixOptions_for_NoUselessThisAliasOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessThisAliasOptions;
+	options?: NoUselessThisAliasOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessTypeConstraintOptions {
 	/**
@@ -4508,7 +4508,7 @@ export interface RuleWithFixOptions_for_NoUselessTypeConstraintOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessTypeConstraintOptions;
+	options?: NoUselessTypeConstraintOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessUndefinedInitializationOptions {
 	/**
@@ -4522,7 +4522,7 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedInitializationOptions 
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessUndefinedInitializationOptions;
+	options?: NoUselessUndefinedInitializationOptions;
 }
 export interface RuleWithOptions_for_NoVoidOptions {
 	/**
@@ -4546,7 +4546,7 @@ export interface RuleWithFixOptions_for_UseArrowFunctionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseArrowFunctionOptions;
+	options?: UseArrowFunctionOptions;
 }
 export interface RuleWithFixOptions_for_UseDateNowOptions {
 	/**
@@ -4560,7 +4560,7 @@ export interface RuleWithFixOptions_for_UseDateNowOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseDateNowOptions;
+	options?: UseDateNowOptions;
 }
 export interface RuleWithFixOptions_for_UseFlatMapOptions {
 	/**
@@ -4574,7 +4574,7 @@ export interface RuleWithFixOptions_for_UseFlatMapOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseFlatMapOptions;
+	options?: UseFlatMapOptions;
 }
 export interface RuleWithFixOptions_for_UseIndexOfOptions {
 	/**
@@ -4588,7 +4588,7 @@ export interface RuleWithFixOptions_for_UseIndexOfOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseIndexOfOptions;
+	options?: UseIndexOfOptions;
 }
 export interface RuleWithFixOptions_for_UseLiteralKeysOptions {
 	/**
@@ -4602,7 +4602,7 @@ export interface RuleWithFixOptions_for_UseLiteralKeysOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseLiteralKeysOptions;
+	options?: UseLiteralKeysOptions;
 }
 export interface RuleWithFixOptions_for_UseNumericLiteralsOptions {
 	/**
@@ -4616,7 +4616,7 @@ export interface RuleWithFixOptions_for_UseNumericLiteralsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNumericLiteralsOptions;
+	options?: UseNumericLiteralsOptions;
 }
 export interface RuleWithFixOptions_for_UseOptionalChainOptions {
 	/**
@@ -4630,7 +4630,7 @@ export interface RuleWithFixOptions_for_UseOptionalChainOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseOptionalChainOptions;
+	options?: UseOptionalChainOptions;
 }
 export interface RuleWithFixOptions_for_UseRegexLiteralsOptions {
 	/**
@@ -4644,7 +4644,7 @@ export interface RuleWithFixOptions_for_UseRegexLiteralsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseRegexLiteralsOptions;
+	options?: UseRegexLiteralsOptions;
 }
 export interface RuleWithFixOptions_for_UseSimpleNumberKeysOptions {
 	/**
@@ -4658,7 +4658,7 @@ export interface RuleWithFixOptions_for_UseSimpleNumberKeysOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSimpleNumberKeysOptions;
+	options?: UseSimpleNumberKeysOptions;
 }
 export interface RuleWithFixOptions_for_UseSimplifiedLogicExpressionOptions {
 	/**
@@ -4672,7 +4672,7 @@ export interface RuleWithFixOptions_for_UseSimplifiedLogicExpressionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSimplifiedLogicExpressionOptions;
+	options?: UseSimplifiedLogicExpressionOptions;
 }
 export interface RuleWithFixOptions_for_UseWhileOptions {
 	/**
@@ -4686,7 +4686,7 @@ export interface RuleWithFixOptions_for_UseWhileOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseWhileOptions;
+	options?: UseWhileOptions;
 }
 export interface RuleWithOptions_for_NoChildrenPropOptions {
 	/**
@@ -4710,7 +4710,7 @@ export interface RuleWithFixOptions_for_NoConstAssignOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConstAssignOptions;
+	options?: NoConstAssignOptions;
 }
 export interface RuleWithOptions_for_NoConstantConditionOptions {
 	/**
@@ -4734,7 +4734,7 @@ export interface RuleWithFixOptions_for_NoConstantMathMinMaxClampOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConstantMathMinMaxClampOptions;
+	options?: NoConstantMathMinMaxClampOptions;
 }
 export interface RuleWithOptions_for_NoConstructorReturnOptions {
 	/**
@@ -4778,7 +4778,7 @@ export interface RuleWithFixOptions_for_NoGlobalDirnameFilenameOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoGlobalDirnameFilenameOptions;
+	options?: NoGlobalDirnameFilenameOptions;
 }
 export interface RuleWithOptions_for_NoGlobalObjectCallsOptions {
 	/**
@@ -4812,7 +4812,7 @@ export interface RuleWithFixOptions_for_NoInvalidBuiltinInstantiationOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoInvalidBuiltinInstantiationOptions;
+	options?: NoInvalidBuiltinInstantiationOptions;
 }
 export interface RuleWithOptions_for_NoInvalidConstructorSuperOptions {
 	/**
@@ -4906,7 +4906,7 @@ export interface RuleWithFixOptions_for_NoNonoctalDecimalEscapeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoNonoctalDecimalEscapeOptions;
+	options?: NoNonoctalDecimalEscapeOptions;
 }
 export interface RuleWithOptions_for_NoPrecisionLossOptions {
 	/**
@@ -4940,7 +4940,7 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoProcessGlobalOptions;
+	options?: NoProcessGlobalOptions;
 }
 export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
@@ -5024,7 +5024,7 @@ export interface RuleWithFixOptions_for_NoStringCaseMismatchOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoStringCaseMismatchOptions;
+	options?: NoStringCaseMismatchOptions;
 }
 export interface RuleWithFixOptions_for_NoSwitchDeclarationsOptions {
 	/**
@@ -5038,7 +5038,7 @@ export interface RuleWithFixOptions_for_NoSwitchDeclarationsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoSwitchDeclarationsOptions;
+	options?: NoSwitchDeclarationsOptions;
 }
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
@@ -5192,7 +5192,7 @@ export interface RuleWithFixOptions_for_NoUnusedFunctionParametersOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedFunctionParametersOptions;
+	options?: NoUnusedFunctionParametersOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedImportsOptions {
 	/**
@@ -5206,7 +5206,7 @@ export interface RuleWithFixOptions_for_NoUnusedImportsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedImportsOptions;
+	options?: NoUnusedImportsOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedLabelsOptions {
 	/**
@@ -5220,7 +5220,7 @@ export interface RuleWithFixOptions_for_NoUnusedLabelsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedLabelsOptions;
+	options?: NoUnusedLabelsOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedPrivateClassMembersOptions {
 	/**
@@ -5234,7 +5234,7 @@ export interface RuleWithFixOptions_for_NoUnusedPrivateClassMembersOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedPrivateClassMembersOptions;
+	options?: NoUnusedPrivateClassMembersOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
@@ -5248,7 +5248,7 @@ export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedVariablesOptions;
+	options?: NoUnusedVariablesOptions;
 }
 export interface RuleWithFixOptions_for_NoVoidElementsWithChildrenOptions {
 	/**
@@ -5262,7 +5262,7 @@ export interface RuleWithFixOptions_for_NoVoidElementsWithChildrenOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoVoidElementsWithChildrenOptions;
+	options?: NoVoidElementsWithChildrenOptions;
 }
 export interface RuleWithOptions_for_NoVoidTypeReturnOptions {
 	/**
@@ -5286,7 +5286,7 @@ export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExhaustiveDependenciesOptions;
+	options?: UseExhaustiveDependenciesOptions;
 }
 export interface RuleWithFixOptions_for_UseGraphqlNamedOperationsOptions {
 	/**
@@ -5300,7 +5300,7 @@ export interface RuleWithFixOptions_for_UseGraphqlNamedOperationsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseGraphqlNamedOperationsOptions;
+	options?: UseGraphqlNamedOperationsOptions;
 }
 export interface RuleWithOptions_for_UseHookAtTopLevelOptions {
 	/**
@@ -5334,7 +5334,7 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseImportExtensionsOptions;
+	options?: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UseIsNanOptions {
 	/**
@@ -5348,7 +5348,7 @@ export interface RuleWithFixOptions_for_UseIsNanOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseIsNanOptions;
+	options?: UseIsNanOptions;
 }
 export interface RuleWithFixOptions_for_UseJsonImportAttributesOptions {
 	/**
@@ -5362,7 +5362,7 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseJsonImportAttributesOptions;
+	options?: UseJsonImportAttributesOptions;
 }
 export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
 	/**
@@ -5386,7 +5386,7 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseParseIntRadixOptions;
+	options?: UseParseIntRadixOptions;
 }
 export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	/**
@@ -5410,7 +5410,7 @@ export interface RuleWithFixOptions_for_UseSingleJsDocAsteriskOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSingleJsDocAsteriskOptions;
+	options?: UseSingleJsDocAsteriskOptions;
 }
 export interface RuleWithOptions_for_UseUniqueElementIdsOptions {
 	/**
@@ -5444,7 +5444,7 @@ export interface RuleWithFixOptions_for_UseValidTypeofOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseValidTypeofOptions;
+	options?: UseValidTypeofOptions;
 }
 export interface RuleWithOptions_for_UseYieldOptions {
 	/**
@@ -5498,7 +5498,7 @@ export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoFloatingPromisesOptions;
+	options?: NoFloatingPromisesOptions;
 }
 export interface RuleWithOptions_for_NoImportCyclesOptions {
 	/**
@@ -5532,7 +5532,7 @@ export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoMisusedPromisesOptions;
+	options?: NoMisusedPromisesOptions;
 }
 export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	/**
@@ -5556,7 +5556,7 @@ export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoReactForwardRefOptions;
+	options?: NoReactForwardRefOptions;
 }
 export interface RuleWithOptions_for_NoShadowOptions {
 	/**
@@ -5610,7 +5610,7 @@ export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessCatchBindingOptions;
+	options?: NoUselessCatchBindingOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	/**
@@ -5624,7 +5624,7 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessUndefinedOptions;
+	options?: NoUselessUndefinedOptions;
 }
 export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
 	/**
@@ -5638,7 +5638,7 @@ export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoVueDataObjectDeclarationOptions;
+	options?: NoVueDataObjectDeclarationOptions;
 }
 export interface RuleWithOptions_for_NoVueDuplicateKeysOptions {
 	/**
@@ -5682,7 +5682,7 @@ export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentArrowReturnOptions;
+	options?: UseConsistentArrowReturnOptions;
 }
 export interface RuleWithOptions_for_UseDeprecatedDateOptions {
 	/**
@@ -5706,7 +5706,7 @@ export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExhaustiveSwitchCasesOptions;
+	options?: UseExhaustiveSwitchCasesOptions;
 }
 export interface RuleWithOptions_for_UseExplicitTypeOptions {
 	/**
@@ -5760,7 +5760,7 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSortedClassesOptions;
+	options?: UseSortedClassesOptions;
 }
 export interface RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions {
 	/**
@@ -5774,7 +5774,7 @@ export interface RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseVueDefineMacrosOrderOptions;
+	options?: UseVueDefineMacrosOrderOptions;
 }
 export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	/**
@@ -5828,7 +5828,7 @@ export interface RuleWithFixOptions_for_NoDeleteOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoDeleteOptions;
+	options?: NoDeleteOptions;
 }
 export interface RuleWithOptions_for_NoDynamicNamespaceImportAccessOptions {
 	/**
@@ -5892,7 +5892,7 @@ export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseGoogleFontPreconnectOptions;
+	options?: UseGoogleFontPreconnectOptions;
 }
 export interface RuleWithOptions_for_UseSolidForComponentOptions {
 	/**
@@ -5926,7 +5926,7 @@ export interface RuleWithFixOptions_for_NoBlankTargetOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoBlankTargetOptions;
+	options?: NoBlankTargetOptions;
 }
 export interface RuleWithOptions_for_NoDangerouslySetInnerHtmlOptions {
 	/**
@@ -6050,7 +6050,7 @@ export interface RuleWithFixOptions_for_NoImplicitBooleanOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoImplicitBooleanOptions;
+	options?: NoImplicitBooleanOptions;
 }
 export interface RuleWithFixOptions_for_NoInferrableTypesOptions {
 	/**
@@ -6064,7 +6064,7 @@ export interface RuleWithFixOptions_for_NoInferrableTypesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoInferrableTypesOptions;
+	options?: NoInferrableTypesOptions;
 }
 export interface RuleWithOptions_for_NoMagicNumbersOptions {
 	/**
@@ -6098,7 +6098,7 @@ export interface RuleWithFixOptions_for_NoNegationElseOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoNegationElseOptions;
+	options?: NoNegationElseOptions;
 }
 export interface RuleWithOptions_for_NoNestedTernaryOptions {
 	/**
@@ -6122,7 +6122,7 @@ export interface RuleWithFixOptions_for_NoNonNullAssertionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoNonNullAssertionOptions;
+	options?: NoNonNullAssertionOptions;
 }
 export interface RuleWithOptions_for_NoParameterAssignOptions {
 	/**
@@ -6186,7 +6186,7 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoRestrictedTypesOptions;
+	options?: NoRestrictedTypesOptions;
 }
 export interface RuleWithFixOptions_for_NoShoutyConstantsOptions {
 	/**
@@ -6200,7 +6200,7 @@ export interface RuleWithFixOptions_for_NoShoutyConstantsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoShoutyConstantsOptions;
+	options?: NoShoutyConstantsOptions;
 }
 export interface RuleWithFixOptions_for_NoSubstrOptions {
 	/**
@@ -6214,7 +6214,7 @@ export interface RuleWithFixOptions_for_NoSubstrOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoSubstrOptions;
+	options?: NoSubstrOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedTemplateLiteralOptions {
 	/**
@@ -6228,7 +6228,7 @@ export interface RuleWithFixOptions_for_NoUnusedTemplateLiteralOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnusedTemplateLiteralOptions;
+	options?: NoUnusedTemplateLiteralOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessElseOptions {
 	/**
@@ -6242,7 +6242,7 @@ export interface RuleWithFixOptions_for_NoUselessElseOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessElseOptions;
+	options?: NoUselessElseOptions;
 }
 export interface RuleWithOptions_for_NoValueAtRuleOptions {
 	/**
@@ -6266,7 +6266,7 @@ export interface RuleWithFixOptions_for_NoYodaExpressionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoYodaExpressionOptions;
+	options?: NoYodaExpressionOptions;
 }
 export interface RuleWithFixOptions_for_UseArrayLiteralsOptions {
 	/**
@@ -6280,7 +6280,7 @@ export interface RuleWithFixOptions_for_UseArrayLiteralsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseArrayLiteralsOptions;
+	options?: UseArrayLiteralsOptions;
 }
 export interface RuleWithFixOptions_for_UseAsConstAssertionOptions {
 	/**
@@ -6294,7 +6294,7 @@ export interface RuleWithFixOptions_for_UseAsConstAssertionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseAsConstAssertionOptions;
+	options?: UseAsConstAssertionOptions;
 }
 export interface RuleWithFixOptions_for_UseAtIndexOptions {
 	/**
@@ -6308,7 +6308,7 @@ export interface RuleWithFixOptions_for_UseAtIndexOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseAtIndexOptions;
+	options?: UseAtIndexOptions;
 }
 export interface RuleWithFixOptions_for_UseBlockStatementsOptions {
 	/**
@@ -6322,7 +6322,7 @@ export interface RuleWithFixOptions_for_UseBlockStatementsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseBlockStatementsOptions;
+	options?: UseBlockStatementsOptions;
 }
 export interface RuleWithFixOptions_for_UseCollapsedElseIfOptions {
 	/**
@@ -6336,7 +6336,7 @@ export interface RuleWithFixOptions_for_UseCollapsedElseIfOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseCollapsedElseIfOptions;
+	options?: UseCollapsedElseIfOptions;
 }
 export interface RuleWithFixOptions_for_UseCollapsedIfOptions {
 	/**
@@ -6350,7 +6350,7 @@ export interface RuleWithFixOptions_for_UseCollapsedIfOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseCollapsedIfOptions;
+	options?: UseCollapsedIfOptions;
 }
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
@@ -6374,7 +6374,7 @@ export interface RuleWithFixOptions_for_UseConsistentArrayTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentArrayTypeOptions;
+	options?: UseConsistentArrayTypeOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentBuiltinInstantiationOptions {
 	/**
@@ -6388,7 +6388,7 @@ export interface RuleWithFixOptions_for_UseConsistentBuiltinInstantiationOptions
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentBuiltinInstantiationOptions;
+	options?: UseConsistentBuiltinInstantiationOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentCurlyBracesOptions {
 	/**
@@ -6402,7 +6402,7 @@ export interface RuleWithFixOptions_for_UseConsistentCurlyBracesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentCurlyBracesOptions;
+	options?: UseConsistentCurlyBracesOptions;
 }
 export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
 	/**
@@ -6426,7 +6426,7 @@ export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentObjectDefinitionsOptions;
+	options?: UseConsistentObjectDefinitionsOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
@@ -6440,7 +6440,7 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentTypeDefinitionsOptions;
+	options?: UseConsistentTypeDefinitionsOptions;
 }
 export interface RuleWithFixOptions_for_UseConstOptions {
 	/**
@@ -6454,7 +6454,7 @@ export interface RuleWithFixOptions_for_UseConstOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConstOptions;
+	options?: UseConstOptions;
 }
 export interface RuleWithFixOptions_for_UseDefaultParameterLastOptions {
 	/**
@@ -6468,7 +6468,7 @@ export interface RuleWithFixOptions_for_UseDefaultParameterLastOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseDefaultParameterLastOptions;
+	options?: UseDefaultParameterLastOptions;
 }
 export interface RuleWithOptions_for_UseDefaultSwitchClauseOptions {
 	/**
@@ -6502,7 +6502,7 @@ export interface RuleWithFixOptions_for_UseEnumInitializersOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseEnumInitializersOptions;
+	options?: UseEnumInitializersOptions;
 }
 export interface RuleWithFixOptions_for_UseExplicitLengthCheckOptions {
 	/**
@@ -6516,7 +6516,7 @@ export interface RuleWithFixOptions_for_UseExplicitLengthCheckOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExplicitLengthCheckOptions;
+	options?: UseExplicitLengthCheckOptions;
 }
 export interface RuleWithFixOptions_for_UseExponentiationOperatorOptions {
 	/**
@@ -6530,7 +6530,7 @@ export interface RuleWithFixOptions_for_UseExponentiationOperatorOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExponentiationOperatorOptions;
+	options?: UseExponentiationOperatorOptions;
 }
 export interface RuleWithFixOptions_for_UseExportTypeOptions {
 	/**
@@ -6544,7 +6544,7 @@ export interface RuleWithFixOptions_for_UseExportTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExportTypeOptions;
+	options?: UseExportTypeOptions;
 }
 export interface RuleWithOptions_for_UseExportsLastOptions {
 	/**
@@ -6588,7 +6588,7 @@ export interface RuleWithFixOptions_for_UseFragmentSyntaxOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseFragmentSyntaxOptions;
+	options?: UseFragmentSyntaxOptions;
 }
 export interface RuleWithOptions_for_UseGraphqlNamingConventionOptions {
 	/**
@@ -6622,7 +6622,7 @@ export interface RuleWithFixOptions_for_UseImportTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseImportTypeOptions;
+	options?: UseImportTypeOptions;
 }
 export interface RuleWithOptions_for_UseLiteralEnumMembersOptions {
 	/**
@@ -6646,7 +6646,7 @@ export interface RuleWithFixOptions_for_UseNamingConventionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNamingConventionOptions;
+	options?: UseNamingConventionOptions;
 }
 export interface RuleWithFixOptions_for_UseNodeAssertStrictOptions {
 	/**
@@ -6660,7 +6660,7 @@ export interface RuleWithFixOptions_for_UseNodeAssertStrictOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNodeAssertStrictOptions;
+	options?: UseNodeAssertStrictOptions;
 }
 export interface RuleWithFixOptions_for_UseNodejsImportProtocolOptions {
 	/**
@@ -6674,7 +6674,7 @@ export interface RuleWithFixOptions_for_UseNodejsImportProtocolOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNodejsImportProtocolOptions;
+	options?: UseNodejsImportProtocolOptions;
 }
 export interface RuleWithFixOptions_for_UseNumberNamespaceOptions {
 	/**
@@ -6688,7 +6688,7 @@ export interface RuleWithFixOptions_for_UseNumberNamespaceOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNumberNamespaceOptions;
+	options?: UseNumberNamespaceOptions;
 }
 export interface RuleWithFixOptions_for_UseNumericSeparatorsOptions {
 	/**
@@ -6702,7 +6702,7 @@ export interface RuleWithFixOptions_for_UseNumericSeparatorsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNumericSeparatorsOptions;
+	options?: UseNumericSeparatorsOptions;
 }
 export interface RuleWithFixOptions_for_UseObjectSpreadOptions {
 	/**
@@ -6716,7 +6716,7 @@ export interface RuleWithFixOptions_for_UseObjectSpreadOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseObjectSpreadOptions;
+	options?: UseObjectSpreadOptions;
 }
 export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
@@ -6740,7 +6740,7 @@ export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseReadonlyClassPropertiesOptions;
+	options?: UseReadonlyClassPropertiesOptions;
 }
 export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	/**
@@ -6754,7 +6754,7 @@ export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSelfClosingElementsOptions;
+	options?: UseSelfClosingElementsOptions;
 }
 export interface RuleWithFixOptions_for_UseShorthandAssignOptions {
 	/**
@@ -6768,7 +6768,7 @@ export interface RuleWithFixOptions_for_UseShorthandAssignOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseShorthandAssignOptions;
+	options?: UseShorthandAssignOptions;
 }
 export interface RuleWithFixOptions_for_UseShorthandFunctionTypeOptions {
 	/**
@@ -6782,7 +6782,7 @@ export interface RuleWithFixOptions_for_UseShorthandFunctionTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseShorthandFunctionTypeOptions;
+	options?: UseShorthandFunctionTypeOptions;
 }
 export interface RuleWithFixOptions_for_UseSingleVarDeclaratorOptions {
 	/**
@@ -6796,7 +6796,7 @@ export interface RuleWithFixOptions_for_UseSingleVarDeclaratorOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSingleVarDeclaratorOptions;
+	options?: UseSingleVarDeclaratorOptions;
 }
 export interface RuleWithOptions_for_UseSymbolDescriptionOptions {
 	/**
@@ -6820,7 +6820,7 @@ export interface RuleWithFixOptions_for_UseTemplateOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseTemplateOptions;
+	options?: UseTemplateOptions;
 }
 export interface RuleWithFixOptions_for_UseThrowNewErrorOptions {
 	/**
@@ -6834,7 +6834,7 @@ export interface RuleWithFixOptions_for_UseThrowNewErrorOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseThrowNewErrorOptions;
+	options?: UseThrowNewErrorOptions;
 }
 export interface RuleWithOptions_for_UseThrowOnlyErrorOptions {
 	/**
@@ -6858,7 +6858,7 @@ export interface RuleWithFixOptions_for_UseTrimStartEndOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseTrimStartEndOptions;
+	options?: UseTrimStartEndOptions;
 }
 export interface RuleWithFixOptions_for_UseUnifiedTypeSignaturesOptions {
 	/**
@@ -6872,7 +6872,7 @@ export interface RuleWithFixOptions_for_UseUnifiedTypeSignaturesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseUnifiedTypeSignaturesOptions;
+	options?: UseUnifiedTypeSignaturesOptions;
 }
 export interface RuleWithOptions_for_NoAlertOptions {
 	/**
@@ -6896,7 +6896,7 @@ export interface RuleWithFixOptions_for_NoApproximativeNumericConstantOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoApproximativeNumericConstantOptions;
+	options?: NoApproximativeNumericConstantOptions;
 }
 export interface RuleWithOptions_for_NoArrayIndexKeyOptions {
 	/**
@@ -6940,7 +6940,7 @@ export interface RuleWithFixOptions_for_NoBiomeFirstExceptionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoBiomeFirstExceptionOptions;
+	options?: NoBiomeFirstExceptionOptions;
 }
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
@@ -6984,7 +6984,7 @@ export interface RuleWithFixOptions_for_NoCommentTextOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoCommentTextOptions;
+	options?: NoCommentTextOptions;
 }
 export interface RuleWithFixOptions_for_NoCompareNegZeroOptions {
 	/**
@@ -6998,7 +6998,7 @@ export interface RuleWithFixOptions_for_NoCompareNegZeroOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoCompareNegZeroOptions;
+	options?: NoCompareNegZeroOptions;
 }
 export interface RuleWithOptions_for_NoConfusingLabelsOptions {
 	/**
@@ -7022,7 +7022,7 @@ export interface RuleWithFixOptions_for_NoConfusingVoidTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConfusingVoidTypeOptions;
+	options?: NoConfusingVoidTypeOptions;
 }
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
@@ -7036,7 +7036,7 @@ export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConsoleOptions;
+	options?: NoConsoleOptions;
 }
 export interface RuleWithFixOptions_for_NoConstEnumOptions {
 	/**
@@ -7050,7 +7050,7 @@ export interface RuleWithFixOptions_for_NoConstEnumOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConstEnumOptions;
+	options?: NoConstEnumOptions;
 }
 export interface RuleWithOptions_for_NoConstantBinaryExpressionsOptions {
 	/**
@@ -7084,7 +7084,7 @@ export interface RuleWithFixOptions_for_NoDebuggerOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoDebuggerOptions;
+	options?: NoDebuggerOptions;
 }
 export interface RuleWithOptions_for_NoDocumentCookieOptions {
 	/**
@@ -7118,7 +7118,7 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoDoubleEqualsOptions;
+	options?: NoDoubleEqualsOptions;
 }
 export interface RuleWithOptions_for_NoDuplicateAtImportRulesOptions {
 	/**
@@ -7282,7 +7282,7 @@ export interface RuleWithFixOptions_for_NoEmptyInterfaceOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoEmptyInterfaceOptions;
+	options?: NoEmptyInterfaceOptions;
 }
 export interface RuleWithOptions_for_NoEvolvingTypesOptions {
 	/**
@@ -7326,7 +7326,7 @@ export interface RuleWithFixOptions_for_NoExtraNonNullAssertionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoExtraNonNullAssertionOptions;
+	options?: NoExtraNonNullAssertionOptions;
 }
 export interface RuleWithOptions_for_NoFallthroughSwitchClauseOptions {
 	/**
@@ -7350,7 +7350,7 @@ export interface RuleWithFixOptions_for_NoFocusedTestsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoFocusedTestsOptions;
+	options?: NoFocusedTestsOptions;
 }
 export interface RuleWithOptions_for_NoFunctionAssignOptions {
 	/**
@@ -7384,7 +7384,7 @@ export interface RuleWithFixOptions_for_NoGlobalIsFiniteOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoGlobalIsFiniteOptions;
+	options?: NoGlobalIsFiniteOptions;
 }
 export interface RuleWithFixOptions_for_NoGlobalIsNanOptions {
 	/**
@@ -7398,7 +7398,7 @@ export interface RuleWithFixOptions_for_NoGlobalIsNanOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoGlobalIsNanOptions;
+	options?: NoGlobalIsNanOptions;
 }
 export interface RuleWithOptions_for_NoHeadImportInDocumentOptions {
 	/**
@@ -7472,7 +7472,7 @@ export interface RuleWithFixOptions_for_NoMisleadingCharacterClassOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoMisleadingCharacterClassOptions;
+	options?: NoMisleadingCharacterClassOptions;
 }
 export interface RuleWithOptions_for_NoMisleadingInstantiatorOptions {
 	/**
@@ -7506,7 +7506,7 @@ export interface RuleWithFixOptions_for_NoMisrefactoredShorthandAssignOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoMisrefactoredShorthandAssignOptions;
+	options?: NoMisrefactoredShorthandAssignOptions;
 }
 export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	/**
@@ -7530,7 +7530,7 @@ export interface RuleWithFixOptions_for_NoOctalEscapeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoOctalEscapeOptions;
+	options?: NoOctalEscapeOptions;
 }
 export interface RuleWithFixOptions_for_NoPrototypeBuiltinsOptions {
 	/**
@@ -7544,7 +7544,7 @@ export interface RuleWithFixOptions_for_NoPrototypeBuiltinsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoPrototypeBuiltinsOptions;
+	options?: NoPrototypeBuiltinsOptions;
 }
 export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
 	/**
@@ -7558,7 +7558,7 @@ export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoQuickfixBiomeOptions;
+	options?: NoQuickfixBiomeOptions;
 }
 export interface RuleWithFixOptions_for_NoReactSpecificPropsOptions {
 	/**
@@ -7572,7 +7572,7 @@ export interface RuleWithFixOptions_for_NoReactSpecificPropsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoReactSpecificPropsOptions;
+	options?: NoReactSpecificPropsOptions;
 }
 export interface RuleWithOptions_for_NoRedeclareOptions {
 	/**
@@ -7596,7 +7596,7 @@ export interface RuleWithFixOptions_for_NoRedundantUseStrictOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoRedundantUseStrictOptions;
+	options?: NoRedundantUseStrictOptions;
 }
 export interface RuleWithOptions_for_NoSelfCompareOptions {
 	/**
@@ -7640,7 +7640,7 @@ export interface RuleWithFixOptions_for_NoSkippedTestsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoSkippedTestsOptions;
+	options?: NoSkippedTestsOptions;
 }
 export interface RuleWithFixOptions_for_NoSparseArrayOptions {
 	/**
@@ -7654,7 +7654,7 @@ export interface RuleWithFixOptions_for_NoSparseArrayOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoSparseArrayOptions;
+	options?: NoSparseArrayOptions;
 }
 export interface RuleWithOptions_for_NoSuspiciousSemicolonInJsxOptions {
 	/**
@@ -7698,7 +7698,7 @@ export interface RuleWithFixOptions_for_NoTsIgnoreOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoTsIgnoreOptions;
+	options?: NoTsIgnoreOptions;
 }
 export interface RuleWithOptions_for_NoUnassignedVariablesOptions {
 	/**
@@ -7742,7 +7742,7 @@ export interface RuleWithFixOptions_for_NoUnsafeNegationOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnsafeNegationOptions;
+	options?: NoUnsafeNegationOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
 	/**
@@ -7756,7 +7756,7 @@ export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessEscapeInStringOptions;
+	options?: NoUselessEscapeInStringOptions;
 }
 export interface RuleWithOptions_for_NoUselessRegexBackrefsOptions {
 	/**
@@ -7780,7 +7780,7 @@ export interface RuleWithFixOptions_for_NoVarOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoVarOptions;
+	options?: NoVarOptions;
 }
 export interface RuleWithOptions_for_NoWithOptions {
 	/**
@@ -7824,7 +7824,7 @@ export interface RuleWithFixOptions_for_UseBiomeIgnoreFolderOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseBiomeIgnoreFolderOptions;
+	options?: UseBiomeIgnoreFolderOptions;
 }
 export interface RuleWithOptions_for_UseDefaultSwitchClauseLastOptions {
 	/**
@@ -7888,7 +7888,7 @@ export interface RuleWithFixOptions_for_UseIsArrayOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseIsArrayOptions;
+	options?: UseIsArrayOptions;
 }
 export interface RuleWithOptions_for_UseIterableCallbackReturnOptions {
 	/**
@@ -7912,7 +7912,7 @@ export interface RuleWithFixOptions_for_UseNamespaceKeywordOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNamespaceKeywordOptions;
+	options?: UseNamespaceKeywordOptions;
 }
 export interface RuleWithFixOptions_for_UseNumberToFixedDigitsArgumentOptions {
 	/**
@@ -7926,7 +7926,7 @@ export interface RuleWithFixOptions_for_UseNumberToFixedDigitsArgumentOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseNumberToFixedDigitsArgumentOptions;
+	options?: UseNumberToFixedDigitsArgumentOptions;
 }
 export interface RuleWithFixOptions_for_UseStaticResponseMethodsOptions {
 	/**
@@ -7940,7 +7940,7 @@ export interface RuleWithFixOptions_for_UseStaticResponseMethodsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseStaticResponseMethodsOptions;
+	options?: UseStaticResponseMethodsOptions;
 }
 export interface RuleWithFixOptions_for_UseStrictModeOptions {
 	/**
@@ -7954,7 +7954,7 @@ export interface RuleWithFixOptions_for_UseStrictModeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseStrictModeOptions;
+	options?: UseStrictModeOptions;
 }
 export type ImportGroups = ImportGroup[];
 export type SortOrder = "natural" | "lexicographic";
