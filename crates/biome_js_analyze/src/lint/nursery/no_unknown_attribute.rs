@@ -980,7 +980,7 @@ fn is_valid_data_attribute(name: &str) -> bool {
 }
 
 fn is_valid_aria_attribute(name: &str) -> bool {
-    ARIA_PROPERTIES.iter().any(|&element| element == name)
+    ARIA_PROPERTIES.contains(&name)
 }
 
 fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
@@ -1041,13 +1041,11 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
         {
             return Some(prop);
         }
-    } else {
-        if let Some(&prop) = POPOVER_API_PROPS_LOWERCASE
-            .iter()
-            .find(|&&element| element.eq_ignore_ascii_case(name))
-        {
-            return Some(prop);
-        }
+    } else if let Some(&prop) = POPOVER_API_PROPS_LOWERCASE
+        .iter()
+        .find(|&&element| element.eq_ignore_ascii_case(name))
+    {
+        return Some(prop);
     }
 
     DOM_PROPERTY_NAMES
