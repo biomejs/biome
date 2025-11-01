@@ -2679,7 +2679,7 @@
 			"properties": {
 				"allow": {
 					"description": "Allows a list of bitwise operators to be used as exceptions.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2701,8 +2701,7 @@
 				},
 				"allowNoReferrer": {
 					"description": "Whether `noreferrer` is allowed in addition to `noopener`.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -2776,7 +2775,7 @@
 			"properties": {
 				"allowedLabels": {
 					"description": "A list of (non-confusing) labels that should be allowed",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2803,7 +2802,7 @@
 			"properties": {
 				"allow": {
 					"description": "Allowed calls on the console object.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2997,7 +2996,7 @@
 			"properties": {
 				"ignoreNull": {
 					"description": "If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.\n\nIf `false`, no such exception will be made.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3214,8 +3213,7 @@
 			"properties": {
 				"allowComments": {
 					"description": "Whether comments are considered meaningful",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3260,8 +3258,7 @@
 			"properties": {
 				"maxAllowedComplexity": {
 					"description": "The maximum complexity score that we allow. Anything higher is considered excessive.",
-					"default": 15,
-					"type": "integer",
+					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 1.0
 				}
@@ -3279,20 +3276,17 @@
 			"properties": {
 				"maxLines": {
 					"description": "The maximum number of lines allowed in a function body.",
-					"default": 50,
-					"type": "integer",
+					"type": ["integer", "null"],
 					"format": "uint16",
 					"minimum": 1.0
 				},
 				"skipBlankLines": {
 					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"skipIifes": {
 					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3405,8 +3399,7 @@
 			"properties": {
 				"allowedIdentifiers": {
 					"description": "A list of variable names allowed for `forEach` calls.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -3558,8 +3551,7 @@
 			"properties": {
 				"ignoreTypes": {
 					"description": "Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3595,8 +3587,7 @@
 			"properties": {
 				"allowForLoopAfterthoughts": {
 					"description": "Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3716,19 +3707,16 @@
 			"properties": {
 				"allowedStrings": {
 					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"ignoreProps": {
 					"description": "When enabled, strings inside props are always ignored",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"noStrings": {
 					"description": "When enabled, also flag string literals inside JSX expressions and attributes",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3751,20 +3739,17 @@
 			"properties": {
 				"inputComponents": {
 					"description": "Array of component names that should be considered the same as an `input` element.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"labelAttributes": {
 					"description": "Array of attributes that should be treated as the `label` accessible text content.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"labelComponents": {
 					"description": "Array of component names that should be considered the same as a `label` element.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -3993,8 +3978,10 @@
 			"properties": {
 				"propertyAssignment": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.",
-					"default": "allow",
-					"allOf": [{ "$ref": "#/definitions/PropertyAssignmentMode" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/PropertyAssignmentMode" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4052,8 +4039,7 @@
 			"properties": {
 				"defaultVisibility": {
 					"description": "The default visibility to assume for symbols without visibility tag.\n\nDefault: **public**.",
-					"default": "public",
-					"allOf": [{ "$ref": "#/definitions/Visibility" }]
+					"anyOf": [{ "$ref": "#/definitions/Visibility" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -4208,7 +4194,10 @@
 			"properties": {
 				"elements": {
 					"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
-					"allOf": [{ "$ref": "#/definitions/CustomRestrictedElements" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/CustomRestrictedElements" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4224,7 +4213,7 @@
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": { "type": "string" }
 				}
 			},
@@ -4241,7 +4230,7 @@
 			"properties": {
 				"paths": {
 					"description": "A list of import paths that should trigger the rule.",
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/Paths" }
 				},
 				"patterns": {
@@ -4262,8 +4251,7 @@
 			"type": "object",
 			"properties": {
 				"types": {
-					"default": {},
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedType"
 					}
@@ -4282,7 +4270,6 @@
 			"properties": {
 				"entropyThreshold": {
 					"description": "Set entropy threshold (default is 41).",
-					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint16",
 					"minimum": 0.0
@@ -4503,18 +4490,24 @@
 			"properties": {
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				},
 				"optionalDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				},
 				"peerDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4530,8 +4523,7 @@
 			"properties": {
 				"checkTypes": {
 					"description": "Check undeclared types.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -4741,8 +4733,7 @@
 			"properties": {
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -4798,8 +4789,7 @@
 			"properties": {
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -5400,12 +5390,13 @@
 			"type": "object",
 			"properties": {
 				"groups": {
-					"default": [],
-					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ImportGroups" },
+						{ "type": "null" }
+					]
 				},
 				"identifierOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -13951,12 +13942,12 @@
 			"properties": {
 				"allowConstantExport": {
 					"description": "Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)",
-					"default": false,
-					"type": "boolean"
+					"default": null,
+					"type": ["boolean", "null"]
 				},
 				"allowExportNames": {
 					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -13972,8 +13963,10 @@
 			"type": "object",
 			"properties": {
 				"syntax": {
-					"default": "shorthand",
-					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ConsistentArrayType" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13990,13 +13983,14 @@
 			"properties": {
 				"requireForObjectLiteral": {
 					"description": "Determines whether the rule enforces a consistent style when the return value is an object literal.\n\nThis option is only applicable when used in conjunction with the `asNeeded` option.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"style": {
 					"description": "The style to enforce for arrow function return statements.",
-					"default": "asNeeded",
-					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -14055,8 +14049,10 @@
 			"properties": {
 				"accessibility": {
 					"description": "The kind of accessibility you want to enforce. Default to \"noPublic\"",
-					"default": "noPublic",
-					"allOf": [{ "$ref": "#/definitions/Accessibility" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/Accessibility" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -14074,8 +14070,10 @@
 			"properties": {
 				"syntax": {
 					"description": "The preferred syntax to enforce.",
-					"default": "shorthand",
-					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ObjectPropertySyntax" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -14090,8 +14088,10 @@
 			"type": "object",
 			"properties": {
 				"style": {
-					"default": "interface",
-					"allOf": [{ "$ref": "#/definitions/ConsistentTypeDefinition" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ConsistentTypeDefinition" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -14148,9 +14148,7 @@
 		},
 		"UseDeprecatedDateOptions": {
 			"type": "object",
-			"properties": {
-				"argumentName": { "default": "deletionDate", "type": "string" }
-			},
+			"properties": { "argumentName": { "type": ["string", "null"] } },
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {
@@ -14194,19 +14192,16 @@
 			"properties": {
 				"hooks": {
 					"description": "List of hooks of which the dependencies should be validated.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/Hook" }
 				},
 				"reportMissingDependenciesArray": {
 					"description": "Whether to report an error when a hook has no dependencies array.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14279,7 +14274,10 @@
 			"properties": {
 				"filenameCases": {
 					"description": "Allowed cases for file names.",
-					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/FilenameCases" },
+						{ "type": "null" }
+					]
 				},
 				"match": {
 					"description": "Regular expression to enforce",
@@ -14287,11 +14285,11 @@
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14462,8 +14460,7 @@
 			"properties": {
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14479,8 +14476,7 @@
 			"properties": {
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
-					"default": "auto",
-					"allOf": [{ "$ref": "#/definitions/Style2" }]
+					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -14537,8 +14533,7 @@
 			"properties": {
 				"checkShorthandFragments": {
 					"description": "Set to `true` to check shorthand fragments (`<></>`)",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14594,8 +14589,7 @@
 			"properties": {
 				"max": {
 					"description": "Maximum number of parameters allowed (default: 4)",
-					"default": 4,
-					"type": "integer",
+					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				}
@@ -14634,16 +14628,16 @@
 			"properties": {
 				"conventions": {
 					"description": "Custom conventions.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/Convention" }
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14791,7 +14785,7 @@
 			"properties": {
 				"checkAllProperties": {
 					"description": "When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14814,9 +14808,7 @@
 		},
 		"UseSelfClosingElementsOptions": {
 			"type": "object",
-			"properties": {
-				"ignoreHtmlElements": { "default": false, "type": "boolean" }
-			},
+			"properties": { "ignoreHtmlElements": { "type": ["boolean", "null"] } },
 			"additionalProperties": false
 		},
 		"UseSemanticElementsConfiguration": {
@@ -14903,8 +14895,7 @@
 			"type": "object",
 			"properties": {
 				"sortOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -14935,8 +14926,7 @@
 			"type": "object",
 			"properties": {
 				"sortOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -15040,8 +15030,7 @@
 			"properties": {
 				"excludedComponents": {
 					"description": "Component names that accept an `id` prop that does not translate to a DOM element id.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" },
 					"uniqueItems": true
 				}
@@ -15079,14 +15068,12 @@
 			"properties": {
 				"allowInvalidRoles": {
 					"description": "It allows specifying a list of roles that might be invalid otherwise",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"ignoreNonDom": {
 					"description": "Use this option to ignore non-DOM elements, such as custom components",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -15112,8 +15099,7 @@
 			"properties": {
 				"inputComponents": {
 					"description": "`input` like custom components that should be checked.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -15157,8 +15143,7 @@
 			"properties": {
 				"order": {
 					"description": "The order of the Vue define macros.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},

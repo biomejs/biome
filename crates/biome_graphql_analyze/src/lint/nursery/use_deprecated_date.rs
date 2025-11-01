@@ -67,7 +67,7 @@ impl Rule for UseDeprecatedDate {
             return Some((DeprecatedDateIssue::Missing, node.clone()));
         };
         let arguments = arguments.arguments();
-        let argument_name = ctx.options().argument_name.clone();
+        let argument_name = ctx.options().argument_name_or_default();
         let Some(argument) = arguments.into_iter().find(|argument| {
             argument.name().is_ok_and(|name| {
                 name.value_token()
@@ -101,7 +101,7 @@ impl Rule for UseDeprecatedDate {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let span = ctx.query().range();
-        let argument_name = ctx.options().argument_name.clone();
+        let argument_name = ctx.options().argument_name_or_default();
 
         match state.0 {
             DeprecatedDateIssue::Missing => Some(

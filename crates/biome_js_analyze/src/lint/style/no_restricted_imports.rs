@@ -455,7 +455,11 @@ impl Rule for NoRestrictedImports {
 
         let mut results: Vec<RestrictedImportMessage> = vec![];
 
-        if let Some(paths) = options.paths.get(import_source) {
+        if let Some(paths) = options
+            .paths
+            .as_ref()
+            .and_then(|paths| paths.get(import_source))
+        {
             let path_options: PathOptions = paths.clone().into();
             results.extend(check_import_restrictions(
                 &path_options,

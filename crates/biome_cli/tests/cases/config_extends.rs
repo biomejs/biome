@@ -550,3 +550,209 @@ fn extends_config_merge_overrides() {
         result,
     ));
 }
+
+#[test]
+fn extends_config_rule_fix_options_merge() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let shared = Utf8Path::new("shared.json");
+    fs.insert(
+        shared.into(),
+        r#"{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "correctness": {
+                        "noUnusedVariables": {
+                            "level": "on",
+                            "options": {
+                                "ignoreRestSiblings": false
+                            }
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "extends": ["shared.json"],
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "correctness": {
+                        "noUnusedVariables": {
+                            "level": "on",
+                            "fix": "safe"
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(
+        test_file.into(),
+        "const { a, ...rest } = { a: 1, b: 2}; export { rest }",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_rule_fix_options_merge",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_config_rule_fine_grained_options_merge() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let shared = Utf8Path::new("shared.json");
+    fs.insert(
+        shared.into(),
+        r#"{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                        "level": "on",
+                            "options": {
+                                "strictCase": false,
+                                "conventions": [{
+                                    "selector": { "kind": "variable", "scope": "global" },
+                                    "formats": ["PascalCase"]
+                                }]
+                            }
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "extends": ["shared.json"],
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                            "level": "on",
+                            "options": {
+                                "strictCase": true
+                            }
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(
+        test_file.into(),
+        "export const lowercase = 0; export const PascalCASE = 1;",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_rule_fine_grained_options_merge",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_config_rule_fine_grained_options_merge2() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let shared = Utf8Path::new("shared.json");
+    fs.insert(
+        shared.into(),
+        r#"{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                        "level": "on",
+                            "options": {
+                                "conventions": [{
+                                    "selector": { "kind": "variable", "scope": "global" },
+                                    "formats": ["PascalCase"]
+                                }]
+                            }
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "extends": ["shared.json"],
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                            "level": "on",
+                            "options": {
+                                "conventions": [{
+                                    "selector": { "kind": "variable", "scope": "global" },
+                                    "formats": ["CONSTANT_CASE"]
+                                }]
+                            }
+                        }
+                    }
+                }
+            }
+        }"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), "export const PascalCase = 0;");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_rule_fine_grained_options_merge2",
+        fs,
+        console,
+        result,
+    ));
+}

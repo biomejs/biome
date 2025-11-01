@@ -1,7 +1,7 @@
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoBlankTargetOptions {
@@ -11,19 +11,17 @@ pub struct NoBlankTargetOptions {
     pub allow_domains: Vec<String>,
 
     /// Whether `noreferrer` is allowed in addition to `noopener`.
-    #[serde(default = "default_allow_no_referrer")]
-    pub allow_no_referrer: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub allow_no_referrer: Option<bool>,
 }
 
-impl Default for NoBlankTargetOptions {
-    fn default() -> Self {
-        Self {
-            allow_domains: Default::default(),
-            allow_no_referrer: default_allow_no_referrer(),
-        }
+impl NoBlankTargetOptions {
+    pub const DEFAULT_ALLOW_NO_REFERRER: bool = true;
+
+    /// Returns [`Self::allow_no_referrer`] if it is set
+    /// Otherwise, returns [`Self::DEFAULT_ALLOW_NO_REFERRER`].
+    pub fn allow_no_referrer(&self) -> bool {
+        self.allow_no_referrer
+            .unwrap_or(Self::DEFAULT_ALLOW_NO_REFERRER)
     }
-}
-
-fn default_allow_no_referrer() -> bool {
-    true
 }

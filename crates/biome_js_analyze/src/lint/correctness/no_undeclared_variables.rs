@@ -109,7 +109,7 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
-                if !ctx.options().check_types && identifier.is_only_type() {
+                if !ctx.options().check_types() && identifier.is_only_type() {
                     return None;
                 }
 

@@ -8201,7 +8201,7 @@ export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
 	 */
-	elements: CustomRestrictedElements;
+	elements?: CustomRestrictedElements;
 }
 export interface NoSelfAssignOptions {}
 export interface NoSetterReturnOptions {}
@@ -8463,13 +8463,13 @@ export interface NoRestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: Record<string, string>;
+	deniedGlobals?: Record<string, string>;
 }
 export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, Paths>;
+	paths?: Record<string, Paths>;
 	/**
 	 * gitignore-style patterns that should trigger the rule.
 	 */
@@ -8498,7 +8498,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	/**
 	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
 	 */
-	allowExportNames: string[];
+	allowExportNames?: string[];
 }
 export interface UseConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -8533,7 +8533,7 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * Allowed cases for file names.
 	 */
-	filenameCases: FilenameCases;
+	filenameCases?: FilenameCases;
 	/**
 	 * Regular expression to enforce
 	 */
@@ -8541,11 +8541,11 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
@@ -8565,15 +8565,15 @@ export interface UseNamingConventionOptions {
 	/**
 	 * Custom conventions.
 	 */
-	conventions: Convention[];
+	conventions?: Convention[];
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
@@ -8585,7 +8585,7 @@ export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
 	 */
-	checkAllProperties: boolean;
+	checkAllProperties?: boolean;
 }
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
@@ -8609,7 +8609,7 @@ export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoCatchAssignOptions {}
 export interface NoClassAssignOptions {}
@@ -8619,14 +8619,14 @@ export interface NoConfusingLabelsOptions {
 	/**
 	 * A list of (non-confusing) labels that should be allowed
 	 */
-	allowedLabels: string[];
+	allowedLabels?: string[];
 }
 export interface NoConfusingVoidTypeOptions {}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoConstEnumOptions {}
 export interface NoConstantBinaryExpressionsOptions {}
@@ -8640,7 +8640,7 @@ export interface NoDoubleEqualsOptions {
 
 If `false`, no such exception will be made. 
 	 */
-	ignoreNull: boolean;
+	ignoreNull?: boolean;
 }
 export interface NoDuplicateAtImportRulesOptions {}
 export interface NoDuplicateCaseOptions {}

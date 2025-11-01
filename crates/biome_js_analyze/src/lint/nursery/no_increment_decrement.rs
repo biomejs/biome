@@ -152,7 +152,7 @@ impl Rule for NoIncrementDecrement {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if ctx.options().allow_for_loop_afterthoughts && is_for_loop_afterthought(node.syntax()) {
+        if ctx.options().allow_for_loop_afterthoughts() && is_for_loop_afterthought(node.syntax()) {
             return None;
         }
 

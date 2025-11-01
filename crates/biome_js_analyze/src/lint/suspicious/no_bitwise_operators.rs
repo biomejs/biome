@@ -126,6 +126,7 @@ impl Rule for NoBitwiseOperators {
                 .options()
                 .allow
                 .iter()
+                .flatten()
                 .any(|op_str| op_str.as_ref() == op.text_trimmed())
             {
                 return None;

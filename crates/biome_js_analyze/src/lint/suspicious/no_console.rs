@@ -77,6 +77,7 @@ impl Rule for NoConsole {
                 .options()
                 .allow
                 .iter()
+                .flatten()
                 .any(|allowed| allowed.as_ref() == member_name)
             {
                 return None;

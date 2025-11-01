@@ -1,0 +1,76 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["shared.json"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "conventions": [
+              {
+                "selector": { "kind": "variable", "scope": "global" },
+                "formats": ["CONSTANT_CASE"]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## `shared.json`
+
+```json
+{
+            "linter": {
+                "enabled": true,
+                "rules": {
+                    "style": {
+                        "useNamingConvention": {
+                        "level": "on",
+                            "options": {
+                                "conventions": [{
+                                    "selector": { "kind": "variable", "scope": "global" },
+                                    "formats": ["PascalCase"]
+                                }]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+```
+
+## `test.js`
+
+```js
+export const PascalCase = 0;
+```
+
+# Emitted Messages
+
+```block
+test.js:1:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global variable name should be in CONSTANT_CASE.
+  
+  > 1 │ export const PascalCase = 0;
+      │              ^^^^^^^^^^
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 info.
+```
