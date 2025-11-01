@@ -8280,7 +8280,6 @@ export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
 export interface NoUnknownAttributeOptions {
 	ignore: string[];
-	requireDataLowercase?: boolean;
 }
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
