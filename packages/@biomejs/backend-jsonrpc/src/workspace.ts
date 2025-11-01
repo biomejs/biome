@@ -1729,6 +1729,10 @@ export interface Nursery {
 	 */
 	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
 	/**
+	 * Disallow importing components that are never used in Glimmer templates.
+	 */
+	noUnusedGlimmerComponents?: RuleConfiguration_for_NoUnusedGlimmerComponentsOptions;
+	/**
 	 * Disallow unused catch bindings.
 	 */
 	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
@@ -3109,6 +3113,9 @@ export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 export type RuleConfiguration_for_NoUnusedExpressionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnusedExpressionsOptions;
+export type RuleConfiguration_for_NoUnusedGlimmerComponentsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnusedGlimmerComponentsOptions;
 export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
@@ -5669,6 +5676,16 @@ export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
 	 * Rule's options
 	 */
 	options: NoUnusedExpressionsOptions;
+}
+export interface RuleWithOptions_for_NoUnusedGlimmerComponentsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedGlimmerComponentsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
@@ -8347,6 +8364,7 @@ export interface NoUnknownAttributeOptions {
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
+export interface NoUnusedGlimmerComponentsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
@@ -9125,6 +9143,7 @@ export type Category =
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"
+	| "lint/nursery/noUnusedGlimmerComponents"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"

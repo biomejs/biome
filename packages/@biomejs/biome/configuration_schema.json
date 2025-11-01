@@ -4738,6 +4738,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUnusedGlimmerComponentsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedGlimmerComponentsOptions" }
+			]
+		},
+		"NoUnusedGlimmerComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedImportsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5238,6 +5248,13 @@
 					"description": "Disallow expression statements that are neither a function call nor an assignment.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedGlimmerComponents": {
+					"description": "Disallow importing components that are never used in Glimmer templates.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedGlimmerComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9402,6 +9419,23 @@
 					"description": "Rule's options",
 					"allOf": [
 						{ "$ref": "#/definitions/NoUnusedFunctionParametersOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnusedGlimmerComponentsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoUnusedGlimmerComponentsOptions" }
 					]
 				}
 			},

@@ -891,6 +891,8 @@ dependencies = [
  "biome_diagnostics",
  "biome_fs",
  "biome_glob",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_semantic",
