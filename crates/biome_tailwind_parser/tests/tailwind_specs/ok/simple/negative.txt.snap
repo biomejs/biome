@@ -1,0 +1,113 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+-top-4 -mb-2 hover:-mt-2
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: DASH@0..1 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@1..4 "top" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@5..6 "4" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@6..7 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: DASH@7..8 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@8..10 "mb" [] [],
+                minus_token: DASH@10..11 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@11..12 "2" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@12..13 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@13..18 "hover" [] [],
+                },
+                COLON@18..19 ":" [] [],
+            ],
+            negative_token: DASH@19..20 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@20..22 "mt" [] [],
+                minus_token: DASH@22..23 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@23..25 "2" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@25..25 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..25
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..25
+    0: TW_FULL_CANDIDATE@0..6
+      0: TW_VARIANT_LIST@0..0
+      1: DASH@0..1 "-" [] []
+      2: TW_FUNCTIONAL_CANDIDATE@1..6
+        0: TW_BASE@1..4 "top" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_NAMED_VALUE@5..6
+          0: TW_VALUE@5..6 "4" [] []
+        3: (empty)
+      3: (empty)
+    1: WHITESPACE@6..7 " " [] []
+    2: TW_FULL_CANDIDATE@7..12
+      0: TW_VARIANT_LIST@7..7
+      1: DASH@7..8 "-" [] []
+      2: TW_FUNCTIONAL_CANDIDATE@8..12
+        0: TW_BASE@8..10 "mb" [] []
+        1: DASH@10..11 "-" [] []
+        2: TW_NAMED_VALUE@11..12
+          0: TW_VALUE@11..12 "2" [] []
+        3: (empty)
+      3: (empty)
+    3: WHITESPACE@12..13 " " [] []
+    4: TW_FULL_CANDIDATE@13..25
+      0: TW_VARIANT_LIST@13..19
+        0: TW_STATIC_VARIANT@13..18
+          0: TW_BASE@13..18 "hover" [] []
+        1: COLON@18..19 ":" [] []
+      1: DASH@19..20 "-" [] []
+      2: TW_FUNCTIONAL_CANDIDATE@20..25
+        0: TW_BASE@20..22 "mt" [] []
+        1: DASH@22..23 "-" [] []
+        2: TW_NAMED_VALUE@23..25
+          0: TW_VALUE@23..25 "2" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@25..25 "" [] []
+
+```

@@ -1,0 +1,130 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..16 "gradient-to-r" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@16..17 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@17..21 "from" [] [],
+                minus_token: DASH@21..22 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@22..32 "indigo-500" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@32..33 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@33..36 "via" [] [],
+                minus_token: DASH@36..37 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@37..47 "purple-500" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@47..48 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@48..50 "to" [] [],
+                minus_token: DASH@50..51 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@51..60 "pink-500" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@60..60 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..60
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..60
+    0: TW_FULL_CANDIDATE@0..16
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..16
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..16
+          0: TW_VALUE@3..16 "gradient-to-r" [] []
+        3: (empty)
+      3: (empty)
+    1: WHITESPACE@16..17 " " [] []
+    2: TW_FULL_CANDIDATE@17..32
+      0: TW_VARIANT_LIST@17..17
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@17..32
+        0: TW_BASE@17..21 "from" [] []
+        1: DASH@21..22 "-" [] []
+        2: TW_NAMED_VALUE@22..32
+          0: TW_VALUE@22..32 "indigo-500" [] []
+        3: (empty)
+      3: (empty)
+    3: WHITESPACE@32..33 " " [] []
+    4: TW_FULL_CANDIDATE@33..47
+      0: TW_VARIANT_LIST@33..33
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@33..47
+        0: TW_BASE@33..36 "via" [] []
+        1: DASH@36..37 "-" [] []
+        2: TW_NAMED_VALUE@37..47
+          0: TW_VALUE@37..47 "purple-500" [] []
+        3: (empty)
+      3: (empty)
+    5: WHITESPACE@47..48 " " [] []
+    6: TW_FULL_CANDIDATE@48..60
+      0: TW_VARIANT_LIST@48..48
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@48..60
+        0: TW_BASE@48..50 "to" [] []
+        1: DASH@50..51 "-" [] []
+        2: TW_NAMED_VALUE@51..60
+          0: TW_VALUE@51..60 "pink-500" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@60..60 "" [] []
+
+```

@@ -27,6 +27,7 @@ TwRoot {
                 },
                 COLON@11..12 ":" [] [],
             ],
+            negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@12..16 "text" [] [],
                 minus_token: DASH@16..17 "-" [] [],
@@ -56,13 +57,14 @@ TwRoot {
         2: TW_STATIC_VARIANT@6..11
           0: TW_BASE@6..11 "focus" [] []
         3: COLON@11..12 ":" [] []
-      1: TW_FUNCTIONAL_CANDIDATE@12..25
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@12..25
         0: TW_BASE@12..16 "text" [] []
         1: DASH@16..17 "-" [] []
         2: TW_NAMED_VALUE@17..25
           0: TW_VALUE@17..25 "red-500" [] [Newline("\n")]
         3: (empty)
-      2: (empty)
+      3: (empty)
   2: EOF@25..25 "" [] []
 
 ```

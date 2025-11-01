@@ -191,3 +191,13 @@ fn variant_multiple_full() {
         TW_VALUE:7
     );
 }
+
+#[test]
+fn negative() {
+    assert_lex!(
+        TailwindLexContext::SawNegative,
+        "-mt",
+        DASH:1,
+        TW_BASE:2,
+    );
+}
