@@ -660,6 +660,7 @@ AnyCssAtRule =
 	| TwReferenceAtRule
 	| TwConfigAtRule
 	| TwPluginAtRule
+	| TwSlotAtRule
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
@@ -1966,7 +1967,17 @@ TwConfigAtRule =
 
 // Tailwind 4.0 @plugin directive (compatibility)
 // @plugin "@tailwindcss/typography";
+// @plugin "my-plugin" {
+//  debug: false;
+//  threshold: 0.5;
+// }
 TwPluginAtRule =
   'plugin'
   name: CssString
-  ';'
+  block: AnyCssDeclarationBlock?
+  ';'?
+
+// Tailwind 4.0 @slot directive
+TwSlotAtRule =
+	'slot'
+	';'

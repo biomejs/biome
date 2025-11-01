@@ -1,0 +1,211 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@plugin "my-plugin" {
+  color: { red: 100; green: 200; blue: 300 };
+}
+
+/* Error: Objects are not supported in `@plugin` options. */
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwPluginAtRule {
+                plugin_token: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssBogusProperty {
+                                    items: [
+                                        CssIdentifier {
+                                            value_token: IDENT@21..29 "color" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                        COLON@29..31 ":" [] [Whitespace(" ")],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusPropertyValue {
+                                                    items: [
+                                                        L_CURLY@31..33 "{" [] [Whitespace(" ")],
+                                                        IDENT@33..36 "red" [] [],
+                                                        COLON@36..38 ":" [] [Whitespace(" ")],
+                                                        CSS_NUMBER_LITERAL@38..41 "100" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@41..43 ";" [] [Whitespace(" ")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@43..48 "green" [] [],
+                                    },
+                                    colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@50..53 "200" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@53..55 ";" [] [Whitespace(" ")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@55..59 "blue" [] [],
+                                    },
+                                    colon_token: COLON@59..61 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@61..65 "300" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@65..66 "}" [] [],
+                },
+                semicolon_token: SEMICOLON@66..67 ";" [] [],
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@67..69 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@69..132 "" [Newline("\n"), Newline("\n"), Comments("/* Error: Objects are ..."), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..132
+  0: (empty)
+  1: CSS_RULE_LIST@0..69
+    0: CSS_AT_RULE@0..67
+      0: AT@0..1 "@" [] []
+      1: TW_PLUGIN_AT_RULE@1..67
+        0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
+        1: CSS_STRING@8..20
+          0: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_BLOCK@20..66
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_DECLARATION_LIST@21..65
+            0: CSS_DECLARATION_WITH_SEMICOLON@21..43
+              0: CSS_DECLARATION@21..41
+                0: CSS_BOGUS_PROPERTY@21..41
+                  0: CSS_IDENTIFIER@21..29
+                    0: IDENT@21..29 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@29..31 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@31..41
+                    0: CSS_BOGUS_PROPERTY_VALUE@31..41
+                      0: L_CURLY@31..33 "{" [] [Whitespace(" ")]
+                      1: IDENT@33..36 "red" [] []
+                      2: COLON@36..38 ":" [] [Whitespace(" ")]
+                      3: CSS_NUMBER_LITERAL@38..41 "100" [] []
+                1: (empty)
+              1: SEMICOLON@41..43 ";" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_WITH_SEMICOLON@43..55
+              0: CSS_DECLARATION@43..53
+                0: CSS_GENERIC_PROPERTY@43..53
+                  0: CSS_IDENTIFIER@43..48
+                    0: IDENT@43..48 "green" [] []
+                  1: COLON@48..50 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@50..53
+                    0: CSS_NUMBER@50..53
+                      0: CSS_NUMBER_LITERAL@50..53 "200" [] []
+                1: (empty)
+              1: SEMICOLON@53..55 ";" [] [Whitespace(" ")]
+            2: CSS_DECLARATION_WITH_SEMICOLON@55..65
+              0: CSS_DECLARATION@55..65
+                0: CSS_GENERIC_PROPERTY@55..65
+                  0: CSS_IDENTIFIER@55..59
+                    0: IDENT@55..59 "blue" [] []
+                  1: COLON@59..61 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@61..65
+                    0: CSS_NUMBER@61..65
+                      0: CSS_NUMBER_LITERAL@61..65 "300" [] [Whitespace(" ")]
+                1: (empty)
+              1: (empty)
+          2: R_CURLY@65..66 "}" [] []
+        3: SEMICOLON@66..67 ";" [] []
+    1: CSS_BOGUS_RULE@67..69
+      0: R_CURLY@67..69 "}" [Newline("\n")] []
+  2: EOF@69..132 "" [Newline("\n"), Newline("\n"), Comments("/* Error: Objects are ..."), Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+plugin-with-invalid-options.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @plugin "my-plugin" {
+  > 2 │   color: { red: 100; green: 200; blue: 300 };
+      │          ^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+plugin-with-invalid-options.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    1 │ @plugin "my-plugin" {
+    2 │   color: { red: 100; green: 200; blue: 300 };
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ /* Error: Objects are not supported in `@plugin` options. */
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    1 │ @plugin "my-plugin" {
+    2 │   color: { red: 100; green: 200; blue: 300 };
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ /* Error: Objects are not supported in `@plugin` options. */
+  
+```

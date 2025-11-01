@@ -3577,6 +3577,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoIncrementDecrementConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoIncrementDecrementOptions" }
+			]
+		},
+		"NoIncrementDecrementOptions": {
+			"type": "object",
+			"properties": {
+				"allowForLoopAfterthoughts": {
+					"description": "Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoInferrableTypesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3982,6 +3999,18 @@
 			]
 		},
 		"NoParameterPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoParametersOnlyUsedInRecursionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoParametersOnlyUsedInRecursionOptions"
+				}
+			]
+		},
+		"NoParametersOnlyUsedInRecursionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5129,6 +5158,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noIncrementDecrement": {
+					"description": "Disallows the usage of the unary operators ++ and --.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoIncrementDecrementConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsxLiterals": {
 					"description": "Disallow string literals inside JSX elements.",
 					"anyOf": [
@@ -5147,6 +5183,15 @@
 					"description": "Prevent client components from being async functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoNextAsyncClientComponentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noParametersOnlyUsedInRecursion": {
+					"description": "Disallow function parameters that are only used in recursive calls.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoParametersOnlyUsedInRecursionConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -7606,6 +7651,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoIncrementDecrementOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoIncrementDecrementOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoInferrableTypesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8224,6 +8284,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoParameterPropertiesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoParametersOnlyUsedInRecursionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoParametersOnlyUsedInRecursionOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

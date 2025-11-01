@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+const items = [1, 2, 3];
+---
+
+{items.map(item => <div>{item}</div>)}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@29..32 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@35..71 "items.map(item => <div>{item}</div>)" [] [],
+            },
+            r_curly_token: R_CURLY@71..72 "}" [] [],
+        },
+    ],
+    eof_token: EOF@72..73 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..73
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..32
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..29
+      0: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] []
+    2: FENCE@29..32 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@32..72
+    0: HTML_SINGLE_TEXT_EXPRESSION@32..72
+      0: L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@35..71
+        0: HTML_LITERAL@35..71 "items.map(item => <div>{item}</div>)" [] []
+      2: R_CURLY@71..72 "}" [] []
+  4: EOF@72..73 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: component-frameworks/vue-component-casing.vue
+---
+# Input
+
+```vue
+<script setup lang="ts">
+import Button from './Button.vue';
+import TextInput from './TextInput.vue';
+</script>
+
+<template>
+  <Button label="test button" />
+  <TextInput placeholder="enter text" />
+  <button>native button</button>
+</template>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```vue
+<script setup lang="ts">
+import Button from './Button.vue';
+import TextInput from './TextInput.vue';
+</script>
+
+<template>
+	<Button label="test button"/>
+	<TextInput placeholder="enter text"/>
+	<button>native button</button>
+</template>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\nimport Button from './Button.vue';\nimport TextInput from './TextInput.vue';\n" => 24..101

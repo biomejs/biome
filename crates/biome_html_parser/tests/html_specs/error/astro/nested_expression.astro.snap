@@ -1,0 +1,133 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+const items = [1, 2, 3];
+---
+
+{items.map(item => <div>{item}</div>)
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@29..32 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusTextExpression {
+            items: [
+                L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] [],
+                HTML_LITERAL@35..53 "items.map(item =>" [] [Whitespace(" ")],
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@53..54 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@54..57 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@57..58 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@58..59 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@59..63 "item" [] [],
+                    },
+                    r_curly_token: R_CURLY@63..64 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@64..65 "<" [] [],
+                slash_token: SLASH@65..66 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@66..69 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@69..70 ">" [] [],
+            },
+        },
+        HtmlContent {
+            value_token: HTML_LITERAL@70..71 ")" [] [],
+        },
+    ],
+    eof_token: EOF@71..72 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..72
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..32
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..29
+      0: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] []
+    2: FENCE@29..32 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@32..71
+    0: HTML_BOGUS_TEXT_EXPRESSION@32..53
+      0: L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] []
+      1: HTML_LITERAL@35..53 "items.map(item =>" [] [Whitespace(" ")]
+    1: HTML_ELEMENT@53..70
+      0: HTML_OPENING_ELEMENT@53..58
+        0: L_ANGLE@53..54 "<" [] []
+        1: HTML_TAG_NAME@54..57
+          0: HTML_LITERAL@54..57 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@57..57
+        3: R_ANGLE@57..58 ">" [] []
+      1: HTML_ELEMENT_LIST@58..64
+        0: HTML_SINGLE_TEXT_EXPRESSION@58..64
+          0: L_CURLY@58..59 "{" [] []
+          1: HTML_TEXT_EXPRESSION@59..63
+            0: HTML_LITERAL@59..63 "item" [] []
+          2: R_CURLY@63..64 "}" [] []
+      2: HTML_CLOSING_ELEMENT@64..70
+        0: L_ANGLE@64..65 "<" [] []
+        1: SLASH@65..66 "/" [] []
+        2: HTML_TAG_NAME@66..69
+          0: HTML_LITERAL@66..69 "div" [] []
+        3: R_ANGLE@69..70 ">" [] []
+    2: HTML_CONTENT@70..71
+      0: HTML_LITERAL@70..71 ")" [] []
+  4: EOF@71..72 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+nested_expression.astro:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+    3 │ ---
+    4 │ 
+  > 5 │ {items.map(item => <div>{item}</div>)
+      │ ^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i This is where the opening expression was found:
+  
+    3 │ ---
+    4 │ 
+  > 5 │ {items.map(item => <div>{item}</div>)
+      │ ^
+    6 │ 
+  
+```

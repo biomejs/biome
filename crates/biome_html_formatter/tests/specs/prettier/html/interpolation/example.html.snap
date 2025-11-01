@@ -126,7 +126,7 @@ example.html:1:114 parse ━━━━━━━━━━━━━━━━━━�
        │ ^^
     12 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 example.html:11:72 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -142,7 +142,7 @@ example.html:11:72 parse ━━━━━━━━━━━━━━━━━━�
     19 │ 
     20 │                     preserve
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 example.html:18:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -158,7 +158,7 @@ example.html:18:65 parse ━━━━━━━━━━━━━━━━━━�
        │ ^^
     27 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 example.html:26:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -170,7 +170,7 @@ example.html:26:35 parse ━━━━━━━━━━━━━━━━━━�
        │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 
 ```
