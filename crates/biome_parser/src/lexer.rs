@@ -201,6 +201,8 @@ pub trait Lexer<'src> {
     }
 
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
+    ///
+    /// See also: [`Self::prev_byte_at`]
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
         self.source()
@@ -216,6 +218,18 @@ pub trait Lexer<'src> {
         } else {
             self.source().as_bytes().get(self.position() - 1).copied()
         }
+    }
+
+    /// Returns the byte at position `self.position - offset` or `None` if it is out of bounds. Looks backwards instead of forwards.
+    #[inline]
+    fn prev_byte_at(&self, offset: usize) -> Option<u8> {
+        if offset > self.position() {
+            return None;
+        }
+        self.source()
+            .as_bytes()
+            .get(self.position() - offset)
+            .copied()
     }
 
     #[inline]
