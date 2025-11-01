@@ -86,7 +86,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoParametersOnlyUsedInRecursion {
-        version: "next",
+        version: "2.3.3",
         name: "noParametersOnlyUsedInRecursion",
         language: "js",
         sources: &[RuleSource::Clippy("only_used_in_recursion").inspired()],
