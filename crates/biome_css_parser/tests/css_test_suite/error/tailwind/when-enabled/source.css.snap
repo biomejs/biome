@@ -1,0 +1,102 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@source ;
+@source not ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
+                not_token: missing (optional),
+                source: missing (required),
+                semicolon_token: SEMICOLON@8..9 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@9..11 "@" [Newline("\n")] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@11..18 "source" [] [Whitespace(" ")],
+                not_token: NOT_KW@18..22 "not" [] [Whitespace(" ")],
+                source: missing (required),
+                semicolon_token: SEMICOLON@22..23 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..24
+  0: (empty)
+  1: CSS_RULE_LIST@0..23
+    0: CSS_AT_RULE@0..9
+      0: AT@0..1 "@" [] []
+      1: TW_SOURCE_AT_RULE@1..9
+        0: SOURCE_KW@1..8 "source" [] [Whitespace(" ")]
+        1: (empty)
+        2: (empty)
+        3: SEMICOLON@8..9 ";" [] []
+    1: CSS_AT_RULE@9..23
+      0: AT@9..11 "@" [Newline("\n")] []
+      1: TW_SOURCE_AT_RULE@11..23
+        0: SOURCE_KW@11..18 "source" [] [Whitespace(" ")]
+        1: NOT_KW@18..22 "not" [] [Whitespace(" ")]
+        2: (empty)
+        3: SEMICOLON@22..23 ";" [] []
+  2: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+source.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string literal, or an inline("...") but instead found ';'.
+  
+  > 1 │ @source ;
+      │         ^
+    2 │ @source not ;
+    3 │ 
+  
+  i Expected a string literal, or an inline("...") here.
+  
+  > 1 │ @source ;
+      │         ^
+    2 │ @source not ;
+    3 │ 
+  
+source.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string literal, or an inline("...") but instead found ';'.
+  
+    1 │ @source ;
+  > 2 │ @source not ;
+      │             ^
+    3 │ 
+  
+  i Expected a string literal, or an inline("...") here.
+  
+    1 │ @source ;
+  > 2 │ @source not ;
+      │             ^
+    3 │ 
+  
+```

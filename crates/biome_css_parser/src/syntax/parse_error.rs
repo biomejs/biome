@@ -239,3 +239,7 @@ pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnos
             "Enable "<Emphasis>"`tailwindDirectives`"</Emphasis>" in the css parser options, or remove this if you are not using Tailwind CSS."
         })
 }
+
+pub(crate) fn expected_tw_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["string literal", "inline(\"...\")"], range, p)
+}

@@ -225,7 +225,7 @@ CssRoot {
             rule: TwSourceAtRule {
                 source_token: SOURCE_KW@284..291 "source" [] [Whitespace(" ")],
                 not_token: missing (optional),
-                path: CssString {
+                source: CssString {
                     value_token: CSS_STRING_LITERAL@291..303 "\"./base.css\"" [] [],
                 },
                 semicolon_token: SEMICOLON@303..304 ";" [] [],

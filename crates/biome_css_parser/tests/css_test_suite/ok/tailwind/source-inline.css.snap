@@ -1,0 +1,89 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@source inline("underline");
+@source not inline("underline");
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
+                not_token: missing (optional),
+                source: TwSourceInline {
+                    inline_token: INLINE_KW@8..14 "inline" [] [],
+                    l_paren_token: L_PAREN@14..15 "(" [] [],
+                    content: CssString {
+                        value_token: CSS_STRING_LITERAL@15..26 "\"underline\"" [] [],
+                    },
+                    r_paren_token: R_PAREN@26..27 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@27..28 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@28..30 "@" [Newline("\n")] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@30..37 "source" [] [Whitespace(" ")],
+                not_token: NOT_KW@37..41 "not" [] [Whitespace(" ")],
+                source: TwSourceInline {
+                    inline_token: INLINE_KW@41..47 "inline" [] [],
+                    l_paren_token: L_PAREN@47..48 "(" [] [],
+                    content: CssString {
+                        value_token: CSS_STRING_LITERAL@48..59 "\"underline\"" [] [],
+                    },
+                    r_paren_token: R_PAREN@59..60 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@60..61 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@61..62 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..62
+  0: (empty)
+  1: CSS_RULE_LIST@0..61
+    0: CSS_AT_RULE@0..28
+      0: AT@0..1 "@" [] []
+      1: TW_SOURCE_AT_RULE@1..28
+        0: SOURCE_KW@1..8 "source" [] [Whitespace(" ")]
+        1: (empty)
+        2: TW_SOURCE_INLINE@8..27
+          0: INLINE_KW@8..14 "inline" [] []
+          1: L_PAREN@14..15 "(" [] []
+          2: CSS_STRING@15..26
+            0: CSS_STRING_LITERAL@15..26 "\"underline\"" [] []
+          3: R_PAREN@26..27 ")" [] []
+        3: SEMICOLON@27..28 ";" [] []
+    1: CSS_AT_RULE@28..61
+      0: AT@28..30 "@" [Newline("\n")] []
+      1: TW_SOURCE_AT_RULE@30..61
+        0: SOURCE_KW@30..37 "source" [] [Whitespace(" ")]
+        1: NOT_KW@37..41 "not" [] [Whitespace(" ")]
+        2: TW_SOURCE_INLINE@41..60
+          0: INLINE_KW@41..47 "inline" [] []
+          1: L_PAREN@47..48 "(" [] []
+          2: CSS_STRING@48..59
+            0: CSS_STRING_LITERAL@48..59 "\"underline\"" [] []
+          3: R_PAREN@59..60 ")" [] []
+        3: SEMICOLON@60..61 ";" [] []
+  2: EOF@61..62 "" [Newline("\n")] []
+
+```
