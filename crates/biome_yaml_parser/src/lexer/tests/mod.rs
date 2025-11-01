@@ -1,6 +1,7 @@
 #![cfg(test)]
 
 mod block;
+mod document;
 mod flow;
 
 use super::TextSize;

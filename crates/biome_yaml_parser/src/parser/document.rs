@@ -13,7 +13,7 @@ use biome_yaml_syntax::{
 use super::{
     YamlParser,
     block::{is_at_any_block_node, parse_any_block_node},
-    parse_error::{expected_directive, malformed_document},
+    parse_error::{expected_directive, unexpected_token},
 };
 
 #[derive(Default)]
@@ -41,7 +41,7 @@ impl ParseNodeList for DocumentList {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(YamlSyntaxKind::YAML_BOGUS, token_set![EOF]),
-            malformed_document,
+            unexpected_token,
         )
     }
 }

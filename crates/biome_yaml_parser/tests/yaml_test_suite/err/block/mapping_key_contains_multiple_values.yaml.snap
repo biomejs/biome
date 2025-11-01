@@ -134,7 +134,7 @@ mapping_key_contains_multiple_values.yaml:2:9 parse ━━━━━━━━━�
   
 mapping_key_contains_multiple_values.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Malformed document
+  × Unexpected end of file.
   
     1 │ a:
     2 │   "aaa" 'a' acb: 40
