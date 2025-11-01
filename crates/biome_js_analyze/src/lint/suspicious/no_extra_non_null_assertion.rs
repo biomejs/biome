@@ -82,6 +82,27 @@ impl Rule for NoExtraNonNullAssertion {
                 }
             }
             AnyTsNonNullAssertion::TsNonNullAssertionExpression(_) => {
+                // First check if this is nested within another non-null assertion (always invalid)
+                let is_nested_in_non_null_assertion = node
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find_map(|ancestor| {
+                        if ancestor.kind() == JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION {
+                            Some(true)
+                        } else if ancestor.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+                            None // Continue searching
+                        } else {
+                            Some(false) // Found a different ancestor, stop searching
+                        }
+                    })
+                    .unwrap_or(false);
+
+                if is_nested_in_non_null_assertion {
+                    return Some(());
+                }
+
+                // Then check other cases
                 let parent = node
                     .syntax()
                     .ancestors()
@@ -90,14 +111,13 @@ impl Rule for NoExtraNonNullAssertion {
                     .and_then(AnyJsExpression::cast)?;
 
                 // Cases considered as invalid:
-                // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression
-                // - TsNonNullAssertionExpression > TsNonNullAssertionExpression
+                // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression (nested in left side)
                 // - JsCallExpression[optional] > TsNonNullAssertionExpression
                 // - JsStaticMemberExpression[optional] > TsNonNullAssertionExpression
                 let has_extra_non_assertion = match parent {
                     AnyJsExpression::JsAssignmentExpression(expr) => {
                         // Only flag if the non-null assertion is nested within the left side,
-                        // not if it's on the right side of the assignment
+                        // not if it's a separate assertion on the right side
                         let left = expr.left().ok()?;
                         let left_syntax = left.syntax();
                         let current_syntax = node.syntax();
@@ -109,6 +129,7 @@ impl Rule for NoExtraNonNullAssertion {
                                 .is_some()
                         } else {
                             // Current node is on the right side, don't flag it
+                            // (nested assertions on right side are already handled above)
                             false
                         }
                     },
