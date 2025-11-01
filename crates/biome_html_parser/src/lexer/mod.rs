@@ -82,15 +82,7 @@ impl<'src> HtmlLexer<'src> {
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, false)
             }
-            _ => {
-                if self.position == 0
-                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
-                {
-                    self.unicode_bom_length = bom_size;
-                    return bom;
-                }
-                self.consume_unexpected_character()
-            }
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -134,7 +126,15 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(HTML_LITERAL)
                 }
             }
-            _ => self.consume_html_text(current),
+            _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_html_text(current)
+            }
         }
     }
 
