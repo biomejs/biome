@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// Notably, keep in mind that the following features are not supported yet:
     ///
     /// - Screen variant sorting (e.g. `md:`, `max-lg:`). Only static, dynamic and arbitrary variants are supported.
-    /// - Custom utilitites and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
+    /// - Custom variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported. However, custom component and utility classes can be configured via the `classes` option (see below).
     /// - Options such as `prefix` and `separator`.
     /// - Object properties (e.g. in `clsx` calls).
     ///
@@ -83,6 +83,29 @@ declare_lint_rule! {
     /// #### functions
     ///
     /// If specified, strings in the indicated functions will be sorted. This is useful when working with libraries like [`clsx`](https://github.com/lukeed/clsx) or [`cva`](https://cva.style/).
+    ///
+    /// #### classes
+    ///
+    /// If specified, custom component and utility classes will be sorted along with Tailwind's default classes.
+    /// Custom classes are appended to the end of their respective layer (components or utilities).
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "classes": {
+    ///             "components": ["btn-", "card$"],
+    ///             "utilities": ["custom-"]
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Patterns are matched as follows:
+    /// - Entries without a trailing `$` are treated as **prefixes** (e.g., `btn-` matches `btn-primary`, `btn-secondary`, etc.)
+    /// - Entries with a trailing `$` denote **exact matches** (e.g., `card$` matches only `card`, not `card-header`)
+    ///
+    /// With this configuration, custom classes like `btn-primary`, `card`, `custom-utility`, and `custom-spacing`
+    /// will be recognized and sorted after the default Tailwind classes in their respective layers.
     ///
     /// ```js,expect_diagnostic,use_options
     /// clsx("px-2 foo p-4 bar", {
@@ -150,6 +173,10 @@ declare_lint_rule! {
     ///
     /// This is a deliberate decision. We're unsure about this behavior, and would appreciate feedback on it. If this is a problem for you, please share a detailed explanation of your use case in [the GitHub issue](https://github.com/biomejs/biome/issues/1274).
     ///
+    /// ### Custom utilities ordering
+    ///
+    /// When using the `classes` option to add custom utilities, they will be sorted after all of the default Tailwind CSS classes in their respective layer.
+    ///
     pub UseSortedClasses {
         version: "1.6.0",
         name: "useSortedClasses",
@@ -176,7 +203,23 @@ impl Rule for UseSortedClasses {
             && let Some(value) = node.value()
         {
             let template_ctx = sort::get_template_literal_space_context(node);
-            let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
+
+            // Use custom config if custom classes are provided, otherwise use default
+            let sorted_value: String = match &options.classes {
+                Some(custom_classes)
+                    if custom_classes.components.is_some()
+                        || custom_classes.utilities.is_some() =>
+                {
+                    let config = SortConfig::with_custom_classes(
+                        &get_config_preset(&UseSortedClassesPreset::default()),
+                        custom_classes.components.as_deref(),
+                        custom_classes.utilities.as_deref(),
+                    );
+                    sort_class_name(&value, &config, &template_ctx)
+                }
+                _ => sort_class_name(&value, &SORT_CONFIG, &template_ctx),
+            };
+
             if sorted_value.is_empty() {
                 return None;
             }
