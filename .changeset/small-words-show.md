@@ -2,4 +2,4 @@
 '@biomejs/biome': patch
 ---
 
-Added the new rule [`no-unknown-property`](https://biomejs.dev/linter/rules/no-unknown-property/)  from eslint react
+Fixed #7657: Added the new rule [`no-unknown-property`](https://biomejs.dev/linter/rules/no-unknown-property/) from ESLint
