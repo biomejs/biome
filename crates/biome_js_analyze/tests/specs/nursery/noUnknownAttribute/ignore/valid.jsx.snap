@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<div css={{ flex: 1 }}></div>
+	<div class="bar"></div>
+	<div someProp="bar"></div>
+</>;
+
+```
