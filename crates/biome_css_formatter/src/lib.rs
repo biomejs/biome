@@ -316,10 +316,9 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
             let original = token.text_trimmed();
             match original.to_ascii_lowercase_cow() {
                 Cow::Borrowed(_) => self.format_trimmed_token_trivia(token, f),
-                Cow::Owned(lowercase) => write!(
-                    f,
-                    [dynamic_text(&lowercase, token.text_trimmed_range().start())]
-                ),
+                Cow::Owned(lowercase) => {
+                    write!(f, [text(&lowercase, token.text_trimmed_range().start())])
+                }
             }
         } else {
             self.format_trimmed_token_trivia(token, f)

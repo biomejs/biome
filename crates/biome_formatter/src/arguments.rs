@@ -76,7 +76,7 @@ impl<Context> Format<Context> for Argument<'_, Context> {
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [
-///     format_args!(text("a"), space(), text("b"))
+///     format_args!(token("a"), space(), token("b"))
 /// ])?;
 ///
 /// assert_eq!("a b", formatted.print()?.as_code());
@@ -140,11 +140,11 @@ mod tests {
         write!(
             &mut buffer,
             [
-                text("function"),
+                token("function"),
                 space(),
-                text("a"),
+                token("a"),
                 space(),
-                group(&format_args!(text("("), text(")")))
+                group(&format_args!(token("("), token(")")))
             ]
         )
         .unwrap();
@@ -152,14 +152,14 @@ mod tests {
         assert_eq!(
             buffer.into_vec(),
             vec![
-                FormatElement::StaticText { text: "function" },
+                FormatElement::Token { text: "function" },
                 FormatElement::Space,
-                FormatElement::StaticText { text: "a" },
+                FormatElement::Token { text: "a" },
                 FormatElement::Space,
                 // Group
                 FormatElement::Tag(Tag::StartGroup(tag::Group::new())),
-                FormatElement::StaticText { text: "(" },
-                FormatElement::StaticText { text: ")" },
+                FormatElement::Token { text: "(" },
+                FormatElement::Token { text: ")" },
                 FormatElement::Tag(Tag::EndGroup)
             ]
         );

@@ -1,7 +1,7 @@
 use crate::context::JsonFormatContext;
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, dynamic_text};
+use biome_formatter::prelude::{Tag, text};
 use biome_formatter::trivia::{FormatLeadingComments, FormatTrailingComments};
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
@@ -114,7 +114,7 @@ impl Format<JsonFormatContext> for FormatJsonVerbatimNode<'_> {
             },
         );
 
-        dynamic_text(
+        text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
             self.node.text_trimmed_range().start(),
         )

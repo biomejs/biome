@@ -60,7 +60,7 @@ impl Format<GraphqlFormatContext> for FormatTypeLeadingSeparator<'_> {
                 let content = format_with(|f| {
                     write!(
                         f,
-                        [soft_line_break_or_space(), text(self.separator), space()]
+                        [soft_line_break_or_space(), token(self.separator), space()]
                     )
                 });
 
