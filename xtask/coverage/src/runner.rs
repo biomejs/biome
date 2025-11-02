@@ -307,8 +307,7 @@ pub(crate) fn run_test_suite(
                     Ok(result) => result,
                     Err(panic) => {
                         let error = panic
-                            .downcast_ref::<String>()
-                            .map(|x| x.to_string())
+                            .downcast_ref::<String>().cloned()
                             .or_else(|| panic.downcast_ref::<&str>().map(|x| (*x).to_string()))
                             .unwrap_or_default();
                         tracing::error!(

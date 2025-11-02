@@ -341,7 +341,7 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 })
             }
             Cow::Owned(text) => f.write_element(FormatElement::DynamicText {
-                text: text.to_string().into_boxed_str(),
+                text: text.clone().into_boxed_str(),
                 source_position: self.start,
             }),
         }

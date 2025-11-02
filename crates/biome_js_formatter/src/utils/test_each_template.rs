@@ -290,7 +290,7 @@ impl Format<JsFormatContext> for EachTemplateTable {
 
                 match element {
                     EachTemplateElement::Column(column) => {
-                        let mut text = column.text.to_string();
+                        let mut text = column.text.clone();
 
                         if current_column != 0 && (!is_last_in_row || !text.is_empty()) {
                             text = std::format!(" {text}");

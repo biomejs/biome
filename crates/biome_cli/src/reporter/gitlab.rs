@@ -174,7 +174,7 @@ impl Display for GitLabDiagnostics<'_> {
 
                 GitLabDiagnostic::try_from_diagnostic(
                     biome_diagnostic,
-                    path.to_string(),
+                    path.clone(),
                     fingerprint,
                 )
             })

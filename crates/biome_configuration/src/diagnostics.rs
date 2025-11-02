@@ -146,7 +146,7 @@ impl BiomeDiagnostic {
 
     pub fn root_in_root(nested_path: String, root_path: Option<String>) -> Self {
         Self::RootInRoot(RootInRoot {
-            path: nested_path.to_string(),
+            path: nested_path.clone(),
             other_path: root_path,
         })
     }
