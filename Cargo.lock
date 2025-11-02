@@ -912,6 +912,7 @@ dependencies = [
  "bitvec",
  "camino",
  "codspeed-criterion-compat",
+ "codspeed-divan-compat",
  "enumflags2",
  "globset",
  "insta",
@@ -1644,11 +1645,13 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-divan-compat",
  "insta",
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 

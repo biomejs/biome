@@ -55,6 +55,7 @@ biome_plugin_loader = { workspace = true }
 biome_service       = { workspace = true }
 biome_test_utils    = { path = "../biome_test_utils" }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+divan               = { package = "codspeed-divan-compat", version = "4.0.4" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 
@@ -72,3 +73,7 @@ workspace = true
 [[bench]]
 harness = false
 name    = "js_analyzer"
+
+[[bench]]
+harness = false
+name    = "use_sorted_classes_parser"
