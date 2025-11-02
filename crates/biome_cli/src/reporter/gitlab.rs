@@ -172,11 +172,7 @@ impl Display for GitLabDiagnostics<'_> {
                 let initial_fingerprint = self.compute_initial_fingerprint(biome_diagnostic, &path);
                 let fingerprint = hasher.rehash_until_unique(initial_fingerprint);
 
-                GitLabDiagnostic::try_from_diagnostic(
-                    biome_diagnostic,
-                    path.clone(),
-                    fingerprint,
-                )
+                GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, path.clone(), fingerprint)
             })
             .collect();
         let serialized = serde_json::to_string_pretty(&gitlab_diagnostics)?;
