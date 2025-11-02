@@ -189,6 +189,7 @@ pub mod no_unassigned_variables;
 pub mod no_undeclared_dependencies;
 pub mod no_undeclared_variables;
 pub mod no_unknown_at_rules;
+pub mod no_unknown_attribute;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;

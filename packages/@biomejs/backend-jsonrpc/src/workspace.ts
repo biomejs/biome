@@ -1709,6 +1709,10 @@ export interface Nursery {
 	 */
 	noShadow?: RuleConfiguration_for_NoShadowOptions;
 	/**
+	 * Disallow unknown DOM properties.
+	 */
+	noUnknownAttribute?: RuleConfiguration_for_NoUnknownAttributeOptions;
+	/**
 	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
 	 */
 	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
@@ -3086,6 +3090,9 @@ export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 export type RuleConfiguration_for_NoShadowOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoShadowOptions;
+export type RuleConfiguration_for_NoUnknownAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnknownAttributeOptions;
 export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
@@ -5605,6 +5612,16 @@ export interface RuleWithOptions_for_NoShadowOptions {
 	 * Rule's options
 	 */
 	options: NoShadowOptions;
+}
+export interface RuleWithOptions_for_NoUnknownAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnknownAttributeOptions;
 }
 export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
 	/**
@@ -8306,6 +8323,9 @@ export interface NoNextAsyncClientComponentOptions {}
 export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
+export interface NoUnknownAttributeOptions {
+	ignore: string[];
+}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
@@ -9082,6 +9102,7 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"

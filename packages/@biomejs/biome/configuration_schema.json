@@ -4546,6 +4546,19 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUnknownAttributeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnknownAttributeOptions" }
+			]
+		},
+		"NoUnknownAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
 		"NoUnknownFunctionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5193,6 +5206,13 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAttribute": {
+					"description": "Disallow unknown DOM properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnknownAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9064,6 +9084,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnknownAtRulesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnknownAttributeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnknownAttributeOptions" }]
 				}
 			},
 			"additionalProperties": false
