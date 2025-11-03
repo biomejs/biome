@@ -347,6 +347,28 @@ pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpressi
         [Some(SyntaxElement::Token(html_literal_token))],
     ))
 }
+pub fn svelte_debug_block(
+    sv_curly_at_token: SyntaxToken,
+    debug_token: SyntaxToken,
+    bindings: SvelteBindingList,
+    r_curly_token: SyntaxToken,
+) -> SvelteDebugBlock {
+    SvelteDebugBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DEBUG_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_at_token)),
+            Some(SyntaxElement::Token(debug_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
+    SvelteName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_NAME,
+        [Some(SyntaxElement::Token(svelte_ident_token))],
+    ))
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,
@@ -369,6 +391,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_binding_list<I, S>(items: I, separators: S) -> SvelteBindingList
+where
+    I: IntoIterator<Item = SvelteName>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    SvelteBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter
@@ -415,6 +458,16 @@ where
 {
     HtmlBogusTextExpression::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_BOGUS_TEXT_EXPRESSION,
+        slots,
+    ))
+}
+pub fn svelte_bogus_block<I>(slots: I) -> SvelteBogusBlock
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteBogusBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BOGUS_BLOCK,
         slots,
     ))
 }

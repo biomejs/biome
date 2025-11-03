@@ -8,6 +8,7 @@ impl FormatRule<AnyHtmlTextExpression> for FormatAnyHtmlTextExpression {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyHtmlTextExpression, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnyHtmlTextExpression::AnySvelteBlock(node) => node.format().fmt(f),
             AnyHtmlTextExpression::HtmlBogusTextExpression(node) => node.format().fmt(f),
             AnyHtmlTextExpression::HtmlDoubleTextExpression(node) => node.format().fmt(f),
             AnyHtmlTextExpression::HtmlSingleTextExpression(node) => node.format().fmt(f),
