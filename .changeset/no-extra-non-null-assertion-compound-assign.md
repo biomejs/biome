@@ -8,13 +8,13 @@ The rule now correctly distinguishes between nested non-null assertions (still f
 
 #### Examples
 
-##### Valid (now allowed):
+##### Valid (now allowed)
 
 ```ts
 arr[0]! ^= arr[1]!;
 ```
 
-##### Invalid (still flagged):
+##### Invalid (still flagged)
 
 ```ts
 arr[0]!! ^= arr[1];
