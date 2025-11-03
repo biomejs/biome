@@ -161,7 +161,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// assert_eq!(LineEnding::Lf.as_str(), "\n");
     /// ```
@@ -201,7 +201,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// let cr = LineEnding::Cr;
     /// assert!(cr.is_carriage_return());
@@ -218,7 +218,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// assert!(LineEnding::Auto.is_auto());
     /// assert!(!LineEnding::Lf.is_auto());
@@ -245,8 +245,8 @@ impl FromStr for LineEnding {
     /// # Examples
     ///
     /// ```
-    /// let e: LineEnding = "auto".parse().unwrap();
-    /// assert_eq!(e, LineEnding::Auto);
+    /// let e: biome_formatter::LineEnding = "auto".parse().unwrap();
+    /// assert_eq!(e, biome_formatter::LineEnding::Auto);
     /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -266,7 +266,7 @@ impl std::fmt::Display for LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     /// assert_eq!(format!("{}", LineEnding::Lf), "LF");
     /// assert_eq!(format!("{}", LineEnding::Crlf), "CRLF");
     /// assert_eq!(format!("{}", LineEnding::Cr), "CR");

@@ -43,7 +43,7 @@ fn commonjs_file_rejects_import_statement() {
 
     match workspace.get_parse("/project/a.js".into()) {
         Ok(parse) => {
-            insta::assert_debug_snapshot!(parse.diagnostics(), @r###"
+            insta::assert_debug_snapshot!(parse.diagnostics(), @r#"
             [
                 ParseDiagnostic {
                     span: Some(
@@ -57,9 +57,10 @@ fn commonjs_file_rejects_import_statement() {
                             ),
                         ],
                     },
+                    advice_offset: None,
                 },
             ]
-            "###);
+            "#);
         }
         Err(error) => panic!("File not available: {error}"),
     }

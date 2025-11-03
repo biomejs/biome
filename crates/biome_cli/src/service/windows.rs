@@ -129,7 +129,7 @@ impl AsyncRead for ClientReadHalf {
                         return Poll::Ready(Ok(()));
                     }
 
-                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => continue,
+                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => {}
                     Err(err) => return Poll::Ready(Err(err)),
                 },
 
@@ -154,7 +154,7 @@ impl AsyncWrite for ClientWriteHalf {
             match self.inner.poll_write_ready(cx) {
                 Poll::Ready(Ok(())) => match self.inner.try_write(buf) {
                     Ok(count) => return Poll::Ready(Ok(count)),
-                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => continue,
+                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => {}
                     Err(err) => return Poll::Ready(Err(err)),
                 },
 
@@ -257,7 +257,7 @@ impl AsyncRead for ServerReadHalf {
                         return Poll::Ready(Ok(()));
                     }
 
-                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => continue,
+                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => {}
                     Err(err) => return Poll::Ready(Err(err)),
                 },
 
@@ -282,7 +282,7 @@ impl AsyncWrite for ServerWriteHalf {
             match self.inner.poll_write_ready(cx) {
                 Poll::Ready(Ok(())) => match self.inner.try_write(buf) {
                     Ok(count) => return Poll::Ready(Ok(count)),
-                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => continue,
+                    Err(err) if err.kind() == io::ErrorKind::WouldBlock => {}
                     Err(err) => return Poll::Ready(Err(err)),
                 },
 

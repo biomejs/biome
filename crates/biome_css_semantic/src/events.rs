@@ -218,7 +218,7 @@ impl SemanticEventExtractor {
                         initial_value = Some(CssPropertyInitialValue::from(prop.value()));
                     }
                     "syntax" => {
-                        syntax = Some(prop.value().to_trimmed_string().to_string());
+                        syntax = Some(prop.value().to_trimmed_string().clone());
                     }
                     "inherits" => {
                         inherits = Some(
