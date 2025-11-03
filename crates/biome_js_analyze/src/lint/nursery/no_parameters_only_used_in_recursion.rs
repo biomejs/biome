@@ -428,9 +428,9 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         // Omit parentheses
         let current_expr = current_expr.omit_parentheses();
 
-        // Direct parameter reference - found it!
         if let Some(ref_id) = current_expr.as_js_reference_identifier() {
             if ref_id.name().ok().is_some_and(|n| n.text() == param_name) {
+                // Found direct parameter reference
                 return true;
             }
             continue;
