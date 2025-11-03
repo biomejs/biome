@@ -1,4 +1,5 @@
 use crate::bool::Bool;
+use crate::glob_list::GlobList;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
@@ -86,7 +87,7 @@ pub struct FormatterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
+    pub includes: Option<GlobList>,
 }
 
 impl FormatterConfiguration {

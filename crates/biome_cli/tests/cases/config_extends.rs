@@ -550,3 +550,53 @@ fn extends_config_merge_overrides() {
         result,
     ));
 }
+
+#[test]
+fn extends_config_by_moving_double_star_at_the_beginning_from_extend_config() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let shared = Utf8Path::new("shared.json");
+    fs.insert(
+        shared.into(),
+        r#"{
+            "files": {
+                "includes": ["**", "!**/dist"]
+            }
+        }"#,
+    );
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "extends": ["shared.json"],
+            "files": {
+                "includes": ["!components"]
+            }
+        }"#,
+    );
+
+    let test_file = Utf8Path::new("components/test.js");
+    fs.insert(test_file.into(), "debugger; const a = 0;");
+
+    let test_file = Utf8Path::new("dist/test.js");
+    fs.insert(test_file.into(), "debugger; const a = 0;");
+
+    let test_file = Utf8Path::new("trigger.js");
+    fs.insert(test_file.into(), "debugger; const a = 0;");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_by_moving_double_star_at_the_beginning_from_extend_config",
+        fs,
+        console,
+        result,
+    ));
+}

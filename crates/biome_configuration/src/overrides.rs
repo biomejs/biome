@@ -1,6 +1,7 @@
 use crate::analyzer::assist::AssistEnabled;
 use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+use crate::glob_list::GlobList;
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
 use crate::{
@@ -78,14 +79,14 @@ pub struct OverridePattern {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum OverrideGlobs {
-    Globs(Box<[biome_glob::NormalizedGlob]>),
+    Globs(Box<GlobList>),
     EditorconfigGlob(Box<biome_glob::editorconfig::EditorconfigGlob>),
 }
 impl OverrideGlobs {
     /// Normalize `path` and match it against the list of globs.
     pub fn is_match_candidate(&self, path: &biome_glob::CandidatePath) -> bool {
         match self {
-            Self::Globs(globs) => path.matches_with_exceptions(globs),
+            Self::Globs(globs) => path.matches_with_exceptions(globs.as_ref().as_slice()),
             Self::EditorconfigGlob(glob) => glob.is_match_candidate(path),
         }
     }
