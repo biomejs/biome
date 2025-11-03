@@ -281,7 +281,7 @@ fn get_arrow_function_name(
 
         // Stop searching if we hit a function boundary
         // (prevents extracting wrong name from outer scope)
-        if AnyFunctionLike::cast_ref(&ancestor).is_some() {
+        if AnyFunctionLike::can_cast(ancestor.kind()) {
             break;
         }
     }
