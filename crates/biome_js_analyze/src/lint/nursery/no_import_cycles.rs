@@ -160,7 +160,7 @@ impl Rule for NoImportCycles {
         } = module_info.get_import_path_by_js_node(node)?;
 
         let options = ctx.options();
-        if options.ignore_types && *phase == JsImportPhase::Type {
+        if options.ignore_types() && *phase == JsImportPhase::Type {
             return None;
         }
 
@@ -230,7 +230,7 @@ fn find_cycle(
             phase,
         } in module_info.all_import_paths()
         {
-            if options.ignore_types && phase == JsImportPhase::Type {
+            if options.ignore_types() && phase == JsImportPhase::Type {
                 continue;
             }
 

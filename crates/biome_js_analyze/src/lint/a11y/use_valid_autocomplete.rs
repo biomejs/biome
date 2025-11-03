@@ -140,11 +140,17 @@ impl Rule for UseValidAutocomplete {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let input_components = &ctx.options().input_components;
 
         let elem_name = node.name().ok()?.name_value_token().ok()?;
         let elem_name = elem_name.text_trimmed();
-        if elem_name != "input" && input_components.iter().all(|x| x.as_ref() != elem_name) {
+        if elem_name != "input"
+            && ctx
+                .options()
+                .input_components
+                .iter()
+                .flatten()
+                .all(|x| x.as_ref() != elem_name)
+        {
             return None;
         }
 

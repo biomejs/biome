@@ -91,7 +91,7 @@ impl Rule for UseSortedAttributes {
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
         let options = ctx.options();
-        let sort_by = options.sort_order;
+        let sort_by = options.sort_order.unwrap_or_default();
 
         let comparator = match sort_by {
             SortOrder::Natural => PropElement::ascii_nat_cmp,
@@ -149,7 +149,7 @@ impl Rule for UseSortedAttributes {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         let options = ctx.options();
-        let sort_by = options.sort_order;
+        let sort_by = options.sort_order.unwrap_or_default();
 
         let comparator = match sort_by {
             SortOrder::Natural => PropElement::ascii_nat_cmp,

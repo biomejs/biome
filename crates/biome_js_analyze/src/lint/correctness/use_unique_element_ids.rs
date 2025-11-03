@@ -139,9 +139,9 @@ impl Rule for UseUniqueElementIds {
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();
-        if node
-            .element_name(model)
-            .is_some_and(|name| options.excluded_components.contains(name.text()))
+        if let Some(name) = node.element_name(model)
+            && let Some(excluded_components) = &options.excluded_components
+            && excluded_components.contains(name.text())
         {
             return None;
         }
