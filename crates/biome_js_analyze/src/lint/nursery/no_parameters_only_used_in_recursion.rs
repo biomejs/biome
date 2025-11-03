@@ -289,6 +289,8 @@ fn get_arrow_function_name(
     None
 }
 
+/// Returns true if the function is a TypeScript signature without an implementation body.
+/// Matches interface method signatures, call signatures, function types, and declared functions.
 fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool {
     matches!(
         parent_function,
@@ -307,6 +309,9 @@ fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool
     )
 }
 
+/// Checks if a call expression is a recursive call to the current function.
+/// Handles direct calls (`foo()`), method calls (`this.foo()`), and computed members (`this["foo"]()`).
+/// Uses a conservative approach to avoid false positives.
 fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool {
     let Ok(callee) = call.callee() else {
         return false;
@@ -371,6 +376,9 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool
     false
 }
 
+/// Checks if a parameter reference occurs within a recursive call expression.
+/// Walks up the syntax tree from the reference to find a recursive call that uses the parameter,
+/// stopping at the function boundary.
 fn is_reference_in_recursive_call(
     reference: &Reference,
     function_name: &TokenText,
@@ -478,7 +486,9 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
     Some(false)
 }
 
-/// Enhanced version that checks if any argument traces to parameters
+/// Checks if a recursive call uses a specific parameter in its arguments.
+/// Examines each argument to see if it traces back to the parameter through transformations
+/// like arithmetic operations, unary operations, or member access.
 fn is_recursive_call_with_param_usage(
     call: &JsCallExpression,
     function_name: &TokenText,
