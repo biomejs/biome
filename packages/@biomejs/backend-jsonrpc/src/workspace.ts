@@ -8342,7 +8342,7 @@ export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
 export interface NoUnknownAttributeOptions {
-	ignore: string[];
+	ignore?: string[];
 }
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}

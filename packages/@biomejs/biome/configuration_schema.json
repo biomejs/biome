@@ -4554,7 +4554,7 @@
 		"NoUnknownAttributeOptions": {
 			"type": "object",
 			"properties": {
-				"ignore": { "type": "array", "items": { "type": "string" } }
+				"ignore": { "type": ["array", "null"], "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},
