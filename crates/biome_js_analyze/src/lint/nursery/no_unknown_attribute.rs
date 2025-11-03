@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoUnknownAttribute {
-        version: "next",
+        version: "2.3.3",
         name: "noUnknownAttribute",
         language: "jsx",
         domains: &[RuleDomain::React],

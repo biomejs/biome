@@ -1,5 +1,34 @@
 # @biomejs/biome
 
+## 2.3.3
+
+### Patch Changes
+
+- [#7907](https://github.com/biomejs/biome/pull/7907) [`57bd662`](https://github.com/biomejs/biome/commit/57bd662ad5155c9a1f13085cc5422f56a44d282e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7839](https://github.com/biomejs/biome/issues/7839). Now the Biome parser correctly parses the Astro frontmatter even when a triple fence is inside quotes.
+
+- [#7934](https://github.com/biomejs/biome/pull/7934) [`a35c496`](https://github.com/biomejs/biome/commit/a35c4962e2241e127444284049012c60aec71a41) Thanks [@alissonlauffer](https://github.com/alissonlauffer)! - Fixed [#7919](https://github.com/biomejs/biome/issues/7919): The HTML parser now correctly handles Unicode BOM (Byte Order Mark) characters at the beginning of HTML files, ensuring proper parsing and tokenization.
+
+- [#7869](https://github.com/biomejs/biome/pull/7869) [`c80361d`](https://github.com/biomejs/biome/commit/c80361d9abaf810bdb2e9a81cc1e4ab814d385b0) Thanks [@matanshavit](https://github.com/matanshavit)! - Fixed [#7864](https://github.com/biomejs/biome/issues/7864): Biome now preserves component tag name casing in Svelte, Astro, and Vue files.
+
+- [#7926](https://github.com/biomejs/biome/pull/7926) [`69cecec`](https://github.com/biomejs/biome/commit/69cececbbaccbe5c44c71afee8e242437783cabc) Thanks [@matanshavit](https://github.com/matanshavit)! - Added the rule [`noParametersOnlyUsedInRecursion`](https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion/).
+
+  This rule detects function parameters that are exclusively used in recursive calls and can be removed to simplify the function signature since they are effectively unused.
+
+  ```js
+  function factorial(n, acc) {
+    if (n === 0) return 1;
+    return factorial(n - 1, acc); // acc is only used here
+  }
+  ```
+
+  Fixes [#6484](https://github.com/biomejs/biome/issues/6484).
+
+- [#7774](https://github.com/biomejs/biome/pull/7774) [`2509b91`](https://github.com/biomejs/biome/commit/2509b91cde53b8f747d397fcec5e37eb47bd524d) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Fixed [#7657](https://github.com/biomejs/biome/issues/7657): Added the new rule [`no-unknown-property`](https://biomejs.dev/linter/rules/no-unknown-property/) from ESLint
+
+- [#7918](https://github.com/biomejs/biome/pull/7918) [`7165d06`](https://github.com/biomejs/biome/commit/7165d067bb0162ffcc354ea3ced63c67d71bd185) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7913](https://github.com/biomejs/biome/issues/7913): The CSS parser, with `tailwindDirectives` enabled, will now correctly handle `@slot`.
+
+- [#7959](https://github.com/biomejs/biome/pull/7959) [`ffae203`](https://github.com/biomejs/biome/commit/ffae2031a0104b6b9ca77cdedaf85202694f12f9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed the Biome Language Server so it no longer returns an internal error when the formatter is disabled in the configuration.
+
 ## 2.3.2
 
 ### Patch Changes
