@@ -1,22 +1,16 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
-assertion_line: 83
-expression: invalid.graphql
+expression: valid.graphql
 ---
 # Input
 ```graphql
+# should not generate diagnostics
 enum EnumValue {
-	"""
-	basic
-	"""
+	"basic"
 	BASIC
-	"""
-	fluent
-	"""
+	"fluent"
 	FLUENT
-	"""
-	native
-	"""
+	"native"
 	NATIVE
 }
 

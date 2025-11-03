@@ -4,7 +4,7 @@
 
 Added the nursery rule [`useConsistentGraphqlDescriptions`](https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions/), requiring all descriptions to follow the same style (either block or inline) inside GraphQL files.
 
-**Invalid example:**
+**Invalid:**
 
 ```graphql
 enum EnumValue {
@@ -13,7 +13,7 @@ enum EnumValue {
 }
 ```
 
-**Valid example:**
+**Valid:**
 
 ```graphql
 enum EnumValue {
