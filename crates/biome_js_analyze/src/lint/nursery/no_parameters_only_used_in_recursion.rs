@@ -124,19 +124,11 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         // Get function name for recursion detection
         let function_name = get_function_name(&parent_function)?;
 
-        // Get all references to this parameter
-        let all_refs: Vec<_> = binding.all_references(model).collect();
-
-        // If no references, let noUnusedFunctionParameters handle it
-        if all_refs.is_empty() {
-            return None;
-        }
-
         // Classify references
         let mut refs_in_recursion = 0;
         let mut refs_elsewhere = 0;
 
-        for reference in all_refs {
+        for reference in binding.all_references(model) {
             if is_reference_in_recursive_call(
                 &reference,
                 &function_name,
