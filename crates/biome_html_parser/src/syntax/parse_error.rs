@@ -33,7 +33,7 @@ pub(crate) fn expected_text_expression(
 }
 
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    expect_one_of(&["element", "text"], range).into_diagnostic(p)
+    expect_one_of(&["element", "text", "closing block"], range).into_diagnostic(p)
 }
 
 pub(crate) fn expected_closed_fence(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

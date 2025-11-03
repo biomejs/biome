@@ -754,6 +754,120 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteDebugBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteKeyBlock>
+    for crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteKeyBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteKeyBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteKeyBlock,
+        crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteKeyBlock,
+        crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteKeyClosingBlock>
+    for crate::svelte::auxiliary::key_closing_block::FormatSvelteKeyClosingBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteKeyClosingBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteKeyClosingBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyClosingBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteKeyClosingBlock,
+        crate::svelte::auxiliary::key_closing_block::FormatSvelteKeyClosingBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_closing_block::FormatSvelteKeyClosingBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyClosingBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteKeyClosingBlock,
+        crate::svelte::auxiliary::key_closing_block::FormatSvelteKeyClosingBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_closing_block::FormatSvelteKeyClosingBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteKeyOpeningBlock>
+    for crate::svelte::auxiliary::key_opening_block::FormatSvelteKeyOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteKeyOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteKeyOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteKeyOpeningBlock,
+        crate::svelte::auxiliary::key_opening_block::FormatSvelteKeyOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_opening_block::FormatSvelteKeyOpeningBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteKeyOpeningBlock,
+        crate::svelte::auxiliary::key_opening_block::FormatSvelteKeyOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::key_opening_block::FormatSvelteKeyOpeningBlock::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteName>
     for crate::svelte::auxiliary::name::FormatSvelteName
 {

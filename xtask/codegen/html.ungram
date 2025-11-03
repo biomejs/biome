@@ -190,14 +190,39 @@ AnyHtmlAttributeInitializer =
 
 AnySvelteBlock =
 	SvelteDebugBlock
+	| SvelteKeyBlock
 	| SvelteBogusBlock
 
 // {@debug}
+// ^^^^^^^^
 SvelteDebugBlock =
 	'{@'
 	'debug'
 	bindings: SvelteBindingList
 	'}'
+
+// {#key ...} ... {/key}
+// ^^^^^^^^^^^^^^^^^^^^^
+SvelteKeyBlock =
+	opening_block: SvelteKeyOpeningBlock
+	children: HtmlElementList
+	closing_block: SvelteKeyClosingBlock
+
+// {#key ...} ... {/key}
+// ^^^^^^^^^^
+SvelteKeyOpeningBlock =
+ 	'{#'
+ 	'key'
+ 	expression: HtmlTextExpression
+ 	'}'
+
+// {#key ...} ... {/key}
+//                ^^^^^^
+SvelteKeyClosingBlock =
+ 	'{/'
+ 	'key'
+ 	'}'
+
 
 SvelteBindingList = (SvelteName (',' SvelteName)*)
 

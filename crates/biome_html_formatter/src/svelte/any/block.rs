@@ -10,6 +10,7 @@ impl FormatRule<AnySvelteBlock> for FormatAnySvelteBlock {
         match node {
             AnySvelteBlock::SvelteBogusBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteDebugBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteKeyBlock(node) => node.format().fmt(f),
         }
     }
 }
