@@ -221,6 +221,12 @@ pub(crate) struct Document {
 
     /// Embedded content for foreign language snippets.
     pub(crate) embedded_snippets: Vec<AnyEmbeddedSnippet>,
+
+    /// Original untransformed source text for embedded languages (Glimmer, Vue, Svelte, Astro).
+    ///
+    /// For languages where templates are transformed during parsing (e.g., `<template>` → markers),
+    /// this field stores the original source so semantic analysis can scan the actual templates.
+    pub(crate) original_source_text: Option<std::sync::Arc<String>>,
 }
 
 impl Document {

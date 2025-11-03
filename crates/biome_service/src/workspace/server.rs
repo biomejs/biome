@@ -362,6 +362,7 @@ impl WorkspaceServer {
         let size = content.len();
         let limit = settings.get_max_file_size(&path);
 
+        let mut original_source_text = None;
         let syntax = if size > limit {
             Some(Err(FileTooLarge { size, limit }))
         } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
@@ -386,6 +387,9 @@ impl WorkspaceServer {
                     .unwrap()
                     .insert(path.clone(), node_cache);
             }
+
+            // Save original source text for embedded languages
+            original_source_text = parsed.original_source_text.clone();
 
             Some(Ok(parsed.any_parse))
         };
@@ -450,7 +454,8 @@ impl WorkspaceServer {
                         file_source_index,
                         syntax: syntax.clone(),
                         embedded_snippets: embedded_snippets.clone(),
-                    }
+                        original_source_text: original_source_text.clone(),
+                }
                 },
                 || Document {
                     content: content.clone(),
@@ -458,6 +463,7 @@ impl WorkspaceServer {
                     file_source_index,
                     syntax: syntax.clone(),
                     embedded_snippets: embedded_snippets.clone(),
+                    original_source_text: original_source_text.clone(),
                 },
             );
 
@@ -519,6 +525,17 @@ impl WorkspaceServer {
                 },
                 None => Err(WorkspaceError::not_found()),
             })
+    }
+
+    /// Get the original untransformed source text for embedded languages
+    fn get_original_source_text(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<Arc<String>> {
+        self.documents
+            .pin()
+            .get(path)
+            .and_then(|doc| doc.original_source_text.clone())
     }
 
     fn get_parse_with_embedded_format_nodes(
@@ -1380,6 +1397,7 @@ impl Workspace for WorkspaceServer {
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             embedded_snippets,
+            original_source_text: parsed.original_source_text,
         };
 
         if persist_node_cache {
@@ -1471,6 +1489,8 @@ impl Workspace for WorkspaceServer {
             } else {
                 Vec::new()
             };
+            // Get original source text for embedded languages (Glimmer, Vue, Svelte, Astro)
+            let original_source_text = self.get_original_source_text(&path);
             let results = lint(LintParams {
                 parse,
                 settings: &settings,
@@ -1486,6 +1506,7 @@ impl Workspace for WorkspaceServer {
                 pull_code_actions,
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
+                original_source_text,
             });
 
             let LintResults {
@@ -1517,6 +1538,7 @@ impl Workspace for WorkspaceServer {
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
+                    original_source_text: None,
                 });
 
                 diagnostics.extend(results.diagnostics);

@@ -58,6 +58,7 @@ use tracing::instrument;
 pub mod astro;
 pub(crate) mod css;
 pub mod glimmer;
+pub mod glimmer_module;
 pub(crate) mod graphql;
 pub(crate) mod grit;
 pub(crate) mod html;
@@ -486,6 +487,14 @@ pub struct Capabilities {
 pub struct ParseResult {
     pub(crate) any_parse: AnyParse,
     pub(crate) language: Option<DocumentFileSource>,
+
+    /// Original untransformed source text for embedded languages.
+    ///
+    /// For languages like Glimmer, Vue, Svelte, and Astro, the parser transforms
+    /// the source by replacing `<template>` tags with markers. This field stores
+    /// the original untransformed text so that semantic analysis can scan the
+    /// actual templates.
+    pub(crate) original_source_text: Option<Arc<String>>,
 }
 
 pub struct ParseEmbedResult {
@@ -544,6 +553,17 @@ pub(crate) struct LintParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
+
+    /// Original untransformed source text for embedded languages (Glimmer, Vue, Svelte, Astro).
+    ///
+    /// This is needed because parsers transform embedded templates by replacing
+    /// `<template>` tags with markers like `__BIOME_GLIMMER_TEMPLATE_0__`.
+    /// The semantic analysis needs access to the original untransformed source
+    /// to scan for template references.
+    ///
+    /// File handlers for embedded languages should populate this field with the
+    /// original source text before delegating to the JavaScript linter.
+    pub(crate) original_source_text: Option<Arc<String>>,
 }
 
 pub(crate) struct LintResults {

@@ -1,9 +1,0 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: validTypeConstraints.ts
----
-# Input
-```ts
-/* should not generate diagnostics */
-function f<T extends any>() {}
-```

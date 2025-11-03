@@ -17,7 +17,7 @@ use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::Regex;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 /// Regex to match Glimmer <template> tags
 /// Simple pattern: <template> never has attributes and never nests
@@ -216,9 +216,13 @@ fn parse(
         cache,
     );
 
+    // Store the original source text so semantic analysis can scan templates
+    let original_source_text = Some(Arc::new(text.to_string()));
+
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
+        original_source_text,
     }
 }
 

@@ -331,6 +331,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
+        original_source_text: None,
     }
 }
 
