@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
-    TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    COMMENT, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL,
+    NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -11,7 +11,7 @@ use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlag
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
 use biome_unicode_table::lookup_byte;
-use std::ops::Add;
+use std::ops::{Add, AddAssign};
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -33,6 +33,22 @@ pub(crate) struct HtmlLexer<'src> {
     after_newline: bool,
 
     unicode_bom_length: usize,
+}
+
+enum IdentifierContext {
+    None,
+    Doctype,
+    Svelte,
+}
+
+impl IdentifierContext {
+    const fn is_doctype(&self) -> bool {
+        matches!(self, Self::Doctype)
+    }
+
+    const fn is_svelte(&self) -> bool {
+        matches!(self, Self::Svelte)
+    }
 }
 
 impl<'src> HtmlLexer<'src> {
@@ -59,6 +75,7 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
+            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
@@ -79,18 +96,13 @@ impl<'src> HtmlLexer<'src> {
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 self.consume_tag_name(current)
             }
-            _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
-                self.consume_identifier(current, false)
+            _ if (self.current_kind != T![<] && is_attribute_name_byte(current)) => {
+                self.consume_identifier(current, IdentifierContext::None)
             }
-            _ => {
-                if self.position == 0
-                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
-                {
-                    self.unicode_bom_length = bom_size;
-                    return bom;
-                }
-                self.consume_unexpected_character()
+            _ if is_at_svelte_start_identifier(current) => {
+                self.consume_identifier(current, IdentifierContext::Svelte)
             }
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -100,7 +112,9 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
+            b',' if self.current() == T![<] => self.consume_byte(T![,]),
             b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
                 if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
@@ -134,7 +148,15 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(HTML_LITERAL)
                 }
             }
-            _ => self.consume_html_text(current),
+            _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_html_text(current)
+            }
         }
     }
 
@@ -160,13 +182,15 @@ impl<'src> HtmlLexer<'src> {
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
             _ if is_tag_name_byte(current) || is_attribute_name_byte(current) => {
-                self.consume_identifier(current, true)
+                self.consume_identifier(current, IdentifierContext::Doctype)
             }
             _ => self.consume_unexpected_character(),
         }
     }
 
-    /// Consume an embedded language in its entirety. Stops immediately before the closing tag.
+    /// Consume an embedded language in its entirety. Stops immediately:
+    /// - before the closing tag
+    /// - before the Astro fence, if applicable
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
@@ -175,8 +199,14 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let end_tag = lang.end_tag();
+        // double, single, template
+        let mut quotes_seen = QuotesSeen::new();
         self.assert_current_char_boundary();
         while let Some(byte) = self.current_byte() {
+            if context == HtmlLexContext::AstroFencedCodeBlock {
+                quotes_seen.check_byte(byte);
+            }
+
             let end = self.position + end_tag.len();
             let both_ends_at_char_boundaries =
                 self.source.is_char_boundary(self.position) && self.source.is_char_boundary(end);
@@ -187,7 +217,10 @@ impl<'src> HtmlLexer<'src> {
             }
             self.advance_byte_or_char(byte);
 
-            if context == HtmlLexContext::AstroFencedCodeBlock && self.at_frontmatter_edge() {
+            if context == HtmlLexContext::AstroFencedCodeBlock
+                && self.at_frontmatter_edge()
+                && quotes_seen.is_empty()
+            {
                 return HTML_LITERAL;
             }
         }
@@ -201,6 +234,8 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes tokens within a double text expression ('{{...}}') until the closing
+    /// delimiter is reached. Returns HTML_LITERAL for the expression content.
     fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'}' if self.at_closing_double_text_expression() => {
@@ -221,24 +256,41 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_single_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'}' if !self.at_closing_double_text_expression() => self.consume_byte(T!['}']),
-            b'<' => self.consume_byte(T![<]),
-            _ => {
-                while let Some(current) = self.current_byte() {
-                    match current {
-                        b'}' if !self.at_closing_double_text_expression() => break,
-                        _ => {
-                            self.advance(1);
-                        }
+    // TODO: keep this function, and enhance svelte_expression until we don't need it anymore
+    /// Consumes tokens within a single text expression ('{...}') while tracking nested
+    /// brackets until the matching closing bracket is found.
+    fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
+        let mut brackets_stack = 0;
+        if self.prev_byte() == Some(b'{') {
+            brackets_stack += 1;
+        }
+        while let Some(current) = self.current_byte() {
+            match current {
+                b',' if brackets_stack == 0 => break,
+                b'}' => {
+                    brackets_stack -= 1;
+                    if brackets_stack == 0 {
+                        break;
+                    } else {
+                        self.advance(1);
                     }
                 }
-                HTML_LITERAL
+                b'{' => {
+                    brackets_stack += 1;
+                    self.advance(1);
+                }
+
+                _ => {
+                    self.advance(1);
+                }
             }
         }
+
+        HTML_LITERAL
     }
 
+    /// Consumes an HTML comment starting with '<!--' until the closing '-->' is found.
+    /// Returns COMMENT token type.
     fn consume_comment(&mut self) -> HtmlSyntaxKind {
         // eat <!--
         self.advance(4);
@@ -272,7 +324,8 @@ impl<'src> HtmlLexer<'src> {
             }
         }
     }
-
+    /// Consume a token in the [HtmlLexContext::AstroFencedCodeBlock] context until
+    /// either the closing `---` fence is reached or a script tag is encountered.
     fn consume_astro_frontmatter(
         &mut self,
         current: u8,
@@ -293,6 +346,19 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'}' => self.consume_byte(T!['}']),
+            b',' => self.consume_byte(T![,]),
+            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            b'{' => self.consume_byte(T!['{']),
+            _ if is_at_svelte_start_identifier(current) => {
+                self.consume_identifier(current, IdentifierContext::Svelte)
+            }
+            _ => self.consume_single_text_expression(),
+        }
+    }
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {
@@ -320,7 +386,7 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
-    fn consume_identifier(&mut self, first: u8, doctype_context: bool) -> HtmlSyntaxKind {
+    fn consume_identifier(&mut self, first: u8, context: IdentifierContext) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
         const BUFFER_SIZE: usize = 14;
@@ -331,25 +397,46 @@ impl<'src> HtmlLexer<'src> {
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            if is_attribute_name_byte(byte) {
-                if len < BUFFER_SIZE {
-                    buffer[len] = byte;
-                    len += 1;
-                }
+            match context {
+                IdentifierContext::Doctype | IdentifierContext::None => {
+                    if is_attribute_name_byte(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
 
-                self.advance(1)
-            } else {
-                break;
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
+                IdentifierContext::Svelte => {
+                    if is_at_svelte_continue_identifier(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
-            b"html" | b"HTML" if doctype_context => HTML_KW,
+            b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
+            b"html" | b"HTML" if context.is_doctype() => HTML_KW,
+            buffer if context.is_svelte() => match buffer {
+                b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
+                _ => SVELTE_IDENT,
+            },
             _ => HTML_LITERAL,
         }
     }
 
+    /// Consumes an HTML tag name token starting with the given byte.
+    /// Tag names can contain alphanumeric characters, hyphens, colons and dots.
     fn consume_tag_name(&mut self, first: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
@@ -366,6 +453,8 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
+    /// Consumes a quoted string literal token, handling escaped characters and unicode sequences.
+    /// Returns ERROR_TOKEN if the string is not properly terminated or contains invalid escapes.
     fn consume_string_literal(&mut self, quote: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
         let start = self.text_position();
@@ -477,6 +566,8 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes a left angle bracket '<' token, which may start a comment, CDATA section,
+    /// or regular tag opening.
     fn consume_l_angle(&mut self) -> HtmlSyntaxKind {
         self.assert_byte(b'<');
 
@@ -489,18 +580,39 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes an opening double text expression '{{' token used for interpolation.
     fn consume_l_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_opening_double_text_expression());
         self.advance(2);
         T!["{{"]
     }
 
+    /// Consumes a Svelte opening block token starting with '{' followed by @, #, : or /.
+    fn consume_svelte_opening_block(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_svelte_opening_block());
+        let next_byte = self.byte_at(1);
+        let token = match next_byte {
+            Some(b'@') => T!["{@"],
+            Some(b'#') => T!["{#"],
+            Some(b':') => T!["{:"],
+            Some(b'/') => T!["{/"],
+            _ => unimplemented!(
+                "Svelte block not correctly lexed. Char not expected {:?}",
+                next_byte
+            ),
+        };
+        self.advance(2);
+        token
+    }
+
+    /// Consumes a closing double text expression '}}' token used for interpolation.
     fn consume_r_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_closing_double_text_expression());
         self.advance(2);
         T!["}}"]
     }
 
+    /// Consumes a frontmatter fence '---' token that delimits Astro frontmatter blocks.
     fn consume_frontmatter_edge(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_frontmatter_edge());
         self.advance(3);
@@ -553,10 +665,20 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
+    fn at_svelte_opening_block(&self) -> bool {
+        self.current_byte() == Some(b'{')
+            && (self.byte_at(1) == Some(b'@')
+                || self.byte_at(1) == Some(b'#')
+                || self.byte_at(1) == Some(b':')
+                || self.byte_at(1) == Some(b'/'))
+    }
+
+    #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
+    /// Consumes the opening CDATA section marker '<![CDATA[' token.
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
 
@@ -564,6 +686,7 @@ impl<'src> HtmlLexer<'src> {
         T!["<![CDATA["]
     }
 
+    /// Consumes the closing CDATA section marker ']]>' token.
     fn consume_cdata_end(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_end_cdata());
 
@@ -767,12 +890,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     }
                     HtmlLexContext::TextExpression(kind) => match kind {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
-                        TextExpressionKind::Single => self.consume_single_text_expression(current),
+                        TextExpressionKind::Single => self.consume_single_text_expression(),
                     },
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {
                         self.consume_astro_frontmatter(current, context)
                     }
+                    HtmlLexContext::Svelte => self.consume_svelte(current),
                 },
                 None => EOF,
             }
@@ -863,6 +987,16 @@ fn is_attribute_name_byte(byte: u8) -> bool {
         )
 }
 
+/// Identifiers can contain letters, numbers and `_`
+fn is_at_svelte_continue_identifier(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+/// Identifiers should start with letters or `_`
+fn is_at_svelte_start_identifier(byte: u8) -> bool {
+    byte.is_ascii_alphabetic() || byte == b'_'
+}
+
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
     /// String that contains an invalid escape sequence
@@ -886,5 +1020,166 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
+    }
+}
+struct QuotesSeen {
+    single: u16,
+    double: u16,
+    template: u16,
+    inside_comment: bool,
+    prev_byte: Option<u8>,
+}
+
+impl QuotesSeen {
+    fn new() -> Self {
+        Self {
+            single: 0,
+            double: 0,
+            template: 0,
+            inside_comment: false,
+            prev_byte: None,
+        }
+    }
+
+    /// It checks the given byte. If it's a quote, it's tracked
+    fn check_byte(&mut self, byte: u8) {
+        // Check for comment exit first
+        if self.inside_comment {
+            if byte == b'\n' {
+                // Exit single-line comment
+                self.inside_comment = false;
+            } else if self.prev_byte == Some(b'*') && byte == b'/' {
+                // Exit multi-line comment
+                self.inside_comment = false;
+            }
+            self.prev_byte = Some(byte);
+            return; // Don't track quotes inside comments
+        }
+
+        // Check for comment entry
+        if self.prev_byte == Some(b'/') && (byte == b'/' || byte == b'*') {
+            self.inside_comment = true;
+            self.prev_byte = Some(byte);
+            return;
+        }
+
+        // Normal quote tracking
+        match byte {
+            b'"' => self.track_double(),
+            b'\'' => self.track_single(),
+            b'`' => self.track_template(),
+            _ => {}
+        }
+
+        self.prev_byte = Some(byte);
+    }
+
+    /// It adds a single quote if single quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_single(&mut self) {
+        if (self.single == 0 && (self.double > 0 || self.template > 0))
+            || (self.single == 0 && self.double == 0 && self.template == 0)
+        {
+            self.single.add_assign(1);
+        } else {
+            self.single = self.single.saturating_sub(1);
+        }
+    }
+    /// It adds a double quote if double quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_double(&mut self) {
+        if (self.double == 0 && (self.single > 0 || self.template > 0))
+            || (self.double == 0 && self.single == 0 && self.template == 0)
+        {
+            self.double.add_assign(1);
+        } else {
+            self.double = self.double.saturating_sub(1);
+        }
+    }
+
+    /// It adds a template quote if template quotes are zero and the others are greater than zero. It removes it otherwise
+    fn track_template(&mut self) {
+        if (self.template == 0 && (self.single > 0 || self.double > 0))
+            || (self.template == 0 && self.single == 0 && self.double == 0)
+        {
+            self.template.add_assign(1);
+        } else {
+            self.template = self.template.saturating_sub(1);
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.single == 0 && self.double == 0 && self.template == 0
+    }
+}
+
+#[cfg(test)]
+mod quotes_seen {
+    use crate::lexer::QuotesSeen;
+
+    fn track(source: &str, quotes_seen: &mut QuotesSeen) {
+        for char in source.as_bytes() {
+            quotes_seen.check_byte(*char);
+        }
+    }
+
+    #[test]
+    fn is_not_empty() {
+        let source = r#"'"`"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(!quotes_seen.is_empty());
+
+        let source = r#"`'""'"#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(!quotes_seen.is_empty());
+    }
+    #[test]
+    fn is_empty() {
+        let source = r#" '"``"' "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_inside_comments() {
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_1() {
+        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const f = "something" "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_2() {
+        let source = r#"/* Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh. */
+const f = "something" "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
+    }
+
+    #[test]
+    fn empty_with_comments_outside_comments_3() {
+        let source = r#"/* "safe"
+ 'safe'
+ `safe`*/
+const f = "something" "#;
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(quotes_seen.is_empty());
     }
 }

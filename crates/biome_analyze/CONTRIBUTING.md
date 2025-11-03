@@ -26,6 +26,7 @@ The analyzer allows implementors to create **three different** types of rules:
         * [Biome lint rules inspired by other lint rules](#biome-lint-rules-inspired-by-other-lint-rules)
       - [`rule_category!` macro](#rule_category-macro)
       - [Rule severity](#rule-severity)
+      - [Rule group and severity](#rule-group-and-severity)
       - [Rule domains](#rule-domains)
       - [Rule Options](#rule-options)
         * [Options for our example rule](#options-for-our-example-rule)
@@ -516,6 +517,28 @@ declare_lint_rule! {
 }
 ```
 
+#### Rule group and severity
+
+> [!NOTE]
+> This section is relevant to Biome maintainers when they want to move (promote) a rule to a group that is not `nursery`.
+
+We try to maintain consistency in the default severity level and group membership of the rules.
+For legacy reasons, we have some rules that don't follow these constraints.
+
+- `correctness`, `security`, and `a11y` rules **must** have a severity set to `error`.
+
+  If `error` is too strict for a rule, then it should certainly be in another group (for example `suspicious` instead of `correctness`).
+
+- `style` rules **must** have a severity set to `info` or `warn`. If in doubt, choose `info`.
+
+- `complexity` rules **must** have a severity set to `warn` or `info`. If in doubt, choose `info`.
+
+- `suspicious` rules **must** have a severity set to `warn` or `error`. If in doubt, choose `warn`.
+
+- `performance` rules **must** have a severity set to `warn`.
+
+- Actions **must** have a severity set to `info`.
+
 #### Rule domains
 
 Domains are very specific ways to collect rules that belong to the same "concept". Domains are a way for users to opt-in/opt-out rules that belong to the same domain.
@@ -547,6 +570,7 @@ Instead, if the rule is **recommended** but _doesn't have domains_, the rule is 
 
 > [!NOTE]
 > Before adding a new domain, please consult with the maintainers of the project.
+
 
 #### Rule Options
 

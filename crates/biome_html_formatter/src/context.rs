@@ -9,8 +9,11 @@ use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct HtmlFormatOptions {
+    /// The file source.
+    file_source: HtmlFileSource,
+
     /// The indent style.
     indent_style: IndentStyle,
 
@@ -46,11 +49,33 @@ pub struct HtmlFormatOptions {
     self_close_void_elements: SelfCloseVoidElements,
 }
 
-impl HtmlFormatOptions {
-    pub fn new(_file_source: HtmlFileSource) -> Self {
+impl Default for HtmlFormatOptions {
+    fn default() -> Self {
         Self {
+            file_source: HtmlFileSource::html(),
+            indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
+            line_width: LineWidth::default(),
+            attribute_position: AttributePosition::default(),
+            bracket_same_line: BracketSameLine::default(),
+            whitespace_sensitivity: WhitespaceSensitivity::default(),
+            indent_script_and_style: IndentScriptAndStyle::default(),
+            self_close_void_elements: SelfCloseVoidElements::default(),
+        }
+    }
+}
+
+impl HtmlFormatOptions {
+    pub fn new(file_source: HtmlFileSource) -> Self {
+        Self {
+            file_source,
             ..Default::default()
         }
+    }
+
+    pub fn file_source(&self) -> &HtmlFileSource {
+        &self.file_source
     }
 
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {

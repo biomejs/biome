@@ -1,4 +1,10 @@
 <!--
+  IMPORTANT!!
+  If you generated this PR with the help of any AI assistance, please disclose it in the PR.
+  https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#ai-assistance-notice
+-->
+
+<!--
 	Thanks for submitting a Pull Request! We appreciate you spending the time to work on these changes.
 	Please provide enough information so that others can review your PR.
 	Once created, your PR will be automatically labeled according to changed files.

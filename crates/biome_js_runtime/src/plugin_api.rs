@@ -25,15 +25,15 @@ impl JsPluginApi {
 
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
-            NativeFunction::from_closure(move |_this, args, _context| {
-                let [JsValue::String(severity), JsValue::String(message)] = args else {
+            NativeFunction::from_closure(move |_this, args, context| {
+                let [severity, message] = args else {
                     return Err(JsNativeError::typ()
                         .with_message("registerDiagnostic() expects two string arguments")
                         .into());
                 };
 
                 let severity =
-                    match severity.to_std_string_lossy().as_str() {
+                    match severity.to_string(context)?.to_std_string_lossy().as_str() {
                         "fatal" => Severity::Fatal,
                         "error" => Severity::Error,
                         "warning" => Severity::Warning,
@@ -49,7 +49,7 @@ impl JsPluginApi {
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
                     None::<TextRange>, // TODO: retrieve a span from the AST
-                    message.to_std_string_lossy(),
+                    message.to_string(context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
 
