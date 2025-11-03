@@ -122,7 +122,7 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         }
 
         // Get function name for recursion detection
-        let function_name = get_function_name(&parent_function);
+        let function_name = get_function_name(&parent_function)?;
 
         // Get all references to this parameter
         let all_refs: Vec<_> = binding.all_references(model).collect();
@@ -139,7 +139,7 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         for reference in all_refs {
             if is_reference_in_recursive_call(
                 &reference,
-                function_name.as_ref(),
+                &function_name,
                 &parent_function,
                 name_text,
             ) {
@@ -379,15 +379,10 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool
 
 fn is_reference_in_recursive_call(
     reference: &Reference,
-    function_name: Option<&TokenText>,
+    function_name: &TokenText,
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
 ) -> bool {
-    // Early return if no function name (cannot be recursive)
-    let Some(name) = function_name else {
-        return false;
-    };
-
     let ref_node = reference.syntax();
 
     // Walk up the tree to find if we're inside a call expression
@@ -396,7 +391,7 @@ fn is_reference_in_recursive_call(
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
             // Check if this call is recursive AND uses our parameter
-            if is_recursive_call_with_param_usage(&call_expr, name, param_name) {
+            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name) {
                 return true;
             }
         }
