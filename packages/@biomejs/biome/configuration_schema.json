@@ -1510,7 +1510,7 @@
 			"type": "object",
 			"properties": {
 				"experimentalScannerIgnores": {
-					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
+					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
