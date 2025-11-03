@@ -713,16 +713,17 @@ impl Session {
         });
 
         // Let the user know the scanning is taking long time using the $/progress notification.
-        let progress = if is_work_done_progress_supported {
-            self.client
+        let progress = if is_work_done_progress_supported
+            && self
+                .client
                 .send_request::<lsp_types::request::WorkDoneProgressCreate>(
                     lsp_types::WorkDoneProgressCreateParams {
                         token: progress_token.clone(),
                     },
                 )
                 .await
-                .ok();
-
+                .is_ok()
+        {
             let progress = self
                 .client
                 .progress(progress_token.clone(), "Biome is scanning the project");
