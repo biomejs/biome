@@ -542,6 +542,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)
 - [zoomdong @fireairforce](https://github.com/fireairforce)
+- [Maikel @netail](https://github.com/netail)
 
 ### Past Maintainers
 
