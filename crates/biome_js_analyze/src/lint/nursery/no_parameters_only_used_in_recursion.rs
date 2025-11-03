@@ -7,8 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsCallExpression, JsIdentifierBinding,
-    JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction,
-    function_ext::AnyFunctionLike,
+    JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction, function_ext::AnyFunctionLike,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
@@ -261,12 +260,7 @@ fn get_arrow_function_name(
     let arrow_syntax = arrow_fn.syntax();
 
     // Walk up the syntax tree to find a variable declarator or assignment
-    for ancestor in arrow_syntax.ancestors() {
-        // Skip the arrow function node itself
-        if ancestor == *arrow_syntax {
-            continue;
-        }
-
+    for ancestor in arrow_syntax.ancestors().skip(1) {
         // Check for variable declarator: const foo = () => ...
         if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
             return declarator
