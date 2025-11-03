@@ -312,68 +312,49 @@ fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool
 /// Checks if a call expression is a recursive call to the current function.
 /// Handles direct calls (`foo()`), method calls (`this.foo()`), and computed members (`this["foo"]()`).
 /// Uses a conservative approach to avoid false positives.
-fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
+fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> Option<bool> {
+    let callee = call.callee().ok()?;
 
     let expr = callee.omit_parentheses();
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id
-            .name()
-            .ok()
-            .is_some_and(|n| n.text() == function_name.text());
+        let name = ref_id.name().ok()?;
+        return Some(name.text() == function_name.text());
     }
 
     // Member expression: this.foo() or this?.foo()
     if let Some(member) = expr.as_js_static_member_expression() {
         // Check if object is 'this' (for method calls)
-        let is_this_call = member
-            .object()
-            .ok()
-            .is_some_and(|obj| obj.as_js_this_expression().is_some());
-
-        if !is_this_call {
-            return false;
+        let object = member.object().ok()?;
+        if object.as_js_this_expression().is_none() {
+            return Some(false);
         }
 
         // Check if member name matches function name
-        let member_name_matches = member.member().ok().is_some_and(|m| {
-            m.as_js_name()
-                .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed() == function_name.text())
-        });
-
-        return member_name_matches;
+        let member_node = member.member().ok()?;
+        let name = member_node.as_js_name()?;
+        let token = name.value_token().ok()?;
+        return Some(token.text_trimmed() == function_name.text());
     }
 
     // Computed member expression: this["foo"]() or this?.["foo"]()
     if let Some(computed) = expr.as_js_computed_member_expression() {
         // Check if object is 'this' (for method calls)
-        let is_this_call = computed
-            .object()
-            .ok()
-            .is_some_and(|obj| obj.as_js_this_expression().is_some());
-
-        if !is_this_call {
-            return false;
+        let object = computed.object().ok()?;
+        if object.as_js_this_expression().is_none() {
+            return Some(false);
         }
 
         // Conservative approach: only handle string literal members
-        if let Ok(member_expr) = computed.member()
-            && let Some(lit) = member_expr.as_any_js_literal_expression()
-            && let Some(string_lit) = lit.as_js_string_literal_expression()
-            && let Ok(text) = string_lit.inner_string_text()
-        {
-            return text.text() == function_name.text();
-        }
-
-        return false;
+        let member_expr = computed.member().ok()?;
+        let lit = member_expr.as_any_js_literal_expression()?;
+        let string_lit = lit.as_js_string_literal_expression()?;
+        let text = string_lit.inner_string_text().ok()?;
+        return Some(text.text() == function_name.text());
     }
 
-    false
+    Some(false)
 }
 
 /// Checks if a parameter reference occurs within a recursive call expression.
@@ -495,7 +476,7 @@ fn is_recursive_call_with_param_usage(
     param_name: &str,
 ) -> Option<bool> {
     // First check if this is a recursive call at all
-    if !is_recursive_call(call, function_name) {
+    if !is_recursive_call(call, function_name)? {
         return Some(false);
     }
 
