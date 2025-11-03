@@ -2,6 +2,21 @@
 "@biomejs/biome": patch
 ---
 
-Fixed `noExtraNonNullAssertion` incorrectly flagging separate non-null assertions on both sides of an assignment (e.g. `arr[0]! ^= arr[1]!`).
+Fixed [#7927](https://github.com/biomejs/biome/issues/7927): [`noExtraNonNullAssertion`](https://biomejs.dev/linter/rules/no-extra-non-null-assertion) incorrectly flagged separate non-null assertions on both sides of an assignment.
 
-The rule now correctly distinguishes between nested non-null assertions (still flagged, e.g. `arr[0]!! ^= arr[1]` or `arr[0] ^= arr[1]!!`) and separate non-null assertions on different sides of an assignment (allowed).
+The rule now correctly distinguishes between nested non-null assertions (still flagged) and separate non-null assertions on different sides of an assignment (allowed).
+
+#### Examples
+
+##### Valid (now allowed):
+
+```ts
+arr[0]! ^= arr[1]!;
+```
+
+##### Invalid (still flagged):
+
+```ts
+arr[0]!! ^= arr[1];
+arr[0] ^= arr[1]!!;
+```
