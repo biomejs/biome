@@ -32,6 +32,12 @@ pub(crate) enum HtmlLexContext {
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
 
+    /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
+    /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
+    ///
+    /// Outside of this context, the lexer doesn't yield any particular keywords.
+    Svelte,
+
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
     /// - `{{ foo }}`
     /// - `attr={ foo }`

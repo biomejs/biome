@@ -331,3 +331,34 @@ fn cdata_full() {
         CDATA_END: 3,
     }
 }
+
+#[test]
+fn svelte_openings() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{@debug}",
+        SV_CURLY_AT: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{/debug}",
+        SV_CURLY_SLASH: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{:debug}",
+        SV_CURLY_COLON: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{#debug}",
+        SV_CURLY_HASH: 2,
+        HTML_LITERAL: 6,
+    }
+}

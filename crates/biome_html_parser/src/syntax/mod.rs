@@ -1,5 +1,6 @@
 mod astro;
 mod parse_error;
+mod svelte;
 
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;

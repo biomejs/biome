@@ -20,11 +20,12 @@ mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
+mod svelte;
 mod trivia;
 pub mod utils;
 mod verbatim;
 
-/// Formats a Html file based on its features.
+/// Formats a HTML file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
 pub fn format_node(
