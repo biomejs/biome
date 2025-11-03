@@ -134,7 +134,9 @@ impl Rule for NoParametersOnlyUsedInRecursion {
                 &function_name,
                 &parent_function,
                 name_text,
-            ) {
+            )
+            .unwrap_or(false)
+            {
                 refs_in_recursion += 1;
             } else {
                 refs_elsewhere += 1;
@@ -374,7 +376,7 @@ fn is_reference_in_recursive_call(
     function_name: &TokenText,
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
-) -> bool {
+) -> Option<bool> {
     let ref_node = reference.syntax();
 
     // Walk up the tree to find if we're inside a call expression
@@ -383,8 +385,8 @@ fn is_reference_in_recursive_call(
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
             // Check if this call is recursive AND uses our parameter
-            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name) {
-                return true;
+            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name)? {
+                return Some(true);
             }
         }
 
@@ -396,7 +398,7 @@ fn is_reference_in_recursive_call(
         current = node.parent();
     }
 
-    false
+    Some(false)
 }
 
 fn is_function_boundary(
@@ -412,7 +414,7 @@ fn is_function_boundary(
 ///
 /// Uses an iterative approach with a worklist to avoid stack overflow
 /// on deeply nested expressions.
-fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
+fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool> {
     // Worklist of expressions to examine
     let mut to_check = vec![expr.clone()];
 
@@ -423,7 +425,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         if let Some(ref_id) = current_expr.as_js_reference_identifier() {
             if ref_id.name().ok().is_some_and(|n| n.text() == param_name) {
                 // Found direct parameter reference
-                return true;
+                return Some(true);
             }
             continue;
         }
@@ -431,48 +433,32 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         // Binary operations: a + 1, a - b
         // Add both sides to worklist
         if let Some(bin_expr) = current_expr.as_js_binary_expression() {
-            if let Ok(left) = bin_expr.left() {
-                to_check.push(left);
-            }
-            if let Ok(right) = bin_expr.right() {
-                to_check.push(right);
-            }
+            to_check.push(bin_expr.left().ok()?);
+            to_check.push(bin_expr.right().ok()?);
             continue;
         }
 
         // Logical operations: a && b, a || b, a ?? b
         // Add both sides to worklist
         if let Some(logical_expr) = current_expr.as_js_logical_expression() {
-            if let Ok(left) = logical_expr.left() {
-                to_check.push(left);
-            }
-            if let Ok(right) = logical_expr.right() {
-                to_check.push(right);
-            }
+            to_check.push(logical_expr.left().ok()?);
+            to_check.push(logical_expr.right().ok()?);
             continue;
         }
 
         // Conditional expression: cond ? a : b
         // Add all three parts to worklist (test, consequent, alternate)
         if let Some(cond_expr) = current_expr.as_js_conditional_expression() {
-            if let Ok(test) = cond_expr.test() {
-                to_check.push(test);
-            }
-            if let Ok(consequent) = cond_expr.consequent() {
-                to_check.push(consequent);
-            }
-            if let Ok(alternate) = cond_expr.alternate() {
-                to_check.push(alternate);
-            }
+            to_check.push(cond_expr.test().ok()?);
+            to_check.push(cond_expr.consequent().ok()?);
+            to_check.push(cond_expr.alternate().ok()?);
             continue;
         }
 
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {
-            if let Ok(arg) = unary_expr.argument() {
-                to_check.push(arg);
-            }
+            to_check.push(unary_expr.argument().ok()?);
             continue;
         }
 
@@ -489,7 +475,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
     }
 
     // Didn't find the parameter anywhere
-    false
+    Some(false)
 }
 
 /// Enhanced version that checks if any argument traces to parameters
@@ -497,19 +483,17 @@ fn is_recursive_call_with_param_usage(
     call: &JsCallExpression,
     function_name: &TokenText,
     param_name: &str,
-) -> bool {
+) -> Option<bool> {
     // First check if this is a recursive call at all
     if !is_recursive_call(call, function_name) {
-        return false;
+        return Some(false);
     }
 
     // Check if any argument uses the parameter
-    let Ok(arguments) = call.arguments() else {
-        return false;
-    };
+    let arguments = call.arguments().ok()?;
 
     for arg in arguments.args() {
-        let Ok(arg_node) = arg else { continue };
+        let arg_node = arg.ok()?;
 
         // Skip spread arguments (conservative)
         if arg_node.as_js_spread().is_some() {
@@ -518,11 +502,11 @@ fn is_recursive_call_with_param_usage(
 
         // Check if argument expression uses the parameter
         if let Some(expr) = arg_node.as_any_js_expression()
-            && traces_to_parameter(expr, param_name)
+            && traces_to_parameter(expr, param_name)?
         {
-            return true;
+            return Some(true);
         }
     }
 
-    false
+    Some(false)
 }
