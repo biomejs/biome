@@ -1239,6 +1239,7 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -5267,11 +5268,13 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "uuid"
-version = "1.15.1"
+version = "1.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0f540e3240398cce6128b64ba83fdbdd86129c16a3aa1a3a252efd66eb3d587"
+checksum = "2f87b8aa10b915a06587d0dec516c282ff295b475d94abf425d62b57710070a2"
 dependencies = [
  "getrandom 0.3.2",
+ "js-sys",
+ "wasm-bindgen",
 ]
 
 [[package]]
