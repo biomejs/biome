@@ -2,14 +2,14 @@ pub mod builder;
 pub mod model;
 pub mod specificity;
 
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_rowan::AstNode;
 use builder::SemanticModelBuilder;
 use model::SemanticModel;
 
 use crate::events::SemanticEventExtractor;
 
-pub fn semantic_model(root: &CssRoot) -> SemanticModel {
+pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
 
@@ -32,8 +32,8 @@ pub fn semantic_model(root: &CssRoot) -> SemanticModel {
 
 #[cfg(test)]
 mod tests {
-    use biome_css_parser::CssParserOptions;
-    use biome_css_parser::parse_css;
+    use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     #[test]
     fn test_simple_ruleset() {
@@ -42,6 +42,7 @@ mod tests {
   font-family: verdana;
   font-size: 20px;
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -64,6 +65,7 @@ mod tests {
     color: red;
   }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -91,6 +93,7 @@ mod tests {
             color: orange;
         }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -118,6 +121,7 @@ mod tests {
             color: orange;
         }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -151,6 +155,7 @@ mod tests {
   --custom-size: 20px;
 }
   "#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -171,7 +176,11 @@ mod tests {
 
     #[test]
     fn test_empty_at_property() {
-        let parse = parse_css(r#"@property --item-size {}"#, CssParserOptions::default());
+        let parse = parse_css(
+            r#"@property --item-size {}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
@@ -193,6 +202,7 @@ mod tests {
   inherits: true;
   initial-value: 40%;
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -207,9 +217,10 @@ mod tests {
 mod specificity_tests {
     use crate::model::{SemanticModel, Specificity};
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     fn to_semantic_model(source: &str) -> SemanticModel {
-        let parse = parse_css(source, CssParserOptions::default());
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let root = parse.tree();
         super::semantic_model(&root)
     }

@@ -969,6 +969,20 @@ impl CssImportSupports {
         )
     }
 }
+impl CssInlineRoot {
+    pub fn with_items(self, element: CssDeclarationOrRuleList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssKeyframesAtRule {
     pub fn with_keyframes_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

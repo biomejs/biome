@@ -411,11 +411,12 @@ mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     #[test]
     fn smoke_test() {
         let src = r#"html {}"#;
-        let parse = parse_css(src, CssParserOptions::default());
+        let parse = parse_css(src, CssFileSource::css(), CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");

@@ -863,6 +863,15 @@ pub fn css_import_supports(
         ],
     ))
 }
+pub fn css_inline_root(items: CssDeclarationOrRuleList, eof_token: SyntaxToken) -> CssInlineRoot {
+    CssInlineRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_INLINE_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
     name: AnyCssKeyframesName,

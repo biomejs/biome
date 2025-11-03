@@ -33,6 +33,7 @@ pub(crate) mod generic_delimiter;
 pub(crate) mod import_anonymous_layer;
 pub(crate) mod import_named_layer;
 pub(crate) mod import_supports;
+pub(crate) mod inline_root;
 pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
 pub(crate) mod keyframes_scope_function;

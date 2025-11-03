@@ -141,9 +141,9 @@ impl Format<FormatSemanticModelContext> for Specificity {
 
 #[cfg(test)]
 mod tests {
-
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     #[ignore]
     #[test]
@@ -162,7 +162,7 @@ mod tests {
   }
 }"#;
 
-        let parsed = parse_css(source, CssParserOptions::default());
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
     }
