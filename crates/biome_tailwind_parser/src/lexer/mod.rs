@@ -58,7 +58,7 @@ impl<'src> TailwindLexer<'src> {
             b'-' => self.consume_byte(T![-]),
             b'!' => self.consume_byte(T![!]),
             b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ if current.is_ascii_alphanumeric() => self.consume_base(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
