@@ -43,11 +43,11 @@ enum IdentifierContext {
 
 impl IdentifierContext {
     const fn is_doctype(&self) -> bool {
-        matches!(self, IdentifierContext::Doctype)
+        matches!(self, Self::Doctype)
     }
 
     const fn is_svelte(&self) -> bool {
-        matches!(self, IdentifierContext::Svelte)
+        matches!(self, Self::Svelte)
     }
 }
 
