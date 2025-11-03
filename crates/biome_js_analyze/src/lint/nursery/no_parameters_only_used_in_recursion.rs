@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::ReferencesExtensions;
+use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsCallExpression, JsIdentifierBinding,
     JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction, function_ext::AnyFunctionLike,
@@ -378,7 +378,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool
 }
 
 fn is_reference_in_recursive_call(
-    reference: &biome_js_semantic::Reference,
+    reference: &Reference,
     function_name: Option<&TokenText>,
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
