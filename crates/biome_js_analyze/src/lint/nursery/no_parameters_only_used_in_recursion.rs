@@ -8,6 +8,7 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsCallExpression, JsIdentifierBinding,
     JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction,
+    function_ext::AnyFunctionLike,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
@@ -292,27 +293,12 @@ fn get_arrow_function_name(
 
         // Stop searching if we hit a function boundary
         // (prevents extracting wrong name from outer scope)
-        if is_function_like(&ancestor) {
+        if AnyFunctionLike::cast_ref(&ancestor).is_some() {
             break;
         }
     }
 
     None
-}
-
-/// Checks if a syntax node is a function-like boundary
-/// (we should stop searching for names beyond these)
-fn is_function_like(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
-    use biome_js_syntax::JsSyntaxKind::*;
-    matches!(
-        node.kind(),
-        JS_FUNCTION_DECLARATION
-            | JS_FUNCTION_EXPRESSION
-            | JS_ARROW_FUNCTION_EXPRESSION
-            | JS_METHOD_CLASS_MEMBER
-            | JS_METHOD_OBJECT_MEMBER
-            | JS_CONSTRUCTOR_CLASS_MEMBER
-    )
 }
 
 fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool {
