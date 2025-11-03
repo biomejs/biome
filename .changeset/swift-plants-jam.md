@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed the LSP server returns an internal error if the formatter is disabled in the configuration.
+Fixed the Biome Language Server so it no longer returns an internal error when the formatter is disabled in the configuration.
