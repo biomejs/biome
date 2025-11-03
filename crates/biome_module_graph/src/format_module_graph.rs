@@ -118,16 +118,7 @@ impl Format<FormatTypeContext> for Imports {
                     ),]
                 )
             });
-            let arrow = format_with(|f| {
-                write!(
-                    f,
-                    [&format_args![
-                        space(),
-                        token("=>"),
-                        space()
-                    ]]
-                )
-            });
+            let arrow = format_with(|f| write!(f, [&format_args![space(), token("=>"), space()]]));
 
             let export = format_with(|f| {
                 write!(
