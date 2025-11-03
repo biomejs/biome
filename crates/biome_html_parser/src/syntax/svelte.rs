@@ -36,8 +36,15 @@ pub(crate) fn parse_debug_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
     Present(marker.complete(p, SVELTE_DEBUG_BLOCK))
 }
 
-const BLOCK_RECOVER: TokenSet<HtmlSyntaxKind> =
-    token_set!(T!['{'], T![<], T!["{@"], T!["{/"], T!["{:"], T!["{#"]);
+const BLOCK_RECOVER: TokenSet<HtmlSyntaxKind> = token_set!(
+    T!['{'],
+    T![<],
+    T!["{@"],
+    T!["{/"],
+    T!["{:"],
+    T!["{#"],
+    T!['}']
+);
 
 #[derive(Debug)]
 struct BindingList;
