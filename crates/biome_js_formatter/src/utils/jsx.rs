@@ -1,6 +1,6 @@
 use crate::JsCommentStyle;
 use crate::prelude::*;
-use biome_formatter::{QuoteStyle, comments::CommentStyle, format_args, write};
+use biome_formatter::{FormatOptions, QuoteStyle, TextWidth, comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
     JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
@@ -423,6 +423,7 @@ impl Format<JsFormatContext> for JsxWord {
         f.write_element(FormatElement::LocatedTokenText {
             source_position: self.source_position,
             slice: self.text.clone(),
+            text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
         })
     }
 }
