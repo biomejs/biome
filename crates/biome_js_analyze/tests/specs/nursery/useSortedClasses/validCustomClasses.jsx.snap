@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomClasses.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+// Valid (already sorted)
+<div class="container btn-primary px-2 text-red-500 custom-utility" />;
+
+```

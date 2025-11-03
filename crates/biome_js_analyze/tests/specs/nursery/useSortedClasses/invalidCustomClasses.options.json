@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useSortedClasses": {
+					"level": "error",
+					"options": {
+						"classes": {
+							"components": ["btn-", "card$"],
+							"utilities": ["custom-"]
+						}
+					}
+				}
+			}
+		}
+	}
+}
