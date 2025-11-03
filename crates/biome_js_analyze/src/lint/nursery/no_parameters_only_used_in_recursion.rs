@@ -313,12 +313,8 @@ fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool
     )
 }
 
-fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>) -> bool {
+fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> bool {
     let Ok(callee) = call.callee() else {
-        return false;
-    };
-
-    let Some(name) = function_name else {
         return false;
     };
 
@@ -326,7 +322,10 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        return ref_id.name().ok().is_some_and(|n| n.text() == name.text());
+        return ref_id
+            .name()
+            .ok()
+            .is_some_and(|n| n.text() == function_name.text());
     }
 
     // Member expression: this.foo() or this?.foo()
@@ -345,7 +344,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
         let member_name_matches = member.member().ok().is_some_and(|m| {
             m.as_js_name()
                 .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed() == name.text())
+                .is_some_and(|t| t.text_trimmed() == function_name.text())
         });
 
         return member_name_matches;
@@ -369,7 +368,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: Option<&TokenText>)
             && let Some(string_lit) = lit.as_js_string_literal_expression()
             && let Ok(text) = string_lit.inner_string_text()
         {
-            return text.text() == name.text();
+            return text.text() == function_name.text();
         }
 
         return false;
@@ -507,8 +506,13 @@ fn is_recursive_call_with_param_usage(
     function_name: Option<&TokenText>,
     param_name: &str,
 ) -> bool {
+    // Early return if no function name (cannot be recursive)
+    let Some(name) = function_name else {
+        return false;
+    };
+
     // First check if this is a recursive call at all
-    if !is_recursive_call(call, function_name) {
+    if !is_recursive_call(call, name) {
         return false;
     }
 
