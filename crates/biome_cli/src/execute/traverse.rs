@@ -405,7 +405,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     }
                                     .with_severity(severity)
                                     .with_file_source_code(old.clone())
-                                    .with_file_path(file_path.to_string())
+                                    .with_file_path(file_path.clone())
                                 } else {
                                     FormatDiffDiagnostic {
                                         diff: ContentDiffAdvice {
@@ -415,7 +415,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     }
                                     .with_severity(severity)
                                     .with_file_source_code(old.clone())
-                                    .with_file_path(file_path.to_string())
+                                    .with_file_path(file_path.clone())
                                 };
                                 if should_print || self.execution.is_ci() {
                                     diagnostics_to_print.push(diag);

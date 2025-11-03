@@ -23,6 +23,7 @@ TwRoot {
                 },
                 COLON@4..5 ":" [] [],
             ],
+            negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@5..6 "[" [] [],
                 property_token: TW_PROPERTY@6..18 "--pattern-fg" [] [],
@@ -54,7 +55,8 @@ TwRoot {
         0: TW_STATIC_VARIANT@0..4
           0: TW_BASE@0..4 "dark" [] []
         1: COLON@4..5 ":" [] []
-      1: TW_ARBITRARY_CANDIDATE@5..42
+      1: (empty)
+      2: TW_ARBITRARY_CANDIDATE@5..42
         0: L_BRACKET@5..6 "[" [] []
         1: TW_PROPERTY@6..18 "--pattern-fg" [] []
         2: COLON@18..19 ":" [] []
@@ -64,7 +66,7 @@ TwRoot {
           0: SLASH@38..39 "/" [] []
           1: TW_NAMED_VALUE@39..42
             0: TW_VALUE@39..42 "10" [] [Newline("\n")]
-      2: (empty)
+      3: (empty)
   2: EOF@42..42 "" [] []
 
 ```

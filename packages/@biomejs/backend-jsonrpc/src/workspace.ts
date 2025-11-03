@@ -145,7 +145,7 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
-	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>
 
 Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
 	 */
@@ -1697,6 +1697,10 @@ export interface Nursery {
 	 */
 	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
 	/**
+	 * Disallow function parameters that are only used in recursive calls.
+	 */
+	noParametersOnlyUsedInRecursion?: RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
+	/**
 	 * Replaces usages of forwardRef with passing ref as a prop.
 	 */
 	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
@@ -1704,6 +1708,10 @@ export interface Nursery {
 	 * Disallow variable declarations from shadowing variables declared in the outer scope.
 	 */
 	noShadow?: RuleConfiguration_for_NoShadowOptions;
+	/**
+	 * Disallow unknown DOM properties.
+	 */
+	noUnknownAttribute?: RuleConfiguration_for_NoUnknownAttributeOptions;
 	/**
 	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
 	 */
@@ -3073,12 +3081,18 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
+export type RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions;
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
 export type RuleConfiguration_for_NoShadowOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoShadowOptions;
+export type RuleConfiguration_for_NoUnknownAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnknownAttributeOptions;
 export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
@@ -5561,6 +5575,20 @@ export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	 */
 	options: NoNextAsyncClientComponentOptions;
 }
+export interface RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoParametersOnlyUsedInRecursionOptions;
+}
 export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5584,6 +5612,16 @@ export interface RuleWithOptions_for_NoShadowOptions {
 	 * Rule's options
 	 */
 	options: NoShadowOptions;
+}
+export interface RuleWithOptions_for_NoUnknownAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnknownAttributeOptions;
 }
 export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
 	/**
@@ -8282,8 +8320,12 @@ export interface NoJsxLiteralsOptions {
 }
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
+export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
+export interface NoUnknownAttributeOptions {
+	ignore: string[];
+}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
@@ -9057,8 +9099,10 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"
