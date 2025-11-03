@@ -20,7 +20,10 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
 
     match p.cur() {
         T![debug] => parse_debug_block(p, m),
-        _ => Absent,
+        _ => {
+            m.abandon(p);
+            Absent
+        }
     }
 }
 pub(crate) fn parse_debug_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyntax {

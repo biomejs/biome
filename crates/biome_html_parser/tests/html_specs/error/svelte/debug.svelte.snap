@@ -7,6 +7,7 @@ expression: snapshot
 ```svelte
 {@debug
 {@debug something}
+{@debug debug}
 
 ```
 
@@ -35,19 +36,29 @@ HtmlRoot {
             ],
             r_curly_token: R_CURLY@25..26 "}" [] [],
         },
+        SvelteDebugBlock {
+            sv_curly_at_token: SV_CURLY_AT@26..29 "{@" [Newline("\n")] [],
+            debug_token: DEBUG_KW@29..35 "debug" [] [Whitespace(" ")],
+            bindings: SvelteBindingList [
+                SvelteName {
+                    svelte_ident_token: SVELTE_IDENT@35..40 "debug" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@40..41 "}" [] [],
+        },
     ],
-    eof_token: EOF@26..27 "" [Newline("\n")] [],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..27
+0: HTML_ROOT@0..42
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..26
+  3: HTML_ELEMENT_LIST@0..41
     0: SVELTE_DEBUG_BLOCK@0..7
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: DEBUG_KW@2..7 "debug" [] []
@@ -60,7 +71,14 @@ HtmlRoot {
         0: SVELTE_NAME@16..25
           0: SVELTE_IDENT@16..25 "something" [] []
       3: R_CURLY@25..26 "}" [] []
-  4: EOF@26..27 "" [Newline("\n")] []
+    2: SVELTE_DEBUG_BLOCK@26..41
+      0: SV_CURLY_AT@26..29 "{@" [Newline("\n")] []
+      1: DEBUG_KW@29..35 "debug" [] [Whitespace(" ")]
+      2: SVELTE_BINDING_LIST@35..40
+        0: SVELTE_NAME@35..40
+          0: SVELTE_IDENT@35..40 "debug" [] []
+      3: R_CURLY@40..41 "}" [] []
+  4: EOF@41..42 "" [Newline("\n")] []
 
 ```
 
@@ -74,6 +92,7 @@ debug.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━
     1 │ {@debug
   > 2 │ {@debug something}
       │ ^^
-    3 │ 
+    3 │ {@debug debug}
+    4 │ 
   
 ```

@@ -428,7 +428,7 @@ impl<'src> HtmlLexer<'src> {
             b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
             buffer if context.is_svelte() => match buffer {
-                b"debug" => DEBUG_KW,
+                b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
                 _ => SVELTE_IDENT,
             },
             _ => HTML_LITERAL,
