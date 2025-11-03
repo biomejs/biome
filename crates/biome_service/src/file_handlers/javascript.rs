@@ -631,8 +631,14 @@ fn parse_template_expression(
 }
 
 fn is_styled_tag(tag: &AnyJsExpression) -> bool {
+    // css``
+    if let AnyJsExpression::JsIdentifierExpression(ident) = tag
+        && ident.name().is_ok_and(|name| name.has_name("css"))
+    {
+        return true;
+    }
     // styled.div``
-    if let AnyJsExpression::JsStaticMemberExpression(expr) = &tag
+    if let AnyJsExpression::JsStaticMemberExpression(expr) = tag
         && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.object()
         && ident.name().is_ok_and(|name| name.has_name("styled"))
     {
@@ -640,7 +646,7 @@ fn is_styled_tag(tag: &AnyJsExpression) -> bool {
     }
 
     // styled(Component)``
-    if let AnyJsExpression::JsCallExpression(expr) = &tag
+    if let AnyJsExpression::JsCallExpression(expr) = tag
         && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.callee()
         && ident.name().is_ok_and(|name| name.has_name("styled"))
     {
