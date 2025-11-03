@@ -3,7 +3,9 @@ use crate::parser::CssParser;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
-use crate::syntax::parse_error::{expected_identifier, expected_selector, expected_string};
+use crate::syntax::parse_error::{
+    expected_identifier, expected_selector, expected_string, expected_tw_source,
+};
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
@@ -228,10 +230,28 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![not]) {
         p.bump(T![not]);
     }
-    parse_string(p).or_add_diagnostic(p, expected_string);
+    if p.at(T![inline]) {
+        parse_source_inline(p).or_add_diagnostic(p, expected_tw_source);
+    } else {
+        parse_string(p).or_add_diagnostic(p, expected_tw_source);
+    }
     p.expect(T![;]);
 
     Present(m.complete(p, TW_SOURCE_AT_RULE))
+}
+
+pub(crate) fn parse_source_inline(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![inline]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.expect(T![inline]);
+    p.expect(T!['(']);
+    parse_string(p).or_add_diagnostic(p, expected_string);
+    p.expect(T![')']);
+
+    Present(m.complete(p, TW_SOURCE_INLINE))
 }
 
 // @reference "../../app.css";

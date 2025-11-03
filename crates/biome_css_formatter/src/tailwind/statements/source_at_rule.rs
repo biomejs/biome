@@ -8,7 +8,7 @@ impl FormatNodeRule<TwSourceAtRule> for FormatTwSourceAtRule {
         let TwSourceAtRuleFields {
             source_token,
             not_token,
-            path,
+            source,
             semicolon_token,
         } = node.as_fields();
 
@@ -16,6 +16,6 @@ impl FormatNodeRule<TwSourceAtRule> for FormatTwSourceAtRule {
         if let Some(not_token) = not_token {
             write!(f, [not_token.format(), space()])?;
         }
-        write!(f, [path.format(), semicolon_token.format()])
+        write!(f, [source.format(), semicolon_token.format()])
     }
 }
