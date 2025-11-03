@@ -1,5 +1,65 @@
 # @biomejs/biome
 
+## 2.3.3
+
+### Patch Changes
+
+- [#7907](https://github.com/biomejs/biome/pull/7907) [`57bd662`](https://github.com/biomejs/biome/commit/57bd662ad5155c9a1f13085cc5422f56a44d282e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7839](https://github.com/biomejs/biome/issues/7839). Now the Biome parser correctly parses the Astro frontmatter even when a triple fence is inside quotes.
+
+- [#7934](https://github.com/biomejs/biome/pull/7934) [`a35c496`](https://github.com/biomejs/biome/commit/a35c4962e2241e127444284049012c60aec71a41) Thanks [@alissonlauffer](https://github.com/alissonlauffer)! - Fixed [#7919](https://github.com/biomejs/biome/issues/7919): The HTML parser now correctly handles Unicode BOM (Byte Order Mark) characters at the beginning of HTML files, ensuring proper parsing and tokenization.
+
+- [#7869](https://github.com/biomejs/biome/pull/7869) [`c80361d`](https://github.com/biomejs/biome/commit/c80361d9abaf810bdb2e9a81cc1e4ab814d385b0) Thanks [@matanshavit](https://github.com/matanshavit)! - Fixed [#7864](https://github.com/biomejs/biome/issues/7864): Biome now preserves component tag name casing in Svelte, Astro, and Vue files.
+
+- [#7926](https://github.com/biomejs/biome/pull/7926) [`69cecec`](https://github.com/biomejs/biome/commit/69cececbbaccbe5c44c71afee8e242437783cabc) Thanks [@matanshavit](https://github.com/matanshavit)! - Added the rule [`noParametersOnlyUsedInRecursion`](https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion/).
+
+  This rule detects function parameters that are exclusively used in recursive calls and can be removed to simplify the function signature since they are effectively unused.
+
+  ```js
+  function factorial(n, acc) {
+    if (n === 0) return 1;
+    return factorial(n - 1, acc); // acc is only used here
+  }
+  ```
+
+  Fixes [#6484](https://github.com/biomejs/biome/issues/6484).
+
+- [#7774](https://github.com/biomejs/biome/pull/7774) [`2509b91`](https://github.com/biomejs/biome/commit/2509b91cde53b8f747d397fcec5e37eb47bd524d) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Fixed [#7657](https://github.com/biomejs/biome/issues/7657): Added the new rule [`no-unknown-property`](https://biomejs.dev/linter/rules/no-unknown-property/) from ESLint
+
+- [#7918](https://github.com/biomejs/biome/pull/7918) [`7165d06`](https://github.com/biomejs/biome/commit/7165d067bb0162ffcc354ea3ced63c67d71bd185) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7913](https://github.com/biomejs/biome/issues/7913): The CSS parser, with `tailwindDirectives` enabled, will now correctly handle `@slot`.
+
+- [#7959](https://github.com/biomejs/biome/pull/7959) [`ffae203`](https://github.com/biomejs/biome/commit/ffae2031a0104b6b9ca77cdedaf85202694f12f9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed the Biome Language Server so it no longer returns an internal error when the formatter is disabled in the configuration.
+
+## 2.3.2
+
+### Patch Changes
+
+- [#7859](https://github.com/biomejs/biome/pull/7859) [`c600618`](https://github.com/biomejs/biome/commit/c6006184a860b42fea3f0ea5fe96c47087341a90) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noIncrementDecrement`](https://biomejs.dev/linter/rules/no-increment-decrement/), disallows the usage of the unary operators ++ and --.
+
+- [#7901](https://github.com/biomejs/biome/pull/7901) [`0d17b05`](https://github.com/biomejs/biome/commit/0d17b05477a537b6d652a2e56c50bb1db013ef06) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7837](https://github.com/biomejs/biome/issues/7837), where Biome couldn't properly parse text expressions that contained nested curly brackets. This was breaking parsing in Astro and Svelte files.
+
+- [#7874](https://github.com/biomejs/biome/pull/7874) [`e617d36`](https://github.com/biomejs/biome/commit/e617d363b9356bef007192a7f508e15d63f56e9b) Thanks [@Bertie690](https://github.com/Bertie690)! - Fixed [#7230](https://github.com/biomejs/biome/issues/7230): [`noUselessStringConcat`](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer emits false positives for multi-line strings with leading `+` operators.
+
+  Previously, the rule did not check for leading newlines on the `+` operator, emitting false positives if one occurred at the start of a line. \
+  Notably, formatting with `operatorLinebreak="before"` would move the `+` operators to the start of lines automatically, resulting in spurious errors whenever a multi-line string was used.
+
+  Now, the rule correctly detects and ignores multi-line concatenations with leading operators as well, working regardless of the setting of `operatorLinebreak`.
+
+  **Example**
+
+  ```ts
+  // The following code used to error if the `+` operators were at the start of lines (as opposed to the end).
+  // Now, the rule correctly recognizes this as a stylistic concatenation and ignores it.
+  const reallyLongStringThatShouldNotError =
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit." +
+    "Quisque faucibus ex sapien vitae pellentesque sem placerat." +
+    "In id cursus mi pretium tellus duis convallis." +
+    "Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla";
+  ```
+
+- [#7786](https://github.com/biomejs/biome/pull/7786) [`33ffcd5`](https://github.com/biomejs/biome/commit/33ffcd50a749ca0e188796a10b4ffffb59ead4b3) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#7601](https://github.com/biomejs/biome/issues/7601): Properly match Grit plugin's code snippet with only one child.
+
+- [#7901](https://github.com/biomejs/biome/pull/7901) [`0d17b05`](https://github.com/biomejs/biome/commit/0d17b05477a537b6d652a2e56c50bb1db013ef06) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7837](https://github.com/biomejs/biome/issues/7837), where Biome Language Server panicked when opening HTML-ish files when the experimental full support is enabled.
+
 ## 2.3.1
 
 ### Patch Changes

@@ -47,8 +47,8 @@ use crate::syntax::at_rule::starting_style::parse_starting_style_at_rule;
 use crate::syntax::at_rule::supports::parse_supports_at_rule;
 use crate::syntax::at_rule::tailwind::{
     parse_apply_at_rule, parse_config_at_rule, parse_custom_variant_at_rule, parse_plugin_at_rule,
-    parse_reference_at_rule, parse_source_at_rule, parse_theme_at_rule, parse_utility_at_rule,
-    parse_variant_at_rule,
+    parse_reference_at_rule, parse_slot_at_rule, parse_source_at_rule, parse_theme_at_rule,
+    parse_utility_at_rule, parse_variant_at_rule,
 };
 use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
 use crate::syntax::at_rule::value::parse_value_at_rule;
@@ -159,6 +159,11 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
             .or_else(|| parse_unknown_at_rule(p)),
         T![plugin] => CssSyntaxFeatures::Tailwind
             .parse_exclusive_syntax(p, parse_plugin_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![slot] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_slot_at_rule, |p, m| {
                 tailwind_disabled(p, m.range(p))
             })
             .or_else(|| parse_unknown_at_rule(p)),

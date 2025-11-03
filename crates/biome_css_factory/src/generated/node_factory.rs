@@ -2503,21 +2503,30 @@ pub fn tw_reference_at_rule(
         ],
     ))
 }
+pub fn tw_slot_at_rule(slot_token: SyntaxToken, semicolon_token: SyntaxToken) -> TwSlotAtRule {
+    TwSlotAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SLOT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(slot_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn tw_source_at_rule(
     source_token: SyntaxToken,
-    path: CssString,
+    source: AnyTwSource,
     semicolon_token: SyntaxToken,
 ) -> TwSourceAtRuleBuilder {
     TwSourceAtRuleBuilder {
         source_token,
-        path,
+        source,
         semicolon_token,
         not_token: None,
     }
 }
 pub struct TwSourceAtRuleBuilder {
     source_token: SyntaxToken,
-    path: CssString,
+    source: AnyTwSource,
     semicolon_token: SyntaxToken,
     not_token: Option<SyntaxToken>,
 }
@@ -2532,11 +2541,27 @@ impl TwSourceAtRuleBuilder {
             [
                 Some(SyntaxElement::Token(self.source_token)),
                 self.not_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.path.into_syntax())),
+                Some(SyntaxElement::Node(self.source.into_syntax())),
                 Some(SyntaxElement::Token(self.semicolon_token)),
             ],
         ))
     }
+}
+pub fn tw_source_inline(
+    inline_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    content: CssString,
+    r_paren_token: SyntaxToken,
+) -> TwSourceInline {
+    TwSourceInline::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SOURCE_INLINE,
+        [
+            Some(SyntaxElement::Token(inline_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,

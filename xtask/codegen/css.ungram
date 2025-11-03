@@ -660,6 +660,7 @@ AnyCssAtRule =
 	| TwReferenceAtRule
 	| TwConfigAtRule
 	| TwPluginAtRule
+	| TwSlotAtRule
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
@@ -1944,11 +1945,22 @@ TwApplyClassList = CssIdentifier*
 
 // Tailwind 4.0 @source directive
 // @source "../node_modules/@my-company/ui-lib";
+// @source inline("underline");
 TwSourceAtRule =
   'source'
   'not'?
-  path: CssString
+  source: AnyTwSource
   ';'
+
+AnyTwSource =
+	CssString
+	| TwSourceInline
+
+TwSourceInline =
+	'inline'
+	'('
+	content: CssString
+	')'
 
 // Tailwind 4.0 @reference directive
 // @reference "../../app.css";
@@ -1975,3 +1987,8 @@ TwPluginAtRule =
   name: CssString
   block: AnyCssDeclarationBlock?
   ';'?
+
+// Tailwind 4.0 @slot directive
+TwSlotAtRule =
+	'slot'
+	';'

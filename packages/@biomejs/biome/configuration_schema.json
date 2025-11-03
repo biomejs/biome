@@ -1510,7 +1510,7 @@
 			"type": "object",
 			"properties": {
 				"experimentalScannerIgnores": {
-					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
+					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
@@ -4009,6 +4009,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoParametersOnlyUsedInRecursionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoParametersOnlyUsedInRecursionOptions"
+				}
+			]
+		},
+		"NoParametersOnlyUsedInRecursionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoPositiveTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4538,6 +4550,19 @@
 					"type": "array",
 					"items": { "type": "string" }
 				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnknownAttributeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnknownAttributeOptions" }
+			]
+		},
+		"NoUnknownAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": { "type": "array", "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},
@@ -5175,6 +5200,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noParametersOnlyUsedInRecursion": {
+					"description": "Disallow function parameters that are only used in recursive calls.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoParametersOnlyUsedInRecursionConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noReactForwardRef": {
 					"description": "Replaces usages of forwardRef with passing ref as a prop.",
 					"anyOf": [
@@ -5186,6 +5220,13 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAttribute": {
+					"description": "Disallow unknown DOM properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnknownAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8276,6 +8317,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoParametersOnlyUsedInRecursionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoParametersOnlyUsedInRecursionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoPositiveTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9051,6 +9113,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnknownAtRulesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnknownAttributeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnknownAttributeOptions" }]
 				}
 			},
 			"additionalProperties": false
