@@ -120,6 +120,7 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
+            b',' if self.current() == T![<] => self.consume_byte(T![,]),
             b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
@@ -255,6 +256,7 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    // TODO: keep this function, and enhance svelte_expression until we don't need it anymore
     /// Consumes tokens within a single text expression ('{...}') while tracking nested
     /// brackets until the matching closing bracket is found.
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
@@ -264,6 +266,7 @@ impl<'src> HtmlLexer<'src> {
         }
         while let Some(current) = self.current_byte() {
             match current {
+                b',' if brackets_stack == 0 => break,
                 b'}' => {
                     brackets_stack -= 1;
                     if brackets_stack == 0 {
@@ -347,6 +350,8 @@ impl<'src> HtmlLexer<'src> {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'}' => self.consume_byte(T!['}']),
+            b',' => self.consume_byte(T![,]),
+            b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => self.consume_byte(T!['{']),
             _ if is_at_svelte_start_identifier(current) => {
                 self.consume_identifier(current, IdentifierContext::Svelte)
@@ -354,7 +359,6 @@ impl<'src> HtmlLexer<'src> {
             _ => self.consume_single_text_expression(),
         }
     }
-
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {

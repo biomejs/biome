@@ -15,9 +15,7 @@ impl FormatNodeRule<SvelteDebugBlock> for FormatSvelteDebugBlock {
 
         write!(f, [sv_curly_at_token.format(), debug_token.format(),])?;
 
-        if let Some(bindings) = bindings {
-            write!(f, [space(), bindings.format()])?;
-        }
+        write!(f, [space(), bindings.format()])?;
 
         write!(f, [r_curly_token.format()])
     }

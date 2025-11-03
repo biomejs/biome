@@ -838,6 +838,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElementList {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteBindingList,
+        crate::svelte::lists::binding_list::FormatSvelteBindingList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::lists::binding_list::FormatSvelteBindingList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteBindingList,
+        crate::svelte::lists::binding_list::FormatSvelteBindingList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::lists::binding_list::FormatSvelteBindingList::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::AstroBogusFrontmatter>
     for crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter
 {

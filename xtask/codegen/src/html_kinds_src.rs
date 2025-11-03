@@ -19,6 +19,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("{#", "SV_CURLY_HASH"),
         ("{/", "SV_CURLY_SLASH"),
         ("{:", "SV_CURLY_COLON"),
+        (",", "COMMA"),
     ],
     keywords: &["null", "true", "false", "doctype", "html", "debug"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
@@ -57,6 +58,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "ASTRO_EMBEDDED_CONTENT",
         // Svelte nodes
         "SVELTE_DEBUG_BLOCK",
+        "SVELTE_BINDING_LIST",
         "SVELTE_NAME",
         // Bogus nodes
         "HTML_BOGUS",

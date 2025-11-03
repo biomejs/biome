@@ -631,7 +631,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && SvelteName::can_cast(element.kind())
+                    && SvelteBindingList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -677,6 +677,13 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             HTML_ELEMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlElement::can_cast)
             }
+            SVELTE_BINDING_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                SvelteName::can_cast,
+                T ! [,],
+                false,
+            ),
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

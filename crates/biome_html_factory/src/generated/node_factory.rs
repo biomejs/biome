@@ -350,38 +350,18 @@ pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpressi
 pub fn svelte_debug_block(
     sv_curly_at_token: SyntaxToken,
     debug_token: SyntaxToken,
+    bindings: SvelteBindingList,
     r_curly_token: SyntaxToken,
-) -> SvelteDebugBlockBuilder {
-    SvelteDebugBlockBuilder {
-        sv_curly_at_token,
-        debug_token,
-        r_curly_token,
-        bindings: None,
-    }
-}
-pub struct SvelteDebugBlockBuilder {
-    sv_curly_at_token: SyntaxToken,
-    debug_token: SyntaxToken,
-    r_curly_token: SyntaxToken,
-    bindings: Option<SvelteName>,
-}
-impl SvelteDebugBlockBuilder {
-    pub fn with_bindings(mut self, bindings: SvelteName) -> Self {
-        self.bindings = Some(bindings);
-        self
-    }
-    pub fn build(self) -> SvelteDebugBlock {
-        SvelteDebugBlock::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::SVELTE_DEBUG_BLOCK,
-            [
-                Some(SyntaxElement::Token(self.sv_curly_at_token)),
-                Some(SyntaxElement::Token(self.debug_token)),
-                self.bindings
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly_token)),
-            ],
-        ))
-    }
+) -> SvelteDebugBlock {
+    SvelteDebugBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DEBUG_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_at_token)),
+            Some(SyntaxElement::Token(debug_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
 }
 pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
@@ -411,6 +391,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_binding_list<I, S>(items: I, separators: S) -> SvelteBindingList
+where
+    I: IntoIterator<Item = SvelteName>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    SvelteBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter

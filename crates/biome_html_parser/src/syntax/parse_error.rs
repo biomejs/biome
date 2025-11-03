@@ -92,3 +92,8 @@ pub(crate) fn closing_tag_should_not_have_attributes(
 ) -> ParseDiagnostic {
     ParseDiagnostic::new("Closing tags should not have attributes.", range)
 }
+
+pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a closing block.", range)
+        .with_hint(markup!("Add a '}' block."))
+}

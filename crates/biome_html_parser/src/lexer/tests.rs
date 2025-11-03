@@ -362,3 +362,14 @@ fn svelte_openings() {
         HTML_LITERAL: 6,
     }
 }
+
+#[test]
+fn svelte_keywords() {
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "  debug  ",
+        WHITESPACE: 2,
+        DEBUG_KW: 5,
+        WHITESPACE: 2,
+    )
+}

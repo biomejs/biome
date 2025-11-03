@@ -83,6 +83,7 @@ AnyHtmlContent =
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| AnySvelteBlock
 	| HtmlBogusTextExpression
 
 
@@ -195,8 +196,10 @@ AnySvelteBlock =
 SvelteDebugBlock =
 	'{@'
 	'debug'
-	bindings: SvelteName?
+	bindings: SvelteBindingList
 	'}'
+
+SvelteBindingList = (SvelteName (',' SvelteName)*)
 
 SvelteName = 'svelte_ident'
 

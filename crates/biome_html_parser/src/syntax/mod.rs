@@ -5,6 +5,7 @@ mod svelte;
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
+use crate::syntax::svelte::parse_svelte_at_block;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -226,6 +227,7 @@ impl ParseNodeList for ElementList {
                 |p| parse_double_text_expression(p, HtmlLexContext::Regular),
                 |p, m| disabled_interpolation(p, m.range(p)),
             ),
+            T!["{@"] => parse_svelte_at_block(p),
             T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
                 let m = p.start();
                 p.bump_remap(HTML_LITERAL);
@@ -492,7 +494,7 @@ pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
 
-// Parsers a single tag expression. `context` is applied after lexing the last token `}`
+/// Parsers a single tag expression. `context` is applied after lexing the last token `}`
 pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
