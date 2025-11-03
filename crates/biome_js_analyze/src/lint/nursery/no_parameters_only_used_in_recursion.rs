@@ -383,6 +383,11 @@ fn is_reference_in_recursive_call(
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
 ) -> bool {
+    // Early return if no function name (cannot be recursive)
+    let Some(name) = function_name else {
+        return false;
+    };
+
     let ref_node = reference.syntax();
 
     // Walk up the tree to find if we're inside a call expression
@@ -391,7 +396,7 @@ fn is_reference_in_recursive_call(
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
             // Check if this call is recursive AND uses our parameter
-            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name) {
+            if is_recursive_call_with_param_usage(&call_expr, name, param_name) {
                 return true;
             }
         }
@@ -503,16 +508,11 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
 /// Enhanced version that checks if any argument traces to parameters
 fn is_recursive_call_with_param_usage(
     call: &JsCallExpression,
-    function_name: Option<&TokenText>,
+    function_name: &TokenText,
     param_name: &str,
 ) -> bool {
-    // Early return if no function name (cannot be recursive)
-    let Some(name) = function_name else {
-        return false;
-    };
-
     // First check if this is a recursive call at all
-    if !is_recursive_call(call, name) {
+    if !is_recursive_call(call, function_name) {
         return false;
     }
 
