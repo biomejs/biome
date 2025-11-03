@@ -45,6 +45,8 @@ pub struct JsFormatContext {
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,
+
+    should_delegate_fmt_embedded_nodes: bool,
 }
 
 impl JsFormatContext {
@@ -54,6 +56,7 @@ impl JsFormatContext {
             comments: Rc::new(comments),
             cached_function_body: None,
             source_map: None,
+            should_delegate_fmt_embedded_nodes: false,
         }
     }
 
@@ -90,6 +93,15 @@ impl JsFormatContext {
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_fmt_embedded_nodes(mut self) -> Self {
+        self.should_delegate_fmt_embedded_nodes = true;
+        self
+    }
+
+    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
+        self.should_delegate_fmt_embedded_nodes
     }
 }
 

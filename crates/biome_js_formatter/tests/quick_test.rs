@@ -33,7 +33,7 @@ const c = [
         .with_arrow_parentheses(ArrowParentheses::AsNeeded)
         .with_attribute_position(AttributePosition::Multiline);
 
-    let doc = format_node(options.clone(), &tree.syntax()).unwrap();
+    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
     let result = doc.print().unwrap();
 
     println!("{}", doc.into_document());

@@ -418,3 +418,53 @@ function Foo({cond}) {
         Err(error) => panic!("File not formatted: {error}"),
     }
 }
+
+#[test]
+fn format_js_with_embedded_css() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div`
+  display:
+    flex;
+  color : red ;
+`;
+
+const Bar = styled(Component)`
+  display:
+    flex;
+  color : red ;
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            project_key,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = styled.div`
+    display: flex;
+    color: red;
+    `;
+
+    const Bar = styled(Component)`
+    display: flex;
+    color: red;
+    `;
+    ");
+}

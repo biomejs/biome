@@ -1,7 +1,8 @@
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities, search,
+    EnabledForPath, ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams,
+    LintResults, ParseEmbedResult, ParseResult, ParserCapabilities, ProcessLint,
+    SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -10,7 +11,7 @@ use crate::settings::{
     OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{DocumentFileSource, EmbeddedSnippet};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -29,10 +30,13 @@ use biome_configuration::javascript::{
     JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
+use biome_css_parser::parse_css_with_offset_and_cache;
+use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_diagnostics::Applicability;
+use biome_formatter::prelude::{Document, Interned, LineMode};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -47,13 +51,14 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
+    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsClassDeclaration, JsClassExpression,
+    JsFileSource, JsFunctionDeclaration, JsLanguage, JsSyntaxNode, JsTemplateExpression,
+    JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -490,7 +495,7 @@ impl ExtensionHandler for JsFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_embedded_nodes: None,
+                parse_embedded_nodes: Some(parse_embedded_nodes),
             },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -511,7 +516,7 @@ impl ExtensionHandler for JsFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
-                format_embedded: None,
+                format_embedded: Some(format_embedded),
             },
             search: SearchCapabilities {
                 search: Some(search),
@@ -551,6 +556,98 @@ fn parse(
         any_parse: parse.into(),
         language: None,
     }
+}
+
+fn parse_embedded_nodes(
+    root: &AnyParse,
+    biome_path: &BiomePath,
+    _file_source: &DocumentFileSource,
+    settings: &Settings,
+    cache: &mut NodeCache,
+) -> ParseEmbedResult {
+    let mut nodes = Vec::new();
+    let js_root: AnyJsRoot = root.tree();
+
+    // Walk through all HTML elements looking for script tags and style tags
+    for node in js_root.syntax().descendants() {
+        let Some(expr) = JsTemplateExpression::cast_ref(&node) else {
+            continue;
+        };
+
+        if let Some((content, file_source)) =
+            parse_template_expression(expr, cache, biome_path, settings)
+        {
+            nodes.push((content.into(), file_source))
+        }
+    }
+
+    ParseEmbedResult { nodes }
+}
+
+fn parse_template_expression(
+    expr: JsTemplateExpression,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &Settings,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let tag = expr.tag()?;
+
+    // TODO: Interpolations are not supported yet.
+    if expr.elements().len() != 1 {
+        return None;
+    }
+
+    // SAFETY: Checked above that the template expression has exactly one element inside.
+    let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = expr.elements().first().unwrap()
+    else {
+        return None;
+    };
+
+    if is_styled_tag(&tag) {
+        let file_source = DocumentFileSource::Css(
+            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+        );
+        let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+        let content = chunk.template_chunk_token().ok()?;
+        let parse = parse_css_with_offset_and_cache(
+            content.text(),
+            file_source.to_css_file_source().unwrap_or_default(),
+            content.text_range().start(),
+            cache,
+            options,
+        );
+
+        let snippet = EmbeddedSnippet::new(
+            parse.into(),
+            chunk.range(),
+            content.text_range(),
+            content.text_range().start(),
+        );
+
+        Some((snippet, file_source))
+    } else {
+        None
+    }
+}
+
+fn is_styled_tag(tag: &AnyJsExpression) -> bool {
+    // styled.div``
+    if let AnyJsExpression::JsStaticMemberExpression(expr) = &tag
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.object()
+        && ident.name().is_ok_and(|name| name.has_name("styled"))
+    {
+        return true;
+    }
+
+    // styled(Component)``
+    if let AnyJsExpression::JsCallExpression(expr) = &tag
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.callee()
+        && ident.name().is_ok_and(|name| name.has_name("styled"))
+    {
+        return true;
+    }
+
+    false
 }
 
 fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -615,7 +712,7 @@ fn debug_formatter_ir(
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -1010,6 +1107,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             &params.document_file_source,
                         ),
                         tree.syntax(),
+                        false,
                     )?
                     .print()?
                     .into_code()
@@ -1036,7 +1134,7 @@ pub(crate) fn format(
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -1097,6 +1195,48 @@ pub(crate) fn format_on_type(
 
     let printed = biome_js_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
+}
+
+fn format_embedded(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: &Settings,
+    embedded_nodes: Vec<FormatEmbedNode>,
+) -> Result<Printed, WorkspaceError> {
+    let tree = parse.syntax();
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let mut formatted = format_node(options, &tree, true)?;
+
+    formatted.format_embedded(move |range| {
+        let mut iter = embedded_nodes.iter();
+        let node = iter.find(|node| node.range == range)?;
+
+        let wrap_document = |document: Document| {
+            // TODO: Ident inside the literal?
+            let elements = vec![
+                FormatElement::Line(LineMode::Hard),
+                FormatElement::Interned(Interned::new(document.into_elements())),
+            ];
+            Document::new(elements)
+        };
+
+        match node.source {
+            DocumentFileSource::Css(_) => {
+                let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
+                let node = node.node.clone().embedded_syntax::<CssLanguage>();
+                let formatted =
+                    biome_css_formatter::format_node_with_offset(css_options, &node).unwrap();
+                Some(wrap_document(formatted.into_document()))
+            }
+            _ => None,
+        }
+    });
+
+    match formatted.print() {
+        Ok(printed) => Ok(printed),
+        Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
 }
 
 fn rename(

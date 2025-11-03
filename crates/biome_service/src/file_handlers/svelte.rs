@@ -155,7 +155,7 @@ fn format(
         0
     };
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
     match formatted.print_with_indent(indent_amount) {
         Ok(printed) => Ok(printed),
         Err(error) => {
