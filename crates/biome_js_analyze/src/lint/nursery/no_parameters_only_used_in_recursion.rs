@@ -17,8 +17,6 @@ declare_lint_rule! {
     /// A parameter that is only passed to recursive calls is effectively unused
     /// and can be removed or replaced with a constant, simplifying the function.
     ///
-    /// This rule is inspired by Rust Clippy's `only_used_in_recursion` lint.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
