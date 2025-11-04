@@ -7,18 +7,3 @@ expression: allowComments.graphql
 # Allowed comment
 
 ```
-
-# Diagnostics
-```
-allowComments.graphql:2:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i An empty source is not allowed.
-  
-    1 │ # Allowed comment
-  > 2 │ 
-      │ 
-  
-  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
-  
-
-```
