@@ -140,7 +140,7 @@ impl Rule for UseReadonlyClassProperties {
 
         let ClassMemberReferences { writes, .. } = ctx.model.class_member_references(&members);
 
-        let private_only = !ctx.options().check_all_properties;
+        let private_only = !ctx.options().check_all_properties();
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(&members, private_only);
         let non_readonly_class_property_members =

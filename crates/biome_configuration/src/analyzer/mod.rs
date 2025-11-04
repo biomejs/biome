@@ -21,11 +21,11 @@ use std::str::FromStr;
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
-pub enum RuleConfiguration<T: Default> {
+pub enum RuleConfiguration<T: Default + Merge> {
     Plain(RulePlainConfiguration),
     WithOptions(RuleWithOptions<T>),
 }
-impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
+impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
@@ -38,7 +38,7 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Default> RuleConfiguration<T> {
+impl<T: Default + Merge> RuleConfiguration<T> {
     pub fn is_disabled(&self) -> bool {
         matches!(self.level(), RulePlainConfiguration::Off)
     }
@@ -60,7 +60,7 @@ impl<T: Default> RuleConfiguration<T> {
 }
 // Rule configuration has a custom [Merge] implementation so that overriding the
 // severity doesn't override the options.
-impl<T: Clone + Default> Merge for RuleConfiguration<T> {
+impl<T: Clone + Default + Merge> Merge for RuleConfiguration<T> {
     fn merge_with(&mut self, other: Self) {
         match self {
             Self::Plain(_) => *self = other,
@@ -75,7 +75,7 @@ impl<T: Clone + Default> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static + Debug> RuleConfiguration<T> {
+impl<T: Clone + Default + Merge + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -83,17 +83,17 @@ impl<T: Clone + Default + 'static + Debug> RuleConfiguration<T> {
         }
     }
 }
-impl<T: Default> Default for RuleConfiguration<T> {
+impl<T: Default + Merge> Default for RuleConfiguration<T> {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Off)
     }
 }
-impl<T: Default> From<RulePlainConfiguration> for RuleConfiguration<T> {
+impl<T: Default + Merge> From<RulePlainConfiguration> for RuleConfiguration<T> {
     fn from(value: RulePlainConfiguration) -> Self {
         Self::Plain(value)
     }
 }
-impl<T: Default> From<GroupPlainConfiguration> for RuleConfiguration<T> {
+impl<T: Default + Merge> From<GroupPlainConfiguration> for RuleConfiguration<T> {
     fn from(value: GroupPlainConfiguration) -> Self {
         Self::from(RulePlainConfiguration::from(value))
     }
@@ -102,16 +102,16 @@ impl<T: Default> From<GroupPlainConfiguration> for RuleConfiguration<T> {
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
-pub enum RuleFixConfiguration<T: Default> {
+pub enum RuleFixConfiguration<T: Default + Merge> {
     Plain(RulePlainConfiguration),
     WithOptions(RuleWithFixOptions<T>),
 }
-impl<T: Default> Default for RuleFixConfiguration<T> {
+impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Off)
     }
 }
-impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
+impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
@@ -124,7 +124,7 @@ impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Default> RuleFixConfiguration<T> {
+impl<T: Default + Merge> RuleFixConfiguration<T> {
     pub fn is_disabled(&self) -> bool {
         matches!(self.level(), RulePlainConfiguration::Off)
     }
@@ -146,7 +146,7 @@ impl<T: Default> RuleFixConfiguration<T> {
 }
 // Rule configuration has a custom [Merge] implementation so that overriding the
 // severity doesn't override the options.
-impl<T: Clone + Default> Merge for RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge> Merge for RuleFixConfiguration<T> {
     fn merge_with(&mut self, other: Self) {
         match self {
             Self::Plain(_) => *self = other,
@@ -161,7 +161,7 @@ impl<T: Clone + Default> Merge for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -171,17 +171,17 @@ impl<T: Clone + Default + 'static> RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Default> From<RulePlainConfiguration> for RuleFixConfiguration<T> {
+impl<T: Default + Merge> From<RulePlainConfiguration> for RuleFixConfiguration<T> {
     fn from(value: RulePlainConfiguration) -> Self {
         Self::Plain(value)
     }
 }
-impl<T: Default> From<GroupPlainConfiguration> for RuleFixConfiguration<T> {
+impl<T: Default + Merge> From<GroupPlainConfiguration> for RuleFixConfiguration<T> {
     fn from(value: GroupPlainConfiguration) -> Self {
         Self::from(RulePlainConfiguration::from(value))
     }
 }
-impl<T: Default> From<&RuleConfiguration<T>> for Severity {
+impl<T: Default + Merge> From<&RuleConfiguration<T>> for Severity {
     fn from(conf: &RuleConfiguration<T>) -> Self {
         match conf {
             RuleConfiguration::Plain(p) => (*p).into(),
@@ -377,17 +377,18 @@ impl<T: Default> Merge for RuleAssistWithOptions<T> {
 )]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct RuleWithOptions<T: Default> {
+pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
     pub level: RulePlainConfiguration,
     /// Rule's options
+    #[serde(default)]
     pub options: T,
 }
 
-impl<T: Default> Merge for RuleWithOptions<T> {
+impl<T: Default + Merge> Merge for RuleWithOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
-        self.options = other.options;
+        self.options.merge_with(other.options);
     }
 }
 
@@ -396,21 +397,22 @@ impl<T: Default> Merge for RuleWithOptions<T> {
 )]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct RuleWithFixOptions<T: Default> {
+pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
     pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fix: Option<FixKind>,
     /// Rule's options
+    #[serde(default)]
     pub options: T,
 }
 
-impl<T: Default> Merge for RuleWithFixOptions<T> {
+impl<T: Default + Merge> Merge for RuleWithFixOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
         self.fix = other.fix.or(self.fix);
-        self.options = other.options;
+        self.options.merge_with(other.options);
     }
 }
 

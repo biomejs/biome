@@ -79,7 +79,7 @@ impl Rule for UseConsistentGraphqlDescriptions {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let style = ctx.options().style;
+        let style = ctx.options().style.unwrap_or_default();
 
         let value = node.graphql_string_value().ok()?;
 
@@ -96,7 +96,7 @@ impl Rule for UseConsistentGraphqlDescriptions {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let span = ctx.query().range();
-        let style = ctx.options().style;
+        let style = ctx.options().style.unwrap_or_default();
 
         Some(
             RuleDiagnostic::new(

@@ -103,7 +103,8 @@ impl Rule for UseSelfClosingElements {
             .opening_element()
             .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
 
-        if node.children().is_empty() && !(ctx.options().ignore_html_elements && is_html_element) {
+        if node.children().is_empty() && !(ctx.options().ignore_html_elements() && is_html_element)
+        {
             Some(())
         } else {
             None

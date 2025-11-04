@@ -1057,7 +1057,8 @@ impl Rule for NoUnknownAttribute {
         if options
             .ignore
             .iter()
-            .any(|ignored| ignored == node_name.text())
+            .flatten()
+            .any(|ignored| ignored.as_ref() == node_name.text())
         {
             return None;
         }

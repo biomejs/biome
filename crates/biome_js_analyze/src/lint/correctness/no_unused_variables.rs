@@ -170,7 +170,7 @@ fn suggested_fix_if_unused(
 ) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
     // It is fine to ignore unused rest spread siblings if the option is enabled
-    if options.ignore_rest_siblings && is_rest_spread_sibling(&decl) {
+    if options.ignore_rest_siblings() && is_rest_spread_sibling(&decl) {
         return None;
     }
 
