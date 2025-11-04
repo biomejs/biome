@@ -1056,8 +1056,13 @@ impl QuotesSeen {
             return; // Don't track quotes inside comments
         }
 
-        // Check for comment entry
-        if self.prev_byte == Some(b'/') && (byte == b'/' || byte == b'*') {
+        // Check for comment entry - but only if we're not inside quotes
+        if self.prev_byte == Some(b'/')
+            && (byte == b'/' || byte == b'*')
+            && self.single == 0
+            && self.double == 0
+            && self.template == 0
+        {
             self.inside_comment = true;
             self.prev_byte = Some(byte);
             return;
