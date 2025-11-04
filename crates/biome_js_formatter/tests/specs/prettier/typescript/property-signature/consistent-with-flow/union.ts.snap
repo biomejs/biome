@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/property-signature/consistent-with-flow/union.ts
+---
+# Input
+
+```ts
+export interface DirectiveArgumentNode extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ export interface DirectiveArgumentNode extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+```
+
+# Output
+
+```ts
+export interface DirectiveArgumentNode extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+}
+```

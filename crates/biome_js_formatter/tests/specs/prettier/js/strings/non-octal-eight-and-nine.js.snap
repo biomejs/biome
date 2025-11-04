@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/strings/non-octal-eight-and-nine.js
+---
+# Input
+
+```js
+// https://github.com/babel/babel/pull/11852
+
+"\8","\9";
+() => {
+  "use strict";
+  "\8", "\9";
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ // https://github.com/babel/babel/pull/11852
+ 
+-("\8", "\9");
++"\8", "\9";
+ () => {
+   "use strict";
+-  ("\8", "\9");
++  "\8", "\9";
+ };
+```
+
+# Output
+
+```js
+// https://github.com/babel/babel/pull/11852
+
+"\8", "\9";
+() => {
+  "use strict";
+  "\8", "\9";
+};
+```

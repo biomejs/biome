@@ -1,0 +1,174 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/comments/16889.ts
+---
+# Input
+
+```ts
+class A {
+  @decorator
+  /**
+   * The method description
+   *
+  */
+  async method() {
+  }
+
+  @decorator/**
+   * The method description
+   *
+  */
+  async method() {
+  }
+
+  @decorator/**
+   * The method description
+   *
+  */ async method() {
+  }
+
+  @decorator
+  async /* comment */ method() {
+  }
+
+  @decorator /* comment */ async method() {
+  }
+
+  @decorator
+  // line comment
+  async method() {
+  }
+
+  @decorator // line comment
+  async method() {
+  }
+
+
+  @decorator
+   /* comment */
+  public async method() {
+  }
+
+  @decorator
+   /* comment */
+  static async method() {
+  }
+
+  @decorator
+   /* comment */
+  protected async method() {
+  }
+
+  @decorator
+   /* comment */
+  protected async method() {
+  }
+
+  @decorator
+   /* comment */
+  * method() {}
+
+  @decorator
+  * /* comment */ method() {}
+
+   /* comment */
+  abstract method():void;
+
+}
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -54,5 +54,5 @@
+   */* comment */ method() {}
+ 
+   /* comment */
+-  abstract method(): void;
++  abstract method():void;
+ }
+```
+
+# Output
+
+```ts
+class A {
+  @decorator
+  /**
+   * The method description
+   *
+   */
+  async method() {}
+
+  @decorator /**
+   * The method description
+   *
+   */
+  async method() {}
+
+  @decorator /**
+   * The method description
+   *
+   */
+  async method() {}
+
+  @decorator
+  async /* comment */ method() {}
+
+  @decorator /* comment */ async method() {}
+
+  @decorator
+  // line comment
+  async method() {}
+
+  @decorator // line comment
+  async method() {}
+
+  @decorator
+  /* comment */
+  public async method() {}
+
+  @decorator
+  /* comment */
+  static async method() {}
+
+  @decorator
+  /* comment */
+  protected async method() {}
+
+  @decorator
+  /* comment */
+  protected async method() {}
+
+  @decorator
+  /* comment */
+  *method() {}
+
+  @decorator
+  */* comment */ method() {}
+
+  /* comment */
+  abstract method():void;
+}
+```
+
+# Errors
+```
+16889.ts:68:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    67 │    /* comment */
+  > 68 │   abstract method():void;
+       │   ^^^^^^^^
+    69 │ 
+    70 │ }
+  
+
+```

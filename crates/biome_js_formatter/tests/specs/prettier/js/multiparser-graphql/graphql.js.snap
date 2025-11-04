@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/multiparser-graphql/graphql.js
+---
+# Input
+
+```js
+graphql(schema, `
+mutation     MarkReadNotificationMutation(
+    $input
+    : MarkReadNotificationData!
+  )
+{ markReadNotification(data: $input ) { notification {seenState} } }`)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,9 @@
+ graphql(
+   schema,
+   `
+-    mutation MarkReadNotificationMutation($input: MarkReadNotificationData!) {
+-      markReadNotification(data: $input) {
+-        notification {
+-          seenState
+-        }
+-      }
+-    }
+-  `,
++mutation     MarkReadNotificationMutation(
++    $input
++    : MarkReadNotificationData!
++  )
++{ markReadNotification(data: $input ) { notification {seenState} } }`,
+ );
+```
+
+# Output
+
+```js
+graphql(
+  schema,
+  `
+mutation     MarkReadNotificationMutation(
+    $input
+    : MarkReadNotificationData!
+  )
+{ markReadNotification(data: $input ) { notification {seenState} } }`,
+);
+```

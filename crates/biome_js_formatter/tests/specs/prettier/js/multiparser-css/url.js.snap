@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/multiparser-css/url.js
+---
+# Input
+
+```js
+styled.div`color:red;background: url(http://example.com?q=${foo})`
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1 @@
+-styled.div`
+-  color: red;
+-  background: url(http://example.com?q=${foo});
+-`;
++styled.div`color:red;background: url(http://example.com?q=${foo})`;
+```
+
+# Output
+
+```js
+styled.div`color:red;background: url(http://example.com?q=${foo})`;
+```

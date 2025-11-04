@@ -1,0 +1,580 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/object-pattern.js
+---
+# Input
+
+```js
+{
+  // destructuring binding
+  const { void: void } = value;
+}
+{
+  // for-of destructuring binding
+  for (const { p: void } of []);
+}
+{
+  // destructuring assignment
+  ({ p: void } = {});
+}
+{
+  // for-of destructuring assignment
+  for ({ p: void } of []);
+}
+{
+  // function param
+  function f({ q: { q: { p: void }, p: void }, p: void }) {}
+}
+{
+  // arrow function param
+  ({ q: { q: { p: void }, p: void }, p: void }) => {}
+}
+{
+  // async arrow function param
+  async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+}
+{
+  // destructuring assignment in async call
+  async({ p: void } = {});
+}
+{
+  // catch param
+  try {} catch ({ p: void }) {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -16,33 +16,15 @@
+ }
+ {
+   // function param
+-  function f({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) {}
++  function f({ q: { q: { p: void }, p: void }, p: void }) {}
+ }
+ {
+   // arrow function param
+-  ({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) => {};
++  ({ q: { q: { p: void }, p: void }, p: void }) => {}
+ }
+ {
+   // async arrow function param
+-  async ({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) => {};
++  async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+ }
+ {
+   // destructuring assignment in async call
+@@ -50,6 +32,5 @@
+ }
+ {
+   // catch param
+-  try {
+-  } catch ({ p: void }) {}
++  try {} catch ({ p: void }) {}
+ }
+```
+
+# Output
+
+```js
+{
+  // destructuring binding
+  const { void: void } = value;
+}
+{
+  // for-of destructuring binding
+  for (const { p: void } of []);
+}
+{
+  // destructuring assignment
+  ({ p: void } = {});
+}
+{
+  // for-of destructuring assignment
+  for ({ p: void } of []);
+}
+{
+  // function param
+  function f({ q: { q: { p: void }, p: void }, p: void }) {}
+}
+{
+  // arrow function param
+  ({ q: { q: { p: void }, p: void }, p: void }) => {}
+}
+{
+  // async arrow function param
+  async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+}
+{
+  // destructuring assignment in async call
+  async(({ p: void } = {}));
+}
+{
+  // catch param
+  try {} catch ({ p: void }) {}
+}
+```
+
+# Errors
+```
+object-pattern.js:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    1 │ {
+    2 │   // destructuring binding
+  > 3 │   const { void: void } = value;
+      │                 ^^^^
+    4 │ }
+    5 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    1 │ {
+    2 │   // destructuring binding
+  > 3 │   const { void: void } = value;
+      │                 ^^^^
+    4 │ }
+    5 │ {
+  
+object-pattern.js:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    1 │ {
+    2 │   // destructuring binding
+  > 3 │   const { void: void } = value;
+      │                      ^
+    4 │ }
+    5 │ {
+  
+  i Remove }
+  
+object-pattern.js:7:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    5 │ {
+    6 │   // for-of destructuring binding
+  > 7 │   for (const { p: void } of []);
+      │                   ^^^^
+    8 │ }
+    9 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    5 │ {
+    6 │   // for-of destructuring binding
+  > 7 │   for (const { p: void } of []);
+      │                   ^^^^
+    8 │ }
+    9 │ {
+  
+object-pattern.js:7:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    5 │ {
+    6 │   // for-of destructuring binding
+  > 7 │   for (const { p: void } of []);
+      │                        ^
+    8 │ }
+    9 │ {
+  
+  i Remove }
+  
+object-pattern.js:11:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+     9 │ {
+    10 │   // destructuring assignment
+  > 11 │   ({ p: void } = {});
+       │         ^^^^
+    12 │ }
+    13 │ {
+  
+  i This expression cannot be assigned to
+  
+object-pattern.js:15:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    13 │ {
+    14 │   // for-of destructuring assignment
+  > 15 │   for ({ p: void } of []);
+       │             ^^^^
+    16 │ }
+    17 │ {
+  
+  i This expression cannot be assigned to
+  
+object-pattern.js:19:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                             ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                             ^^^^
+    20 │ }
+    21 │ {
+  
+object-pattern.js:19:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                  ^
+    20 │ }
+    21 │ {
+  
+  i Remove }
+  
+object-pattern.js:19:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                        ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                        ^^^^
+    20 │ }
+    21 │ {
+  
+object-pattern.js:19:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                             ^
+    20 │ }
+    21 │ {
+  
+  i Remove }
+  
+object-pattern.js:19:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                                   ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                                   ^^^^
+    20 │ }
+    21 │ {
+  
+object-pattern.js:19:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    17 │ {
+    18 │   // function param
+  > 19 │   function f({ q: { q: { p: void }, p: void }, p: void }) {}
+       │                                                        ^
+    20 │ }
+    21 │ {
+  
+  i Remove }
+  
+object-pattern.js:23:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                   ^^^^
+    24 │ }
+    25 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                   ^^^^
+    24 │ }
+    25 │ {
+  
+object-pattern.js:23:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                        ^
+    24 │ }
+    25 │ {
+  
+  i Remove }
+  
+object-pattern.js:23:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                              ^^^^
+    24 │ }
+    25 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                              ^^^^
+    24 │ }
+    25 │ {
+  
+object-pattern.js:23:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                   ^
+    24 │ }
+    25 │ {
+  
+  i Remove }
+  
+object-pattern.js:23:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                         ^^^^
+    24 │ }
+    25 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                         ^^^^
+    24 │ }
+    25 │ {
+  
+object-pattern.js:23:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                              ^
+    24 │ }
+    25 │ {
+  
+  i Remove }
+  
+object-pattern.js:27:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                         ^^^^
+    28 │ }
+    29 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                         ^^^^
+    28 │ }
+    29 │ {
+  
+object-pattern.js:27:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                              ^
+    28 │ }
+    29 │ {
+  
+  i Remove }
+  
+object-pattern.js:27:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                    ^^^^
+    28 │ }
+    29 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                    ^^^^
+    28 │ }
+    29 │ {
+  
+object-pattern.js:27:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                         ^
+    28 │ }
+    29 │ {
+  
+  i Remove }
+  
+object-pattern.js:27:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                               ^^^^
+    28 │ }
+    29 │ {
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                               ^^^^
+    28 │ }
+    29 │ {
+  
+object-pattern.js:27:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+       │                                                    ^
+    28 │ }
+    29 │ {
+  
+  i Remove }
+  
+object-pattern.js:31:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    29 │ {
+    30 │   // destructuring assignment in async call
+  > 31 │   async({ p: void } = {});
+       │              ^^^^
+    32 │ }
+    33 │ {
+  
+  i This expression cannot be assigned to
+  
+object-pattern.js:35:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    33 │ {
+    34 │   // catch param
+  > 35 │   try {} catch ({ p: void }) {}
+       │                      ^^^^
+    36 │ }
+    37 │ 
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    33 │ {
+    34 │   // catch param
+  > 35 │   try {} catch ({ p: void }) {}
+       │                      ^^^^
+    36 │ }
+    37 │ 
+  
+object-pattern.js:35:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    33 │ {
+    34 │   // catch param
+  > 35 │   try {} catch ({ p: void }) {}
+       │                           ^
+    36 │ }
+    37 │ 
+  
+  i Remove }
+  
+
+```

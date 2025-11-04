@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/classes/multiple-static.js
+---
+# Input
+
+```js
+class C {
+  static
+  static
+  static
+  a() {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,6 @@
+ class C {
+-  static static;
+-  static a() {}
++  static
++  static
++  static
++  a() {}
+ }
+```
+
+# Output
+
+```js
+class C {
+  static
+  static
+  static
+  a() {}
+}
+```
+
+# Errors
+```
+multiple-static.js:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' already seen
+  
+    1 │ class C {
+    2 │   static
+  > 3 │   static
+      │   ^^^^^^
+    4 │   static
+    5 │   a() {}
+  
+  i duplicate modifier
+  
+    1 │ class C {
+    2 │   static
+  > 3 │   static
+      │   ^^^^^^
+    4 │   static
+    5 │   a() {}
+  
+  i first seen here
+  
+    1 │ class C {
+  > 2 │   static
+      │   ^^^^^^
+    3 │   static
+    4 │   static
+  
+multiple-static.js:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' already seen
+  
+    2 │   static
+    3 │   static
+  > 4 │   static
+      │   ^^^^^^
+    5 │   a() {}
+    6 │ }
+  
+  i duplicate modifier
+  
+    2 │   static
+    3 │   static
+  > 4 │   static
+      │   ^^^^^^
+    5 │   a() {}
+    6 │ }
+  
+  i first seen here
+  
+    1 │ class C {
+  > 2 │   static
+      │   ^^^^^^
+    3 │   static
+    4 │   static
+  
+
+```

@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/multiparser-css/issue-16692.js
+---
+# Input
+
+```js
+const c1 = styled.div`
+    border:    1px     ${solid}      red;
+`;
+
+const c2 = styled.div`
+ font-size:      var(--font-size-h${level});
+`;
+
+const c3 = styled.div`
+    grid-area:       area-${area};
+`;
+
+const c4 = styled.div`
+    grid-area:       var(--${one});
+`;
+
+const c5 = styled.div`
+ font-size:      var(--font-size-h ${level});
+`;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,19 +1,19 @@
+ const c1 = styled.div`
+-  border: 1px ${solid} red;
++    border:    1px     ${solid}      red;
+ `;
+ 
+ const c2 = styled.div`
+-  font-size: var(--font-size-h${level});
++ font-size:      var(--font-size-h${level});
+ `;
+ 
+ const c3 = styled.div`
+-  grid-area: area-${area};
++    grid-area:       area-${area};
+ `;
+ 
+ const c4 = styled.div`
+-  grid-area: var(--${one});
++    grid-area:       var(--${one});
+ `;
+ 
+ const c5 = styled.div`
+-  font-size: var(--font-size-h ${level});
++ font-size:      var(--font-size-h ${level});
+ `;
+```
+
+# Output
+
+```js
+const c1 = styled.div`
+    border:    1px     ${solid}      red;
+`;
+
+const c2 = styled.div`
+ font-size:      var(--font-size-h${level});
+`;
+
+const c3 = styled.div`
+    grid-area:       area-${area};
+`;
+
+const c4 = styled.div`
+    grid-area:       var(--${one});
+`;
+
+const c5 = styled.div`
+ font-size:      var(--font-size-h ${level});
+`;
+```

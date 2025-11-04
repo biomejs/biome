@@ -1,0 +1,131 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/unary-expression-void.js
+---
+# Input
+
+```js
+// expr
+void [
+  // pattern
+  [ void ] = [{
+    // expr
+    [ void [] ]:
+    // pattern
+    [ void ] =
+    // expr
+    void [
+      // pattern
+      ([void]) => []
+    ]
+    // expr
+  }] = [void []]
+]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,18 +1,16 @@
+ // expr
+ void [
+   // pattern
+-  ([void] = [
+-    {
+-      // expr
+-      [void []]:
+-        // pattern
+-        // expr
+-        [void] = void [
+-          // pattern
+-          ([void]) => [],
+-        ],
+-      // expr
+-    },
+-  ] =
+-    [void []]),
+-];
++  [ void ] = [{
++    // expr
++    [ void [] ]:
++    // pattern
++    [ void ] =
++    // expr
++    void [
++      // pattern
++      ([void]) => []
++    ]
++    // expr
++  }] = [void []]
++]
+```
+
+# Output
+
+```js
+// expr
+void [
+  // pattern
+  [ void ] = [{
+    // expr
+    [ void [] ]:
+    // pattern
+    [ void ] =
+    // expr
+    void [
+      // pattern
+      ([void]) => []
+    ]
+    // expr
+  }] = [void []]
+]
+```
+
+# Errors
+```
+unary-expression-void.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    2 │ void [
+    3 │   // pattern
+  > 4 │   [ void ] = [{
+      │     ^^^^
+    5 │     // expr
+    6 │     [ void [] ]:
+  
+  i This expression cannot be assigned to
+  
+unary-expression-void.js:8:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+     6 │     [ void [] ]:
+     7 │     // pattern
+   > 8 │     [ void ] =
+       │       ^^^^
+     9 │     // expr
+    10 │     void [
+  
+  i This expression cannot be assigned to
+  
+unary-expression-void.js:12:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `=>`
+  
+    10 │     void [
+    11 │       // pattern
+  > 12 │       ([void]) => []
+       │                ^^
+    13 │     ]
+    14 │     // expr
+  
+  i Remove =>
+  
+
+```

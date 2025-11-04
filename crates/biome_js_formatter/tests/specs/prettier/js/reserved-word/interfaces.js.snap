@@ -1,0 +1,103 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/reserved-word/interfaces.js
+---
+# Input
+
+```js
+foo.interface;
+interface.foo;
+new interface();
+({ interface: "foo" });
+(interface, "foo");
+void interface;
+var interface = "foo";
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,6 +2,6 @@
+ interface.foo;
+ new interface();
+ ({ interface: "foo" });
+-(interface, "foo");
++interface, "foo";
+ void interface;
+ var interface = "foo";
+```
+
+# Output
+
+```js
+foo.interface;
+interface.foo;
+new interface();
+({ interface: "foo" });
+interface, "foo";
+void interface;
+var interface = "foo";
+```
+
+# Errors
+```
+interfaces.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `interface` as an identifier in strict mode
+  
+    1 │ foo.interface;
+  > 2 │ interface.foo;
+      │ ^^^^^^^^^
+    3 │ new interface();
+    4 │ ({ interface: "foo" });
+  
+interfaces.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `interface` as an identifier in strict mode
+  
+    1 │ foo.interface;
+    2 │ interface.foo;
+  > 3 │ new interface();
+      │     ^^^^^^^^^
+    4 │ ({ interface: "foo" });
+    5 │ (interface, "foo");
+  
+interfaces.js:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `interface` as an identifier in strict mode
+  
+    3 │ new interface();
+    4 │ ({ interface: "foo" });
+  > 5 │ (interface, "foo");
+      │  ^^^^^^^^^
+    6 │ void interface;
+    7 │ var interface = "foo";
+  
+interfaces.js:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `interface` as an identifier in strict mode
+  
+    4 │ ({ interface: "foo" });
+    5 │ (interface, "foo");
+  > 6 │ void interface;
+      │      ^^^^^^^^^
+    7 │ var interface = "foo";
+    8 │ 
+  
+interfaces.js:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `interface` as an identifier in strict mode
+  
+    5 │ (interface, "foo");
+    6 │ void interface;
+  > 7 │ var interface = "foo";
+      │     ^^^^^^^^^
+    8 │ 
+  
+
+```

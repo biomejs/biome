@@ -1,0 +1,141 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/sequence-break/break.js
+---
+# Input
+
+```js
+const f = (argument1, argument2, argument3) =>
+  (doSomethingWithArgument(argument1), doSomethingWithArgument(argument2),argument1);
+(function(){
+	return aLongIdentifierName, aLongIdentifierName, aLongIdentifierName, aLongIdentifierName;
+});
+(function(){
+	throw aLongIdentifierName, aLongIdentifierName, aLongIdentifierName, aLongIdentifierName;
+});
+aLongIdentifierName, aLongIdentifierName, aLongIdentifierName, aLongIdentifierName;
+a.then(() => (aLongIdentifierName, aLongIdentifierName, aLongIdentifierName, aLongIdentifierName));
+for (aLongIdentifierName = 0, aLongIdentifierName = 0, aLongIdentifierName = 0, aLongIdentifierName = 0; test; update) {}
+(a = b ? c : function() { return 0; }),
+  (a = b ? c : function() { return 0; }),
+  (a = b ? c : function() { return 0; }),
+  (a = b ? c : function() { return 0; }),
+  (a = b ? c : function() { return 0; });
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -13,16 +13,16 @@
+ });
+ (function () {
+   throw (
+-    aLongIdentifierName,
++    (aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName,
+-    aLongIdentifierName
++    aLongIdentifierName)
+   );
+ });
+-(aLongIdentifierName,
++aLongIdentifierName,
+   aLongIdentifierName,
+   aLongIdentifierName,
+-  aLongIdentifierName);
++  aLongIdentifierName;
+ a.then(
+   () => (
+     aLongIdentifierName,
+@@ -39,7 +39,7 @@
+   test;
+   update
+ ) {}
+-((a = b
++(a = b
+   ? c
+   : function () {
+       return 0;
+@@ -63,4 +63,4 @@
+     ? c
+     : function () {
+         return 0;
+-      }));
++      });
+```
+
+# Output
+
+```js
+const f = (argument1, argument2, argument3) => (
+  doSomethingWithArgument(argument1),
+  doSomethingWithArgument(argument2),
+  argument1
+);
+(function () {
+  return (
+    aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName
+  );
+});
+(function () {
+  throw (
+    (aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName)
+  );
+});
+aLongIdentifierName,
+  aLongIdentifierName,
+  aLongIdentifierName,
+  aLongIdentifierName;
+a.then(
+  () => (
+    aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName,
+    aLongIdentifierName
+  ),
+);
+for (
+  aLongIdentifierName = 0,
+    aLongIdentifierName = 0,
+    aLongIdentifierName = 0,
+    aLongIdentifierName = 0;
+  test;
+  update
+) {}
+(a = b
+  ? c
+  : function () {
+      return 0;
+    }),
+  (a = b
+    ? c
+    : function () {
+        return 0;
+      }),
+  (a = b
+    ? c
+    : function () {
+        return 0;
+      }),
+  (a = b
+    ? c
+    : function () {
+        return 0;
+      }),
+  (a = b
+    ? c
+    : function () {
+        return 0;
+      });
+```

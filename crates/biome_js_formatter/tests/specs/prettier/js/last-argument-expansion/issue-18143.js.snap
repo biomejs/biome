@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/last-argument-expansion/issue-18143.js
+---
+# Input
+
+```js
+assert.deepStrictEqual(linesCollection.getViewLinesIndentGuides____(-1, -1), []);
+assert.deepStrictEqual(linesCollection.getViewLinesIndentGuides___(-1, -1), [1]);
+assert.deepStrictEqual(linesCollection.getViewLinesIndentGuides(-1, -1), [1, 2]);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,10 +2,11 @@
+   linesCollection.getViewLinesIndentGuides____(-1, -1),
+   [],
+ );
+-assert.deepStrictEqual(linesCollection.getViewLinesIndentGuides___(-1, -1), [
+-  1,
+-]);
+ assert.deepStrictEqual(
++  linesCollection.getViewLinesIndentGuides___(-1, -1),
++  [1],
++);
++assert.deepStrictEqual(
+   linesCollection.getViewLinesIndentGuides(-1, -1),
+   [1, 2],
+ );
+```
+
+# Output
+
+```js
+assert.deepStrictEqual(
+  linesCollection.getViewLinesIndentGuides____(-1, -1),
+  [],
+);
+assert.deepStrictEqual(
+  linesCollection.getViewLinesIndentGuides___(-1, -1),
+  [1],
+);
+assert.deepStrictEqual(
+  linesCollection.getViewLinesIndentGuides(-1, -1),
+  [1, 2],
+);
+```

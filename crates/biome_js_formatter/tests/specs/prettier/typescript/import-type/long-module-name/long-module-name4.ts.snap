@@ -1,0 +1,118 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/import-type/long-module-name/long-module-name4.ts
+---
+# Input
+
+```ts
+interface RuleMap {
+  'arrow-parens': typeof import('./long/long/long/long/long/path/to/rules/arrow-parens');
+  'consistent-return': typeof import('./long/long/long/long/long/path/to/rules/consistent-return');
+  'dot-notation': typeof import('./long/long/long/long/long/path/to/rules/dot-notation');
+  'init-declarations': typeof import('./long/long/long/long/long/path/to/rules/init-declarations');
+  'max-params': typeof import('./long/long/long/long/long/path/to/rules/max-params');
+  'no-dupe-args': typeof import('./long/long/long/long/long/path/to/rules/no-dupe-args');
+  'no-dupe-class-members': typeof import('./long/long/long/long/long/path/to/rules/no-dupe-class-members');
+  'no-empty-function': typeof import('./long/long/long/long/long/path/to/rules/no-empty-function');
+  'no-implicit-globals': typeof import('./long/long/long/long/long/path/to/rules/no-implicit-globals');
+  'no-invalid-this': typeof import('./long/long/long/long/long/path/to/rules/no-invalid-this');
+  'no-loop-func': typeof import('./long/long/long/long/long/path/to/rules/no-loop-func');
+  'no-loss-of-precision': typeof import('./long/long/long/long/long/path/to/rules/no-loss-of-precision');
+  'no-magic-numbers': typeof import('./long/long/long/long/long/path/to/rules/no-magic-numbers');
+  'no-restricted-globals': typeof import('./long/long/long/long/long/path/to/rules/no-restricted-globals');
+  'no-restricted-imports': typeof import('./long/long/long/long/long/path/to/rules/no-restricted-imports');
+  'no-undef': typeof import('./long/long/long/long/long/path/to/rules/no-undef');
+  'no-unused-expressions': typeof import('./long/long/long/long/long/path/to/rules/no-unused-expressions');
+  'no-useless-constructor': typeof import('./long/long/long/long/long/path/to/rules/no-useless-constructor');
+  'prefer-const': typeof import('./long/long/long/long/long/path/to/rules/prefer-const');
+  'prefer-destructuring': typeof import('./long/long/long/long/long/path/to/rules/prefer-destructuring');
+  'prefer-destructuring2': typeof import(
+// comment
+'./long/long/long/long/long/path/to/rules/prefer-destructuring');
+  'prefer-destructuring3':
+// comment
+typeof import(
+'./long/long/long/long/long/path/to/rules/prefer-destructuring');
+  strict: typeof import('./long/long/long/long/long/path/to/rules/strict');
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -19,10 +19,8 @@
+   "no-useless-constructor": typeof import("./long/long/long/long/long/path/to/rules/no-useless-constructor");
+   "prefer-const": typeof import("./long/long/long/long/long/path/to/rules/prefer-const");
+   "prefer-destructuring": typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+-  "prefer-destructuring2": typeof import(
+-    // comment
+-    "./long/long/long/long/long/path/to/rules/prefer-destructuring"
+-  );
++  "prefer-destructuring2": typeof import(// comment
++  "./long/long/long/long/long/path/to/rules/prefer-destructuring");
+   "prefer-destructuring3": // comment
+   typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+   strict: typeof import("./long/long/long/long/long/path/to/rules/strict");
+```
+
+# Output
+
+```ts
+interface RuleMap {
+  "arrow-parens": typeof import("./long/long/long/long/long/path/to/rules/arrow-parens");
+  "consistent-return": typeof import("./long/long/long/long/long/path/to/rules/consistent-return");
+  "dot-notation": typeof import("./long/long/long/long/long/path/to/rules/dot-notation");
+  "init-declarations": typeof import("./long/long/long/long/long/path/to/rules/init-declarations");
+  "max-params": typeof import("./long/long/long/long/long/path/to/rules/max-params");
+  "no-dupe-args": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-args");
+  "no-dupe-class-members": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-class-members");
+  "no-empty-function": typeof import("./long/long/long/long/long/path/to/rules/no-empty-function");
+  "no-implicit-globals": typeof import("./long/long/long/long/long/path/to/rules/no-implicit-globals");
+  "no-invalid-this": typeof import("./long/long/long/long/long/path/to/rules/no-invalid-this");
+  "no-loop-func": typeof import("./long/long/long/long/long/path/to/rules/no-loop-func");
+  "no-loss-of-precision": typeof import("./long/long/long/long/long/path/to/rules/no-loss-of-precision");
+  "no-magic-numbers": typeof import("./long/long/long/long/long/path/to/rules/no-magic-numbers");
+  "no-restricted-globals": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-globals");
+  "no-restricted-imports": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-imports");
+  "no-undef": typeof import("./long/long/long/long/long/path/to/rules/no-undef");
+  "no-unused-expressions": typeof import("./long/long/long/long/long/path/to/rules/no-unused-expressions");
+  "no-useless-constructor": typeof import("./long/long/long/long/long/path/to/rules/no-useless-constructor");
+  "prefer-const": typeof import("./long/long/long/long/long/path/to/rules/prefer-const");
+  "prefer-destructuring": typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+  "prefer-destructuring2": typeof import(// comment
+  "./long/long/long/long/long/path/to/rules/prefer-destructuring");
+  "prefer-destructuring3": // comment
+  typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+  strict: typeof import("./long/long/long/long/long/path/to/rules/strict");
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   "arrow-parens": typeof import("./long/long/long/long/long/path/to/rules/arrow-parens");
+    3:   "consistent-return": typeof import("./long/long/long/long/long/path/to/rules/consistent-return");
+    4:   "dot-notation": typeof import("./long/long/long/long/long/path/to/rules/dot-notation");
+    5:   "init-declarations": typeof import("./long/long/long/long/long/path/to/rules/init-declarations");
+    6:   "max-params": typeof import("./long/long/long/long/long/path/to/rules/max-params");
+    7:   "no-dupe-args": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-args");
+    8:   "no-dupe-class-members": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-class-members");
+    9:   "no-empty-function": typeof import("./long/long/long/long/long/path/to/rules/no-empty-function");
+   10:   "no-implicit-globals": typeof import("./long/long/long/long/long/path/to/rules/no-implicit-globals");
+   11:   "no-invalid-this": typeof import("./long/long/long/long/long/path/to/rules/no-invalid-this");
+   12:   "no-loop-func": typeof import("./long/long/long/long/long/path/to/rules/no-loop-func");
+   13:   "no-loss-of-precision": typeof import("./long/long/long/long/long/path/to/rules/no-loss-of-precision");
+   14:   "no-magic-numbers": typeof import("./long/long/long/long/long/path/to/rules/no-magic-numbers");
+   15:   "no-restricted-globals": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-globals");
+   16:   "no-restricted-imports": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-imports");
+   17:   "no-undef": typeof import("./long/long/long/long/long/path/to/rules/no-undef");
+   18:   "no-unused-expressions": typeof import("./long/long/long/long/long/path/to/rules/no-unused-expressions");
+   19:   "no-useless-constructor": typeof import("./long/long/long/long/long/path/to/rules/no-useless-constructor");
+   20:   "prefer-const": typeof import("./long/long/long/long/long/path/to/rules/prefer-const");
+   21:   "prefer-destructuring": typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+   25:   typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+```

@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/comments-closure-typecast/comment-in-the-middle.js
+---
+# Input
+
+```js
+var a =
+/**
+ * bla bla bla
+ * @type {string |
+  * number
+ * }
+* bla bla bla
+ */
+//2
+ ((window['s'])).toString();
+console.log(a.foo());
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,5 +7,5 @@
+    * bla bla bla
+    */
+   //2
+-  window["s"].toString();
++  (window["s"]).toString();
+ console.log(a.foo());
+```
+
+# Output
+
+```js
+var a =
+  /**
+   * bla bla bla
+   * @type {string |
+   * number
+   * }
+   * bla bla bla
+   */
+  //2
+  (window["s"]).toString();
+console.log(a.foo());
+```

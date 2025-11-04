@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/test-declarations/optional.js
+---
+# Input
+
+```js
+describe?.("some string some string some string some string some string some string some string some string", (done) => {})
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1 @@
+-describe?.(
+-  "some string some string some string some string some string some string some string some string",
+-  (done) => {},
+-);
++describe?.("some string some string some string some string some string some string some string some string", (done) => {});
+```
+
+# Output
+
+```js
+describe?.("some string some string some string some string some string some string some string some string", (done) => {});
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: describe?.("some string some string some string some string some string some string some string some string", (done) => {});
+```

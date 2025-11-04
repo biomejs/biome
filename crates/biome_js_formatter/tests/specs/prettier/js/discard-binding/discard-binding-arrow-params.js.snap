@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/discard-binding-arrow-params.js
+---
+# Input
+
+```js
+(void) => {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,4 @@
+-(void) => {};
++(void)
++=>
++{
++}
+```
+
+# Output
+
+```js
+(void)
+=>
+{
+}
+```
+
+# Errors
+```
+discard-binding-arrow-params.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ (void) => {}
+      │        ^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ (void) => {}
+      │        ^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ (void) => {}
+      │ ^^^^^^^^^
+    2 │ 
+  
+
+```

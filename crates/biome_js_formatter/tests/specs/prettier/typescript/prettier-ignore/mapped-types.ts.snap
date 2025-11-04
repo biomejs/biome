@@ -1,0 +1,197 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/prettier-ignore/mapped-types.ts
+---
+# Input
+
+```ts
+type a= {
+    // prettier-ignore
+    [A in B]: C  |  D
+  }
+
+type b= {
+    [
+      // prettier-ignore
+      A in B
+    ]: C  |  D
+  }
+
+type c= {
+    [
+      A in
+      // prettier-ignore
+      B
+    ]: C  |  D
+  }
+
+type d= {
+    [A in B]:
+      // prettier-ignore
+      C  |  D
+  }
+
+type e= {
+    [
+      /* prettier-ignore */
+      A in B
+    ]: C  |  D
+  }
+
+type f= {
+    [
+      A in
+      /* prettier-ignore */
+      B
+    ]: C  |  D
+  }
+
+type g= {
+    [A in B]:
+      /* prettier-ignore */
+      C  |  D
+  }
+
+
+type h= {
+    /* prettier-ignore */ [A in B]: C  |  D
+  }
+
+type i= {
+    [/* prettier-ignore */ A in B ]: C  |  D
+  }
+
+type j= {
+    [A in /* prettier-ignore */ B]: C  |  D
+  }
+
+type k= {
+    [A in B]: /* prettier-ignore */ C  |  D
+  }
+
+type l= {
+    /* prettier-ignore */
+    [A in B]: C  |  D
+  }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -11,11 +11,12 @@
+   };
+ 
+ type c = {
+-  [A in B]: C | D; // prettier-ignore
++  [A in B]: C | D;
+ };
+ 
+ type d = {
+-  [A in B]: C | D; // prettier-ignore
++  [A in B]: // prettier-ignore
++  C | D;
+ };
+ 
+ type e = {
+@@ -26,11 +27,12 @@
+   };
+ 
+ type f = {
+-  [A /* prettier-ignore */ in B]: C | D;
++  [A in B]: C | D;
+ };
+ 
+ type g = {
+-  [A in B /* prettier-ignore */]: C | D;
++  [A in B]: /* prettier-ignore */
++  C | D;
+ };
+ 
+ type h = {
+@@ -38,15 +40,15 @@
+   };
+ 
+ type i = {
+-    [/* prettier-ignore */ A in B ]: C  |  D
+-  };
++  [/* prettier-ignore */ A in B]: C | D;
++};
+ 
+ type j = {
+   [A in /* prettier-ignore */ B]: C | D;
+ };
+ 
+ type k = {
+-  [A in B]: /* prettier-ignore */ C  |  D;
++  [A in B]: /* prettier-ignore */ C | D;
+ };
+ 
+ type l = {
+```
+
+# Output
+
+```ts
+type a = {
+    // prettier-ignore
+    [A in B]: C  |  D
+  };
+
+type b = {
+    [
+      // prettier-ignore
+      A in B
+    ]: C  |  D
+  };
+
+type c = {
+  [A in B]: C | D;
+};
+
+type d = {
+  [A in B]: // prettier-ignore
+  C | D;
+};
+
+type e = {
+    [
+      /* prettier-ignore */
+      A in B
+    ]: C  |  D
+  };
+
+type f = {
+  [A in B]: C | D;
+};
+
+type g = {
+  [A in B]: /* prettier-ignore */
+  C | D;
+};
+
+type h = {
+    /* prettier-ignore */ [A in B]: C  |  D
+  };
+
+type i = {
+  [/* prettier-ignore */ A in B]: C | D;
+};
+
+type j = {
+  [A in /* prettier-ignore */ B]: C | D;
+};
+
+type k = {
+  [A in B]: /* prettier-ignore */ C | D;
+};
+
+type l = {
+    /* prettier-ignore */
+    [A in B]: C  |  D
+  };
+```

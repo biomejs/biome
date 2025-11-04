@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/assignment-expression/property-key.js
+---
+# Input
+
+```js
+a = {
+  [this.resource = resource]: 1,
+}
+
+class A {
+  [this.resource = resource] = 1;
+
+  [this.resource = resource]() {
+
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+ a = {
+-  [(this.resource = resource)]: 1,
++  [this.resource = resource]: 1,
+ };
+ 
+ class A {
+-  [(this.resource = resource)] = 1;
++  [this.resource = resource] = 1;
+ 
+-  [(this.resource = resource)]() {}
++  [this.resource = resource]() {}
+ }
+```
+
+# Output
+
+```js
+a = {
+  [this.resource = resource]: 1,
+};
+
+class A {
+  [this.resource = resource] = 1;
+
+  [this.resource = resource]() {}
+}
+```

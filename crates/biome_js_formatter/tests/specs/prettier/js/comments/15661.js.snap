@@ -1,0 +1,305 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/comments/15661.js
+---
+# Input
+
+```js
+!(
+    x || // foo
+    y || // bar
+    z /*
+    * comment
+    */
+)
+
+!(
+    cond1 || // foo
+    cond2 || // bar
+    cond3 // baz
+);
+
+!(
+    a && // alpha
+    b || // bravo
+    c // charlie
+);
+
+!(
+    x || // foo
+    (y && z) // bar
+);
+
+!(
+    a || // first condition
+    (b || c) // second condition
+    || d // third condition
+);
+
+void(
+    p && // first
+    q || // second
+    r && // third
+    s // fourth
+);
+
+void(
+    cond1 || // foo
+    cond2 && // bar
+    cond3 || // baz
+    cond4 // qux
+);
+
+!(
+    (cond1 && cond2) || // multi-cond1
+    (cond3 || cond4) // multi-cond2
+);
+
+!(
+    (cond1 || cond2) && // complex-cond1
+    (cond3 || cond4) || // complex-cond2
+    cond5 // complex-cond3
+);
+
+void(
+    (condA || condB) && // test A
+    (condC || condD) || // test B
+    condE // test C
+);
+
+void(
+    (x || y) && ( // nested
+    z || w) // comment for w
+);
+
+!(
+    a && ( // begin nested
+    b || c) // end nested
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -9,27 +9,35 @@
+ );
+ 
+ !(
+-  cond1 || // foo
+-  cond2 || // bar
+-  cond3 // baz
++  (
++    cond1 || // foo
++    cond2 || // bar
++    cond3
++  ) // baz
+ );
+ 
+ !(
+-  (a && // alpha
+-    b) || // bravo
+-  c // charlie
++  (
++    (a && // alpha
++      b) || // bravo
++    c
++  ) // charlie
+ );
+ 
+ !(
+-  x || // foo
+-  (y && z) // bar
++  (
++    x || // foo
++    (y && z)
++  ) // bar
+ );
+ 
+ !(
+-  a || // first condition
+-  b ||
+-  c || // second condition
+-  d // third condition
++  (
++    a || // first condition
++    b ||
++    c || // second condition
++    d
++  ) // third condition
+ );
+ 
+ void (
+@@ -42,36 +50,48 @@
+ );
+ 
+ void (
+-  cond1 || // foo
+-  (cond2 && // bar
+-    cond3) || // baz
+-  cond4 // qux
++  (
++    cond1 || // foo
++    (cond2 && // bar
++      cond3) || // baz
++    cond4
++  ) // qux
+ );
+ 
+ !(
+-  (cond1 && cond2) || // multi-cond1
+-  cond3 ||
+-  cond4 // multi-cond2
++  (
++    (cond1 && cond2) || // multi-cond1
++    cond3 ||
++    cond4
++  ) // multi-cond2
+ );
+ 
+ !(
+-  ((cond1 || cond2) && // complex-cond1
+-    (cond3 || cond4)) || // complex-cond2
+-  cond5 // complex-cond3
++  (
++    ((cond1 || cond2) && // complex-cond1
++      (cond3 || cond4)) || // complex-cond2
++    cond5
++  ) // complex-cond3
+ );
+ 
+ void (
+-  ((condA || condB) && // test A
+-    (condC || condD)) || // test B
+-  condE // test C
++  (
++    ((condA || condB) && // test A
++      (condC || condD)) || // test B
++    condE
++  ) // test C
+ );
+ 
+ void (
+-  (x || y) && // nested
+-  (z || w) // comment for w
++  (
++    (x || y) && // nested
++    (z || w)
++  ) // comment for w
+ );
+ 
+ !(
+-  a && // begin nested
+-  (b || c) // end nested
++  (
++    a && // begin nested
++    (b || c)
++  ) // end nested
+ );
+```
+
+# Output
+
+```js
+!(
+  (
+    x || // foo
+    y || // bar
+    z
+  ) /*
+   * comment
+   */
+);
+
+!(
+  (
+    cond1 || // foo
+    cond2 || // bar
+    cond3
+  ) // baz
+);
+
+!(
+  (
+    (a && // alpha
+      b) || // bravo
+    c
+  ) // charlie
+);
+
+!(
+  (
+    x || // foo
+    (y && z)
+  ) // bar
+);
+
+!(
+  (
+    a || // first condition
+    b ||
+    c || // second condition
+    d
+  ) // third condition
+);
+
+void (
+  (
+    (p && // first
+      q) || // second
+    (r && // third
+      s)
+  ) // fourth
+);
+
+void (
+  (
+    cond1 || // foo
+    (cond2 && // bar
+      cond3) || // baz
+    cond4
+  ) // qux
+);
+
+!(
+  (
+    (cond1 && cond2) || // multi-cond1
+    cond3 ||
+    cond4
+  ) // multi-cond2
+);
+
+!(
+  (
+    ((cond1 || cond2) && // complex-cond1
+      (cond3 || cond4)) || // complex-cond2
+    cond5
+  ) // complex-cond3
+);
+
+void (
+  (
+    ((condA || condB) && // test A
+      (condC || condD)) || // test B
+    condE
+  ) // test C
+);
+
+void (
+  (
+    (x || y) && // nested
+    (z || w)
+  ) // comment for w
+);
+
+!(
+  (
+    a && // begin nested
+    (b || c)
+  ) // end nested
+);
+```

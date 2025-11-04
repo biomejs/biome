@@ -1,0 +1,348 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/interface2/break/break.ts
+---
+# Input
+
+```ts
+export interface Environment1 extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+> {
+  m(): void;
+};
+export class Environment1____ extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+> {
+  m(): void;
+};
+export class Environment2 extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+  DifferentType1,
+  DifferentType2,
+  DifferentType3,
+  DifferentType4,
+> {
+  m() {};
+};
+
+// Declare Interface Break
+declare interface ExtendsOne extends ASingleInterface {
+  x: string;
+}
+
+declare interface ExtendsLarge extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+declare class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+
+declare interface ExtendsMany extends Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7 {
+  x: string;
+}
+
+// Interface declaration break
+interface ExtendsOne extends ASingleInterface {
+  x: string;
+}
+
+interface ExtendsLarge extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+
+interface ExtendsMany extends Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7 {
+  s: string;
+}
+
+// Generic Types
+interface ExtendsOne extends ASingleInterface<string> {
+  x: string;
+}
+
+interface ExtendsLarge extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+  x: string;
+}
+class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+  x: string;
+}
+
+interface ExtendsMany
+  extends ASingleGenericInterface<Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7> {
+  x: string;
+}
+class ExtendsMany____
+  extends ASingleGenericInterface<Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7> {
+  x: string;
+}
+
+interface ExtendsManyWithGenerics
+  extends InterfaceOne, InterfaceTwo, ASingleGenericInterface<Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7>, InterfaceThree {
+
+    x: string;
+  }
+
+export interface ExtendsLongOneWithGenerics extends Bar< SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,  ToBreakLineToBreakLineToBreakLine> {}
+export class ExtendsLongOneWithGenerics____ extends Bar< SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,  ToBreakLineToBreakLineToBreakLine> {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,14 @@
+-export interface Environment1
+-  extends GenericEnvironment<SomeType, AnotherType, YetAnotherType> {
++export interface Environment1 extends GenericEnvironment<
++  SomeType,
++  AnotherType,
++  YetAnotherType,
++> {
+   m(): void;
+ }
+ export class Environment1____ extends GenericEnvironment<
+   SomeType,
+   AnotherType,
+-  YetAnotherType
++  YetAnotherType,
+ > {
+   m(): void;
+ }
+@@ -16,9 +19,9 @@
+   DifferentType1,
+   DifferentType2,
+   DifferentType3,
+-  DifferentType4
++  DifferentType4,
+ > {
+-  m() {}
++  m() {};
+ }
+ 
+ // Declare Interface Break
+```
+
+# Output
+
+```ts
+export interface Environment1 extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+> {
+  m(): void;
+}
+export class Environment1____ extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+> {
+  m(): void;
+}
+export class Environment2 extends GenericEnvironment<
+  SomeType,
+  AnotherType,
+  YetAnotherType,
+  DifferentType1,
+  DifferentType2,
+  DifferentType3,
+  DifferentType4,
+> {
+  m() {};
+}
+
+// Declare Interface Break
+declare interface ExtendsOne extends ASingleInterface {
+  x: string;
+}
+
+declare interface ExtendsLarge
+  extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+declare class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+
+declare interface ExtendsMany
+  extends Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7 {
+  x: string;
+}
+
+// Interface declaration break
+interface ExtendsOne extends ASingleInterface {
+  x: string;
+}
+
+interface ExtendsLarge
+  extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+  x: string;
+}
+
+interface ExtendsMany
+  extends Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7 {
+  s: string;
+}
+
+// Generic Types
+interface ExtendsOne extends ASingleInterface<string> {
+  x: string;
+}
+
+interface ExtendsLarge
+  extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+  x: string;
+}
+class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+  x: string;
+}
+
+interface ExtendsMany
+  extends ASingleGenericInterface<
+    Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7
+  > {
+  x: string;
+}
+class ExtendsMany____ extends ASingleGenericInterface<
+  Interface1,
+  Interface2,
+  Interface3,
+  Interface4,
+  Interface5,
+  Interface6,
+  Interface7
+> {
+  x: string;
+}
+
+interface ExtendsManyWithGenerics
+  extends InterfaceOne,
+    InterfaceTwo,
+    ASingleGenericInterface<
+      Interface1,
+      Interface2,
+      Interface3,
+      Interface4,
+      Interface5,
+      Interface6,
+      Interface7
+    >,
+    InterfaceThree {
+  x: string;
+}
+
+export interface ExtendsLongOneWithGenerics
+  extends Bar<
+    SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,
+    ToBreakLineToBreakLineToBreakLine
+  > {}
+export class ExtendsLongOneWithGenerics____ extends Bar<
+  SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,
+  ToBreakLineToBreakLineToBreakLine
+> {}
+```
+
+# Errors
+```
+break.ts:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    3 │   AnotherType,
+    4 │   YetAnotherType,
+  > 5 │ > {
+      │ ^
+    6 │   m(): void;
+    7 │ };
+  
+  i Expected a type parameter here.
+  
+    3 │   AnotherType,
+    4 │   YetAnotherType,
+  > 5 │ > {
+      │ ^
+    6 │   m(): void;
+    7 │ };
+  
+break.ts:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    10 │   AnotherType,
+    11 │   YetAnotherType,
+  > 12 │ > {
+       │ ^
+    13 │   m(): void;
+    14 │ };
+  
+  i Expected a type parameter here.
+  
+    10 │   AnotherType,
+    11 │   YetAnotherType,
+  > 12 │ > {
+       │ ^
+    13 │   m(): void;
+    14 │ };
+  
+break.ts:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    21 │   DifferentType3,
+    22 │   DifferentType4,
+  > 23 │ > {
+       │ ^
+    24 │   m() {};
+    25 │ };
+  
+  i Expected a type parameter here.
+  
+    21 │   DifferentType3,
+    22 │   DifferentType4,
+  > 23 │ > {
+       │ ^
+    24 │   m() {};
+    25 │ };
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   36: declare class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+   60: class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+   84: class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+```

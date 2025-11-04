@@ -1,0 +1,76 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/type-params/18041.ts
+---
+# Input
+
+```ts
+type BufferStreamOrVoid<
+  C extends undefined | Buffer | Stream | boolean,
+  P extends undefined | Buffer,
+  R extends Buffer | Stream | void = // Inline comment about void.
+  // Above line comment about exclue.
+  Exclude<C, false> extends never
+    ? void
+    : C & P extends Buffer
+    ? Buffer
+    : Stream
+> = R;
+
+type A<
+  B  = // Inline comment about void.
+  // Above line comment about exclue.
+  C
+> = R;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,8 @@
+ type BufferStreamOrVoid<
+   C extends undefined | Buffer | Stream | boolean,
+   P extends undefined | Buffer,
+-  R extends Buffer | Stream | void = // Above line comment about exclue. // Inline comment about void.
++  R extends Buffer | Stream | void = // Inline comment about void.
++  // Above line comment about exclue.
+   Exclude<C, false> extends never
+     ? void
+     : C & P extends Buffer
+@@ -10,6 +11,7 @@
+ > = R;
+ 
+ type A<
+-  B = // Above line comment about exclue. // Inline comment about void.
++  B = // Inline comment about void.
++  // Above line comment about exclue.
+   C,
+ > = R;
+```
+
+# Output
+
+```ts
+type BufferStreamOrVoid<
+  C extends undefined | Buffer | Stream | boolean,
+  P extends undefined | Buffer,
+  R extends Buffer | Stream | void = // Inline comment about void.
+  // Above line comment about exclue.
+  Exclude<C, false> extends never
+    ? void
+    : C & P extends Buffer
+      ? Buffer
+      : Stream,
+> = R;
+
+type A<
+  B = // Inline comment about void.
+  // Above line comment about exclue.
+  C,
+> = R;
+```

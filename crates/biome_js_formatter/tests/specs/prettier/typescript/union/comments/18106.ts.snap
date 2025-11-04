@@ -1,0 +1,146 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/union/comments/18106.ts
+---
+# Input
+
+```ts
+export interface DirectiveArgumentNode1 extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+}
+
+export class DirectiveArgumentNode12 extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+  = 1
+}
+
+type A = // dir, exp, arg, modifiers
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+
+const elements: // dir, exp, arg, modifiers
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+  = 1
+
+type A2 = /* block comment */
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+
+type A3 = /* block comment
+ */
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ export interface DirectiveArgumentNode1 extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+@@ -8,21 +8,21 @@
+ 
+ export class DirectiveArgumentNode12 extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+ }
+ 
+-type A = // dir, exp, arg, modifiers
+-
+-    | [string]
+-    | [string, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode, ObjectExpression];
++type A =
++  // dir, exp, arg, modifiers
++  | [string]
++  | [string, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ 
+ const elements: // dir, exp, arg, modifiers
+-| [string]
++  | [string]
+   | [string, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+```
+
+# Output
+
+```ts
+export interface DirectiveArgumentNode1 extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+}
+
+export class DirectiveArgumentNode12 extends ArrayExpression {
+  elements: // dir, exp, arg, modifiers
+    | [string]
+    | [string, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode]
+    | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+}
+
+type A =
+  // dir, exp, arg, modifiers
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+
+const elements: // dir, exp, arg, modifiers
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+
+type A2 =
+  /* block comment */
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+
+type A3 =
+  /* block comment
+   */
+  | [string]
+  | [string, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode]
+  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+```

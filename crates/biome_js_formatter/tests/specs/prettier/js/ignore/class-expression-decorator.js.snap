@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/ignore/class-expression-decorator.js
+---
+# Input
+
+```js
+(
+  // prettier-ignore
+  @decorator
+  class {}
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-// prettier-ignore
+ (
++  // prettier-ignore
+   @decorator
+   class {}
+ );
+```
+
+# Output
+
+```js
+(
+  // prettier-ignore
+  @decorator
+  class {}
+);
+```

@@ -1,0 +1,104 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/if/comment-between-condition-and-body.js
+---
+# Input
+
+```js
+if (1) { // foo may not exist
+  doThing(foo);
+}
+if (1){}else { // foo may not exist
+  doThing(foo);
+}
+
+if (2)
+// foo may not exist
+{
+  doThing(foo);
+}
+if (2){}else
+// foo may not exist
+{
+  doThing(foo);
+}
+
+if (3)// foo may not exist
+{
+  doThing(foo);
+}
+if (3){}else// foo may not exist
+{
+  doThing(foo);
+}
+
+if (4)/* foo may not exist */{
+  doThing(foo);
+}
+if (4){}else/* foo may not exist */{
+  doThing(foo);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -13,7 +13,8 @@
+   doThing(foo);
+ }
+ if (2) {
+-} // foo may not exist
++}
++// foo may not exist
+ else {
+   doThing(foo);
+ }
+```
+
+# Output
+
+```js
+if (1) {
+  // foo may not exist
+  doThing(foo);
+}
+if (1) {
+} else {
+  // foo may not exist
+  doThing(foo);
+}
+
+if (2) {
+  // foo may not exist
+  doThing(foo);
+}
+if (2) {
+}
+// foo may not exist
+else {
+  doThing(foo);
+}
+
+if (3) {
+  // foo may not exist
+  doThing(foo);
+}
+if (3) {
+} // foo may not exist
+else {
+  doThing(foo);
+}
+
+if (4) {
+  /* foo may not exist */ doThing(foo);
+}
+if (4) {
+} /* foo may not exist */ else {
+  doThing(foo);
+}
+```

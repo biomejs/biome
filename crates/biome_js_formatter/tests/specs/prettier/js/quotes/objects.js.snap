@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/quotes/objects.js
+---
+# Input
+
+```js
+const obj = {
+ 'a': true,
+ b: true,
+ "𐊧": true,
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ const obj = {
+   a: true,
+   b: true,
+-  "𐊧": true,
++  𐊧: true,
+ };
+```
+
+# Output
+
+```js
+const obj = {
+  a: true,
+  b: true,
+  𐊧: true,
+};
+```

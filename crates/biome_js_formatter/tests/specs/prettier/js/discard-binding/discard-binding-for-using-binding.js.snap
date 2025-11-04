@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/discard-binding-for-using-binding.js
+---
+# Input
+
+```js
+{
+  for(using void of []);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,3 @@
+ {
+-  for (using void of []);
++  for(using void of []);
+ }
+```
+
+# Output
+
+```js
+{
+  for(using void of []);
+}
+```
+
+# Errors
+```
+discard-binding-for-using-binding.js:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `void`
+  
+    1 │ {
+  > 2 │   for(using void of []);
+      │             ^^^^
+    3 │ }
+    4 │ 
+  
+  i Remove void
+  
+discard-binding-for-using-binding.js:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ']'.
+  
+    1 │ {
+  > 2 │   for(using void of []);
+      │                      ^
+    3 │ }
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ {
+  > 2 │   for(using void of []);
+      │                      ^
+    3 │ }
+    4 │ 
+  
+discard-binding-for-using-binding.js:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    1 │ {
+  > 2 │   for(using void of []);
+      │                       ^
+    3 │ }
+    4 │ 
+  
+  i Remove )
+  
+
+```

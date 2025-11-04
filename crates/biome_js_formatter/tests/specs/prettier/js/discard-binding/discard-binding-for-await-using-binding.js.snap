@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/discard-binding-for-await-using-binding.js
+---
+# Input
+
+```js
+async () => {
+  for(await using void of []);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,3 @@
+ async () => {
+-  for (await using void of []);
++  for(await using void of []);
+ };
+```
+
+# Output
+
+```js
+async () => {
+  for(await using void of []);
+};
+```
+
+# Errors
+```
+discard-binding-for-await-using-binding.js:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `void`
+  
+    1 │ async () => {
+  > 2 │   for(await using void of []);
+      │                   ^^^^
+    3 │ }
+    4 │ 
+  
+  i Remove void
+  
+discard-binding-for-await-using-binding.js:2:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ']'.
+  
+    1 │ async () => {
+  > 2 │   for(await using void of []);
+      │                            ^
+    3 │ }
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ async () => {
+  > 2 │   for(await using void of []);
+      │                            ^
+    3 │ }
+    4 │ 
+  
+discard-binding-for-await-using-binding.js:2:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    1 │ async () => {
+  > 2 │   for(await using void of []);
+      │                             ^
+    3 │ }
+    4 │ 
+  
+  i Remove )
+  
+
+```

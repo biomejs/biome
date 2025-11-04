@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/import-attributes/multiple.js
+---
+# Input
+
+```js
+import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with {
+  BABEL_8_BREAKING: "false",
+  USE_ESM: "true", IS_STANDALONE: "false" };
+
+import a1 from "foo" with {
+  BABEL_8_BREAKING: "false",
+  USE_ESM: "true", IS_STANDALONE: "false" };
+import a2 from "foo" with {BABEL_8_BREAKING: "false",
+  USE_ESM: "true", IS_STANDALONE: "false" };
+import a3 from "foo" with {
+  BABEL_8_BREAKING: "false", };
+import a4 from "foo" with { BABEL_8_BREAKING: "false", };
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,18 @@
+-import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
++import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
+ 
+-import a1 from "foo" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
+-import a2 from "foo" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
++import a1 from "foo" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
++import a2 from "foo" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
+ import a3 from "foo" with { BABEL_8_BREAKING: "false" };
+ import a4 from "foo" with { BABEL_8_BREAKING: "false" };
+```
+
+# Output
+
+```js
+import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with {
+  BABEL_8_BREAKING: "false",
+  USE_ESM: "true",
+  IS_STANDALONE: "false",
+};
+
+import a1 from "foo" with {
+  BABEL_8_BREAKING: "false",
+  USE_ESM: "true",
+  IS_STANDALONE: "false",
+};
+import a2 from "foo" with {
+  BABEL_8_BREAKING: "false",
+  USE_ESM: "true",
+  IS_STANDALONE: "false",
+};
+import a3 from "foo" with { BABEL_8_BREAKING: "false" };
+import a4 from "foo" with { BABEL_8_BREAKING: "false" };
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with {
+```

@@ -1,0 +1,143 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/using.js
+---
+# Input
+
+```js
+{
+  using void = f();
+}
+async (void) => {
+  await using void = f();
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,10 @@
+ {
+-  using void = f();
++  using;
++  void = f();
++}
++async (void)
++=>
++{
++  await using;
++  void = f();
+ }
+-async (void) => {
+-  await using void = f();
+-};
+```
+
+# Output
+
+```js
+{
+  using;
+  void = f();
+}
+async (void)
+=>
+{
+  await using;
+  void = f();
+}
+```
+
+# Errors
+```
+using.js:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ {
+  > 2 │   using void = f();
+      │         ^^^^
+    3 │ }
+    4 │ async (void) => {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ {
+  > 2 │   using void = f();
+      │         ^^^^
+    3 │ }
+    4 │ async (void) => {
+  
+  i ...Which is required to end this statement
+  
+    1 │ {
+  > 2 │   using void = f();
+      │   ^^^^^^^^^^
+    3 │ }
+    4 │ async (void) => {
+  
+using.js:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    2 │   using void = f();
+    3 │ }
+  > 4 │ async (void) => {
+      │              ^^
+    5 │   await using void = f();
+    6 │ }
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    2 │   using void = f();
+    3 │ }
+  > 4 │ async (void) => {
+      │              ^^
+    5 │   await using void = f();
+    6 │ }
+  
+  i ...Which is required to end this statement
+  
+    2 │   using void = f();
+    3 │ }
+  > 4 │ async (void) => {
+      │ ^^^^^^^^^^^^^^^
+    5 │   await using void = f();
+    6 │ }
+  
+using.js:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    3 │ }
+    4 │ async (void) => {
+  > 5 │   await using void = f();
+      │               ^^^^
+    6 │ }
+    7 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    3 │ }
+    4 │ async (void) => {
+  > 5 │   await using void = f();
+      │               ^^^^
+    6 │ }
+    7 │ 
+  
+  i ...Which is required to end this statement
+  
+    3 │ }
+    4 │ async (void) => {
+  > 5 │   await using void = f();
+      │   ^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+
+```

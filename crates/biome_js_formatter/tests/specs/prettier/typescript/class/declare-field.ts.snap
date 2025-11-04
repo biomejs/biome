@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/class/declare-field.ts
+---
+# Input
+
+```ts
+class A {
+  declare private readonly name: string;
+   private declare readonly name2: string;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ class A {
+-  declare private readonly name: string;
+-  declare private readonly name2: string;
++  private declare readonly name: string;
++  private declare readonly name2: string;
+ }
+```
+
+# Output
+
+```ts
+class A {
+  private declare readonly name: string;
+  private declare readonly name2: string;
+}
+```

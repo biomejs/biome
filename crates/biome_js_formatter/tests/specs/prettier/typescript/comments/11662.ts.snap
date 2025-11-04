@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/comments/11662.ts
+---
+# Input
+
+```ts
+foo<a>
+  // TEST
+  // 1
+  // 2
+  // 3
+  // 4
+  // 5
+  `x`
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,7 @@
+-foo<a>
+-// TEST
++foo<a>`// TEST
+ // 1
+ // 2
+ // 3
+ // 4
+ // 5
+-`x`;
++x`;
+```
+
+# Output
+
+```ts
+foo<a>`// TEST
+// 1
+// 2
+// 3
+// 4
+// 5
+x`;
+```

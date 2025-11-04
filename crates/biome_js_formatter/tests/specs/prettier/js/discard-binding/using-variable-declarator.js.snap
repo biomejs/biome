@@ -1,0 +1,447 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/using-variable-declarator.js
+---
+# Input
+
+```js
+{
+  // using 1 declarator
+  using void = f();
+}
+{
+  // using 2 declarators
+  using void = f(), void = g();
+}
+{
+  // using void declarator and normal declarator
+  using void = f(), x = g();
+}
+{
+  // using declarator in for-of
+  for(using void of []);
+}
+async () => {
+  {
+    // await using 1 declarator
+    await using void = f();
+  }
+  {
+    // await using 2 declarators
+    await using void = f(), void = g();
+  }
+  {
+    // await using void declarator and normal declarator
+    await using void = f(), x = g();
+  }
+  {
+    // await using declarator in for-of
+    for(await using void of []);
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,38 +1,40 @@
+ {
+   // using 1 declarator
+-  using void = f();
++  using;
++  void = f();
+ }
+ {
+   // using 2 declarators
+-  using void = f(),
+-    void = g();
++  using;
++  (void = f()), (void = g());
+ }
+ {
+   // using void declarator and normal declarator
+-  using void = f(),
+-    x = g();
++  using;
++  (void = f()), (x = g());
+ }
+ {
+   // using declarator in for-of
+-  for (using void of []);
++  for(using void of []);
+ }
+ async () => {
+   {
+     // await using 1 declarator
+-    await using void = f();
++    await using;
++    void = f();
+   }
+   {
+     // await using 2 declarators
+-    await using void = f(),
+-      void = g();
++    await using;
++    (void = f()), (void = g());
+   }
+   {
+     // await using void declarator and normal declarator
+-    await using void = f(),
+-      x = g();
++    await using;
++    (void = f()), (x = g());
+   }
+   {
+     // await using declarator in for-of
+-    for (await using void of []);
++    for(await using void of []);
+   }
+ };
+```
+
+# Output
+
+```js
+{
+  // using 1 declarator
+  using;
+  void = f();
+}
+{
+  // using 2 declarators
+  using;
+  (void = f()), (void = g());
+}
+{
+  // using void declarator and normal declarator
+  using;
+  (void = f()), (x = g());
+}
+{
+  // using declarator in for-of
+  for(using void of []);
+}
+async () => {
+  {
+    // await using 1 declarator
+    await using;
+    void = f();
+  }
+  {
+    // await using 2 declarators
+    await using;
+    (void = f()), (void = g());
+  }
+  {
+    // await using void declarator and normal declarator
+    await using;
+    (void = f()), (x = g());
+  }
+  {
+    // await using declarator in for-of
+    for(await using void of []);
+  }
+};
+```
+
+# Errors
+```
+using-variable-declarator.js:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ {
+    2 │   // using 1 declarator
+  > 3 │   using void = f();
+      │         ^^^^
+    4 │ }
+    5 │ {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ {
+    2 │   // using 1 declarator
+  > 3 │   using void = f();
+      │         ^^^^
+    4 │ }
+    5 │ {
+  
+  i ...Which is required to end this statement
+  
+    1 │ {
+    2 │   // using 1 declarator
+  > 3 │   using void = f();
+      │   ^^^^^^^^^^
+    4 │ }
+    5 │ {
+  
+using-variable-declarator.js:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    5 │ {
+    6 │   // using 2 declarators
+  > 7 │   using void = f(), void = g();
+      │         ^^^^
+    8 │ }
+    9 │ {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    5 │ {
+    6 │   // using 2 declarators
+  > 7 │   using void = f(), void = g();
+      │         ^^^^
+    8 │ }
+    9 │ {
+  
+  i ...Which is required to end this statement
+  
+    5 │ {
+    6 │   // using 2 declarators
+  > 7 │   using void = f(), void = g();
+      │   ^^^^^^^^^^
+    8 │ }
+    9 │ {
+  
+using-variable-declarator.js:7:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    5 │ {
+    6 │   // using 2 declarators
+  > 7 │   using void = f(), void = g();
+      │                     ^^^^
+    8 │ }
+    9 │ {
+  
+  i This expression cannot be assigned to
+  
+using-variable-declarator.js:11:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     9 │ {
+    10 │   // using void declarator and normal declarator
+  > 11 │   using void = f(), x = g();
+       │         ^^^^
+    12 │ }
+    13 │ {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     9 │ {
+    10 │   // using void declarator and normal declarator
+  > 11 │   using void = f(), x = g();
+       │         ^^^^
+    12 │ }
+    13 │ {
+  
+  i ...Which is required to end this statement
+  
+     9 │ {
+    10 │   // using void declarator and normal declarator
+  > 11 │   using void = f(), x = g();
+       │   ^^^^^^^^^^
+    12 │ }
+    13 │ {
+  
+using-variable-declarator.js:15:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `void`
+  
+    13 │ {
+    14 │   // using declarator in for-of
+  > 15 │   for(using void of []);
+       │             ^^^^
+    16 │ }
+    17 │ async () => {
+  
+  i Remove void
+  
+using-variable-declarator.js:15:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ']'.
+  
+    13 │ {
+    14 │   // using declarator in for-of
+  > 15 │   for(using void of []);
+       │                      ^
+    16 │ }
+    17 │ async () => {
+  
+  i Expected an expression here.
+  
+    13 │ {
+    14 │   // using declarator in for-of
+  > 15 │   for(using void of []);
+       │                      ^
+    16 │ }
+    17 │ async () => {
+  
+using-variable-declarator.js:15:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    13 │ {
+    14 │   // using declarator in for-of
+  > 15 │   for(using void of []);
+       │                       ^
+    16 │ }
+    17 │ async () => {
+  
+  i Remove )
+  
+using-variable-declarator.js:20:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    18 │   {
+    19 │     // await using 1 declarator
+  > 20 │     await using void = f();
+       │                 ^^^^
+    21 │   }
+    22 │   {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    18 │   {
+    19 │     // await using 1 declarator
+  > 20 │     await using void = f();
+       │                 ^^^^
+    21 │   }
+    22 │   {
+  
+  i ...Which is required to end this statement
+  
+    18 │   {
+    19 │     // await using 1 declarator
+  > 20 │     await using void = f();
+       │     ^^^^^^^^^^^^^^^^
+    21 │   }
+    22 │   {
+  
+using-variable-declarator.js:24:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    22 │   {
+    23 │     // await using 2 declarators
+  > 24 │     await using void = f(), void = g();
+       │                 ^^^^
+    25 │   }
+    26 │   {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    22 │   {
+    23 │     // await using 2 declarators
+  > 24 │     await using void = f(), void = g();
+       │                 ^^^^
+    25 │   }
+    26 │   {
+  
+  i ...Which is required to end this statement
+  
+    22 │   {
+    23 │     // await using 2 declarators
+  > 24 │     await using void = f(), void = g();
+       │     ^^^^^^^^^^^^^^^^
+    25 │   }
+    26 │   {
+  
+using-variable-declarator.js:24:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    22 │   {
+    23 │     // await using 2 declarators
+  > 24 │     await using void = f(), void = g();
+       │                             ^^^^
+    25 │   }
+    26 │   {
+  
+  i This expression cannot be assigned to
+  
+using-variable-declarator.js:28:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    26 │   {
+    27 │     // await using void declarator and normal declarator
+  > 28 │     await using void = f(), x = g();
+       │                 ^^^^
+    29 │   }
+    30 │   {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    26 │   {
+    27 │     // await using void declarator and normal declarator
+  > 28 │     await using void = f(), x = g();
+       │                 ^^^^
+    29 │   }
+    30 │   {
+  
+  i ...Which is required to end this statement
+  
+    26 │   {
+    27 │     // await using void declarator and normal declarator
+  > 28 │     await using void = f(), x = g();
+       │     ^^^^^^^^^^^^^^^^
+    29 │   }
+    30 │   {
+  
+using-variable-declarator.js:32:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `void`
+  
+    30 │   {
+    31 │     // await using declarator in for-of
+  > 32 │     for(await using void of []);
+       │                     ^^^^
+    33 │   }
+    34 │ }
+  
+  i Remove void
+  
+using-variable-declarator.js:32:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ']'.
+  
+    30 │   {
+    31 │     // await using declarator in for-of
+  > 32 │     for(await using void of []);
+       │                              ^
+    33 │   }
+    34 │ }
+  
+  i Expected an expression here.
+  
+    30 │   {
+    31 │     // await using declarator in for-of
+  > 32 │     for(await using void of []);
+       │                              ^
+    33 │   }
+    34 │ }
+  
+using-variable-declarator.js:32:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    30 │   {
+    31 │     // await using declarator in for-of
+  > 32 │     for(await using void of []);
+       │                               ^
+    33 │   }
+    34 │ }
+  
+  i Remove )
+  
+
+```

@@ -1,0 +1,128 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/as/break-after-keyword/18148.ts
+---
+# Input
+
+```ts
+// 79 width until `as` or `satisfies` keyword
+const firstItem1 = ______________.items.find((item) => item.type === 'item') as const;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_1 = ______________.items.find((item) => item.type === 'item') as const;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem2 = ______________.items.find((item) => item.type === 'item') as string | number;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_2 = ______________.items.find((item) => item.type === 'item') as string | number;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem3 = _____________.find((item) => item.type === 'item') satisfies string | number;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_3 = _____________.find((item) => item.type === 'item') satisfies string | number;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem4 = ______________.items.find((item) => item.type === 'item') as not_union;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_4 = ______________.items.find((item) => item.type === 'item') as not_union;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem5 = ______________.items.find((item) => item.type === 'item') as a_union_will_break | // comments
+a_union_will_break2;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_5 = ______________.items.find((item) => item.type === 'item') as a_union_will_break | // comments
+a_union_will_break2;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,18 +12,18 @@
+   | string
+   | number;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_2 = ______________.items.find(
+-  (item) => item.type === "item",
+-) as string | number;
++const firstItem_2 = ______________.items.find((item) => item.type === "item") as
++  | string
++  | number;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem3 = _____________.find((item) => item.type === "item") satisfies
+   | string
+   | number;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_3 = _____________.find(
+-  (item) => item.type === "item",
+-) satisfies string | number;
++const firstItem_3 = _____________.find((item) => item.type === "item") satisfies
++  | string
++  | number;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem4 = ______________.items.find(
+@@ -39,8 +39,6 @@
+   | a_union_will_break // comments
+   | a_union_will_break2;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_5 = ______________.items.find(
+-  (item) => item.type === "item",
+-) as
++const firstItem_5 = ______________.items.find((item) => item.type === "item") as
+   | a_union_will_break // comments
+   | a_union_will_break2;
+```
+
+# Output
+
+```ts
+// 79 width until `as` or `satisfies` keyword
+const firstItem1 = ______________.items.find(
+  (item) => item.type === "item",
+) as const;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_1 = ______________.items.find(
+  (item) => item.type === "item",
+) as const;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem2 = ______________.items.find((item) => item.type === "item") as
+  | string
+  | number;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_2 = ______________.items.find((item) => item.type === "item") as
+  | string
+  | number;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem3 = _____________.find((item) => item.type === "item") satisfies
+  | string
+  | number;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_3 = _____________.find((item) => item.type === "item") satisfies
+  | string
+  | number;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem4 = ______________.items.find(
+  (item) => item.type === "item",
+) as not_union;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_4 = ______________.items.find(
+  (item) => item.type === "item",
+) as not_union;
+
+// 79 width until `as` or `satisfies` keyword
+const firstItem5 = ______________.items.find((item) => item.type === "item") as
+  | a_union_will_break // comments
+  | a_union_will_break2;
+// 80 width until `as` or `satisfies` keyword
+const firstItem_5 = ______________.items.find((item) => item.type === "item") as
+  | a_union_will_break // comments
+  | a_union_will_break2;
+```

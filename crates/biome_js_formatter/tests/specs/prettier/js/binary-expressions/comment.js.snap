@@ -1,0 +1,166 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/binary-expressions/comment.js
+---
+# Input
+
+```js
+a = (
+  // Comment 1
+  (Math.random() * (yRange * (1 - minVerticalFraction)))
+  + (minVerticalFraction * yRange)
+) - offset;
+
+a +
+ a +
+ a + // comment
+ a +
+ a;
+
+a &&
+  longLongLongLongLongLongLongLongLong &&
+  longLongLongLongLongLongLongLongLong &&  // comment
+  longLongLongLongLongLongLongLongLong &&
+  longLongLongLongLongLongLongLongLong
+
+a ||
+  longLongLongLongLongLongLongLongLong ||
+  longLongLongLongLongLongLongLongLong ||  // comment
+  longLongLongLongLongLongLongLongLong ||
+  longLongLongLongLongLongLongLongLong
+
+var a = x(abifornCringerMoshedPerplexSawder
++ kochabCooieGameOnOboleUnweave // f
++ glimseGlyphsHazardNoopsTieTie+bifornCringerMoshedPerplexSawder);
+
+foo[
+  a +
+  a + // comment
+  a +
+  bar[
+    b +
+    b +
+    b + // comment
+    b +
+    b
+  ]
+];
+
+!(
+  a +
+  a + // comment
+  a +
+  !(
+    b +
+    b +
+    b + // comment
+    b +
+    b
+  )
+);
+
+const logical_expression =
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* trailing comment */ &&
+  /* leading comment */ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb &&
+  // line comment
+  cccccccccccccccccccccccc;
+
+const bc = a /* internal before */ || /* internal after */ b;
+
+a +
+  /**/
+  a.a().a();
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -65,4 +65,6 @@
+ 
+ a +
+   /**/
+-  a.a().a();
++  a
++    .a()
++    .a();
+```
+
+# Output
+
+```js
+a =
+  // Comment 1
+  Math.random() * (yRange * (1 - minVerticalFraction)) +
+  minVerticalFraction * yRange -
+  offset;
+
+a +
+  a +
+  a + // comment
+  a +
+  a;
+
+a &&
+  longLongLongLongLongLongLongLongLong &&
+  longLongLongLongLongLongLongLongLong && // comment
+  longLongLongLongLongLongLongLongLong &&
+  longLongLongLongLongLongLongLongLong;
+
+a ||
+  longLongLongLongLongLongLongLongLong ||
+  longLongLongLongLongLongLongLongLong || // comment
+  longLongLongLongLongLongLongLongLong ||
+  longLongLongLongLongLongLongLongLong;
+
+var a = x(
+  abifornCringerMoshedPerplexSawder +
+    kochabCooieGameOnOboleUnweave + // f
+    glimseGlyphsHazardNoopsTieTie +
+    bifornCringerMoshedPerplexSawder,
+);
+
+foo[
+  a +
+    a + // comment
+    a +
+    bar[
+      b +
+        b +
+        b + // comment
+        b +
+        b
+    ]
+];
+
+!(
+  a +
+  a + // comment
+  a +
+  !(
+    b +
+    b +
+    b + // comment
+    b +
+    b
+  )
+);
+
+const logical_expression =
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* trailing comment */ &&
+  /* leading comment */ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb &&
+  // line comment
+  cccccccccccccccccccccccc;
+
+const bc = a /* internal before */ || /* internal after */ b;
+
+a +
+  /**/
+  a
+    .a()
+    .a();
+```

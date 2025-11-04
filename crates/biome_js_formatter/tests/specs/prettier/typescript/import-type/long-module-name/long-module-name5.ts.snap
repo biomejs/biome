@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/import-type/long-module-name/long-module-name5.ts
+---
+# Input
+
+```ts
+type A = import("./long/long/long/long/long/long/long/long/long/long/path/to/module")
+type B = import("./long/long/long/long/long/long/long/long/long/long/path/to/module",{with:{type:'json'}})
+type C = import("./long/long/long/long/long/long/long/long/long/long/path/to/module",{with:{
+type:'json'}})
+type D = import("./long/long/long/long/long/long/long/long/long/long/path/to/module",{
+with:{type:'json'}})
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,14 @@
+ type A =
+   import("./long/long/long/long/long/long/long/long/long/long/path/to/module");
+-type B = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  { with: { type: "json" } }
+-);
+-type C = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  {
+-    with: {
+-      type: "json",
+-    },
+-  }
+-);
+-type D = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  {
+-    with: { type: "json" },
+-  }
+-);
++type B =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
++type C =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
++type D =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
+```
+
+# Output
+
+```ts
+type A =
+  import("./long/long/long/long/long/long/long/long/long/long/path/to/module");
+type B =
+  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+    type: "json",
+  }});
+type C =
+  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+    type: "json",
+  }});
+type D =
+  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+    type: "json",
+  }});
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:   import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+    8:   import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+   12:   import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
+```

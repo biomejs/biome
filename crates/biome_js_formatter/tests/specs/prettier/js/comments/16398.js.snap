@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/comments/16398.js
+---
+# Input
+
+```js
+if (foo) a = b;
+/* foo */ else foo.split;
+
+if (foo) a = b;
+else /* foo */ foo.split;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ /* foo */ else foo.split;
+ 
+ if (foo) a = b;
+-else /* foo */ foo.split;
++/* foo */ else foo.split;
+```
+
+# Output
+
+```js
+if (foo) a = b;
+/* foo */ else foo.split;
+
+if (foo) a = b;
+/* foo */ else foo.split;
+```

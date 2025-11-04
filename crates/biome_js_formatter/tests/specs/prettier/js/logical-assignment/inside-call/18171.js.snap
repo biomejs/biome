@@ -1,0 +1,157 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/logical-assignment/inside-call/18171.js
+---
+# Input
+
+```js
+fn(
+  _,
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+      ? annularCooeedSplicesWalksWayWay
+      : kochabCooieGameOnOboleUnweave
+);
+
+new fn(
+  _,
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+      ? annularCooeedSplicesWalksWayWay
+      : kochabCooieGameOnOboleUnweave
+);
+
+fn(
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+      ? annularCooeedSplicesWalksWayWay
+      : kochabCooieGameOnOboleUnweave
+);
+
+new fn(
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+      ? annularCooeedSplicesWalksWayWay
+      : kochabCooieGameOnOboleUnweave
+);
+
+// https://github.com/typescript-eslint/typescript-eslint/blob/ea2ee6b65a2f14dd2c3fc8d12be969cbeaef80a8/packages/typescript-estree/src/parseSettings/resolveProjectList.ts#L75C1-L80C7
+{{    RESOLUTION_CACHE = new ExpiringCache(
+      options.singleRun
+        ? 'Infinity'
+        : (options.cacheLifetime?.glob ??
+          DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+    );
+    RESOLUTION_CACHE = new_ExpiringCache(
+      options.singleRun
+        ? 'Infinity'
+        : (options.cacheLifetime?.glob ??
+          DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+    );}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -10,8 +10,8 @@
+ new fn(
+   _,
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+-  // Should this line indent?
+-  anodyneCondosMalateOverateRetinol
++    // Should this line indent?
++    anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+@@ -26,8 +26,8 @@
+ 
+ new fn(
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+-  // Should this line indent?
+-  anodyneCondosMalateOverateRetinol
++    // Should this line indent?
++    anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+@@ -39,7 +39,7 @@
+       options.singleRun
+         ? "Infinity"
+         : (options.cacheLifetime?.glob ??
+-          DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
++            DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+     );
+     RESOLUTION_CACHE = new_ExpiringCache(
+       options.singleRun
+```
+
+# Output
+
+```js
+fn(
+  _,
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+    ? annularCooeedSplicesWalksWayWay
+    : kochabCooieGameOnOboleUnweave,
+);
+
+new fn(
+  _,
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+    ? annularCooeedSplicesWalksWayWay
+    : kochabCooieGameOnOboleUnweave,
+);
+
+fn(
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+    ? annularCooeedSplicesWalksWayWay
+    : kochabCooieGameOnOboleUnweave,
+);
+
+new fn(
+  glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+    // Should this line indent?
+    anodyneCondosMalateOverateRetinol
+    ? annularCooeedSplicesWalksWayWay
+    : kochabCooieGameOnOboleUnweave,
+);
+
+// https://github.com/typescript-eslint/typescript-eslint/blob/ea2ee6b65a2f14dd2c3fc8d12be969cbeaef80a8/packages/typescript-estree/src/parseSettings/resolveProjectList.ts#L75C1-L80C7
+{
+  {
+    RESOLUTION_CACHE = new ExpiringCache(
+      options.singleRun
+        ? "Infinity"
+        : (options.cacheLifetime?.glob ??
+            DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+    );
+    RESOLUTION_CACHE = new_ExpiringCache(
+      options.singleRun
+        ? "Infinity"
+        : (options.cacheLifetime?.glob ??
+            DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+    );
+  }
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   35: // https://github.com/typescript-eslint/typescript-eslint/blob/ea2ee6b65a2f14dd2c3fc8d12be969cbeaef80a8/packages/typescript-estree/src/parseSettings/resolveProjectList.ts#L75C1-L80C7
+```

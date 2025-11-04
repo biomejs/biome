@@ -1,0 +1,232 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/basic.js
+---
+# Input
+
+```js
+const [void] = [,void] = [void,] = [];
+
+function f(void, { p: void }, [ void ]) {}
+
+(void, { p: void }, [ void ]) => {}
+
+async (void, { p: void }, [ void ]) => {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,13 @@
+-const [void] = ([, void] = [void] = []);
++const [void] = [,void] = [void,] = [];
+ 
+-function f(void, { p: void }, [void]) {}
++function f(void, { p: void }, [ void ]) {}
+ 
+-(void, { p: void }, [void]) => {};
++(void, { p: void }, [ void ])
++=>
++{
++}
+ 
+-async (void, { p: void }, [void]) => {};
++async (void, { p: void }, [ void ])
++=>
++{
++}
+```
+
+# Output
+
+```js
+const [void] = [,void] = [void,] = [];
+
+function f(void, { p: void }, [ void ]) {}
+
+(void, { p: void }, [ void ])
+=>
+{
+}
+
+async (void, { p: void }, [ void ])
+=>
+{
+}
+```
+
+# Errors
+```
+basic.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+  > 1 │ const [void] = [,void] = [void,] = [];
+      │        ^^^^
+    2 │ 
+    3 │ function f(void, { p: void }, [ void ]) {}
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+  > 1 │ const [void] = [,void] = [void,] = [];
+      │        ^^^^
+    2 │ 
+    3 │ function f(void, { p: void }, [ void ]) {}
+  
+basic.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+  > 1 │ const [void] = [,void] = [void,] = [];
+      │                  ^^^^
+    2 │ 
+    3 │ function f(void, { p: void }, [ void ]) {}
+  
+  i This expression cannot be assigned to
+  
+basic.js:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+  > 1 │ const [void] = [,void] = [void,] = [];
+      │                           ^^^^
+    2 │ 
+    3 │ function f(void, { p: void }, [ void ]) {}
+  
+  i This expression cannot be assigned to
+  
+basic.js:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parameter but instead found 'void'.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │            ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+  i Expected a parameter here.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │            ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+basic.js:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │                       ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │                       ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+basic.js:3:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │                            ^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+  i Remove }
+  
+basic.js:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │                                 ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    1 │ const [void] = [,void] = [void,] = [];
+    2 │ 
+  > 3 │ function f(void, { p: void }, [ void ]) {}
+      │                                 ^^^^
+    4 │ 
+    5 │ (void, { p: void }, [ void ]) => {}
+  
+basic.js:5:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    3 │ function f(void, { p: void }, [ void ]) {}
+    4 │ 
+  > 5 │ (void, { p: void }, [ void ]) => {}
+      │                               ^^
+    6 │ 
+    7 │ async (void, { p: void }, [ void ]) => {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    3 │ function f(void, { p: void }, [ void ]) {}
+    4 │ 
+  > 5 │ (void, { p: void }, [ void ]) => {}
+      │                               ^^
+    6 │ 
+    7 │ async (void, { p: void }, [ void ]) => {}
+  
+  i ...Which is required to end this statement
+  
+    3 │ function f(void, { p: void }, [ void ]) {}
+    4 │ 
+  > 5 │ (void, { p: void }, [ void ]) => {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ async (void, { p: void }, [ void ]) => {}
+  
+basic.js:7:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    5 │ (void, { p: void }, [ void ]) => {}
+    6 │ 
+  > 7 │ async (void, { p: void }, [ void ]) => {}
+      │                                     ^^
+    8 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    5 │ (void, { p: void }, [ void ]) => {}
+    6 │ 
+  > 7 │ async (void, { p: void }, [ void ]) => {}
+      │                                     ^^
+    8 │ 
+  
+  i ...Which is required to end this statement
+  
+    5 │ (void, { p: void }, [ void ]) => {}
+    6 │ 
+  > 7 │ async (void, { p: void }, [ void ]) => {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+
+```

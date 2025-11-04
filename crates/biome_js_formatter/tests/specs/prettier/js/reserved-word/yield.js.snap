@@ -1,0 +1,103 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/reserved-word/yield.js
+---
+# Input
+
+```js
+foo.yield;
+yield.foo;
+new yield();
+({ yield: "foo" });
+(yield, "foo");
+void yield;
+var yield = "foo";
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,6 +2,6 @@
+ yield.foo;
+ new yield();
+ ({ yield: "foo" });
+-(yield, "foo");
++yield, "foo";
+ void yield;
+ var yield = "foo";
+```
+
+# Output
+
+```js
+foo.yield;
+yield.foo;
+new yield();
+({ yield: "foo" });
+yield, "foo";
+void yield;
+var yield = "foo";
+```
+
+# Errors
+```
+yield.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+    1 │ foo.yield;
+  > 2 │ yield.foo;
+      │ ^^^^^
+    3 │ new yield();
+    4 │ ({ yield: "foo" });
+  
+yield.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+    1 │ foo.yield;
+    2 │ yield.foo;
+  > 3 │ new yield();
+      │     ^^^^^
+    4 │ ({ yield: "foo" });
+    5 │ (yield, "foo");
+  
+yield.js:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+    3 │ new yield();
+    4 │ ({ yield: "foo" });
+  > 5 │ (yield, "foo");
+      │  ^^^^^
+    6 │ void yield;
+    7 │ var yield = "foo";
+  
+yield.js:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+    4 │ ({ yield: "foo" });
+    5 │ (yield, "foo");
+  > 6 │ void yield;
+      │      ^^^^^
+    7 │ var yield = "foo";
+    8 │ 
+  
+yield.js:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+    5 │ (yield, "foo");
+    6 │ void yield;
+  > 7 │ var yield = "foo";
+      │     ^^^^^
+    8 │ 
+  
+
+```

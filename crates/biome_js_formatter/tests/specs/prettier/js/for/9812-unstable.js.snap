@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/for/9812-unstable.js
+---
+# Input
+
+```js
+for(x of y)
+// comment
+{bar();}
+
+for(x of y)
+// comment
+{}
+
+for(x of y)
+// comment
+;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,11 @@
+-for (x of y) { // comment
++// comment
++for (x of y) {
+   bar();
+ }
+ 
+-for (x of y) { // comment
++// comment
++for (x of y) {
+ }
+ 
+-for (x of y); // comment
++// comment
++for (x of y);
+```
+
+# Output
+
+```js
+// comment
+for (x of y) {
+  bar();
+}
+
+// comment
+for (x of y) {
+}
+
+// comment
+for (x of y);
+```

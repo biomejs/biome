@@ -1,0 +1,364 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/array-pattern.js
+---
+# Input
+
+```js
+{
+  // destructuring binding
+  const [, void, ] = value;
+}
+{
+  // for-of destructuring binding
+  for (const [void] of []);
+}
+{
+  // destructuring assignment
+  [void] = [];
+}
+{
+  // for-of destructuring assignment;
+  for ([void] of []);
+}
+{
+  // function param;
+  function f([[[void], void, ], void]) {}
+}
+{
+  // arrow function param
+  ([[[void], void, ], void]) => {}
+}
+{
+  // async arrow function param
+  async ([[[void], void, ], void]) => {}
+}
+{
+  // destructuring assignment in async call";
+  async([void] = []);
+}
+{
+  // catch param
+  try {} catch ([void]) {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ {
+   // destructuring binding
+-  const [, void] = value;
++  const [, void, ] = value;
+ }
+ {
+   // for-of destructuring binding
+@@ -16,15 +16,21 @@
+ }
+ {
+   // function param;
+-  function f([[[void], void], void]) {}
++  function f([[[void], void, ], void]) {}
+ }
+ {
+   // arrow function param
+-  ([[[void], void], void]) => {};
++  ([[[void], void, ], void])
++  =>
++  {
++  }
+ }
+ {
+   // async arrow function param
+-  async ([[[void], void], void]) => {};
++  async ([[[void], void, ], void])
++  =>
++  {
++  }
+ }
+ {
+   // destructuring assignment in async call";
+@@ -32,6 +38,5 @@
+ }
+ {
+   // catch param
+-  try {
+-  } catch ([void]) {}
++  try {} catch ([void]) {}
+ }
+```
+
+# Output
+
+```js
+{
+  // destructuring binding
+  const [, void, ] = value;
+}
+{
+  // for-of destructuring binding
+  for (const [void] of []);
+}
+{
+  // destructuring assignment
+  [void] = [];
+}
+{
+  // for-of destructuring assignment;
+  for ([void] of []);
+}
+{
+  // function param;
+  function f([[[void], void, ], void]) {}
+}
+{
+  // arrow function param
+  ([[[void], void, ], void])
+  =>
+  {
+  }
+}
+{
+  // async arrow function param
+  async ([[[void], void, ], void])
+  =>
+  {
+  }
+}
+{
+  // destructuring assignment in async call";
+  async(([void] = []));
+}
+{
+  // catch param
+  try {} catch ([void]) {}
+}
+```
+
+# Errors
+```
+array-pattern.js:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    1 │ {
+    2 │   // destructuring binding
+  > 3 │   const [, void, ] = value;
+      │            ^^^^
+    4 │ }
+    5 │ {
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    1 │ {
+    2 │   // destructuring binding
+  > 3 │   const [, void, ] = value;
+      │            ^^^^
+    4 │ }
+    5 │ {
+  
+array-pattern.js:7:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    5 │ {
+    6 │   // for-of destructuring binding
+  > 7 │   for (const [void] of []);
+      │               ^^^^
+    8 │ }
+    9 │ {
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    5 │ {
+    6 │   // for-of destructuring binding
+  > 7 │   for (const [void] of []);
+      │               ^^^^
+    8 │ }
+    9 │ {
+  
+array-pattern.js:11:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+     9 │ {
+    10 │   // destructuring assignment
+  > 11 │   [void] = [];
+       │    ^^^^
+    12 │ }
+    13 │ {
+  
+  i This expression cannot be assigned to
+  
+array-pattern.js:15:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    13 │ {
+    14 │   // for-of destructuring assignment;
+  > 15 │   for ([void] of []);
+       │         ^^^^
+    16 │ }
+    17 │ {
+  
+  i This expression cannot be assigned to
+  
+array-pattern.js:19:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                 ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                 ^^^^
+    20 │ }
+    21 │ {
+  
+array-pattern.js:19:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                        ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                        ^^^^
+    20 │ }
+    21 │ {
+  
+array-pattern.js:19:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                                 ^^^^
+    20 │ }
+    21 │ {
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    17 │ {
+    18 │   // function param;
+  > 19 │   function f([[[void], void, ], void]) {}
+       │                                 ^^^^
+    20 │ }
+    21 │ {
+  
+array-pattern.js:23:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ([[[void], void, ], void]) => {}
+       │                              ^^
+    24 │ }
+    25 │ {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ([[[void], void, ], void]) => {}
+       │                              ^^
+    24 │ }
+    25 │ {
+  
+  i ...Which is required to end this statement
+  
+    21 │ {
+    22 │   // arrow function param
+  > 23 │   ([[[void], void, ], void]) => {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ {
+  
+array-pattern.js:27:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ([[[void], void, ], void]) => {}
+       │                                    ^^
+    28 │ }
+    29 │ {
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ([[[void], void, ], void]) => {}
+       │                                    ^^
+    28 │ }
+    29 │ {
+  
+  i ...Which is required to end this statement
+  
+    25 │ {
+    26 │   // async arrow function param
+  > 27 │   async ([[[void], void, ], void]) => {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ {
+  
+array-pattern.js:31:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `void`
+  
+    29 │ {
+    30 │   // destructuring assignment in async call";
+  > 31 │   async([void] = []);
+       │          ^^^^
+    32 │ }
+    33 │ {
+  
+  i This expression cannot be assigned to
+  
+array-pattern.js:35:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found 'void'.
+  
+    33 │ {
+    34 │   // catch param
+  > 35 │   try {} catch ([void]) {}
+       │                  ^^^^
+    36 │ }
+    37 │ 
+  
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
+  
+    33 │ {
+    34 │   // catch param
+  > 35 │   try {} catch ([void]) {}
+       │                  ^^^^
+    36 │ }
+    37 │ 
+  
+
+```

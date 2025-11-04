@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/discard-binding/discard-binding-for-bindings.js
+---
+# Input
+
+```js
+for(const { p: void } of []);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-for (const { p: void } of []);
++for(const { p: void } of []);
+```
+
+# Output
+
+```js
+for(const { p: void } of []);
+```
+
+# Errors
+```
+discard-binding-for-bindings.js:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found 'void'.
+  
+  > 1 │ for(const { p: void } of []);
+      │                ^^^^
+    2 │ 
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+  > 1 │ for(const { p: void } of []);
+      │                ^^^^
+    2 │ 
+  
+discard-binding-for-bindings.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+  > 1 │ for(const { p: void } of []);
+      │                     ^
+    2 │ 
+  
+  i Remove }
+  
+
+```

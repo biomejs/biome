@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/class-and-interface/long-type-parameters/long-type-parameters.ts
+---
+# Input
+
+```ts
+export interface MarkDef<
+  M extends string | Mark = Mark,
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef
+> extends
+    A,
+    B,
+    C {}
+
+declare class MarkDef<
+  M extends string | Mark = Mark,
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef
+> implements
+    A,
+    B,
+    C {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,7 +6,6 @@
+     C {}
+ 
+ declare class MarkDef<
+-    M extends string | Mark = Mark,
+-    ES extends ExprRef | SignalRef = ExprRef | SignalRef,
+-  >
+-  implements A, B, C {}
++  M extends string | Mark = Mark,
++  ES extends ExprRef | SignalRef = ExprRef | SignalRef,
++> implements A, B, C {}
+```
+
+# Output
+
+```ts
+export interface MarkDef<
+  M extends string | Mark = Mark,
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef,
+> extends A,
+    B,
+    C {}
+
+declare class MarkDef<
+  M extends string | Mark = Mark,
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef,
+> implements A, B, C {}
+```

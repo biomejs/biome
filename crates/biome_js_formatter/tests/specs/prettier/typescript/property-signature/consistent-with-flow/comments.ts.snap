@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/property-signature/consistent-with-flow/comments.ts
+---
+# Input
+
+```ts
+interface A {
+  property: // Comment
+    B
+}
+
+interface A {
+  property: /* Comment */ B
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+ interface A {
+-  property: B; // Comment
++  property: // Comment
++  B;
+ }
+ 
+ interface A {
+```
+
+# Output
+
+```ts
+interface A {
+  property: // Comment
+  B;
+}
+
+interface A {
+  property: /* Comment */ B;
+}
+```

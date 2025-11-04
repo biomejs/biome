@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/sequence-expression/no-semi/expression.js
+---
+# Input
+
+```js
+a;
++1, b
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ a;
+-(+1, b);
+++1, b;
+```
+
+# Output
+
+```js
+a;
++1, b;
+```

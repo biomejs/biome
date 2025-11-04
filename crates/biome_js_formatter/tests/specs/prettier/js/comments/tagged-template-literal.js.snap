@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/comments/tagged-template-literal.js
+---
+# Input
+
+```js
+foo``; // comment 1
+
+foo // comment 2
+``;
+
+foo // comment 3
+`
+`;
+
+foo /* comment 4 */`
+`;
+
+foo /* comment 5 */
+`
+`;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,8 +7,8 @@
+ `
+ `;
+ 
+-foo /* comment 4 */ `
++foo /* comment 4 */`
+ `;
+ 
+-foo /* comment 5 */ `
++foo /* comment 5 */`
+ `;
+```
+
+# Output
+
+```js
+foo``; // comment 1
+
+foo // comment 2
+``;
+
+foo // comment 3
+`
+`;
+
+foo /* comment 4 */`
+`;
+
+foo /* comment 5 */`
+`;
+```

@@ -1,0 +1,77 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: typescript/import-type/comma/comma.ts
+---
+# Input
+
+```ts
+type A = import("foo", {
+  with: {
+  type: "json",}})
+type A = import("foo", {
+  with: {
+  type: "json"},})
+// Not supported, https://github.com/microsoft/TypeScript/issues/61489
+// type A = import("foo", {
+//   with: {
+//   type: "json"}},)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,8 @@
+-type A = import("foo", {
+-  with: {
+-    type: "json",
+-  },
+-});
++type A = import("foo", { with: { type: "json" }});
+ type A = import("foo", {
+   with: {
+-    type: "json",
+-  },
+-});
++  type: "json"}
++,})
+ // Not supported, https://github.com/microsoft/TypeScript/issues/61489
+ // type A = import("foo", {
+ //   with: {
+```
+
+# Output
+
+```ts
+type A = import("foo", { with: { type: "json" }});
+type A = import("foo", {
+  with: {
+  type: "json"}
+,})
+// Not supported, https://github.com/microsoft/TypeScript/issues/61489
+// type A = import("foo", {
+//   with: {
+//   type: "json"}},)
+```
+
+# Errors
+```
+comma.ts:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `,`
+  
+    4 │ type A = import("foo", {
+    5 │   with: {
+  > 6 │   type: "json"},})
+      │                ^
+    7 │ // Not supported, https://github.com/microsoft/TypeScript/issues/61489
+    8 │ // type A = import("foo", {
+  
+  i Remove ,
+  
+
+```
