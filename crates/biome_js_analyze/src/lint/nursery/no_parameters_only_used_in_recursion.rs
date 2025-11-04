@@ -374,7 +374,7 @@ fn is_reference_in_recursive_call(
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
             // Check if this call is recursive AND uses our parameter
-            if is_recursive_call_with_param_usage(&call_expr, function_name, param_name)? {
+            if let Some(true) = is_recursive_call_with_param_usage(&call_expr, function_name, param_name) {
                 return Some(true);
             }
         }
