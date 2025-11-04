@@ -3755,6 +3755,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLeakedConditionalRenderingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoLeakedConditionalRenderingOptions" }
+			]
+		},
+		"NoLeakedConditionalRenderingOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMagicNumbersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5173,6 +5183,15 @@
 					"description": "Disallow string literals inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLeakedConditionalRendering": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoLeakedConditionalRenderingConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -7905,6 +7924,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoLabelWithoutControlOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoLeakedConditionalRenderingOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoLeakedConditionalRenderingOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

@@ -119,6 +119,7 @@ pub mod no_irregular_whitespace;
 pub mod no_jsx_literals;
 pub mod no_label_var;
 pub mod no_label_without_control;
+pub mod no_leaked_conditional_rendering;
 pub mod no_magic_numbers;
 pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;

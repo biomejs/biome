@@ -1693,6 +1693,10 @@ export interface Nursery {
 	 */
 	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noLeakedConditionalRendering?: RuleConfiguration_for_NoLeakedConditionalRenderingOptions;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
@@ -3082,6 +3086,9 @@ export type RuleConfiguration_for_NoIncrementDecrementOptions =
 export type RuleConfiguration_for_NoJsxLiteralsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoJsxLiteralsOptions;
+export type RuleConfiguration_for_NoLeakedConditionalRenderingOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoLeakedConditionalRenderingOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
@@ -5567,6 +5574,16 @@ export interface RuleWithOptions_for_NoJsxLiteralsOptions {
 	 * Rule's options
 	 */
 	options: NoJsxLiteralsOptions;
+}
+export interface RuleWithOptions_for_NoLeakedConditionalRenderingOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoLeakedConditionalRenderingOptions;
 }
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
@@ -8336,6 +8353,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export interface NoLeakedConditionalRenderingOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoParametersOnlyUsedInRecursionOptions {}
@@ -9115,6 +9133,7 @@ export type Category =
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedConditionalRendering"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
