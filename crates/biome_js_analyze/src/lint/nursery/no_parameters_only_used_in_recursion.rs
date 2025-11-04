@@ -320,7 +320,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> Opti
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
         let name = ref_id.value_token().ok()?;
-        return Some(name.text_trimmed() == function_name.text());
+        return Some(name.token_text_trimmed() == *function_name);
     }
 
     // Member expression: this.foo() or this?.foo()
@@ -335,7 +335,7 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> Opti
         let member_node = member.member().ok()?;
         let name = member_node.as_js_name()?;
         let token = name.value_token().ok()?;
-        return Some(token.text_trimmed() == function_name.text());
+        return Some(token.token_text_trimmed() == *function_name);
     }
 
     // Computed member expression: this["foo"]() or this?.["foo"]()
@@ -350,9 +350,8 @@ fn is_recursive_call(call: &JsCallExpression, function_name: &TokenText) -> Opti
         let member_expr = computed.member().ok()?;
         let lit = member_expr.as_any_js_literal_expression()?;
         let string_lit = lit.as_js_string_literal_expression()?;
-        // Note: inner_string_text() already uses token_text_trimmed() internally
         let text = string_lit.inner_string_text().ok()?;
-        return Some(text.text() == function_name.text());
+        return Some(text == *function_name);
     }
 
     Some(false)
