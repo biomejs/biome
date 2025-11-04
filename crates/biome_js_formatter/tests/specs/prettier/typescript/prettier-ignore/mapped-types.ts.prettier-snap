@@ -3,53 +3,53 @@ type a = {
     [A in B]: C  |  D
   };
 
-type a = {
+type b = {
     [
       // prettier-ignore
       A in B
     ]: C  |  D
   };
 
-type a = {
+type c = {
   [A in B]: C | D; // prettier-ignore
 };
 
-type a = {
-  A in B: C | D; // prettier-ignore
+type d = {
+  [A in B]: C | D; // prettier-ignore
 };
 
-type a = {
+type e = {
     [
       /* prettier-ignore */
       A in B
     ]: C  |  D
   };
 
-type a = {
+type f = {
   [A /* prettier-ignore */ in B]: C | D;
 };
 
-type a = {
-  A in B /* prettier-ignore */: C | D;
-};
-
-type a = {
-    /* prettier-ignore */ [A in B]: C  |  D
-  };
-
-type a = {
-    [/* prettier-ignore */ A in B ]: C  |  D
-  };
-
-type a = {
-  [A in /* prettier-ignore */ B]: C | D;
-};
-
-type a = {
+type g = {
   [A in B /* prettier-ignore */]: C | D;
 };
 
-type a = {
+type h = {
+    /* prettier-ignore */ [A in B]: C  |  D
+  };
+
+type i = {
+    [/* prettier-ignore */ A in B ]: C  |  D
+  };
+
+type j = {
+  [A in /* prettier-ignore */ B]: C | D;
+};
+
+type k = {
+  [A in B]: /* prettier-ignore */ C  |  D;
+};
+
+type l = {
     /* prettier-ignore */
     [A in B]: C  |  D
   };

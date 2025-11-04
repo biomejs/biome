@@ -1,0 +1,15 @@
+type BufferStreamOrVoid<
+  C extends undefined | Buffer | Stream | boolean,
+  P extends undefined | Buffer,
+  R extends Buffer | Stream | void = // Above line comment about exclue. // Inline comment about void.
+  Exclude<C, false> extends never
+    ? void
+    : C & P extends Buffer
+      ? Buffer
+      : Stream,
+> = R;
+
+type A<
+  B = // Above line comment about exclue. // Inline comment about void.
+  C,
+> = R;

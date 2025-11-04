@@ -41,3 +41,8 @@ class C2 // comment
 {
   foo() {}
 }
+
+(class A10
+  extends /* a */ /* prettier-ignore */ /* a */ /* prettier-ignore */ B {});
+class A10
+  extends /* a */ /* prettier-ignore */ /* a */ /* prettier-ignore */ B {}

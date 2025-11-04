@@ -1,0 +1,7 @@
+interface A {
+  property: B; // Comment
+}
+
+interface A {
+  property: /* Comment */ B;
+}

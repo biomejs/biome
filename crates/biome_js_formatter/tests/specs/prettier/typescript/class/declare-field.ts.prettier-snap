@@ -1,0 +1,4 @@
+class A {
+  declare private readonly name: string;
+  declare private readonly name2: string;
+}

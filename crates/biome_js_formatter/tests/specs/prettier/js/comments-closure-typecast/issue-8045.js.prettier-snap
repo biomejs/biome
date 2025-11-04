@@ -7,7 +7,7 @@ function jsdocCastInReturn() {
   );
 }
 
-const myLongVariableName =
+const myLongVariableFoo1 =
   /** @type {ThisIsAVeryLongTypeThatShouldTriggerLineWrapping} */
   (fooBarBaz);
 
@@ -18,7 +18,7 @@ function jsdocCastInReturn() {
   );
 }
 
-const myLongVariableName =
+const myLongVariableFoo2 =
   /** @type {ThisIsAVeryLongTypeThatShouldTriggerLineWrapping} */
   (fooBarBaz);
 

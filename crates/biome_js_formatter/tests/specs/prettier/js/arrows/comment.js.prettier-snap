@@ -63,22 +63,16 @@ func(
 
 func(
   () =>
-    (
-      // comment
-      a, b, c
-    ),
+    // comment
+    (a, b, c),
 );
 func(
   () => () =>
-    (
-      // comment
-      a, b, c
-    ),
+    // comment
+    (a, b, c),
 );
 func(
   () => () => () =>
-    (
-      // comment
-      a, b, c
-    ),
+    // comment
+    (a, b, c),
 );

@@ -7,5 +7,5 @@ var a =
    * bla bla bla
    */
   //2
-  (window["s"]).toString();
+  window["s"].toString();
 console.log(a.foo());

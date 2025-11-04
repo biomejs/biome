@@ -6,6 +6,9 @@ export interface ThirdVeryLongAndBoringInterfaceName
   extends ALongAndBoringInterfaceName {
   c: string;
 }
+export class ThirdVeryLongAndBoringInterfaceName____ extends ALongAndBoringInterfaceName {
+  c: string;
+}
 
 export interface ThirdVeryLongAndBoringInterfaceName
   extends ALongAndBoringInterfaceName,

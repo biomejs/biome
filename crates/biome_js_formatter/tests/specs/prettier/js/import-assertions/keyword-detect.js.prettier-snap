@@ -1,0 +1,6 @@
+import "./test.json" /* with */ /* with */ assert { type: "json" };
+import { default as b } from "./test.json" /* with */ /* with */ assert { type: "json" };
+
+export { default as e } from "./test.json" /* with */ /* with */ assert { type: "json" };
+
+export * from "./test.json" /* with */ /* with */ assert { type: "json" };

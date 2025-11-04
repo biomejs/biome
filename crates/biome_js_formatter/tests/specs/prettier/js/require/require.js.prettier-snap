@@ -35,3 +35,5 @@ const plugin = require(
 const plugin2 = require(
   path.join(__dirname, global.STANDALONE ? "../standalone.js" : ".."),
 );
+
+const plugin3 = require("./a/long/long/long/long/long/long/long/long/long/long/long/path/to/module");

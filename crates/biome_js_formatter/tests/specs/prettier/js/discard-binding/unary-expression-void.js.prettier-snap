@@ -1,0 +1,18 @@
+// expr
+void [
+  // pattern
+  ([void] = [
+    {
+      // expr
+      [void []]:
+        // pattern
+        // expr
+        [void] = void [
+          // pattern
+          ([void]) => [],
+        ],
+      // expr
+    },
+  ] =
+    [void []]),
+];

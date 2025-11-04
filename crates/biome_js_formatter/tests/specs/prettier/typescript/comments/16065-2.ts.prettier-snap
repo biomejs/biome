@@ -1,23 +1,23 @@
 class Foo {
   // PropertyDefinition
-  @decorator /* comment */
-  readonly propertyDefinition;
+  @decorator
+  readonly /* comment */ propertyDefinition;
 
   // TSAbstractPropertyDefinition
-  @decorator /* comment */
-  abstract abstractPropertyDefinition;
+  @decorator
+  abstract /* comment */ abstractPropertyDefinition;
 
   // TSAbstractMethodDefinition
-  @decorator /* comment */
-  abstract abstractMethodDefinition;
+  @decorator
+  abstract /* comment */ abstractMethodDefinition;
 
   // MethodDefinition
-  @decorator /* comment */
-  private methodDefinition() {}
+  @decorator
+  private /* comment */ methodDefinition() {}
 
   // AccessorProperty
-  @decorator /* comment */
-  accessor accessorProperty = 3;
+  @decorator
+  accessor /* comment */ accessorProperty = 3;
 
   constructor(
     // TSParameterProperty
