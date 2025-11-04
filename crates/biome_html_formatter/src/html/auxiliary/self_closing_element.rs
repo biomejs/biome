@@ -58,7 +58,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     if slash_token.is_some() {
                         write!(f, [slash_token.format()])?;
                     } else {
-                        write!(f, [text("/")])?;
+                        write!(f, [token("/")])?;
                     }
                 }
                 // We remove the slash only from void elements
