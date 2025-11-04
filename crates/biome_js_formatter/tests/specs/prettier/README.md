@@ -23,10 +23,7 @@ extract these snapshots into plain files for use in the Rust tests. To update
 the snapshots:
 
 1. Clone the Prettier git repository locally (https://github.com/prettier/prettier)
-2. Remove all the directories inside
-   `crates/biome_js_formatter/tests/specs/prettier` to ensure all obsolete tests are
-   removed
-3. Go to `crates/biome_formatter_test/src/prettier` directory
-4. Install prettier ``pnpm install``
-5. Go to `crates/biome_js_formatter/tests/specs/prettier` directory
-6. Run `node prepare_tests.js <prettier root directory>`
+1. Go to `crates/biome_formatter_test/src/prettier` directory
+1. Install prettier ``pnpm install``
+1. Go to `crates/biome_js_formatter/tests/specs/prettier` directory
+1. Run `node prepare_tests.cjs <prettier root directory>`
