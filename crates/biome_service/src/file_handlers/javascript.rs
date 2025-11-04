@@ -565,6 +565,10 @@ fn parse_embedded_nodes(
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseEmbedResult {
+    if !settings.experimental_js_embedded_snippets_enabled() {
+        return ParseEmbedResult { nodes: vec![] };
+    }
+
     let mut nodes = Vec::new();
     let js_root: AnyJsRoot = root.tree();
 

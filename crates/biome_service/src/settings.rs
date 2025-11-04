@@ -7,7 +7,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
@@ -76,11 +76,20 @@ pub struct Settings {
 
     // TODO: remove once HTML full support is stable
     pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
+
+    // TODO: remove once embedded snippets support is stable
+    pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
 }
 
 impl Settings {
     pub fn experimental_full_html_support_enabled(&self) -> bool {
         self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
+    pub fn experimental_js_embedded_snippets_enabled(&self) -> bool {
+        self.experimental_js_embedded_snippets_enabled
             .unwrap_or_default()
             .value()
     }
@@ -135,6 +144,8 @@ impl Settings {
 
         // javascript settings
         if let Some(javascript) = configuration.javascript {
+            self.experimental_js_embedded_snippets_enabled =
+                javascript.experimental_embedded_snippets_enabled;
             self.languages.javascript = javascript.into()
         }
         // json settings

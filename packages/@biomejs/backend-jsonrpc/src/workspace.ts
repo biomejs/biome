@@ -277,6 +277,10 @@ export interface JsConfiguration {
 	 */
 	assist?: JsAssistConfiguration;
 	/**
+	 * Enables support for embedding snippets.
+	 */
+	experimentalEmbeddedSnippetsEnabled?: Bool;
+	/**
 	 * Formatting options
 	 */
 	formatter?: JsFormatterConfiguration;

@@ -440,6 +440,20 @@ const Bar = styled(Component)`
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
 
     workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .unwrap();
+
+    workspace
         .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new(FILE_PATH),
