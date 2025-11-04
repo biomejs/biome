@@ -1,16 +1,18 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: svelte/debug.svelte
+info: text_expressions/expressions_line_boundaries.astro
 ---
 # Input
 
-```svelte
-{@debug}
+```astro
+<p>
+	Start {expr1}
+	{expr2} middle
+	end {expr3}
+</p>
 
-{@debug foo}
-
-
-{@debug foo, bar}{@debug foo, bar,      baz}
+<div>{a}
+{b}</div>
 
 ```
 
@@ -33,10 +35,24 @@ Indent script and style: false
 Self close void elements: never
 -----
 
-```svelte
-{@debug}
+```astro
+<p>
+	Start {expr1}
+	{expr2}middle end {expr3}
+</p>
 
-{@debug foo}
-
-{@debug foo, bar}{@debug foo, bar, baz}
+<div>
+	{a}
+	{b}
+</div>
 ```
+
+
+
+## Unimplemented nodes/tokens
+
+"expr1" => 12..17
+"expr2" => 21..26
+"expr3" => 39..44
+"a" => 60..61
+"b" => 65..66

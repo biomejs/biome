@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, HtmlAttributeName, HtmlTagName};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttributeName, HtmlTagName};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::HtmlFormatter;
@@ -779,6 +779,14 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
     f: &HtmlFormatter,
     element: &AnyHtmlElement,
 ) -> bool {
+    /// Text expressions (like {name}) are treated as whitespace-sensitive
+    /// to preserve spaces around them, similar to inline elements like <span>
+    if is_text_expression(element) {
+        let sensitivity = f.options().whitespace_sensitivity();
+        return sensitivity.is_strict() || sensitivity.is_css();
+    }
+
+    // For HTML elements, check whitespace sensitivity based on tag name
     let name = match element {
         AnyHtmlElement::HtmlElement(element) => {
             element.opening_element().and_then(|element| element.name())
@@ -807,6 +815,14 @@ pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
     HTML_INLINE_TAGS
         .iter()
         .any(|tag| tag_name.text_trimmed().eq_ignore_ascii_case(tag))
+}
+
+// Whether the element is a text expression (like `{name}` in Astro/Vue/Svelte)
+pub(crate) fn is_text_expression(element: &AnyHtmlElement) -> bool {
+    matches!(
+        element,
+        AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(_))
+    )
 }
 
 #[cfg(test)]

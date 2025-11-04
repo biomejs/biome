@@ -1,16 +1,15 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: svelte/debug.svelte
+info: text_expressions/single-expressions-whitespace.vue
 ---
 # Input
 
-```svelte
-{@debug}
-
-{@debug foo}
-
-
-{@debug foo, bar}{@debug foo, bar,      baz}
+```vue
+<template>
+	<p>User: {name} ({username})</p>
+	<div>{count} items in cart</div>
+	<span>{first} {last}</span>
+</template>
 
 ```
 
@@ -33,10 +32,10 @@ Indent script and style: false
 Self close void elements: never
 -----
 
-```svelte
-{@debug}
-
-{@debug foo}
-
-{@debug foo, bar}{@debug foo, bar, baz}
+```vue
+<template>
+	<p>User: { name} ( { username})</p>
+	<div>{ count} items in cart</div>
+	<span>{ first} { last}</span>
+</template>
 ```

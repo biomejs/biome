@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/inline/whitespace-after-closing-tag.html
+---
+# Input
+
+```html
+<p>
+	Lorem, ipsum dolor sit amet <span>consectetur</span> adipisicing elit.
+</p>
+
+<p><span id="name">name</span> (<span id="username">username</span>)</p>
+
+<div>
+	Text before <b>bold</b> text after <i>italic</i> more text.
+</div>
+
+<span>hello <a>link1</a> <a>link2</a> world</span>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<p>
+	Lorem, ipsum dolor sit amet <span>consectetur</span> adipisicing elit.
+</p>
+
+<p>
+	<span id="name">name</span> (<span id="username">username</span>)
+</p>
+
+<div>
+	Text before <b>bold</b> text after <i>italic</i> more text.
+</div>
+
+<span
+	>hello <a>link1</a> <a>link2</a> world</span
+>
+```
