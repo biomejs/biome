@@ -414,7 +414,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         let current_expr = current_expr.omit_parentheses();
 
         if let Some(ref_id) = current_expr.as_js_reference_identifier() {
-            if ref_id.name().ok().is_some_and(|n| n.text() == param_name) {
+            if ref_id.name().ok()?.text() == param_name {
                 // Found direct parameter reference
                 return Some(true);
             }
@@ -456,9 +456,9 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Static member access: obj.field
         // Add object to worklist
         if let Some(member_expr) = current_expr.as_js_static_member_expression()
-            && let Ok(obj) = member_expr.object()
         {
-            to_check.push(obj);
+            to_check.push(member_expr.object().ok()?);
+            continue;
         }
 
         // Any other expression - not safe to trace
