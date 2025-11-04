@@ -472,13 +472,13 @@ const Bar = styled(Component)`
 
     insta::assert_snapshot!(result.as_code(), @r"
     const Foo = styled.div`
-    display: flex;
-    color: red;
+    	display: flex;
+    	color: red;
     `;
 
     const Bar = styled(Component)`
-    display: flex;
-    color: red;
+    	display: flex;
+    	color: red;
     `;
     ");
 }

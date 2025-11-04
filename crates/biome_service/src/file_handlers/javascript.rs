@@ -33,7 +33,7 @@ use biome_configuration::javascript::{
 use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_diagnostics::Applicability;
-use biome_formatter::prelude::{Document, Interned, LineMode};
+use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
     IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
@@ -1223,10 +1223,13 @@ fn format_embedded(
         let node = iter.find(|node| node.range == range)?;
 
         let wrap_document = |document: Document| {
-            // TODO: Ident inside the literal?
+            // TODO: Option to disable indent here?
             let elements = vec![
                 FormatElement::Line(LineMode::Hard),
+                FormatElement::Tag(Tag::StartIndent),
+                FormatElement::Line(LineMode::Hard),
                 FormatElement::Interned(Interned::new(document.into_elements())),
+                FormatElement::Tag(Tag::EndIndent),
             ];
             Document::new(elements)
         };
