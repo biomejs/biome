@@ -202,6 +202,42 @@ impl HtmlElement {
         is_script && is_lang_typescript
     }
 
+    /// Returns `true` if the element is a `<script lang="jsx">`
+    pub fn is_jsx_lang(&self) -> bool {
+        let is_script = self.is_script_tag();
+        let lang_attribute = self.find_attribute_by_name("lang");
+        let is_lang_jsx = lang_attribute.is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_string().cloned())
+                .and_then(|value| value.value_token().ok())
+                .is_some_and(|token| {
+                    let text = inner_string_text(&token);
+                    text.eq_ignore_ascii_case("jsx")
+                })
+        });
+        is_script && is_lang_jsx
+    }
+
+    /// Returns `true` if the element is a `<script lang="tsx">`
+    pub fn is_tsx_lang(&self) -> bool {
+        let is_script = self.is_script_tag();
+        let lang_attribute = self.find_attribute_by_name("lang");
+        let is_lang_tsx = lang_attribute.is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_string().cloned())
+                .and_then(|value| value.value_token().ok())
+                .is_some_and(|token| {
+                    let text = inner_string_text(&token);
+                    text.eq_ignore_ascii_case("tsx")
+                })
+        });
+        is_script && is_lang_tsx
+    }
+
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
         let is_style = self.is_style_tag();
