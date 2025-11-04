@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.92
+**Average compatibility**: 95.18
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 97.67
+**Compatible lines**: 96.48
 
 <details>
     <summary>Definition</summary>
@@ -21,6 +21,11 @@
 ## Test cases
 
 ### js/array-spread/multiple.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/arrays/array-and-tuple.js
 
 **Prettier Similarity**: 100.00%
 
@@ -152,6 +157,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/arrows/array-and-object.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/arrows/arrow-chain-with-trailing-comments.js
 
 **Prettier Similarity**: 100.00%
@@ -188,8 +198,101 @@
 
 
 ### js/arrows/comment.js
+```diff
+ /**
+  * Curried function that ends with a BEM CSS Selector
+  *
+  * @param {String} block - the BEM Block you'd like to select.
+  * @returns {Function}
+  */
+ export const bem =
+   (block) =>
+   /**
+    * @param {String} [element] - the BEM Element within that block; if undefined, selects the block itself.
+    * @returns {Function}
+    */
+   (element) =>
+   /**
+    * @param {?String} [modifier] - the BEM Modifier for the Block or Element; if undefined, selects the Block or Element unmodified.
+    * @returns {String}
+    */
+   (modifier) =>
+     [
+       ".",
+       css(block),
+       element ? `__${css(element)}` : "",
+       modifier ? `--${css(modifier)}` : "",
+     ].join("");
+ 
+ <FlatList
+   renderItem={(
+     info, // $FlowExpectedError - bad widgetCount type 6, should be Object
+   ) => <span>{info.item.widget.missingProp}</span>}
+   data={data}
+ />;
+ 
+ func(
+   () =>
+     // comment
+     a,
+ );
+ func(
+   () => () =>
+     // comment
+     a,
+ );
+ func(
+   () => () => () =>
+     // comment
+     a,
+ );
+ 
+ func(() =>
+   // comment
+   a ? b : c,
+ );
+ func(
+   () => () =>
+     // comment
+     a ? b : c,
+ );
+ func(
+   () => () => () =>
+     // comment
+     a ? b : c,
+ );
+ 
+ func(
+   () =>
+-    // comment
+-    (a, b, c),
++    (
++      // comment
++      a, b, c
++    ),
+ );
+ func(
+   () => () =>
+-    // comment
+-    (a, b, c),
++    (
++      // comment
++      a, b, c
++    ),
+ );
+ func(
+   () => () => () =>
+-    // comment
+-    (a, b, c),
++    (
++      // comment
++      a, b, c
++    ),
+ );
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 85.71%
 
 
 ### js/arrows/curried.js
@@ -331,6 +434,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/arrows/issue-10814.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/arrows/issue-1389-curry.js
 
 **Prettier Similarity**: 100.00%
@@ -349,18 +457,6 @@
 ### js/arrows/long-contents.js
 
 **Prettier Similarity**: 100.00%
-
-
-### js/arrows/newline-before-arrow/newline-before-arrow.js
-```diff
--async (x) => x;
-+async;
-+x;
-+=> x
-
-```
-
-**Prettier Similarity**: 0.00%
 
 
 ### js/arrows/parens.js
@@ -404,6 +500,31 @@
 
 
 ### js/assignment-expression/assignment_expression.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/assignment-expression/property-key.js
+```diff
+ a = {
+-  [(this.resource = resource)]: 1,
++  [this.resource = resource]: 1,
+ };
+ 
+ class A {
+-  [(this.resource = resource)] = 1;
++  [this.resource = resource] = 1;
+ 
+-  [(this.resource = resource)]() {}
++  [this.resource = resource]() {}
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/assignment-expression/property-value.js
 
 **Prettier Similarity**: 100.00%
 
@@ -459,6 +580,11 @@
 
 
 ### js/assignment/issue-15534.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/assignment/issue-17437.js
 
 **Prettier Similarity**: 100.00%
 
@@ -598,6 +724,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/binary-expressions/array-and-object.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/binary-expressions/arrow.js
 
 **Prettier Similarity**: 100.00%
@@ -613,9 +744,88 @@
 **Prettier Similarity**: 100.00%
 
 
-### js/binary-expressions/comment.js
+### js/binary-expressions/chain-expression.js
 
 **Prettier Similarity**: 100.00%
+
+
+### js/binary-expressions/comment.js
+```diff
+ a =
+   // Comment 1
+   Math.random() * (yRange * (1 - minVerticalFraction)) +
+   minVerticalFraction * yRange -
+   offset;
+ 
+ a +
+   a +
+   a + // comment
+   a +
+   a;
+ 
+ a &&
+   longLongLongLongLongLongLongLongLong &&
+   longLongLongLongLongLongLongLongLong && // comment
+   longLongLongLongLongLongLongLongLong &&
+   longLongLongLongLongLongLongLongLong;
+ 
+ a ||
+   longLongLongLongLongLongLongLongLong ||
+   longLongLongLongLongLongLongLongLong || // comment
+   longLongLongLongLongLongLongLongLong ||
+   longLongLongLongLongLongLongLongLong;
+ 
+ var a = x(
+   abifornCringerMoshedPerplexSawder +
+     kochabCooieGameOnOboleUnweave + // f
+     glimseGlyphsHazardNoopsTieTie +
+     bifornCringerMoshedPerplexSawder,
+ );
+ 
+ foo[
+   a +
+     a + // comment
+     a +
+     bar[
+       b +
+         b +
+         b + // comment
+         b +
+         b
+     ]
+ ];
+ 
+ !(
+   a +
+   a + // comment
+   a +
+   !(
+     b +
+     b +
+     b + // comment
+     b +
+     b
+   )
+ );
+ 
+ const logical_expression =
+   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* trailing comment */ &&
+   /* leading comment */ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb &&
+   // line comment
+   cccccccccccccccccccccccc;
+ 
+ const bc = a /* internal before */ || /* internal after */ b;
+ 
+ a +
+   /**/
+-  a.a().a();
++  a
++    .a()
++    .a();
+
+```
+
+**Prettier Similarity**: 95.71%
 
 
 ### js/binary-expressions/equality.js
@@ -661,6 +871,37 @@
 ### js/binary-expressions/math.js
 
 **Prettier Similarity**: 100.00%
+
+
+### js/binary-expressions/mutiple-comments/17192.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/binary-expressions/parentheses/bitwise.js
+```diff
+ // https://github.com/prettier/prettier/issues/18145
+-1 << bit % 8;
++1 << (bit % 8);
+ 1 >> (bit - 8);
+-1 | bit % 8;
+-1 & bit % 8;
+-1 ^ bit % 8;
+-1 >>> bit % 8;
++1 | (bit % 8);
++1 & (bit % 8);
++1 ^ (bit % 8);
++1 >>> (bit % 8);
+ (a + b) % c;
+ a % (b + c);
+ 1 << (bit * 8);
+ 1 >> (bit / 8);
+ 1 << (bit + 8);
+ 1 >> (bit - 8);
+
+```
+
+**Prettier Similarity**: 61.54%
 
 
 ### js/binary-expressions/return.js
@@ -709,244 +950,8 @@
 
 
 ### js/break-calls/react.js
-```diff
- function helloWorld() {
-   useEffect(() => {
-     // do something
-   }, [props.value]);
-   useEffect(() => {
-     // do something
-   }, [
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-   ]);
- }
- 
- function helloWorldWithReact() {
-   React.useEffect(() => {
-     // do something
-   }, [props.value]);
-   React.useEffect(() => {
-     // do something
-   }, [
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-     props.value,
-   ]);
- }
- 
- function MyComponent(props) {
-   useEffect(
-     () => {
-       console.log("some code", props.foo);
-     },
- 
-     // We need to disable the eslint warning here,
-     // because of some complicated reason.
-     // eslint-disable line react-hooks/exhaustive-deps
-     [],
-   );
- 
-   return null;
- }
- 
- function Comp1() {
-   const { firstName, lastName } = useMemo(
-     () => parseFullName(fullName),
-     [fullName],
-   );
- }
- 
- function Comp2() {
-   const { firstName, lastName } = useMemo(
-     () => func(),
-     [
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-       props.value,
-     ],
-   );
- }
- 
- function Comp3() {
-   const { firstName, lastName } = useMemo(
-     (aaa, bbb, ccc, ddd, eee, fff, ggg, hhh, iii, jjj, kkk) =>
-       func(aaa, bbb, ccc, ddd, eee, fff, ggg, hhh, iii, jjj, kkk),
-     [foo, bar, baz],
-   );
- }
- 
- function Comp4() {
-   const { firstName, lastName } = useMemo(
-     () =>
-       (foo && bar && baz) ||
-       baz ||
-       (foo && baz(foo) + bar(foo) + foo && bar && baz) ||
-       baz ||
-       (foo && baz(foo) + bar(foo)),
-     [foo, bar, baz],
-   );
- }
- 
- function Comp5() {
-   const { firstName, lastName } = useMemo(() => func(), [foo]);
- }
- 
- function Component1() {
--  useImperativeHandle(ref, () => {
--    /* Function body */
--  }, []);
--  useImperativeHandle(ref, () => {
--    /* Function body */
--  }, [props.value]);
--  useImperativeHandle(ref, () => {
--    /* Function body */
--  }, [
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--  ]);
-+  useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [],
-+  );
-+  useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [props.value],
-+  );
-+  useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+    ],
-+  );
- }
- 
- function Component2() {
--  React.useImperativeHandle(ref, () => {
--    /* Function body */
--  }, []);
--  React.useImperativeHandle(ref, () => {
--    /* Function body */
--  }, [props.value]);
--  React.useImperativeHandle(ref, () => {
--    /* Function body */
--  }, [
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--    props.value,
--  ]);
-+  React.useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [],
-+  );
-+  React.useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [props.value],
-+  );
-+  React.useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+      props.value,
-+    ],
-+  );
- }
- 
- function Component3() {
--  useImperativeHandle(ref, () => {
--    /* Function body */
--  }, []);
-+  useImperativeHandle(
-+    ref,
-+    () => {
-+      /* Function body */
-+    },
-+    [],
-+  );
- }
 
-```
-
-**Prettier Similarity**: 61.17%
+**Prettier Similarity**: 100.00%
 
 
 ### js/break-calls/reduce.js
@@ -1039,6 +1044,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/chain-expression/number.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/chain-expression/test-2.js
 
 **Prettier Similarity**: 100.00%
@@ -1070,6 +1080,64 @@
 
 
 ### js/class-comment/superclass.js
+```diff
+ class A // comment 1
+   // comment 2
+   extends B {}
+ 
+ class A1 extends B {
+   // comment1
+   // comment2
+   // comment3
+ }
+ 
+ class A2 /* a */ extends B {}
+ class A3 extends B /* a */ {}
+ class A4 extends /* a */ B {}
+ 
+ (class A5 // comment 1
+   // comment 2
+   extends B {});
+ 
+ (class A6 extends B {
+   // comment1
+   // comment2
+   // comment3
+ });
+ 
+ (class A7 /* a */ extends B {});
+ (class A8 extends B /* a */ {});
+ (class A9 extends /* a */ B {});
+ 
+ class a extends b {
+   // comment
+   constructor() {}
+ }
+ 
+ class c extends d {
+   // comment2
+   constructor() {}
+ }
+ 
+ class C2 // comment
+   extends Base
+ {
+   foo() {}
+ }
+ 
+-(class A10
+-  extends /* a */ /* prettier-ignore */ /* a */ /* prettier-ignore */ B {});
+-class A10
+-  extends /* a */ /* prettier-ignore */ /* a */ /* prettier-ignore */ B {}
++(class A10 extends /* a */ /* prettier-ignore */ B {});
++class A10 extends /* a */ /* prettier-ignore */ B {}
+
+```
+
+**Prettier Similarity**: 91.67%
+
+
+### js/class-extends/array-and-object.js
 
 **Prettier Similarity**: 100.00%
 
@@ -1130,6 +1198,16 @@
 
 
 ### js/classes/class-fields-features.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/classes/computed-constructor-property.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/classes/constructor.js
 
 **Prettier Similarity**: 100.00%
 
@@ -1199,6 +1277,22 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/classes/multiple-static.js
+```diff
+ class C {
+-  static static;
+-  static a() {}
++  static
++  static
++  static
++  a() {}
+ }
+
+```
+
+**Prettier Similarity**: 33.33%
+
+
 ### js/classes/new.js
 
 **Prettier Similarity**: 100.00%
@@ -1224,6 +1318,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/comments-closure-typecast/array-and-object.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/comments-closure-typecast/binary-expr.js
 
 **Prettier Similarity**: 100.00%
@@ -1235,8 +1334,23 @@
 
 
 ### js/comments-closure-typecast/comment-in-the-middle.js
+```diff
+ var a =
+   /**
+    * bla bla bla
+    * @type {string |
+    * number
+    * }
+    * bla bla bla
+    */
+   //2
+-  window["s"].toString();
++  (window["s"]).toString();
+ console.log(a.foo());
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 90.91%
 
 
 ### js/comments-closure-typecast/comment-placement.js
@@ -1310,6 +1424,154 @@
 
 
 ### js/comments/15661.js
+```diff
+ !(
+   (
+     x || // foo
+     y || // bar
+     z
+   ) /*
+    * comment
+    */
+ );
+ 
+ !(
+-  cond1 || // foo
+-  cond2 || // bar
+-  cond3 // baz
++  (
++    cond1 || // foo
++    cond2 || // bar
++    cond3
++  ) // baz
+ );
+ 
+ !(
+-  (a && // alpha
+-    b) || // bravo
+-  c // charlie
++  (
++    (a && // alpha
++      b) || // bravo
++    c
++  ) // charlie
+ );
+ 
+ !(
+-  x || // foo
+-  (y && z) // bar
++  (
++    x || // foo
++    (y && z)
++  ) // bar
+ );
+ 
+ !(
+-  a || // first condition
+-  b ||
+-  c || // second condition
+-  d // third condition
++  (
++    a || // first condition
++    b ||
++    c || // second condition
++    d
++  ) // third condition
+ );
+ 
+ void (
+   (
+     (p && // first
+       q) || // second
+     (r && // third
+       s)
+   ) // fourth
+ );
+ 
+ void (
+-  cond1 || // foo
+-  (cond2 && // bar
+-    cond3) || // baz
+-  cond4 // qux
++  (
++    cond1 || // foo
++    (cond2 && // bar
++      cond3) || // baz
++    cond4
++  ) // qux
+ );
+ 
+ !(
+-  (cond1 && cond2) || // multi-cond1
+-  cond3 ||
+-  cond4 // multi-cond2
++  (
++    (cond1 && cond2) || // multi-cond1
++    cond3 ||
++    cond4
++  ) // multi-cond2
+ );
+ 
+ !(
+-  ((cond1 || cond2) && // complex-cond1
+-    (cond3 || cond4)) || // complex-cond2
+-  cond5 // complex-cond3
++  (
++    ((cond1 || cond2) && // complex-cond1
++      (cond3 || cond4)) || // complex-cond2
++    cond5
++  ) // complex-cond3
+ );
+ 
+ void (
+-  ((condA || condB) && // test A
+-    (condC || condD)) || // test B
+-  condE // test C
++  (
++    ((condA || condB) && // test A
++      (condC || condD)) || // test B
++    condE
++  ) // test C
+ );
+ 
+ void (
+-  (x || y) && // nested
+-  (z || w) // comment for w
++  (
++    (x || y) && // nested
++    (z || w)
++  ) // comment for w
+ );
+ 
+ !(
+-  a && // begin nested
+-  (b || c) // end nested
++  (
++    a && // begin nested
++    (b || c)
++  ) // end nested
+ );
+
+```
+
+**Prettier Similarity**: 49.48%
+
+
+### js/comments/16398.js
+```diff
+ if (foo) a = b;
+ /* foo */ else foo.split;
+ 
+ if (foo) a = b;
+-else /* foo */ foo.split;
++/* foo */ else foo.split;
+
+```
+
+**Prettier Similarity**: 80.00%
+
+
+### js/comments/array-and-object.js
 
 **Prettier Similarity**: 100.00%
 
@@ -1489,6 +1751,11 @@
 
 
 ### js/comments/function-declaration.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/comments/function/18146.js
 
 **Prettier Similarity**: 100.00%
 
@@ -1785,7 +2052,8 @@
  function sequenceExpressionInside() {
    return (
      // Reason for a
-     a, b
+-    (a, b)
++    a, b
    );
  }
  
@@ -1847,7 +2115,7 @@
 
 ```
 
-**Prettier Similarity**: 96.41%
+**Prettier Similarity**: 95.81%
 
 
 ### js/comments/single-star-jsdoc.js
@@ -1862,26 +2130,44 @@
 
 ### js/comments/tagged-template-literal.js
 ```diff
- foo``; // comment
+ foo``; // comment 1
  
- foo // comment
+ foo // comment 2
  ``;
  
- foo // comment
+ foo // comment 3
  `
  `;
  
--foo/* comment */ `
-+foo /* comment */`
+-foo /* comment 4 */ `
++foo /* comment 4 */`
  `;
  
--foo/* comment */ `
-+foo /* comment */`
+-foo /* comment 5 */ `
++foo /* comment 5 */`
  `;
 
 ```
 
 **Prettier Similarity**: 85.71%
+
+
+### js/comments/tagged-template-literal/11662.js
+```diff
+-foo
+-// TEST
++foo`// TEST
+ // 1
+ // 2
+ // 3
+ // 4
+ // 5
+-`x`;
++x`;
+
+```
+
+**Prettier Similarity**: 62.50%
 
 
 ### js/comments/template-literal.js
@@ -2583,6 +2869,389 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/discard-binding/array-pattern.js
+```diff
+ {
+   // destructuring binding
+-  const [, void] = value;
++  const [, void, ] = value;
+ }
+ {
+   // for-of destructuring binding
+   for (const [void] of []);
+ }
+ {
+   // destructuring assignment
+   [void] = [];
+ }
+ {
+   // for-of destructuring assignment;
+   for ([void] of []);
+ }
+ {
+   // function param;
+-  function f([[[void], void], void]) {}
++  function f([[[void], void, ], void]) {}
+ }
+ {
+   // arrow function param
+-  ([[[void], void], void]) => {};
++  ([[[void], void, ], void])
++  =>
++  {
++  }
+ }
+ {
+   // async arrow function param
+-  async ([[[void], void], void]) => {};
++  async ([[[void], void, ], void])
++  =>
++  {
++  }
+ }
+ {
+   // destructuring assignment in async call";
+   async(([void] = []));
+ }
+ {
+   // catch param
+-  try {
+-  } catch ([void]) {}
++  try {} catch ([void]) {}
+ }
+
+```
+
+**Prettier Similarity**: 73.81%
+
+
+### js/discard-binding/basic.js
+```diff
+-const [void] = ([, void] = [void] = []);
++const [void] = [,void] = [void,] = [];
+ 
+-function f(void, { p: void }, [void]) {}
++function f(void, { p: void }, [ void ]) {}
+ 
+-(void, { p: void }, [void]) => {};
++(void, { p: void }, [ void ])
++=>
++{
++}
+ 
+-async (void, { p: void }, [void]) => {};
++async (void, { p: void }, [ void ])
++=>
++{
++}
+
+```
+
+**Prettier Similarity**: 23.08%
+
+
+### js/discard-binding/discard-binding-arrow-params.js
+```diff
+-(void) => {};
++(void)
++=>
++{
++}
+
+```
+
+**Prettier Similarity**: 0.00%
+
+
+### js/discard-binding/discard-binding-assignment.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/discard-binding/discard-binding-async-arrow-params.js
+```diff
+-async (void) => {};
++async (void)
++=>
++{
++}
+
+```
+
+**Prettier Similarity**: 0.00%
+
+
+### js/discard-binding/discard-binding-bindings.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/discard-binding/discard-binding-for-await-using-binding.js
+```diff
+ async () => {
+-  for (await using void of []);
++  for(await using void of []);
+ };
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/discard-binding/discard-binding-for-bindings.js
+```diff
+-for (const { p: void } of []);
++for(const { p: void } of []);
+
+```
+
+**Prettier Similarity**: 0.00%
+
+
+### js/discard-binding/discard-binding-for-lhs.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/discard-binding/discard-binding-for-using-binding.js
+```diff
+ {
+-  for (using void of []);
++  for(using void of []);
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/discard-binding/function-parameter.js
+```diff
+ {
+   // function parameter
+   function f(void) {}
+ }
+ {
+   // arrow function parameter
+-  (x, void) => {};
++  (x, void)
++  =>
++  {
++  }
+ }
+ {
+   // async arrow function parameter
+-  async (void, x) => {};
++  async (void, x)
++  =>
++  {
++  }
+ }
+ {
+   // object method parameter
+   ({ f(x, void, y) {} });
+ }
+ {
+   // class method parameter
+   class C {
+-    m(void) {}
++    m(void,) {}
+   }
+ }
+
+```
+
+**Prettier Similarity**: 67.86%
+
+
+### js/discard-binding/object-pattern.js
+```diff
+ {
+   // destructuring binding
+   const { void: void } = value;
+ }
+ {
+   // for-of destructuring binding
+   for (const { p: void } of []);
+ }
+ {
+   // destructuring assignment
+   ({ p: void } = {});
+ }
+ {
+   // for-of destructuring assignment
+   for ({ p: void } of []);
+ }
+ {
+   // function param
+-  function f({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) {}
++  function f({ q: { q: { p: void }, p: void }, p: void }) {}
+ }
+ {
+   // arrow function param
+-  ({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) => {};
++  ({ q: { q: { p: void }, p: void }, p: void }) => {}
+ }
+ {
+   // async arrow function param
+-  async ({
+-    q: {
+-      q: { p: void },
+-      p: void,
+-    },
+-    p: void,
+-  }) => {};
++  async ({ q: { q: { p: void }, p: void }, p: void }) => {}
+ }
+ {
+   // destructuring assignment in async call
+   async(({ p: void } = {}));
+ }
+ {
+   // catch param
+-  try {
+-  } catch ({ p: void }) {}
++  try {} catch ({ p: void }) {}
+ }
+
+```
+
+**Prettier Similarity**: 58.18%
+
+
+### js/discard-binding/unary-expression-void.js
+```diff
+ // expr
+ void [
+   // pattern
+-  ([void] = [
+-    {
+-      // expr
+-      [void []]:
+-        // pattern
+-        // expr
+-        [void] = void [
+-          // pattern
+-          ([void]) => [],
+-        ],
+-      // expr
+-    },
+-  ] =
+-    [void []]),
+-];
++  [ void ] = [{
++    // expr
++    [ void [] ]:
++    // pattern
++    [ void ] =
++    // expr
++    void [
++      // pattern
++      ([void]) => []
++    ]
++    // expr
++  }] = [void []]
++]
+
+```
+
+**Prettier Similarity**: 16.67%
+
+
+### js/discard-binding/using-variable-declarator.js
+```diff
+ {
+   // using 1 declarator
+-  using void = f();
++  using;
++  void = f();
+ }
+ {
+   // using 2 declarators
+-  using void = f(),
+-    void = g();
++  using;
++  (void = f()), (void = g());
+ }
+ {
+   // using void declarator and normal declarator
+-  using void = f(),
+-    x = g();
++  using;
++  (void = f()), (x = g());
+ }
+ {
+   // using declarator in for-of
+-  for (using void of []);
++  for(using void of []);
+ }
+ async () => {
+   {
+     // await using 1 declarator
+-    await using void = f();
++    await using;
++    void = f();
+   }
+   {
+     // await using 2 declarators
+-    await using void = f(),
+-      void = g();
++    await using;
++    (void = f()), (void = g());
+   }
+   {
+     // await using void declarator and normal declarator
+-    await using void = f(),
+-      x = g();
++    await using;
++    (void = f()), (x = g());
+   }
+   {
+     // await using declarator in for-of
+-    for (await using void of []);
++    for(await using void of []);
+   }
+ };
+
+```
+
+**Prettier Similarity**: 65.00%
+
+
+### js/discard-binding/using.js
+```diff
+ {
+-  using void = f();
++  using;
++  void = f();
++}
++async (void)
++=>
++{
++  await using;
++  void = f();
+ }
+-async (void) => {
+-  await using void = f();
+-};
+
+```
+
+**Prettier Similarity**: 20.00%
+
+
 ### js/dynamic-import/assertions.js
 
 **Prettier Similarity**: 100.00%
@@ -2984,6 +3653,33 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/for/9812-unstable.js
+```diff
+-for (x of y) { // comment
++// comment
++for (x of y) {
+   bar();
+ }
+ 
+-for (x of y) { // comment
++// comment
++for (x of y) {
+ }
+ 
+-for (x of y); // comment
++// comment
++for (x of y);
+
+```
+
+**Prettier Similarity**: 45.45%
+
+
+### js/for/9812.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/for/comment.js
 
 **Prettier Similarity**: 100.00%
@@ -3196,6 +3892,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/function-single-destructuring/array-and-object.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/function-single-destructuring/array.js
 
 **Prettier Similarity**: 100.00%
@@ -3312,8 +4013,169 @@
 
 
 ### js/identifier/parentheses/let.js
+```diff
+ let.a = 1;
+ 
+ let.a[0] = 1;
+ 
+ (let)[a] = 1;
+ 
+ (let)[a].b.c.e = 1;
+ 
+ foo[let[a]] = 1;
+ 
+ (let)[let[a]] = 1;
+ 
+ (let)[a] ??= 1;
+ 
+ foo = let[a];
+ 
+ let()[a] = 1;
+ 
+ foo(let)[a] = 1;
+ 
+ foo(let[a])[a] = 1;
+ 
+ (let)[0] = 1;
+ 
+ (let)["a"] = 1;
+ 
+ let = 1;
+ 
+ var let = 1;
+ 
+ [let[a]] = 1;
+ 
+ ({ a: let[a] } = 1);
+ 
+ alert((let[0] = 1));
+ 
+ ((let)[0] = 1) || 2;
+ 
+-(((let)[0] = 1), 2);
++((let)[0] = 1), 2;
+ 
+ ((let)[0] = 1) ? a : b;
+ 
+ if ((let[0] = 1));
+ 
+ while ((let[0] = 1));
+ 
+ do {} while ((let[0] = 1));
+ 
+ var a = (let[0] = 1);
+ 
+ ((let)[0] = 1) instanceof a;
+ 
+ void (let[0] = 1);
+ 
+ ((let)[0] = 1)();
+ 
+ new (let[0] = 1)();
+ 
+ ((let)[0] = 1)``;
+ 
+ ((let)[0] = 1).toString;
+ 
+ ((let)[0] = 1)?.toString;
+ 
+ [...(let[0] = 1)];
+ 
+ foo = () => (let[0] = 1);
+ 
+ function* foo() {
+   yield (let[0] = 1);
+ }
+ 
+ async function foo() {
+   await (let[0] = 1);
+ }
+ 
+ function foo() {
+   return (let[0] = 1);
+ }
+ 
+ while (true) (let)[0] = 1;
+ 
+ throw (let[0] = 1);
+ 
+ ({ foo: (let[0] = 1) });
+ 
+ [(let[0] = 1)];
+ 
+ for ((let)[0] = 1; ; );
+ for ((let)[0] in {});
+ for ((let)[0] of []);
+ 
+ switch ((let[0] = 1)) {
+ }
+ 
+ switch (foo) {
+   case (let[0] = 1):
+ }
+ 
+ with ((let[0] = 1));
+ 
+ (let)[x].foo();
+ 
+ let.let[x].foo();
+ 
+ a = let[x].foo();
+ 
+ (let)[2];
+ 
+ a[1] + (let[2] = 2);
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 99.09%
+
+
+### js/if/comment-between-condition-and-body.js
+```diff
+ if (1) {
+   // foo may not exist
+   doThing(foo);
+ }
+ if (1) {
+ } else {
+   // foo may not exist
+   doThing(foo);
+ }
+ 
+ if (2) {
+   // foo may not exist
+   doThing(foo);
+ }
+ if (2) {
+-} // foo may not exist
++}
++// foo may not exist
+ else {
+   doThing(foo);
+ }
+ 
+ if (3) {
+   // foo may not exist
+   doThing(foo);
+ }
+ if (3) {
+ } // foo may not exist
+ else {
+   doThing(foo);
+ }
+ 
+ if (4) {
+   /* foo may not exist */ doThing(foo);
+ }
+ if (4) {
+ } /* foo may not exist */ else {
+   doThing(foo);
+ }
+
+```
+
+**Prettier Similarity**: 94.74%
 
 
 ### js/if/comment_before_else.js
@@ -3428,11 +4290,6 @@
 
 
 ### js/ignore/decorator.js
-
-**Prettier Similarity**: 100.00%
-
-
-### js/ignore/ignore-2.js
 
 **Prettier Similarity**: 100.00%
 
@@ -3559,6 +4416,9 @@
 ```diff
 -export * as bar from "bar.json" assert {};
 +export * as bar from "bar.json";
++assert;
++{
++}
 
 ```
 
@@ -3566,13 +4426,31 @@
 
 
 ### js/import-assertions/bracket-spacing/re-export.js
+```diff
+-export { default as foo2 } from "foo.json" assert { type: "json" };
++export { default as foo2 } from "foo.json";
++assert;
++{
++  type: "json";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/bracket-spacing/static-import.js
+```diff
+-import json from "./foo.json" assert { type: "json" };
++import json from "./foo.json";
++assert;
++{
++  type: "json";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/dynamic-import.js
@@ -3586,27 +4464,94 @@
 -export * as bar from "bar.json" assert {};
 -export * as baz from "baz.json" /* comment */ assert {};
 +export * as bar from "bar.json";
-+export * as baz from "baz.json" /* comment */;
++assert;
++{
++}
++export * as baz from "baz.json";
++assert;
++{
++  /* comment */
++}
  
  import * as foo from "foo.json";
 -import * as bar from "bar.json" assert {};
 -import * as baz from "baz.json" /* comment */ assert {};
 +import * as bar from "bar.json";
-+import * as baz from "baz.json" /* comment */;
++assert;
++{
++}
++import * as baz from "baz.json";
++assert;
++{
++  /* comment */
++}
 
 ```
 
-**Prettier Similarity**: 42.86%
+**Prettier Similarity**: 14.29%
+
+
+### js/import-assertions/keyword-detect.js
+```diff
+-import "./test.json" /* with */ /* with */ assert { type: "json" };
+-import { default as b } from "./test.json" /* with */ /* with */ assert { type: "json" };
++import "./test.json"; /* with */
++assert; /* with */
++{
++  type: "json";
++}
++import { default as b } from "./test.json"; /* with */
++assert; /* with */
++{
++  type: "json";
++}
+ 
+-export { default as e } from "./test.json" /* with */ /* with */ assert { type: "json" };
++export { default as e } from "./test.json"; /* with */
++assert; /* with */
++{
++  type: "json";
++}
+ 
+-export * from "./test.json" /* with */ /* with */ assert { type: "json" };
++export * from "./test.json"; /* with */
++assert; /* with */
++{
++  type: "json";
++}
+
+```
+
+**Prettier Similarity**: 9.09%
 
 
 ### js/import-assertions/multi-types.js
+```diff
+-import json from "./foo.json" assert { type: "json", type: "bar" };
++import json from "./foo.json";
++assert;
++{
++  type: "json", type;
++  : "bar"
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/non-type.js
+```diff
+-import foo from "foo.json" assert { lazy: "true" };
++import foo from "foo.json";
++assert;
++{
++  lazy: "true";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/not-import-assertions.js
@@ -3615,18 +4560,57 @@
 
 
 ### js/import-assertions/re-export.js
+```diff
+-export { default as foo2 } from "foo.json" assert { type: "json" };
+-export * from "foo.json" assert { type: "json" };
+-export * as foo3 from "foo.json" assert { type: "json" };
++export { default as foo2 } from "foo.json";
++assert;
++{
++  type: "json";
++}
++export * from "foo.json";
++assert;
++{
++  type: "json";
++}
++export * as foo3 from "foo.json";
++assert;
++{
++  type: "json";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/static-import.js
+```diff
+-import json from "./foo.json" assert { type: "json" };
++import json from "./foo.json";
++assert;
++{
++  type: "json";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-assertions/without-from.js
+```diff
+-import "foo" assert { type: "json" };
++import "foo";
++assert;
++{
++  type: "json";
++}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/import-attributes/bracket-spacing/dynamic-import.js
@@ -3681,53 +4665,81 @@
 ### js/import-attributes/keyword-detect.js
 ```diff
 -import "./test.json" /* assert */ /* assert */ with { type: "json" };
--import {} from "./test.json" /* assert */ /* assert */ with { type: "json" };
--import "./test.json" /* with */ /* with */ assert { type: "json" };
--import {} from "./test.json" /* with */ /* with */ assert { type: "json" };
+-import a from "./test.json" /* assert */ /* assert */ with { type: "json" };
 +import "./test.json" /* assert */ with { /* assert */ type: "json" };
-+import {} from "./test.json" /* assert */ with { /* assert */ type: "json" };
-+import "./test.json" /* with */ assert { /* with */ type: "json" };
-+import {} from "./test.json" /* with */ assert { /* with */ type: "json" };
++import a from "./test.json" /* assert */ with { /* assert */ type: "json" };
  
--export {} from "./test.json" /* assert */ /* assert */ with { type: "json" };
--export {} from "./test.json" /* with */ /* with */ assert { type: "json" };
-+export {} from "./test.json" /* assert */ with { /* assert */ type: "json" };
-+export {} from "./test.json" /* with */ assert { /* with */ type: "json" };
+-export { default as c } from "./test.json" /* assert */ /* assert */ with { type: "json" };
++export { default as c } from "./test.json" /* assert */ with {
++  /* assert */ type: "json",
++};
  
 -export * from "./test.json" /* assert */ /* assert */ with { type: "json" };
--export * from "./test.json" /* with */ /* with */ assert { type: "json" };
 +export * from "./test.json" /* assert */ with { /* assert */ type: "json" };
-+export * from "./test.json" /* with */ assert { /* with */ type: "json" };
 
 ```
 
-**Prettier Similarity**: 20.00%
+**Prettier Similarity**: 25.00%
 
 
 ### js/import-attributes/long-sources.js
 ```diff
- import a10 from "./aaaaaaaaaa.json" with { type: "json" };
- import a20 from "./aaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
- import a30 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
--import a40 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
--import a50 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
--import a60 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
--import a70 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
--import a80 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
-+import a40 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
+ import a11 from "./aaaaaaaaaa.json" with { type: "json" };
+ import a12 from "./aaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+ import a13 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+-import a14 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+-import a15 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+-import a16 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+-import a17 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
+-import a18 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" };
++import a14 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
 +  type: "json",
 +};
-+import a50 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++import a15 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
 +  type: "json",
 +};
-+import a60 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++import a16 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
 +  type: "json",
 +};
-+import a70 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++import a17 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
 +  type: "json",
 +};
-+import a80 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++import a18 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
 +  type: "json",
++};
+ 
+-import a21 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { // comment
+-type: "json" };
+-import a22 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type:
++import a21 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++  // comment
++  type: "json",
++};
++import a22 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
+   // comment
+-  "json" };
+-import a23 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" }; // comment
++  type: "json",
++};
++import a23 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++  type: "json", // comment
++};
+ 
+-import a31 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { /* comment */
+-type: "json" };
+-import a32 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type:
++import a31 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++  /* comment */
++  type: "json",
++};
++import a32 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
+   /* comment */
+-  "json" };
+-import a33 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with { type: "json" /* comment */ };
++  type: "json",
++};
++import a33 from "./aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json" with {
++  type: "json" /* comment */,
 +};
  
  import("./aaaaaaaaaa.json", { with: { type: "json" } });
@@ -3753,12 +4765,41 @@
 
 ```
 
-**Prettier Similarity**: 61.54%
+**Prettier Similarity**: 44.44%
 
 
 ### js/import-attributes/multi-types.js
 
 **Prettier Similarity**: 100.00%
+
+
+### js/import-attributes/multiple.js
+```diff
+-import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
++import syntaxImportAssertions from "@babel/plugin-syntax-import-assertions" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
+ 
+-import a1 from "foo" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
+-import a2 from "foo" with { BABEL_8_BREAKING: "false", USE_ESM: "true", IS_STANDALONE: "false" };
++import a1 from "foo" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
++import a2 from "foo" with {
++  BABEL_8_BREAKING: "false",
++  USE_ESM: "true",
++  IS_STANDALONE: "false",
++};
+ import a3 from "foo" with { BABEL_8_BREAKING: "false" };
+ import a4 from "foo" with { BABEL_8_BREAKING: "false" };
+
+```
+
+**Prettier Similarity**: 16.67%
 
 
 ### js/import-attributes/non-type.js
@@ -3871,6 +4912,21 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/import/long-module-name/import-defer.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/import/long-module-name/import-expression.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/import/long-module-name/import-source.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/import/multiple_standalones.js
 
 **Prettier Similarity**: 100.00%
@@ -3977,6 +5033,29 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/last-argument-expansion/issue-18143.js
+```diff
+ assert.deepStrictEqual(
+   linesCollection.getViewLinesIndentGuides____(-1, -1),
+   [],
+ );
+-assert.deepStrictEqual(linesCollection.getViewLinesIndentGuides___(-1, -1), [
+-  1,
+-]);
+ assert.deepStrictEqual(
++  linesCollection.getViewLinesIndentGuides___(-1, -1),
++  [1],
++);
++assert.deepStrictEqual(
+   linesCollection.getViewLinesIndentGuides(-1, -1),
+   [1, 2],
+ );
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
 ### js/last-argument-expansion/issue-7518.js
 
 **Prettier Similarity**: 100.00%
@@ -4022,17 +5101,81 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/logical-assignment/inside-call/18171.js
+```diff
+ fn(
+   _,
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+     // Should this line indent?
+     anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+ 
+ new fn(
+   _,
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+-  // Should this line indent?
+-  anodyneCondosMalateOverateRetinol
++    // Should this line indent?
++    anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+ 
+ fn(
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+     // Should this line indent?
+     anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+ 
+ new fn(
+   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
+-  // Should this line indent?
+-  anodyneCondosMalateOverateRetinol
++    // Should this line indent?
++    anodyneCondosMalateOverateRetinol
+     ? annularCooeedSplicesWalksWayWay
+     : kochabCooieGameOnOboleUnweave,
+ );
+ 
+ // https://github.com/typescript-eslint/typescript-eslint/blob/ea2ee6b65a2f14dd2c3fc8d12be969cbeaef80a8/packages/typescript-estree/src/parseSettings/resolveProjectList.ts#L75C1-L80C7
+ {
+   {
+     RESOLUTION_CACHE = new ExpiringCache(
+       options.singleRun
+         ? "Infinity"
+         : (options.cacheLifetime?.glob ??
+-          DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
++            DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+     );
+     RESOLUTION_CACHE = new_ExpiringCache(
+       options.singleRun
+         ? "Infinity"
+         : (options.cacheLifetime?.glob ??
+             DEFAULT_TSCONFIG_CACHE_DURATION_SECONDS),
+     );
+   }
+ }
+
+```
+
+**Prettier Similarity**: 90.20%
+
+
 ### js/logical-assignment/logical-assignment.js
 
 **Prettier Similarity**: 100.00%
 
 
-### js/logical_expressions/issue-7024.js
+### js/logical-expressions/issue-7024.js
 
 **Prettier Similarity**: 100.00%
 
 
-### js/logical_expressions/logical_expression_operators.js
+### js/logical-expressions/logical-expression-operators.js
 
 **Prettier Similarity**: 100.00%
 
@@ -4053,6 +5196,11 @@
 
 
 ### js/method-chain/13018.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/method-chain/array-and-object.js
 
 **Prettier Similarity**: 100.00%
 
@@ -4138,6 +5286,11 @@
 
 
 ### js/method-chain/issue-11298.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/method-chain/issue-17457.js
 
 **Prettier Similarity**: 100.00%
 
@@ -4268,13 +5421,121 @@
 
 
 ### js/no-semi/issue2006.js
+```diff
+ switch (n) {
+   case 11:
+     var c = a.e;
+-    ((i.a += Ga(c.e)), F(i, c.i, 0));
++    (i.a += Ga(c.e)), F(i, c.i, 0);
+ }
+ 
+ var c = a.e;
+-((i.a += Ga(c.e)), F(i, c.i, 0));
++(i.a += Ga(c.e)), F(i, c.i, 0);
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 75.00%
 
 
 ### js/no-semi/no-semi.js
+```diff
+ // with preexisting semi
+ 
+ x;
+ [1, 2, 3].forEach(fn);
+ x;
+ [a, b, ...c] = [1, 2];
+ x;
+ /r/i.test("r");
+ x;
+ +1;
+ x;
+ -1;
+ x;
+ ("h" + "i").repeat(10);
+ x;
+-(1, 2);
++1, 2;
+ x;
+ (() => {})();
+ x;
+ ({ a: 1 }).entries();
+ x;
+ ({ a: 1 }).entries();
+ x;
+ <Hello />;
+ x;
+ `string`;
+ x;
+ (x, y) => x;
+ 
+ // doesn't have to be preceded by a semicolon
+ 
+ class X {}
+ [1, 2, 3].forEach(fn);
+ 
+ // don't semicolon if it doesn't start statement
+ 
+ if (true) (() => {})();
+ 
+ // check indentation
+ 
+ if (true) {
+   x;
+   (() => {})();
+ }
+ 
+ // check statement clauses
+ 
+ do break;
+ while (false);
+ if (true)
+   do break;
+   while (false);
+ 
+ if (true) 1;
+ else 2;
+ for (;;);
+ for (x of y);
+ 
+ debugger;
+ 
+ // check that it doesn't break non-ASI
+ 
+ 1 - 1;
+ 
+ 1 + 1;
+ 
+ 1 / 1;
+ 
+ arr[0];
+ 
+ fn(x);
+ 
+ !1;
+ 
+ 1 < 1;
+ 
+ tag`string`;
+ 
+ x;
+ (x) => x;
+ 
+ x;
+ (a || b).c++;
+ 
+ x;
+ ++(a || b).c;
+ 
+ while (false) (function () {})();
+ 
+ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
+   (b + c);
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 98.90%
 
 
 ### js/no-semi/private-field.js
@@ -4312,6 +5573,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/object-multiline/multiline.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/object-prop-break-in/comment.js
 
 **Prettier Similarity**: 100.00%
@@ -4343,23 +5609,6 @@
 
 
 ### js/object-property-ignore/issue-5678.js
-
-**Prettier Similarity**: 100.00%
-
-
-### js/objects/assignment-expression/object-property.js
-```diff
- a = {
--  [(this.resource = resource)]: 1,
-+  [this.resource = resource]: 1,
- };
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
-### js/objects/assignment-expression/object-value.js
 
 **Prettier Similarity**: 100.00%
 
@@ -4415,6 +5664,11 @@
 
 
 ### js/optional-chaining-assignment/valid-lhs-plus-eq.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/optional-chaining/as-key.js
 
 **Prettier Similarity**: 100.00%
 
@@ -4885,14 +6139,67 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/require/comments.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/require/long-module-name.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/require/require.js
 
 **Prettier Similarity**: 100.00%
 
 
 ### js/reserved-word/interfaces.js
+```diff
+ foo.interface;
+ interface.foo;
+ new interface();
+ ({ interface: "foo" });
+-(interface, "foo");
++interface, "foo";
+ void interface;
+ var interface = "foo";
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 85.71%
+
+
+### js/reserved-word/let.js
+```diff
+ foo.let;
+ let.foo;
+ new let();
+ ({ let: "foo" });
+-(let, "foo");
++let, "foo";
+ void let;
+ var let = "foo";
+
+```
+
+**Prettier Similarity**: 85.71%
+
+
+### js/reserved-word/yield.js
+```diff
+ foo.yield;
+ yield.foo;
+ new yield();
+ ({ yield: "foo" });
+-(yield, "foo");
++yield, "foo";
+ void yield;
+ var yield = "foo";
+
+```
+
+**Prettier Similarity**: 85.71%
 
 
 ### js/rest/trailing-commas.js
@@ -4926,13 +6233,101 @@
 
 
 ### js/sequence-break/break.js
+```diff
+ const f = (argument1, argument2, argument3) => (
+   doSomethingWithArgument(argument1),
+   doSomethingWithArgument(argument2),
+   argument1
+ );
+ (function () {
+   return (
+     aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName
+   );
+ });
+ (function () {
+   throw (
+-    aLongIdentifierName,
++    (aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName,
+-    aLongIdentifierName
++    aLongIdentifierName)
+   );
+ });
+-(aLongIdentifierName,
++aLongIdentifierName,
+   aLongIdentifierName,
+   aLongIdentifierName,
+-  aLongIdentifierName);
++  aLongIdentifierName;
+ a.then(
+   () => (
+     aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName,
+     aLongIdentifierName
+   ),
+ );
+ for (
+   aLongIdentifierName = 0,
+     aLongIdentifierName = 0,
+     aLongIdentifierName = 0,
+     aLongIdentifierName = 0;
+   test;
+   update
+ ) {}
+-((a = b
++(a = b
+   ? c
+   : function () {
+       return 0;
+     }),
+   (a = b
+     ? c
+     : function () {
+         return 0;
+       }),
+   (a = b
+     ? c
+     : function () {
+         return 0;
+       }),
+   (a = b
+     ? c
+     : function () {
+         return 0;
+       }),
+   (a = b
+     ? c
+     : function () {
+         return 0;
+-      }));
++      });
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 90.91%
 
 
 ### js/sequence-expression/export-default.js
 
 **Prettier Similarity**: 100.00%
+
+
+### js/sequence-expression/expression.js
+```diff
+-(a, b);
++a, b;
+ 
+-(a, b);
++a, b;
+
+```
+
+**Prettier Similarity**: 33.33%
 
 
 ### js/sequence-expression/ignore.js
@@ -4952,6 +6347,17 @@
 -);
 +    )
 +  );
+
+```
+
+**Prettier Similarity**: 50.00%
+
+
+### js/sequence-expression/no-semi/expression.js
+```diff
+ a;
+-(+1, b);
+++1, b;
 
 ```
 
@@ -4981,6 +6387,20 @@
 ```
 
 **Prettier Similarity**: 82.35%
+
+
+### js/sequence-expression/return.js
+```diff
+ function a() {
+-  return (a, b);
+-  return (a, b);
++  return a, b;
++  return a, b;
+ }
+
+```
+
+**Prettier Similarity**: 50.00%
 
 
 ### js/shebang/shebang-newline.js
@@ -5044,8 +6464,20 @@
 
 
 ### js/strings/non-octal-eight-and-nine.js
+```diff
+ // https://github.com/babel/babel/pull/11852
+ 
+-("\8", "\9");
++"\8", "\9";
+ () => {
+   "use strict";
+-  ("\8", "\9");
++  "\8", "\9";
+ };
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 71.43%
 
 
 ### js/strings/strings.js
@@ -5402,6 +6834,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/top-level-await/test.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### js/trailing-comma/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
@@ -5649,7 +7086,32 @@
 **Prettier Similarity**: 100.00%
 
 
+### jsx/cursor/after-last-jsx-text.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/cursor/after-tag.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/cursor/before-first-jsx-text.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/cursor/before-tag.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### jsx/cursor/in-jsx-text.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/cursor/in-tag.js
 
 **Prettier Similarity**: 100.00%
 
@@ -5808,6 +7270,11 @@
 
 
 ### jsx/ignore/jsx_ignore.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/ignore/spread.js
 
 **Prettier Similarity**: 100.00%
 
@@ -5991,8 +7458,16 @@
 
 
 ### jsx/jsx/regex.js
+```diff
+-((x = <div>one</div>), (<div>two</div>));
++(x = <div>one</div>), (<div>two</div>);
+ x = <a>{}</a>;
+ x = <a>{1 / 2}</a>;
+ x = <a>{/w/.test(s)}</a>;
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 75.00%
 
 
 ### jsx/jsx/return-statement.js
@@ -6090,7 +7565,589 @@
 **Prettier Similarity**: 100.00%
 
 
+### jsx/text-wrap/issue-16897.js
+
+**Prettier Similarity**: 100.00%
+
+
 ### jsx/text-wrap/test.js
+```diff
+ // Wrapping text
+ x = (
+   <div>
+     Some text that would need to wrap on to a new line in order to display
+     correctly and nicely
+   </div>
+ );
+ 
+ // Wrapping tags
+ x = (
+   <div>
+     <first>f</first> <first>f</first> <first>f</first> <first>f</first>{" "}
+     <first>f</first> <first>f</first>
+   </div>
+ );
+ 
+ // Wrapping tags
+ x = (
+   <div>
+     <first>f</first>
+     <first>f</first>
+     <first>f</first>
+     <first>f</first>
+     <first>f</first>
+     <first>f</first>
+   </div>
+ );
+ 
+ // Wrapping tags
+ x = (
+   <div>
+     <a />
+     <b />
+     <c />
+     <first>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</first>{" "}
+     <first>f</first>
+   </div>
+ );
+ 
+ // Wrapping tags
+ x = (
+   <div>
+     <sadashdkjahsdkjhaskjdhaksjdhkashdkashdkasjhdkajshdkashdkashd />{" "}
+     <first>f</first>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     before
+     <div>
+       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
+       mollis lorem.
+     </div>
+     after
+   </div>
+ );
+ 
+ x = (
+   <div>
+     before{stuff}after{stuff}after{stuff}after{stuff}after{stuff}after{stuff}
+     {stuff}
+     {stuff}after{stuff}after
+   </div>
+ );
+ 
+ x = (
+   <div>
+     before {stuff} after {stuff} after {stuff} after {stuff} after {stuff} after{" "}
+     {stuff} {stuff} {stuff} after {stuff} after
+   </div>
+ );
+ 
+ x = (
+   <div>
+     Please state your <b>name</b> and <b>occupation</b> for the board of{" "}
+     <b>school</b> directors.
+   </div>
+ );
+ 
+ function DiffOverview(props) {
+   const { source, target, since } = props;
+   return (
+     <div>
+       <div className="alert alert-info">
+         <p>
+           This diff overview is computed against the current list of records in
+           this collection and the list it contained on <b>{humanDate(since)}</b>
+           .
+         </p>
+         <p>
+           <b>Note:</b> <code>last_modified</code> and <code>schema</code> record
+           metadata are omitted for easier review.
+         </p>
+       </div>
+       <Diff source={source} target={target} />
+     </div>
+   );
+ }
+ 
+ x = (
+   <font size={-3}>
+     <i>
+       Starting at minute {graphActivity.startTime}, running for{" "}
+       {graphActivity.length} to minute{" "}
+       {graphActivity.startTime + graphActivity.length}
+     </i>
+   </font>
+ );
+ 
+ x = (
+   <div>
+     First second third
+     <div attr="a very long string attribute that will overflow because it is very long">
+       Something
+     </div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div>First</div>
+     Second
+     <div>Third</div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     First <div>Second</div> Third
+   </div>
+ );
+ 
+ leading_whitespace = (
+   <div>
+     {" "}
+     First Second Third Fourth Fifth Sixth Seventh Eighth Ninth Tenth Eleventh
+     Twelfth Thirteenth Fourteenth
+   </div>
+ );
+ 
+ trailing_whitespace = (
+   <div>
+     First Second Third Fourth Fifth Sixth Seventh Eighth Ninth Tenth Eleventh
+     Twelfth Thirteenth Fourteenth{" "}
+   </div>
+ );
+ 
+ no_leading_or_trailing_whitespace = (
+   <div>
+     First Second Third Fourth Fifth Sixth Seventh Eighth Ninth Tenth Eleventh
+     Twelfth Thirteenth Fourteenth
+   </div>
+ );
+ 
+ facebook_translation_leave_text_around_tag = (
+   <div>
+     <span>First</span>, (<span>Second</span>)
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <span>First second third fourth fifth sixth seventh</span>, (
+     <span>Second</span>)
+   </div>
+ );
+ 
+ this_really_should_split_across_lines = (
+   <div>
+     before{stuff}after{stuff}after{stuff}after{stuff}after{stuff}after{stuff}
+     after{stuff}after{stuff}after{stuff}after{stuff}after{stuff}after{stuff}
+     after{stuff}after{stuff}after
+   </div>
+ );
+ 
+ unstable_before = (
+   <div className="yourScore">
+     Your score:{" "}
+     <span className="score">{`${mini.crosstable.users[sessionUserId]} - ${mini.crosstable.users[user.id]}`}</span>
+   </div>
+ );
+ 
+ unstable_after_first_run = (
+   <div className="yourScore">
+     Your score:{" "}
+     <span className="score">{`${mini.crosstable.users[sessionUserId]} - ${
+       mini.crosstable.users[user.id]
+     }`}</span>
+   </div>
+ );
+ 
+ solitary_whitespace = (
+   <div
+     first="first"
+     second="second"
+     third="third"
+     fourth="fourth"
+     fifth="fifth"
+     sixth="sixth"
+   >
+     {" "}
+   </div>
+ );
+ 
+ jsx_whitespace_on_newline = (
+   <div>
+     <div>First</div> <div>Second</div> <div>Third</div>
+   </div>
+ );
+ 
+ jsx_around_multiline_element = (
+   <div>
+     Before{" "}
+     <div>
+       {
+         "Enough text to make this element wrap on to multiple lines when formatting"
+       }
+     </div>{" "}
+     After
+   </div>
+ );
+ 
+ jsx_around_multiline_element_second_pass = (
+   <div>
+     Before{" "}
+     <div>
+       {
+         "Enough text to make this element wrap on to multiple lines when formatting"
+       }
+     </div>{" "}
+     After
+   </div>
+ );
+ 
+ convert_space_expressions = <div> </div>;
+ 
+ x = (
+   <div>
+     <first />
+     <second />
+     <third />
+     <fourth />
+     <fifth />
+     <sixth />
+   </div>
+ );
+ 
+ const Abc = () => {
+   return (
+     <div>
+       Please state your <b>name</b> and <b>occupation</b> for the board of
+       directors.
+     </div>
+   );
+ };
+ 
+ x = <div id="moo">Some stuff here</div>;
+ 
+ headers_and_paragraphs = (
+   <div>
+     <h2>First</h2>
+     <p>The first paragraph.</p>
+ 
+     <h2>Second</h2>
+     <p>The second paragraph.</p>
+   </div>
+ );
+ 
+ no_text_one_tag_per_line = (
+   <div>
+     <first />
+     <second />
+   </div>
+ );
+ 
+ with_text_fill_line = (
+   <div>
+     Text <first />
+     <second />
+   </div>
+ );
+ 
+ line_after_br = (
+   <div>
+     Text
+     <br />
+     More text
+     <br />
+     And more
+     <br />
+   </div>
+ );
+ 
+ line_after_br = (
+   <div>
+     Text
+     <br />
+     More text
+     <br />
+     And more
+     <br />
+   </div>
+ );
+ 
+ line_after_br = (
+   <div>
+     Text
+     <br />
+     More text
+     <br />
+     And more
+     <br />
+   </div>
+ );
+ 
+ line_after_br_2 = (
+   <div>
+     A<br />B<br />C
+   </div>
+ );
+ 
+ br_followed_by_whitespace = (
+   <div>
+     <br /> text
+   </div>
+ );
+ 
+ dont_preserve_blank_lines_when_jsx_contains_text = (
+   <div>
+     <div>Zeroth</div>
+     <div>First</div>
+     Second
+   </div>
+ );
+ 
+ multiple_expressions = (
+   <div>
+     {header}
+     {body}
+     {footer}
+   </div>
+ );
+ 
+ single_expression_child_tags = (
+   <div>
+     You currently have <strong>{dashboardStr}</strong> and{" "}
+     <strong>{userStr}</strong>
+   </div>
+ );
+ 
+ expression_does_not_break = (
+   <div>
+     texty text text text text text text text text text text text{" "}
+     {this.props.type}{" "}
+   </div>
+ );
+ 
+ br_triggers_expression_break = (
+   <div>
+     <br />
+-    text text text text text text text text text text text{" "}
+-    {this.props.type}{" "}
++    text text text text text text text text text text text {
++      this.props.type
++    }{" "}
+   </div>
+ );
+ 
+ jsx_whitespace_after_tag = (
+   <div>
+     <span a="a" b="b">
+       {variable}
+     </span>{" "}
+     ({variable})
+   </div>
+ );
+ 
+ x = (
+   <div>
+     ENDS IN <div>text text text text text text text text text text text</div>{" "}
+     HRS
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <h2>Message</h2>
+     Hello, I'm a simple message.
+   </div>
+ );
+ 
+ x = (
+   <div>
+     Hello, I'm a simple message.
+     <h2>Message</h2>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div>
+       <div>
+         <div>
+           <div>
+             Line {startRange.row + 1}:{startRange.column + 1} -{" "}
+             {endRange.row + 1}:{endRange.column + 1}
+             {caller}
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     {" "}
+     <div>text</div>
+   </div>
+ );
+ 
+ // NOTE: Multiple JSX whitespaces are collapsed into a single space.
+ x = <div> </div>;
+ 
+ // Don't break a self-closing element without attributes
+ // ----------
+ x = (
+   <p>
+     text text text text text text text text text text text text text text text
+     <br />
+     text text text text text text
+   </p>
+ );
+ 
+ x = (
+   <div>
+     <div>First</div>-<div>Second</div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div>First</div>-<div>Second</div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div>First</div>-<div>Second</div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div className="first" tabIndex="1">
+       First
+     </div>
+     -
+     <div className="second" tabIndex="2">
+       Second
+     </div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div className="first" tabIndex="1">
+       First
+     </div>
+     -
+     <div className="second" tabIndex="2">
+       Second
+     </div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <div className="first" tabIndex="1">
+       First
+     </div>
+     -
+     <div className="second" tabIndex="2">
+       Second
+     </div>
+   </div>
+ );
+ 
+ x = (
+   <div>
+     {hour}:{minute}:{second}
+   </div>
+ );
+ 
+ x = (
+   <div>
+     {hour}:{minute}:{second}
+   </div>
+ );
+ 
+ x = (
+   <div>
+     {hour}:{minute}:{second}
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <strong>text here</strong>.<br />
+   </div>
+ );
+ 
+ x = <div>Sales tax estimated using a rate of {salesTax * 100}%.</div>;
+ 
+ x = <div>{title}&nbsp;</div>;
+ 
+ x = (
+   <div>
+     <span />
+     bar
+   </div>
+ );
+ 
+ x = (
+   <div>
+     <span>
+       <strong>{name}</strong>’s{" "}
+     </span>
+     Hello <strong>world</strong>.<br />
+     <Text>You {type}ed this shipment to</Text>
+   </div>
+ );
+ 
+ x = (
+   <HelpBlock>
+     {parameter.Description}: {errorMsg}
+   </HelpBlock>
+ );
+ 
+ x = (
+   <label>
+     {value} solution{plural}
+   </label>
+ );
+ 
+ x = <span>Copy &quot;{name}&quot;</span>;
+ 
+ x = <BasicText light>(avg. {value}/5)</BasicText>;
+ 
+ x = (
+   <p>
+     Use the <code>Button</code>'s
+   </p>
+ );
+ 
+ this_really_should_split_across_lines = (
+   <div>
+     before{stuff}after{stuff}after{stuff}after{stuff}after{stuff}after{stuff}
+     after{stuff}after
+   </div>
+ );
+ 
+ let myDiv = ReactTestUtils.renderIntoDocument(
+   <div>
+     <div key="theDog" className="dog" />,
+     <div key="theBird" className="bird" />
+   </div>,
+ );
+
+```
+
+**Prettier Similarity**: 99.47%
+
+
+### jsx/top-level-await/test.jsx
 
 **Prettier Similarity**: 100.00%
 
@@ -6159,8 +8216,7 @@
 ```diff
  const foo1 =
    // comment
--
--    <T,>() =>
+-  <T,>() =>
 +    <T>() =>
      () =>
        1;
@@ -6211,15 +8267,14 @@
  
  foo4 =
    // comment
--
--    <T,>() =>
+-  <T,>() =>
 +    <T>() =>
      () =>
        1;
 
 ```
 
-**Prettier Similarity**: 80.39%
+**Prettier Similarity**: 83.67%
 
 
 ### typescript/arrow/arrow_regression.ts
@@ -6270,6 +8325,26 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/as/as-const/as-const.ts
+```diff
+ 1 /* comment */ as const;
+-1 /* comment */ as const;
++1 as /* comment */ const;
+ 1 as const /* comment */;
+ 1 as const; /* comment */
+ 
+ 1 as const; // comment
+ 1 as const; // comment
+ 1 as const; // comment
+ 1 as const; // comment
+ 
+ 1 as /* comment */ not_const;
+
+```
+
+**Prettier Similarity**: 90.91%
+
+
 ### typescript/as/as.ts
 
 **Prettier Similarity**: 100.00%
@@ -6283,6 +8358,67 @@
 ### typescript/as/assignment2.ts
 
 **Prettier Similarity**: 100.00%
+
+
+### typescript/as/break-after-keyword/18148.ts
+```diff
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem1 = ______________.items.find(
+   (item) => item.type === "item",
+ ) as const;
+ // 80 width until `as` or `satisfies` keyword
+ const firstItem_1 = ______________.items.find(
+   (item) => item.type === "item",
+ ) as const;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem2 = ______________.items.find((item) => item.type === "item") as
+   | string
+   | number;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_2 = ______________.items.find(
+-  (item) => item.type === "item",
+-) as string | number;
++const firstItem_2 = ______________.items.find((item) => item.type === "item") as
++  | string
++  | number;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem3 = _____________.find((item) => item.type === "item") satisfies
+   | string
+   | number;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_3 = _____________.find(
+-  (item) => item.type === "item",
+-) satisfies string | number;
++const firstItem_3 = _____________.find((item) => item.type === "item") satisfies
++  | string
++  | number;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem4 = ______________.items.find(
+   (item) => item.type === "item",
+ ) as not_union;
+ // 80 width until `as` or `satisfies` keyword
+ const firstItem_4 = ______________.items.find(
+   (item) => item.type === "item",
+ ) as not_union;
+ 
+ // 79 width until `as` or `satisfies` keyword
+ const firstItem5 = ______________.items.find((item) => item.type === "item") as
+   | a_union_will_break // comments
+   | a_union_will_break2;
+ // 80 width until `as` or `satisfies` keyword
+-const firstItem_5 = ______________.items.find(
+-  (item) => item.type === "item",
+-) as
++const firstItem_5 = ______________.items.find((item) => item.type === "item") as
+   | a_union_will_break // comments
+   | a_union_will_break2;
+
+```
+
+**Prettier Similarity**: 80.43%
 
 
 ### typescript/as/export_default_as.ts
@@ -6418,6 +8554,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/cast/array-and-object.ts
+
+**Prettier Similarity**: 100.00%
+
+
 ### typescript/cast/as-const.ts
 
 **Prettier Similarity**: 100.00%
@@ -6443,29 +8584,6 @@
 **Prettier Similarity**: 100.00%
 
 
-### typescript/cast/tuple-and-record.ts
-```diff
- breakAfterCast = <PermissionsChecker<any> | undefined>(
-   (<any>permissions)[receiverType]
- );
--breakAfterCast = <PermissionsChecker<any> | undefined>(
--  (<any>permissions)(#[receiverType])
--);
-+breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
- 
- testObjLiteral = <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
--testObjLiteral = <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
-+testObjLiteral =  <PermissionsChecker<any> | undefined>
-+#
-+{
-+  prop1: "myPropVal";
-+}
-
-```
-
-**Prettier Similarity**: 45.45%
-
-
 ### typescript/catch-clause/type-annotation.ts
 
 **Prettier Similarity**: 100.00%
@@ -6474,16 +8592,22 @@
 ### typescript/chain-expression/call-expression.ts
 ```diff
  // Member expressions
- a?.b!();
- a?.b!();
+-(a?.b)!();
+-(a?.b)!();
++a?.b!();
++a?.b!();
  (a!?.b)();
- a.b?.c!();
- a.b?.c!();
+-(a.b?.c)!();
+-(a.b?.c)!();
++a.b?.c!();
++a.b?.c!();
  (a.b!?.c)();
  (a!.b?.c)();
- a?.b.c!();
- a?.b.c!();
+-(a?.b.c)!();
+-(a?.b.c)!();
 -(a?.b!.c)();
++a?.b.c!();
++a?.b.c!();
 +a?.b!.c();
  (a!?.b.c)();
  a[b?.c]!();
@@ -6513,30 +8637,42 @@
  (a!?.()).b();
  
  // Call expressions
- a?.()!();
- a?.()!();
+-(a?.())!();
+-(a?.())!();
++a?.()!();
++a?.()!();
  (a!?.())();
- a.b.c?.()!();
- a.b.c?.()!();
+-(a.b.c?.())!();
+-(a.b.c?.())!();
++a.b.c?.()!();
++a.b.c?.()!();
  (a.b.c!?.())();
- a.b?.c()!();
- a.b?.c()!();
+-(a.b?.c())!();
+-(a.b?.c())!();
++a.b?.c()!();
++a.b?.c()!();
  (a.b!?.c())();
- a?.b.c()!();
- a?.b.c()!();
+-(a?.b.c())!();
+-(a?.b.c())!();
 -(a?.b!.c())();
++a?.b.c()!();
++a?.b.c()!();
 +a?.b!.c()();
  a(b?.c)!();
  a(b?.c)!();
  a(b?.c!)();
  (a?.b)()!();
  (a?.b)()!();
- a?.b!()();
- a?.b!()();
+-(a?.b)!()();
+-(a?.b)!()();
++a?.b!()();
++a?.b!()();
  (a?.())()!();
  (a?.())()!();
- a?.()!()();
- a?.()!()();
+-(a?.())!()();
+-(a?.())!()();
++a?.()!()();
++a?.()!()();
  (a!?.())()();
  
  // Not `.callee`
@@ -6544,7 +8680,7 @@
 
 ```
 
-**Prettier Similarity**: 93.75%
+**Prettier Similarity**: 65.62%
 
 
 ### typescript/chain-expression/member-expression.ts
@@ -6624,12 +8760,16 @@
  a(b?.c!).foo;
  (a?.b)()!.foo;
  (a?.b)()!.foo;
- a?.b!().foo;
- a?.b!().foo;
+-(a?.b)!().foo;
+-(a?.b)!().foo;
++a?.b!().foo;
++a?.b!().foo;
  (a?.())()!.foo;
  (a?.())()!.foo;
- a?.()!().foo;
- a?.()!().foo;
+-(a?.())!().foo;
+-(a?.())!().foo;
++a?.()!().foo;
++a?.()!().foo;
  (a!?.())().foo;
  
  // Not `.object`
@@ -6640,7 +8780,7 @@
 
 ```
 
-**Prettier Similarity**: 68.66%
+**Prettier Similarity**: 62.69%
 
 
 ### typescript/chain-expression/test.ts
@@ -6688,6 +8828,29 @@
 **Prettier Similarity**: 73.68%
 
 
+### typescript/class-and-interface/long-type-parameters/long-type-parameters.ts
+```diff
+ export interface MarkDef<
+   M extends string | Mark = Mark,
+   ES extends ExprRef | SignalRef = ExprRef | SignalRef,
+ > extends A,
+     B,
+     C {}
+ 
+ declare class MarkDef<
+-    M extends string | Mark = Mark,
+-    ES extends ExprRef | SignalRef = ExprRef | SignalRef,
+-  >
+-  implements A, B, C {}
++  M extends string | Mark = Mark,
++  ES extends ExprRef | SignalRef = ExprRef | SignalRef,
++> implements A, B, C {}
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
 ### typescript/class-comment/class-implements.ts
 
 **Prettier Similarity**: 100.00%
@@ -6714,38 +8877,22 @@
 
 
 ### typescript/class/constructor.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/class/declare-field.ts
 ```diff
- class C {
-   constructor(override a: number) {}
- }
- class D {
-   constructor(private a: number) {}
- }
- class E {
-   constructor(protected a: number) {}
- }
- class F {
-   constructor(public a: number) {}
- }
- class G {
-   constructor(readonly a: number) {}
- }
- 
  class A {
--  "constructor": typeof A;
-+  'constructor': typeof A
-   static Foo() {
-     return new A();
-   }
- }
- 
- class B {
-   constructor<>() {}
+-  declare private readonly name: string;
+-  declare private readonly name2: string;
++  private declare readonly name: string;
++  private declare readonly name2: string;
  }
 
 ```
 
-**Prettier Similarity**: 96.15%
+**Prettier Similarity**: 50.00%
 
 
 ### typescript/class/declare-readonly-field-initializer-w-annotation.ts
@@ -6789,6 +8936,11 @@
 
 
 ### typescript/class/generics.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/class/issue-16723.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -6850,77 +9002,114 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/comments/10260.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/comments/11662.ts
+```diff
+-foo<a>
+-// TEST
++foo<a>`// TEST
+ // 1
+ // 2
+ // 3
+ // 4
+ // 5
+-`x`;
++x`;
+
+```
+
+**Prettier Similarity**: 62.50%
+
+
 ### typescript/comments/15707.ts
 
 **Prettier Similarity**: 100.00%
 
 
 ### typescript/comments/16065-2.ts
-```diff
- class Foo {
-   // PropertyDefinition
--  @decorator /* comment */
--  readonly propertyDefinition;
-+  @decorator
-+  readonly /* comment */ propertyDefinition;
- 
-   // TSAbstractPropertyDefinition
--  @decorator /* comment */
--  abstract abstractPropertyDefinition;
-+  @decorator
-+  abstract /* comment */ abstractPropertyDefinition;
- 
-   // TSAbstractMethodDefinition
--  @decorator /* comment */
--  abstract abstractMethodDefinition;
-+  @decorator
-+  abstract /* comment */ abstractMethodDefinition;
- 
-   // MethodDefinition
--  @decorator /* comment */
--  private methodDefinition() {}
-+  @decorator
-+  private /* comment */ methodDefinition() {}
- 
-   // AccessorProperty
--  @decorator /* comment */
--  accessor accessorProperty = 3;
-+  @decorator
-+  accessor /* comment */ accessorProperty = 3;
- 
-   constructor(
-     // TSParameterProperty
-     @decorator
-     readonly /* comment */ parameterProperty,
-   ) {}
- }
 
-```
-
-**Prettier Similarity**: 62.96%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/comments/16065.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/comments/16207.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/comments/16889.ts
 ```diff
- class Foo {
-   constructor(
-     @decorator1
--    readonly // comment1
--    baz1: string,
-+    // comment1
-+    readonly baz1: string,
+ class A {
+   @decorator
+   /**
+    * The method description
+    *
+    */
+   async method() {}
  
-     @decorator2
--    private // comment2
--    baz2: string,
-+    // comment2
-+    private baz2: string,
-   ) {}
+   @decorator /**
+    * The method description
+    *
+    */
+   async method() {}
+ 
+   @decorator /**
+    * The method description
+    *
+    */
+   async method() {}
+ 
+   @decorator
+   async /* comment */ method() {}
+ 
+   @decorator /* comment */ async method() {}
+ 
+   @decorator
+   // line comment
+   async method() {}
+ 
+   @decorator // line comment
+   async method() {}
+ 
+   @decorator
+   /* comment */
+   public async method() {}
+ 
+   @decorator
+   /* comment */
+   static async method() {}
+ 
+   @decorator
+   /* comment */
+   protected async method() {}
+ 
+   @decorator
+   /* comment */
+   protected async method() {}
+ 
+   @decorator
+   /* comment */
+   *method() {}
+ 
+   @decorator
+   */* comment */ method() {}
+ 
+   /* comment */
+-  abstract method(): void;
++  abstract method():void;
  }
 
 ```
 
-**Prettier Similarity**: 63.64%
+**Prettier Similarity**: 98.28%
 
 
 ### typescript/comments/abstract_class.ts
@@ -6981,7 +9170,9 @@
  };
  
  type B = {
-   /* commentB */ [b in B]: string;
+-  /* commentB */
+-  [b in B]: string;
++  /* commentB */ [b in B]: string;
  };
  
  type C = {
@@ -7017,10 +9208,16 @@
  
 -type M = { [m in M /* commentG */]: string };
 +type M = { [m in M] /* commentG */ : string };
+ 
+ // https://github.com/excalidraw/excalidraw/blob/712f2675195ace8d507f563ec4306efe319b3c84/packages/common/src/utility-types.ts#L61-L64
+ type MakeBrand<T extends string> = {
+   /** @private using ~ to sort last in intellisense */
+   [K in `~brand~${T}`]: T;
+ };
 
 ```
 
-**Prettier Similarity**: 95.00%
+**Prettier Similarity**: 91.49%
 
 
 ### typescript/comments/method_types.ts
@@ -7087,44 +9284,8 @@
 
 
 ### typescript/comments/type-parameters.ts
-```diff
- functionName<A /* A comment */>();
- const a: T</* comment */> = 1;
- functionName</* comment */>();
- function foo</* comment */>() {}
- interface Foo {
--  </* comment */>(arg): any;
-+ </* comment */>(arg): any;
- }
- type T = </* comment */>(arg) => any;
- 
- functionName<A>(); // comment
- const a: T<
-   // comment
- > = 1;
- functionName<
-   // comment
- >();
- function foo<
-   // comment
- >() {}
- interface Foo {
-   <
-     A, // comment
-   >(
-     arg,
-   ): any;
- }
- type T = <
-   // comment
-->(
--  arg,
--) => any;
-+>(arg) => any;
 
-```
-
-**Prettier Similarity**: 87.10%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/comments/type_literals.ts
@@ -7213,8 +9374,20 @@
 
 
 ### typescript/compiler/indexSignatureWithInitializer.ts
+```diff
+ // These used to be indexers, now they are computed properties
+ interface I {
+   [x = ""]: string;
+ }
+ 
+ class C {
+-  [(x = 0)]: string;
++  [x = 0]: string;
+ }
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 87.50%
 
 
 ### typescript/compiler/mappedTypeWithCombinedTypeMappers.ts
@@ -7237,7 +9410,7 @@
 **Prettier Similarity**: 100.00%
 
 
-### typescript/conditional-types/conditonal-types.ts
+### typescript/conditional-types/conditional-types.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -7708,16 +9881,6 @@
 
 
 ### typescript/conformance/internalModules/importDeclarations/shadowedInternalModule.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement2.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/conformance/parser/ecmascript5/Statements/parserForInStatement2.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -8212,6 +10375,16 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/d-ts-files/const-without-initializer-in-namespace.d.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/d-ts-files/const-without-initializer.d.ts
+
+**Prettier Similarity**: 100.00%
+
+
 ### typescript/declare/declare-get-set-field.ts
 
 **Prettier Similarity**: 100.00%
@@ -8524,12 +10697,12 @@
 **Prettier Similarity**: 100.00%
 
 
-### typescript/end-of-line/multiline.ts
+### typescript/edge-cases/15463.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/enum/computed-members.ts
+### typescript/end-of-line/multiline.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -8575,6 +10748,11 @@
 
 
 ### typescript/export/export-class.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/export/export-type-star-from-2.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -8723,7 +10901,12 @@
 **Prettier Similarity**: 93.33%
 
 
-### typescript/import-require/import_require.ts
+### typescript/import-require/comments.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/import-require/import-require.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -8733,9 +10916,148 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/import-type/attributes/import-type-attributes.ts
+```diff
+-type A = import("foo", { with: { type: "json" } });
++type A = import("foo", { with: { type: "json" }});
+
+```
+
+**Prettier Similarity**: 0.00%
+
+
+### typescript/import-type/comma/comma.ts
+```diff
+-type A = import("foo", {
+-  with: {
+-    type: "json",
+-  },
+-});
++type A = import("foo", { with: { type: "json" }});
+ type A = import("foo", {
+   with: {
+-    type: "json",
+-  },
+-});
++  type: "json"}
++,})
+ // Not supported, https://github.com/microsoft/TypeScript/issues/61489
+ // type A = import("foo", {
+ //   with: {
+ //   type: "json"}},)
+
+```
+
+**Prettier Similarity**: 42.86%
+
+
 ### typescript/import-type/import-type.ts
 
 **Prettier Similarity**: 100.00%
+
+
+### typescript/import-type/long-module-name/long-module-name.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/import-type/long-module-name/long-module-name2.ts
+```diff
+ const plugin = {};
+-export default plugin as typeof import(
+-  // Comment
+-  "@babel/plugin-transform-react-jsx"
+-).default;
++export default plugin as typeof import(// Comment
++"@babel/plugin-transform-react-jsx").default;
+
+```
+
+**Prettier Similarity**: 20.00%
+
+
+### typescript/import-type/long-module-name/long-module-name3.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/import-type/long-module-name/long-module-name4.ts
+```diff
+ interface RuleMap {
+   "arrow-parens": typeof import("./long/long/long/long/long/path/to/rules/arrow-parens");
+   "consistent-return": typeof import("./long/long/long/long/long/path/to/rules/consistent-return");
+   "dot-notation": typeof import("./long/long/long/long/long/path/to/rules/dot-notation");
+   "init-declarations": typeof import("./long/long/long/long/long/path/to/rules/init-declarations");
+   "max-params": typeof import("./long/long/long/long/long/path/to/rules/max-params");
+   "no-dupe-args": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-args");
+   "no-dupe-class-members": typeof import("./long/long/long/long/long/path/to/rules/no-dupe-class-members");
+   "no-empty-function": typeof import("./long/long/long/long/long/path/to/rules/no-empty-function");
+   "no-implicit-globals": typeof import("./long/long/long/long/long/path/to/rules/no-implicit-globals");
+   "no-invalid-this": typeof import("./long/long/long/long/long/path/to/rules/no-invalid-this");
+   "no-loop-func": typeof import("./long/long/long/long/long/path/to/rules/no-loop-func");
+   "no-loss-of-precision": typeof import("./long/long/long/long/long/path/to/rules/no-loss-of-precision");
+   "no-magic-numbers": typeof import("./long/long/long/long/long/path/to/rules/no-magic-numbers");
+   "no-restricted-globals": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-globals");
+   "no-restricted-imports": typeof import("./long/long/long/long/long/path/to/rules/no-restricted-imports");
+   "no-undef": typeof import("./long/long/long/long/long/path/to/rules/no-undef");
+   "no-unused-expressions": typeof import("./long/long/long/long/long/path/to/rules/no-unused-expressions");
+   "no-useless-constructor": typeof import("./long/long/long/long/long/path/to/rules/no-useless-constructor");
+   "prefer-const": typeof import("./long/long/long/long/long/path/to/rules/prefer-const");
+   "prefer-destructuring": typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+-  "prefer-destructuring2": typeof import(
+-    // comment
+-    "./long/long/long/long/long/path/to/rules/prefer-destructuring"
+-  );
++  "prefer-destructuring2": typeof import(// comment
++  "./long/long/long/long/long/path/to/rules/prefer-destructuring");
+   "prefer-destructuring3": // comment
+   typeof import("./long/long/long/long/long/path/to/rules/prefer-destructuring");
+   strict: typeof import("./long/long/long/long/long/path/to/rules/strict");
+ }
+
+```
+
+**Prettier Similarity**: 86.21%
+
+
+### typescript/import-type/long-module-name/long-module-name5.ts
+```diff
+ type A =
+   import("./long/long/long/long/long/long/long/long/long/long/path/to/module");
+-type B = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  { with: { type: "json" } }
+-);
+-type C = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  {
+-    with: {
+-      type: "json",
+-    },
+-  }
+-);
+-type D = import(
+-  "./long/long/long/long/long/long/long/long/long/long/path/to/module",
+-  {
+-    with: { type: "json" },
+-  }
+-);
++type B =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
++type C =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
++type D =
++  import("./long/long/long/long/long/long/long/long/long/long/path/to/module", { with: {
++    type: "json",
++  }});
+
+```
+
+**Prettier Similarity**: 10.00%
 
 
 ### typescript/index-signature/index-signature.ts
@@ -8818,6 +11140,11 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/interface/no-semi/14040.ts
+
+**Prettier Similarity**: 100.00%
+
+
 ### typescript/interface/pattern-parameters.ts
 
 **Prettier Similarity**: 100.00%
@@ -8837,6 +11164,14 @@
 +  AnotherType,
 +  YetAnotherType,
 +> {
+   m(): void;
+ }
+ export class Environment1____ extends GenericEnvironment<
+   SomeType,
+   AnotherType,
+-  YetAnotherType
++  YetAnotherType,
+ > {
    m(): void;
  }
  export class Environment2 extends GenericEnvironment<
@@ -8862,6 +11197,9 @@
    extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
    x: string;
  }
+ declare class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+   x: string;
+ }
  
  declare interface ExtendsMany
    extends Interface1,
@@ -8881,6 +11219,9 @@
  
  interface ExtendsLarge
    extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
+   x: string;
+ }
+ class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName {
    x: string;
  }
  
@@ -8904,6 +11245,9 @@
    extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
    x: string;
  }
+ class ExtendsLarge____ extends ASingleInterfaceWithAReallyReallyReallyReallyLongName<string> {
+   x: string;
+ }
  
  interface ExtendsMany
    extends ASingleGenericInterface<
@@ -8915,6 +11259,17 @@
      Interface6,
      Interface7
    > {
+   x: string;
+ }
+ class ExtendsMany____ extends ASingleGenericInterface<
+   Interface1,
+   Interface2,
+   Interface3,
+   Interface4,
+   Interface5,
+   Interface6,
+   Interface7
+ > {
    x: string;
  }
  
@@ -8939,10 +11294,14 @@
      SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,
      ToBreakLineToBreakLineToBreakLine
    > {}
+ export class ExtendsLongOneWithGenerics____ extends Bar<
+   SomeLongTypeSomeLongTypeSomeLongTypeSomeLongType,
+   ToBreakLineToBreakLineToBreakLine
+ > {}
 
 ```
 
-**Prettier Similarity**: 93.33%
+**Prettier Similarity**: 94.12%
 
 
 ### typescript/interface2/comments-declare.ts
@@ -9027,6 +11386,121 @@
 ```
 
 **Prettier Similarity**: 69.77%
+
+
+### typescript/intersection/intersection-parens.ts
+```diff
+ export type A = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &
+   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+ 
+ export type B = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &
+   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+ 
+ export type C = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &
+   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+ 
+ export type D = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &
+   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+ 
+ export type Multi = (string & number)[];
+ 
+ function f(): string & number {}
+ 
+ var x: string & number;
+ var y: string & number;
+ 
+ class Foo<T extends string & number> {}
+ 
+ interface Interface {
+   i: (X & Y) | Z;
+   j: Partial<X & Y>;
+ }
+ 
+ type State = {
+   sharedProperty: any;
+ } & ({ discriminant: "FOO"; foo: any } & { discriminant: "BAR"; bar: any } & {
+   discriminant: "BAZ";
+   baz: any;
+ });
+ 
+ const foo1 = [abc, def, ghi, jkl, mno, pqr, stu, vwx, yz] as (string &
+   undefined)[];
+ 
+ const foo2: (AAAAAAAAAAAAAAAAAAAAAA &
+   BBBBBBBBBBBBBBBBBBBBBB &
+   CCCCCCCCCCCCCCCCCCCCCC &
+   DDDDDDDDDDDDDDDDDDDDDD)[] = [];
+ 
+ const foo3: keyof (AAAAAAAAAAAAAAAAAAAAAA &
+   BBBBBBBBBBBBBBBBBBBBBB &
+   CCCCCCCCCCCCCCCCCCCCCC &
+   DDDDDDDDDDDDDDDDDDDDDD) = bar;
+ 
+ const foo4: foo &
+   (AAAAAAAAAAAAAAAAAAAAAA &
+     BBBBBBBBBBBBBBBBBBBBBB &
+     CCCCCCCCCCCCCCCCCCCCCC &
+     DDDDDDDDDDDDDDDDDDDDDD) = bar;
+ 
+ let a1: C;
+ let a2: C;
+ let a3: C;
+ let a4: C;
+ let a5: C;
+ let a6: /*1*/ C;
+ let a7: /*1*/ C;
+ let a8: /*1*/ C;
+ let a9: /*1*/ C;
+ let a10: /*1*/ /*2*/ C;
+ let a11: /*1*/ /*2*/ C;
+ 
+ let aa1: /*1*/ /*2*/ C & D;
+ let aa2: /*1*/ /*2*/ C & /*3*/ D;
+ let aa3: /*1*/ /*2*/ C & /*3*/ D /*4*/;
+ 
+ type A1 = C;
+ type A2 = C;
+ type A3 = C;
+ type A4 = C;
+ type A5 = C;
+-type A6 /*1*/ = C;
+-type A7 /*1*/ = C;
+-type A8 /*1*/ = C;
+-type A9 /*1*/ = C;
+-type A10 /*1*/ = /*2*/ C;
+-type A11 /*1*/ = /*2*/ C;
+-type A12 /*1*/ = C;
++type A6 = /*1*/ C;
++type A7 = /*1*/ C;
++type A8 = /*1*/ C;
++type A9 = /*1*/ C;
++type A10 = /*1*/ /*2*/ C;
++type A11 = /*1*/ /*2*/ C;
++type A12 = /*1*/ C;
+ type A13 = /*1*/ C;
+ 
+ type Aa1 = /*1*/ /*2*/ C & D;
+ type Aa2 = /*1*/ /*2*/ C & /*3*/ D;
+ type Aa3 = /*1*/ /*2*/ C & /*3*/ D /*4*/;
+ 
+-type C1 /*1*/ = a & b;
+-type C2 /*1*/ = a & b;
+-type C3 /*1*/ = a & b;
+-type C4 /*1*/ = a & b;
+-type C5 /*1*/ = a & b;
+-type C6 /*0*/ /*1*/ = a & b;
++type C1 = /*1*/ a & b;
++type C2 = /*1*/ a & b;
++type C3 = /*1*/ a & b;
++type C4 = /*1*/ a & b;
++type C5 = /*1*/ a & b;
++type C6 /*0*/ = /*1*/ a & b;
+ 
+ type Ctor = (new () => X) & Y;
+
+```
+
+**Prettier Similarity**: 86.17%
 
 
 ### typescript/intersection/type-arguments.ts
@@ -9203,6 +11677,56 @@
 
 
 ### typescript/mapped-type/break-mode/break-mode.ts
+```diff
+ type A1 = { readonly [A in B]: T };
+ type A2 = {
+   readonly [A in B]: T;
+ };
+-type A3 = { readonly [A in B]: T };
+-type A4 = { readonly [A in B]: T };
++type A3 = {
++  readonly [A in B]: T;
++};
++type A4 = {
++  readonly [A in B]: T;
++};
+ type A5 = { readonly [A in B]: T };
+ type A6 = { readonly [A in B]: T };
+ type A7 = { readonly [A in B]: T };
+ 
+ type B1 = { [A in B]: T };
+ type B2 = {
+   [A in B]: T;
+ };
+-type B4 = { [A in B]: T };
++type B4 = {
++  [A in B]: T;
++};
+ 
+ type C1 = { +readonly [A in B]: T };
+-type C2 = { +readonly [A in B]: T };
++type C2 = {
++  +readonly [A in B]: T;
++};
+ type C3 = {
+   +readonly [A in B]: T;
+ };
+ 
+ type D1 = { -readonly [A in B]: T };
+-type D2 = { -readonly [A in B]: T };
++type D2 = {
++  -readonly [A in B]: T;
++};
+ type D3 = {
+   -readonly [A in B]: T;
+ };
+
+```
+
+**Prettier Similarity**: 59.46%
+
+
+### typescript/mapped-type/break-mode/issue-10571.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -9213,6 +11737,66 @@
 
 
 ### typescript/mapped-type/issue-11098.ts
+```diff
+ type Type = {
+   // comment
+   readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment1
+   // comment2
+   readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   +readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   -readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   +readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   +readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   readonly [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   [T in number];
+ };
+ 
+ type Type = {
+   // comment
+   readonly [T in number];
+ };
+ 
+ type Type = {
+   // foo
+-  /* bar */
+-  readonly [T in number];
++  /* bar */ readonly [T in number];
+ };
+
+```
+
+**Prettier Similarity**: 96.08%
+
+
+### typescript/mapped-type/issue-17784.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -9386,7 +11970,17 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/object-multiline/multiline.ts
+
+**Prettier Similarity**: 100.00%
+
+
 ### typescript/optional-call/type-parameters.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/optional-chaining/as-key.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -9446,6 +12040,11 @@
 **Prettier Similarity**: 0.00%
 
 
+### typescript/prettier-ignore/issue-16927.ts
+
+**Prettier Similarity**: 100.00%
+
+
 ### typescript/prettier-ignore/mapped-types.ts
 ```diff
  type a = {
@@ -9453,62 +12052,62 @@
      [A in B]: C  |  D
    };
  
- type a = {
+ type b = {
      [
        // prettier-ignore
        A in B
      ]: C  |  D
    };
  
- type a = {
+ type c = {
 -  [A in B]: C | D; // prettier-ignore
 +  [A in B]: C | D;
  };
  
- type a = {
--  A in B: C | D; // prettier-ignore
+ type d = {
+-  [A in B]: C | D; // prettier-ignore
 +  [A in B]: // prettier-ignore
 +  C | D;
  };
  
- type a = {
+ type e = {
      [
        /* prettier-ignore */
        A in B
      ]: C  |  D
    };
  
- type a = {
+ type f = {
 -  [A /* prettier-ignore */ in B]: C | D;
 +  [A in B]: C | D;
  };
  
- type a = {
--  A in B /* prettier-ignore */: C | D;
+ type g = {
+-  [A in B /* prettier-ignore */]: C | D;
 +  [A in B]: /* prettier-ignore */
 +  C | D;
  };
  
- type a = {
+ type h = {
      /* prettier-ignore */ [A in B]: C  |  D
    };
  
- type a = {
+ type i = {
 -    [/* prettier-ignore */ A in B ]: C  |  D
 -  };
 +  [/* prettier-ignore */ A in B]: C | D;
 +};
  
- type a = {
+ type j = {
    [A in /* prettier-ignore */ B]: C | D;
  };
  
- type a = {
--  [A in B /* prettier-ignore */]: C | D;
+ type k = {
+-  [A in B]: /* prettier-ignore */ C  |  D;
 +  [A in B]: /* prettier-ignore */ C | D;
  };
  
- type a = {
+ type l = {
      /* prettier-ignore */
      [A in B]: C  |  D
    };
@@ -9576,6 +12175,44 @@
 ### typescript/private-fields-in-in/basic.ts
 
 **Prettier Similarity**: 100.00%
+
+
+### typescript/property-signature/consistent-with-flow/comments.ts
+```diff
+ interface A {
+-  property: B; // Comment
++  property: // Comment
++  B;
+ }
+ 
+ interface A {
+   property: /* Comment */ B;
+ }
+
+```
+
+**Prettier Similarity**: 75.00%
+
+
+### typescript/property-signature/consistent-with-flow/intersection.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/property-signature/consistent-with-flow/union.ts
+```diff
+ export interface DirectiveArgumentNode extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ }
+
+```
+
+**Prettier Similarity**: 85.71%
 
 
 ### typescript/quote-props/types.ts
@@ -9776,6 +12413,16 @@
 ```
 
 **Prettier Similarity**: 40.00%
+
+
+### typescript/top-level-await/test.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/top-level-await/test.tsx
+
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/trailing-comma/arrow-functions.tsx
@@ -10011,58 +12658,71 @@
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeof-this/decorators.ts
+### typescript/type-params/18041.ts
+```diff
+ type BufferStreamOrVoid<
+   C extends undefined | Buffer | Stream | boolean,
+   P extends undefined | Buffer,
+-  R extends Buffer | Stream | void = // Above line comment about exclue. // Inline comment about void.
++  R extends Buffer | Stream | void = // Inline comment about void.
++  // Above line comment about exclue.
+   Exclude<C, false> extends never
+     ? void
+     : C & P extends Buffer
+       ? Buffer
+       : Stream,
+ > = R;
+ 
+ type A<
+-  B = // Above line comment about exclue. // Inline comment about void.
++  B = // Inline comment about void.
++  // Above line comment about exclue.
+   C,
+ > = R;
+
+```
+
+**Prettier Similarity**: 76.47%
+
+
+### typescript/type-params/class-method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeof-this/typeof-this.ts
+### typescript/type-params/consistent/flow-only.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeof/typeof.ts
+### typescript/type-params/consistent/issue-9501.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/class-method.ts
+### typescript/type-params/consistent/simple-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/consistent/flow-only.ts
+### typescript/type-params/consistent/template-literal-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/consistent/issue-9501.ts
+### typescript/type-params/consistent/typescript-only.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/consistent/simple-types.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/typeparams/consistent/template-literal-types.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/typeparams/consistent/typescript-only.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/typeparams/const.ts
+### typescript/type-params/const.ts
 ```diff
  function a<const T>() {}
  function b<const T extends U>() {}
  function c<T, const U>() {}
  declare function d<const T>();
- <const T,>() => {};
+-<const T,>() => {};
++<const T>() => {};
  <const T extends U>() => {};
  (function <const T>() {});
  (function <const T extends U>() {});
@@ -10094,37 +12754,23 @@
 
 ```
 
-**Prettier Similarity**: 96.88%
+**Prettier Similarity**: 93.75%
 
 
-### typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
-```diff
--const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> = (
--  arg,
--) => null;
-+const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> =
-+  arg => null;
- 
- const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx</* comment */> =
--  (arg) => null;
-+  arg => null;
- 
- const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<
-   // comment
--> = (arg) => null;
-+> =
-+  arg => null;
-
-```
-
-**Prettier Similarity**: 50.00%
-
-
-### typescript/typeparams/line-breaking-after-extends-2.ts
+### typescript/type-params/constraints-and-default-2.ts
 ```diff
  a = {
    parseFunctionBodyAndFinish<
      T extends
+       | N.Function
+       | N.TSDeclareMethod
+       | N.TSDeclareFunction
+       | N.ClassPrivateMethod,
+   >() {},
+ };
+ a = {
+   parseFunctionBodyAndFinish<
+     T =
        | N.Function
        | N.TSDeclareMethod
        | N.TSDeclareFunction
@@ -10142,10 +12788,25 @@
      | Bar
      | Baz,
  >();
+ function parseFunctionBodyAndFinish<
+   T =
+     | N.Function
+     | N.TSDeclareMethod
+     | N.TSDeclareFunction
+     | N.ClassPrivateMethod
+     | Foo
+     | Bar
+     | Baz,
+ >();
  
  function parseFunctionBodyAndFinish<
    T extends // comment
 -    N.Function | N.TSDeclareMethod | Baz,
++  N.Function | N.TSDeclareMethod | Baz,
+ >();
+ function parseFunctionBodyAndFinish<
+-  T = N.Function | N.TSDeclareMethod | Baz, // comment
++  T = // comment
 +  N.Function | N.TSDeclareMethod | Baz,
  >();
  
@@ -10156,33 +12817,55 @@
      filepath?: string;
    },
  >() {}
+ function makeChainWalker2<
+   ArgT = {
+     options: ValidatedOptions;
+     dirname: string;
+     filepath?: string;
+   },
+ >() {}
 
 ```
 
-**Prettier Similarity**: 96.97%
+**Prettier Similarity**: 95.24%
 
 
-### typescript/typeparams/line-breaking-after-extends.ts
-
-**Prettier Similarity**: 100.00%
-
-
-### typescript/typeparams/long-function-arg.ts
+### typescript/type-params/constraints-and-default.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/print-width-120/issue-7542.tsx
+### typescript/type-params/long-function-arg.ts
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/tagged-template-expression.ts
+### typescript/type-params/print-width-120/issue-7542.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-### typescript/typeparams/trailing-comma/type-paramters.ts
+### typescript/type-params/tagged-template-expression.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/type-params/trailing-comma/type-paramters.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/typeof-this/decorators.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/typeof-this/typeof-this.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/typeof/typeof.ts
 
 **Prettier Similarity**: 100.00%
 
@@ -10192,9 +12875,111 @@
 **Prettier Similarity**: 100.00%
 
 
-### typescript/union/consistent-with-flow/comment.ts
+### typescript/union/comments/18106.ts
+```diff
+ export interface DirectiveArgumentNode1 extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ }
+ 
+ export class DirectiveArgumentNode12 extends ArrayExpression {
+   elements: // dir, exp, arg, modifiers
+-  | [string]
++    | [string]
+     | [string, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode]
+     | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+ }
+ 
+-type A = // dir, exp, arg, modifiers
+-
+-    | [string]
+-    | [string, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode, ObjectExpression];
++type A =
++  // dir, exp, arg, modifiers
++  | [string]
++  | [string, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ 
+ const elements: // dir, exp, arg, modifiers
+-| [string]
++  | [string]
+   | [string, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode, ObjectExpression] = 1;
+ 
+ type A2 =
+   /* block comment */
+   | [string]
+   | [string, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ 
+ type A3 =
+   /* block comment
+    */
+   | [string]
+   | [string, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode]
+   | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+
+```
+
+**Prettier Similarity**: 79.07%
+
+
+### typescript/union/consistent-with-flow/81-characters.ts
 
 **Prettier Similarity**: 100.00%
+
+
+### typescript/union/consistent-with-flow/comment.ts
+```diff
+ type A1 = /* 4 */ (A | B)[];
+ 
+-type A2 = // dir, exp, arg, modifiers
+-
+-    | [string]
+-    | [string, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode]
+-    | [string, ExpressionNode, ExpressionNode, ObjectExpression];
++type A2 =
++  // dir, exp, arg, modifiers
++  | [string]
++  | [string, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode]
++  | [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ 
+ type A3 = // dir, exp, arg, modifiers
+   [string] &
+     [string, ExpressionNode] &
+     [string, ExpressionNode, ExpressionNode] &
+     [string, ExpressionNode, ExpressionNode, ObjectExpression];
+ 
+ type SuperLongTypeNameLoremIpsumLoremIpsumBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla =
+-
+-    | Fooo1000
+-    | Baz2000
+-    | BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
++  | Fooo1000
++  | Baz2000
++  | BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
+ 
+ type SuperLongTypeNameLoremIpsumLoremIpsumBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBl2 =
+   Fooo1000 &
+     Baz2000 &
+     BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
+
+```
+
+**Prettier Similarity**: 60.00%
 
 
 ### typescript/union/consistent-with-flow/comments.ts
@@ -10249,8 +13034,80 @@
 
 
 ### typescript/union/inlining.ts
+```diff
+ interface RelayProps {
+   articles: a | null;
+ }
+ interface RelayProps {
+   articles: Array<{
+     __id: string;
+   } | null> | null | void;
+ }
+ 
+ interface RelayProps {
+   articles:
+     | Array<{
+         __id: string;
+       } | null>
+     | null // articles type may be null
+     | void; // articles type may be void
+ }
+ 
+ type FooBar =
+   | null // null
+   | {
+-      /** x **/
+-      y: number;
++      /** x **/ y: number;
+       z: string;
+     } // this documents the first option
+   | void; // this documents the second option
+ 
+ type FooBarWithoutComment = null | {
+   y: number;
+   z: string;
+ } | void;
+ 
+ type FooBar2 =
+   | Number // this documents the first option
+   | void; // this documents the second option
+ 
+ type UploadState<E, EM, D> =
+   // The upload hasnt begun yet
+   | { type: "Not_begun" }
+   // The upload timed out
+   | { type: "Timed_out" }
+   // Failed somewhere on the line
+   | { type: "Failed"; error: E; errorMsg: EM }
+   // Uploading to aws3 and CreatePostMutation succeeded
+   | { type: "Success"; data: D };
+ 
+ type UploadState2<E, EM, D> =
+   // The upload hasnt begun yet
+   | A
+   // The upload timed out
+   | B
+   // Failed somewhere on the line
+   | C
+   // Uploading to aws3 and CreatePostMutation succeeded
+   | D;
+ 
+ type window = Window & {
+   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
+ };
+ 
+ type T1 = (number | string)["toString"];
+ type T2 = (number | string)["toString"];
+ type T3 = (number | string)["toString"];
+ type T4 = (number | string)["toString"];
+ type T5 = number | ((arg: any) => void);
+ type T6 = number | ((arg: any) => void);
+ type T7 = number | ((arg: any) => void);
+ type T8 = number | ((arg: any) => void);
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 97.06%
 
 
 ### typescript/union/single-type/single-type.ts
