@@ -458,7 +458,6 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         if let Some(member_expr) = current_expr.as_js_static_member_expression()
         {
             to_check.push(member_expr.object().ok()?);
-            continue;
         }
 
         // Any other expression - not safe to trace
