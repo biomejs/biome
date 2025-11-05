@@ -165,11 +165,9 @@ impl HtmlElement {
         name_token.text_trimmed().eq_ignore_ascii_case("script")
     }
 
-    /// Returns `true` if the element is a `<script type="module">`
-    pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
-        let is_script = self.is_script_tag();
-        let type_attribute = self.find_attribute_by_name("type");
-        let is_type_module = type_attribute.is_some_and(|attribute| {
+    fn has_attribute(&self, name: &str, value: &str) -> bool {
+        let attribute = self.find_attribute_by_name(name);
+        attribute.is_some_and(|attribute| {
             attribute
                 .initializer()
                 .and_then(|initializer| initializer.value().ok())
@@ -177,47 +175,34 @@ impl HtmlElement {
                 .and_then(|value| value.value_token().ok())
                 .is_some_and(|token| {
                     let text = inner_string_text(&token);
-                    text.eq_ignore_ascii_case("module")
+                    text.eq_ignore_ascii_case(value)
                 })
-        });
+        })
+    }
 
-        Ok(is_script && is_type_module)
+    /// Returns `true` if the element is a `<script type="module">`
+    pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
+        Ok(self.is_script_tag() && self.has_attribute("type", "module"))
     }
 
     /// Returns `true` if the element is a `<script lang="ts">`
     pub fn is_typescript_lang(&self) -> bool {
-        let is_script = self.is_script_tag();
-        let lang_attribute = self.find_attribute_by_name("lang");
-        let is_lang_typescript = lang_attribute.is_some_and(|attribute| {
-            attribute
-                .initializer()
-                .and_then(|initializer| initializer.value().ok())
-                .and_then(|value| value.as_html_string().cloned())
-                .and_then(|value| value.value_token().ok())
-                .is_some_and(|token| {
-                    let text = inner_string_text(&token);
-                    text.eq_ignore_ascii_case("ts")
-                })
-        });
-        is_script && is_lang_typescript
+        self.is_script_tag() && self.has_attribute("lang", "ts")
+    }
+
+    /// Returns `true` if the element is a `<script lang="jsx">`
+    pub fn is_jsx_lang(&self) -> bool {
+        self.is_script_tag() && self.has_attribute("lang", "jsx")
+    }
+
+    /// Returns `true` if the element is a `<script lang="tsx">`
+    pub fn is_tsx_lang(&self) -> bool {
+        self.is_script_tag() && self.has_attribute("lang", "tsx")
     }
 
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
-        let is_style = self.is_style_tag();
-        let lang_attribute = self.find_attribute_by_name("lang");
-        let is_lang_typescript = lang_attribute.is_some_and(|attribute| {
-            attribute
-                .initializer()
-                .and_then(|initializer| initializer.value().ok())
-                .and_then(|value| value.as_html_string().cloned())
-                .and_then(|value| value.value_token().ok())
-                .is_some_and(|token| {
-                    let text = inner_string_text(&token);
-                    text.eq_ignore_ascii_case("sass") || text.eq_ignore_ascii_case("scss")
-                })
-        });
-        is_style && is_lang_typescript
+        self.is_style_tag() && self.has_attribute("lang", "scss")
     }
 }
 
