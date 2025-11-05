@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
-use biome_console::markup;
+use biome_console::{markup, Display};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -224,7 +224,8 @@ impl Rule for NoBannedTypes {
         )
         .note(banned_type.message())
         // TODO: Update this if/when the rule gets split up or has individual disabling options added
-        .note("If that's really what you want, use an inline disable comment.")
+        .note("If that's really what you want, use an inline disable comment.");
+
         Some(diagnostic)
     }
 
@@ -293,7 +294,7 @@ impl BannedType {
     }
 
     /// Retrieve a diagnostic message from a [BannedType].
-    fn message(&self) -> impl Display {
+    fn message(&self) -> impl biome_console::Display {
         match *self {
             Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
                 let primitiveStr = self.as_js_syntax_kind().map(|syntax| syntax.to_string())
