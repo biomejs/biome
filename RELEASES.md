@@ -25,7 +25,7 @@ Beta releases are published on GitHub, and `npmjs.org` under the `beta` tag.
 
 ### Stable release
 
-Beta releases are published manually by the [Core Contributors team](/GOVERNANCE.md#core-contributor), only this team has the right to publish these releases.
+Stable releases are published manually by the [Core Contributors team](/GOVERNANCE.md#core-contributor), only this team has the right to publish these releases.
 
 Stable releases are published on GitHub, and `npmjs.org` under the `latest` tag.
 
