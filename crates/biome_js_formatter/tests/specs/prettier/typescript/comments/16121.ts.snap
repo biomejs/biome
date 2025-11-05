@@ -1,0 +1,173 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/comments/16121.ts
+---
+# Input
+
+```ts
+// FIXME
+// TODO: reformat issue
+// export type IntersectionType =
+//   & FirstPart
+//   // Presence of comment makes this non-idempotent
+//   & {
+//     an: string,
+//     object: string,
+//     type: string,
+//   }
+
+
+// export type IntersectionType =
+//   & FirstPart
+//   // Comment Line 1
+//   // Comment Line 2
+//   & {
+//     an: string,
+//     object: string,
+//     type: string,
+//   }
+
+// export type IntersectionType =
+//   | FirstPart
+//   // Presence of comment is not a problem
+//   | {
+//       an: string;
+//       object: string;
+//       type: string;
+//     };
+
+// export type IntersectionType =
+//   | FirstPart
+//   // Comment Line 1
+//   // Comment Line 2
+//   | {
+//       an: string;
+//       object: string;
+//       type: string;
+//     };
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,35 +1,39 @@
+-export type IntersectionType = FirstPart &
+-  // Presence of comment makes this non-idempotent
+-  {
+-    an: string;
+-    object: string;
+-    type: string;
+-  };
++// FIXME
++// TODO: reformat issue
++// export type IntersectionType =
++//   & FirstPart
++//   // Presence of comment makes this non-idempotent
++//   & {
++//     an: string,
++//     object: string,
++//     type: string,
++//   }
+ 
+-export type IntersectionType = FirstPart &
+-  // Comment Line 1
+-  // Comment Line 2
+-  {
+-    an: string;
+-    object: string;
+-    type: string;
+-  };
++// export type IntersectionType =
++//   & FirstPart
++//   // Comment Line 1
++//   // Comment Line 2
++//   & {
++//     an: string,
++//     object: string,
++//     type: string,
++//   }
+ 
+-export type IntersectionType =
+-  | FirstPart
+-  // Presence of comment is not a problem
+-  | {
+-      an: string;
+-      object: string;
+-      type: string;
+-    };
++// export type IntersectionType =
++//   | FirstPart
++//   // Presence of comment is not a problem
++//   | {
++//       an: string;
++//       object: string;
++//       type: string;
++//     };
+ 
+-export type IntersectionType =
+-  | FirstPart
+-  // Comment Line 1
+-  // Comment Line 2
+-  | {
+-      an: string;
+-      object: string;
+-      type: string;
+-    };
++// export type IntersectionType =
++//   | FirstPart
++//   // Comment Line 1
++//   // Comment Line 2
++//   | {
++//       an: string;
++//       object: string;
++//       type: string;
++//     };
+```
+
+# Output
+
+```ts
+// FIXME
+// TODO: reformat issue
+// export type IntersectionType =
+//   & FirstPart
+//   // Presence of comment makes this non-idempotent
+//   & {
+//     an: string,
+//     object: string,
+//     type: string,
+//   }
+
+// export type IntersectionType =
+//   & FirstPart
+//   // Comment Line 1
+//   // Comment Line 2
+//   & {
+//     an: string,
+//     object: string,
+//     type: string,
+//   }
+
+// export type IntersectionType =
+//   | FirstPart
+//   // Presence of comment is not a problem
+//   | {
+//       an: string;
+//       object: string;
+//       type: string;
+//     };
+
+// export type IntersectionType =
+//   | FirstPart
+//   // Comment Line 1
+//   // Comment Line 2
+//   | {
+//       an: string;
+//       object: string;
+//       type: string;
+//     };
+```

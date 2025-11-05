@@ -1,0 +1,244 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/as/comments/18160.ts
+---
+# Input
+
+```ts
+// FIXME
+// TODO: reformat issue
+// 1 as /*
+// comment
+// */const;
+// 1 as /*
+// comment
+// */Foo;
+// 1 satisfies /*
+// comment
+// */Foo;
+
+// 1 as
+// /*
+// comment
+// */const;
+// 1 as
+// /*
+// comment
+// */Foo;
+// 1 satisfies
+// /*
+// comment
+// */Foo;
+
+// 1 as /*
+// comment
+// */
+// const;
+// 1 as /*
+// comment
+// */
+// Foo;
+// 1 satisfies /*
+// comment
+// */
+// Foo;
+
+// 1 as
+// /*
+// comment
+// */
+// const;
+// 1 as
+// /*
+// comment
+// */
+// Foo;
+// 1 satisfies
+// /*
+// comment
+// */
+// Foo;
+
+// 1 as // comment
+// const;
+// 1 as // comment
+// Foo;
+// 1 satisfies // comment
+// Foo;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,45 +1,60 @@
+-1 as const /*
+-comment
+-*/;
+-1 as /*
+-comment
+-*/ Foo;
+-1 satisfies /*
+-comment
+-*/ Foo;
++// FIXME
++// TODO: reformat issue
++// 1 as /*
++// comment
++// */const;
++// 1 as /*
++// comment
++// */Foo;
++// 1 satisfies /*
++// comment
++// */Foo;
+ 
+-1 as const;
+-/*
+-comment
+-*/
+-1 as /*
+-comment
+-*/ Foo;
+-1 satisfies /*
+-comment
+-*/ Foo;
++// 1 as
++// /*
++// comment
++// */const;
++// 1 as
++// /*
++// comment
++// */Foo;
++// 1 satisfies
++// /*
++// comment
++// */Foo;
+ 
+-1 as const /*
+-comment
+-*/;
+-1 /*
+-comment
+-*/ as Foo;
+-1 /*
+-comment
+-*/ satisfies Foo;
++// 1 as /*
++// comment
++// */
++// const;
++// 1 as /*
++// comment
++// */
++// Foo;
++// 1 satisfies /*
++// comment
++// */
++// Foo;
+ 
+-1 as const;
+-/*
+-comment
+-*/
+-1 /*
+-comment
+-*/ as Foo;
+-1 /*
+-comment
+-*/ satisfies Foo;
++// 1 as
++// /*
++// comment
++// */
++// const;
++// 1 as
++// /*
++// comment
++// */
++// Foo;
++// 1 satisfies
++// /*
++// comment
++// */
++// Foo;
+ 
+-1 as const; // comment
+-1 as Foo; // comment
+-1 satisfies Foo; // comment
++// 1 as // comment
++// const;
++// 1 as // comment
++// Foo;
++// 1 satisfies // comment
++// Foo;
+```
+
+# Output
+
+```ts
+// FIXME
+// TODO: reformat issue
+// 1 as /*
+// comment
+// */const;
+// 1 as /*
+// comment
+// */Foo;
+// 1 satisfies /*
+// comment
+// */Foo;
+
+// 1 as
+// /*
+// comment
+// */const;
+// 1 as
+// /*
+// comment
+// */Foo;
+// 1 satisfies
+// /*
+// comment
+// */Foo;
+
+// 1 as /*
+// comment
+// */
+// const;
+// 1 as /*
+// comment
+// */
+// Foo;
+// 1 satisfies /*
+// comment
+// */
+// Foo;
+
+// 1 as
+// /*
+// comment
+// */
+// const;
+// 1 as
+// /*
+// comment
+// */
+// Foo;
+// 1 satisfies
+// /*
+// comment
+// */
+// Foo;
+
+// 1 as // comment
+// const;
+// 1 as // comment
+// Foo;
+// 1 satisfies // comment
+// Foo;
+```

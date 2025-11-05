@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/binary-expressions/mutiple-comments/17192.js
+---
+# Input
+
+```js
+// FIXME
+// TODO: reformat issue
+// ErrorLike =
+//   SerializedProps &
+//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
+//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+//   { cause: unknown };
+
+// ErrorLike =
+//   SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+//   { cause: unknown };
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,14 @@
+-ErrorLike =
+-  SerializedProps &
+-  // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// FIXME
++// TODO: reformat issue
++// ErrorLike =
++//   SerializedProps &
++//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
+ 
+-ErrorLike =
+-  SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// ErrorLike =
++//   SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
+```
+
+# Output
+
+```js
+// FIXME
+// TODO: reformat issue
+// ErrorLike =
+//   SerializedProps &
+//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
+//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+//   { cause: unknown };
+
+// ErrorLike =
+//   SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+//   { cause: unknown };
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: //   // cause is a new addition to Error that is not yet available in all runtimes. We have added
+    6: //   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+    7: //   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+   11: //   SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+   12: //   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+   13: //   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+```

@@ -1,0 +1,351 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/call/boolean/boolean.js
+---
+# Input
+
+```js
+// FIXME
+// TODO: reformat issue
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// )?.toString();
+// a = new Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+// a = !(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// );
+// a = !!(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// );
+
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+// a = new Foo(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+
+// // Different operators
+// a = Boolean(
+//   a_long_long_long_long_condition && a_long_long_long_long_condition && a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition ?? a_long_long_long_long_condition ?? a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition + a_long_long_long_long_condition + a_long_long_long_long_condition,
+// );
+
+// // Not argument
+// a = (
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// )(Boolean);
+// a = new (
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// )(Foo);
+
+// // Not `Boolean`
+// a = not_Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+
+// // Nested
+// a = Boolean(
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+//   &&
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+// );
+// a = Boolean(
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+//   ||
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+// );
+// a = Boolean(Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// ));
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,103 +1,69 @@
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-)?.toString();
+-a = new Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = !(
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-);
+-a = !!(
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-);
++// FIXME
++// TODO: reformat issue
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// )?.toString();
++// a = new Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
++// a = !(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// );
++// a = !!(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// );
+ 
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
+-a = new Foo(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
++// a = new Foo(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
+ 
+-// Different operators
+-a = Boolean(
+-  a_long_long_long_long_condition &&
+-    a_long_long_long_long_condition &&
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ??
+-    a_long_long_long_long_condition ??
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition +
+-    a_long_long_long_long_condition +
+-    a_long_long_long_long_condition,
+-);
++// // Different operators
++// a = Boolean(
++//   a_long_long_long_long_condition && a_long_long_long_long_condition && a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition ?? a_long_long_long_long_condition ?? a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition + a_long_long_long_long_condition + a_long_long_long_long_condition,
++// );
+ 
+-// Not argument
+-a = (
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-)(Boolean);
+-a = new (a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition)(Foo);
++// // Not argument
++// a = (
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// )(Boolean);
++// a = new (
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// )(Foo);
+ 
+-// Not `Boolean`
+-a = not_Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
++// // Not `Boolean`
++// a = not_Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
+ 
+-// Nested
+-a = Boolean(
+-  (a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition) &&
+-    (a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition),
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  Boolean(
+-    a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition,
+-  ),
+-);
++// // Nested
++// a = Boolean(
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++//   &&
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++// );
++// a = Boolean(
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++//   ||
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++// );
++// a = Boolean(Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// ));
+```
+
+# Output
+
+```js
+// FIXME
+// TODO: reformat issue
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// )?.toString();
+// a = new Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+// a = !(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// );
+// a = !!(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// );
+
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+// a = new Foo(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+//   anotherArgument,
+// );
+
+// // Different operators
+// a = Boolean(
+//   a_long_long_long_long_condition && a_long_long_long_long_condition && a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition ?? a_long_long_long_long_condition ?? a_long_long_long_long_condition,
+// );
+// a = Boolean(
+//   a_long_long_long_long_condition + a_long_long_long_long_condition + a_long_long_long_long_condition,
+// );
+
+// // Not argument
+// a = (
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// )(Boolean);
+// a = new (
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+// )(Foo);
+
+// // Not `Boolean`
+// a = not_Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// );
+
+// // Nested
+// a = Boolean(
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+//   &&
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+// );
+// a = Boolean(
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+//   ||
+//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+// );
+// a = Boolean(Boolean(
+//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+// ));
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+    7: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   10: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   13: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+   16: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+   20: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   24: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   28: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   34: //   a_long_long_long_long_condition && a_long_long_long_long_condition && a_long_long_long_long_condition,
+   37: //   a_long_long_long_long_condition ?? a_long_long_long_long_condition ?? a_long_long_long_long_condition,
+   40: //   a_long_long_long_long_condition + a_long_long_long_long_condition + a_long_long_long_long_condition,
+   45: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+   48: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
+   53: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+   58: //   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+   60: //   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+   63: //   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+   65: //   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
+   68: //   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
+```
