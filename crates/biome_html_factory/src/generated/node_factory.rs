@@ -363,6 +363,50 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_key_block(
+    opening_block: SvelteKeyOpeningBlock,
+    children: HtmlElementList,
+    closing_block: SvelteKeyClosingBlock,
+) -> SvelteKeyBlock {
+    SvelteKeyBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_KEY_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_key_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    key_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteKeyClosingBlock {
+    SvelteKeyClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_KEY_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(key_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_key_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    key_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteKeyOpeningBlock {
+    SvelteKeyOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_KEY_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_hash_token)),
+            Some(SyntaxElement::Token(key_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,

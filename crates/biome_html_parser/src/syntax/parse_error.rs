@@ -33,7 +33,7 @@ pub(crate) fn expected_text_expression(
 }
 
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    expect_one_of(&["element", "text"], range).into_diagnostic(p)
+    expect_one_of(&["element", "text", "closing block"], range).into_diagnostic(p)
 }
 
 pub(crate) fn expected_closed_fence(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
@@ -94,5 +94,5 @@ pub(crate) fn closing_tag_should_not_have_attributes(
 }
 
 pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Expected an identifier.", range)
+    p.err_builder("Expected a closing block, instead found none.", range)
 }
