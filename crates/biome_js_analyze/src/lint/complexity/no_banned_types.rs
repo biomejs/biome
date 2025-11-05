@@ -21,15 +21,14 @@ declare_lint_rule! {
     /// This rule aims to prevent usage of potentially "misleading" types and type aliases
     /// which may behave unexpectedly.
     ///
-    /// ### Disallow primitive wrapper types like `Boolean` and `Number`
+    /// ### Disallow "boxed object" types like `Boolean` and `Number`
     ///
     /// JavaScript's 8 data types are described in TypeScript by the lowercase types 
     /// `undefined`, `null`, `boolean`, `number`, `string`, `bigint` `symbol`, and `object`.
     ///
     /// The latter 6 also have uppercase variants, which instead represent _interfaces_ with the shared properties of their primitive counterparts.
-    /// Due to the nature of structural typing, JavaScript "wrapper objects" like `new Boolean(true)` and "primitive-like"
-    /// objects that implement the interface are also assignable to these uppercase types, despite behaving differently from primitives in many circumstances
-    /// like equality and truthiness.
+    /// Due to the nature of structural typing, these uppercase types accept both primitive values and non-primitive "boxed object"s 
+    /// like `new Boolean(true)`, despite the two behaving differently in many circumstances like equality and truthiness.
     /// 
     /// It is thus considered best practice to avoid these "boxed types" in favor of their lowercase
     /// primitive counterparts.
@@ -105,17 +104,12 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// type wrapFn<T extends Function> = { func: T }
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
     /// const notEmpty: {} = {prop: 12};
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// const alsoNotAnObj: Object = 12;
+    /// const alsoNotAnObj: Object = "foo";
     /// ```
-    ///
     ///
     /// ### Valid
     ///
@@ -128,7 +122,9 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts
-    /// declare function betterFunction(cb: () => void);
+    /// function betterFunction(cb: (n: number) => string) {
+    ///   return n(12);
+    /// }
     /// ```
     /// 
     /// ```ts
