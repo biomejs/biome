@@ -56,7 +56,7 @@ impl AstroFileHandler {
             format!(
                 "{}{}{}",
                 &input[..start.end() + 1],
-                output.trim_start(),
+                output.trim_start_matches([' ', '	']),
                 &input[end.start()..]
             )
         } else {
