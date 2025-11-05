@@ -1112,18 +1112,16 @@ fn is_jsx_factory_binding(
     }
 
     // Check for custom JSX factory
-    if let Some(jsx_factory) = ctx.jsx_factory() {
-        if is_jsx_factory_import(binding, jsx_factory) {
+    if let Some(jsx_factory) = ctx.jsx_factory()
+        && is_jsx_factory_import(binding, jsx_factory) {
             return true;
         }
-    }
 
     // Check for custom JSX fragment factory
-    if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory() {
-        if is_jsx_factory_import(binding, jsx_fragment_factory) {
+    if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory()
+        && is_jsx_factory_import(binding, jsx_fragment_factory) {
             return true;
         }
-    }
 
     false
 }

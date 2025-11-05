@@ -1629,8 +1629,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
         // and the factory settings are not already set
-        if let Some(path) = self.path {
-            if analyzer_options.jsx_runtime()
+        if let Some(path) = self.path
+            && analyzer_options.jsx_runtime()
                 == Some(biome_analyze::options::JsxRuntime::ReactClassic)
             {
                 if analyzer_options.jsx_factory().is_none() {
@@ -1654,7 +1654,6 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
                     analyzer_options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
                 }
             }
-        }
 
         let mut lint = LintVisitor::new(
             self.only,

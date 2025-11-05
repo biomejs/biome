@@ -629,16 +629,14 @@ fn is_unused(ctx: &RuleContext<NoUnusedImports>, local_name: &AnyJsBinding) -> b
             return false;
         }
         // Check for custom JSX factory imports
-        if let Some(jsx_factory) = ctx.jsx_factory() {
-            if is_jsx_factory_import(binding, jsx_factory) {
+        if let Some(jsx_factory) = ctx.jsx_factory()
+            && is_jsx_factory_import(binding, jsx_factory) {
                 return false;
             }
-        }
-        if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory() {
-            if is_jsx_factory_import(binding, jsx_fragment_factory) {
+        if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory()
+            && is_jsx_factory_import(binding, jsx_fragment_factory) {
                 return false;
             }
-        }
     }
 
     let jsdoc_types = ctx.jsdoc_types();
