@@ -2,6 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#7981](https://github.com/biomejs/biome/issues/7981)
-
-Added support for `html.experimentalFullSupportEnabled` in Vue jsx/tsx scripts. Biome now supports `html.experimentalFullSupportEnabled` in Vue jsx/tsx scripts instead of throwing errors.
+Fixed [#7981](https://github.com/biomejs/biome/issues/7981). Now Biome correctly detects and parses `lang='tsx'` and `lang='jsx'` languages when used inside in `.vue` files, when  `.experimentalFullSupportEnabled` is enabled.
