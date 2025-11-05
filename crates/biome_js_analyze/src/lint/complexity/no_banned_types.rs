@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// ### Disallow "boxed object" types like `Boolean` and `Number`
     ///
     /// JavaScript's 8 data types are described in TypeScript by the lowercase types
-    /// `undefined`, `null`, `boolean`, `number`, `string`, `bigint` `symbol`, and `object`.
+    /// `undefined`, `null`, `boolean`, `number`, `string`, `bigint`, `symbol`, and `object`.
     ///
     /// The latter 6 also have uppercase variants, which instead represent _interfaces_ with the shared properties of their primitive counterparts.
     /// Due to the nature of structural typing, these uppercase types accept both primitive values and non-primitive "boxed object"s
@@ -35,18 +35,19 @@ declare_lint_rule! {
     ///
     /// ### Disallow the unsafe `Function` type
     ///
-    /// TypeScript's built-in `Function` type is capable of accepting a callback of any shape or form,
+    /// TypeScript's built-in `Function` type is capable of accepting callbacks of any shape or form,
     /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly.
-    /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class.
+    /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class, 
+    /// which is likewise a potential source of confusion.
     ///
-    /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible.
+    /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible. \
     /// When a generic "catch-all" callback type is required, one of the following can be used instead:
     /// - `() => void`: A function that accepts no parameters and whose return value is ignored
     /// - `(...args: never) => unknown`: A "top type" for functions that can be assigned any function type,
     ///    but can't be called directly
     ///
     /// ### Disallow the misleading empty object type `{}`
-    /// In Typescript, the type `{}` _doesn't_ represent an empty object (as many new to the language may assume).
+    /// In TypeScript, the type `{}` _doesn't_ represent an empty object (as many new to the language may assume).
     /// It actually accepts any non-nullish value, _including non-object primitives_.
     /// The following TypeScript example is thus perfectly valid:
     ///
