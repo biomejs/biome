@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
-use biome_console::{markup, Display};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -294,7 +294,7 @@ impl BannedType {
     }
 
     /// Retrieve a diagnostic message from a [BannedType].
-    fn message(&self) -> impl biome_console::Display {
+    fn message(&self) -> impl biome_console::fmt::Display {
         match *self {
             Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
                 let primitiveStr = self.as_js_syntax_kind().map(|syntax| syntax.to_string())
