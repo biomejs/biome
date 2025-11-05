@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 95.18
+**Average compatibility**: 94.65
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 96.48
+**Compatible lines**: 95.67
 
 <details>
     <summary>Definition</summary>
@@ -874,8 +874,36 @@
 
 
 ### js/binary-expressions/mutiple-comments/17192.js
+```diff
+-ErrorLike =
+-  SerializedProps &
+-  // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// FIXME
++// TODO: reformat issue
++// ErrorLike =
++//   SerializedProps &
++//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
+ 
+-ErrorLike =
+-  SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// ErrorLike =
++//   SerializedProps & // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 7.14%
 
 
 ### js/binary-expressions/parentheses/bitwise.js
@@ -957,6 +985,181 @@
 ### js/break-calls/reduce.js
 
 **Prettier Similarity**: 100.00%
+
+
+### js/call/boolean/boolean.js
+```diff
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-)?.toString();
+-a = new Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = !(
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-);
+-a = !!(
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-);
++// FIXME
++// TODO: reformat issue
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// )?.toString();
++// a = new Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
++// a = !(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// );
++// a = !!(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// );
+ 
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
+-a = new Foo(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-  anotherArgument,
+-);
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
++// a = new Foo(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++//   anotherArgument,
++// );
+ 
+-// Different operators
+-a = Boolean(
+-  a_long_long_long_long_condition &&
+-    a_long_long_long_long_condition &&
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ??
+-    a_long_long_long_long_condition ??
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition +
+-    a_long_long_long_long_condition +
+-    a_long_long_long_long_condition,
+-);
++// // Different operators
++// a = Boolean(
++//   a_long_long_long_long_condition && a_long_long_long_long_condition && a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition ?? a_long_long_long_long_condition ?? a_long_long_long_long_condition,
++// );
++// a = Boolean(
++//   a_long_long_long_long_condition + a_long_long_long_long_condition + a_long_long_long_long_condition,
++// );
+ 
+-// Not argument
+-a = (
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition
+-)(Boolean);
+-a = new (a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition ||
+-  a_long_long_long_long_condition)(Foo);
++// // Not argument
++// a = (
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// )(Boolean);
++// a = new (
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition
++// )(Foo);
+ 
+-// Not `Boolean`
+-a = not_Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
++// // Not `Boolean`
++// a = not_Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// );
+ 
+-// Nested
+-a = Boolean(
+-  (a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition) &&
+-    (a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition),
+-);
+-a = Boolean(
+-  a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition ||
+-    a_long_long_long_long_condition,
+-);
+-a = Boolean(
+-  Boolean(
+-    a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition ||
+-      a_long_long_long_long_condition,
+-  ),
+-);
++// // Nested
++// a = Boolean(
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++//   &&
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++// );
++// a = Boolean(
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++//   ||
++//   (a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition)
++// );
++// a = Boolean(Boolean(
++//   a_long_long_long_long_condition || a_long_long_long_long_condition || a_long_long_long_long_condition,
++// ));
+
+```
+
+**Prettier Similarity**: 4.85%
 
 
 ### js/call/first-argument-expansion/expression-2nd-arg.js
@@ -5180,6 +5383,37 @@
 **Prettier Similarity**: 100.00%
 
 
+### js/logical-expressions/multiple-comments/17192.js
+```diff
+-ErrorLike = SerializedProps &&
+-  // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// FIXME
++// TODO: reformat issue
++// ErrorLike =
++//   SerializedProps &&
++//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
+ 
+-ErrorLike = SerializedProps && // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause: unknown };
++// ErrorLike =
++//   SerializedProps && // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause: unknown };
+
+```
+
+**Prettier Similarity**: 7.14%
+
+
 ### js/member/conditional.js
 
 **Prettier Similarity**: 100.00%
@@ -6351,6 +6585,22 @@
 ```
 
 **Prettier Similarity**: 50.00%
+
+
+### js/sequence-expression/ignored.js
+```diff
+-const a = () => () =>
+-  // prettier-ignore
+-  (a,b);
++// FIXME
++// TODO: reformat issue
++// const a = ()=>()=>
++// // prettier-ignore
++// (a,b)
+
+```
+
+**Prettier Similarity**: 0.00%
 
 
 ### js/sequence-expression/no-semi/expression.js
@@ -8421,6 +8671,115 @@
 **Prettier Similarity**: 80.43%
 
 
+### typescript/as/comments/18160.ts
+```diff
+-1 as const /*
+-comment
+-*/;
+-1 as /*
+-comment
+-*/ Foo;
+-1 satisfies /*
+-comment
+-*/ Foo;
++// FIXME
++// TODO: reformat issue
++// 1 as /*
++// comment
++// */const;
++// 1 as /*
++// comment
++// */Foo;
++// 1 satisfies /*
++// comment
++// */Foo;
+ 
+-1 as const;
+-/*
+-comment
+-*/
+-1 as /*
+-comment
+-*/ Foo;
+-1 satisfies /*
+-comment
+-*/ Foo;
++// 1 as
++// /*
++// comment
++// */const;
++// 1 as
++// /*
++// comment
++// */Foo;
++// 1 satisfies
++// /*
++// comment
++// */Foo;
+ 
+-1 as const /*
+-comment
+-*/;
+-1 /*
+-comment
+-*/ as Foo;
+-1 /*
+-comment
+-*/ satisfies Foo;
++// 1 as /*
++// comment
++// */
++// const;
++// 1 as /*
++// comment
++// */
++// Foo;
++// 1 satisfies /*
++// comment
++// */
++// Foo;
+ 
+-1 as const;
+-/*
+-comment
+-*/
+-1 /*
+-comment
+-*/ as Foo;
+-1 /*
+-comment
+-*/ satisfies Foo;
++// 1 as
++// /*
++// comment
++// */
++// const;
++// 1 as
++// /*
++// comment
++// */
++// Foo;
++// 1 satisfies
++// /*
++// comment
++// */
++// Foo;
+ 
+-1 as const; // comment
+-1 as Foo; // comment
+-1 satisfies Foo; // comment
++// 1 as // comment
++// const;
++// 1 as // comment
++// Foo;
++// 1 satisfies // comment
++// Foo;
+
+```
+
+**Prettier Similarity**: 6.67%
+
+
 ### typescript/as/export_default_as.ts
 
 **Prettier Similarity**: 100.00%
@@ -9038,6 +9397,85 @@
 ### typescript/comments/16065.ts
 
 **Prettier Similarity**: 100.00%
+
+
+### typescript/comments/16121.ts
+```diff
+-export type IntersectionType = FirstPart &
+-  // Presence of comment makes this non-idempotent
+-  {
+-    an: string;
+-    object: string;
+-    type: string;
+-  };
++// FIXME
++// TODO: reformat issue
++// export type IntersectionType =
++//   & FirstPart
++//   // Presence of comment makes this non-idempotent
++//   & {
++//     an: string,
++//     object: string,
++//     type: string,
++//   }
+ 
+-export type IntersectionType = FirstPart &
+-  // Comment Line 1
+-  // Comment Line 2
+-  {
+-    an: string;
+-    object: string;
+-    type: string;
+-  };
++// export type IntersectionType =
++//   & FirstPart
++//   // Comment Line 1
++//   // Comment Line 2
++//   & {
++//     an: string,
++//     object: string,
++//     type: string,
++//   }
+ 
+-export type IntersectionType =
+-  | FirstPart
+-  // Presence of comment is not a problem
+-  | {
+-      an: string;
+-      object: string;
+-      type: string;
+-    };
++// export type IntersectionType =
++//   | FirstPart
++//   // Presence of comment is not a problem
++//   | {
++//       an: string;
++//       object: string;
++//       type: string;
++//     };
+ 
+-export type IntersectionType =
+-  | FirstPart
+-  // Comment Line 1
+-  // Comment Line 2
+-  | {
+-      an: string;
+-      object: string;
+-      type: string;
+-    };
++// export type IntersectionType =
++//   | FirstPart
++//   // Comment Line 1
++//   // Comment Line 2
++//   | {
++//       an: string;
++//       object: string;
++//       type: string;
++//     };
+
+```
+
+**Prettier Similarity**: 7.69%
 
 
 ### typescript/comments/16207.ts
@@ -11075,6 +11513,18 @@
 **Prettier Similarity**: 100.00%
 
 
+### typescript/instantiation-expression/17714.ts
+```diff
+-void <_T extends never>() => {}<never>;
++// FIXME
++// TODO: reformat issue
++// void (<_T extends never>() => {})<never>;
+
+```
+
+**Prettier Similarity**: 0.00%
+
+
 ### typescript/instantiation-expression/basic.ts
 
 **Prettier Similarity**: 100.00%
@@ -11501,6 +11951,37 @@
 ```
 
 **Prettier Similarity**: 86.17%
+
+
+### typescript/intersection/mutiple-comments/17192.ts
+```diff
+-export type ErrorLike = SerializedProps<Error> &
+-  // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause?: unknown };
++// FIXME
++// TODO: reformat issue
++// export type ErrorLike =
++//   SerializedProps<Error> &
++//   // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause?: unknown };
+ 
+-export type ErrorLike2 = SerializedProps<Error> & // cause is a new addition to Error that is not yet available in all runtimes. We have added
+-  // it to try and pinpoint additional reasoning for failures such as Node's fetch.
+-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+-  { cause?: unknown };
++// export type ErrorLike2 =
++//   SerializedProps<Error> & // cause is a new addition to Error that is not yet available in all runtimes. We have added
++//   // it to try and pinpoint additional reasoning for failures such as Node's fetch.
++//   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
++//   { cause?: unknown };
+
+```
+
+**Prettier Similarity**: 7.14%
 
 
 ### typescript/intersection/type-arguments.ts
