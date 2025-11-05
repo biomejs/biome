@@ -85,8 +85,8 @@ mod tests {
         const TOMBSTONE: Self = Self::Kind0;
         const EOF: Self = Self::Kind383;
 
-        fn to_raw(&self) -> biome_rowan::RawSyntaxKind {
-            biome_rowan::RawSyntaxKind(*self as u16)
+        fn to_raw(&self) -> RawSyntaxKind {
+            RawSyntaxKind(*self as u16)
         }
 
         #[expect(unsafe_code)]
@@ -192,7 +192,9 @@ mod tests {
         assert!(!set.contains(TestKind::Kind0));
         assert!(!set.contains(TestKind::Kind127));
 
-        let set = token_set![TestKind::Kind0, TestKind::Kind128, TestKind::Kind383,];
+        let set = TokenSet::singleton(TestKind::Kind0)
+            .union(TokenSet::singleton(TestKind::Kind128))
+            .union(TokenSet::singleton(TestKind::Kind383));
 
         assert!(set.contains(TestKind::Kind0));
         assert!(set.contains(TestKind::Kind128));
@@ -202,14 +204,12 @@ mod tests {
         assert!(!set.contains(TestKind::Kind255));
         assert!(!set.contains(TestKind::Kind256));
 
-        let set = token_set![
-            TestKind::Kind0,
-            TestKind::Kind127,
-            TestKind::Kind128,
-            TestKind::Kind255,
-            TestKind::Kind256,
-            TestKind::Kind383,
-        ];
+        let set = TokenSet::singleton(TestKind::Kind0)
+            .union(TokenSet::singleton(TestKind::Kind127))
+            .union(TokenSet::singleton(TestKind::Kind128))
+            .union(TokenSet::singleton(TestKind::Kind255))
+            .union(TokenSet::singleton(TestKind::Kind256))
+            .union(TokenSet::singleton(TestKind::Kind383));
 
         assert!(set.contains(TestKind::Kind0));
         assert!(set.contains(TestKind::Kind127));
@@ -217,19 +217,5 @@ mod tests {
         assert!(set.contains(TestKind::Kind255));
         assert!(set.contains(TestKind::Kind256));
         assert!(set.contains(TestKind::Kind383));
-    }
-
-    #[test]
-    fn test_union() {
-        let set1 = token_set![TestKind::Kind0];
-        let set2 = token_set![TestKind::Kind128];
-        let set3 = token_set![TestKind::Kind383];
-
-        let union = set1.union(set2);
-        let union = union.union(set3);
-
-        assert!(union.contains(TestKind::Kind0));
-        assert!(union.contains(TestKind::Kind128));
-        assert!(union.contains(TestKind::Kind383));
     }
 }
