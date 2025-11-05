@@ -24,8 +24,8 @@ declare_lint_rule! {
     ///
     /// The rule supports the following exceptions:
     ///
-    /// - The name of the file can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
-    ///   For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    /// - The name of the file can start with a dot, a plus sign, or a dollar sign, be prefixed and suffixed by underscores `_`.
+    ///   For example, `.filename.js`, `+filename.js`, `$filename.js`, `__filename__.js`, or even `.__filename__.js`.
     ///
     ///   The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
     ///
@@ -217,7 +217,9 @@ impl Rule for UseFilenamingConvention {
             //
             // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
             // [Vike](https://vike.dev/route) routing conventions where page name starts with `+`.
-            let file_name = if matches!(first_char, b'.' | b'+') {
+            //
+            // Support filenames starting with `$`.
+            let file_name = if matches!(first_char, b'.' | b'+' | b'$') {
                 &file_name[1..]
             } else {
                 file_name
@@ -305,6 +307,8 @@ impl Rule for UseFilenamingConvention {
                     // The filename starts with a dot
                     split.next()?
                 } else if let Some(stripped_name) = name.strip_prefix('+') {
+                    stripped_name
+                } else if let Some(stripped_name) = name.strip_prefix('$') {
                     stripped_name
                 } else {
                     name
