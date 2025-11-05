@@ -37,7 +37,7 @@ declare_lint_rule! {
     ///
     /// TypeScript's built-in `Function` type is capable of accepting callbacks of any shape or form,
     /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly.
-    /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class, 
+    /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class,
     /// which is likewise a potential source of confusion.
     ///
     /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible. \
