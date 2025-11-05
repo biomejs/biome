@@ -123,7 +123,7 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// function betterFunction(cb: (n: number) => string) {
-    ///   return n(12);
+    ///   return cb(12);
     /// }
     /// ```
     ///
