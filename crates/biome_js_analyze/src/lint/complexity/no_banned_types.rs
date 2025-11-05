@@ -316,7 +316,7 @@ impl BannedType {
             }
             Self::Object | Self::EmptyObject => {
                 markup! {
-                    "\n`"{ self.to_string() }"` accepts _any non-nullable value_, including non-object primitives like `123` and `true`."
+                    "`"{ self.to_string() }"` accepts _any non-nullable value_, including non-object primitives like `123` and `true`."
                     "\n- If you want a type meaning \"any arbitrary object\", use `object` instead."
                     "\n- If you want a type meaning \"any value\", use `unknown` instead."
                     "\n- If you want a type meaning \"an object without any properties\", use `{ [k: string]: never }` or `Record<string, never>` instead."
