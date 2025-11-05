@@ -322,7 +322,6 @@ impl BannedType {
                 }.to_owned()
             }
         }
-
     }
 
     /// Converts a [BannedType] to a [JsSyntaxKind]
