@@ -55,6 +55,16 @@ pub(crate) enum HtmlLexContext {
     AstroFencedCodeBlock,
 }
 
+impl HtmlLexContext {
+    pub fn single_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Single)
+    }
+
+    pub fn double_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Double)
+    }
+}
+
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TextExpressionKind {
     // {{ expr }}

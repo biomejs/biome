@@ -1,16 +1,13 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: text_expressions/expressions.vue
+info: svelte/key.svelte
 ---
 # Input
 
-```vue
-<template>
-	{{ x => {
-	return "hello"
-} }}
-
-</template>
+```svelte
+{#key expression}
+	<div></div>
+{/key}
 
 ```
 
@@ -33,10 +30,8 @@ Indent script and style: false
 Self close void elements: never
 -----
 
-```vue
-<template>
-	{{ x => {
-	return "hello"
-} }}
-</template>
+```svelte
+{#key expression}
+	<div></div>
+{/key}
 ```
