@@ -371,14 +371,11 @@ mod tests {
 
     #[test]
     fn smoke_test() {
-        let src = r#"
-foo: bar
-"#;
+        let src = r#"foo: bar"#;
         let parse = parse_yaml(src);
-        dbg!(&parse.tree());
         let options = YamlFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
 
-        assert_eq!(formatted.print().unwrap().as_code(), "");
+        assert_eq!(formatted.print().unwrap().as_code(), "foo: bar");
     }
 }
