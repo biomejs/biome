@@ -222,7 +222,7 @@ impl Rule for NoBannedTypes {
             banned_type_range,
             markup! {"Don't use '"{banned_type.to_string()}"' as a type."}.to_owned(),
         )
-        .note(markup! { {banned_type.message()} }.to_owned());
+        .note(banned_type.message())
         // TODO: Update this if/when the rule gets split up or has individual disabling options added
         .note("If that's really what you want, use an inline disable comment.")
         Some(diagnostic)
@@ -293,7 +293,7 @@ impl BannedType {
     }
 
     /// Retrieve a diagnostic message from a [BannedType].
-    fn message(&self) -> &str {
+    fn message(&self) -> impl Display {
         match *self {
             Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
                 let primitiveStr = self.as_js_syntax_kind().map(|syntax| syntax.to_string())
@@ -303,12 +303,14 @@ impl BannedType {
                     "Prefer using lowercase primitive types instead of uppercase \"boxed object\" types."
                     "\n`"{ self.to_string() }"` accepts anything that implements the corresponding interface - both primitives and \"primitive-like\" objects."
                     "\nIt is considered best practice to use `"{ primitiveStr }"` instead in nearly all circumstances."
-                }
+                }.to_owned()
             }
             Self::Function => {
-                "The `Function` type is unsafe and accepts any arbitrary function or \"function-like\" value."
-                "\nExplicitly defining the function shape helps prevent mismatching argument types and return values."
-                "\nIf a generic \"catch-all\" callback type is required, consider using a \"top type\" like `(...args: never) => unknown` instead."
+                markup! {
+                    "The `Function` type is unsafe and accepts any arbitrary function or \"function-like\" value."
+                    "\nExplicitly defining the function shape helps prevent mismatching argument types and return values."
+                    "\nIf a generic \"catch-all\" callback type is required, consider using a \"top type\" like `(...args: never) => unknown` instead."
+                }.to_owned()
             }
             Self::Object | Self::EmptyObject => {
                 markup! {
@@ -316,7 +318,7 @@ impl BannedType {
                     "\n- If you want a type meaning \"any arbitrary object\", use `object` instead."
                     "\n- If you want a type meaning \"any value\", use `unknown` instead."
                     "\n- If you want a type meaning \"an object without any properties\", use `{ [k: string]: never }` or `Record<string, never>` instead."
-                }
+                }.to_owned()
             }
         }
     }
