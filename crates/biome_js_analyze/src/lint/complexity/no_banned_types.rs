@@ -23,31 +23,31 @@ declare_lint_rule! {
     ///
     /// ### Disallow "boxed object" types like `Boolean` and `Number`
     ///
-    /// JavaScript's 8 data types are described in TypeScript by the lowercase types 
+    /// JavaScript's 8 data types are described in TypeScript by the lowercase types
     /// `undefined`, `null`, `boolean`, `number`, `string`, `bigint` `symbol`, and `object`.
     ///
     /// The latter 6 also have uppercase variants, which instead represent _interfaces_ with the shared properties of their primitive counterparts.
-    /// Due to the nature of structural typing, these uppercase types accept both primitive values and non-primitive "boxed object"s 
+    /// Due to the nature of structural typing, these uppercase types accept both primitive values and non-primitive "boxed object"s
     /// like `new Boolean(true)`, despite the two behaving differently in many circumstances like equality and truthiness.
-    /// 
+    ///
     /// It is thus considered best practice to avoid these "boxed types" in favor of their lowercase
     /// primitive counterparts.
     ///
     /// ### Disallow the unsafe `Function` type
     ///
-    /// TypeScript's built-in `Function` type is capable of accepting a callback of any shape or form, 
+    /// TypeScript's built-in `Function` type is capable of accepting a callback of any shape or form,
     /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly.
     /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class.
     ///
     /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible.
     /// When a generic "catch-all" callback type is required, one of the following can be used instead:
     /// - `() => void`: A function that accepts no parameters and whose return value is ignored
-    /// - `(...args: never) => unknown`: A "top type" for functions that can be assigned any function type, 
+    /// - `(...args: never) => unknown`: A "top type" for functions that can be assigned any function type,
     ///    but can't be called directly
     ///
     /// ### Disallow the misleading empty object type `{}`
     /// In Typescript, the type `{}` _doesn't_ represent an empty object (as many new to the language may assume).
-    /// It actually accepts any non-nullish value, _including non-object primitives_. 
+    /// It actually accepts any non-nullish value, _including non-object primitives_.
     /// The following TypeScript example is thus perfectly valid:
     ///
     /// ```ts,expect_diagnostic
@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// Often, developers writing `{}` actually mean one of the following:
     /// - `object`: Represents any object value
     /// - `unknown`: Represents any value at all, including `null` and `undefined`
-    /// - `{ [k: string]: never }` or `Record<string, never>`: Represent object types that disallow property access 
+    /// - `{ [k: string]: never }` or `Record<string, never>`: Represent object types that disallow property access
     ///
     /// To avoid confusion, this rule forbids the use of the type `{}`, except in two situations:
     ///
@@ -126,17 +126,17 @@ declare_lint_rule! {
     ///   return n(12);
     /// }
     /// ```
-    /// 
+    ///
     /// ```ts
     /// type wrapFn<T extends (...args: never) => unknown> = { func: T }
     /// ```
     ///
     /// ```ts
-    /// const goodObj: object = {foo: 12}; 
+    /// const goodObj: object = {foo: 12};
     /// ```
     ///
     /// ```ts
-    /// type emptyObj = Record<string, never>; 
+    /// type emptyObj = Record<string, never>;
     /// ```
     ///
     /// Exceptions for `{}`:
@@ -297,13 +297,13 @@ impl BannedType {
     fn message(&self) -> impl biome_console::fmt::Display {
         match *self {
             Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
-                let primitiveStr = self.as_js_syntax_kind().map(|syntax| syntax.to_string())
+                let primitive_str = self.as_js_syntax_kind().and_then(|syntax| syntax.to_string())
                     .expect("BannedType should be coercible to its lowercase primitive as a string");
 
                 markup! {
                     "Prefer using lowercase primitive types instead of uppercase \"boxed object\" types."
                     "\n`"{ self.to_string() }"` accepts anything that implements the corresponding interface - both primitives and \"primitive-like\" objects."
-                    "\nIt is considered best practice to use `"{ primitiveStr }"` instead in nearly all circumstances."
+                    "\nIt is considered best practice to use `"{ primitive_str }"` instead in nearly all circumstances."
                 }.to_owned()
             }
             Self::Function => {
@@ -322,8 +322,9 @@ impl BannedType {
                 }.to_owned()
             }
         }
+
     }
-    
+
     /// Converts a [BannedType] to a [JsSyntaxKind]
     fn as_js_syntax_kind(&self) -> Option<JsSyntaxKind> {
         Some(match *self {
@@ -363,4 +364,3 @@ impl Display for BannedType {
         write!(f, "{representation}")
     }
 }
-
