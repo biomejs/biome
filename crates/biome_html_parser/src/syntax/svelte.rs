@@ -30,11 +30,18 @@ pub(crate) fn parse_key_block(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    parse_opening_block(p, T![key], SVELTE_KEY_OPENING_BLOCK).ok();
+    let completed = parse_opening_block(p, T![key], SVELTE_KEY_OPENING_BLOCK).ok();
 
     SvelteElementList.parse_list(p);
 
-    parse_closing_block(p, T![key], SVELTE_KEY_CLOSING_BLOCK).ok();
+    parse_closing_block(p, T![key], SVELTE_KEY_CLOSING_BLOCK).or_add_diagnostic(p, |p, range| {
+        let diagnostic = expected_svelte_closing_block(p, range);
+        if let Some(completed) = completed {
+            diagnostic.with_detail(completed.range(p), "This is where the block started.")
+        } else {
+            diagnostic
+        }
+    });
 
     Present(m.complete(p, SVELTE_KEY_BLOCK))
 }
@@ -60,8 +67,14 @@ pub(crate) fn parse_opening_block(
         return Absent;
     }
     p.bump_with_context(keyword, HtmlLexContext::Svelte);
-
-    TextExpression::new_single().parse_element(p).ok();
+    TextExpression::new_single()
+        .parse_element(p)
+        .or_add_diagnostic(p, |p, range| {
+            p.err_builder(
+                "Expected an expression, instead none was found.",
+                range.sub_start(m.start()),
+            )
+        });
 
     p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
 

@@ -94,5 +94,5 @@ pub(crate) fn closing_tag_should_not_have_attributes(
 }
 
 pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Expected an identifier.", range)
+    p.err_builder("Expected a closing block, instead found none.", range)
 }
