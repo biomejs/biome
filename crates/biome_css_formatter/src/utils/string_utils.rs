@@ -9,7 +9,7 @@ use biome_formatter::QuoteStyle;
 use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
     Format, FormatResult,
-    prelude::{dynamic_text, write},
+    prelude::{text, write},
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;
@@ -35,7 +35,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
                 f,
                 [format_replaced(
                     &self.token,
-                    &dynamic_text(&lowercase, self.token.text_trimmed_range().start()),
+                    &text(&lowercase, self.token.text_trimmed_range().start()),
                 )]
             ),
         }

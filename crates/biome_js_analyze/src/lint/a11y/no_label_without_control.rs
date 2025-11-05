@@ -162,6 +162,7 @@ fn has_label_attribute(options: &NoLabelWithoutControlOptions, attribute: &JsxAt
         && !options
             .label_attributes
             .iter()
+            .flatten()
             .any(|name| name.as_ref() == attribute_name)
     {
         return false;
@@ -232,6 +233,7 @@ fn has_nested_control(options: &NoLabelWithoutControlOptions, jsx_tag: &AnyJsxTa
                         || options
                             .input_components
                             .iter()
+                            .flatten()
                             .any(|name| name.as_ref() == element_name)
                     {
                         return true;
@@ -248,6 +250,7 @@ fn has_element_name(options: &NoLabelWithoutControlOptions, element_name: &str) 
     options
         .label_components
         .iter()
+        .flatten()
         .any(|label_component_name| label_component_name.as_ref() == element_name)
 }
 

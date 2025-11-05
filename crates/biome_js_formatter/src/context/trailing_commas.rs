@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::prelude::{if_group_breaks, text};
+use biome_formatter::prelude::if_group_breaks;
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
 use std::fmt;
@@ -43,7 +43,7 @@ impl Format<JsFormatContext> for FormatTrailingCommas {
         }
 
         if matches!(self, Self::ES5) || f.options().trailing_commas().is_all() {
-            write!(f, [if_group_breaks(&text(","))])?
+            write!(f, [if_group_breaks(&token(","))])?
         }
 
         Ok(())

@@ -145,7 +145,7 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
-	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>
 
 Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
 	 */
@@ -1661,6 +1661,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow continue statements.
+	 */
+	noContinue?: RuleConfiguration_for_NoContinueOptions;
+	/**
 	 * Restrict imports of deprecated exports.
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
@@ -1681,6 +1685,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
+	 * Disallows the usage of the unary operators ++ and --.
+	 */
+	noIncrementDecrement?: RuleConfiguration_for_NoIncrementDecrementOptions;
+	/**
 	 * Disallow string literals inside JSX elements.
 	 */
 	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
@@ -1693,6 +1701,10 @@ export interface Nursery {
 	 */
 	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
 	/**
+	 * Disallow function parameters that are only used in recursive calls.
+	 */
+	noParametersOnlyUsedInRecursion?: RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
+	/**
 	 * Replaces usages of forwardRef with passing ref as a prop.
 	 */
 	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
@@ -1700,6 +1712,10 @@ export interface Nursery {
 	 * Disallow variable declarations from shadowing variables declared in the outer scope.
 	 */
 	noShadow?: RuleConfiguration_for_NoShadowOptions;
+	/**
+	 * Disallow unknown DOM properties.
+	 */
+	noUnknownAttribute?: RuleConfiguration_for_NoUnknownAttributeOptions;
 	/**
 	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
 	 */
@@ -3042,6 +3058,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoContinueOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoContinueOptions;
 export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDeprecatedImportsOptions;
@@ -3057,6 +3076,9 @@ export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
+export type RuleConfiguration_for_NoIncrementDecrementOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoIncrementDecrementOptions;
 export type RuleConfiguration_for_NoJsxLiteralsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoJsxLiteralsOptions;
@@ -3066,12 +3088,18 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
+export type RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions;
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
 export type RuleConfiguration_for_NoShadowOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoShadowOptions;
+export type RuleConfiguration_for_NoUnknownAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnknownAttributeOptions;
 export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
@@ -5456,6 +5484,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoContinueOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoContinueOptions;
+}
 export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5510,6 +5548,16 @@ export interface RuleWithOptions_for_NoImportCyclesOptions {
 	 */
 	options: NoImportCyclesOptions;
 }
+export interface RuleWithOptions_for_NoIncrementDecrementOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoIncrementDecrementOptions;
+}
 export interface RuleWithOptions_for_NoJsxLiteralsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5544,6 +5592,20 @@ export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	 */
 	options: NoNextAsyncClientComponentOptions;
 }
+export interface RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoParametersOnlyUsedInRecursionOptions;
+}
 export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5567,6 +5629,16 @@ export interface RuleWithOptions_for_NoShadowOptions {
 	 * Rule's options
 	 */
 	options: NoShadowOptions;
+}
+export interface RuleWithOptions_for_NoUnknownAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnknownAttributeOptions;
 }
 export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
 	/**
@@ -8129,7 +8201,7 @@ export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
 	 */
-	elements: CustomRestrictedElements;
+	elements?: CustomRestrictedElements;
 }
 export interface NoSelfAssignOptions {}
 export interface NoSetterReturnOptions {}
@@ -8228,6 +8300,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptySourceOptions {
@@ -8242,6 +8315,12 @@ export interface NoImportCyclesOptions {
 	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
 	 */
 	ignoreTypes?: boolean;
+}
+export interface NoIncrementDecrementOptions {
+	/**
+	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
+	 */
+	allowForLoopAfterthoughts?: boolean;
 }
 export interface NoJsxLiteralsOptions {
 	/**
@@ -8259,8 +8338,12 @@ export interface NoJsxLiteralsOptions {
 }
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
+export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
+export interface NoUnknownAttributeOptions {
+	ignore?: string[];
+}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
@@ -8380,13 +8463,13 @@ export interface NoRestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: Record<string, string>;
+	deniedGlobals?: Record<string, string>;
 }
 export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, Paths>;
+	paths?: Record<string, Paths>;
 	/**
 	 * gitignore-style patterns that should trigger the rule.
 	 */
@@ -8415,7 +8498,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	/**
 	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
 	 */
-	allowExportNames: string[];
+	allowExportNames?: string[];
 }
 export interface UseConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -8450,7 +8533,7 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * Allowed cases for file names.
 	 */
-	filenameCases: FilenameCases;
+	filenameCases?: FilenameCases;
 	/**
 	 * Regular expression to enforce
 	 */
@@ -8458,11 +8541,11 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
@@ -8482,15 +8565,15 @@ export interface UseNamingConventionOptions {
 	/**
 	 * Custom conventions.
 	 */
-	conventions: Convention[];
+	conventions?: Convention[];
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
@@ -8502,7 +8585,7 @@ export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
 	 */
-	checkAllProperties: boolean;
+	checkAllProperties?: boolean;
 }
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
@@ -8526,7 +8609,7 @@ export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoCatchAssignOptions {}
 export interface NoClassAssignOptions {}
@@ -8536,14 +8619,14 @@ export interface NoConfusingLabelsOptions {
 	/**
 	 * A list of (non-confusing) labels that should be allowed
 	 */
-	allowedLabels: string[];
+	allowedLabels?: string[];
 }
 export interface NoConfusingVoidTypeOptions {}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoConstEnumOptions {}
 export interface NoConstantBinaryExpressionsOptions {}
@@ -8557,7 +8640,7 @@ export interface NoDoubleEqualsOptions {
 
 If `false`, no such exception will be made. 
 	 */
-	ignoreNull: boolean;
+	ignoreNull?: boolean;
 }
 export interface NoDuplicateAtImportRulesOptions {}
 export interface NoDuplicateCaseOptions {}
@@ -9023,18 +9106,22 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"

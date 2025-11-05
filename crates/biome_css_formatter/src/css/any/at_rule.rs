@@ -37,6 +37,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::TwCustomVariantAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::TwPluginAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::TwReferenceAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwSlotAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::TwSourceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::TwThemeAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::TwUtilityAtRule(node) => node.format().fmt(f),

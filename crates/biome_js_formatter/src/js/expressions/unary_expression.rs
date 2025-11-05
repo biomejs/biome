@@ -36,9 +36,9 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
             write!(
                 f,
                 [group(&format_args![
-                    text("("),
+                    token("("),
                     soft_block_indent(&argument.format()),
-                    text(")")
+                    token(")")
                 ])]
             )
         } else {

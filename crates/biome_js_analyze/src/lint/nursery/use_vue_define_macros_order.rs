@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -12,6 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, TriviaPieceKind};
 use biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions;
+use rustc_hash::FxHashMap;
 
 use crate::JsRuleAction;
 
@@ -97,7 +96,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueDefineMacrosOrder {
-        version: "next",
+        version: "2.3.0",
         name: "useVueDefineMacrosOrder",
         language: "js",
         sources: &[RuleSource::EslintVueJs("define-macros-order").same()],
@@ -120,11 +119,11 @@ impl Rule for UseVueDefineMacrosOrder {
             return None;
         }
 
-        let order = &ctx.options().order;
-        let order_map: HashMap<&str, usize> = order
-            .iter()
+        let order_map: FxHashMap<&str, usize> = ctx
+            .options()
+            .order_or_default()
             .enumerate()
-            .map(|(idx, s)| (s.as_ref(), idx))
+            .map(|(idx, s)| (s, idx))
             .collect();
 
         struct FoundMacro {
@@ -226,9 +225,15 @@ impl Rule for UseVueDefineMacrosOrder {
         if let Some(vue_macro) = found_macro
             && vue_macro.has_out_of_order_content_prior
         {
+            let name = ctx
+                .options()
+                .order_or_default()
+                .nth(vue_macro.order_index)
+                .expect("Valid index")
+                .into();
             return Some(MacroOrderIssue {
                 range: vue_macro.range,
-                name: order[vue_macro.order_index].clone(),
+                name,
                 move_from_to: vue_macro
                     .fixable_statement_index
                     .map(|index| (index, skippable_top_statements_end_index)),
@@ -239,11 +244,9 @@ impl Rule for UseVueDefineMacrosOrder {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let order = &ctx.options().order;
-
-        let pretty_order = order
-            .iter()
-            .map(|s| s.as_ref())
+        let pretty_order = ctx
+            .options()
+            .order_or_default()
             .collect::<Vec<&str>>()
             .join(", ");
 

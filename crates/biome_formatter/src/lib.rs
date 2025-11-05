@@ -161,7 +161,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// assert_eq!(LineEnding::Lf.as_str(), "\n");
     /// ```
@@ -201,7 +201,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// let cr = LineEnding::Cr;
     /// assert!(cr.is_carriage_return());
@@ -218,7 +218,7 @@ impl LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     ///
     /// assert!(LineEnding::Auto.is_auto());
     /// assert!(!LineEnding::Lf.is_auto());
@@ -245,8 +245,8 @@ impl FromStr for LineEnding {
     /// # Examples
     ///
     /// ```
-    /// let e: LineEnding = "auto".parse().unwrap();
-    /// assert_eq!(e, LineEnding::Auto);
+    /// let e: biome_formatter::LineEnding = "auto".parse().unwrap();
+    /// assert_eq!(e, biome_formatter::LineEnding::Auto);
     /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -266,7 +266,7 @@ impl std::fmt::Display for LineEnding {
     /// # Examples
     ///
     /// ```
-    /// use crate::LineEnding;
+    /// use biome_formatter::LineEnding;
     /// assert_eq!(format!("{}", LineEnding::Lf), "LF");
     /// assert_eq!(format!("{}", LineEnding::Crlf), "CRLF");
     /// assert_eq!(format!("{}", LineEnding::Cr), "CR");
@@ -1147,7 +1147,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
 ///         write!(f, [
 ///             hard_line_break(),
-///             dynamic_text(&self.0, TextSize::from(0)),
+///             text(&self.0, TextSize::from(0)),
 ///             hard_line_break(),
 ///         ])
 ///     }
@@ -1396,7 +1396,7 @@ where
 /// let mut state = FormatState::new(SimpleFormatContext::default());
 /// let mut buffer = VecBuffer::new(&mut state);
 ///
-/// write!(&mut buffer, [format_args!(text("Hello World"))])?;
+/// write!(&mut buffer, [format_args!(token("Hello World"))])?;
 ///
 /// let formatted = Formatted::new(Document::from(buffer.into_vec()), SimpleFormatContext::default());
 ///
@@ -1415,7 +1415,7 @@ where
 /// let mut state = FormatState::new(SimpleFormatContext::default());
 /// let mut buffer = VecBuffer::new(&mut state);
 ///
-/// write!(&mut buffer, [text("Hello World")])?;
+/// write!(&mut buffer, [token("Hello World")])?;
 ///
 /// let formatted = Formatted::new(Document::from(buffer.into_vec()), SimpleFormatContext::default());
 ///
@@ -1447,7 +1447,7 @@ pub fn write<Context>(
 /// use biome_formatter::{format, format_args};
 ///
 /// # fn main() -> FormatResult<()> {
-/// let formatted = format!(SimpleFormatContext::default(), [&format_args!(text("test"))])?;
+/// let formatted = format!(SimpleFormatContext::default(), [&format_args!(token("test"))])?;
 /// assert_eq!("test", formatted.print()?.as_code());
 /// # Ok(())
 /// # }
@@ -1460,7 +1460,7 @@ pub fn write<Context>(
 /// use biome_formatter::{format};
 ///
 /// # fn main() -> FormatResult<()> {
-/// let formatted = format!(SimpleFormatContext::default(), [text("test")])?;
+/// let formatted = format!(SimpleFormatContext::default(), [token("test")])?;
 /// assert_eq!("test", formatted.print()?.as_code());
 /// # Ok(())
 /// # }

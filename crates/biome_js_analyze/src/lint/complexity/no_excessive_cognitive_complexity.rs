@@ -82,7 +82,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let calculated_score = ctx.query().score.calculated_score;
-        (calculated_score > ctx.options().max_allowed_complexity.get()).then_some(())
+        (calculated_score > ctx.options().max_allowed_complexity().get()).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -91,9 +91,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
             score: ComplexityScore { calculated_score },
         } = ctx.query();
 
-        let NoExcessiveCognitiveComplexityOptions {
-            max_allowed_complexity,
-        } = ctx.options();
+        let max_allowed_complexity = ctx.options().max_allowed_complexity();
 
         let range = function_like
             .name_range()

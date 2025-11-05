@@ -41,6 +41,7 @@ HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
 AstroBogusFrontmatter = SyntaxElement*
 HtmlBogusTextExpression = SyntaxElement*
+SvelteBogusBlock = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
@@ -82,6 +83,7 @@ AnyHtmlContent =
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| AnySvelteBlock
 	| HtmlBogusTextExpression
 
 
@@ -159,6 +161,7 @@ HtmlAttributeList = AnyHtmlAttribute*
 AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
+	| HtmlSingleTextExpression
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -180,6 +183,25 @@ AnyHtmlAttributeInitializer =
 	| HtmlSingleTextExpression
 
 
+
+// ==================================
+// Svelte
+// ==================================
+
+AnySvelteBlock =
+	SvelteDebugBlock
+	| SvelteBogusBlock
+
+// {@debug}
+SvelteDebugBlock =
+	'{@'
+	'debug'
+	bindings: SvelteBindingList
+	'}'
+
+SvelteBindingList = (SvelteName (',' SvelteName)*)
+
+SvelteName = 'svelte_ident'
 
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'

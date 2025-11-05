@@ -144,7 +144,7 @@ interpolation.html:1:52 parse ━━━━━━━━━━━━━━━━�
        │ 	^^
     11 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 interpolation.html:10:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -154,6 +154,6 @@ interpolation.html:10:36 parse ━━━━━━━━━━━━━━━━�
        │ 	                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ 
   
-  i Remove it or enable the parsing using the html.parser.textExpression option.
+  i Remove it or enable the parsing using the html.parser.interpolation option.
   
 ```

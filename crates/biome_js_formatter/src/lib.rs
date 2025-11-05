@@ -373,13 +373,13 @@ where
         let needs_parentheses = self.needs_parentheses(node);
 
         if needs_parentheses {
-            write!(f, [text("(")])?;
+            write!(f, [token("(")])?;
         }
 
         self.fmt_fields(node, f)?;
 
         if needs_parentheses {
-            write!(f, [text(")")])?;
+            write!(f, [token(")")])?;
         }
 
         Ok(())

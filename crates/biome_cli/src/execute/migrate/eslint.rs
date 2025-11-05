@@ -134,7 +134,7 @@ fn load_flat_config_data(
                 | biome_diagnostics::Severity::Warning
         )
     }) {
-        let diagnostic = diagnostic.with_file_path(path_str.to_string());
+        let diagnostic = diagnostic.with_file_path(path_str.clone());
         console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
     }
     if let Some(result) = deserialized {
@@ -216,7 +216,7 @@ fn load_legacy_config_data(
                 | biome_diagnostics::Severity::Warning
         )
     }) {
-        let diagnostic = diagnostic.with_file_path(path_str.to_string());
+        let diagnostic = diagnostic.with_file_path(path_str.clone());
         console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
     }
     if let Some(mut result) = deserialized {

@@ -7130,6 +7130,7 @@ impl TwPluginAtRule {
         TwPluginAtRuleFields {
             plugin_token: self.plugin_token(),
             name: self.name(),
+            block: self.block(),
             semicolon_token: self.semicolon_token(),
         }
     }
@@ -7139,8 +7140,11 @@ impl TwPluginAtRule {
     pub fn name(&self) -> SyntaxResult<CssString> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn block(&self) -> Option<AnyCssDeclarationBlock> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwPluginAtRule {
@@ -7155,7 +7159,8 @@ impl Serialize for TwPluginAtRule {
 pub struct TwPluginAtRuleFields {
     pub plugin_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssString>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub block: Option<AnyCssDeclarationBlock>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwReferenceAtRule {
@@ -7203,6 +7208,46 @@ pub struct TwReferenceAtRuleFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwSlotAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwSlotAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwSlotAtRuleFields {
+        TwSlotAtRuleFields {
+            slot_token: self.slot_token(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn slot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for TwSlotAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwSlotAtRuleFields {
+    pub slot_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwSourceAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7219,18 +7264,22 @@ impl TwSourceAtRule {
     pub fn as_fields(&self) -> TwSourceAtRuleFields {
         TwSourceAtRuleFields {
             source_token: self.source_token(),
-            path: self.path(),
+            not_token: self.not_token(),
+            source: self.source(),
             semicolon_token: self.semicolon_token(),
         }
     }
     pub fn source_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn path(&self) -> SyntaxResult<CssString> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn not_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn source(&self) -> SyntaxResult<AnyTwSource> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwSourceAtRule {
@@ -7244,8 +7293,59 @@ impl Serialize for TwSourceAtRule {
 #[derive(Serialize)]
 pub struct TwSourceAtRuleFields {
     pub source_token: SyntaxResult<SyntaxToken>,
-    pub path: SyntaxResult<CssString>,
+    pub not_token: Option<SyntaxToken>,
+    pub source: SyntaxResult<AnyTwSource>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwSourceInline {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwSourceInline {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwSourceInlineFields {
+        TwSourceInlineFields {
+            inline_token: self.inline_token(),
+            l_paren_token: self.l_paren_token(),
+            content: self.content(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn inline_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn content(&self) -> SyntaxResult<CssString> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for TwSourceInline {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwSourceInlineFields {
+    pub inline_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub content: SyntaxResult<CssString>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwThemeAtRule {
@@ -7361,8 +7461,8 @@ impl TwValueThemeReference {
     pub fn reference(&self) -> SyntaxResult<CssDashedIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn minus_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
     pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -7379,7 +7479,7 @@ impl Serialize for TwValueThemeReference {
 #[derive(Serialize)]
 pub struct TwValueThemeReferenceFields {
     pub reference: SyntaxResult<CssDashedIdentifier>,
-    pub minus_token: SyntaxResult<SyntaxToken>,
+    pub minus_token: Option<SyntaxToken>,
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7458,6 +7558,7 @@ pub enum AnyCssAtRule {
     TwCustomVariantAtRule(TwCustomVariantAtRule),
     TwPluginAtRule(TwPluginAtRule),
     TwReferenceAtRule(TwReferenceAtRule),
+    TwSlotAtRule(TwSlotAtRule),
     TwSourceAtRule(TwSourceAtRule),
     TwThemeAtRule(TwThemeAtRule),
     TwUtilityAtRule(TwUtilityAtRule),
@@ -7635,6 +7736,12 @@ impl AnyCssAtRule {
     pub fn as_tw_reference_at_rule(&self) -> Option<&TwReferenceAtRule> {
         match &self {
             Self::TwReferenceAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_slot_at_rule(&self) -> Option<&TwSlotAtRule> {
+        match &self {
+            Self::TwSlotAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -9722,6 +9829,25 @@ impl AnyTwCustomVariantSelector {
     pub fn as_tw_custom_variant_shorthand(&self) -> Option<&TwCustomVariantShorthand> {
         match &self {
             Self::TwCustomVariantShorthand(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTwSource {
+    CssString(CssString),
+    TwSourceInline(TwSourceInline),
+}
+impl AnyTwSource {
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_source_inline(&self) -> Option<&TwSourceInline> {
+        match &self {
+            Self::TwSourceInline(item) => Some(item),
             _ => None,
         }
     }
@@ -18352,9 +18478,10 @@ impl std::fmt::Debug for TwPluginAtRule {
                     &support::DebugSyntaxResult(self.plugin_token()),
                 )
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugOptionalElement(self.block()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -18429,6 +18556,57 @@ impl From<TwReferenceAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwSlotAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SLOT_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_SLOT_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwSlotAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwSlotAtRule")
+                .field("slot_token", &support::DebugSyntaxResult(self.slot_token()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwSlotAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwSlotAtRule> for SyntaxNode {
+    fn from(n: TwSlotAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<TwSlotAtRule> for SyntaxElement {
+    fn from(n: TwSlotAtRule) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwSourceAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18461,7 +18639,11 @@ impl std::fmt::Debug for TwSourceAtRule {
                     "source_token",
                     &support::DebugSyntaxResult(self.source_token()),
                 )
-                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field(
+                    "not_token",
+                    &support::DebugOptionalElement(self.not_token()),
+                )
+                .field("source", &support::DebugSyntaxResult(self.source()))
                 .field(
                     "semicolon_token",
                     &support::DebugSyntaxResult(self.semicolon_token()),
@@ -18481,6 +18663,65 @@ impl From<TwSourceAtRule> for SyntaxNode {
 }
 impl From<TwSourceAtRule> for SyntaxElement {
     fn from(n: TwSourceAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwSourceInline {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SOURCE_INLINE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_SOURCE_INLINE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwSourceInline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwSourceInline")
+                .field(
+                    "inline_token",
+                    &support::DebugSyntaxResult(self.inline_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("content", &support::DebugSyntaxResult(self.content()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwSourceInline").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwSourceInline> for SyntaxNode {
+    fn from(n: TwSourceInline) -> Self {
+        n.syntax
+    }
+}
+impl From<TwSourceInline> for SyntaxElement {
+    fn from(n: TwSourceInline) -> Self {
         n.syntax.into()
     }
 }
@@ -18619,7 +18860,7 @@ impl std::fmt::Debug for TwValueThemeReference {
                 .field("reference", &support::DebugSyntaxResult(self.reference()))
                 .field(
                     "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
+                    &support::DebugOptionalElement(self.minus_token()),
                 )
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()
@@ -18837,6 +19078,11 @@ impl From<TwReferenceAtRule> for AnyCssAtRule {
         Self::TwReferenceAtRule(node)
     }
 }
+impl From<TwSlotAtRule> for AnyCssAtRule {
+    fn from(node: TwSlotAtRule) -> Self {
+        Self::TwSlotAtRule(node)
+    }
+}
 impl From<TwSourceAtRule> for AnyCssAtRule {
     fn from(node: TwSourceAtRule) -> Self {
         Self::TwSourceAtRule(node)
@@ -18888,6 +19134,7 @@ impl AstNode for AnyCssAtRule {
         .union(TwCustomVariantAtRule::KIND_SET)
         .union(TwPluginAtRule::KIND_SET)
         .union(TwReferenceAtRule::KIND_SET)
+        .union(TwSlotAtRule::KIND_SET)
         .union(TwSourceAtRule::KIND_SET)
         .union(TwThemeAtRule::KIND_SET)
         .union(TwUtilityAtRule::KIND_SET)
@@ -18924,6 +19171,7 @@ impl AstNode for AnyCssAtRule {
                 | TW_CUSTOM_VARIANT_AT_RULE
                 | TW_PLUGIN_AT_RULE
                 | TW_REFERENCE_AT_RULE
+                | TW_SLOT_AT_RULE
                 | TW_SOURCE_AT_RULE
                 | TW_THEME_AT_RULE
                 | TW_UTILITY_AT_RULE
@@ -18979,6 +19227,7 @@ impl AstNode for AnyCssAtRule {
             }
             TW_PLUGIN_AT_RULE => Self::TwPluginAtRule(TwPluginAtRule { syntax }),
             TW_REFERENCE_AT_RULE => Self::TwReferenceAtRule(TwReferenceAtRule { syntax }),
+            TW_SLOT_AT_RULE => Self::TwSlotAtRule(TwSlotAtRule { syntax }),
             TW_SOURCE_AT_RULE => Self::TwSourceAtRule(TwSourceAtRule { syntax }),
             TW_THEME_AT_RULE => Self::TwThemeAtRule(TwThemeAtRule { syntax }),
             TW_UTILITY_AT_RULE => Self::TwUtilityAtRule(TwUtilityAtRule { syntax }),
@@ -19018,6 +19267,7 @@ impl AstNode for AnyCssAtRule {
             Self::TwCustomVariantAtRule(it) => &it.syntax,
             Self::TwPluginAtRule(it) => &it.syntax,
             Self::TwReferenceAtRule(it) => &it.syntax,
+            Self::TwSlotAtRule(it) => &it.syntax,
             Self::TwSourceAtRule(it) => &it.syntax,
             Self::TwThemeAtRule(it) => &it.syntax,
             Self::TwUtilityAtRule(it) => &it.syntax,
@@ -19055,6 +19305,7 @@ impl AstNode for AnyCssAtRule {
             Self::TwCustomVariantAtRule(it) => it.syntax,
             Self::TwPluginAtRule(it) => it.syntax,
             Self::TwReferenceAtRule(it) => it.syntax,
+            Self::TwSlotAtRule(it) => it.syntax,
             Self::TwSourceAtRule(it) => it.syntax,
             Self::TwThemeAtRule(it) => it.syntax,
             Self::TwUtilityAtRule(it) => it.syntax,
@@ -19094,6 +19345,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::TwCustomVariantAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwPluginAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwReferenceAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwSlotAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwSourceAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwThemeAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwUtilityAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -19133,6 +19385,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::TwCustomVariantAtRule(it) => it.into(),
             AnyCssAtRule::TwPluginAtRule(it) => it.into(),
             AnyCssAtRule::TwReferenceAtRule(it) => it.into(),
+            AnyCssAtRule::TwSlotAtRule(it) => it.into(),
             AnyCssAtRule::TwSourceAtRule(it) => it.into(),
             AnyCssAtRule::TwThemeAtRule(it) => it.into(),
             AnyCssAtRule::TwUtilityAtRule(it) => it.into(),
@@ -25142,6 +25395,65 @@ impl From<AnyTwCustomVariantSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssString> for AnyTwSource {
+    fn from(node: CssString) -> Self {
+        Self::CssString(node)
+    }
+}
+impl From<TwSourceInline> for AnyTwSource {
+    fn from(node: TwSourceInline) -> Self {
+        Self::TwSourceInline(node)
+    }
+}
+impl AstNode for AnyTwSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET.union(TwSourceInline::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_STRING | TW_SOURCE_INLINE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_STRING => Self::CssString(CssString { syntax }),
+            TW_SOURCE_INLINE => Self::TwSourceInline(TwSourceInline { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssString(it) => &it.syntax,
+            Self::TwSourceInline(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssString(it) => it.syntax,
+            Self::TwSourceInline(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyTwSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwSourceInline(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTwSource> for SyntaxNode {
+    fn from(n: AnyTwSource) -> Self {
+        match n {
+            AnyTwSource::CssString(it) => it.into(),
+            AnyTwSource::TwSourceInline(it) => it.into(),
+        }
+    }
+}
+impl From<AnyTwSource> for SyntaxElement {
+    fn from(n: AnyTwSource) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyTwUtilityName {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -25600,6 +25912,11 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
     }
 }
 impl std::fmt::Display for AnyTwCustomVariantSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTwSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -26449,7 +26766,17 @@ impl std::fmt::Display for TwReferenceAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for TwSlotAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for TwSourceAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwSourceInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

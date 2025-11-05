@@ -771,7 +771,7 @@ impl Rule for UseNamingConvention {
             // This notably avoids a conflict with the `noUnusedVariables` lint rule.
             return None;
         }
-        if options.require_ascii && !name.is_ascii() {
+        if options.require_ascii() && !name.is_ascii() {
             return Some(State {
                 convention_selector: Selector::default(),
                 name_range: Range {
@@ -786,6 +786,7 @@ impl Rule for UseNamingConvention {
         for convention in options
             .conventions
             .iter()
+            .flatten()
             .filter(|convention| node_selector.contains(convention.selector))
         {
             if let Some(matching) = &convention.matching {
@@ -814,7 +815,7 @@ impl Rule for UseNamingConvention {
                 }
             }
             if !convention.formats.is_empty() {
-                let actual_case = Case::identify(name, options.strict_case);
+                let actual_case = Case::identify(name, options.strict_case());
                 if (*convention.formats | Case::Uni).contains(actual_case) {
                     // Valid case
                     return None;
@@ -836,7 +837,7 @@ impl Rule for UseNamingConvention {
             name_range_start += prefix_len;
             name = trimmed_name;
         }
-        let actual_case = Case::identify(name, options.strict_case);
+        let actual_case = Case::identify(name, options.strict_case());
         if (*default_convention.formats | Case::Uni).contains(actual_case) || name.is_empty() {
             // Valid case
             return None;
@@ -891,7 +892,7 @@ impl Rule for UseNamingConvention {
             }
             Suggestion::Formats(expected_cases) => {
                 let name_token_range = TextRange::at(name_token_range.start() + TextSize::from(name_range.start as u32), TextSize::from(name_range.len() as u32));
-                if options.strict_case && (expected_cases.contains(Case::Camel) || expected_cases.contains(Case::Pascal)) {
+                if options.strict_case() && (expected_cases.contains(Case::Camel) || expected_cases.contains(Case::Pascal)) {
                     let trimmed_name = &name[(name_range.start as _)..(name_range.end as _)];
                     let actual_case = Case::identify(trimmed_name, false);
                     if matches!(actual_case, Case::Camel | Case::Pascal)

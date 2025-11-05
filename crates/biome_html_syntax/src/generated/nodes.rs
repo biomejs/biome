@@ -849,6 +849,91 @@ impl Serialize for HtmlTextExpression {
 pub struct HtmlTextExpressionFields {
     pub html_literal_token: SyntaxResult<SyntaxToken>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteDebugBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteDebugBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteDebugBlockFields {
+        SvelteDebugBlockFields {
+            sv_curly_at_token: self.sv_curly_at_token(),
+            debug_token: self.debug_token(),
+            bindings: self.bindings(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn sv_curly_at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn debug_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn bindings(&self) -> SvelteBindingList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for SvelteDebugBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteDebugBlockFields {
+    pub sv_curly_at_token: SyntaxResult<SyntaxToken>,
+    pub debug_token: SyntaxResult<SyntaxToken>,
+    pub bindings: SvelteBindingList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteNameFields {
+        SvelteNameFields {
+            svelte_ident_token: self.svelte_ident_token(),
+        }
+    }
+    pub fn svelte_ident_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for SvelteName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteNameFields {
+    pub svelte_ident_token: SyntaxResult<SyntaxToken>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroFrontmatterElement {
     AstroBogusFrontmatter(AstroBogusFrontmatter),
@@ -873,6 +958,7 @@ pub enum AnyHtmlAttribute {
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
+    HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlAttribute {
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
@@ -890,6 +976,12 @@ impl AnyHtmlAttribute {
     pub fn as_html_double_text_expression(&self) -> Option<&HtmlDoubleTextExpression> {
         match &self {
             Self::HtmlDoubleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
+        match &self {
+            Self::HtmlSingleTextExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -981,11 +1073,18 @@ impl AnyHtmlElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlTextExpression {
+    AnySvelteBlock(AnySvelteBlock),
     HtmlBogusTextExpression(HtmlBogusTextExpression),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
     HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlTextExpression {
+    pub fn as_any_svelte_block(&self) -> Option<&AnySvelteBlock> {
+        match &self {
+            Self::AnySvelteBlock(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_bogus_text_expression(&self) -> Option<&HtmlBogusTextExpression> {
         match &self {
             Self::HtmlBogusTextExpression(item) => Some(item),
@@ -1001,6 +1100,25 @@ impl AnyHtmlTextExpression {
     pub fn as_html_single_text_expression(&self) -> Option<&HtmlSingleTextExpression> {
         match &self {
             Self::HtmlSingleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteBlock {
+    SvelteBogusBlock(SvelteBogusBlock),
+    SvelteDebugBlock(SvelteDebugBlock),
+}
+impl AnySvelteBlock {
+    pub fn as_svelte_bogus_block(&self) -> Option<&SvelteBogusBlock> {
+        match &self {
+            Self::SvelteBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_debug_block(&self) -> Option<&SvelteDebugBlock> {
+        match &self {
+            Self::SvelteDebugBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -2042,6 +2160,115 @@ impl From<HtmlTextExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteDebugBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_DEBUG_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_DEBUG_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteDebugBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteDebugBlock")
+                .field(
+                    "sv_curly_at_token",
+                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
+                )
+                .field(
+                    "debug_token",
+                    &support::DebugSyntaxResult(self.debug_token()),
+                )
+                .field("bindings", &self.bindings())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteDebugBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteDebugBlock> for SyntaxNode {
+    fn from(n: SvelteDebugBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteDebugBlock> for SyntaxElement {
+    fn from(n: SvelteDebugBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteName")
+                .field(
+                    "svelte_ident_token",
+                    &support::DebugSyntaxResult(self.svelte_ident_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteName> for SyntaxNode {
+    fn from(n: SvelteName) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteName> for SyntaxElement {
+    fn from(n: SvelteName) -> Self {
+        n.syntax.into()
+    }
+}
 impl From<AstroBogusFrontmatter> for AnyAstroFrontmatterElement {
     fn from(node: AstroBogusFrontmatter) -> Self {
         Self::AstroBogusFrontmatter(node)
@@ -2121,15 +2348,24 @@ impl From<HtmlDoubleTextExpression> for AnyHtmlAttribute {
         Self::HtmlDoubleTextExpression(node)
     }
 }
+impl From<HtmlSingleTextExpression> for AnyHtmlAttribute {
+    fn from(node: HtmlSingleTextExpression) -> Self {
+        Self::HtmlSingleTextExpression(node)
+    }
+}
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = HtmlAttribute::KIND_SET
         .union(HtmlBogusAttribute::KIND_SET)
-        .union(HtmlDoubleTextExpression::KIND_SET);
+        .union(HtmlDoubleTextExpression::KIND_SET)
+        .union(HtmlSingleTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            HTML_ATTRIBUTE | HTML_BOGUS_ATTRIBUTE | HTML_DOUBLE_TEXT_EXPRESSION
+            HTML_ATTRIBUTE
+                | HTML_BOGUS_ATTRIBUTE
+                | HTML_DOUBLE_TEXT_EXPRESSION
+                | HTML_SINGLE_TEXT_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -2138,6 +2374,9 @@ impl AstNode for AnyHtmlAttribute {
             HTML_BOGUS_ATTRIBUTE => Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax }),
             HTML_DOUBLE_TEXT_EXPRESSION => {
                 Self::HtmlDoubleTextExpression(HtmlDoubleTextExpression { syntax })
+            }
+            HTML_SINGLE_TEXT_EXPRESSION => {
+                Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
             }
             _ => return None,
         };
@@ -2148,6 +2387,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => &it.syntax,
             Self::HtmlBogusAttribute(it) => &it.syntax,
             Self::HtmlDoubleTextExpression(it) => &it.syntax,
+            Self::HtmlSingleTextExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -2155,6 +2395,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => it.syntax,
             Self::HtmlBogusAttribute(it) => it.syntax,
             Self::HtmlDoubleTextExpression(it) => it.syntax,
+            Self::HtmlSingleTextExpression(it) => it.syntax,
         }
     }
 }
@@ -2164,6 +2405,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -2173,6 +2415,7 @@ impl From<AnyHtmlAttribute> for SyntaxNode {
             AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into(),
+            AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into(),
         }
     }
 }
@@ -2435,14 +2678,18 @@ impl From<HtmlSingleTextExpression> for AnyHtmlTextExpression {
 }
 impl AstNode for AnyHtmlTextExpression {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = HtmlBogusTextExpression::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnySvelteBlock::KIND_SET
+        .union(HtmlBogusTextExpression::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            HTML_BOGUS_TEXT_EXPRESSION | HTML_DOUBLE_TEXT_EXPRESSION | HTML_SINGLE_TEXT_EXPRESSION
-        )
+        match kind {
+            HTML_BOGUS_TEXT_EXPRESSION
+            | HTML_DOUBLE_TEXT_EXPRESSION
+            | HTML_SINGLE_TEXT_EXPRESSION => true,
+            k if AnySvelteBlock::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -2455,7 +2702,12 @@ impl AstNode for AnyHtmlTextExpression {
             HTML_SINGLE_TEXT_EXPRESSION => {
                 Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_svelte_block) = AnySvelteBlock::cast(syntax) {
+                    return Some(Self::AnySvelteBlock(any_svelte_block));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -2464,6 +2716,7 @@ impl AstNode for AnyHtmlTextExpression {
             Self::HtmlBogusTextExpression(it) => &it.syntax,
             Self::HtmlDoubleTextExpression(it) => &it.syntax,
             Self::HtmlSingleTextExpression(it) => &it.syntax,
+            Self::AnySvelteBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -2471,12 +2724,14 @@ impl AstNode for AnyHtmlTextExpression {
             Self::HtmlBogusTextExpression(it) => it.syntax,
             Self::HtmlDoubleTextExpression(it) => it.syntax,
             Self::HtmlSingleTextExpression(it) => it.syntax,
+            Self::AnySvelteBlock(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyHtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnySvelteBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -2486,6 +2741,7 @@ impl std::fmt::Debug for AnyHtmlTextExpression {
 impl From<AnyHtmlTextExpression> for SyntaxNode {
     fn from(n: AnyHtmlTextExpression) -> Self {
         match n {
+            AnyHtmlTextExpression::AnySvelteBlock(it) => it.into(),
             AnyHtmlTextExpression::HtmlBogusTextExpression(it) => it.into(),
             AnyHtmlTextExpression::HtmlDoubleTextExpression(it) => it.into(),
             AnyHtmlTextExpression::HtmlSingleTextExpression(it) => it.into(),
@@ -2494,6 +2750,66 @@ impl From<AnyHtmlTextExpression> for SyntaxNode {
 }
 impl From<AnyHtmlTextExpression> for SyntaxElement {
     fn from(n: AnyHtmlTextExpression) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<SvelteBogusBlock> for AnySvelteBlock {
+    fn from(node: SvelteBogusBlock) -> Self {
+        Self::SvelteBogusBlock(node)
+    }
+}
+impl From<SvelteDebugBlock> for AnySvelteBlock {
+    fn from(node: SvelteDebugBlock) -> Self {
+        Self::SvelteDebugBlock(node)
+    }
+}
+impl AstNode for AnySvelteBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SvelteBogusBlock::KIND_SET.union(SvelteDebugBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SVELTE_BOGUS_BLOCK | SVELTE_DEBUG_BLOCK)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SVELTE_BOGUS_BLOCK => Self::SvelteBogusBlock(SvelteBogusBlock { syntax }),
+            SVELTE_DEBUG_BLOCK => Self::SvelteDebugBlock(SvelteDebugBlock { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::SvelteBogusBlock(it) => &it.syntax,
+            Self::SvelteDebugBlock(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::SvelteBogusBlock(it) => it.syntax,
+            Self::SvelteDebugBlock(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteDebugBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteBlock> for SyntaxNode {
+    fn from(n: AnySvelteBlock) -> Self {
+        match n {
+            AnySvelteBlock::SvelteBogusBlock(it) => it.into(),
+            AnySvelteBlock::SvelteDebugBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnySvelteBlock> for SyntaxElement {
+    fn from(n: AnySvelteBlock) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -2524,6 +2840,11 @@ impl std::fmt::Display for AnyHtmlElement {
     }
 }
 impl std::fmt::Display for AnyHtmlTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnySvelteBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2619,6 +2940,16 @@ impl std::fmt::Display for HtmlTagName {
     }
 }
 impl std::fmt::Display for HtmlTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteDebugBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2903,7 +3234,63 @@ impl From<HtmlBogusTextExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct SvelteBogusBlock {
+    syntax: SyntaxNode,
+}
+impl SvelteBogusBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for SvelteBogusBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_BOGUS_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_BOGUS_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteBogusBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SvelteBogusBlock")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<SvelteBogusBlock> for SyntaxNode {
+    fn from(n: SvelteBogusBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteBogusBlock> for SyntaxElement {
+    fn from(n: SvelteBogusBlock) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,
@@ -3064,6 +3451,88 @@ impl IntoIterator for &HtmlElementList {
 impl IntoIterator for HtmlElementList {
     type Item = AnyHtmlElement;
     type IntoIter = AstNodeListIterator<Language, AnyHtmlElement>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct SvelteBindingList {
+    syntax_list: SyntaxList,
+}
+impl SvelteBindingList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for SvelteBindingList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_BINDING_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_BINDING_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for SvelteBindingList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for SvelteBindingList {
+    type Language = Language;
+    type Node = SvelteName;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for SvelteBindingList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("SvelteBindingList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for SvelteBindingList {
+    type Item = SyntaxResult<SvelteName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, SvelteName>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &SvelteBindingList {
+    type Item = SyntaxResult<SvelteName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, SvelteName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -18,6 +18,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@0..10 "underline" [] [Newline("\n")],
             },
@@ -36,9 +37,10 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..10
     0: TW_FULL_CANDIDATE@0..10
       0: TW_VARIANT_LIST@0..0
-      1: TW_STATIC_CANDIDATE@0..10
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@0..10
         0: TW_BASE@0..10 "underline" [] [Newline("\n")]
-      2: (empty)
+      3: (empty)
   2: EOF@10..10 "" [] []
 
 ```

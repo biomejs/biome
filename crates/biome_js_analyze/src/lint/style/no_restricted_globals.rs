@@ -97,7 +97,7 @@ impl Rule for NoRestrictedGlobals {
                 let token = token.ok()?;
                 let text = token.text_trimmed();
 
-                is_restricted(text, &binding, &options.denied_globals).map(|message| {
+                is_restricted(text, &binding, options.denied_globals.as_ref()).map(|message| {
                     (
                         token.text_trimmed_range(),
                         text.to_string().into_boxed_str(),
@@ -134,7 +134,7 @@ impl Rule for NoRestrictedGlobals {
 fn is_restricted(
     name: &str,
     binding: &Option<Binding>,
-    denied_globals: &FxHashMap<Box<str>, Box<str>>,
+    denied_globals: Option<&FxHashMap<Box<str>, Box<str>>>,
 ) -> Option<Option<String>> {
     if binding.is_some() {
         return None;
@@ -144,7 +144,7 @@ fn is_restricted(
         return Some(None);
     }
 
-    if let Some(message) = denied_globals.get(name) {
+    if let Some(message) = denied_globals.and_then(|denied_globals| denied_globals.get(name)) {
         return Some(Some(message.to_string()));
     }
 

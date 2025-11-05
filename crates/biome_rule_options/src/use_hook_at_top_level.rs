@@ -3,10 +3,11 @@ use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
     DeserializationDiagnostic, DeserializationVisitor, TextRange,
 };
+use biome_deserialize_macros::Merge;
 use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseHookAtTopLevelOptions {}

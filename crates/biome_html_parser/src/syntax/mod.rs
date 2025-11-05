@@ -1,9 +1,11 @@
 mod astro;
 mod parse_error;
+mod svelte;
 
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
+use crate::syntax::svelte::parse_svelte_at_block;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -225,6 +227,7 @@ impl ParseNodeList for ElementList {
                 |p| parse_double_text_expression(p, HtmlLexContext::Regular),
                 |p, m| disabled_interpolation(p, m.range(p)),
             ),
+            T!["{@"] => parse_svelte_at_block(p),
             T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
                 let m = p.start();
                 p.bump_remap(HTML_LITERAL);
@@ -312,6 +315,13 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             .ok();
 
         Present(m.complete(p, HTML_ATTRIBUTE))
+    } else if p.at(T!['{']) {
+        m.abandon(p);
+        HtmlSyntaxFeatures::SingleTextExpressions.parse_exclusive_syntax(
+            p,
+            |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+        )
     } else {
         parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
         if p.at(T![=]) {
@@ -324,7 +334,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!['{'])
+    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{']])
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -484,7 +494,7 @@ pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
 
-// Parsers a single tag expression. `context` is applied after lexing the last token `}`
+/// Parsers a single tag expression. `context` is applied after lexing the last token `}`
 pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
@@ -563,7 +573,7 @@ impl TextExpression {
                         HtmlLexContext::TextExpression(self.kind),
                     );
                 } else {
-                    p.bump_remap_any_with_context(HtmlLexContext::TextExpression(self.kind));
+                    p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
                 }
             }
             TextExpressionKind::Double => {

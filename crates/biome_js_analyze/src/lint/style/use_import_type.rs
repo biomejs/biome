@@ -186,7 +186,7 @@ impl Rule for UseImportType {
             return None;
         }
         let model = ctx.model();
-        let style = ctx.options().style;
+        let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
             AnyJsImportClause::JsImportCombinedClause(clause) => {

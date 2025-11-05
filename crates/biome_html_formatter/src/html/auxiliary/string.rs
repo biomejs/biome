@@ -33,9 +33,9 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
                         [format_replaced(
                             value,
                             &group(&format_args![
-                                text("\""),
+                                token("\""),
                                 located_token_text(value, range),
-                                text("\""),
+                                token("\""),
                             ])
                         )]
                     )?;

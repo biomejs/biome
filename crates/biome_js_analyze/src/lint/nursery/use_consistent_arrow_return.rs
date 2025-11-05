@@ -76,7 +76,7 @@ impl Rule for UseConsistentArrowReturn {
         let options = ctx.options();
         let body = arrow.body().ok()?;
 
-        match options.style {
+        match options.style.unwrap_or_default() {
             UseConsistentArrowReturnStyle::Always => {
                 if let AnyJsFunctionBody::AnyJsExpression(expr) = body {
                     if expr.syntax().has_comments_descendants() {
@@ -104,7 +104,7 @@ impl Rule for UseConsistentArrowReturn {
             }
             UseConsistentArrowReturnStyle::AsNeeded => match body {
                 AnyJsFunctionBody::AnyJsExpression(expr) => {
-                    if options.require_for_object_literal {
+                    if options.require_for_object_literal.unwrap_or_default() {
                         let mut expression = expr.clone();
                         if let Some(paren_expr) = expression.as_js_parenthesized_expression() {
                             expression = paren_expr.expression().ok()?;
@@ -130,7 +130,7 @@ impl Rule for UseConsistentArrowReturn {
                             && let Some(arg) = return_statement.argument()
                         {
                             if arg.as_js_object_expression().is_some()
-                                && options.require_for_object_literal
+                                && options.require_for_object_literal.unwrap_or_default()
                             {
                                 return None;
                             }
