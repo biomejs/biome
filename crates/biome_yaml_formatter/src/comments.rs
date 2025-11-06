@@ -24,36 +24,7 @@ impl FormatRule<SourceComment<YamlLanguage>> for FormatYamlLeadingComment {
         comment: &SourceComment<YamlLanguage>,
         f: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
-        if is_alignable_comment(comment.piece()) {
-            let mut source_offset = comment.piece().text_range().start();
-
-            let mut lines = comment.piece().text().lines();
-
-            // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
-            let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
-
-            source_offset += first_line.text_len();
-
-            // Indent the remaining lines by one space so that all `*` are aligned.
-            write!(
-                f,
-                [align(
-                    1,
-                    &format_once(|f| {
-                        for line in lines {
-                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
-
-                            source_offset += line.text_len();
-                        }
-
-                        Ok(())
-                    })
-                )]
-            )
-        } else {
-            write!(f, [comment.piece().as_piece()])
-        }
+        write!(f, [comment.piece().as_piece()])
     }
 }
 
