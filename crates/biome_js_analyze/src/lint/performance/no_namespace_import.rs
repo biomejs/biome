@@ -32,7 +32,11 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to specify modules that are allowed to use namespace imports.
+    /// The following options are available
+    ///
+    /// ### `allowlist`
+    ///
+    /// Allows to specify module names that are permitted to use namespace imports.
     /// This can be useful for libraries that are designed to work with namespace imports,
     /// or when you need to import many exports from a module.
     ///
