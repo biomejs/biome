@@ -1,13 +1,12 @@
 use biome_diagnostics::category;
 use biome_formatter::comments::{
     CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
-    is_alignable_comment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
 use biome_rowan::SyntaxTriviaPieceComments;
 use biome_suppression::parse_suppression_comment;
-use biome_yaml_syntax::{TextLen, YamlLanguage};
+use biome_yaml_syntax::YamlLanguage;
 
 use crate::prelude::*;
 
