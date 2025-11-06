@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlRoot;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::unique_operation_name::UniqueOperationNameOptions;
 use rustc_hash::FxHashMap;
 
@@ -57,7 +57,7 @@ declare_lint_rule! {
 }
 
 pub struct DuplicateOperationName {
-    name: Box<str>,
+    name: TokenText,
     text_range: TextRange,
 }
 
@@ -69,14 +69,15 @@ impl Rule for UniqueOperationName {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let root = ctx.query();
-        let mut operation_names: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
+        let mut operation_names: FxHashMap<TokenText, TextRange> = FxHashMap::default();
         let mut duplicates = vec![];
 
         for definition in root.definitions() {
             if let Some(operation) = definition.as_graphql_operation_definition()
                 && let Some(name_token) = operation.name()
+                && let Ok(token) = name_token.value_token()
             {
-                let name = name_token.to_trimmed_string().into_boxed_str();
+                let name = token.token_text_trimmed();
                 let text_range = operation.range();
 
                 if let Some(_existing_range) = operation_names.insert(name.clone(), text_range) {
@@ -96,9 +97,12 @@ impl Rule for UniqueOperationName {
                 rule_category!(),
                 text_range,
                 markup! {
-                    "Operation named \""{ name }"\" is already defined."
+                    "Operation named \""{ name.text() }"\" is already defined."
                 },
             )
+            .note(markup! {
+                "Rename the operation to have a unique name."
+            })
             .note(markup! {
                 "GraphQL operation names must be unique to ensure proper identification."
             }),

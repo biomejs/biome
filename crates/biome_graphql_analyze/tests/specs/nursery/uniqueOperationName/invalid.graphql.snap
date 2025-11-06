@@ -54,6 +54,8 @@ invalid.graphql:7:1 lint/nursery/uniqueOperationName ━━━━━━━━━
     12 │ 
     13 │ mutation updateUser {
   
+  i Rename the operation to have a unique name.
+  
   i GraphQL operation names must be unique to ensure proper identification.
   
 
@@ -76,6 +78,8 @@ invalid.graphql:19:1 lint/nursery/uniqueOperationName ━━━━━━━━�
     24 │ 
     25 │ mutation updateUser {
   
+  i Rename the operation to have a unique name.
+  
   i GraphQL operation names must be unique to ensure proper identification.
   
 
@@ -96,6 +100,8 @@ invalid.graphql:25:1 lint/nursery/uniqueOperationName ━━━━━━━━�
   > 29 │ }
        │ ^
     30 │ 
+  
+  i Rename the operation to have a unique name.
   
   i GraphQL operation names must be unique to ensure proper identification.
   
