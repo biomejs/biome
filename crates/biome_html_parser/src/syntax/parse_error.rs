@@ -17,7 +17,7 @@ pub(crate) fn disabled_svelte_prop(p: &HtmlParser, range: TextRange) -> ParseDia
     p.err_builder("This looks like Svelte syntax, but this is not a Svelte file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".svelte"</Emphasis>" file extension."))
 }
 
-pub(crate) fn expected_text_expression(
+pub(crate) fn expected_closing_text_expression(
     p: &HtmlParser,
     curr_range: TextRange,
     opening_range: TextRange,
@@ -30,6 +30,10 @@ pub(crate) fn expected_text_expression(
         opening_range,
         "This is where the opening expression was found:",
     )
+}
+
+pub(crate) fn expected_text_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("expression", range, p).into_diagnostic(p)
 }
 
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
