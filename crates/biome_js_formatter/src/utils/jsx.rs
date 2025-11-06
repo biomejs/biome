@@ -420,8 +420,8 @@ impl JsxWord {
 
 impl Format<JsFormatContext> for JsxWord {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        source_position(self.source_position).fmt(f)?;
         f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
             slice: self.text.clone(),
         })
     }

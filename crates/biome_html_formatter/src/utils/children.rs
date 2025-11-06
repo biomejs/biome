@@ -63,8 +63,8 @@ impl HtmlWord {
 
 impl Format<HtmlFormatContext> for HtmlWord {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        source_position(self.source_position).fmt(f)?;
         f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
             slice: self.text.clone(),
         })
     }

@@ -5,9 +5,9 @@ use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
 use crate::{TagKind, TextSize};
-use biome_rowan::TokenText;
 #[cfg(target_pointer_width = "64")]
 use biome_rowan::static_assert;
+use biome_rowan::TokenText;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -26,6 +26,11 @@ pub enum FormatElement {
     /// Forces the parent group to print in expanded mode.
     ExpandParent,
 
+    /// Indicates the position of the elements coming after this element in the source document.
+    /// The printer will create a source map entry from this position in the source document to the
+    /// formatted position.
+    SourcePosition(TextSize),
+
     /// A ASCII only Token that contains no line breaks or tab characters.
     Token {
         text: &'static str,
@@ -35,15 +40,11 @@ pub enum FormatElement {
     Text {
         /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
         text: Box<str>,
-        /// The start position of the text in the unformatted source code
-        source_position: TextSize,
     },
 
     /// A token for a text that is taken as is from the source code (input text and formatted representation are identical).
     /// Implementing by taking a slice from a `SyntaxToken` to avoid allocating a new string.
     LocatedTokenText {
-        /// The start position of the token in the unformatted source code
-        source_position: TextSize,
         /// The token text
         slice: TokenText,
     },
@@ -70,6 +71,9 @@ impl std::fmt::Debug for FormatElement {
             Self::Space | Self::HardSpace => write!(fmt, "Space"),
             Self::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
             Self::ExpandParent => write!(fmt, "ExpandParent"),
+            Self::SourcePosition(position) => {
+                fmt.debug_tuple("SourcePosition").field(position).finish()
+            }
             Self::Token { text } => fmt.debug_tuple("Token").field(text).finish(),
             Self::Text { text, .. } => fmt.debug_tuple("Text").field(text).finish(),
             Self::LocatedTokenText { slice, .. } => {
@@ -248,7 +252,8 @@ impl FormatElements for FormatElement {
             | Self::Space
             | Self::Tag(_)
             | Self::HardSpace
-            | Self::Token { .. } => false,
+            | Self::Token { .. }
+            | Self::SourcePosition(_) => false,
         }
     }
 
@@ -372,8 +377,7 @@ pub trait FormatElements {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::format_element::{LINE_TERMINATORS, normalize_newlines};
+    use crate::format_element::{normalize_newlines, LINE_TERMINATORS};
 
     #[test]
     fn test_normalize_newlines() {

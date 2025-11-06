@@ -40,7 +40,7 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
 
             // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), Some(source_offset))])?;
 
             source_offset += first_line.text_len();
 
@@ -54,7 +54,7 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
                             [
                                 hard_line_break(),
                                 token(" "),
-                                text(line.trim(), source_offset)
+                                text(line.trim(), Some(source_offset))
                             ]
                         )?;
 

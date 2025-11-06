@@ -96,15 +96,9 @@ impl<'a> Printer<'a> {
                 }
             }
 
-            FormatElement::Token { text } => self.print_text(Text::Token(text), None),
-            FormatElement::Text {
-                text,
-                source_position,
-            } => self.print_text(Text::Text(text), Some(*source_position)),
-            FormatElement::LocatedTokenText {
-                slice,
-                source_position,
-            } => self.print_text(Text::Text(slice), Some(*source_position)),
+            FormatElement::Token { text } => self.print_text(Text::Token(text)),
+            FormatElement::Text { text, .. } => self.print_text(Text::Text(text)),
+            FormatElement::LocatedTokenText { slice, .. } => self.print_text(Text::Text(slice)),
 
             FormatElement::Line(line_mode) => {
                 if args.mode().is_flat() {
@@ -143,6 +137,14 @@ impl<'a> Printer<'a> {
 
             FormatElement::ExpandParent => {
                 // Handled in `Document::propagate_expands()
+            }
+
+            FormatElement::SourcePosition(source_position) => {
+                // The printer defers printing indents until the next text
+                // is printed. Pushing the marker now would mean that the
+                // mapped range includes the indent range, which we don't want.
+                // Queue the source map position and emit it when printing the next character
+                self.state.pending_source_position = Some(*source_position);
             }
 
             FormatElement::LineSuffixBoundary => {
@@ -314,7 +316,7 @@ impl<'a> Printer<'a> {
         result
     }
 
-    fn print_text(&mut self, text: Text, source_position: Option<TextSize>) {
+    fn print_text(&mut self, text: Text) {
         if !self.state.pending_indent.is_empty() {
             let (indent_char, repeat_count) = match self.options.indent_style() {
                 IndentStyle::Tab => ('\t', 1),
@@ -354,7 +356,8 @@ impl<'a> Printer<'a> {
         // If the token has no source position (was created by the formatter)
         // both the start and end marker will use the last known position
         // in the input source (from state.source_position)
-        if let Some(source) = source_position {
+        let pending_source_position = self.state.pending_source_position.take();
+        if let Some(source) = pending_source_position {
             self.state.source_position = source;
         }
 
@@ -379,7 +382,7 @@ impl<'a> Printer<'a> {
             }
         }
 
-        if source_position.is_some() {
+        if pending_source_position.is_some() {
             let text_str = match text {
                 Text::Token(s) => s,
                 Text::Text(s) => s,
@@ -781,6 +784,8 @@ struct PrinterState<'a> {
     buffer: String,
     source_markers: Vec<SourceMarker>,
     source_position: TextSize,
+    /// The next source position that should be flushed when writing the next text.
+    pending_source_position: Option<TextSize>,
     pending_indent: Indention,
     pending_space: bool,
     measured_group_fits: bool,
@@ -1152,6 +1157,10 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 }
             }
 
+            FormatElement::SourcePosition(_) => {
+                // Source position tracking is not needed for fits checking
+            }
+
             FormatElement::BestFitting(best_fitting) => {
                 let slice = match args.mode() {
                     PrintMode::Flat => best_fitting.most_flat(),
@@ -1513,10 +1522,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1539,10 +1545,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1565,10 +1568,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1595,10 +1595,7 @@ a"#,
     fn it_breaks_a_group_if_a_string_contains_a_newline() {
         let result = format(&FormatArrayElements {
             items: vec![
-                &text(
-                    "`This is a string spanning\ntwo lines`",
-                    TextSize::default(),
-                ),
+                &text("`This is a string spanning\ntwo lines`", None),
                 &token("\"b\""),
             ],
         });
@@ -1882,10 +1879,7 @@ Group 1 breaks"#
             &format_args![group(&format_args!(
                 token("("),
                 soft_line_break(),
-                text(
-                    "This is a string\n containing a newline",
-                    TextSize::default()
-                ),
+                text("This is a string\n containing a newline", None),
                 soft_line_break(),
                 token(")")
             ))],
