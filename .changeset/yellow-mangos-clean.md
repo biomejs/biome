@@ -8,7 +8,7 @@ The rule no longer emits diagnostics for or offers to fix functions that referen
 the [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments),
 because that object is undefined for arrow functions.
 
-#### Valid:
+**Valid example:**
 
 ```ts
 // Valid: this function cannot be transformed into an arrow function because
