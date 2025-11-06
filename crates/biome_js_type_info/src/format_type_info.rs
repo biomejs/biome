@@ -2,17 +2,17 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
-    ReturnType, Type, TypeData, TypeId, TypeImportQualifier, TypeInstance,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
-    TypeofAwaitExpression, TypeofExpression, Union, NUM_PREDEFINED_TYPES,
+    MergedReference, NUM_PREDEFINED_TYPES, NamedFunctionParameter, Object, ObjectLiteral,
+    PatternFunctionParameter, ReturnType, Type, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
-use biome_formatter::{format_args, write};
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     TransformSourceMap,
 };
+use biome_formatter::{format_args, write};
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 use std::fmt::Debug;

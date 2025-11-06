@@ -1,14 +1,14 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{format_element, write, Argument, Arguments, GroupId, TextRange, TextSize};
+use crate::{Argument, Arguments, GroupId, TextRange, TextSize, format_element, write};
 use crate::{Buffer, VecBuffer};
+use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::num::NonZeroU8;
-use Tag::*;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.

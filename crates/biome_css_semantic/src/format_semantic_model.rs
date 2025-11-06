@@ -142,7 +142,7 @@ impl Format<FormatSemanticModelContext> for Specificity {
 #[cfg(test)]
 mod tests {
     use crate::semantic_model;
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{CssParserOptions, parse_css};
 
     #[ignore]
     #[test]

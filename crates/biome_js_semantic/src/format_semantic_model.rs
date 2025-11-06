@@ -1,9 +1,9 @@
 use biome_formatter::prelude::*;
-use biome_formatter::{format_args, write};
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     TransformSourceMap,
 };
+use biome_formatter::{format_args, write};
 
 use crate::{Binding, BindingId, Scope, ScopeId, SemanticModel};
 
