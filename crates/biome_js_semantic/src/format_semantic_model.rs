@@ -1,10 +1,10 @@
 use crate::{Binding, BindingId, JsDeclarationKind, Scope, ScopeId, SemanticModel};
 use biome_formatter::prelude::*;
-use biome_formatter::{format_args, write};
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
+use biome_formatter::{format_args, write};
 
 pub struct FormatSemanticModelOptions;
 
