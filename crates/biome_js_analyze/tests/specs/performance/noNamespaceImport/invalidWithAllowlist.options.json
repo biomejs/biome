@@ -6,7 +6,7 @@
 				"noNamespaceImport": {
 					"level": "error",
 					"options": {
-						"allowlist": ["zod"]
+						"allowedModules": ["zod"]
 					}
 				}
 			}

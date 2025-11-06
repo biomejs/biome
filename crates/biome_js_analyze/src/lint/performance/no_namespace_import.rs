@@ -34,7 +34,7 @@ declare_lint_rule! {
     ///
     /// The following options are available
     ///
-    /// ### `allowlist`
+    /// ### `allowedModules`
     ///
     /// Allows to specify module names that are permitted to use namespace imports.
     /// This can be useful for libraries that are designed to work with namespace imports,
@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "allowlist": ["zod", "valibot"]
+    ///         "allowedModules": ["zod", "valibot"]
     ///     }
     /// }
     /// ```
@@ -76,17 +76,16 @@ impl Rule for NoNamespaceImport {
             return None;
         }
 
-        // Check if the module is in the allowlist
+        // Check if the module is in the allowed modules list
         if let Ok(source) = import_namespace_clause.source() {
             if let AnyJsModuleSource::JsModuleSource(js_module_source) = source {
                 if let Ok(inner_text) = js_module_source.inner_string_text() {
                     let module_name = inner_text.text();
                     if ctx
                         .options()
-                        .allowlist
+                        .allowed_modules
                         .iter()
-                        .flatten()
-                        .any(|allowed| allowed.as_ref() == module_name)
+                        .any(|allowed| allowed.as_str() == module_name)
                     {
                         return None;
                     }

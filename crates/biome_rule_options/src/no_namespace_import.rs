@@ -5,14 +5,14 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoNamespaceImportOptions {
     /// A list of module specifiers that are allowed to use namespace imports
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub allowlist: Option<Box<[Box<str>]>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub allowed_modules: Vec<String>,
 }
 
 impl biome_deserialize::Merge for NoNamespaceImportOptions {
     fn merge_with(&mut self, other: Self) {
-        if let Some(allowlist) = other.allowlist {
-            self.allowlist = Some(allowlist);
+        if !other.allowed_modules.is_empty() {
+            self.allowed_modules = other.allowed_modules;
         }
     }
 }
