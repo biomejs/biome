@@ -1432,7 +1432,6 @@ mod tests {
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
     use crate::{Document, FormatState, IndentStyle, Printed, VecBuffer, format_args, write};
-    use biome_rowan::TextSize;
 
     fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
         format_with_options(

@@ -336,8 +336,7 @@ macro_rules! best_fitting {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::{FormatState, SimpleFormatOptions, VecBuffer, write};
-    use biome_rowan::TextSize;
+    use crate::{write, FormatState, SimpleFormatOptions, VecBuffer};
 
     struct TestFormat;
 
@@ -386,7 +385,7 @@ mod tests {
     #[test]
     fn best_fitting_variants_print_as_lists() {
         use crate::prelude::*;
-        use crate::{Formatted, format, format_args};
+        use crate::{format, format_args, Formatted};
 
         // The second variant below should be selected when printing at a width of 30
         let formatted_best_fitting = format!(
