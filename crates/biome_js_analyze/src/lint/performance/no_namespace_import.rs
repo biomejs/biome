@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::JsImportNamespaceClause;
+use biome_js_syntax::{AnyJsModuleSource, JsImportNamespaceClause};
 use biome_rowan::AstNode;
 use biome_rule_options::no_namespace_import::NoNamespaceImportOptions;
 
@@ -30,6 +30,25 @@ declare_lint_rule! {
     /// import type * as baz from "baz"
     /// ```
     ///
+    /// ## Options
+    ///
+    /// Use the options to specify modules that are allowed to use namespace imports.
+    /// This can be useful for libraries that are designed to work with namespace imports,
+    /// or when you need to import many exports from a module.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowlist": ["zod", "valibot"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import * as z from "zod";
+    /// import * as v from "valibot";
+    /// ```
+    ///
     pub NoNamespaceImport {
         version: "1.6.0",
         name: "noNamespaceImport",
@@ -52,6 +71,25 @@ impl Rule for NoNamespaceImport {
         if import_namespace_clause.type_token().is_some() {
             return None;
         }
+
+        // Check if the module is in the allowlist
+        if let Ok(source) = import_namespace_clause.source() {
+            if let AnyJsModuleSource::JsModuleSource(js_module_source) = source {
+                if let Ok(inner_text) = js_module_source.inner_string_text() {
+                    let module_name = inner_text.text();
+                    if ctx
+                        .options()
+                        .allowlist
+                        .iter()
+                        .flatten()
+                        .any(|allowed| allowed.as_ref() == module_name)
+                    {
+                        return None;
+                    }
+                }
+            }
+        }
+
         Some(())
     }
 
