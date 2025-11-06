@@ -249,6 +249,7 @@ pub mod no_vue_reserved_props;
 pub mod no_with;
 pub mod no_yoda_expression;
 pub mod organize_imports;
+pub mod unique_operation_name;
 pub mod use_adjacent_overload_signatures;
 pub mod use_alt_text;
 pub mod use_anchor_content;

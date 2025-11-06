@@ -5301,6 +5301,13 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"uniqueOperationName": {
+					"description": "Enforce unique operation names across a GraphQL document.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UniqueOperationNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useArraySortCompare": {
 					"description": "Require Array#sort and Array#toSorted calls to always provide a compareFunction.",
 					"anyOf": [
@@ -10186,6 +10193,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUniqueOperationNameOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UniqueOperationNameOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseAdjacentOverloadSignaturesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14003,6 +14025,16 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UniqueOperationNameConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUniqueOperationNameOptions" }
+			]
+		},
+		"UniqueOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"anyOf": [

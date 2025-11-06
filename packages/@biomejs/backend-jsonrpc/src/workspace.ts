@@ -1761,6 +1761,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Enforce unique operation names across a GraphQL document.
+	 */
+	uniqueOperationName?: RuleConfiguration_for_UniqueOperationNameOptions;
+	/**
 	 * Require Array#sort and Array#toSorted calls to always provide a compareFunction.
 	 */
 	useArraySortCompare?: RuleConfiguration_for_UseArraySortCompareOptions;
@@ -3166,6 +3170,9 @@ export type RuleConfiguration_for_NoVueReservedKeysOptions =
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
+export type RuleConfiguration_for_UniqueOperationNameOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UniqueOperationNameOptions;
 export type RuleConfiguration_for_UseArraySortCompareOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseArraySortCompareOptions;
@@ -5814,6 +5821,16 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 * Rule's options
 	 */
 	options: NoVueReservedPropsOptions;
+}
+export interface RuleWithOptions_for_UniqueOperationNameOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UniqueOperationNameOptions;
 }
 export interface RuleWithOptions_for_UseArraySortCompareOptions {
 	/**
@@ -8510,6 +8527,7 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
+export interface UniqueOperationNameOptions {}
 export interface UseArraySortCompareOptions {}
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -9307,6 +9325,7 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/uniqueOperationName"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
