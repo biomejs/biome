@@ -2,10 +2,18 @@
 "@biomejs/biome": patch
 ---
 
-Make useArrowFunction fixer safer
+Fixed an edge case in the [`useArrowFunction`](https://biomejs.dev/linter/rules/use-arrow-function/) rule.
 
-Previously, when a function referred to `arguments`,
-it could be auto-fixed into an arrow function which would be
-broken because `arguments` is not defined for arrow functions.
-Now, using `arguments` prevents the fixer from affecting a
-function.
+The rule no longer emits diagnostics for or offers to fix functions that reference
+the [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments),
+because that object is undefined for arrow functions.
+
+#### Valid:
+
+```ts
+// Valid: this function cannot be transformed into an arrow function because
+// arguments is not defined for arrow functions.
+const getFirstArg = function () {
+  return arguments[0];
+}
+```

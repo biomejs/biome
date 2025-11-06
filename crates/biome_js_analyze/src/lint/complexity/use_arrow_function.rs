@@ -59,10 +59,14 @@ declare_lint_rule! {
     ///     return 0;
     /// }
     /// ```
-    /// Functions that reference the arguments object
+    ///
+    /// Functions that reference the [arguments
+    /// object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments)
+    /// are ignored because the arguments object is not available to arrow
+    /// functions.
     ///
     /// ```js
-    /// function z() {
+    /// const q = function () {
     ///     return arguments[0];
     /// }
     /// ```
