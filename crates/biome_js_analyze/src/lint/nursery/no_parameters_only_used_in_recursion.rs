@@ -278,12 +278,25 @@ fn get_function_binding(
                     continue;
                 }
 
+                // Check for variable declarator: const foo = () => ...
                 if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor)
                     && let Ok(id) = declarator.id()
                     && let Some(any_binding) = id.as_any_js_binding()
                     && let Some(js_id_binding) = any_binding.as_js_identifier_binding()
                 {
                     return Some(model.as_binding(js_id_binding));
+                }
+
+                // Check for assignment expression: foo = () => ...
+                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
+                    && let Ok(left) = assignment.left()
+                    && let Some(id_assignment) = left.as_any_js_assignment()
+                    && let Some(js_id_assignment) = id_assignment.as_js_identifier_assignment()
+                {
+                    // For assignment expressions, resolve the assignment target to its binding.
+                    // JsIdentifierAssignment implements HasDeclarationAstNode, so model.binding()
+                    // can resolve write references to their bindings.
+                    return model.binding(js_id_assignment);
                 }
 
                 if is_function_like(&ancestor) {
