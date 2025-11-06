@@ -38,7 +38,7 @@ mutation updateUser {
 
 # Diagnostics
 ```
-invalid.graphql:7:1 lint/nursery/uniqueOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:7:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Operation named "user" is already defined.
   
@@ -62,7 +62,7 @@ invalid.graphql:7:1 lint/nursery/uniqueOperationName ━━━━━━━━━
 ```
 
 ```
-invalid.graphql:19:1 lint/nursery/uniqueOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:19:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Operation named "updateUser" is already defined.
   
@@ -86,7 +86,7 @@ invalid.graphql:19:1 lint/nursery/uniqueOperationName ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:25:1 lint/nursery/uniqueOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:25:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Operation named "updateUser" is already defined.
   

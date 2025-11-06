@@ -1761,10 +1761,6 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
-	 * Enforce unique operation names across a GraphQL document.
-	 */
-	uniqueOperationName?: RuleConfiguration_for_UniqueOperationNameOptions;
-	/**
 	 * Require Array#sort and Array#toSorted calls to always provide a compareFunction.
 	 */
 	useArraySortCompare?: RuleConfiguration_for_UseArraySortCompareOptions;
@@ -1804,6 +1800,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
+	/**
+	 * Enforce unique operation names across a GraphQL document.
+	 */
+	useUniqueGraphqlOperationName?: RuleConfiguration_for_UseUniqueGraphqlOperationNameOptions;
 	/**
 	 * Enforce specific order of Vue compiler macros.
 	 */
@@ -3170,9 +3170,6 @@ export type RuleConfiguration_for_NoVueReservedKeysOptions =
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
-export type RuleConfiguration_for_UniqueOperationNameOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UniqueOperationNameOptions;
 export type RuleConfiguration_for_UseArraySortCompareOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseArraySortCompareOptions;
@@ -3203,6 +3200,9 @@ export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleConfiguration_for_UseUniqueGraphqlOperationNameOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseUniqueGraphqlOperationNameOptions;
 export type RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions;
@@ -5822,16 +5822,6 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 */
 	options: NoVueReservedPropsOptions;
 }
-export interface RuleWithOptions_for_UniqueOperationNameOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UniqueOperationNameOptions;
-}
 export interface RuleWithOptions_for_UseArraySortCompareOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5943,6 +5933,16 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 * Rule's options
 	 */
 	options: UseSortedClassesOptions;
+}
+export interface RuleWithOptions_for_UseUniqueGraphqlOperationNameOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseUniqueGraphqlOperationNameOptions;
 }
 export interface RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions {
 	/**
@@ -8527,7 +8527,6 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
-export interface UniqueOperationNameOptions {}
 export interface UseArraySortCompareOptions {}
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -8573,6 +8572,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseUniqueGraphqlOperationNameOptions {}
 export interface UseVueDefineMacrosOrderOptions {
 	/**
 	 * The order of the Vue define macros.
@@ -9325,7 +9325,6 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
-	| "lint/nursery/uniqueOperationName"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -9342,6 +9341,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueValidVBind"

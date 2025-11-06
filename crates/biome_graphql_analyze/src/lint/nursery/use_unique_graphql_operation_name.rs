@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlRoot;
 use biome_rowan::{AstNode, TextRange, TokenText};
-use biome_rule_options::unique_operation_name::UniqueOperationNameOptions;
+use biome_rule_options::use_unique_graphql_operation_name::UseUniqueGraphqlOperationNameOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
@@ -47,9 +47,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UniqueOperationName {
+    pub UseUniqueGraphqlOperationName {
         version: "next",
-        name: "uniqueOperationName",
+        name: "useUniqueGraphqlOperationName",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("unique-operation-name").inspired()],
@@ -61,11 +61,11 @@ pub struct DuplicateOperationName {
     text_range: TextRange,
 }
 
-impl Rule for UniqueOperationName {
+impl Rule for UseUniqueGraphqlOperationName {
     type Query = Ast<GraphqlRoot>;
     type State = DuplicateOperationName;
     type Signals = Box<[Self::State]>;
-    type Options = UniqueOperationNameOptions;
+    type Options = UseUniqueGraphqlOperationNameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let root = ctx.query();

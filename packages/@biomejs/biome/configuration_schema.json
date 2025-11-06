@@ -5301,13 +5301,6 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"uniqueOperationName": {
-					"description": "Enforce unique operation names across a GraphQL document.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UniqueOperationNameConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useArraySortCompare": {
 					"description": "Require Array#sort and Array#toSorted calls to always provide a compareFunction.",
 					"anyOf": [
@@ -5377,6 +5370,15 @@
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueGraphqlOperationName": {
+					"description": "Enforce unique operation names across a GraphQL document.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseUniqueGraphqlOperationNameConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -10193,21 +10195,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUniqueOperationNameOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UniqueOperationNameOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseAdjacentOverloadSignaturesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -12165,6 +12152,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseUniqueGraphqlOperationNameOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseValidAnchorOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14026,16 +14030,6 @@
 				}
 			]
 		},
-		"UniqueOperationNameConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUniqueOperationNameOptions" }
-			]
-		},
-		"UniqueOperationNameOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -15319,6 +15313,16 @@
 					"uniqueItems": true
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseUniqueGraphqlOperationNameConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseUniqueGraphqlOperationNameOptions" }
+			]
+		},
+		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseValidAnchorConfiguration": {
