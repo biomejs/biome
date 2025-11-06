@@ -3,7 +3,6 @@ use crate::prelude::*;
 use crate::shared::TextPrintMode;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
-use biome_rowan::TextSize;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdFencedCodeBlock {
@@ -54,7 +53,10 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
             [
                 format_replaced(
                     &l_fence,
-                    &text(&normalized_fence, l_fence.text_trimmed_range().start())
+                    &text(
+                        &normalized_fence,
+                        Some(l_fence.text_trimmed_range().start())
+                    )
                 ),
                 code_list.format(),
                 hard_line_break(),
@@ -89,11 +91,14 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                 f,
                 [format_replaced(
                     &r_fence,
-                    &text(&normalized_fence, r_fence.text_trimmed_range().start())
+                    &text(
+                        &normalized_fence,
+                        Some(r_fence.text_trimmed_range().start())
+                    )
                 )]
             )?;
         } else {
-            write!(f, [text(&normalized_fence, TextSize::default())])?;
+            write!(f, [text(&normalized_fence, None)])?;
         }
 
         Ok(())

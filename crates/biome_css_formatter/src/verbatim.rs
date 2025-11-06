@@ -217,7 +217,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            verbatim_text_start,
+            Some(verbatim_text_start),
         )
         .fmt(f)?;
 
@@ -288,7 +288,7 @@ fn write_verbatim_range_source(
     let mut source = range.start();
 
     raw.slice(relative_range).try_for_each_chunk(|chunk| {
-        text(chunk, source).fmt(f)?;
+        text(chunk, Some(source)).fmt(f)?;
         source += TextSize::from(chunk.len() as u32);
         Ok(())
     })

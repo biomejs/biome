@@ -80,7 +80,7 @@ impl FormatSvelteDirectiveValue {
                 f,
                 [
                     colon_token.format(),
-                    text(initializer_value.text(), initializer.range().start()),
+                    text(initializer_value.text(), Some(initializer.range().start())),
                     initializer.format().with_options(
                         FormatHtmlAttributeInitializerClauseOptions {
                             compact: CompactKind::Remove,

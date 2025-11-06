@@ -91,13 +91,7 @@ impl Format<FormatTypeContext> for Exports {
         let mut joiner = f.join();
         for (export_name, export) in self.deref() {
             let name = format_with(|f| {
-                write!(
-                    f,
-                    [text(
-                        &std::format!("{:?}", export_name.text()),
-                        TextSize::default()
-                    ),]
-                )
+                write!(f, [text(&std::format!("{:?}", export_name.text()), None),])
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), token("=>"), space()]]));
 
@@ -133,13 +127,7 @@ impl Format<FormatTypeContext> for Imports {
 
         for (import_name, import) in &self.0 {
             let name = format_with(|f| {
-                write!(
-                    f,
-                    [text(
-                        &std::format!("{:?}", import_name.text()),
-                        TextSize::default()
-                    ),]
-                )
+                write!(f, [text(&std::format!("{:?}", import_name.text()), None),])
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), token("=>"), space()]]));
 
@@ -249,7 +237,7 @@ impl Format<FormatTypeContext> for JsBindingData {
                 [&format_args![
                     token("Name:"),
                     space(),
-                    text(&self.name, TextSize::default()),
+                    text(&self.name, None),
                     token(","),
                     hard_line_break(),
                     token("Type:"),
@@ -259,10 +247,7 @@ impl Format<FormatTypeContext> for JsBindingData {
                     hard_line_break(),
                     token("Declaration kind:"),
                     space(),
-                    text(
-                        &std::format!("{:?}", self.declaration_kind),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("{:?}", self.declaration_kind), None),
                 ]]
             )
         });
@@ -325,7 +310,7 @@ impl Format<FormatTypeContext> for JsOwnExport {
                     f,
                     [&format_args![
                         token("JsOwnExport::Binding("),
-                        text(&range_str, TextSize::default()),
+                        text(&range_str, None),
                         token(")")
                     ]]
                 )
@@ -334,7 +319,7 @@ impl Format<FormatTypeContext> for JsOwnExport {
                 f,
                 [&format_args![
                     token("JsOwnExport::Type("),
-                    text(&std::format!("{resolved_type_id:?}"), TextSize::default()),
+                    text(&std::format!("{resolved_type_id:?}"), None),
                     token(")")
                 ]]
             ),
@@ -360,10 +345,7 @@ impl Format<FormatTypeContext> for JsImport {
             [&format_args![
                 token("Specifier:"),
                 space(),
-                text(
-                    &std::format!("{:?}", self.specifier.text()),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.specifier.text()), None),
             ]]
         )?;
         write!(f, [hard_line_break()])?;
@@ -410,7 +392,7 @@ impl Format<FormatTypeContext> for TypedSize {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         let value = std::format!("{}", self.0);
-        write!(f, [text(&value, TextSize::default())])
+        write!(f, [text(&value, None)])
     }
 }
 

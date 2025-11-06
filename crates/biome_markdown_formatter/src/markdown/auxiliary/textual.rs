@@ -29,7 +29,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                     f,
                     [format_replaced(
                         &value_token,
-                        &text(cleaned, value_token.text_trimmed_range().start())
+                        &text(cleaned, Some(value_token.text_trimmed_range().start()))
                     )]
                 )
             }
@@ -58,7 +58,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                                 if i > 0 {
                                     write!(f, [hard_space()])?;
                                 }
-                                write!(f, [text(word, position)])?;
+                                write!(f, [text(word, Some(position))])?;
                             }
                             if has_trailing_ws {
                                 write!(f, [hard_space()])?;
@@ -74,7 +74,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 f,
                 [format_replaced(
                     &value_token,
-                    &text(trimmed_text, value_token.text_trimmed_range().start())
+                    &text(trimmed_text, Some(value_token.text_trimmed_range().start()))
                 )]
             )
         } else if self.print_mode.is_trim_start() {
@@ -83,7 +83,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 f,
                 [format_replaced(
                     &value_token,
-                    &text(trimmed_text, value_token.text_trimmed_range().start())
+                    &text(trimmed_text, Some(value_token.text_trimmed_range().start()))
                 )]
             )
         } else if self.print_mode.is_keep_leading_spaces() {
@@ -94,7 +94,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 f,
                 [format_replaced(
                     &value_token,
-                    &text(full_text, value_token.text_range().start())
+                    &text(full_text, Some(value_token.text_range().start()))
                 )]
             )
         } else {

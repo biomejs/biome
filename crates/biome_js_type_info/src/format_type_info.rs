@@ -2,18 +2,17 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NUM_PREDEFINED_TYPES, NamedFunctionParameter, Object, ObjectLiteral,
-    PatternFunctionParameter, ReturnType, Type, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
+    ReturnType, Type, TypeData, TypeId, TypeImportQualifier, TypeInstance,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    TypeofAwaitExpression, TypeofExpression, Union, NUM_PREDEFINED_TYPES,
 };
 use biome_formatter::prelude::*;
+use biome_formatter::{format_args, write};
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{format_args, write};
-use biome_js_syntax::TextSize;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 use std::fmt::Debug;
@@ -101,10 +100,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Conditional => write!(f, [token("conditional")]),
             Self::ImportNamespace(module_id) => write!(
                 f,
-                [text(
-                    &std::format!("namespace for {module_id:?}"),
-                    TextSize::default()
-                )]
+                [text(&std::format!("namespace for {module_id:?}"), None)]
             ),
             Self::Class(class) => write!(f, [&class.as_ref()]),
             Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
@@ -187,7 +183,7 @@ impl Format<FormatTypeContext> for Function {
 
         let name = format_with(|f| {
             if let Some(name) = &self.name {
-                write!(f, [text(&std::format!("\"{name}\""), TextSize::default())])
+                write!(f, [text(&std::format!("\"{name}\""), None)])
             } else {
                 Ok(())
             }
@@ -350,7 +346,7 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             }
             Self::Getter(name) | Self::ConstAssertedGetter(name) => {
                 let quoted = std::format!("get \"{name}\"");
-                write!(formatter, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, None)])
             }
             Self::IndexSignature(index_signature_type)
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
@@ -358,15 +354,15 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 let quoted = std::format!("\"{name}\"");
-                write!(formatter, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, None)])
             }
             Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 let quoted = std::format!("\"{name}\"?");
-                write!(formatter, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, None)])
             }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
                 let quoted = std::format!("static \"{name}\"");
-                write!(formatter, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, None)])
             }
         }
     }
@@ -452,7 +448,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         [&format_args![
                             destructure.ty,
                             token("["),
-                            text(&index.to_string(), TextSize::default()),
+                            text(&index.to_string(), None),
                             token("]")
                         ]]
                     )
@@ -477,7 +473,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         f,
                         [&format_args![
                             token("["),
-                            text(&std::format!("({index} others)"), TextSize::default()),
+                            text(&std::format!("({index} others)"), None),
                             token("..."),
                             destructure.ty,
                             token("]")
@@ -490,7 +486,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     f,
                     [&format_args![
                         &expr.object,
-                        text(&std::format!("[{}]", expr.index), TextSize::default()),
+                        text(&std::format!("[{}]", expr.index), None),
                     ]]
                 )
             }
@@ -578,10 +574,7 @@ impl Format<FormatTypeContext> for GenericTypeParameter {
 
         write!(
             f,
-            [&format_args![
-                text(&self.name, TextSize::default()),
-                constraint, default
-            ]]
+            [&format_args![text(&self.name, None), constraint, default]]
         )
     }
 }
@@ -619,7 +612,7 @@ impl Format<FormatTypeContext> for TypeReference {
                             [&format_args![
                                 token("Global"),
                                 space(),
-                                text(&std::format!("{id:?}"), TextSize::default()),
+                                text(&std::format!("{id:?}"), None),
                             ]]
                         )
                     }
@@ -628,18 +621,18 @@ impl Format<FormatTypeContext> for TypeReference {
                     write!(
                         f,
                         [&format_args![
-                            text(&std::format!("Module({module_id})"), TextSize::default()),
+                            text(&std::format!("Module({module_id})"), None),
                             space(),
-                            text(&std::format!("{id:?}"), TextSize::default()),
+                            text(&std::format!("{id:?}"), None),
                         ]]
                     )
                 } else {
                     write!(
                         f,
                         [&format_args![
-                            text(&std::format!("{level:?}"), TextSize::default()),
+                            text(&std::format!("{level:?}"), None),
                             space(),
-                            text(&std::format!("{id:?}"), TextSize::default()),
+                            text(&std::format!("{id:?}"), None),
                         ]]
                     )
                 }
@@ -671,17 +664,14 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
                 f,
                 [&format_args![
                     space(),
-                    text(
-                        &std::format!("(scope ID: {})", self.scope_id.index()),
-                        TextSize::default()
-                    )
+                    text(&std::format!("(scope ID: {})", self.scope_id.index()), None)
                 ]]
             )
         });
 
         write!(f, [token("\"")])?;
         for (index, part) in self.path.iter().enumerate() {
-            write!(f, [text(part, TextSize::default())])?;
+            write!(f, [text(part, None)])?;
             if index != self.path.len() - 1 {
                 write!(f, [token(".")])?;
             }
@@ -735,7 +725,7 @@ impl Format<FormatTypeContext> for Class {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         let name = format_with(|f| {
             if let Some(name) = &self.name {
-                write!(f, [text(&std::format!("\"{name}\""), TextSize::default())])
+                write!(f, [text(&std::format!("\"{name}\""), None)])
             } else {
                 Ok(())
             }
@@ -782,7 +772,7 @@ impl Format<FormatTypeContext> for Interface {
             [&format_args![
                 token("interface"),
                 space(),
-                text(&std::format!("\"{}\"", self.name), TextSize::default()),
+                text(&std::format!("\"{}\"", self.name), None),
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
@@ -807,31 +797,19 @@ impl Format<FormatTypeContext> for Interface {
 impl Format<FormatTypeContext> for Literal {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         match self {
-            Self::BigInt(bigint_text) => write!(
-                f,
-                [
-                    token("bigint:"),
-                    space(),
-                    text(bigint_text, TextSize::default())
-                ]
-            ),
+            Self::BigInt(bigint_text) => {
+                write!(f, [token("bigint:"), space(), text(bigint_text, None)])
+            }
             Self::Boolean(lit) => write!(
                 f,
                 [
                     token("bool:"),
                     space(),
-                    text(lit.as_bool().to_string().as_str(), TextSize::default())
+                    text(lit.as_bool().to_string().as_str(), None)
                 ]
             ),
             Self::Number(lit) => {
-                write!(
-                    f,
-                    [
-                        token("number:"),
-                        space(),
-                        text(lit.as_str(), TextSize::default())
-                    ]
-                )
+                write!(f, [token("number:"), space(), text(lit.as_str(), None)])
             }
             Self::Object(obj) => write!(f, [&obj]),
             Self::RegExp(regex) => write!(
@@ -840,23 +818,13 @@ impl Format<FormatTypeContext> for Literal {
                     token("regex:"),
                     space(),
                     token("/"),
-                    text(&regex.pattern, TextSize::default()),
+                    text(&regex.pattern, None),
                     token("/"),
-                    text(&regex.flags, TextSize::default())
+                    text(&regex.flags, None)
                 ]
             ),
-            Self::String(lit) => write!(
-                f,
-                [
-                    token("string:"),
-                    space(),
-                    text(lit.as_str(), TextSize::default())
-                ]
-            ),
-            Self::Template(tmpl) => write!(
-                f,
-                [token("string:"), space(), text(tmpl, TextSize::default())]
-            ),
+            Self::String(lit) => write!(f, [token("string:"), space(), text(lit.as_str(), None)]),
+            Self::Template(tmpl) => write!(f, [token("string:"), space(), text(tmpl, None)]),
         }
     }
 }
@@ -925,7 +893,7 @@ impl Format<FormatTypeContext> for ResolvedPath {
         let value = self.deref();
         if let Ok(value) = value {
             let quoted = std::format!("\"{}\"", value.as_str().replace('\\', "/"));
-            write!(f, [text(&quoted, TextSize::default())])?;
+            write!(f, [text(&quoted, None)])?;
         }
 
         Ok(())
@@ -940,7 +908,7 @@ impl Format<FormatTypeContext> for ImportSymbol {
         let import = format_with(|f| match self {
             Self::Default => write!(f, [token("Default")]),
             Self::Named(name) => {
-                write!(f, [text(name, TextSize::default())])
+                write!(f, [text(name, None)])
             }
             Self::All => write!(f, [token("All")]),
         });
@@ -1044,7 +1012,7 @@ impl Format<FormatTypeContext> for FmtTypeReferences<'_> {
 
 impl Format<FormatTypeContext> for Text {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        write!(f, [&format_args![text(self, TextSize::default())]])
+        write!(f, [&format_args![text(self, None)]])
     }
 }
 
@@ -1103,10 +1071,7 @@ where
 {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         let verbatim_text = std::format!("{:#?}", self.0);
-        write!(
-            f,
-            [&format_args![text(&verbatim_text, TextSize::default()),]]
-        )
+        write!(f, [&format_args![text(&verbatim_text, None),]])
     }
 }
 

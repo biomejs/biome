@@ -23,8 +23,8 @@ impl MdWord {
 
 impl Format<MarkdownFormatContext> for MdWord {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        source_position(self.source_position).fmt(f)?;
         f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
             slice: self.text.clone(),
         })
     }
