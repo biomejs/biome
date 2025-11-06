@@ -9,8 +9,11 @@ impl FormatRule<AnySvelteBlock> for FormatAnySvelteBlock {
     fn fmt(&self, node: &AnySvelteBlock, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
             AnySvelteBlock::SvelteBogusBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteConstBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteDebugBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteHtmlBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteKeyBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteRenderBlock(node) => node.format().fmt(f),
         }
     }
 }

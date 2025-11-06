@@ -2,8 +2,9 @@ mod tests;
 
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL,
-    KEY_KW, NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL,
+    HTML_STRING_LITERAL, KEY_KW, NEWLINE, RENDER_KW, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM,
+    WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -422,11 +423,25 @@ impl<'src> HtmlLexer<'src> {
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
-            buffer if context.is_svelte() => match buffer {
-                b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
-                b"key" if self.current_kind == T!["{#"] || self.current_kind == T!["{/"] => KEY_KW,
-                _ => SVELTE_IDENT,
-            },
+            buffer if context.is_svelte() => {
+                if self.current_kind == T!["{@"] {
+                    match buffer {
+                        b"debug" => DEBUG_KW,
+                        b"attach" => ATTACH_KW,
+                        b"const" => CONST_KW,
+                        b"render" => RENDER_KW,
+                        b"html" => HTML_KW,
+                        _ => SVELTE_IDENT,
+                    }
+                } else if self.current_kind == T!["{#"] || self.current_kind == T!["{/"] {
+                    match buffer {
+                        b"key" => KEY_KW,
+                        _ => SVELTE_IDENT,
+                    }
+                } else {
+                    SVELTE_IDENT
+                }
+            }
             _ => HTML_LITERAL,
         }
     }

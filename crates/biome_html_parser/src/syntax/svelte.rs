@@ -1,11 +1,14 @@
 use crate::parser::HtmlParser;
-use crate::syntax::parse_error::{expected_child, expected_svelte_closing_block};
+use crate::syntax::parse_error::{
+    expected_child, expected_svelte_closing_block, expected_text_expression,
+};
 use crate::syntax::{TextExpression, parse_html_element};
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK,
-    SVELTE_DEBUG_BLOCK, SVELTE_IDENT, SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK,
-    SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME,
+    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, SVELTE_ATTACH_ATTRIBUTE, SVELTE_BINDING_LIST,
+    SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK, SVELTE_HTML_BLOCK, SVELTE_IDENT,
+    SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK, SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME,
+    SVELTE_RENDER_BLOCK,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -76,7 +79,7 @@ pub(crate) fn parse_opening_block(
             )
         });
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+    p.expect(T!['}']);
 
     Present(m.complete(p, node))
 }
@@ -97,7 +100,7 @@ pub(crate) fn parse_closing_block(
 
     p.expect_with_context(keyword, HtmlLexContext::Svelte);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+    p.expect(T!['}']);
 
     Present(m.complete(p, node))
 }
@@ -111,6 +114,9 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
 
     match p.cur() {
         T![debug] => parse_debug_block(p, m),
+        T![html] => parse_html_block(p, m),
+        T![render] => parse_render_block(p, m),
+        T![const] => parse_const_block(p, m),
         _ => {
             m.abandon(p);
             Absent
@@ -125,9 +131,71 @@ pub(crate) fn parse_debug_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
 
     BindingList.parse_list(p);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+    p.expect(T!['}']);
 
     Present(marker.complete(p, SVELTE_DEBUG_BLOCK))
+}
+
+pub(crate) fn parse_html_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyntax {
+    if !p.at(T![html]) {
+        return Absent;
+    }
+    p.bump_with_context(T![html], HtmlLexContext::single_expression());
+
+    TextExpression::new_single()
+        .parse_element(p)
+        .or_add_diagnostic(p, expected_text_expression);
+
+    p.expect(T!['}']);
+
+    Present(marker.complete(p, SVELTE_HTML_BLOCK))
+}
+
+pub(crate) fn parse_render_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyntax {
+    if !p.at(T![render]) {
+        return Absent;
+    }
+    p.bump_with_context(T![render], HtmlLexContext::single_expression());
+
+    TextExpression::new_single()
+        .parse_element(p)
+        .or_add_diagnostic(p, expected_text_expression);
+
+    p.expect(T!['}']);
+
+    Present(marker.complete(p, SVELTE_RENDER_BLOCK))
+}
+
+pub(crate) fn parse_attach_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!["{@"]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T!["{@"], HtmlLexContext::Svelte);
+    p.expect_with_context(T![attach], HtmlLexContext::single_expression());
+
+    TextExpression::new_single()
+        .parse_element(p)
+        .or_add_diagnostic(p, expected_text_expression);
+
+    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+
+    Present(m.complete(p, SVELTE_ATTACH_ATTRIBUTE))
+}
+
+pub(crate) fn parse_const_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyntax {
+    if !p.at(T![const]) {
+        return Absent;
+    }
+    p.bump_with_context(T![const], HtmlLexContext::single_expression());
+
+    TextExpression::new_single()
+        .parse_element(p)
+        .or_add_diagnostic(p, expected_text_expression);
+
+    p.expect(T!['}']);
+
+    Present(marker.complete(p, SVELTE_CONST_BLOCK))
 }
 
 const BLOCK_RECOVER: TokenSet<HtmlSyntaxKind> = token_set!(
