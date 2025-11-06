@@ -142,10 +142,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"
-{#key expression}
-	<div></div>
-{/key}
+    let code = r#"{@html '<div>'}content{@html '</div>'}
 
     "#;
 

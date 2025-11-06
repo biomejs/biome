@@ -162,6 +162,7 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| SvelteAttachAttribute
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -192,6 +193,9 @@ AnySvelteBlock =
 	SvelteDebugBlock
 	| SvelteKeyBlock
 	| SvelteBogusBlock
+	| SvelteRenderBlock
+	| SvelteHtmlBlock
+	| SvelteConstBlock
 
 // {@debug}
 // ^^^^^^^^
@@ -227,6 +231,38 @@ SvelteKeyClosingBlock =
 SvelteBindingList = (SvelteName (',' SvelteName)*)
 
 SvelteName = 'svelte_ident'
+
+// {@render ...}
+// ^^^^^^^^^^^^^
+SvelteRenderBlock =
+ 	'{@'
+ 	'render'
+ 	expression: HtmlTextExpression
+ 	'}'
+
+ // {@attach ...}
+ // ^^^^^^^^^^^^^
+SvelteAttachAttribute =
+	'{@'
+	'attach'
+  expression: HtmlTextExpression
+  '}'
+
+// {@html ...}
+// ^^^^^^^^^^^
+SvelteHtmlBlock =
+	'{@'
+	'html'
+  expression: HtmlTextExpression
+  '}'
+
+// {@const ...}
+// ^^^^^^^^^^^
+SvelteConstBlock =
+	'{@'
+	'const'
+  expression: HtmlTextExpression
+  '}'
 
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'

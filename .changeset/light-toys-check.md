@@ -10,3 +10,4 @@ Added support Svelte syntax `{#key}`. Biome now is able to parse and format the 
 +  <div></div>
 +{/key}
 ```
+The contents of the expressions inside the `{@key <expression>}` aren't formatted yet.
