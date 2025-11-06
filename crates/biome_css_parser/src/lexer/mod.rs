@@ -939,6 +939,8 @@ impl<'src> CssLexer<'src> {
             b"reference" => REFERENCE_KW,
             b"config" => CONFIG_KW,
             b"plugin" => PLUGIN_KW,
+            b"slot" => SLOT_KW,
+            b"inline" => INLINE_KW,
             _ => IDENT,
         }
     }
@@ -1011,6 +1013,12 @@ impl<'src> CssLexer<'src> {
             && current == b'-'
             && self.peek_byte() == Some(b'*')
         {
+            // HACK: handle `--*`
+            if self.prev_byte() == Some(b'-') {
+                self.advance(1);
+                return Some(current as char);
+            }
+            // otherwise, handle cases like `--color-*`
             return None;
         }
 
@@ -1305,6 +1313,7 @@ impl<'src> CssLexer<'src> {
                             // or the third and fourth code points are a valid escape
                             // return true.
                             BSL => self.is_valid_escape_at(3),
+                            MUL => true,
                             _ => false,
                         }
                     }

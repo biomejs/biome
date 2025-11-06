@@ -3061,8 +3061,6 @@ fn format_empty_svelte_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, "<div></div>");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_svelte_js_files_write",
@@ -3145,8 +3143,6 @@ fn format_empty_svelte_ts_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, "<script></script>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3419,7 +3415,6 @@ fn applies_custom_bracket_spacing_for_graphql() {
     ));
 }
 
-/// Change this when HTML formatting is enabled by default
 #[test]
 fn html_disabled_by_default() {
     let fs = MemoryFileSystem::default();
@@ -3435,12 +3430,6 @@ fn html_disabled_by_default() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert!(matches!(
-        result,
-        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
-    ));
-
-    assert_file_contents(&fs, file_path, "<!DOCTYPE HTML>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

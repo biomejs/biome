@@ -36,9 +36,12 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
-use biome_html_syntax::{HtmlElement, HtmlEmbeddedContent, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::element_ext::AnyEmbeddedContent;
+use biome_html_syntax::{
+    AstroEmbeddedContent, HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode,
+};
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -391,7 +394,19 @@ fn parse_embedded_nodes(
 
     // Walk through all HTML elements looking for script tags and style tags
     for element in html_root.syntax().descendants() {
-        let Some(element) = HtmlElement::cast(element) else {
+        if let Some(astro_embedded_content) = AstroEmbeddedContent::cast_ref(&element) {
+            let result = parse_astro_embedded_script(
+                astro_embedded_content.clone(),
+                cache,
+                biome_path,
+                settings,
+            );
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
+        }
+
+        let Some(element) = HtmlElement::cast_ref(&element) else {
             continue;
         };
 
@@ -423,6 +438,35 @@ fn parse_embedded_nodes(
     ParseEmbedResult { nodes }
 }
 
+pub(crate) fn parse_astro_embedded_script(
+    element: AstroEmbeddedContent,
+    cache: &mut NodeCache,
+    path: &BiomePath,
+    settings: &Settings,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let content = element.content_token()?;
+    let file_source = JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro);
+    let document_file_source = DocumentFileSource::Js(file_source);
+    let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
+    let parse = parse_js_with_offset_and_cache(
+        content.text(),
+        content.text_range().start(),
+        file_source,
+        options,
+        cache,
+    );
+
+    Some((
+        EmbeddedSnippet::new(
+            parse.into(),
+            element.range(),
+            content.text_trimmed_range(),
+            content.text_range().start(),
+        ),
+        document_file_source,
+    ))
+}
+
 pub(crate) fn parse_embedded_script(
     element: HtmlElement,
     cache: &mut NodeCache,
@@ -433,13 +477,19 @@ pub(crate) fn parse_embedded_script(
     let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
-            if element.is_typescript_lang().unwrap_or_default() {
+            let mut file_source = if element.is_typescript_lang() {
                 JsFileSource::ts()
             } else {
                 JsFileSource::js_module()
+            };
+            if html_file_source.is_svelte() {
+                file_source = file_source.with_embedding_kind(EmbeddingKind::Svelte);
+            } else if html_file_source.is_vue() {
+                file_source = file_source.with_embedding_kind(EmbeddingKind::Vue);
             }
+            file_source
         } else if html_file_source.is_astro() {
-            JsFileSource::ts()
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro)
         } else {
             let is_module = element.is_javascript_module().unwrap_or_default();
             if is_module {
@@ -482,6 +532,7 @@ pub(crate) fn parse_embedded_script(
     }
 }
 
+/// Parses embedded style, but it skips it if it contains SASS language
 pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
@@ -491,6 +542,11 @@ pub(crate) fn parse_embedded_style(
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
+            return None;
+        }
+
+        // We don't support SASS
+        if element.is_sass_lang() {
             return None;
         }
 
@@ -720,6 +776,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -757,6 +814,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
@@ -879,7 +937,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                        true,
+                        false,
                     )?
                     .print()?
                     .into_code()
@@ -907,7 +965,7 @@ pub(crate) fn update_snippets(
     let iterator = tree
         .syntax()
         .descendants()
-        .filter_map(HtmlEmbeddedContent::cast);
+        .filter_map(AnyEmbeddedContent::cast);
 
     for element in iterator {
         let Some(snippet) = new_snippets
@@ -917,7 +975,7 @@ pub(crate) fn update_snippets(
             continue;
         };
 
-        if let Ok(value_token) = element.value_token() {
+        if let Some(value_token) = element.value_token() {
             let new_token = ident(snippet.new_code.as_str());
             mutation.replace_token(value_token, new_token);
         }

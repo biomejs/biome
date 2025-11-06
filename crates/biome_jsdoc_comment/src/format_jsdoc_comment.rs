@@ -15,10 +15,7 @@ impl Format<FormatTypeContext> for JsdocComment {
         let comment = format_with(|f| {
             let mut joiner = f.join_with(hard_line_break());
             comment.lines().for_each(|line| {
-                joiner.entry(&format_args![dynamic_text(
-                    line.trim(),
-                    TextSize::default()
-                ),]);
+                joiner.entry(&format_args![text(line.trim(), TextSize::default()),]);
             });
             joiner.finish()
         });
@@ -26,10 +23,10 @@ impl Format<FormatTypeContext> for JsdocComment {
         write!(
             f,
             [&format_args![
-                text("JsDoc"),
-                text("("),
+                token("JsDoc"),
+                token("("),
                 block_indent(&comment),
-                text(")")
+                token(")")
             ]]
         )
     }

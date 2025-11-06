@@ -202,12 +202,12 @@ impl Rule for {rule_name_upper_camel} {{
         None
     }}
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {{
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {{
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let span = node.range();
+        let span = state.range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -241,21 +241,22 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
-    /// Add a link to the corresponding stylelint rule (if any):
-    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```css,expect_diagnostic
-    /// p {{}}
+    /// ```json,expect_diagnostic
+    /// {{
+    ///     "test": true,
+    ///     "test": true
+    /// }}
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```css
-    /// p {{
-    ///   color: red;
+    /// ```json
+    /// {{
+    ///     "test": true
     /// }}
     /// ```
     ///
@@ -317,8 +318,6 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
     ///
     /// ## Examples
     ///

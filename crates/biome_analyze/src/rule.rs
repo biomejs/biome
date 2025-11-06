@@ -147,7 +147,7 @@ pub enum RuleSource {
     EslintN(&'static str),
     /// Rules from [Eslint Plugin Next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
     EslintNext(&'static str),
-    /// Rules from [Eslint Plugin Qwik](https://github.com/BuilderIO/eslint-plugin-qwik)
+    /// Rules from [Eslint Plugin Qwik](https://github.com/QwikDev/qwik)
     EslintQwik(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
@@ -370,7 +370,7 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
-            Self::EslintQwik(rule_name) => format!("https://github.com/BuilderIO/eslint-plugin-qwik/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint/#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),

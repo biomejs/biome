@@ -231,8 +231,8 @@ where
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// # use crate::SpecSnapshot;
+    /// ```rs,ignore
+    /// # use biome_formatter_test::spec::SpecSnapshot;
     /// # fn run_example<L: crate::TestFormatLanguage>(snapshot: SpecSnapshot<'_, L>) {
     /// snapshot.test();
     /// # }
@@ -280,9 +280,13 @@ where
                 panic!("Configuration is invalid");
             }
 
-            let format_language = self
-                .language
-                .to_format_language(&settings, &DocumentFileSource::from_path(input_file));
+            let format_language = self.language.to_format_language(
+                &settings,
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            );
 
             let (mut output_code, printed) = self.formatted(&parsed, format_language.clone());
 

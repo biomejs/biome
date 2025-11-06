@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div>
+	<button popoverTarget="my-popover" popoverTargetAction="toggle">
+		Open Popover
+	</button>
+
+	<div id="my-popover" onBeforeToggle={this.onBeforeToggle} popover>
+		Greetings, one and all!
+	</div>
+</div>;
+
+```

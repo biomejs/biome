@@ -314,6 +314,7 @@ impl LanguageServer for LSPServer {
         self.session.load_extension_settings().await;
         self.session.load_workspace_settings(false).await;
 
+        self.session.set_initialized();
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
             .client
@@ -407,7 +408,8 @@ impl LanguageServer for LSPServer {
             }
         }
 
-        self.session.update_workspace_folders(params.event.added);
+        self.session
+            .update_workspace_folders(params.event.added, params.event.removed);
         self.session.load_workspace_settings(true).await;
     }
 

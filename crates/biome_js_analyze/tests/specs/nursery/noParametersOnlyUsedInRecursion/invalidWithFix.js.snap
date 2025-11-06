@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithFix.js
+---
+# Input
+```js
+// Simple case with fix
+function factorial(n, acc) {
+    if (n === 0) return 1;
+    return factorial(n - 1, acc);
+}
+
+// Multiple parameters with fix
+function fn(a, b, c) {
+    if (a === 0) return 0;
+    return fn(a - 1, b, c);
+}
+
+// Class method with fix
+class Counter {
+    count(n, acc) {
+        if (n === 0) return 0;
+        return this.count(n - 1, acc);
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalidWithFix.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    1 │ // Simple case with fix
+  > 2 │ function factorial(n, acc) {
+      │                       ^^^
+    3 │     if (n === 0) return 1;
+    4 │     return factorial(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+     1  1 │   // Simple case with fix
+     2    │ - function·factorial(n,·acc)·{
+        2 │ + function·factorial(n,·_acc)·{
+     3  3 │       if (n === 0) return 1;
+     4    │ - ····return·factorial(n·-·1,·acc);
+        4 │ + ····return·factorial(n·-·1,·_acc);
+     5  5 │   }
+     6  6 │   
+  
+
+```
+
+```
+invalidWithFix.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters with fix
+   > 8 │ function fn(a, b, c) {
+       │                ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
+  
+     6  6 │   
+     7  7 │   // Multiple parameters with fix
+     8    │ - function·fn(a,·b,·c)·{
+        8 │ + function·fn(a,·_b,·c)·{
+     9  9 │       if (a === 0) return 0;
+    10    │ - ····return·fn(a·-·1,·b,·c);
+       10 │ + ····return·fn(a·-·1,·_b,·c);
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+```
+invalidWithFix.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+     7 │ // Multiple parameters with fix
+   > 8 │ function fn(a, b, c) {
+       │                   ^
+     9 │     if (a === 0) return 0;
+    10 │     return fn(a - 1, b, c);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend c with an underscore.
+  
+     6  6 │   
+     7  7 │   // Multiple parameters with fix
+     8    │ - function·fn(a,·b,·c)·{
+        8 │ + function·fn(a,·b,·_c)·{
+     9  9 │       if (a === 0) return 0;
+    10    │ - ····return·fn(a·-·1,·b,·c);
+       10 │ + ····return·fn(a·-·1,·b,·_c);
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+```
+invalidWithFix.js:15:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is only used in recursive calls.
+  
+    13 │ // Class method with fix
+    14 │ class Counter {
+  > 15 │     count(n, acc) {
+       │              ^^^
+    16 │         if (n === 0) return 0;
+    17 │         return this.count(n - 1, acc);
+  
+  i Parameters that are only used in recursive calls are effectively unused and can be removed.
+  
+  i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i Unsafe fix: If this is intentional, prepend acc with an underscore.
+  
+    13 13 │   // Class method with fix
+    14 14 │   class Counter {
+    15    │ - ····count(n,·acc)·{
+       15 │ + ····count(n,·_acc)·{
+    16 16 │           if (n === 0) return 0;
+    17    │ - ········return·this.count(n·-·1,·acc);
+       17 │ + ········return·this.count(n·-·1,·_acc);
+    18 18 │       }
+    19 19 │   }
+  
+
+```

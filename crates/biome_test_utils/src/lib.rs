@@ -16,7 +16,7 @@ use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
-use biome_package::{PackageJson, TsConfigJson};
+use biome_package::{Manifest, PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -86,7 +86,10 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             &L::lookup_settings(&settings.languages).linter,
             L::resolve_environment(&settings),
             &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(input_file),
+            &DocumentFileSource::from_path(
+                input_file,
+                settings.experimental_full_html_support_enabled(),
+            ),
             None,
         )
     }
@@ -130,7 +133,10 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let document_file_source = DocumentFileSource::from_path(input_file);
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
         settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
@@ -191,7 +197,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
             if path.is_dir() {
                 get_js_like_paths_in_dir(&path)
             } else {
-                DocumentFileSource::from_well_known(&path)
+                DocumentFileSource::from_well_known(&path, false)
                     .is_javascript_like()
                     .then(|| BiomePath::new(path))
                     .into_iter()
@@ -206,14 +212,11 @@ pub fn project_layout_for_test_file(
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
+    let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
-        );
+        let deserialized = PackageJson::read_manifest(&fs, &package_json_file);
         if deserialized.has_errors() {
             diagnostics.extend(
                 deserialized
@@ -240,13 +243,7 @@ pub fn project_layout_for_test_file(
 
     let tsconfig_file = input_file.with_extension("tsconfig.json");
     if let Ok(json) = std::fs::read_to_string(&tsconfig_file) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<TsConfigJson>(
-            json.as_str(),
-            JsonParserOptions::default()
-                .with_allow_comments()
-                .with_allow_trailing_commas(),
-            "",
-        );
+        let deserialized = TsConfigJson::read_manifest(&fs, &tsconfig_file);
         if deserialized.has_errors() {
             diagnostics.extend(
                 deserialized

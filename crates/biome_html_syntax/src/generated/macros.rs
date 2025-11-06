@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ASTRO_EMBEDDED_CONTENT => {
+                    let $pattern = unsafe { $crate::AstroEmbeddedContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
@@ -89,6 +93,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlTextExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_DEBUG_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteDebugBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_NAME => {
+                    let $pattern = unsafe { $crate::SvelteName::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
                     let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
@@ -109,12 +121,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlBogusTextExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_BOGUS_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteBogusBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {
                     let $pattern = unsafe { $crate::HtmlAttributeList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ELEMENT_LIST => {
                     let $pattern = unsafe { $crate::HtmlElementList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_BINDING_LIST => {
+                    let $pattern = unsafe { $crate::SvelteBindingList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

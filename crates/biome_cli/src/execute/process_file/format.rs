@@ -7,13 +7,17 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
+use biome_service::workspace::FeaturesSupported;
 use tracing::{debug, instrument};
 
 #[instrument(name = "cli_format", level = "debug", skip(ctx, path))]
 pub(crate) fn format<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
+    features_supported: &FeaturesSupported,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     let result = workspace_file.guard().check_file_size()?;
@@ -25,7 +29,7 @@ pub(crate) fn format<'ctx>(
         );
         Ok(FileStatus::Ignored)
     } else {
-        format_with_guard(ctx, &mut workspace_file)
+        format_with_guard(ctx, &mut workspace_file, features_supported)
     }
 }
 
@@ -33,6 +37,7 @@ pub(crate) fn format<'ctx>(
 pub(crate) fn format_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
+    features_supported: &FeaturesSupported,
 ) -> FileResult {
     let diagnostics_result = workspace_file
         .guard()
@@ -87,27 +92,29 @@ pub(crate) fn format_with_guard<'ctx>(
 
     let mut output = printed.into_code();
 
-    match workspace_file.as_extension() {
-        Some("astro") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
+    if !features_supported.supports_full_html_support() {
+        match workspace_file.as_extension() {
+            Some("astro") => {
+                if output.is_empty() {
+                    return Ok(FileStatus::Unchanged);
+                }
+                output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
-            output = AstroFileHandler::output(input.as_str(), output.as_str());
-        }
-        Some("vue") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
+            Some("vue") => {
+                if output.is_empty() {
+                    return Ok(FileStatus::Unchanged);
+                }
+                output = VueFileHandler::output(input.as_str(), output.as_str());
             }
-            output = VueFileHandler::output(input.as_str(), output.as_str());
-        }
 
-        Some("svelte") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
+            Some("svelte") => {
+                if output.is_empty() {
+                    return Ok(FileStatus::Unchanged);
+                }
+                output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
-            output = SvelteFileHandler::output(input.as_str(), output.as_str());
+            _ => {}
         }
-        _ => {}
     }
 
     debug!("Format output is different from input: {}", output != input);

@@ -91,7 +91,7 @@ impl Rule for UseSortedKeys {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
-        let sort_order = options.sort_order;
+        let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
@@ -134,7 +134,7 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsonRuleAction> {
         let list = ctx.query();
         let options = ctx.options();
-        let sort_order = options.sort_order;
+        let sort_order = options.sort_order.unwrap_or_default();
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,

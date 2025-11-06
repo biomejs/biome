@@ -370,6 +370,8 @@ where
             preferred_jsx_quote,
             preferred_indentation,
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
             self.options.css_modules(),
         )
         .ok()?;
@@ -407,6 +409,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
             self.options.css_modules(),
         )
         .ok();
@@ -472,6 +476,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
             self.options.css_modules(),
         )
         .ok();

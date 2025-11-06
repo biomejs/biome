@@ -4,11 +4,11 @@ use self::{
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
+pub use crate::file_handlers::astro::AstroFileHandler;
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
-pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
-pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
+pub use crate::file_handlers::svelte::SvelteFileHandler;
+pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::Settings;
 use crate::workspace::{
     AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -55,7 +55,7 @@ use std::borrow::Cow;
 use std::sync::Arc;
 use tracing::instrument;
 
-mod astro;
+pub mod astro;
 pub(crate) mod css;
 pub(crate) mod graphql;
 pub(crate) mod grit;
@@ -63,9 +63,9 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-mod svelte;
+pub mod svelte;
 mod unknown;
-mod vue;
+pub mod vue;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -122,25 +122,38 @@ impl From<GritFileSource> for DocumentFileSource {
 
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
-        Self::from_path(path)
+        Self::from_path(path, false)
     }
 }
 
 impl DocumentFileSource {
-    fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+    fn try_from_well_known(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
         }
+
         if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -148,15 +161,33 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(path: &Utf8Path) -> Self {
-        Self::try_from_well_known(path).unwrap_or(Self::Unknown)
+    pub fn from_well_known(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_well_known(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
-    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
+    fn try_from_extension(
+        extension: &str,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        // Order here is important
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
         }
-        if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+
+        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
@@ -165,9 +196,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -175,8 +204,8 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension).unwrap_or(Self::Unknown)
+    pub fn from_extension(extension: &str, experimental_full_html_support: bool) -> Self {
+        Self::try_from_extension(extension, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -212,8 +241,11 @@ impl DocumentFileSource {
         Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
     }
 
-    pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = Self::try_from_well_known(path) {
+    pub(crate) fn try_from_path(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = Self::try_from_well_known(path, experimental_full_html_support) {
             return Ok(file_source);
         }
 
@@ -244,12 +276,12 @@ impl DocumentFileSource {
                 .ok_or(FileSourceError::MissingFileExtension)?,
         };
 
-        Self::try_from_extension(extension.as_ref())
+        Self::try_from_extension(extension.as_ref(), experimental_full_html_support)
     }
 
     /// Returns the document file source corresponding to the file path
-    pub fn from_path(path: &Utf8Path) -> Self {
-        Self::try_from_path(path).unwrap_or(Self::Unknown)
+    pub fn from_path(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_path(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -334,25 +366,16 @@ impl DocumentFileSource {
         }
     }
 
-    /// Convert the file source from a JS file source into an HTML-like file source, if the file belongs to an HTML-like language.
-    pub fn to_htmlish(&self) -> Self {
-        match self {
-            Self::Js(js) => match js.as_embedding_kind() {
-                EmbeddingKind::Astro => Self::Html(HtmlFileSource::astro()),
-                EmbeddingKind::Vue => Self::Html(HtmlFileSource::vue()),
-                EmbeddingKind::Svelte => Self::Html(HtmlFileSource::svelte()),
-                EmbeddingKind::None => Self::Unknown,
-            },
-            _ => Self::Unknown,
-        }
-    }
-
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
         match file_source {
-            Self::Js(_) => true,
-            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) | Self::Grit(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -374,8 +397,8 @@ impl DocumentFileSource {
     }
 
     /// Whether this file can contain embedded nodes
-    pub fn can_contain_embeds(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
+    pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
+        let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
             Self::Html(_) => true,
             Self::Js(_)
@@ -650,6 +673,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
+    pub(crate) action_offset: Option<TextSize>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -702,6 +726,7 @@ type FormatEmbedded = fn(
     Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
+#[derive(Debug)]
 pub(crate) struct FormatEmbedNode {
     pub(crate) range: TextRange,
     pub(crate) node: AnyParse,
@@ -774,8 +799,8 @@ impl Features {
             json: JsonFileHandler {},
             css: CssFileHandler {},
             astro: AstroFileHandler {},
-            vue: VueFileHandler {},
             svelte: SvelteFileHandler {},
+            vue: VueFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
@@ -787,6 +812,7 @@ impl Features {
     /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
+            // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
@@ -905,36 +931,6 @@ pub(crate) fn search(
         .collect();
 
     Ok(matches)
-}
-
-#[test]
-fn test_svelte_script_lang() {
-    const SVELTE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const SVELTE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG: &str = r#"<script context="module">"#;
-    const SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG: &str =
-        r#"<script context="module" lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
 }
 
 /// Type meant to register all the syntax rules for each language supported by Biome
@@ -1631,6 +1627,34 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
             .map(|(_, manifest)| manifest);
 
+        // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
+        // and the factory settings are not already set
+        if let Some(path) = self.path
+            && analyzer_options.jsx_runtime()
+                == Some(biome_analyze::options::JsxRuntime::ReactClassic)
+        {
+            if analyzer_options.jsx_factory().is_none() {
+                let factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_factory(factory.map(|s| s.into()));
+            }
+            if analyzer_options.jsx_fragment_factory().is_none() {
+                let fragment_factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig
+                            .jsx_fragment_factory_identifier()
+                            .map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+            }
+        }
+
         let mut lint = LintVisitor::new(
             self.only,
             self.skip,
@@ -1662,60 +1686,4 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         (enabled_rules, disabled_rules, analyzer_options)
     }
-}
-
-#[test]
-fn test_vue_script_lang() {
-    const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
-    const VUE_JSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="jsx">"#;
-    const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
-    const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .1
-            .is_jsx()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
 }

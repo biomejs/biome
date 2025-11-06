@@ -1,0 +1,16 @@
+---
+import { Counter } from '@/components/counter'
+import PageLayout from '@/components/page-layout.astro'
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+<PageLayout>
+	<main class="flex h-screen w-screen flex-col items-center justify-center">
+		<Counter client:load>
+
+
+			<span>--</span>
+		</Counter>
+	</main>
+</PageLayout>

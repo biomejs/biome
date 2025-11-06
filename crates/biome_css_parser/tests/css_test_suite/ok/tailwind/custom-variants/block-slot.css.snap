@@ -96,13 +96,8 @@ CssRoot {
                                 items: CssDeclarationOrRuleList [
                                     CssAtRule {
                                         at_token: AT@70..74 "@" [Newline("\n"), Whitespace("\t\t")] [],
-                                        rule: CssUnknownValueAtRule {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@74..78 "slot" [] [],
-                                            },
-                                            components: CssUnknownAtRuleComponentList {
-                                                items: [],
-                                            },
+                                        rule: TwSlotAtRule {
+                                            slot_token: SLOT_KW@74..78 "slot" [] [],
                                             semicolon_token: SEMICOLON@78..79 ";" [] [],
                                         },
                                     },
@@ -181,11 +176,9 @@ CssRoot {
                 1: CSS_DECLARATION_OR_RULE_LIST@70..79
                   0: CSS_AT_RULE@70..79
                     0: AT@70..74 "@" [Newline("\n"), Whitespace("\t\t")] []
-                    1: CSS_UNKNOWN_VALUE_AT_RULE@74..79
-                      0: CSS_IDENTIFIER@74..78
-                        0: IDENT@74..78 "slot" [] []
-                      1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@78..78
-                      2: SEMICOLON@78..79 ";" [] []
+                    1: TW_SLOT_AT_RULE@74..79
+                      0: SLOT_KW@74..78 "slot" [] []
+                      1: SEMICOLON@78..79 ";" [] []
                 2: R_CURLY@79..82 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@82..84 "}" [Newline("\n")] []
   2: EOF@84..85 "" [Newline("\n")] []

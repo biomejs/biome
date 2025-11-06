@@ -331,3 +331,62 @@ fn cdata_full() {
         CDATA_END: 3,
     }
 }
+
+#[test]
+fn svelte_openings() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{@debug}",
+        SV_CURLY_AT: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{/debug}",
+        SV_CURLY_SLASH: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{:debug}",
+        SV_CURLY_COLON: 2,
+        HTML_LITERAL: 6,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "{#debug}",
+        SV_CURLY_HASH: 2,
+        HTML_LITERAL: 6,
+    }
+}
+
+#[test]
+fn svelte_keywords() {
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "{@debug  ",
+        SV_CURLY_AT: 2,
+        DEBUG_KW: 5,
+        WHITESPACE: 2,
+    );
+
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "{@debug debug",
+        SV_CURLY_AT: 2,
+        DEBUG_KW: 5,
+        WHITESPACE: 1,
+        SVELTE_IDENT: 5,
+    );
+
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "  debug  ",
+        WHITESPACE: 2,
+        SVELTE_IDENT: 5,
+        WHITESPACE: 2,
+    )
+}

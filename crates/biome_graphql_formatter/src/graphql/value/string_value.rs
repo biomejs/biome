@@ -13,8 +13,8 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
         } = node.as_fields();
 
         if node.is_block() {
-            let token = graphql_string_literal_token?;
-            let text_trimmed = token.text_trimmed();
+            let string_token = graphql_string_literal_token?;
+            let text_trimmed = string_token.text_trimmed();
             // Extract the content of the block string
             // by removing the triple quotes
             let raw_content = &text_trimmed[3..text_trimmed.len() - 3];
@@ -37,10 +37,10 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
             let content = format_with(|f| {
                 let mut join = f.join();
                 // Write the opening triple quotes
-                join.entry(&text("\"\"\""));
+                join.entry(&token("\"\"\""));
                 join.entry(&hard_line_break());
 
-                let mut start = token.text_trimmed_range().start();
+                let mut start = string_token.text_trimmed_range().start();
                 for line in trimmed_content.lines() {
                     if line.is_empty() || is_blank(line) {
                         // if the line is empty,
@@ -50,7 +50,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
                     }
                     // Write the line with the minimum indentation level removed
                     // SAFETY: min_indent is always less than or equal to the length of the line
-                    join.entry(&dynamic_text(&line[min_indent..], start));
+                    join.entry(&text(&line[min_indent..], start));
                     start += line.text_len();
 
                     if line.is_empty() {
@@ -63,11 +63,11 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
 
                 join.entry(&hard_line_break());
                 // Write the closing triple quotes
-                join.entry(&text("\"\"\""));
+                join.entry(&token("\"\"\""));
                 join.finish()
             });
 
-            FormatGraphqlSyntaxToken.format_replaced(&token, &content, f)
+            FormatGraphqlSyntaxToken.format_replaced(&string_token, &content, f)
         } else {
             write![f, [graphql_string_literal_token.format()]]
         }

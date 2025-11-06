@@ -35,16 +35,16 @@ impl FormatNodeRule<JsExtendsClause> for FormatJsExtendsClause {
                 .is_some_and(|p| p.kind() == JS_ASSIGNMENT_EXPRESSION)
             {
                 if comments.has_leading_comments(super_class.syntax()) || has_trailing_comments {
-                    write!(f, [text("("), &content, text(")")])
+                    write!(f, [token("("), &content, token(")")])
                 } else {
                     let content = content.memoized();
                     write!(
                         f,
                         [
                             if_group_breaks(&format_args![
-                                text("("),
+                                token("("),
                                 &soft_block_indent(&content),
-                                text(")"),
+                                token(")"),
                             ]),
                             if_group_fits_on_line(&content)
                         ]

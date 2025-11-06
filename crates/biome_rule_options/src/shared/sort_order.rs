@@ -8,6 +8,7 @@
     serde::Deserialize,
     serde::Serialize,
     biome_deserialize_macros::Deserializable,
+    biome_deserialize_macros::Merge,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]

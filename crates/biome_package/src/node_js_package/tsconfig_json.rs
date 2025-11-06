@@ -116,6 +116,16 @@ impl TsConfigJson {
                 })
         })
     }
+
+    /// Returns the base identifier from the JSX factory function name.
+    pub fn jsx_factory_identifier(&self) -> Option<&str> {
+        self.compiler_options.jsx_factory.as_deref()
+    }
+
+    /// Returns the base identifier from the JSX fragment factory function name.
+    pub fn jsx_fragment_factory_identifier(&self) -> Option<&str> {
+        self.compiler_options.jsx_fragment_factory.as_deref()
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserializable)]
@@ -137,6 +147,20 @@ pub struct CompilerOptions {
     /// See: https://www.typescriptlang.org/tsconfig/#typeRoots
     #[deserializable(rename = "typeRoots")]
     pub type_roots: Option<Vec<String>>,
+
+    /// See: https://www.typescriptlang.org/tsconfig/#jsxFactory
+    /// Specifies the JSX factory function to use when targeting react JSX emit.
+    /// The value is normalized to the base identifier during deserialization.
+    /// For example, "React.createElement" becomes "React", "h" stays "h".
+    #[deserializable(rename = "jsxFactory")]
+    pub jsx_factory: Option<JsxFactoryIdentifier>,
+
+    /// See: https://www.typescriptlang.org/tsconfig/#jsxFragmentFactory
+    /// Specifies the JSX fragment factory function to use when targeting react JSX emit.
+    /// The value is normalized to the base identifier during deserialization.
+    /// For example, "React.Fragment" becomes "React", "Fragment" stays "Fragment".
+    #[deserializable(rename = "jsxFragmentFactory")]
+    pub jsx_fragment_factory: Option<JsxFactoryIdentifier>,
 }
 
 pub type CompilerOptionsPathsMap = IndexMap<String, Vec<String>, BuildHasherDefault<FxHasher>>;
@@ -164,4 +188,276 @@ impl Deserializable for ExtendsField {
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct ProjectReference {
     pub path: Utf8PathBuf,
+}
+
+/// A JSX factory identifier that is normalized during deserialization.
+///
+/// When deserializing from JSON, if the value contains a dot (e.g., "React.createElement"),
+/// only the base identifier before the first dot is kept (e.g., "React").
+/// This normalization happens once during deserialization for efficiency.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct JsxFactoryIdentifier(String);
+
+impl JsxFactoryIdentifier {
+    /// Returns the normalized identifier as a string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl std::ops::Deref for JsxFactoryIdentifier {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Deserializable for JsxFactoryIdentifier {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        let full_name = String::deserialize(ctx, value, name)?;
+        // Extract the base identifier (everything before the first dot)
+        let base_identifier = full_name.split('.').next().unwrap().trim();
+
+        // Return None if the identifier is empty or whitespace-only
+        // to avoid "configured but unusable" states downstream
+        if base_identifier.is_empty() {
+            return None;
+        }
+
+        Some(Self(base_identifier.to_string()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_jsx_factory_normalization() {
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "React.createElement",
+                "jsxFragmentFactory": "React.Fragment"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            Some("React"),
+            "React.createElement should be normalized to React"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            Some("React"),
+            "React.Fragment should be normalized to React"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_simple_identifier() {
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "h",
+                "jsxFragmentFactory": "Fragment"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            Some("h"),
+            "h should remain as h"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            Some("Fragment"),
+            "Fragment should remain as Fragment"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_namespaced() {
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "MyLib.createElement",
+                "jsxFragmentFactory": "MyLib.Fragment"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            Some("MyLib"),
+            "MyLib.createElement should be normalized to MyLib"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            Some("MyLib"),
+            "MyLib.Fragment should be normalized to MyLib"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_missing() {
+        let json = r#"{
+            "compilerOptions": {}
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            None,
+            "Missing jsxFactory should return None"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            None,
+            "Missing jsxFragmentFactory should return None"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_deeply_nested() {
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "Deeply.Nested.Function",
+                "jsxFragmentFactory": "Another.Nested.Fragment"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            Some("Deeply"),
+            "Deeply.Nested.Function should be normalized to Deeply"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            Some("Another"),
+            "Another.Nested.Fragment should be normalized to Another"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_efficiency() {
+        // This test verifies that normalization happens during deserialization,
+        // not on every access
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "React.createElement"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(tsconfig.jsx_factory_identifier(), Some("React"));
+        assert_eq!(tsconfig.jsx_factory_identifier(), Some("React")); // consistency
+    }
+
+    #[test]
+    fn test_jsx_factory_empty_string() {
+        // Empty strings should be treated as None to avoid "configured but unusable" states
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "",
+                "jsxFragmentFactory": ""
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            None,
+            "Empty jsxFactory should be None"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            None,
+            "Empty jsxFragmentFactory should be None"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_whitespace_only() {
+        // Whitespace-only strings should be treated as None
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "   ",
+                "jsxFragmentFactory": "\t\n"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            None,
+            "Whitespace-only jsxFactory should be None"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            None,
+            "Whitespace-only jsxFragmentFactory should be None"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_dot_only() {
+        // A string with only dots should result in None (empty base identifier)
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": ".",
+                "jsxFragmentFactory": "..."
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            None,
+            "Dot-only jsxFactory should be None"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            None,
+            "Dot-only jsxFragmentFactory should be None"
+        );
+    }
+
+    #[test]
+    fn test_jsx_factory_with_surrounding_whitespace() {
+        // Whitespace should be trimmed
+        let json = r#"{
+            "compilerOptions": {
+                "jsxFactory": "  React.createElement  ",
+                "jsxFragmentFactory": "\tFragment\n"
+            }
+        }"#;
+
+        let (tsconfig, _) = TsConfigJson::parse(Utf8Path::new("/test/tsconfig.json"), json);
+
+        assert_eq!(
+            tsconfig.jsx_factory_identifier(),
+            Some("React"),
+            "Whitespace should be trimmed from jsxFactory"
+        );
+        assert_eq!(
+            tsconfig.jsx_fragment_factory_identifier(),
+            Some("Fragment"),
+            "Whitespace should be trimmed from jsxFragmentFactory"
+        );
+    }
 }

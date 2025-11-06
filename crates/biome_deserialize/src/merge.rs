@@ -29,13 +29,31 @@ impl<T: Merge> Merge for Option<T> {
 
 impl<T> Merge for Vec<T> {
     fn merge_with(&mut self, other: Self) {
-        self.extend(other);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            self.extend(other);
+        }
+    }
+}
+
+impl<T> Merge for Box<[T]> {
+    fn merge_with(&mut self, other: Self) {
+        if self.is_empty() {
+            *self = other;
+        } else if !other.is_empty() {
+            *self = std::mem::take(self).into_iter().chain(other).collect();
+        }
     }
 }
 
 impl<T: Eq + Hash, S: BuildHasher + Default> Merge for std::collections::HashSet<T, S> {
     fn merge_with(&mut self, other: Self) {
-        self.extend(other);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            self.extend(other);
+        }
     }
 }
 
@@ -43,11 +61,15 @@ impl<K: Hash + Eq, V: Merge, S: Default + BuildHasher> Merge
     for std::collections::HashMap<K, V, S>
 {
     fn merge_with(&mut self, other: Self) {
-        for (k, v) in other {
-            if let Some(self_value) = self.get_mut(&k) {
-                self_value.merge_with(v);
-            } else {
-                self.insert(k, v);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            for (k, v) in other {
+                if let Some(self_value) = self.get_mut(&k) {
+                    self_value.merge_with(v);
+                } else {
+                    self.insert(k, v);
+                }
             }
         }
     }
@@ -55,17 +77,25 @@ impl<K: Hash + Eq, V: Merge, S: Default + BuildHasher> Merge
 
 impl<V: Ord> Merge for std::collections::BTreeSet<V> {
     fn merge_with(&mut self, other: Self) {
-        self.extend(other);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            self.extend(other);
+        }
     }
 }
 
 impl<K: Ord, V: Merge> Merge for std::collections::BTreeMap<K, V> {
     fn merge_with(&mut self, other: Self) {
-        for (k, v) in other {
-            if let Some(self_value) = self.get_mut(&k) {
-                self_value.merge_with(v);
-            } else {
-                self.insert(k, v);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            for (k, v) in other {
+                if let Some(self_value) = self.get_mut(&k) {
+                    self_value.merge_with(v);
+                } else {
+                    self.insert(k, v);
+                }
             }
         }
     }
@@ -74,18 +104,26 @@ impl<K: Ord, V: Merge> Merge for std::collections::BTreeMap<K, V> {
 #[cfg(feature = "indexmap")]
 impl<T: Hash + Eq> Merge for indexmap::IndexSet<T> {
     fn merge_with(&mut self, other: Self) {
-        self.extend(other);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            self.extend(other);
+        }
     }
 }
 
 #[cfg(feature = "indexmap")]
 impl<K: Hash + Eq, V: Merge, S: Default + BuildHasher> Merge for indexmap::IndexMap<K, V, S> {
     fn merge_with(&mut self, other: Self) {
-        for (k, v) in other {
-            if let Some(self_value) = self.get_mut(&k) {
-                self_value.merge_with(v);
-            } else {
-                self.insert(k, v);
+        if self.is_empty() {
+            *self = other;
+        } else {
+            for (k, v) in other {
+                if let Some(self_value) = self.get_mut(&k) {
+                    self_value.merge_with(v);
+                } else {
+                    self.insert(k, v);
+                }
             }
         }
     }

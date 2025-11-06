@@ -224,7 +224,8 @@ CssRoot {
             at_token: AT@281..284 "@" [Newline("\n"), Newline("\n")] [],
             rule: TwSourceAtRule {
                 source_token: SOURCE_KW@284..291 "source" [] [Whitespace(" ")],
-                path: CssString {
+                not_token: missing (optional),
+                source: CssString {
                     value_token: CSS_STRING_LITERAL@291..303 "\"./base.css\"" [] [],
                 },
                 semicolon_token: SEMICOLON@303..304 ";" [] [],
@@ -480,9 +481,10 @@ CssRoot {
       0: AT@281..284 "@" [Newline("\n"), Newline("\n")] []
       1: TW_SOURCE_AT_RULE@284..304
         0: SOURCE_KW@284..291 "source" [] [Whitespace(" ")]
-        1: CSS_STRING@291..303
+        1: (empty)
+        2: CSS_STRING@291..303
           0: CSS_STRING_LITERAL@291..303 "\"./base.css\"" [] []
-        2: SEMICOLON@303..304 ";" [] []
+        3: SEMICOLON@303..304 ";" [] []
     5: CSS_QUALIFIED_RULE@304..380
       0: CSS_SELECTOR_LIST@304..315
         0: CSS_COMPOUND_SELECTOR@304..315

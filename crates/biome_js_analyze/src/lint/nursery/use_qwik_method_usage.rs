@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// };
     /// ```
     pub UseQwikMethodUsage {
-        version: "next",
+        version: "2.2.6",
         name: "useQwikMethodUsage",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("use-method-usage").same()],

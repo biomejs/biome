@@ -13,30 +13,13 @@ statement ( ) ;
 ---
 <div></div>"#;
 
-const ASTRO_FILE_FORMATTED: &str = r#"---
-import { something } from "file.astro";
-
-statement();
----
-<div></div>"#;
-
 const ASTRO_FILE_DEBUGGER_BEFORE: &str = r#"---
 debugger;
 ---
 <div></div>"#;
 
-const ASTRO_FILE_DEBUGGER_AFTER: &str = r#"---
----
-<div></div>"#;
-
 const ASTRO_FILE_USELESS_RENAME_BEFORE: &str = r#"---
 import {a as a} from 'mod';
-export { a };
----
-<div></div>"#;
-
-const ASTRO_FILE_USELESS_RENAME_AFTER: &str = r#"---
-import {a} from 'mod';
 export { a };
 ---
 <div></div>"#;
@@ -63,7 +46,7 @@ const ASTRO_FILE_CHECK_BEFORE: &str = r#"---
 import {a as a} from 'mod';
 import {    something } from "file.astro";
 debugger;
-statement ( ) ;
+something ( ) ;
 var foo: string = "";
 ---
 <div></div>"#;
@@ -72,6 +55,20 @@ const ASTRO_FILE_ASTRO_GLOBAL_OBJECT: &str = r#"---
 const { some } = Astro.props
 ---
 <div>{some}</div>"#;
+
+const ASTRO_FILE_WITH_TS_SCRIPT_TAG: &str = r#"---
+const title = "My Page";
+---
+<html>
+<body>
+    <script>
+        const message:     string = "Hello TypeScript";
+        function greet(name:   string): void {
+            console.log(  message + ", " + name );
+        }
+    </script>
+</body>
+</html>"#;
 
 #[test]
 fn format_astro_files() {
@@ -198,6 +195,54 @@ fn lint_astro_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_astro_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+let schema = z.object().optional();
+schema + sure()
+---
+
+<html><head><title>Astro</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support",
         fs,
         console,
         result,
@@ -339,17 +384,6 @@ fn format_stdin_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_successfully",
@@ -373,17 +407,6 @@ fn format_stdin_write_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -448,17 +471,6 @@ fn lint_stdin_write_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_USELESS_RENAME_AFTER);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_stdin_write_successfully",
@@ -493,17 +505,6 @@ fn lint_stdin_write_unsafe_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_DEBUGGER_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -628,6 +629,39 @@ fn astro_global_object() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_global",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_astro_with_typescript_script_tag() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_WITH_TS_SCRIPT_TAG.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_astro_with_typescript_script_tag",
         fs,
         console,
         result,

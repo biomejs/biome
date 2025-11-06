@@ -18,8 +18,26 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             | HTML_BOGUS
             | HTML_BOGUS_ATTRIBUTE
             | HTML_BOGUS_ELEMENT
-            | HTML_BOGUS_TEXT_EXPRESSION => {
-                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            | HTML_BOGUS_TEXT_EXPRESSION
+            | SVELTE_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            ASTRO_EMBEDDED_CONTENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ASTRO_EMBEDDED_CONTENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ASTRO_EMBEDDED_CONTENT, children)
             }
             ASTRO_FRONTMATTER_ELEMENT => {
                 let mut elements = (&children).into_iter();
@@ -33,7 +51,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
+                    && AstroEmbeddedContent::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -594,12 +612,78 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_TEXT_EXPRESSION, children)
             }
+            SVELTE_DEBUG_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!["{@"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![debug]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteBindingList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_DEBUG_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_DEBUG_BLOCK, children)
+            }
+            SVELTE_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == SVELTE_IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_NAME, children)
+            }
             HTML_ATTRIBUTE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlAttribute::can_cast)
             }
             HTML_ELEMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlElement::can_cast)
             }
+            SVELTE_BINDING_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                SvelteName::can_cast,
+                T ! [,],
+                false,
+            ),
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

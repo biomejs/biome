@@ -6,10 +6,9 @@ use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
-use biome_configuration::html::HtmlConfiguration;
+use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
-use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
     BiomeDiagnostic, Configuration, CssConfiguration, DEFAULT_SCANNER_IGNORE_ENTRIES,
@@ -40,6 +39,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -73,9 +73,18 @@ pub struct Settings {
     pub override_settings: OverrideSettings,
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
+
+    // TODO: remove once HTML full support is stable
+    pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 }
 
 impl Settings {
+    pub fn experimental_full_html_support_enabled(&self) -> bool {
+        self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
     pub fn source(&self) -> Option<Configuration> {
         self.source.as_ref().map(|source| {
             let (config, _) = source.deref().clone();
@@ -142,7 +151,8 @@ impl Settings {
         }
         // html settings
         if let Some(html) = configuration.html {
-            self.languages.html = html.into()
+            self.experimental_full_html_support = html.experimental_full_support_enabled;
+            self.languages.html = html.into();
         }
 
         // plugin settings
@@ -304,6 +314,7 @@ impl Settings {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
             FeatureKind::Assist => &self.assist.includes,
+            FeatureKind::HtmlFullSupport => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };
@@ -487,7 +498,7 @@ impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
         }
 
         if let Some(jsx_runtime) = javascript.jsx_runtime {
-            language_setting.environment = jsx_runtime.into();
+            language_setting.environment.jsx_runtime = Some(jsx_runtime);
         }
 
         if let Some(globals) = javascript.globals {

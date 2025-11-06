@@ -32,7 +32,6 @@ pub(crate) async fn did_open(
 
     let path = session.file_path(&url)?;
 
-    eprintln!("Session id {:?}", session.key);
     let project_key = match session.project_for_path(&path) {
         Some(project_key) => project_key,
         None => {
@@ -75,6 +74,9 @@ pub(crate) async fn did_open(
                 "Loading configuration from text_document {:?}",
                 &project_path
             );
+            if !session.has_initialized() {
+                session.load_extension_settings().await;
+            }
             let status = session
                 .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
                 .await;

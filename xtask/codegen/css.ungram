@@ -660,6 +660,7 @@ AnyCssAtRule =
 	| TwReferenceAtRule
 	| TwConfigAtRule
 	| TwPluginAtRule
+	| TwSlotAtRule
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
@@ -1873,9 +1874,14 @@ CssMetavariable = value: 'grit_metavariable'
 // Tailwind
 
 // --value(--tab-size-*)
+//         ^^^^^^^^^^^^
+// --color-*: initial;
+// ^^^^^^^^^
+// --*: initial;
+// ^^^
 TwValueThemeReference =
 	reference: CssDashedIdentifier
-	'-'
+	'-'?
 	'*'
 
 // Enhanced @utility directive to support functional utilities
@@ -1939,10 +1945,22 @@ TwApplyClassList = CssIdentifier*
 
 // Tailwind 4.0 @source directive
 // @source "../node_modules/@my-company/ui-lib";
+// @source inline("underline");
 TwSourceAtRule =
   'source'
-  path: CssString
+  'not'?
+  source: AnyTwSource
   ';'
+
+AnyTwSource =
+	CssString
+	| TwSourceInline
+
+TwSourceInline =
+	'inline'
+	'('
+	content: CssString
+	')'
 
 // Tailwind 4.0 @reference directive
 // @reference "../../app.css";
@@ -1960,7 +1978,17 @@ TwConfigAtRule =
 
 // Tailwind 4.0 @plugin directive (compatibility)
 // @plugin "@tailwindcss/typography";
+// @plugin "my-plugin" {
+//  debug: false;
+//  threshold: 0.5;
+// }
 TwPluginAtRule =
   'plugin'
   name: CssString
-  ';'
+  block: AnyCssDeclarationBlock?
+  ';'?
+
+// Tailwind 4.0 @slot directive
+TwSlotAtRule =
+	'slot'
+	';'

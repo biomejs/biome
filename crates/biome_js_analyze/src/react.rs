@@ -143,7 +143,7 @@ impl ReactLibrary {
 /// List of valid [`React` API]
 ///
 /// [`React` API]: https://reactjs.org/docs/react-api.html
-const VALID_REACT_API: [&str; 29] = [
+const VALID_REACT_API: [&str; 31] = [
     "Component",
     "PureComponent",
     "memo",
@@ -173,6 +173,8 @@ const VALID_REACT_API: [&str; 29] = [
     "useTransition",
     "useId",
     "useSyncExternalStore",
+    "Activity",
+    "useEffectEvent",
 ];
 
 /// Checks if the current [JsCallExpression] is a potential [`React` API].
@@ -331,4 +333,13 @@ pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLi
         .find_map(JsImport::cast)
         .and_then(|import| import.source_text().ok())
         .is_some_and(|source| lib.import_names().contains(&source.text()))
+}
+
+/// Checks if `binding` matches a custom JSX factory identifier.
+/// This is used when `jsxRuntime` is `ReactClassic` and custom JSX factories are configured
+/// via tsconfig.json's `jsxFactory` or `jsxFragmentFactory` options.
+pub(crate) fn is_jsx_factory_import(binding: &JsIdentifierBinding, factory_name: &str) -> bool {
+    binding
+        .name_token()
+        .is_ok_and(|name| name.text_trimmed() == factory_name)
 }

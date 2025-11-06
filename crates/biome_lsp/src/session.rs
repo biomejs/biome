@@ -16,11 +16,10 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, SupportsFeatureParams,
+    FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
+    SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -48,6 +47,7 @@ use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
 use tracing::{debug, error, info, instrument, warn};
+use uuid::Uuid;
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -85,6 +85,9 @@ pub(crate) struct Session {
     /// A flag to notify a message to the user when the configuration is broken, and the LSP attempts
     /// to update the diagnostics
     notified_broken_configuration: AtomicBool,
+
+    /// Tracks whether the initialized() notification has been received
+    initialized: AtomicBool,
 
     /// Projects opened in this session, mapped from the project's root path to
     /// the associated project key.
@@ -213,6 +216,7 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: AtomicBool::new(false),
+            initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
             workspace_folders: Default::default(),
@@ -447,17 +451,6 @@ impl Session {
                 pull_code_actions: false,
             })?;
 
-            let content = self.workspace.get_file_content(GetFileContentParams {
-                project_key: doc.project_key,
-                path: biome_path.clone(),
-            })?;
-            let offset = match biome_path.extension() {
-                Some("vue") => VueFileHandler::start(content.as_str()),
-                Some("astro") => AstroFileHandler::start(content.as_str()),
-                Some("svelte") => SvelteFileHandler::start(content.as_str()),
-                _ => None,
-            };
-
             result
                 .diagnostics
                 .into_iter()
@@ -467,7 +460,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
-                        offset,
+                        None,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {
@@ -595,9 +588,24 @@ impl Session {
         self.workspace_folders.read().unwrap().clone()
     }
 
-    pub(crate) fn update_workspace_folders(&self, folders: Vec<WorkspaceFolder>) {
+    pub(crate) fn update_workspace_folders(
+        &self,
+        added: Vec<WorkspaceFolder>,
+        removed: Vec<WorkspaceFolder>,
+    ) {
         let mut workspace_folders = self.workspace_folders.write().unwrap();
-        *workspace_folders = Some(folders);
+
+        if let Some(ref mut folders) = *workspace_folders {
+            if !removed.is_empty() {
+                folders.retain(|folder| !removed.contains(folder));
+            }
+
+            if !added.is_empty() {
+                folders.extend(added);
+            }
+        } else {
+            *workspace_folders = Some(added);
+        }
     }
 
     /// Returns the base path of the workspace on the filesystem if it has one
@@ -621,6 +629,16 @@ impl Session {
     /// Returns a reference to the client information for this session
     pub(crate) fn client_information(&self) -> Option<&ClientInformation> {
         self.initialize_params.get()?.client_information.as_ref()
+    }
+
+    /// Mark that the initialized() notification has been received
+    pub(crate) fn set_initialized(&self) {
+        self.initialized.store(true, Ordering::Relaxed);
+    }
+
+    /// Returns true if the initialized() notification has been received
+    pub(crate) fn has_initialized(&self) -> bool {
+        self.initialized.load(Ordering::Relaxed)
     }
 
     /// This function attempts to read the `biome.json` configuration file from
@@ -685,6 +703,36 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
+        let progress_token = lsp_types::ProgressToken::String(Uuid::new_v4().to_string());
+        let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
+            params
+                .client_capabilities
+                .window
+                .as_ref()
+                .is_some_and(|window| window.work_done_progress == Some(true))
+        });
+
+        // Let the user know the scanning is taking long time using the $/progress notification.
+        let progress = if is_work_done_progress_supported
+            && self
+                .client
+                .send_request::<lsp_types::request::WorkDoneProgressCreate>(
+                    lsp_types::WorkDoneProgressCreateParams {
+                        token: progress_token.clone(),
+                    },
+                )
+                .await
+                .is_ok()
+        {
+            let progress = self
+                .client
+                .progress(progress_token.clone(), "Biome is scanning the project");
+
+            Some(progress.begin().await)
+        } else {
+            None
+        };
+
         let session = self.clone();
 
         spawn_blocking(move || {
@@ -721,6 +769,10 @@ impl Session {
         })
         .await
         .unwrap();
+
+        if let Some(progress) = progress {
+            progress.finish().await;
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self))]

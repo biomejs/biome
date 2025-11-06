@@ -4,6 +4,7 @@ use super::{
     SearchCapabilities, is_diagnostic_error,
 };
 use crate::WorkspaceError;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -12,10 +13,13 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
+use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleError};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
+};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
@@ -35,6 +39,7 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use tracing::{debug_span, error, info, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -165,15 +170,18 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_analyzer_options(
-        _global: &Settings,
+        global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
+        let configuration =
+            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
+            .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
 
@@ -482,6 +490,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -525,6 +534,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
@@ -564,6 +574,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
+    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
 
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
@@ -633,6 +644,27 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
                         range,
                     });
+
+                    // Check for runaway edit growth
+                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
+                    if !growth_guard.check(curr_len) {
+                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
+                        // We can do this by inspecting the last few fixes that were applied.
+                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
+
+                        let mut seen_rules = HashSet::new();
+                        for action in actions.iter().rev().take(10) {
+                            if let Some((group, rule)) = action.rule_name.as_ref() {
+                                seen_rules.insert((group.clone(), rule.clone()));
+                            }
+                        }
+
+                        return Err(WorkspaceError::RuleError(
+                            RuleError::ConflictingRuleFixesError {
+                                rules: seen_rules.into_iter().collect(),
+                            },
+                        ));
+                    }
                 }
             }
             None => {

@@ -3,7 +3,6 @@ use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::plugins::Plugins;
 use crate::{
     CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     Rules,
@@ -13,6 +12,7 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
     LineEnding, LineWidth,
 };
+use biome_plugin_loader::Plugins;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 

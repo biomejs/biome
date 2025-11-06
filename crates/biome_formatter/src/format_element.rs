@@ -26,17 +26,16 @@ pub enum FormatElement {
     /// Forces the parent group to print in expanded mode.
     ExpandParent,
 
-    /// Token constructed by the formatter from a static string
-    StaticText {
+    /// A ASCII only Token that contains no line breaks or tab characters.
+    Token {
         text: &'static str,
     },
 
-    /// Token constructed from the input source as a dynamic
-    /// string with its start position in the input document.
-    DynamicText {
+    /// An arbitrary text that can contain tabs, newlines, and unicode characters.
+    Text {
         /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
         text: Box<str>,
-        /// The start position of the dynamic token in the unformatted source code
+        /// The start position of the text in the unformatted source code
         source_position: TextSize,
     },
 
@@ -71,8 +70,8 @@ impl std::fmt::Debug for FormatElement {
             Self::Space | Self::HardSpace => write!(fmt, "Space"),
             Self::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
             Self::ExpandParent => write!(fmt, "ExpandParent"),
-            Self::StaticText { text } => fmt.debug_tuple("StaticText").field(text).finish(),
-            Self::DynamicText { text, .. } => fmt.debug_tuple("DynamicText").field(text).finish(),
+            Self::Token { text } => fmt.debug_tuple("Token").field(text).finish(),
+            Self::Text { text, .. } => fmt.debug_tuple("Text").field(text).finish(),
             Self::LocatedTokenText { slice, .. } => {
                 fmt.debug_tuple("LocatedTokenText").field(slice).finish()
             }
@@ -219,7 +218,7 @@ impl FormatElement {
     pub const fn is_text(&self) -> bool {
         matches!(
             self,
-            Self::LocatedTokenText { .. } | Self::DynamicText { .. } | Self::StaticText { .. }
+            Self::LocatedTokenText { .. } | Self::Text { .. } | Self::Token { .. }
         )
     }
 
@@ -238,14 +237,18 @@ impl FormatElements for FormatElement {
             Self::ExpandParent => true,
             Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
             Self::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
-            Self::StaticText { text } => text.contains('\n'),
-            Self::DynamicText { text, .. } => text.contains('\n'),
+
+            Self::Text { text, .. } => text.contains('\n'),
             Self::LocatedTokenText { slice, .. } => slice.contains('\n'),
             Self::Interned(interned) => interned.will_break(),
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
             Self::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
-            Self::LineSuffixBoundary | Self::Space | Self::Tag(_) | Self::HardSpace => false,
+            Self::LineSuffixBoundary
+            | Self::Space
+            | Self::Tag(_)
+            | Self::HardSpace
+            | Self::Token { .. } => false,
         }
     }
 

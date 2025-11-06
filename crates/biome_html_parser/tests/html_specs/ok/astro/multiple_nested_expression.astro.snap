@@ -1,0 +1,152 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+import { Counter } from '@/components/counter'
+
+const show = false
+---
+<div>
+	<!-- expect -->
+	<span />
+	<Counter />
+
+	<!-- errors -->
+	<!-- 1. if brace in brace, got unexpect format -->
+	{show &&<Counter value={show} onAbort={()=>{}}onClick={()=>{}}
+									 className="flex"/>}
+	<!-- 2. not format -->
+	{show&& <span/>}
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..71 "import { Counter } from '@/components/counter'\n\nconst show = false\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@71..74 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@74..76 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@76..79 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@79..80 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@80..100 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- expect -->"), Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@100..105 "span" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [],
+                    slash_token: SLASH@105..106 "/" [] [],
+                    r_angle_token: R_ANGLE@106..107 ">" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@110..118 "Counter" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [],
+                    slash_token: SLASH@118..119 "/" [] [],
+                    r_angle_token: R_ANGLE@119..120 ">" [] [],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@120..193 "{" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- errors -->"), Newline("\n"), Whitespace("\t"), Comments("<!-- 1. if brace in b ..."), Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@193..283 "show &&<Counter value={show} onAbort={()=>{}}onClick={()=>{}}\n\t\t\t\t\t\t\t\t\t className=\"flex\"/>" [] [],
+                    },
+                    r_curly_token: R_CURLY@283..284 "}" [] [],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@284..311 "{" [Newline("\n"), Whitespace("\t"), Comments("<!-- 2. not format -->"), Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@311..325 "show&& <span/>" [] [],
+                    },
+                    r_curly_token: R_CURLY@325..326 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@326..328 "<" [Newline("\n")] [],
+                slash_token: SLASH@328..329 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@329..332 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@332..333 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@333..334 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..334
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..74
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..71
+      0: HTML_LITERAL@3..71 "import { Counter } from '@/components/counter'\n\nconst show = false\n" [Newline("\n")] []
+    2: FENCE@71..74 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@74..333
+    0: HTML_ELEMENT@74..333
+      0: HTML_OPENING_ELEMENT@74..80
+        0: L_ANGLE@74..76 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@76..79
+          0: HTML_LITERAL@76..79 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@79..79
+        3: R_ANGLE@79..80 ">" [] []
+      1: HTML_ELEMENT_LIST@80..326
+        0: HTML_SELF_CLOSING_ELEMENT@80..107
+          0: L_ANGLE@80..100 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- expect -->"), Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@100..105
+            0: HTML_LITERAL@100..105 "span" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@105..105
+          3: SLASH@105..106 "/" [] []
+          4: R_ANGLE@106..107 ">" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@107..120
+          0: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@110..118
+            0: HTML_LITERAL@110..118 "Counter" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@118..118
+          3: SLASH@118..119 "/" [] []
+          4: R_ANGLE@119..120 ">" [] []
+        2: HTML_SINGLE_TEXT_EXPRESSION@120..284
+          0: L_CURLY@120..193 "{" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- errors -->"), Newline("\n"), Whitespace("\t"), Comments("<!-- 1. if brace in b ..."), Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@193..283
+            0: HTML_LITERAL@193..283 "show &&<Counter value={show} onAbort={()=>{}}onClick={()=>{}}\n\t\t\t\t\t\t\t\t\t className=\"flex\"/>" [] []
+          2: R_CURLY@283..284 "}" [] []
+        3: HTML_SINGLE_TEXT_EXPRESSION@284..326
+          0: L_CURLY@284..311 "{" [Newline("\n"), Whitespace("\t"), Comments("<!-- 2. not format -->"), Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@311..325
+            0: HTML_LITERAL@311..325 "show&& <span/>" [] []
+          2: R_CURLY@325..326 "}" [] []
+      2: HTML_CLOSING_ELEMENT@326..333
+        0: L_ANGLE@326..328 "<" [Newline("\n")] []
+        1: SLASH@328..329 "/" [] []
+        2: HTML_TAG_NAME@329..332
+          0: HTML_LITERAL@329..332 "div" [] []
+        3: R_ANGLE@332..333 ">" [] []
+  4: EOF@333..334 "" [Newline("\n")] []
+
+```

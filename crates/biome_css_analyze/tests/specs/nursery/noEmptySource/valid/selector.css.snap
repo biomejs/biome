@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: selector.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {}
+
+```

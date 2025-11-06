@@ -58,7 +58,7 @@ impl<'src> TailwindLexer<'src> {
             b'-' => self.consume_byte(T![-]),
             b'!' => self.consume_byte(T![!]),
             b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ if current.is_ascii_alphanumeric() => self.consume_base(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -68,6 +68,21 @@ impl<'src> TailwindLexer<'src> {
                 }
                 self.consume_unexpected_character()
             }
+        }
+    }
+
+    fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
+            b':' => self.consume_byte(T![:]),
+            b'-' => self.consume_byte(T![-]),
+            b'!' => self.consume_byte(T![!]),
+            b'/' => self.consume_byte(T![/]),
+            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -252,6 +267,7 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     TailwindLexContext::Regular => self.consume_token(current),
+                    TailwindLexContext::SawNegative => self.consume_token_saw_negative(current),
                     TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
                     TailwindLexContext::ArbitraryVariant => {
                         self.consume_token_arbitrary_variant(current)
