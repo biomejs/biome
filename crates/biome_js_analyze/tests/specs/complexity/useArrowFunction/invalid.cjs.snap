@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.cjs
+---
+# Input
+```cjs
+const withBoundArguments = function() {
+	const arguments = 10;
+	return arguments;
+}
+
+```
+
+# Diagnostics
+```
+invalid.cjs:1:28 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+  > 1 │ const withBoundArguments = function() {
+      │                            ^^^^^^^^^^^^
+  > 2 │ 	const arguments = 10;
+  > 3 │ 	return arguments;
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    1   │ - const·withBoundArguments·=·function()·{
+      1 │ + const·withBoundArguments·=·()·=>·{
+    2 2 │   	const arguments = 10;
+    3 3 │   	return arguments;
+  
+
+```

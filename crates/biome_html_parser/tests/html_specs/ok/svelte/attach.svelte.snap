@@ -1,0 +1,257 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+<div {@attach myAttachment}>...</div>
+<button {@attach tooltip(content)}>
+	Hover me
+</button>
+<canvas
+	width={32}
+	height={32}
+	{@attach (canvas) => {
+		const context = canvas.getContext('2d');
+
+		$effect(() => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+		});
+	}}
+></canvas>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteAttachAttribute {
+                        sv_curly_at_token: SV_CURLY_AT@5..7 "{@" [] [],
+                        attach_token: ATTACH_KW@7..13 "attach" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@13..26 " myAttachment" [] [],
+                        },
+                        r_curly_token: R_CURLY@26..27 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@27..28 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@28..31 "..." [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@31..32 "<" [] [],
+                slash_token: SLASH@32..33 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@33..36 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@37..39 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..46 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteAttachAttribute {
+                        sv_curly_at_token: SV_CURLY_AT@46..48 "{@" [] [],
+                        attach_token: ATTACH_KW@48..54 "attach" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@54..71 " tooltip(content)" [] [],
+                        },
+                        r_curly_token: R_CURLY@71..72 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@72..73 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@73..83 "Hover me" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@83..85 "<" [Newline("\n")] [],
+                slash_token: SLASH@85..86 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@86..92 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@92..93 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@93..95 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@95..101 "canvas" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@101..108 "width" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@108..109 "=" [] [],
+                            value: HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@109..110 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@110..112 "32" [] [],
+                                },
+                                r_curly_token: R_CURLY@112..113 "}" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@113..121 "height" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@121..122 "=" [] [],
+                            value: HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@122..123 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@123..125 "32" [] [],
+                                },
+                                r_curly_token: R_CURLY@125..126 "}" [] [],
+                            },
+                        },
+                    },
+                    SvelteAttachAttribute {
+                        sv_curly_at_token: SV_CURLY_AT@126..130 "{@" [Newline("\n"), Whitespace("\t")] [],
+                        attach_token: ATTACH_KW@130..136 "attach" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@136..307 " (canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] [],
+                        },
+                        r_curly_token: R_CURLY@307..308 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@308..310 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@310..311 "<" [] [],
+                slash_token: SLASH@311..312 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@312..318 "canvas" [] [],
+                },
+                r_angle_token: R_ANGLE@318..319 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@319..320 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..320
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..319
+    0: HTML_ELEMENT@0..37
+      0: HTML_OPENING_ELEMENT@0..28
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..27
+          0: SVELTE_ATTACH_ATTRIBUTE@5..27
+            0: SV_CURLY_AT@5..7 "{@" [] []
+            1: ATTACH_KW@7..13 "attach" [] []
+            2: HTML_TEXT_EXPRESSION@13..26
+              0: HTML_LITERAL@13..26 " myAttachment" [] []
+            3: R_CURLY@26..27 "}" [] []
+        3: R_ANGLE@27..28 ">" [] []
+      1: HTML_ELEMENT_LIST@28..31
+        0: HTML_CONTENT@28..31
+          0: HTML_LITERAL@28..31 "..." [] []
+      2: HTML_CLOSING_ELEMENT@31..37
+        0: L_ANGLE@31..32 "<" [] []
+        1: SLASH@32..33 "/" [] []
+        2: HTML_TAG_NAME@33..36
+          0: HTML_LITERAL@33..36 "div" [] []
+        3: R_ANGLE@36..37 ">" [] []
+    1: HTML_ELEMENT@37..93
+      0: HTML_OPENING_ELEMENT@37..73
+        0: L_ANGLE@37..39 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@39..46
+          0: HTML_LITERAL@39..46 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@46..72
+          0: SVELTE_ATTACH_ATTRIBUTE@46..72
+            0: SV_CURLY_AT@46..48 "{@" [] []
+            1: ATTACH_KW@48..54 "attach" [] []
+            2: HTML_TEXT_EXPRESSION@54..71
+              0: HTML_LITERAL@54..71 " tooltip(content)" [] []
+            3: R_CURLY@71..72 "}" [] []
+        3: R_ANGLE@72..73 ">" [] []
+      1: HTML_ELEMENT_LIST@73..83
+        0: HTML_CONTENT@73..83
+          0: HTML_LITERAL@73..83 "Hover me" [Newline("\n"), Whitespace("\t")] []
+      2: HTML_CLOSING_ELEMENT@83..93
+        0: L_ANGLE@83..85 "<" [Newline("\n")] []
+        1: SLASH@85..86 "/" [] []
+        2: HTML_TAG_NAME@86..92
+          0: HTML_LITERAL@86..92 "button" [] []
+        3: R_ANGLE@92..93 ">" [] []
+    2: HTML_ELEMENT@93..319
+      0: HTML_OPENING_ELEMENT@93..310
+        0: L_ANGLE@93..95 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@95..101
+          0: HTML_LITERAL@95..101 "canvas" [] []
+        2: HTML_ATTRIBUTE_LIST@101..308
+          0: HTML_ATTRIBUTE@101..113
+            0: HTML_ATTRIBUTE_NAME@101..108
+              0: HTML_LITERAL@101..108 "width" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@108..113
+              0: EQ@108..109 "=" [] []
+              1: HTML_SINGLE_TEXT_EXPRESSION@109..113
+                0: L_CURLY@109..110 "{" [] []
+                1: HTML_TEXT_EXPRESSION@110..112
+                  0: HTML_LITERAL@110..112 "32" [] []
+                2: R_CURLY@112..113 "}" [] []
+          1: HTML_ATTRIBUTE@113..126
+            0: HTML_ATTRIBUTE_NAME@113..121
+              0: HTML_LITERAL@113..121 "height" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@121..126
+              0: EQ@121..122 "=" [] []
+              1: HTML_SINGLE_TEXT_EXPRESSION@122..126
+                0: L_CURLY@122..123 "{" [] []
+                1: HTML_TEXT_EXPRESSION@123..125
+                  0: HTML_LITERAL@123..125 "32" [] []
+                2: R_CURLY@125..126 "}" [] []
+          2: SVELTE_ATTACH_ATTRIBUTE@126..308
+            0: SV_CURLY_AT@126..130 "{@" [Newline("\n"), Whitespace("\t")] []
+            1: ATTACH_KW@130..136 "attach" [] []
+            2: HTML_TEXT_EXPRESSION@136..307
+              0: HTML_LITERAL@136..307 " (canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] []
+            3: R_CURLY@307..308 "}" [] []
+        3: R_ANGLE@308..310 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@310..310
+      2: HTML_CLOSING_ELEMENT@310..319
+        0: L_ANGLE@310..311 "<" [] []
+        1: SLASH@311..312 "/" [] []
+        2: HTML_TAG_NAME@312..318
+          0: HTML_LITERAL@312..318 "canvas" [] []
+        3: R_ANGLE@318..319 ">" [] []
+  4: EOF@319..320 "" [Newline("\n")] []
+
+```
