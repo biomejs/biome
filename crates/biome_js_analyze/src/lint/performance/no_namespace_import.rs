@@ -98,19 +98,18 @@ impl Rule for NoNamespaceImport {
         }
 
         // Check if the module is in the allowed modules list
-        if let Ok(source) = import_namespace_clause.source() {
-            if let AnyJsModuleSource::JsModuleSource(js_module_source) = source {
-                if let Ok(inner_text) = js_module_source.inner_string_text() {
-                    let module_name = inner_text.text();
-                    if ctx
-                        .options()
-                        .allowed_modules
-                        .iter()
-                        .any(|allowed| allowed.as_str() == module_name)
-                    {
-                        return None;
-                    }
-                }
+        if let Ok(source) = import_namespace_clause.source()
+            && let AnyJsModuleSource::JsModuleSource(js_module_source) = source
+            && let Ok(inner_text) = js_module_source.inner_string_text()
+        {
+            let module_name = inner_text.text();
+            if ctx
+                .options()
+                .allowed_modules
+                .iter()
+                .any(|allowed| allowed.as_str() == module_name)
+            {
+                return None;
             }
         }
 
