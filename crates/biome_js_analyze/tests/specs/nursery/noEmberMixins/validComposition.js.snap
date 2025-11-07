@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validComposition.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+// Composition pattern
+import { action } from '@ember/object';
+import Service from '@ember/service';
+
+export default class MyComponent {
+  @action
+  handleClick() {}
+}
+
+```

@@ -185,6 +185,7 @@ define_categories! {
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
     "lint/nursery/noUnresolvedImports": "https://biomejs.dev/linter/rules/no-unresolved-imports",
     "lint/nursery/noUnusedExpressions": "https://biomejs.dev/linter/rules/no-unused-expressions",
+    "lint/nursery/noUnusedGlimmerComponents": "https://biomejs.dev/linter/rules/no-unused-glimmer-components",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessCatchBinding": "https://biomejs.dev/linter/rules/no-useless-catch-binding",
