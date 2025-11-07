@@ -36,9 +36,15 @@ declare_lint_rule! {
     ///
     /// ### `allowedModules`
     ///
-    /// Allows to specify module names that are permitted to use namespace imports.
-    /// This can be useful for libraries that are designed to work with namespace imports,
-    /// or when you need to import many exports from a module.
+    /// Allows to specify module specifiers that are permitted to use namespace imports.
+    /// This can be useful for:
+    /// - External dependencies that are designed to work with namespace imports (e.g., `zod`, `valibot`)
+    /// - Local modules that export many utilities (e.g., `./utils`, `@/helpers`)
+    ///
+    /// The `allowedModules` option takes an array of strings, where each string is a module specifier.
+    /// Both package names and relative/absolute file paths are supported.
+    ///
+    /// #### Example: External dependencies
     ///
     /// ```json,options
     /// {
@@ -51,6 +57,21 @@ declare_lint_rule! {
     /// ```js,use_options
     /// import * as z from "zod";
     /// import * as v from "valibot";
+    /// ```
+    ///
+    /// #### Example: Local modules
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedModules": ["./utils/helpers", "@/utils"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import * as helpers from "./utils/helpers";
+    /// import * as utils from "@/utils";
     /// ```
     ///
     pub NoNamespaceImport {
