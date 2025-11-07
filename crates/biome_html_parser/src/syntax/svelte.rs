@@ -367,7 +367,7 @@ impl ParseNodeList for SvelteElementList {
         at_l_angle0 && at_slash1
             || at_eof
             || p.at(T!["{/"])
-            || (self.stop_at_curly_colon == true && p.at(T!["{:"]))
+            || (self.stop_at_curly_colon && p.at(T!["{:"]))
     }
 
     fn recover(
