@@ -28,7 +28,7 @@ This option allows you to specify modules that are permitted to use namespace im
 With this configuration, namespace imports from the specified modules will not trigger the rule:
 
 ```js
-import * as z from "zod";      // ✅ No error
-import * as v from "valibot";  // ✅ No error
-import * as foo from "foo";    // ❌ Error - not in allowed modules
+import * as z from "zod";      // No error
+import * as v from "valibot";  // No error
+import * as foo from "foo";    // Error - not in allowed modules
 ```
