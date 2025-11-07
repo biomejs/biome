@@ -8412,7 +8412,12 @@ export interface NoBarrelFileOptions {}
 export interface NoDeleteOptions {}
 export interface NoDynamicNamespaceImportAccessOptions {}
 export interface NoImgElementOptions {}
-export interface NoNamespaceImportOptions {}
+export interface NoNamespaceImportOptions {
+	/**
+	 * A list of module specifiers that are allowed to use namespace imports. Both package names (e.g., "zod") and relative/absolute paths (e.g., "./utils") are supported.
+	 */
+	allowedModules: string[];
+}
 export interface NoReExportAllOptions {}
 export interface NoUnwantedPolyfillioOptions {}
 export interface UseGoogleFontPreconnectOptions {}
