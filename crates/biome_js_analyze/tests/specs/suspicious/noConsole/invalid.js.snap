@@ -1,0 +1,235 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+console.log('hello world')
+console['log']('hello world')
+console.info('hello world')
+console.warn('hello world')
+console.table('hello world')
+console.error('hello world')
+console.nonExistent('hello world')
+console.log('with semicolon');
+
+globalThis.console.warn();
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+  > 1 │ console.log('hello world')
+      │ ^^^^^^^^^^^
+    2 │ console['log']('hello world')
+    3 │ console.info('hello world')
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 │ console.log('hello·world')
+      │ --------------------------
+
+```
+
+```
+invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    1 │ console.log('hello world')
+  > 2 │ console['log']('hello world')
+      │ ^^^^^^^^^^^^^^
+    3 │ console.info('hello world')
+    4 │ console.warn('hello world')
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     1  1 │   console.log('hello world')
+     2    │ - console['log']('hello·world')
+     3  2 │   console.info('hello world')
+     4  3 │   console.warn('hello world')
+  
+
+```
+
+```
+invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    1 │ console.log('hello world')
+    2 │ console['log']('hello world')
+  > 3 │ console.info('hello world')
+      │ ^^^^^^^^^^^^
+    4 │ console.warn('hello world')
+    5 │ console.table('hello world')
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     1  1 │   console.log('hello world')
+     2  2 │   console['log']('hello world')
+     3    │ - console.info('hello·world')
+     4  3 │   console.warn('hello world')
+     5  4 │   console.table('hello world')
+  
+
+```
+
+```
+invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    2 │ console['log']('hello world')
+    3 │ console.info('hello world')
+  > 4 │ console.warn('hello world')
+      │ ^^^^^^^^^^^^
+    5 │ console.table('hello world')
+    6 │ console.error('hello world')
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     2  2 │   console['log']('hello world')
+     3  3 │   console.info('hello world')
+     4    │ - console.warn('hello·world')
+     5  4 │   console.table('hello world')
+     6  5 │   console.error('hello world')
+  
+
+```
+
+```
+invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    3 │ console.info('hello world')
+    4 │ console.warn('hello world')
+  > 5 │ console.table('hello world')
+      │ ^^^^^^^^^^^^^
+    6 │ console.error('hello world')
+    7 │ console.nonExistent('hello world')
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     3  3 │   console.info('hello world')
+     4  4 │   console.warn('hello world')
+     5    │ - console.table('hello·world')
+     6  5 │   console.error('hello world')
+     7  6 │   console.nonExistent('hello world')
+  
+
+```
+
+```
+invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    4 │ console.warn('hello world')
+    5 │ console.table('hello world')
+  > 6 │ console.error('hello world')
+      │ ^^^^^^^^^^^^^
+    7 │ console.nonExistent('hello world')
+    8 │ console.log('with semicolon');
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     4  4 │   console.warn('hello world')
+     5  5 │   console.table('hello world')
+     6    │ - console.error('hello·world')
+     7  6 │   console.nonExistent('hello world')
+     8  7 │   console.log('with semicolon');
+  
+
+```
+
+```
+invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    5 │ console.table('hello world')
+    6 │ console.error('hello world')
+  > 7 │ console.nonExistent('hello world')
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ console.log('with semicolon');
+    9 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     5  5 │   console.table('hello world')
+     6  6 │   console.error('hello world')
+     7    │ - console.nonExistent('hello·world')
+     8  7 │   console.log('with semicolon');
+     9  8 │   
+  
+
+```
+
+```
+invalid.js:8:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+     6 │ console.error('hello world')
+     7 │ console.nonExistent('hello world')
+   > 8 │ console.log('with semicolon');
+       │ ^^^^^^^^^^^
+     9 │ 
+    10 │ globalThis.console.warn();
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     6  6 │   console.error('hello world')
+     7  7 │   console.nonExistent('hello world')
+     8    │ - console.log('with·semicolon');
+     9  8 │   
+    10  9 │   globalThis.console.warn();
+  
+
+```
+
+```
+invalid.js:10:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+     8 │ console.log('with semicolon');
+     9 │ 
+  > 10 │ globalThis.console.warn();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     7 7 │   console.nonExistent('hello world')
+     8 8 │   console.log('with semicolon');
+     9   │ - 
+    10   │ - globalThis.console.warn();
+    11 9 │   
+  
+
+```

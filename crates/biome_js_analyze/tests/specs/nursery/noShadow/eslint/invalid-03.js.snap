@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-03.js
+---
+# Input
+```js
+function a(x) { var b = function () { var x = 'foo'; }; }
+
+```
+
+# Diagnostics
+```
+invalid-03.js:1:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+  > 1 │ function a(x) { var b = function () { var x = 'foo'; }; }
+      │                                           ^
+    2 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ function a(x) { var b = function () { var x = 'foo'; }; }
+      │            ^
+    2 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

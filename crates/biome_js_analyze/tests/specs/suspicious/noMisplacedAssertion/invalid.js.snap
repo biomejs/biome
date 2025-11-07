@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+describe(() => {
+    expect("something").toBeTrue()
+})
+
+expect("")
+assertEquals(1, 1)
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  
+    1 │ describe(() => {
+  > 2 │     expect("something").toBeTrue()
+      │     ^^^^^^
+    3 │ })
+    4 │ 
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it(), test() or Deno.test() function call.
+  
+
+```
+
+```
+invalid.js:5:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  
+    3 │ })
+    4 │ 
+  > 5 │ expect("")
+      │ ^^^^^^
+    6 │ assertEquals(1, 1)
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it(), test() or Deno.test() function call.
+  
+
+```
+
+```
+invalid.js:6:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  
+    5 │ expect("")
+  > 6 │ assertEquals(1, 1)
+      │ ^^^^^^^^^^^^
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it(), test() or Deno.test() function call.
+  
+
+```

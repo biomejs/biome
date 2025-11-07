@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export default class MyComponent {
   count = 0;
 

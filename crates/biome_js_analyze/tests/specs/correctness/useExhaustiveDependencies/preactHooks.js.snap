@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: preactHooks.js
+---
+# Input
+```js
+import { useCallback } from 'preact/compat';
+import { useState } from 'preact/hooks';
+
+function useCounter() {
+    const [value, setValue] = useState(0);
+    const increment = useCallback(() => {
+        setValue(value + 1);
+    }, []);
+    return { value, increment };
+}
+
+```
+
+# Diagnostics
+```
+preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on value.
+  
+    4 │ function useCounter() {
+    5 │     const [value, setValue] = useState(0);
+  > 6 │     const increment = useCallback(() => {
+      │                       ^^^^^^^^^^^
+    7 │         setValue(value + 1);
+    8 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    5 │     const [value, setValue] = useState(0);
+    6 │     const increment = useCallback(() => {
+  > 7 │         setValue(value + 1);
+      │                  ^^^^^
+    8 │     }, []);
+    9 │     return { value, increment };
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    8 │ ····},·[value]);
+      │         +++++   
+
+```

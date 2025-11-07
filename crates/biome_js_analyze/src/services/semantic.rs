@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorFinishContext,
 };
-use biome_html_parser::{parse_html, HtmlParseOptions};
+use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
@@ -42,9 +42,8 @@ static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Regex to match mustache expressions: {{...}}
-static MUSTACHE_EXPR: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\{\{([^}]+)\}\}").expect("Invalid mustache regex")
-});
+static MUSTACHE_EXPR: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\{\{([^}]+)\}\}").expect("Invalid mustache regex"));
 
 /// Regex to match this.property or this.#privateField patterns
 static THIS_MEMBER: LazyLock<Regex> = LazyLock::new(|| {
@@ -177,10 +176,16 @@ impl Visitor for SemanticModelBuilderVisitor {
             let embedding_kind = file_source.as_embedding_kind();
 
             // Check if this is any embedded language
-            if embedding_kind.is_glimmer() || embedding_kind.is_vue() || embedding_kind.is_svelte() || embedding_kind.is_astro() {
+            if embedding_kind.is_glimmer()
+                || embedding_kind.is_vue()
+                || embedding_kind.is_svelte()
+                || embedding_kind.is_astro()
+            {
                 // Try to get the original source from services
                 // If not available, fall back to the (transformed) AST text
-                let source_text = if let Some(original_source) = ctx.services.get_service::<OriginalSourceText>() {
+                let source_text = if let Some(original_source) =
+                    ctx.services.get_service::<OriginalSourceText>()
+                {
                     original_source.text().to_string()
                 } else {
                     builder.root().syntax().text_with_trivia().to_string()
@@ -275,7 +280,8 @@ fn scan_mustache_expressions(
                 // Extract the first identifier (could be a variable or helper)
                 if let Some(first_word) = expr_text.split_whitespace().next() {
                     // Remove any trailing punctuation like () or ,
-                    let identifier = first_word.trim_end_matches(|c: char| !c.is_alphanumeric() && c != '_' && c != '$');
+                    let identifier = first_word
+                        .trim_end_matches(|c: char| !c.is_alphanumeric() && c != '_' && c != '$');
 
                     if !identifier.is_empty() && is_valid_identifier(identifier) {
                         // Try to find a binding with this name
@@ -295,10 +301,7 @@ fn is_pascal_case(s: &str) -> bool {
         return false;
     }
 
-    s.chars()
-        .next()
-        .map(|c| c.is_uppercase())
-        .unwrap_or(false)
+    s.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
 }
 
 /// Check if a string is a valid JavaScript identifier

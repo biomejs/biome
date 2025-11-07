@@ -1,0 +1,398 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function foo() {}
+
+const bar = () => {};
+
+function fooWithNestedEmptyFnBlock() {
+  let a = 1;
+
+  function shouldFail(){}
+
+  return a
+}
+
+
+const barWithNestedEmptyFnBlock = () => {
+  let a = 1;
+
+  const shouldFail = () => {}
+
+  return a
+}
+
+let someVar;
+if (someVar) {
+}
+
+while (someVar) {
+}
+
+switch(someVar) {
+}
+
+try {
+    doSomething();
+} catch(ex) {
+
+} finally {
+
+}
+
+class Foo {
+  static {}
+}
+
+for(let i; i>0; i++){}
+
+const ob = {}
+for (key in ob) {}
+
+const ar = []
+for (val of ar) {}
+
+function fooWithInternalEmptyBlocks(){
+  let someVar;
+  if (someVar) {}
+
+  while (someVar) {
+  }
+
+  switch(someVar) {
+  }
+
+  try {
+      doSomething();
+  } catch(ex) {
+
+  } finally {
+
+  }
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+  > 1 │ function foo() {}
+      │                ^^
+    2 │ 
+    3 │ const bar = () => {};
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:3:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    1 │ function foo() {}
+    2 │ 
+  > 3 │ const bar = () => {};
+      │                   ^^
+    4 │ 
+    5 │ function fooWithNestedEmptyFnBlock() {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+     6 │   let a = 1;
+     7 │ 
+   > 8 │   function shouldFail(){}
+       │                        ^^
+     9 │ 
+    10 │   return a
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    15 │   let a = 1;
+    16 │ 
+  > 17 │   const shouldFail = () => {}
+       │                            ^^
+    18 │ 
+    19 │   return a
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:23:14 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    22 │ let someVar;
+  > 23 │ if (someVar) {
+       │              ^
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ while (someVar) {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:26:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    24 │ }
+    25 │ 
+  > 26 │ while (someVar) {
+       │                 ^
+  > 27 │ }
+       │ ^
+    28 │ 
+    29 │ switch(someVar) {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    27 │ }
+    28 │ 
+  > 29 │ switch(someVar) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ try {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:34:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    32 │ try {
+    33 │     doSomething();
+  > 34 │ } catch(ex) {
+       │             ^
+  > 35 │ 
+  > 36 │ } finally {
+       │ ^
+    37 │ 
+    38 │ }
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:36:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    34 │ } catch(ex) {
+    35 │ 
+  > 36 │ } finally {
+       │           ^
+  > 37 │ 
+  > 38 │ }
+       │ ^
+    39 │ 
+    40 │ class Foo {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:41:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    40 │ class Foo {
+  > 41 │   static {}
+       │   ^^^^^^^^^
+    42 │ }
+    43 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:44:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    42 │ }
+    43 │ 
+  > 44 │ for(let i; i>0; i++){}
+       │                     ^^
+    45 │ 
+    46 │ const ob = {}
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:47:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    46 │ const ob = {}
+  > 47 │ for (key in ob) {}
+       │                 ^^
+    48 │ 
+    49 │ const ar = []
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:50:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    49 │ const ar = []
+  > 50 │ for (val of ar) {}
+       │                 ^^
+    51 │ 
+    52 │ function fooWithInternalEmptyBlocks(){
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:54:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    52 │ function fooWithInternalEmptyBlocks(){
+    53 │   let someVar;
+  > 54 │   if (someVar) {}
+       │                ^^
+    55 │ 
+    56 │   while (someVar) {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:56:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    54 │   if (someVar) {}
+    55 │ 
+  > 56 │   while (someVar) {
+       │                   ^
+  > 57 │   }
+       │   ^
+    58 │ 
+    59 │   switch(someVar) {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:59:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    57 │   }
+    58 │ 
+  > 59 │   switch(someVar) {
+       │   ^^^^^^^^^^^^^^^^^
+  > 60 │   }
+       │   ^
+    61 │ 
+    62 │   try {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:64:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    62 │   try {
+    63 │       doSomething();
+  > 64 │   } catch(ex) {
+       │               ^
+  > 65 │ 
+  > 66 │   } finally {
+       │   ^
+    67 │ 
+    68 │   }
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.js:66:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    64 │   } catch(ex) {
+    65 │ 
+  > 66 │   } finally {
+       │             ^
+  > 67 │ 
+  > 68 │   }
+       │   ^
+    69 │ }
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```

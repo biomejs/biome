@@ -1,0 +1,3953 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+new RegExp('');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('');
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('');
+  + /(?:)/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('', '');
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('',·'');
+  + /(?:)/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw``);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw``);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw``);
+  + /(?:)/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('abc');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('abc');
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('abc');
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp((('abc')), ('g'));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp((('abc')), ('g'));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp((('abc')),·('g'));
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp('abc');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('abc');
+      │ ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('abc');
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('abc', 'g');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('abc', 'g');
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('abc',·'g');
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp('abc', 'g');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('abc', 'g');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('abc',·'g');
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(`abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(`abc`);
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(`abc`);
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+RegExp(`abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(`abc`);
+      │ ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(`abc`);
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(`abc`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(`abc`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(`abc`,·`g`);
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp(`abc`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(`abc`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(`abc`,·`g`);
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`abc`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw`abc`);
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`abc
+abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`abc
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ abc`);
+      │ ^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1   │ - new·RegExp(String.raw`abc
+    2   │ - abc`);
+      1 │ + /abc\nabc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`	abc
+abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`	abc
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ abc`);
+      │ ^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1   │ - new·RegExp(String.raw`→ abc
+    2   │ - abc`);
+      1 │ + /→ abc\nabc/;
+  
+
+```
+
+# Input
+```cjs
+RegExp(String.raw`abc`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(String.raw`abc`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(String.raw`abc`);
+  + /abc/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`abc`, String.raw`g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`abc`, String.raw`g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw`abc`,·String.raw`g`);
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp(String.raw`abc`, String.raw`g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(String.raw`abc`, String.raw`g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(String.raw`abc`,·String.raw`g`);
+  + /abc/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String['raw']`a`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String['raw']`a`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String['raw']`a`);
+  + /a/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('a', `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('a', `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('a',·`g`);
+  + /a/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp(`a`, 'g');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(`a`, 'g');
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(`a`,·'g');
+  + /a/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp(String.raw`a`, 'g');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp(String.raw`a`, 'g');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp(String.raw`a`,·'g');
+  + /a/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`\d`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`\d`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw`\d`,·`g`);
+  + /\d/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String.raw`\\d`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw`\\d`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw`\\d`,·`g`);
+  + /\\d/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String['raw']`\\d`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String['raw']`\\d`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String['raw']`\\d`,·`g`);
+  + /\\d/g;
+  
+
+```
+
+# Input
+```cjs
+new RegExp(String["raw"]`\\d`, `g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String["raw"]`\\d`, `g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String["raw"]`\\d`,·`g`);
+  + /\\d/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp('a', String.raw`g`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('a', String.raw`g`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('a',·String.raw`g`);
+  + /a/g;
+  
+
+```
+
+# Input
+```cjs
+new globalThis.RegExp('a');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new globalThis.RegExp('a');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·globalThis.RegExp('a');
+  + /a/;
+  
+
+```
+
+# Input
+```cjs
+globalThis.RegExp('a');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ globalThis.RegExp('a');
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - globalThis.RegExp('a');
+  + /a/;
+  
+
+```
+
+# Input
+```cjs
+(globalThis).RegExp('a');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ (globalThis).RegExp('a');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - (globalThis).RegExp('a');
+  + /a/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp((String?.raw)`a`);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp((String?.raw)`a`);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp((String?.raw)`a`);
+  + /a/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('abc', 'u');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('abc', 'u');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('abc',·'u');
+  + /abc/u;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('abc', 'd');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('abc', 'd');
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('abc',·'d');
+  + /abc/d;
+  
+
+```
+
+# Input
+```cjs
+RegExp('abc', 'd');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('abc', 'd');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('abc',·'d');
+  + /abc/d;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\\\', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\\\', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\\\',·'');
+  + /\\/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\n', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\n', '');
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\n',·'');
+  + /\n/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\n\n', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\n\n', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\n\n',·'');
+  + /\n\n/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\t', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\t', '');
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\t',·'');
+  + /\t/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\t\t', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\t\t', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\t\t',·'');
+  + /\t\t/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\r\n', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\r\n', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\r\n',·'');
+  + /\r\n/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\u1234', 'g')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\u1234', 'g')
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\u1234',·'g')
+  + /\u1234/g
+  
+
+```
+
+# Input
+```cjs
+RegExp('\u{1234}', 'g')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\u{1234}', 'g')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\u{1234}',·'g')
+  + /\u{1234}/g
+  
+
+```
+
+# Input
+```cjs
+RegExp('\u{11111}', 'g')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\u{11111}', 'g')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\u{11111}',·'g')
+  + /\u{11111}/g
+  
+
+```
+
+# Input
+```cjs
+RegExp('\v', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\v', '');
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\v',·'');
+  + /\v/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\v\v', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\v\v', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\v\v',·'');
+  + /\v\v/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\f', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\f', '');
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\f',·'');
+  + /\f/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\f\f', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\f\f', '');
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\f\f',·'');
+  + /\f\f/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\b', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\b', '');
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\b',·'');
+  + /\b/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\b\\b', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\b\\b', '');
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\b\\b',·'');
+  + /\b\b/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('\\B\\b', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('\\B\\b', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('\\B\\b',·'');
+  + /\B\b/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\w', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\w', '');
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\w',·'');
+  + /\w/;
+  
+
+```
+
+# Input
+```cjs
+new globalThis.RegExp('\\W', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new globalThis.RegExp('\\W', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·globalThis.RegExp('\\W',·'');
+  + /\W/;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\s', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\s', '');
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\s',·'');
+  + /\s/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('\\S', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('\\S', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('\\S',·'')
+  + /\S/
+  
+
+```
+
+# Input
+```cjs
+globalThis.RegExp('\\d', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ globalThis.RegExp('\\d', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - globalThis.RegExp('\\d',·'');
+  + /\d/;
+  
+
+```
+
+# Input
+```cjs
+globalThis.RegExp('\\D', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ globalThis.RegExp('\\D', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - globalThis.RegExp('\\D',·'')
+  + /\D/
+  
+
+```
+
+# Input
+```cjs
+globalThis.RegExp('\\\\\\D', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ globalThis.RegExp('\\\\\\D', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - globalThis.RegExp('\\\\\\D',·'')
+  + /\\\D/
+  
+
+```
+
+# Input
+```cjs
+new RegExp('\\D\\D', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('\\D\\D', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('\\D\\D',·'')
+  + /\D\D/
+  
+
+```
+
+# Input
+```cjs
+new globalThis.RegExp('\\0\\0', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new globalThis.RegExp('\\0\\0', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·globalThis.RegExp('\\0\\0',·'');
+  + /\0\0/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('\\0\\0', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('\\0\\0', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('\\0\\0',·'');
+  + /\0\0/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('\0\0', 'g');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('\0\0', 'g');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('\0\0',·'g');
+  + /\0\0/g;
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\0\\0\\0', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\0\\0\\0', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\0\\0\\0',·'')
+  + /\0\0\0/
+  
+
+```
+
+# Input
+```cjs
+RegExp('\\78\\126\\5934', '')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('\\78\\126\\5934', '')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('\\78\\126\\5934',·'')
+  + /\78\126\5934/
+  
+
+```
+
+# Input
+```cjs
+new window['RegExp']('\\x56\\x78\\x45', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new window['RegExp']('\\x56\\x78\\x45', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·window['RegExp']('\\x56\\x78\\x45',·'');
+  + /\x56\x78\x45/;
+  
+
+```
+
+# Input
+```cjs
+new (window['RegExp'])('\\x56\\x78\\x45', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new (window['RegExp'])('\\x56\\x78\\x45', '');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·(window['RegExp'])('\\x56\\x78\\x45',·'');
+  + /\x56\x78\x45/;
+  
+
+```
+
+# Input
+```cjs
+a in(RegExp('abc'))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ a in(RegExp('abc'))
+      │      ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - a·in(RegExp('abc'))
+  + a·in(/abc/)
+  
+
+```
+
+# Input
+```cjs
+func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - func(new·RegExp(String.raw`\w{1,·2`,·'u'),new·RegExp(String.raw`\w{1,·2`,·'u'))
+  + func(/\w{1,·2/u,new·RegExp(String.raw`\w{1,·2`,·'u'))
+  
+
+```
+
+```
+invalid.jsonc:1:43 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
+      │                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - func(new·RegExp(String.raw`\w{1,·2`,·'u'),new·RegExp(String.raw`\w{1,·2`,·'u'))
+  + func(new·RegExp(String.raw`\w{1,·2`,·'u'),/\w{1,·2/u)
+  
+
+```
+
+# Input
+```cjs
+x = y;
+            RegExp("foo").test(x) ? bar() : baz()
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    1 │ x = y;
+  > 2 │             RegExp("foo").test(x) ? bar() : baz()
+      │             ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   x = y;
+    2   │ - ············RegExp("foo").test(x)·?·bar()·:·baz()
+      2 │ + ············/foo/.test(x)·?·bar()·:·baz()
+  
+
+```
+
+# Input
+```cjs
+typeof RegExp("foo")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ typeof RegExp("foo")
+      │        ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - typeof·RegExp("foo")
+  + typeof·/foo/
+  
+
+```
+
+# Input
+```cjs
+RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
+      │ ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
+  + /foo/·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
+  
+
+```
+
+```
+invalid.jsonc:1:26 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
+  + RegExp("foo")·instanceof·/blahblah/g·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
+  
+
+```
+
+```
+invalid.jsonc:1:69 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
+      │                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
+  + RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·/(\p{Emoji_Presentation})\1/ug·:·false
+  
+
+```
+
+# Input
+```cjs
+[   new RegExp(`someregular`)]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ [   new RegExp(`someregular`)]
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - [···new·RegExp(`someregular`)]
+  + [···/someregular/]
+  
+
+```
+
+# Input
+```cjs
+const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
+            if (typeof totallyValidatesEmails === 'object') {
+                runSomethingThatExists(Regexp('stuff'))
+            }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │             if (typeof totallyValidatesEmails === 'object') {
+    3 │                 runSomethingThatExists(Regexp('stuff'))
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1   │ - const·totallyValidatesEmails·=·new·RegExp("\\S+@(\\S+\\.)+\\S+")
+      1 │ + const·totallyValidatesEmails·=·/\S+@(\S+\.)+\S+/
+    2 2 │               if (typeof totallyValidatesEmails === 'object') {
+    3 3 │                   runSomethingThatExists(Regexp('stuff'))
+  
+
+```
+
+# Input
+```cjs
+!new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !/^Hey,·/u·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                               ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·/jk$/·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:53 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                                                     ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~/^Sup,·/·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:77 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                                                                             ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·/hi/·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:96 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                                                                                                ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·/person/·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:122 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-/hi·again/·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  
+
+```
+
+```
+invalid.jsonc:1:151 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
+      │                                                                                                                                                       ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
+  + !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·/abc/·:·'notregbutstring'
+  
+
+```
+
+# Input
+```cjs
+#!/usr/bin/sh
+            RegExp("foo")
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    1 │ #!/usr/bin/sh
+  > 2 │             RegExp("foo")
+      │             ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   #!/usr/bin/sh
+    2   │ - ············RegExp("foo")
+      2 │ + ············/foo/
+  
+
+```
+
+# Input
+```cjs
+async function abc(){await new RegExp("foo")}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:28 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ async function abc(){await new RegExp("foo")}
+      │                            ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - async·function·abc(){await·new·RegExp("foo")}
+  + async·function·abc(){await·/foo/}
+  
+
+```
+
+# Input
+```cjs
+function* abc(){yield new RegExp("foo")}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ function* abc(){yield new RegExp("foo")}
+      │                       ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - function*·abc(){yield·new·RegExp("foo")}
+  + function*·abc(){yield·/foo/}
+  
+
+```
+
+# Input
+```cjs
+function* abc(){yield* new RegExp("foo")}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ function* abc(){yield* new RegExp("foo")}
+      │                        ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - function*·abc(){yield*·new·RegExp("foo")}
+  + function*·abc(){yield*·/foo/}
+  
+
+```
+
+# Input
+```cjs
+console.log({ ...new RegExp('a') })
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:18 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ console.log({ ...new RegExp('a') })
+      │                  ^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - console.log({·...new·RegExp('a')·})
+  + console.log({·.../a/·})
+  
+
+```
+
+# Input
+```cjs
+delete RegExp('a');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ delete RegExp('a');
+      │        ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - delete·RegExp('a');
+  + delete·/a/;
+  
+
+```
+
+# Input
+```cjs
+void RegExp('a');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ void RegExp('a');
+      │      ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - void·RegExp('a');
+  + void·/a/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
+  + /\S+@(\S+\.)+\S+/**RegExp('a')
+  
+
+```
+
+```
+invalid.jsonc:1:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
+      │                                    ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
+  + new·RegExp("\\S+@(\\S+\\.)+\\S+")**/a/
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
+  + /\S+@(\S+\.)+\S+/%RegExp('a')
+  
+
+```
+
+```
+invalid.jsonc:1:35 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
+      │                                   ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
+  + new·RegExp("\\S+@(\\S+\\.)+\\S+")%/a/
+  
+
+```
+
+# Input
+```cjs
+a in RegExp('abc')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ a in RegExp('abc')
+      │      ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - a·in·RegExp('abc')
+  + a·in·/abc/
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ == new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ == new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·==·new·RegExp('cba');
+      2 │ + ············/abc/·==·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ === new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ === new RegExp('cba');
+      │                       ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·===·new·RegExp('cba');
+      2 │ + ············/abc/·===·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ != new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ != new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·!=·new·RegExp('cba');
+      2 │ + ············/abc/·!=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ !== new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ !== new RegExp('cba');
+      │                       ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·!==·new·RegExp('cba');
+      2 │ + ············/abc/·!==·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ > new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ > new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·>·new·RegExp('cba');
+      2 │ + ············/abc/·>·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ < new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ < new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·<·new·RegExp('cba');
+      2 │ + ············/abc/·<·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ >= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ >= new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·>=·new·RegExp('cba');
+      2 │ + ············/abc/·>=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ <= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ <= new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·<=·new·RegExp('cba');
+      2 │ + ············/abc/·<=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ << new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ << new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·<<·new·RegExp('cba');
+      2 │ + ············/abc/·<<·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ >> new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ >> new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·>>·new·RegExp('cba');
+      2 │ + ············/abc/·>>·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ >>> new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ >>> new RegExp('cba');
+      │                       ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·>>>·new·RegExp('cba');
+      2 │ + ············/abc/·>>>·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ ^ new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ ^ new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·^·new·RegExp('cba');
+      2 │ + ············/abc/·^·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ & new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ & new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·&·new·RegExp('cba');
+      2 │ + ············/abc/·&·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            /abc/ | new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             /abc/ | new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············/abc/·|·new·RegExp('cba');
+      2 │ + ············/abc/·|·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            null ?? new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             null ?? new RegExp('blah')
+      │                     ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············null·??·new·RegExp('blah')
+      2 │ + ············null·??·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc *= new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc *= new RegExp('blah')
+      │                    ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·*=·new·RegExp('blah')
+      2 │ + ············abc·*=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            console.log({a: new RegExp('sup')})
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             console.log({a: new RegExp('sup')})
+      │                             ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············console.log({a:·new·RegExp('sup')})
+      2 │ + ············console.log({a:·/sup/})
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            console.log(() => {new RegExp('sup')})
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             console.log(() => {new RegExp('sup')})
+      │                                ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············console.log(()·=>·{new·RegExp('sup')})
+      2 │ + ············console.log(()·=>·{/sup/})
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            function abc() {new RegExp('sup')}
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             function abc() {new RegExp('sup')}
+      │                             ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············function·abc()·{new·RegExp('sup')}
+      2 │ + ············function·abc()·{/sup/}
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            function abc() {return new RegExp('sup')}
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             function abc() {return new RegExp('sup')}
+      │                                    ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············function·abc()·{return·new·RegExp('sup')}
+      2 │ + ············function·abc()·{return·/sup/}
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc <<= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc <<= new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·<<=·new·RegExp('cba');
+      2 │ + ············abc·<<=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc >>= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc >>= new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·>>=·new·RegExp('cba');
+      2 │ + ············abc·>>=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc >>>= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc >>>= new RegExp('cba');
+      │                      ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·>>>=·new·RegExp('cba');
+      2 │ + ············abc·>>>=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc ^= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc ^= new RegExp('cba');
+      │                    ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·^=·new·RegExp('cba');
+      2 │ + ············abc·^=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc &= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc &= new RegExp('cba');
+      │                    ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·&=·new·RegExp('cba');
+      2 │ + ············abc·&=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc |= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc |= new RegExp('cba');
+      │                    ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·|=·new·RegExp('cba');
+      2 │ + ············abc·|=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc ??= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc ??= new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·??=·new·RegExp('cba');
+      2 │ + ············abc·??=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc &&= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc &&= new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·&&=·new·RegExp('cba');
+      2 │ + ············abc·&&=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc ||= new RegExp('cba');
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc ||= new RegExp('cba');
+      │                     ^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·||=·new·RegExp('cba');
+      2 │ + ············abc·||=·/cba/;
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc **= new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc **= new RegExp('blah')
+      │                     ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·**=·new·RegExp('blah')
+      2 │ + ············abc·**=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc /= new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc /= new RegExp('blah')
+      │                    ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·/=·new·RegExp('blah')
+      2 │ + ············abc·/=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc += new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc += new RegExp('blah')
+      │                    ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·+=·new·RegExp('blah')
+      2 │ + ············abc·+=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc -= new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc -= new RegExp('blah')
+      │                    ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·-=·new·RegExp('blah')
+      2 │ + ············abc·-=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            abc %= new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             abc %= new RegExp('blah')
+      │                    ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············abc·%=·new·RegExp('blah')
+      2 │ + ············abc·%=·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+
+            () => new RegExp('blah')
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:19 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 2 │             () => new RegExp('blah')
+      │                   ^^^^^^^^^^^^^^^^^^
+    3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   
+    2   │ - ············()·=>·new·RegExp('blah')
+      2 │ + ············()·=>·/blah/
+    3 3 │               
+  
+
+```
+
+# Input
+```cjs
+a/RegExp("foo")in b
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ a/RegExp("foo")in b
+      │   ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - a/RegExp("foo")in·b
+  + a//foo/in·b
+  
+
+```
+
+# Input
+```cjs
+a/RegExp("foo")instanceof b
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ a/RegExp("foo")instanceof b
+      │   ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - a/RegExp("foo")instanceof·b
+  + a//foo/instanceof·b
+  
+
+```
+
+# Input
+```cjs
+do RegExp("foo")
+while (true);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ do RegExp("foo")
+      │    ^^^^^^^^^^^^^
+    2 │ while (true);
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1   │ - do·RegExp("foo")
+      1 │ + do·/foo/
+    2 2 │   while (true);
+  
+
+```
+
+# Input
+```cjs
+for(let i;i<5;i++) { break
+new RegExp('search')}
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    1 │ for(let i;i<5;i++) { break
+  > 2 │ new RegExp('search')}
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   for(let i;i<5;i++) { break
+    2   │ - new·RegExp('search')}
+      2 │ + /search/}
+  
+
+```
+
+# Input
+```cjs
+for(let i;i<5;i++) { continue
+new RegExp('search')}
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    1 │ for(let i;i<5;i++) { continue
+  > 2 │ new RegExp('search')}
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   for(let i;i<5;i++) { continue
+    2   │ - new·RegExp('search')}
+      2 │ + /search/}
+  
+
+```
+
+# Input
+```cjs
+
+            switch (value) {
+                case "possibility":
+                    console.log('possibility matched')
+                case RegExp('myReg').toString():
+                    console.log('matches a regexp\' toString value')
+                    break;
+            }
+            
+```
+
+# Diagnostics
+```
+invalid.jsonc:5:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    3 │                 case "possibility":
+    4 │                     console.log('possibility matched')
+  > 5 │                 case RegExp('myReg').toString():
+      │                      ^^^^^^^^^^^^^^^
+    6 │                     console.log('matches a regexp\' toString value')
+    7 │                     break;
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    3 3 │                   case "possibility":
+    4 4 │                       console.log('possibility matched')
+    5   │ - ················case·RegExp('myReg').toString():
+      5 │ + ················case·/myReg/.toString():
+    6 6 │                       console.log('matches a regexp\' toString value')
+    7 7 │                       break;
+  
+
+```
+
+# Input
+```cjs
+throw new RegExp('abcdefg') // fail with a regular expression
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:7 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ throw new RegExp('abcdefg') // fail with a regular expression
+      │       ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - throw·new·RegExp('abcdefg')·//·fail·with·a·regular·expression
+  + throw·/abcdefg/·//·fail·with·a·regular·expression
+  
+
+```
+
+# Input
+```cjs
+for (value of new RegExp('something being searched')) { console.log(value) }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ for (value of new RegExp('something being searched')) { console.log(value) }
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - for·(value·of·new·RegExp('something·being·searched'))·{·console.log(value)·}
+  + for·(value·of·/something·being·searched/)·{·console.log(value)·}
+  
+
+```
+
+# Input
+```cjs
+(async function(){for await (value of new RegExp('something being searched')) { console.log(value) }})()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:39 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ (async function(){for await (value of new RegExp('something being searched')) { console.log(value) }})()
+      │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - (async·function(){for·await·(value·of·new·RegExp('something·being·searched'))·{·console.log(value)·}})()
+  + (async·function(){for·await·(value·of·/something·being·searched/)·{·console.log(value)·}})()
+  
+
+```
+
+# Input
+```cjs
+for (value in new RegExp('something being searched')) { console.log(value) }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ for (value in new RegExp('something being searched')) { console.log(value) }
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - for·(value·in·new·RegExp('something·being·searched'))·{·console.log(value)·}
+  + for·(value·in·/something·being·searched/)·{·console.log(value)·}
+  
+
+```
+
+# Input
+```cjs
+if (condition1 && condition2) new RegExp('avalue').test(str);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ if (condition1 && condition2) new RegExp('avalue').test(str);
+      │                               ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - if·(condition1·&&·condition2)·new·RegExp('avalue').test(str);
+  + if·(condition1·&&·condition2)·/avalue/.test(str);
+  
+
+```
+
+# Input
+```cjs
+debugger
+new RegExp('myReg')
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+    1 │ debugger
+  > 2 │ new RegExp('myReg')
+      │ ^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+    1 1 │   debugger
+    2   │ - new·RegExp('myReg')
+      2 │ + /myReg/
+  
+
+```
+
+# Input
+```cjs
+RegExp("\\\n")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("\\\n")
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("\\\n")
+  + /\\n/
+  
+
+```
+
+# Input
+```cjs
+RegExp("\\\t")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("\\\t")
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("\\\t")
+  + /\\t/
+  
+
+```
+
+# Input
+```cjs
+RegExp("\\\f")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("\\\f")
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("\\\f")
+  + /\\f/
+  
+
+```
+
+# Input
+```cjs
+RegExp("\\\v")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("\\\v")
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("\\\v")
+  + /\\v/
+  
+
+```
+
+# Input
+```cjs
+RegExp("\\\r")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp("\\\r")
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp("\\\r")
+  + /\\r/
+  
+
+```
+
+# Input
+```cjs
+new RegExp("	")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("	")
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("→ ")
+  + /→ /
+  
+
+```
+
+# Input
+```cjs
+new RegExp("/")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("/")
+      │ ^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("/")
+  + /\//
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\.")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\.")
+      │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\.")
+  + /./
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\\.")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\.")
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\.")
+  + /\./
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\\\n\\\n")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\\n\\\n")
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\\n\\\n")
+  + /\\n\\n/
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\\\n\\\f\\\n")
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\\\n\\\f\\\n")
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\\\n\\\f\\\n")
+  + /\\n\\f\\n/
+  
+
+```
+
+# Input
+```cjs
+new RegExp("\u000A\u000A");
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp("\u000A\u000A");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp("\u000A\u000A");
+  + /\u000A\u000A/;
+  
+
+```
+
+# Input
+```cjs
+new RegExp('mysafereg' /* comment explaining its safety */)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('mysafereg' /* comment explaining its safety */)
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('mysafereg'·/*·comment·explaining·its·safety·*/)
+  + /mysafereg/
+  
+
+```
+
+# Input
+```cjs
+new RegExp('[[A--B]]', 'v')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('[[A--B]]', 'v')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('[[A--B]]',·'v')
+  + /[[A--B]]/v
+  
+
+```
+
+# Input
+```cjs
+new RegExp('[[A--B]]', 'v')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('[[A--B]]', 'v')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('[[A--B]]',·'v')
+  + /[[A--B]]/v
+  
+
+```
+
+# Input
+```cjs
+new RegExp('[[A&&&]]', 'v')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('[[A&&&]]', 'v')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('[[A&&&]]',·'v')
+  + /[[A&&&]]/v
+  
+
+```
+
+# Input
+```cjs
+new RegExp('://[^:/]*')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('://[^:/]*')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('://[^:/]*')
+  + /:\/\/[^:\/]*/
+  
+
+```

@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.gjs
+---
+# Input
+```js
+import Component from '@glimmer/component';
+import Button from './Button';
+import Card from './Card';
+
+export default class MyComponent extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```
+
+# Diagnostics
+```
+invalid.gjs:1:8 lint/nursery/noUnusedGlimmerComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Component Component is imported but never used in any template.
+  
+  > 1 │ import Component from '@glimmer/component';
+      │        ^^^^^^^^^
+    2 │ import Button from './Button';
+    3 │ import Card from './Card';
+  
+  i Remove the unused import or add the component to a <template> block.
+  
+
+```
+
+```
+invalid.gjs:2:8 lint/nursery/noUnusedGlimmerComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Component Button is imported but never used in any template.
+  
+    1 │ import Component from '@glimmer/component';
+  > 2 │ import Button from './Button';
+      │        ^^^^^^
+    3 │ import Card from './Card';
+    4 │ 
+  
+  i Remove the unused import or add the component to a <template> block.
+  
+
+```
+
+```
+invalid.gjs:3:8 lint/nursery/noUnusedGlimmerComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Component Card is imported but never used in any template.
+  
+    1 │ import Component from '@glimmer/component';
+    2 │ import Button from './Button';
+  > 3 │ import Card from './Card';
+      │        ^^^^
+    4 │ 
+    5 │ export default class MyComponent extends Component {
+  
+  i Remove the unused import or add the component to a <template> block.
+  
+
+```

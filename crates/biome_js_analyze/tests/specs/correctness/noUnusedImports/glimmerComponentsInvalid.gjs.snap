@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerComponentsInvalid.gjs
+---
+# Input
+```js
+// Dialog is imported but never used in template
+import Component from '@glimmer/component';
+import Button from './Button';
+import Card from './Card';
+import Dialog from './Dialog';
+
+export default class MyComponent extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```
+
+# Diagnostics
+```
+glimmerComponentsInvalid.gjs:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    3 │ import Button from './Button';
+    4 │ import Card from './Card';
+  > 5 │ import Dialog from './Dialog';
+      │        ^^^^^^
+    6 │ 
+    7 │ export default class MyComponent extends Component {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     3 3 │   import Button from './Button';
+     4 4 │   import Card from './Card';
+     5   │ - import·Dialog·from·'./Dialog';
+     6 5 │   
+     7 6 │   export default class MyComponent extends Component {
+  
+
+```

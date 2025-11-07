@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validComponentName.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function loadWidgetComponent(widgetId) {
+  const Component = getWidgetComponent(widgetId);
+  if (!Component) return null;
+  return <Component />;
+}
+```

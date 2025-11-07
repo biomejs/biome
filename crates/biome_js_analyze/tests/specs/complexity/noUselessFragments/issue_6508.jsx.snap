@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_6508.jsx
+---
+# Input
+```jsx
+<>&#9650;</>
+<Fragment>&#9650;</Fragment>
+<React.Fragment>&#9650;</React.Fragment>
+
+```

@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: arguments-object.js
+---
+# Input
+```js
+// valid
+function foo() {
+    console.log(arguments);
+}
+
+// invalid
+console.log(arguments);
+
+const bar = () => {
+    console.log(arguments);
+}
+```
+
+# Diagnostics
+```
+arguments-object.js:7:13 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments variable is undeclared.
+  
+    6 │ // invalid
+  > 7 │ console.log(arguments);
+      │             ^^^^^^^^^
+    8 │ 
+    9 │ const bar = () => {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+arguments-object.js:10:17 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments variable is undeclared.
+  
+     9 │ const bar = () => {
+  > 10 │     console.log(arguments);
+       │                 ^^^^^^^^^
+    11 │ }
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

@@ -22,7 +22,10 @@ fn test_mustache_property_detection() {
     println!("Found members: {:?}", found);
 
     assert!(found.contains(&"count".to_string()), "Should find 'count'");
-    assert!(found.contains(&"#privateField".to_string()), "Should find '#privateField'");
+    assert!(
+        found.contains(&"#privateField".to_string()),
+        "Should find '#privateField'"
+    );
     assert_eq!(found.len(), 2, "Should find exactly 2 members");
 }
 
@@ -84,8 +87,8 @@ fn test_variable_reference_extraction() {
         "myVariable",
         "formatDate date",
         "if condition",
-        "this.property",  // Should not match simple variable pattern
-        "@arg",           // Should not match simple variable pattern
+        "this.property", // Should not match simple variable pattern
+        "@arg",          // Should not match simple variable pattern
     ];
 
     for expr in expressions {
@@ -94,7 +97,8 @@ fn test_variable_reference_extraction() {
 
         if !is_this && !is_arg {
             if let Some(first_word) = expr.split_whitespace().next() {
-                let identifier = first_word.trim_end_matches(|c: char| !c.is_alphanumeric() && c != '_' && c != '$');
+                let identifier = first_word
+                    .trim_end_matches(|c: char| !c.is_alphanumeric() && c != '_' && c != '$');
                 println!("Expression '{}' -> identifier '{}'", expr, identifier);
             }
         }

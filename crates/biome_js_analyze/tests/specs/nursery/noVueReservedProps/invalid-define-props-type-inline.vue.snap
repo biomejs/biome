@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-type-inline.vue
+---
+# Input
+```ts
+defineProps<{
+    ref: string,
+    key: string,
+    foo: string,
+}>();
+
+```
+
+# Diagnostics
+```
+invalid-define-props-type-inline.vue:2:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps<{
+  > 2 │     ref: string,
+      │     ^^^
+    3 │     key: string,
+    4 │     foo: string,
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-define-props-type-inline.vue:3:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps<{
+    2 │     ref: string,
+  > 3 │     key: string,
+      │     ^^^
+    4 │     foo: string,
+    5 │ }>();
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

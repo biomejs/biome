@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_component_and_ts_type.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+export const SampleComponent = () => <></>
+export type SampleType = string
+export type sampleType = string
+
+```

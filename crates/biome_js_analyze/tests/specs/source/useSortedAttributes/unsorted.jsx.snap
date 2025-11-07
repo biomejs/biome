@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted.jsx
+---
+# Input
+```jsx
+<Hello
+	lastName="Smith"
+	firstName="John"
+/>;
+<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+<Hello a10="" a9="" A="" />;
+
+```
+
+# Diagnostics
+```
+unsorted.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+  > 1 │ <Hello
+      │ ^^^^^^
+  > 2 │ 	lastName="Smith"
+  > 3 │ 	firstName="John"
+  > 4 │ />;
+      │ ^^
+    5 │ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+    6 │ <Hello a10="" a9="" A="" />;
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello
+    2   │ - → lastName="Smith"
+    3   │ - → firstName="John"
+      2 │ + → firstName="John"
+      3 │ + → lastName="Smith"
+    4 4 │   />;
+    5 5 │   <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+  
+
+```
+
+```
+unsorted.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    3 │ 	firstName="John"
+    4 │ />;
+  > 5 │ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <Hello a10="" a9="" A="" />;
+    7 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    3 3 │   	firstName="John"
+    4 4 │   />;
+    5   │ - <Hello·tel={5555555}·address="NY"·{...this.props}·lastName="Smith"·firstName="John"·/>;
+      5 │ + <Hello·tel={5555555}·address="NY"·{...this.props}·firstName="John"·lastName="Smith"·/>;
+    6 6 │   <Hello a10="" a9="" A="" />;
+    7 7 │   
+  
+
+```
+
+```
+unsorted.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    3 │ 	firstName="John"
+    4 │ />;
+  > 5 │ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <Hello a10="" a9="" A="" />;
+    7 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    3 3 │   	firstName="John"
+    4 4 │   />;
+    5   │ - <Hello·tel={5555555}·address="NY"·{...this.props}·lastName="Smith"·firstName="John"·/>;
+      5 │ + <Hello·address="NY"·tel={5555555}·{...this.props}·lastName="Smith"·firstName="John"·/>;
+    6 6 │   <Hello a10="" a9="" A="" />;
+    7 7 │   
+  
+
+```
+
+```
+unsorted.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ />;
+    5 │ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+  > 6 │ <Hello a10="" a9="" A="" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    4 4 │   />;
+    5 5 │   <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+    6   │ - <Hello·a10=""·a9=""·A=""·/>;
+      6 │ + <Hello·A=""·a9=""·a10=""·/>;
+    7 7 │   
+  
+
+```

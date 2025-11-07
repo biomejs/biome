@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validEnum.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+enum S {}
+
+enum Status {}
+
+enum SpecialStatus {}
+```

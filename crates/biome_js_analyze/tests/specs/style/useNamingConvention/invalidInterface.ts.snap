@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInterface.ts
+---
+# Input
+```ts
+export interface XXX {}
+
+export interface CONSTANT_CASE {}
+
+export interface camelCase {}
+
+export interface snake_case {}
+
+export interface Unknown_Style {}
+
+interface _XXX {}
+
+interface _CONSTANT_CASE {}
+
+interface _camelCase {}
+
+interface _snake_case {}
+
+interface _Unknown_Style {}
+```
+
+# Diagnostics
+```
+invalidInterface.ts:1:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+  > 1 │ export interface XXX {}
+      │                  ^^^
+    2 │ 
+    3 │ export interface CONSTANT_CASE {}
+  
+
+```
+
+```
+invalidInterface.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+    1 │ export interface XXX {}
+    2 │ 
+  > 3 │ export interface CONSTANT_CASE {}
+      │                  ^^^^^^^^^^^^^
+    4 │ 
+    5 │ export interface camelCase {}
+  
+
+```
+
+```
+invalidInterface.ts:5:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+    3 │ export interface CONSTANT_CASE {}
+    4 │ 
+  > 5 │ export interface camelCase {}
+      │                  ^^^^^^^^^
+    6 │ 
+    7 │ export interface snake_case {}
+  
+
+```
+
+```
+invalidInterface.ts:7:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+    5 │ export interface camelCase {}
+    6 │ 
+  > 7 │ export interface snake_case {}
+      │                  ^^^^^^^^^^
+    8 │ 
+    9 │ export interface Unknown_Style {}
+  
+
+```
+
+```
+invalidInterface.ts:9:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+     7 │ export interface snake_case {}
+     8 │ 
+   > 9 │ export interface Unknown_Style {}
+       │                  ^^^^^^^^^^^^^
+    10 │ 
+    11 │ interface _XXX {}
+  
+
+```

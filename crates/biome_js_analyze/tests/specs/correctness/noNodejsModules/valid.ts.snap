@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type assert from "assert";
+import type * as assert2 from "assert";
+declare module "node:fs" {}
+```

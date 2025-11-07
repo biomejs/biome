@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<input type="text" />
+	<input type="text" autocomplete="name" />
+	<input type="text" autocomplete="" />
+	<input type="text" autocomplete="off" />
+	<input type="text" autocomplete="on" />
+	<input type="text" autocomplete="billing family-name" />
+	<input type="text" autocomplete="section-blue shipping street-address" />
+	<input type="text" autocomplete="section-somewhere shipping work email" />
+	<input type="text" autocomplete />
+	<input type="text" autocomplete={autocompl} />
+	<input type="text" autocomplete={autocompl || "name"} />
+	<input type="text" autocomplete={autocompl || "foo"} />
+	<input type={isEmail ? "email" : "text"} autocomplete="none" />
+	<Foo autocomplete="bar"></Foo>
+	<Input type="text" autocomplete="name" />
+	<Input type="text" autocomplete="baz" />
+</>
+
+```

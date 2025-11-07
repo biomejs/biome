@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue5985.js
+---
+# Input
+```js
+import moment from 'moment';
+import { Moment } from 'moment';
+```
+
+# Diagnostics
+```
+issue5985.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import moment from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { Moment } from 'moment';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·moment·from·'moment';
+    2   │ - import·{·Moment·}·from·'moment';
+      1 │ + import·moment,·{·Moment·}·from·'moment';
+  
+
+```

@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5601.jsx
+---
+# Input
+```jsx
+{
+	/* SHOULD NOT emit diagnostics (classes are sorted correctly)
+	- with double quotes outside and single quotes inside */
+}
+<div class="m-2 flex items-center gap-2 p-4 [&_svg:not([class*='size-'])]:w-4" />;
+
+{
+	/* SHOULD emit diagnostics (classes are not sorted correctly)
+	- with double quotes outside and single quotes inside */
+}
+<div class="flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" />;
+
+{
+	/* SHOULD emit diagnostics (classes are not sorted correctly)
+	- with single quotes outside and double quotes inside */
+}
+<div class='flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center' />;
+
+```
+
+# Diagnostics
+```
+issue_5601.jsx:11:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     9 │ 	- with double quotes outside and single quotes inside */
+    10 │ }
+  > 11 │ <div class="flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ {
+  
+  i Unsafe fix: Sort the classes.
+  
+     9  9 │   	- with double quotes outside and single quotes inside */
+    10 10 │   }
+    11    │ - <div·class="flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·/>;
+       11 │ + <div·class="m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·/>;
+    12 12 │   
+    13 13 │   {
+  
+
+```
+
+```
+issue_5601.jsx:17:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    15 │ 	- with single quotes outside and double quotes inside */
+    16 │ }
+  > 17 │ <div class='flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center' />;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    15 15 │   	- with single quotes outside and double quotes inside */
+    16 16 │   }
+    17    │ - <div·class='flex·gap-2·p-4·m-2·[&_svg:not([class*="size-"])]:w-4·items-center'·/>;
+       17 │ + <div·class='m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*="size-"])]:w-4'·/>;
+    18 18 │   
+  
+
+```

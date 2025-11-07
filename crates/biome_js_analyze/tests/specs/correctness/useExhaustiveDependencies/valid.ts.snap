@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import { type MutableRefObject, useEffect, useRef } from "react";
+
+// capturing declarations
+function overloaded(s: string): string;
+function overloaded(s?: string) {
+  return s;
+}
+
+enum A { B = 1 }
+abstract class C { static D = 1 }
+class D {
+    constructor() {
+
+    }
+}
+
+declare module M {
+    function f();
+}
+
+function MyComponent() {
+    useEffect(() => {
+        overloaded("");
+        console.log(A.B);
+        console.log(C.D);
+        console.log(new D());
+        console.log(M.f());
+    }, []);
+}
+
+// Capturing an object property with optional chaining
+export function MyComponent2() {
+    let selectedArticle: { redirectUrl: string } | undefined;
+
+    useEffect(() => {
+        if (selectedArticle?.redirectUrl) {}
+    }, [selectedArticle?.redirectUrl]);
+}
+
+// Excludes captures from TS typeof
+export function MyComponent3({ outer }: { outer: string[] }) {
+		useEffect(() => {
+			const a: (typeof outer)[number] = "foo";
+			console.log(a)
+		}, []);
+}
+
+// useRef's are still considered as stable even if there's any type assertion
+export function MyComponent4() {
+    const parenthesizedRef = (((useRef())));
+    const sequenceRef = (doSomething(), useRef());
+    const nonNullAssertedRef = useRef()!;
+    const castedRef = useRef() as MutableRefObject<HTMLElement>;
+    const satisfiedRef = useRef() satisfies MutableRefObject<HTMLElement>;
+
+    useEffect(() => {
+        console.log(parenthesizedRef.current);
+        console.log(sequenceRef.current);
+        console.log(nonNullAssertedRef.current);
+        console.log(castedRef.current.innerHTML);
+        console.log(satisfiedRef.current.innerHTML);
+    }, []);
+}
+
+```

@@ -16,11 +16,10 @@
 /// - Enables cross-language linting (e.g., unused imports used in templates)
 /// - Simplifies semantic analysis across both languages
 /// - Foundation for making existing rules work with templates
-
 use super::glimmer::GLIMMER_TEMPLATE;
-use biome_html_parser::{parse_html, HtmlParseOptions};
+use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage, HtmlRoot};
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, JsModule};
 use biome_rowan::{AstNode, NodeCache, SyntaxNode, TextRange};
 
@@ -221,9 +220,8 @@ impl<'a> Iterator for UnifiedDescendantsIter<'a> {
                             if idx < self.templates.len() {
                                 // Start iterating the HTML tree
                                 let template = &self.templates[idx];
-                                self.current_html_iter = Some(Box::new(
-                                    template.html_root.syntax().descendants(),
-                                ));
+                                self.current_html_iter =
+                                    Some(Box::new(template.html_root.syntax().descendants()));
                                 self.current_template_idx = idx;
                                 // Return the first HTML node
                                 return self.next();

@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5620.js
+---
+# Input
+```js
+function callFn(fn) {
+    fn();
+}
+
+callFn(console.log);
+
+```
+
+# Diagnostics
+```
+issue_5620.js:5:8 lint/suspicious/noConsole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    3 │ }
+    4 │ 
+  > 5 │ callFn(console.log);
+      │        ^^^^^^^^^^^
+    6 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+
+```

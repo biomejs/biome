@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+var x, y
+
+function test() {
+	// Comment
+	let foo, bar;
+}
+
+var x = 1,
+	// comment
+    y = 2
+
+let
+	a = 0,
+	b = 1;
+
+let // comment
+	c = 0, // trailing comment
+	/*0*/d;
+
+while(true) var v = 0, u = 1;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+  > 1 │ var x, y
+      │ ^^^^^^^^
+    2 │ 
+    3 │ function test() {
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+     1    │ - var·x,·y
+        1 │ + var·x
+        2 │ + var·y
+     2  3 │   
+     3  4 │   function test() {
+  
+
+```
+
+```
+invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+    3 │ function test() {
+    4 │ 	// Comment
+  > 5 │ 	let foo, bar;
+      │ 	^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+     3  3 │   function test() {
+     4  4 │   	// Comment
+     5    │ - → let·foo,·bar;
+        5 │ + → let·foo;
+        6 │ + → let·bar;
+     6  7 │   }
+     7  8 │   
+  
+
+```
+
+```
+invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+     6 │ }
+     7 │ 
+   > 8 │ var x = 1,
+       │ ^^^^^^^^^^
+   > 9 │ 	// comment
+  > 10 │     y = 2
+       │     ^^^^^
+    11 │ 
+    12 │ let
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+     6  6 │   }
+     7  7 │   
+     8    │ - var·x·=·1,
+     9    │ - → //·comment
+    10    │ - ····y·=·2
+        8 │ + var·x·=·1
+        9 │ + //·comment
+       10 │ + var·y·=·2
+    11 11 │   
+    12 12 │   let
+  
+
+```
+
+```
+invalid.js:12:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+    10 │     y = 2
+    11 │ 
+  > 12 │ let
+       │ ^^^
+  > 13 │ 	a = 0,
+  > 14 │ 	b = 1;
+       │ 	^^^^^^
+    15 │ 
+    16 │ let // comment
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    10 10 │       y = 2
+    11 11 │   
+    12    │ - let
+    13    │ - → a·=·0,
+    14    │ - → b·=·1;
+       12 │ + let·a·=·0;
+       13 │ + let·b·=·1;
+    15 14 │   
+    16 15 │   let // comment
+  
+
+```
+
+```
+invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+    14 │ 	b = 1;
+    15 │ 
+  > 16 │ let // comment
+       │ ^^^^^^^^^^^^^^
+  > 17 │ 	c = 0, // trailing comment
+  > 18 │ 	/*0*/d;
+       │ 	^^^^^^^
+    19 │ 
+    20 │ while(true) var v = 0, u = 1;
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    12 12 │   let
+    13 13 │   	a = 0,
+    14    │ - → b·=·1;
+    15    │ - 
+    16    │ - let·//·comment
+    17    │ - → c·=·0,·//·trailing·comment
+    18    │ - → /*0*/d;
+       14 │ + → b·=·1;//·comment
+       15 │ + 
+       16 │ + let·c·=·0;·//·trailing·comment
+       17 │ + /*0*/
+       18 │ + let·d;
+    19 19 │   
+    20 20 │   while(true) var v = 0, u = 1;
+  
+
+```
+
+```
+invalid.js:20:13 lint/style/useSingleVarDeclarator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declare variables separately
+  
+    18 │ 	/*0*/d;
+    19 │ 
+  > 20 │ while(true) var v = 0, u = 1;
+       │             ^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+
+```

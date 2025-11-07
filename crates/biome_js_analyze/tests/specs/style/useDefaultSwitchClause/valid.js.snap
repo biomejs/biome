@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+switch (a) {
+	case 1:
+		break;
+	default:
+		break;
+}
+
+switch (a) {
+	case 1:
+		break;
+	case 2:
+	default:
+		break;
+}
+
+```

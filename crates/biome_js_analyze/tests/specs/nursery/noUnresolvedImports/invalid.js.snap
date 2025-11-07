@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import foo from "./foo.js";
+import { bar } from "./bar";
+import { other } from "./nonExisting";
+
+```
+
+# Diagnostics
+```
+invalid.js:1:8 lint/nursery/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path ./foo.js has no default export.
+  
+  > 1 │ import foo from "./foo.js";
+      │        ^^^
+    2 │ import { bar } from "./bar";
+    3 │ import { other } from "./nonExisting";
+  
+  i Make sure that the path is correct and that you're importing the right symbol.
+  
+
+```
+
+```
+invalid.js:2:10 lint/nursery/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path ./bar has no export named bar.
+  
+    1 │ import foo from "./foo.js";
+  > 2 │ import { bar } from "./bar";
+      │          ^^^
+    3 │ import { other } from "./nonExisting";
+    4 │ 
+  
+  i Make sure that the path is correct and that you're importing the right symbol.
+  
+
+```
+
+```
+invalid.js:3:23 lint/nursery/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path ./nonExisting cannot be resolved: module not found
+  
+    1 │ import foo from "./foo.js";
+    2 │ import { bar } from "./bar";
+  > 3 │ import { other } from "./nonExisting";
+      │                       ^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Make sure that the path exists and is readable.
+  
+
+```

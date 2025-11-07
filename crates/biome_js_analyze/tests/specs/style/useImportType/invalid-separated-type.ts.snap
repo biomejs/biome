@@ -1,0 +1,223 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-separated-type.ts
+---
+# Input
+```ts
+import { T1, type T2 } from "mod";
+export type { T1, T2 };
+
+import { T3, V1, type T4 } from "mod";
+export type { T3, T4 };
+export { V1 };
+
+import T5, { T6, V2 } from "mod";
+export type { T5, T6 };
+export { V2 };
+
+import V3, { T7, V4, type T8 } from "mod";
+export type { T7, T8 };
+export { V3, V4 };
+
+import V5, { T9 } from "mod";
+export type { T9 };
+export { V5 };
+
+import { type T10 } from "mod";
+export type { T10 };
+
+import T11, { type T12 } from "mod";
+export type { T11, T12 };
+
+import V6, { type T13 } from "mod";
+export type { T13 };
+export { V6 };
+
+```
+
+# Diagnostics
+```
+invalid-separated-type.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+  > 1 │ import { T1, type T2 } from "mod";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export type { T1, T2 };
+    3 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     1    │ - import·{·T1,·type·T2·}·from·"mod";
+        1 │ + import·type·{·T1,·T2·}·from·"mod";
+     2  2 │   export type { T1, T2 };
+     3  3 │   
+  
+
+```
+
+```
+invalid-separated-type.ts:4:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Separate type imports from other imports.
+  
+    2 │ export type { T1, T2 };
+    3 │ 
+  > 4 │ import { T3, V1, type T4 } from "mod";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export type { T3, T4 };
+    6 │ export { V1 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     1  1 │   import { T1, type T2 } from "mod";
+     2  2 │   export type { T1, T2 };
+     3    │ - 
+     4    │ - import·{·T3,·V1,·type·T4·}·from·"mod";
+        3 │ + import·type·{·T3,·T4·}·from·"mod";
+        4 │ + import·{·V1,·}·from·"mod";
+     5  5 │   export type { T3, T4 };
+     6  6 │   export { V1 };
+  
+
+```
+
+```
+invalid-separated-type.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Separate type imports from other imports.
+  
+     6 │ export { V1 };
+     7 │ 
+   > 8 │ import T5, { T6, V2 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ export type { T5, T6 };
+    10 │ export { V2 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     6  6 │   export { V1 };
+     7  7 │   
+     8    │ - import·T5,·{·T6,·V2·}·from·"mod";
+        8 │ + import·type·T5·from·"mod";
+        9 │ + import·type·{·T6,·}·from·"mod";
+       10 │ + import·{·V2·}·from·"mod";
+     9 11 │   export type { T5, T6 };
+    10 12 │   export { V2 };
+  
+
+```
+
+```
+invalid-separated-type.ts:12:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These named imports are only used as types.
+  
+    10 │ export { V2 };
+    11 │ 
+  > 12 │ import V3, { T7, V4, type T8 } from "mod";
+       │            ^^^^^^^^^^^^^^^^^^^
+    13 │ export type { T7, T8 };
+    14 │ export { V3, V4 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    10 10 │   export { V2 };
+    11 11 │   
+    12    │ - import·V3,·{·T7,·V4,·type·T8·}·from·"mod";
+       12 │ + import·V3·from·"mod";
+       13 │ + import·type·{·T7,·T8·}·from·"mod";
+       14 │ + import·{·V4,·}·from·"mod";
+    13 15 │   export type { T7, T8 };
+    14 16 │   export { V3, V4 };
+  
+
+```
+
+```
+invalid-separated-type.ts:16:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These named imports are only used as types.
+  
+    14 │ export { V3, V4 };
+    15 │ 
+  > 16 │ import V5, { T9 } from "mod";
+       │            ^^^^^^
+    17 │ export type { T9 };
+    18 │ export { V5 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    14 14 │   export { V3, V4 };
+    15 15 │   
+    16    │ - import·V5,·{·T9·}·from·"mod";
+       16 │ + import·V5·from·"mod";
+       17 │ + import·type·{·T9·}·from·"mod";
+    17 18 │   export type { T9 };
+    18 19 │   export { V5 };
+  
+
+```
+
+```
+invalid-separated-type.ts:20:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    18 │ export { V5 };
+    19 │ 
+  > 20 │ import { type T10 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ export type { T10 };
+    22 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    18 18 │   export { V5 };
+    19 19 │   
+    20    │ - import·{·type·T10·}·from·"mod";
+       20 │ + import·type·{·T10·}·from·"mod";
+    21 21 │   export type { T10 };
+    22 22 │   
+  
+
+```
+
+```
+invalid-separated-type.ts:23:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    21 │ export type { T10 };
+    22 │ 
+  > 23 │ import T11, { type T12 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ export type { T11, T12 };
+    25 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    21 21 │   export type { T10 };
+    22 22 │   
+    23    │ - import·T11,·{·type·T12·}·from·"mod";
+       23 │ + import·type·T11·from·"mod";
+       24 │ + import·type·{·T12·}·from·"mod";
+    24 25 │   export type { T11, T12 };
+    25 26 │   
+  
+
+```

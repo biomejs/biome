@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerGetters.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - getters used in template */
+export default class MyComponent {
+  count = 0;
+
+  get formattedCount() {
+    return `Count: ${this.count}`;
+  }
+
+  get doubleCount() {
+    return this.count * 2;
+  }
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

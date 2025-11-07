@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import Component from '@glimmer/component';
 import Button from './Button';
 import Card from './Card';

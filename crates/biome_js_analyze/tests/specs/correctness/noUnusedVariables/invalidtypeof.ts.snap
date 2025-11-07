@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidtypeof.ts
+---
+# Input
+```ts
+interface I {}
+
+export declare const x: typeof I;
+
+```
+
+# Diagnostics
+```
+invalidtypeof.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface I is unused.
+  
+  > 1 │ interface I {}
+      │           ^
+    2 │ 
+    3 │ export declare const x: typeof I;
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```

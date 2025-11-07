@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportedBun.js
+---
+# Input
+```js
+import {test, expect} from "bun:test";
+
+expect("something").toBeTrue()
+```
+
+# Diagnostics
+```
+invalidImportedBun.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  
+    1 │ import {test, expect} from "bun:test";
+    2 │ 
+  > 3 │ expect("something").toBeTrue()
+      │ ^^^^^^
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it(), test() or Deno.test() function call.
+  
+
+```

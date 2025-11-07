@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: fromImportRenameValid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+import AwesomeNoReact, { Fragment as AwesomeFragment } from "noReact";
+import AwesomeReact, { StrictMode as AwesomeStrictMode } from "react";
+
+<>
+    <AwesomeFragment></AwesomeFragment>
+    <AwesomeNoReact.Fragment>foo</AwesomeNoReact.Fragment>
+    <AwesomeStrictMode></AwesomeStrictMode>
+    <AwesomeReact.StrictMode>foo</AwesomeReact.StrictMode>
+</>
+
+```

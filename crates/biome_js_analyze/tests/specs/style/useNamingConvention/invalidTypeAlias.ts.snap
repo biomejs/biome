@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeAlias.ts
+---
+# Input
+```ts
+export type camelCase = {}
+
+export type CONSTANT_CASE = {}
+
+export type snake_case = {}
+
+export type Unknown_Style = {}
+
+type _CONSTANT_CASE = {}
+
+type _snake_case = {}
+
+type _Unknown_Style = {}
+
+type str = string
+```
+
+# Diagnostics
+```
+invalidTypeAlias.ts:1:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+  > 1 │ export type camelCase = {}
+      │             ^^^^^^^^^
+    2 │ 
+    3 │ export type CONSTANT_CASE = {}
+  
+
+```
+
+```
+invalidTypeAlias.ts:3:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+    1 │ export type camelCase = {}
+    2 │ 
+  > 3 │ export type CONSTANT_CASE = {}
+      │             ^^^^^^^^^^^^^
+    4 │ 
+    5 │ export type snake_case = {}
+  
+
+```
+
+```
+invalidTypeAlias.ts:5:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+    3 │ export type CONSTANT_CASE = {}
+    4 │ 
+  > 5 │ export type snake_case = {}
+      │             ^^^^^^^^^^
+    6 │ 
+    7 │ export type Unknown_Style = {}
+  
+
+```
+
+```
+invalidTypeAlias.ts:7:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+    5 │ export type snake_case = {}
+    6 │ 
+  > 7 │ export type Unknown_Style = {}
+      │             ^^^^^^^^^^^^^
+    8 │ 
+    9 │ type _CONSTANT_CASE = {}
+  
+
+```
+
+```
+invalidTypeAlias.ts:15:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+    13 │ type _Unknown_Style = {}
+    14 │ 
+  > 15 │ type str = string
+       │      ^^^
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    13 13 │   type _Unknown_Style = {}
+    14 14 │   
+    15    │ - type·str·=·string
+       15 │ + type·Str·=·string
+  
+
+```

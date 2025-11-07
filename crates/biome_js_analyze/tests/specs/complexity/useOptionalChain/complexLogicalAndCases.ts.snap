@@ -1,0 +1,154 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: complexLogicalAndCases.ts
+---
+# Input
+```ts
+// currently do not handle complex computed properties
+foo && foo[bar as string] && foo[bar as string].baz;
+foo && foo[1 + 2] && foo[1 + 2].baz;
+foo && foo[typeof bar] && foo[typeof bar].baz;
+
+// https://github.com/biomejs/biome/issues/1925
+foo?.bar && foo.bar?.baz && foo.bar?.qux;
+
+foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
+
+foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
+
+```
+
+# Diagnostics
+```
+complexLogicalAndCases.ts:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    1 │ // currently do not handle complex computed properties
+  > 2 │ foo && foo[bar as string] && foo[bar as string].baz;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ foo && foo[1 + 2] && foo[1 + 2].baz;
+    4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     1  1 │   // currently do not handle complex computed properties
+     2    │ - foo·&&·foo[bar·as·string]·&&·foo[bar·as·string].baz;
+        2 │ + foo?.[bar·as·string]·&&·foo[bar·as·string].baz;
+     3  3 │   foo && foo[1 + 2] && foo[1 + 2].baz;
+     4  4 │   foo && foo[typeof bar] && foo[typeof bar].baz;
+  
+
+```
+
+```
+complexLogicalAndCases.ts:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    1 │ // currently do not handle complex computed properties
+    2 │ foo && foo[bar as string] && foo[bar as string].baz;
+  > 3 │ foo && foo[1 + 2] && foo[1 + 2].baz;
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
+    5 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     1  1 │   // currently do not handle complex computed properties
+     2  2 │   foo && foo[bar as string] && foo[bar as string].baz;
+     3    │ - foo·&&·foo[1·+·2]·&&·foo[1·+·2].baz;
+        3 │ + foo?.[1·+·2]·&&·foo[1·+·2].baz;
+     4  4 │   foo && foo[typeof bar] && foo[typeof bar].baz;
+     5  5 │   
+  
+
+```
+
+```
+complexLogicalAndCases.ts:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    2 │ foo && foo[bar as string] && foo[bar as string].baz;
+    3 │ foo && foo[1 + 2] && foo[1 + 2].baz;
+  > 4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // https://github.com/biomejs/biome/issues/1925
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     2  2 │   foo && foo[bar as string] && foo[bar as string].baz;
+     3  3 │   foo && foo[1 + 2] && foo[1 + 2].baz;
+     4    │ - foo·&&·foo[typeof·bar]·&&·foo[typeof·bar].baz;
+        4 │ + foo?.[typeof·bar]·&&·foo[typeof·bar].baz;
+     5  5 │   
+     6  6 │   // https://github.com/biomejs/biome/issues/1925
+  
+
+```
+
+```
+complexLogicalAndCases.ts:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    6 │ // https://github.com/biomejs/biome/issues/1925
+  > 7 │ foo?.bar && foo.bar?.baz && foo.bar?.qux;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    7 │ foo?.bar·&&·foo.bar?.baz·&&·foo.bar?.qux;
+      │         -----------                      
+
+```
+
+```
+complexLogicalAndCases.ts:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     7 │ foo?.bar && foo.bar?.baz && foo.bar?.qux;
+     8 │ 
+   > 9 │ foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     7  7 │   foo?.bar && foo.bar?.baz && foo.bar?.qux;
+     8  8 │   
+     9    │ - foo?.bar.baz?.qux·&&·foo.bar.baz.qux.zoo;
+        9 │ + foo?.bar.baz?.qux?.zoo;
+    10 10 │   
+    11 11 │   foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
+  
+
+```
+
+```
+complexLogicalAndCases.ts:11:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     9 │ foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
+    10 │ 
+  > 11 │ foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     9  9 │   foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
+    10 10 │   
+    11    │ - foo·&&·foo.bar.baz?.qux·&&·foo.bar.baz.qux.zoo;
+       11 │ + foo?.bar.baz?.qux?.zoo;
+    12 12 │   
+  
+
+```

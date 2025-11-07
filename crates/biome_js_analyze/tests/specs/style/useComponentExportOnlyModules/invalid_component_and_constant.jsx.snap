@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_component_and_constant.jsx
+---
+# Input
+```jsx
+export const CONSTANT = 3
+export const Foo = () => {}
+
+```
+
+# Diagnostics
+```
+invalid_component_and_constant.jsx:1:14 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━
+
+  ! Exporting a non-component with components is not allowed.
+  
+  > 1 │ export const CONSTANT = 3
+      │              ^^^^^^^^
+    2 │ export const Foo = () => {}
+    3 │ 
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating non-component exports into a new file.
+  
+  i If it is a component, it may not be following the variable naming conventions.
+  
+
+```

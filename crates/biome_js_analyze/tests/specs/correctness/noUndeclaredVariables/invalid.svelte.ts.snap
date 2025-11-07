@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte.ts
+---
+# Input
+```ts
+class Todo {
+    done = $unknown(false);
+    text = $unknown();
+
+    constructor(text) {
+        this.text = text;
+    }
+}
+```
+
+# Diagnostics
+```
+invalid.svelte.ts:2:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The $unknown variable is undeclared.
+  
+    1 │ class Todo {
+  > 2 │     done = $unknown(false);
+      │            ^^^^^^^^
+    3 │     text = $unknown();
+    4 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid.svelte.ts:3:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The $unknown variable is undeclared.
+  
+    1 │ class Todo {
+    2 │     done = $unknown(false);
+  > 3 │     text = $unknown();
+      │            ^^^^^^^^
+    4 │ 
+    5 │     constructor(text) {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

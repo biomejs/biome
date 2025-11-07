@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+/^abc[a-zA-Z]/;
+/^abc/;
+/[\[]/;
+/[\]]/;
+/\[][\]]/;
+/[a-zA-Z\[]/;
+/[[]/;
+/[\[a-z[]]/;
+/[\-\[\]\/\{\}\(\)\*\+\?\.\\^\$\|]/g;
+/\s*:\s*/gim;
+/[\]]/uy;
+/[\]]/s;
+/[\]]/d;
+/\[]/;
+// FIXME: This should not generate a diagnostic
+// /[[^]]/v;
+/[[\]]]/v;
+/[[\[]]/v;
+/[a--b]/v;
+/[a&&b]/v;
+/[[a][b]]/v;
+/[\q{}]/v;
+// FIXME: This should not generate a diagnostic
+// /[[^]--\p{ASCII}]/v;
+/[\u200E\u2066-\u2069]/gu;
+```

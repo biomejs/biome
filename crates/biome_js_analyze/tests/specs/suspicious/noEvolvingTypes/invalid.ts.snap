@@ -1,0 +1,176 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+let a;
+const b = [];
+let c = null;
+
+let someVar1;
+someVar1 = '123';
+someVar1 = 123;
+
+var someVar1;
+someVar1 = '123';
+someVar1 = 123;
+
+let x = 0, y, z = 0;
+var x = 0, y, z = 0;
+for(let a = 0, b; a < 5; a++) {}
+
+function ex() {
+    let b;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+  > 1 │ let a;
+      │     ^
+    2 │ const b = [];
+    3 │ let c = null;
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:2:7 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    1 │ let a;
+  > 2 │ const b = [];
+      │       ^
+    3 │ let c = null;
+    4 │ 
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:3:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    1 │ let a;
+    2 │ const b = [];
+  > 3 │ let c = null;
+      │     ^
+    4 │ 
+    5 │ let someVar1;
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:5:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    3 │ let c = null;
+    4 │ 
+  > 5 │ let someVar1;
+      │     ^^^^^^^^
+    6 │ someVar1 = '123';
+    7 │ someVar1 = 123;
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:9:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+     7 │ someVar1 = 123;
+     8 │ 
+   > 9 │ var someVar1;
+       │     ^^^^^^^^
+    10 │ someVar1 = '123';
+    11 │ someVar1 = 123;
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:13:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    11 │ someVar1 = 123;
+    12 │ 
+  > 13 │ let x = 0, y, z = 0;
+       │            ^
+    14 │ var x = 0, y, z = 0;
+    15 │ for(let a = 0, b; a < 5; a++) {}
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:14:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    13 │ let x = 0, y, z = 0;
+  > 14 │ var x = 0, y, z = 0;
+       │            ^
+    15 │ for(let a = 0, b; a < 5; a++) {}
+    16 │ 
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:15:16 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    13 │ let x = 0, y, z = 0;
+    14 │ var x = 0, y, z = 0;
+  > 15 │ for(let a = 0, b; a < 5; a++) {}
+       │                ^
+    16 │ 
+    17 │ function ex() {
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```
+
+```
+invalid.ts:18:9 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type of this variable may evolve implicitly to any type, including the any type.
+  
+    17 │ function ex() {
+  > 18 │     let b;
+       │         ^
+    19 │ }
+    20 │ 
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+```

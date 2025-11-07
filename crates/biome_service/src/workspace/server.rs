@@ -455,7 +455,7 @@ impl WorkspaceServer {
                         syntax: syntax.clone(),
                         embedded_snippets: embedded_snippets.clone(),
                         original_source_text: original_source_text.clone(),
-                }
+                    }
                 },
                 || Document {
                     content: content.clone(),
@@ -528,10 +528,7 @@ impl WorkspaceServer {
     }
 
     /// Get the original untransformed source text for embedded languages
-    fn get_original_source_text(
-        &self,
-        path: &Utf8Path,
-    ) -> Option<Arc<String>> {
+    fn get_original_source_text(&self, path: &Utf8Path) -> Option<Arc<String>> {
         self.documents
             .pin()
             .get(path)

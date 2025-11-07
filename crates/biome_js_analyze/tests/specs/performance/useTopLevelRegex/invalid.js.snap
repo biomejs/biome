@@ -1,0 +1,227 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function foo(someString) {
+	return /[a-Z]*/.test(someString)
+}
+
+function foo(someString) {
+	const r = /[a-Z]*/;
+	return r.test(someString)
+}
+
+const foo = (someString) => {
+	return /[a-Z]*/.test(someString)
+}
+
+class Foo {
+	constructor() {
+		this.regex = /[a-Z]*/;
+	}
+}
+
+class Foo {
+	regex = /[a-Z]*/;
+}
+
+class Foo {
+	get regex() {
+		return /[a-Z]*/;
+	}
+}
+
+class Foo {
+	set apply(s) {
+		this.value = /[a-Z]*/.test(s);
+	}
+}
+
+const foo = {
+	regex() {
+		return /[a-Z]*/;
+	}
+}
+
+const foo = {
+	get regex() {
+		return /[a-Z]*/;
+	}
+}
+
+const foo = {
+	set apply(s) {
+		this.value = /[a-Z]*/.test(s);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:9 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    1 │ function foo(someString) {
+  > 2 │ 	return /[a-Z]*/.test(someString)
+      │ 	       ^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:6:12 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    5 │ function foo(someString) {
+  > 6 │ 	const r = /[a-Z]*/;
+      │ 	          ^^^^^^^^
+    7 │ 	return r.test(someString)
+    8 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:11:9 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    10 │ const foo = (someString) => {
+  > 11 │ 	return /[a-Z]*/.test(someString)
+       │ 	       ^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:16:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    14 │ class Foo {
+    15 │ 	constructor() {
+  > 16 │ 		this.regex = /[a-Z]*/;
+       │ 		             ^^^^^^^^
+    17 │ 	}
+    18 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:21:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    20 │ class Foo {
+  > 21 │ 	regex = /[a-Z]*/;
+       │ 	        ^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:26:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    24 │ class Foo {
+    25 │ 	get regex() {
+  > 26 │ 		return /[a-Z]*/;
+       │ 		       ^^^^^^^^
+    27 │ 	}
+    28 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:32:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    30 │ class Foo {
+    31 │ 	set apply(s) {
+  > 32 │ 		this.value = /[a-Z]*/.test(s);
+       │ 		             ^^^^^^^^
+    33 │ 	}
+    34 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:38:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    36 │ const foo = {
+    37 │ 	regex() {
+  > 38 │ 		return /[a-Z]*/;
+       │ 		       ^^^^^^^^
+    39 │ 	}
+    40 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:44:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    42 │ const foo = {
+    43 │ 	get regex() {
+  > 44 │ 		return /[a-Z]*/;
+       │ 		       ^^^^^^^^
+    45 │ 	}
+    46 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```
+
+```
+invalid.js:50:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    48 │ const foo = {
+    49 │ 	set apply(s) {
+  > 50 │ 		this.value = /[a-Z]*/.test(s);
+       │ 		             ^^^^^^^^
+    51 │ 	}
+    52 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+```

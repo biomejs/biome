@@ -26,10 +26,10 @@ export default class MyComponent {
 
 #[test]
 fn test_component_detection_in_template() {
-    use regex::Regex;
-    use biome_html_parser::{parse_html, HtmlParseOptions};
+    use biome_html_parser::{HtmlParseOptions, parse_html};
     use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
     use biome_rowan::AstNode;
+    use regex::Regex;
 
     let template_content = r#"<template>
         <Button />
@@ -50,7 +50,12 @@ fn test_component_detection_in_template() {
             if let Some(name_token) = element.name() {
                 let tag_name = name_token.to_string();
                 // Check if PascalCase
-                if tag_name.chars().next().map(|c| c.is_uppercase()).unwrap_or(false) {
+                if tag_name
+                    .chars()
+                    .next()
+                    .map(|c| c.is_uppercase())
+                    .unwrap_or(false)
+                {
                     components.push(tag_name);
                 }
             }
@@ -58,6 +63,9 @@ fn test_component_detection_in_template() {
     }
 
     println!("Found components: {:?}", components);
-    assert!(components.contains(&"Button".to_string()), "Should find Button");
+    assert!(
+        components.contains(&"Button".to_string()),
+        "Should find Button"
+    );
     assert!(components.contains(&"Card".to_string()), "Should find Card");
 }

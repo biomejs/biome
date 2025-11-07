@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: +in+valid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+```
+
+# Diagnostics
+```
++in+valid.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i The filename could be renamed to one of the following names:
+    +in-valid.js
+    +inValid.js
+    +in_valid.js
+  
+
+```

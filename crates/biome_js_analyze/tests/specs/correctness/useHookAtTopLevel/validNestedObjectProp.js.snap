@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNestedObjectProp.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function ReactComponent() {
+    const testObj = {
+        get print() {
+            return "hello"
+        }
+    }
+
+    const callback = useCallback(() => {}, [])
+
+    return <></>
+}
+
+```

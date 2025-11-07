@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+import Document from "next/document";
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/suspicious/noDocumentImportInPage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use next/document outside of pages/_document.jsx to avoid unexpected behaviors.
+  
+  > 1 │ import Document from "next/document";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Only import next/document within pages/_document.jsx to customize the global document structure.
+  
+
+```

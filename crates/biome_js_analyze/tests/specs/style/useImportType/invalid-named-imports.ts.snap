@@ -1,0 +1,218 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-named-imports.ts
+---
+# Input
+```ts
+import { A, B, C, D, E } from "";
+type AA = A;
+type BB = typeof B;
+export { type C };
+export { D };
+const EE = E;
+
+import { X, Y } from "";
+type XX = X;
+const YY = Y;
+
+import { type H, type I, type J } from "";
+export type { H, I, J };
+
+import type { type M, N, type O } from "";
+
+// multiline
+import {
+    U,
+    V,
+    // leading comment
+    W,
+} from "";
+export { U, type V, type W };
+
+```
+
+# Diagnostics
+```
+invalid-named-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │          ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │             ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │                ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    1 │ import·{·type·A,·type·B,·type·C,·D,·E·}·from·"";
+      │          +++++   +++++   +++++                  
+
+```
+
+```
+invalid-named-imports.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+     6 │ const EE = E;
+     7 │ 
+   > 8 │ import { X, Y } from "";
+       │        ^^^^^^^^^^^^^^^^
+     9 │ type XX = X;
+    10 │ const YY = Y;
+  
+  i This import is only used as a type.
+  
+     6 │ const EE = E;
+     7 │ 
+   > 8 │ import { X, Y } from "";
+       │          ^
+     9 │ type XX = X;
+    10 │ const YY = Y;
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    8 │ import·{·type·X,·Y·}·from·"";
+      │          +++++               
+
+```
+
+```
+invalid-named-imports.ts:12:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    10 │ const YY = Y;
+    11 │ 
+  > 12 │ import { type H, type I, type J } from "";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export type { H, I, J };
+    14 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    10 10 │   const YY = Y;
+    11 11 │   
+    12    │ - import·{·type·H,·type·I,·type·J·}·from·"";
+       12 │ + import·type·{·H,·I,·J·}·from·"";
+    13 13 │   export type { H, I, J };
+    14 14 │   
+  
+
+```
+
+```
+invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type keyword makes all inline type keywords useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │        ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i This inline type keyword is useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │               ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i This inline type keyword is useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │                          ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i Safe fix: Remove useless inline type keywords.
+  
+    15 │ import·type·{·type·M,·N,·type·O·}·from·"";
+       │               -----      -----            
+
+```
+
+```
+invalid-named-imports.ts:18:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    17 │ // multiline
+  > 18 │ import {
+       │        ^
+  > 19 │     U,
+  > 20 │     V,
+  > 21 │     // leading comment
+  > 22 │     W,
+  > 23 │ } from "";
+       │ ^^^^^^^^^
+    24 │ export { U, type V, type W };
+    25 │ 
+  
+  i This import is only used as a type.
+  
+    18 │ import {
+    19 │     U,
+  > 20 │     V,
+       │     ^
+    21 │     // leading comment
+    22 │     W,
+  
+  i This import is only used as a type.
+  
+    20 │     V,
+    21 │     // leading comment
+  > 22 │     W,
+       │     ^
+    23 │ } from "";
+    24 │ export { U, type V, type W };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    18 18 │   import {
+    19 19 │       U,
+    20    │ - ····V,
+       20 │ + ····type·V,
+    21 21 │       // leading comment
+    22    │ - ····W,
+       22 │ + ····type·W,
+    23 23 │   } from "";
+    24 24 │   export { U, type V, type W };
+  
+
+```

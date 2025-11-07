@@ -1,0 +1,255 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+    <a target="_blank" href="https://example.com/1"></a>
+    <a target="_blank" rel="" href="https://example.com/2"></a>
+    <a target="_blank" rel={0} href="https://example.com/3"></a>
+    <a target="_blank" rel={false} href="https://example.com/4"></a>
+    <a target="_blank" rel={null} href="https://example.com/5"></a>
+    <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+    <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+    <a target="_blank" href="//example.com/14" rel={"noopenernoreferrer"}></a>
+    <a target="_blank" href="//example.com/17" rel></a>
+    <a target="_blank" href={dynamicLink}></a>
+    <a target={'_blank'} href="//example.com/18"></a>
+    <area target="_blank" href="https://example.com"></area>
+    <form target="_blank" action="https://example.com"></form>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:8 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    1 │ <>
+  > 2 │     <a target="_blank" href="https://example.com/1"></a>
+      │        ^^^^^^^^^^^^^^^
+    3 │     <a target="_blank" rel="" href="https://example.com/2"></a>
+    4 │     <a target="_blank" rel={0} href="https://example.com/3"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the rel="noopener" attribute.
+  
+    2 │ ····<a·target="_blank"·href="https://example.com/1"·rel="noopener"></a>
+      │                                                    +++++++++++++++     
+
+```
+
+```
+invalid.jsx:3:8 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    1 │ <>
+    2 │     <a target="_blank" href="https://example.com/1"></a>
+  > 3 │     <a target="_blank" rel="" href="https://example.com/2"></a>
+      │        ^^^^^^^^^^^^^^^
+    4 │     <a target="_blank" rel={0} href="https://example.com/3"></a>
+    5 │     <a target="_blank" rel={false} href="https://example.com/4"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    3 │ ····<a·target="_blank"·rel="noopener"·href="https://example.com/2"></a>
+      │                             ++++++++                                   
+
+```
+
+```
+invalid.jsx:4:8 lint/security/noBlankTarget ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    2 │     <a target="_blank" href="https://example.com/1"></a>
+    3 │     <a target="_blank" rel="" href="https://example.com/2"></a>
+  > 4 │     <a target="_blank" rel={0} href="https://example.com/3"></a>
+      │        ^^^^^^^^^^^^^^^
+    5 │     <a target="_blank" rel={false} href="https://example.com/4"></a>
+    6 │     <a target="_blank" rel={null} href="https://example.com/5"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+
+```
+
+```
+invalid.jsx:5:8 lint/security/noBlankTarget ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    3 │     <a target="_blank" rel="" href="https://example.com/2"></a>
+    4 │     <a target="_blank" rel={0} href="https://example.com/3"></a>
+  > 5 │     <a target="_blank" rel={false} href="https://example.com/4"></a>
+      │        ^^^^^^^^^^^^^^^
+    6 │     <a target="_blank" rel={null} href="https://example.com/5"></a>
+    7 │     <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+
+```
+
+```
+invalid.jsx:6:8 lint/security/noBlankTarget ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    4 │     <a target="_blank" rel={0} href="https://example.com/3"></a>
+    5 │     <a target="_blank" rel={false} href="https://example.com/4"></a>
+  > 6 │     <a target="_blank" rel={null} href="https://example.com/5"></a>
+      │        ^^^^^^^^^^^^^^^
+    7 │     <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+    8 │     <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+
+```
+
+```
+invalid.jsx:7:8 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    5 │     <a target="_blank" rel={false} href="https://example.com/4"></a>
+    6 │     <a target="_blank" rel={null} href="https://example.com/5"></a>
+  > 7 │     <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+      │        ^^^^^^^^^^^^^^^
+    8 │     <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+    9 │     <a target="_blank" href="//example.com/14" rel={"noopenernoreferrer"}></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    7 │ ····<a·target="_blank"·rel="noopener·noopenernoreferrer"·href="https://example.com/6"></a>
+      │                             +++++++++                                                     
+
+```
+
+```
+invalid.jsx:8:8 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+     6 │     <a target="_blank" rel={null} href="https://example.com/5"></a>
+     7 │     <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+   > 8 │     <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+       │        ^^^^^^^^^^^^^^^
+     9 │     <a target="_blank" href="//example.com/14" rel={"noopenernoreferrer"}></a>
+    10 │     <a target="_blank" href="//example.com/17" rel></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    8 │ ····<a·target="_blank"·rel="noopener·no·referrer"·href="https://example.com/7"></a>
+      │                             +++++++++                                              
+
+```
+
+```
+invalid.jsx:9:8 lint/security/noBlankTarget ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+     7 │     <a target="_blank" rel="noopenernoreferrer" href="https://example.com/6"></a>
+     8 │     <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+   > 9 │     <a target="_blank" href="//example.com/14" rel={"noopenernoreferrer"}></a>
+       │        ^^^^^^^^^^^^^^^
+    10 │     <a target="_blank" href="//example.com/17" rel></a>
+    11 │     <a target="_blank" href={dynamicLink}></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+
+```
+
+```
+invalid.jsx:10:8 lint/security/noBlankTarget ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+     8 │     <a target="_blank" rel="no referrer" href="https://example.com/7"></a>
+     9 │     <a target="_blank" href="//example.com/14" rel={"noopenernoreferrer"}></a>
+  > 10 │     <a target="_blank" href="//example.com/17" rel></a>
+       │        ^^^^^^^^^^^^^^^
+    11 │     <a target="_blank" href={dynamicLink}></a>
+    12 │     <a target={'_blank'} href="//example.com/18"></a>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+
+```
+
+```
+invalid.jsx:12:8 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    10 │     <a target="_blank" href="//example.com/17" rel></a>
+    11 │     <a target="_blank" href={dynamicLink}></a>
+  > 12 │     <a target={'_blank'} href="//example.com/18"></a>
+       │        ^^^^^^^^^^^^^^^^^
+    13 │     <area target="_blank" href="https://example.com"></area>
+    14 │     <form target="_blank" action="https://example.com"></form>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the rel="noopener" attribute.
+  
+    12 │ ····<a·target={'_blank'}·href="//example.com/18"·rel="noopener"></a>
+       │                                                 +++++++++++++++     
+
+```
+
+```
+invalid.jsx:13:11 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    11 │     <a target="_blank" href={dynamicLink}></a>
+    12 │     <a target={'_blank'} href="//example.com/18"></a>
+  > 13 │     <area target="_blank" href="https://example.com"></area>
+       │           ^^^^^^^^^^^^^^^
+    14 │     <form target="_blank" action="https://example.com"></form>
+    15 │ </>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the rel="noopener" attribute.
+  
+    13 │ ····<area·target="_blank"·href="https://example.com"·rel="noopener"></area>
+       │                                                     +++++++++++++++        
+
+```
+
+```
+invalid.jsx:14:11 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener" or rel="noreferrer".
+  
+    12 │     <a target={'_blank'} href="//example.com/18"></a>
+    13 │     <area target="_blank" href="https://example.com"></area>
+  > 14 │     <form target="_blank" action="https://example.com"></form>
+       │           ^^^^^^^^^^^^^^^
+    15 │ </>
+    16 │ 
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the rel="noopener" attribute.
+  
+    14 │ ····<form·target="_blank"·action="https://example.com"·rel="noopener"></form>
+       │                                                       +++++++++++++++        
+
+```

@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFixNone.js
+---
+# Input
+```js
+const x = 0;
+```
+
+# Diagnostics
+```
+invalidFixNone.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable x is unused.
+  
+  > 1 │ const x = 0;
+      │       ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```

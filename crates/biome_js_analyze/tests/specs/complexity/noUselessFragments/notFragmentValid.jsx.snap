@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: notFragmentValid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+import React, { StrictMode } from "react";
+
+<>
+    <StrictMode></StrictMode>
+    <React.StrictMode></React.StrictMode>
+</>
+
+```

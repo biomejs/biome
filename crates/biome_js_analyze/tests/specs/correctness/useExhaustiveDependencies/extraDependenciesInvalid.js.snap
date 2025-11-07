@@ -1,0 +1,230 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: extraDependenciesInvalid.js
+---
+# Input
+```js
+import { useEffect } from "react";
+
+function MyComponent() {
+  let a = 1;
+  useEffect(() => {}, [a]);
+}
+
+// multiple extra dependencies
+
+function MyComponent2() {
+  let a = 1, b = 1;
+  useEffect(() => {}, [a, b]);
+}
+
+// extra const
+
+function MyComponent2() {
+  const a = 1;
+  useEffect(() => {}, [a]);
+}
+
+// dependency more deep than capture
+// Note: This can be a valid case, but there is
+// no way for the lint rule to know
+
+function MyComponent1() {
+  let someObj = getObj();
+  useEffect(() => {
+      console.log(someObj)
+  }, [someObj.id]);
+}
+
+let outer = false;
+// Dependencies from outer scope should not be valid
+function MyComponent3() {
+  useEffect(() => {
+      outer = true;
+  }, [outer]);
+}
+
+```
+
+# Diagnostics
+```
+extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a
+  
+    3 │ function MyComponent() {
+    4 │   let a = 1;
+  > 5 │   useEffect(() => {}, [a]);
+      │   ^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i This dependency can be removed from the list.
+  
+    3 │ function MyComponent() {
+    4 │   let a = 1;
+  > 5 │   useEffect(() => {}, [a]);
+      │                        ^
+    6 │ }
+    7 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    5 │ ··useEffect(()·=>·{},·[a]);
+      │                        -   
+
+```
+
+```
+extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a, b
+  
+    10 │ function MyComponent2() {
+    11 │   let a = 1, b = 1;
+  > 12 │   useEffect(() => {}, [a, b]);
+       │   ^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i This dependency can be removed from the list.
+  
+    10 │ function MyComponent2() {
+    11 │   let a = 1, b = 1;
+  > 12 │   useEffect(() => {}, [a, b]);
+       │                        ^
+    13 │ }
+    14 │ 
+  
+  i This dependency can be removed from the list.
+  
+    10 │ function MyComponent2() {
+    11 │   let a = 1, b = 1;
+  > 12 │   useEffect(() => {}, [a, b]);
+       │                           ^
+    13 │ }
+    14 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    12 │ ··useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
+
+```
+
+```
+extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a
+  
+    17 │ function MyComponent2() {
+    18 │   const a = 1;
+  > 19 │   useEffect(() => {}, [a]);
+       │   ^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i This dependency can be removed from the list.
+  
+    17 │ function MyComponent2() {
+    18 │   const a = 1;
+  > 19 │   useEffect(() => {}, [a]);
+       │                        ^
+    20 │ }
+    21 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    19 │ ··useEffect(()·=>·{},·[a]);
+       │                        -   
+
+```
+
+```
+extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies a dependency more specific that its captures: someObj.id
+  
+    26 │ function MyComponent1() {
+    27 │   let someObj = getObj();
+  > 28 │   useEffect(() => {
+       │   ^^^^^^^^^
+    29 │       console.log(someObj)
+    30 │   }, [someObj.id]);
+  
+  i This capture is more generic than...
+  
+    27 │   let someObj = getObj();
+    28 │   useEffect(() => {
+  > 29 │       console.log(someObj)
+       │                   ^^^^^^^
+    30 │   }, [someObj.id]);
+    31 │ }
+  
+  i ...this dependency.
+  
+    28 │   useEffect(() => {
+    29 │       console.log(someObj)
+  > 30 │   }, [someObj.id]);
+       │       ^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+
+```
+
+```
+extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on someObj.
+  
+    26 │ function MyComponent1() {
+    27 │   let someObj = getObj();
+  > 28 │   useEffect(() => {
+       │   ^^^^^^^^^
+    29 │       console.log(someObj)
+    30 │   }, [someObj.id]);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    27 │   let someObj = getObj();
+    28 │   useEffect(() => {
+  > 29 │       console.log(someObj)
+       │                   ^^^^^^^
+    30 │   }, [someObj.id]);
+    31 │ }
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    30 │ ··},·[someObj.id,·someObj]);
+       │                 +++++++++   
+
+```
+
+```
+extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: outer
+  
+    34 │ // Dependencies from outer scope should not be valid
+    35 │ function MyComponent3() {
+  > 36 │   useEffect(() => {
+       │   ^^^^^^^^^
+    37 │       outer = true;
+    38 │   }, [outer]);
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    36 │   useEffect(() => {
+    37 │       outer = true;
+  > 38 │   }, [outer]);
+       │       ^^^^^
+    39 │ }
+    40 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    38 │ ··},·[outer]);
+       │       -----   
+
+```

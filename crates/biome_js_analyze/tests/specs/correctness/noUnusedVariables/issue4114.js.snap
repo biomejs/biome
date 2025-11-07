@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue4114.js
+---
+# Input
+```js
+c;
+const c = 0;
+```
+
+# Diagnostics
+```
+issue4114.js:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable c is unused.
+  
+    1 │ c;
+  > 2 │ const c = 0;
+      │       ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend c with an underscore.
+  
+    1   │ - c;
+    2   │ - const·c·=·0;
+      1 │ + _c;
+      2 │ + const·_c·=·0;
+  
+
+```

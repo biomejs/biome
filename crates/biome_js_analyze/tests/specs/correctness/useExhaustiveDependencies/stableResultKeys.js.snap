@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stableResultKeys.js
+---
+# Input
+```js
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+
+function useCustomHook() {
+    const dispatch = useDispatch();
+    return { dispatch }
+}
+
+function MyComponent27() {
+    const { dispatch } = useCustomHook();
+    const doAction = useCallback(() => dispatch(someAction()), []);
+}
+
+```

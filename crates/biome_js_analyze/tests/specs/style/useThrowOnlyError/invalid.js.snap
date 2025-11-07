@@ -1,0 +1,365 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+throw undefined;
+throw "error";
+throw 0;
+throw false;
+throw null;
+throw {};
+throw "a" + "b";
+const a = "";
+throw a + "b";
+let foo;
+throw (foo = "error");
+throw (new Error(), 1, 2, 3);
+throw "literal" && "not an Error";
+throw "literal" || new Error();
+throw new Error() && "literal";
+throw "literal" ?? new Error();
+throw foo ? "not an Error" : "literal";
+throw foo ? new Error() : "literal";
+throw foo ? "literal" : new Error();
+throw `${foo}`;
+
+// False positives while valid, not a good practice.
+throw "literal" && new Error();
+throw new Error() || "literal";
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+  > 1 │ throw undefined;
+      │ ^^^^^^^^^^^^^^^^
+    2 │ throw "error";
+    3 │ throw 0;
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:2:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    1 │ throw undefined;
+  > 2 │ throw "error";
+      │ ^^^^^^^^^^^^^^
+    3 │ throw 0;
+    4 │ throw false;
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:3:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    1 │ throw undefined;
+    2 │ throw "error";
+  > 3 │ throw 0;
+      │ ^^^^^^^^
+    4 │ throw false;
+    5 │ throw null;
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:4:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    2 │ throw "error";
+    3 │ throw 0;
+  > 4 │ throw false;
+      │ ^^^^^^^^^^^^
+    5 │ throw null;
+    6 │ throw {};
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:5:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    3 │ throw 0;
+    4 │ throw false;
+  > 5 │ throw null;
+      │ ^^^^^^^^^^^
+    6 │ throw {};
+    7 │ throw "a" + "b";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:6:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    4 │ throw false;
+    5 │ throw null;
+  > 6 │ throw {};
+      │ ^^^^^^^^^
+    7 │ throw "a" + "b";
+    8 │ const a = "";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:7:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    5 │ throw null;
+    6 │ throw {};
+  > 7 │ throw "a" + "b";
+      │ ^^^^^^^^^^^^^^^^
+    8 │ const a = "";
+    9 │ throw a + "b";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:9:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+     7 │ throw "a" + "b";
+     8 │ const a = "";
+   > 9 │ throw a + "b";
+       │ ^^^^^^^^^^^^^^
+    10 │ let foo;
+    11 │ throw (foo = "error");
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:11:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+     9 │ throw a + "b";
+    10 │ let foo;
+  > 11 │ throw (foo = "error");
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ throw (new Error(), 1, 2, 3);
+    13 │ throw "literal" && "not an Error";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:12:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    10 │ let foo;
+    11 │ throw (foo = "error");
+  > 12 │ throw (new Error(), 1, 2, 3);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ throw "literal" && "not an Error";
+    14 │ throw "literal" || new Error();
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:13:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    11 │ throw (foo = "error");
+    12 │ throw (new Error(), 1, 2, 3);
+  > 13 │ throw "literal" && "not an Error";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ throw "literal" || new Error();
+    15 │ throw new Error() && "literal";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:14:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    12 │ throw (new Error(), 1, 2, 3);
+    13 │ throw "literal" && "not an Error";
+  > 14 │ throw "literal" || new Error();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ throw new Error() && "literal";
+    16 │ throw "literal" ?? new Error();
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:15:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    13 │ throw "literal" && "not an Error";
+    14 │ throw "literal" || new Error();
+  > 15 │ throw new Error() && "literal";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ throw "literal" ?? new Error();
+    17 │ throw foo ? "not an Error" : "literal";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:16:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    14 │ throw "literal" || new Error();
+    15 │ throw new Error() && "literal";
+  > 16 │ throw "literal" ?? new Error();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ throw foo ? "not an Error" : "literal";
+    18 │ throw foo ? new Error() : "literal";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:17:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    15 │ throw new Error() && "literal";
+    16 │ throw "literal" ?? new Error();
+  > 17 │ throw foo ? "not an Error" : "literal";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ throw foo ? new Error() : "literal";
+    19 │ throw foo ? "literal" : new Error();
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:18:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    16 │ throw "literal" ?? new Error();
+    17 │ throw foo ? "not an Error" : "literal";
+  > 18 │ throw foo ? new Error() : "literal";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ throw foo ? "literal" : new Error();
+    20 │ throw `${foo}`;
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:19:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    17 │ throw foo ? "not an Error" : "literal";
+    18 │ throw foo ? new Error() : "literal";
+  > 19 │ throw foo ? "literal" : new Error();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ throw `${foo}`;
+    21 │ 
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:20:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    18 │ throw foo ? new Error() : "literal";
+    19 │ throw foo ? "literal" : new Error();
+  > 20 │ throw `${foo}`;
+       │ ^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ // False positives while valid, not a good practice.
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:23:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    22 │ // False positives while valid, not a good practice.
+  > 23 │ throw "literal" && new Error();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ throw new Error() || "literal";
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```
+
+```
+invalid.js:24:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Throwing non-Error values is not allowed.
+  
+    22 │ // False positives while valid, not a good practice.
+    23 │ throw "literal" && new Error();
+  > 24 │ throw new Error() || "literal";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
+  
+
+```

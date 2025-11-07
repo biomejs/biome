@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNamespace.ts
+---
+# Input
+```ts
+export namespace XXX {}
+
+export namespace CONSTANT_CASE {}
+
+export namespace snake_case {}
+
+export namespace Unknown_Style {}
+
+namespace _XXX {}
+
+namespace _CONSTANT_CASE {}
+
+namespace _snake_case {}
+
+namespace _Unknown_Style {}
+```
+
+# Diagnostics
+```
+invalidNamespace.ts:1:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This namespace name should be in camelCase or PascalCase.
+  
+  > 1 │ export namespace XXX {}
+      │                  ^^^
+    2 │ 
+    3 │ export namespace CONSTANT_CASE {}
+  
+
+```
+
+```
+invalidNamespace.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This namespace name should be in camelCase or PascalCase.
+  
+    1 │ export namespace XXX {}
+    2 │ 
+  > 3 │ export namespace CONSTANT_CASE {}
+      │                  ^^^^^^^^^^^^^
+    4 │ 
+    5 │ export namespace snake_case {}
+  
+
+```
+
+```
+invalidNamespace.ts:5:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This namespace name should be in camelCase or PascalCase.
+  
+    3 │ export namespace CONSTANT_CASE {}
+    4 │ 
+  > 5 │ export namespace snake_case {}
+      │                  ^^^^^^^^^^
+    6 │ 
+    7 │ export namespace Unknown_Style {}
+  
+
+```
+
+```
+invalidNamespace.ts:7:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This namespace name should be in camelCase or PascalCase.
+  
+    5 │ export namespace snake_case {}
+    6 │ 
+  > 7 │ export namespace Unknown_Style {}
+      │                  ^^^^^^^^^^^^^
+    8 │ 
+    9 │ namespace _XXX {}
+  
+
+```

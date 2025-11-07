@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportedDeno.js
+---
+# Input
+```js
+import {assertEquals} from "https://deno.land/std@0.220.0/assert/mod.ts";
+
+assertEquals(url.href, "https://deno.land/foo.js");
+Deno.test("url test", () => {
+    const url = new URL("./foo.js", "https://deno.land/");
+});
+```
+
+# Diagnostics
+```
+invalidImportedDeno.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  
+    1 │ import {assertEquals} from "https://deno.land/std@0.220.0/assert/mod.ts";
+    2 │ 
+  > 3 │ assertEquals(url.href, "https://deno.land/foo.js");
+      │ ^^^^^^^^^^^^
+    4 │ Deno.test("url test", () => {
+    5 │     const url = new URL("./foo.js", "https://deno.land/");
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it(), test() or Deno.test() function call.
+  
+
+```

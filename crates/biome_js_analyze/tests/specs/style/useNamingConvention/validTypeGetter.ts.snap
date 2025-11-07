@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTypeGetter.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export interface X {
+    get p(): unknown
+
+    get property(): unknown
+
+    get specialProperty(): unknown
+
+    get stream$(): unknown
+
+    get $stream(): unknown
+
+    get _special_(): unknown
+
+    get "custom-property"(): unknown
+
+    get "@"(): unknown
+
+    get READONLY_PROPERTY(): unknown
+}
+```

@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-mapped-types.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// See https://github.com/biomejs/biome/issues/953
+type X = never;
+type Y = never;
+export const MyMappingPbToGql: {
+    [key in X]: never;
+} = {};
+export const MyOtherMappingPbToGql: {
+    [key in Y]: never;
+} = {};
+
+```

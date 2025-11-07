@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: _document.jsx
+---
+# Input
+```jsx
+import Head from "next/head";
+```
+
+# Diagnostics
+```
+_document.jsx:1:1 lint/suspicious/noHeadImportInDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use next/head in pages/_document.jsx
+  
+  > 1 │ import Head from "next/head";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using the next/head in document pages can cause unexpected issues. Use <Head /> from next/document instead.
+  
+
+```

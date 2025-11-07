@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const a = 3;
+function b() {
+    const a = 10;
+}
+
+const c = function () {
+    const a = 10;
+}
+
+function d(a) {
+    a = 10;
+}
+d(a);
+
+if (true) {
+    const a = 5;
+}
+
+var foo = function(foo) {};
+
+var bar = function() { function bar() {} };
+
+```
+
+# Diagnostics
+```
+invalid.js:3:11 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    1 │ const a = 3;
+    2 │ function b() {
+  > 3 │     const a = 10;
+      │           ^
+    4 │ }
+    5 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ const a = 3;
+      │       ^
+    2 │ function b() {
+    3 │     const a = 10;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    6 │ const c = function () {
+  > 7 │     const a = 10;
+      │           ^
+    8 │ }
+    9 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ const a = 3;
+      │       ^
+    2 │ function b() {
+    3 │     const a = 10;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```
+
+```
+invalid.js:10:12 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+     8 │ }
+     9 │ 
+  > 10 │ function d(a) {
+       │            ^
+    11 │     a = 10;
+    12 │ }
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ const a = 3;
+      │       ^
+    2 │ function b() {
+    3 │     const a = 10;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```
+
+```
+invalid.js:16:11 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    15 │ if (true) {
+  > 16 │     const a = 5;
+       │           ^
+    17 │ }
+    18 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ const a = 3;
+      │       ^
+    2 │ function b() {
+    3 │     const a = 10;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```
+
+```
+invalid.js:19:20 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    17 │ }
+    18 │ 
+  > 19 │ var foo = function(foo) {};
+       │                    ^^^
+    20 │ 
+    21 │ var bar = function() { function bar() {} };
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    17 │ }
+    18 │ 
+  > 19 │ var foo = function(foo) {};
+       │     ^^^
+    20 │ 
+    21 │ var bar = function() { function bar() {} };
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```
+
+```
+invalid.js:21:33 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    19 │ var foo = function(foo) {};
+    20 │ 
+  > 21 │ var bar = function() { function bar() {} };
+       │                                 ^^^
+    22 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    19 │ var foo = function(foo) {};
+    20 │ 
+  > 21 │ var bar = function() { function bar() {} };
+       │     ^^^
+    22 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

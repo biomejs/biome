@@ -1,0 +1,214 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// ref: https://github.com/eslint/eslint/blob/main/tests/lib/rules/no-dupe-else-if.js
+
+if (isSomething(x)) {
+    foo();
+} else if (isSomething(x)) {
+    bar();
+}
+
+if (a) {
+    foo();
+} else if (b) {
+    bar();
+} else if (c && d) {
+    baz();
+} else if (c && d) {
+    quux();
+} else {
+    quuux();
+}
+
+if (n === 1) {
+    foo();
+} else if (n === 2) {
+    bar();
+} else if (n === 3) {
+    baz();
+} else if (n === 2) {
+    quux();
+} else if (n === 5) {
+    quuux();
+}
+
+if (a || b) {
+    foo();
+} else if (a) {
+    bar();
+}
+
+if (a) {
+    foo();
+} else if (b) {
+    bar();
+} else if (a || b) {
+    baz();
+}
+
+if (a) {
+    foo();
+} else if (a && b) {
+    bar();
+}
+
+if (a && b) {
+    foo();
+} else if (a && b && c) {
+    bar();
+}
+
+if (a || b) {
+    foo();
+} else if (b && c) {
+    bar();
+}
+
+if (a) {
+    foo();
+} else if (b && c) {
+    bar();
+} else if (d && (c && e && b || a)) {
+    baz();
+}
+```
+
+# Diagnostics
+```
+invalid.js:5:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    3 │ if (isSomething(x)) {
+    4 │     foo();
+  > 5 │ } else if (isSomething(x)) {
+      │            ^^^^^^^^^^^^^^
+    6 │     bar();
+    7 │ }
+  
+
+```
+
+```
+invalid.js:15:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && d) {
+       │            ^^^^^^
+    16 │     quux();
+    17 │ } else {
+  
+
+```
+
+```
+invalid.js:27:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    25 │ } else if (n === 3) {
+    26 │     baz();
+  > 27 │ } else if (n === 2) {
+       │            ^^^^^^^
+    28 │     quux();
+    29 │ } else if (n === 5) {
+  
+
+```
+
+```
+invalid.js:35:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    33 │ if (a || b) {
+    34 │     foo();
+  > 35 │ } else if (a) {
+       │            ^
+    36 │     bar();
+    37 │ }
+  
+
+```
+
+```
+invalid.js:43:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    41 │ } else if (b) {
+    42 │     bar();
+  > 43 │ } else if (a || b) {
+       │            ^^^^^^
+    44 │     baz();
+    45 │ }
+  
+
+```
+
+```
+invalid.js:49:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    47 │ if (a) {
+    48 │     foo();
+  > 49 │ } else if (a && b) {
+       │            ^^^^^^
+    50 │     bar();
+    51 │ }
+  
+
+```
+
+```
+invalid.js:55:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    53 │ if (a && b) {
+    54 │     foo();
+  > 55 │ } else if (a && b && c) {
+       │            ^^^^^^^^^^^
+    56 │     bar();
+    57 │ }
+  
+
+```
+
+```
+invalid.js:61:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    59 │ if (a || b) {
+    60 │     foo();
+  > 61 │ } else if (b && c) {
+       │            ^^^^^^
+    62 │     bar();
+    63 │ }
+  
+
+```
+
+```
+invalid.js:69:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  
+    67 │ } else if (b && c) {
+    68 │     bar();
+  > 69 │ } else if (d && (c && e && b || a)) {
+       │            ^^^^^^^^^^^^^^^^^^^^^^^
+    70 │     baz();
+    71 │ }
+  
+
+```

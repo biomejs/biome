@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunctionParameter.js
+---
+# Input
+```js
+export function f(_snake_case, CONSTANT_CASE) { return _snake_case }
+```
+
+# Diagnostics
+```
+invalidFunctionParameter.js:1:20 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function parameter name part should be in camelCase or PascalCase.
+  
+  > 1 │ export function f(_snake_case, CONSTANT_CASE) { return _snake_case }
+      │                    ^^^^^^^^^^
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+  - export·function·f(_snake_case,·CONSTANT_CASE)·{·return·_snake_case·}
+  + export·function·f(_snakeCase,·CONSTANT_CASE)·{·return·_snakeCase·}
+  
+
+```
+
+```
+invalidFunctionParameter.js:1:32 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function parameter name should be in camelCase or PascalCase.
+  
+  > 1 │ export function f(_snake_case, CONSTANT_CASE) { return _snake_case }
+      │                                ^^^^^^^^^^^^^
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+  - export·function·f(_snake_case,·CONSTANT_CASE)·{·return·_snake_case·}
+  + export·function·f(_snake_case,·ConstantCase)·{·return·_snake_case·}
+  
+
+```

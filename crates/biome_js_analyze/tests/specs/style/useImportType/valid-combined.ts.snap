@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-combined.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import A, { type B, type C } from "";
+export { A, type B, type C };
+
+import U, * as V from "";
+export { U, V };
+
+```

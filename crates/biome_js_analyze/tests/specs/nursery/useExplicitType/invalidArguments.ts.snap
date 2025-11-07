@@ -1,0 +1,182 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidArguments.ts
+---
+# Input
+```ts
+// argument without type
+export var arrowFn = (arg): string => `test ${arg}`;
+
+// argument with any type
+export var arrowFn = (arg: any): string => `test ${arg}`;
+
+class Test {
+	constructor(foo) {}
+	get prop(): number {
+		return 1;
+	}
+	set prop(foo) {}
+	method(foo): void {
+		return;
+	}
+	arrow = (foo): string => "arrow";
+}
+
+var obj = {
+	method(foo): string {
+		return "test";
+	},
+	set prop(foo) {}
+};
+
+
+```
+
+# Diagnostics
+```
+invalidArguments.ts:2:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    1 │ // argument without type
+  > 2 │ export var arrowFn = (arg): string => `test ${arg}`;
+      │                       ^^^
+    3 │ 
+    4 │ // argument with any type
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:5:28 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter has an any type.
+  
+    4 │ // argument with any type
+  > 5 │ export var arrowFn = (arg: any): string => `test ${arg}`;
+      │                            ^^^
+    6 │ 
+    7 │ class Test {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Replace any with unknown or a more specific type.
+  
+
+```
+
+```
+invalidArguments.ts:8:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+     7 │ class Test {
+   > 8 │ 	constructor(foo) {}
+       │ 	            ^^^
+     9 │ 	get prop(): number {
+    10 │ 		return 1;
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:12:11 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    10 │ 		return 1;
+    11 │ 	}
+  > 12 │ 	set prop(foo) {}
+       │ 	         ^^^
+    13 │ 	method(foo): void {
+    14 │ 		return;
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:13:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    11 │ 	}
+    12 │ 	set prop(foo) {}
+  > 13 │ 	method(foo): void {
+       │ 	       ^^^
+    14 │ 		return;
+    15 │ 	}
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:16:11 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    14 │ 		return;
+    15 │ 	}
+  > 16 │ 	arrow = (foo): string => "arrow";
+       │ 	         ^^^
+    17 │ }
+    18 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:20:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    19 │ var obj = {
+  > 20 │ 	method(foo): string {
+       │ 	       ^^^
+    21 │ 		return "test";
+    22 │ 	},
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```
+
+```
+invalidArguments.ts:23:11 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The parameter doesn't have a type defined.
+  
+    21 │ 		return "test";
+    22 │ 	},
+  > 23 │ 	set prop(foo) {}
+       │ 	         ^^^
+    24 │ };
+    25 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the parameter.
+  
+
+```

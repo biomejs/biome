@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue1931.js
+---
+# Input
+```js
+import { useEffect, useState } from 'library-reexporting-react';
+import * as ReactReexport from 'library-reexporting-react';
+
+function MyComponent25() {
+    const [calc, setCalc] = useState(0);
+    // Built-in hooks such as `useEffect()` normally only get validated when
+    // they're imported from the "react" library. Explicitly configuring them
+    // in the hooks array (as if they are user-provided hooks) overrides this.
+    useEffect(() => {
+        if (calc === 0) {
+            setCalc(1);
+        }
+    }, []);
+}
+
+function MyComponent26() {
+    const [calc, setCalc] = ReactReexport.useState(0);
+    // Built-in hooks such as `useEffect()` normally only get validated when
+    // they're imported from the "react" library. Explicitly configuring them
+    // in the hooks array (as if they are user-provided hooks) overrides this.
+    ReactReexport.useEffect(() => {
+        if (calc === 0) {
+            setCalc(1);
+        }
+    }, []);
+}
+
+```
+
+# Diagnostics
+```
+issue1931.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on calc.
+  
+     7 │     // they're imported from the "react" library. Explicitly configuring them
+     8 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+   > 9 │     useEffect(() => {
+       │     ^^^^^^^^^
+    10 │         if (calc === 0) {
+    11 │             setCalc(1);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     8 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+     9 │     useEffect(() => {
+  > 10 │         if (calc === 0) {
+       │             ^^^^
+    11 │             setCalc(1);
+    12 │         }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    13 │ ····},·[calc]);
+       │         ++++   
+
+```
+
+```
+issue1931.js:21:19 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on calc.
+  
+    19 │     // they're imported from the "react" library. Explicitly configuring them
+    20 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+  > 21 │     ReactReexport.useEffect(() => {
+       │                   ^^^^^^^^^
+    22 │         if (calc === 0) {
+    23 │             setCalc(1);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    20 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+    21 │     ReactReexport.useEffect(() => {
+  > 22 │         if (calc === 0) {
+       │             ^^^^
+    23 │             setCalc(1);
+    24 │         }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    25 │ ····},·[calc]);
+       │         ++++   
+
+```

@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reactCreateElementValid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+React.createElement("div", { tabIndex: '0' })
+React.createElement("div", { tabIndex: '-1' })
+React.createElement("div", { tabIndex: dynamic })
+React.createElement("div", { tabIndex: 0 })
+React.createElement("div", { tabIndex: +0 })
+React.createElement("div", { tabIndex: -0 })
+React.createElement("div", { tabIndex: -5 })
+React.createElement("div", { tabIndex: -5.5 })
+React.createElement("div", { tabIndex: .5 })
+React.createElement("div", { tabIndex: `1` })
+React.createElement("div", { tabIndex: func() })
+React.createElement("div", { tabIndex: null })
+React.createElement("div", { tabIndex: undefined })
+React.createElement("div", { tabIndex: typeof e })
+React.createElement("div", { ...props })
+React.createElement("div", props)
+React.createElement("div", {})
+
+```

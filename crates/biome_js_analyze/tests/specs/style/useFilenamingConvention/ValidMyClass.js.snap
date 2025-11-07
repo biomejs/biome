@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ValidMyClass.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export class ValidMyClass {}
+
+```

@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unusedInferBogusConditional.ts
+---
+# Input
+```ts
+export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
+```
+
+# Diagnostics
+```
+unusedInferBogusConditional.ts:1:65 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Prefix is unused.
+  
+  > 1 │ export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
+      │                                                                 ^^^^^^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```

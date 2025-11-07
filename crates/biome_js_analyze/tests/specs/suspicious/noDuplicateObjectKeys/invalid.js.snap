@@ -1,0 +1,278 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const O1 = {
+    // Comment 1
+    a: 0,
+    // Comment 2
+    a: 1
+};
+const O2 = {
+    // Comment 1
+    f: 0,
+    // Comment 2
+    f() {}
+};
+const O3 = {
+    // Comment 1
+    get prop() { return 0 },
+    // Comment 2
+    prop() {}
+};
+const O4 = {
+    // Comment 1
+    set prop(prop) {},
+    // Comment 2
+    prop() {}
+};
+const O5 = {
+    // Comment 1
+    get prop() { return 0 },
+    // Comment 2
+    get prop() { return 0 },
+};
+const O6 = {
+    // Comment 1
+    set prop(prop) {},
+    // Comment 2
+    set prop(prop) {},
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:3:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This property is later overwritten by an object member with the same name.
+  
+    1 │ const O1 = {
+    2 │     // Comment 1
+  > 3 │     a: 0,
+      │     ^^^^
+    4 │     // Comment 2
+    5 │     a: 1
+  
+  i Overwritten with this property.
+  
+    3 │     a: 0,
+    4 │     // Comment 2
+  > 5 │     a: 1
+      │     ^^^^
+    6 │ };
+    7 │ const O2 = {
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this property.
+  
+     1  1 │   const O1 = {
+     2    │ - ····//·Comment·1
+     3    │ - ····a:·0,
+     4    │ - ····//·Comment·2
+        2 │ + ····//·Comment·1
+        3 │ + ····
+        4 │ + ····//·Comment·2
+     5  5 │       a: 1
+     6  6 │   };
+  
+
+```
+
+```
+invalid.js:9:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This property is later overwritten by an object member with the same name.
+  
+     7 │ const O2 = {
+     8 │     // Comment 1
+   > 9 │     f: 0,
+       │     ^^^^
+    10 │     // Comment 2
+    11 │     f() {}
+  
+  i Overwritten with this method.
+  
+     9 │     f: 0,
+    10 │     // Comment 2
+  > 11 │     f() {}
+       │     ^^^^^^
+    12 │ };
+    13 │ const O3 = {
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this property.
+  
+     6  6 │   };
+     7  7 │   const O2 = {
+     8    │ - ····//·Comment·1
+     9    │ - ····f:·0,
+    10    │ - ····//·Comment·2
+        8 │ + ····//·Comment·1
+        9 │ + ····
+       10 │ + ····//·Comment·2
+    11 11 │       f() {}
+    12 12 │   };
+  
+
+```
+
+```
+invalid.js:15:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter is later overwritten by an object member with the same name.
+  
+    13 │ const O3 = {
+    14 │     // Comment 1
+  > 15 │     get prop() { return 0 },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │     // Comment 2
+    17 │     prop() {}
+  
+  i Overwritten with this method.
+  
+    15 │     get prop() { return 0 },
+    16 │     // Comment 2
+  > 17 │     prop() {}
+       │     ^^^^^^^^^
+    18 │ };
+    19 │ const O4 = {
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this getter.
+  
+    12 12 │   };
+    13 13 │   const O3 = {
+    14    │ - ····//·Comment·1
+    15    │ - ····get·prop()·{·return·0·},
+    16    │ - ····//·Comment·2
+       14 │ + ····//·Comment·1
+       15 │ + ····
+       16 │ + ····//·Comment·2
+    17 17 │       prop() {}
+    18 18 │   };
+  
+
+```
+
+```
+invalid.js:21:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This setter is later overwritten by an object member with the same name.
+  
+    19 │ const O4 = {
+    20 │     // Comment 1
+  > 21 │     set prop(prop) {},
+       │     ^^^^^^^^^^^^^^^^^
+    22 │     // Comment 2
+    23 │     prop() {}
+  
+  i Overwritten with this method.
+  
+    21 │     set prop(prop) {},
+    22 │     // Comment 2
+  > 23 │     prop() {}
+       │     ^^^^^^^^^
+    24 │ };
+    25 │ const O5 = {
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this setter.
+  
+    18 18 │   };
+    19 19 │   const O4 = {
+    20    │ - ····//·Comment·1
+    21    │ - ····set·prop(prop)·{},
+    22    │ - ····//·Comment·2
+       20 │ + ····//·Comment·1
+       21 │ + ····
+       22 │ + ····//·Comment·2
+    23 23 │       prop() {}
+    24 24 │   };
+  
+
+```
+
+```
+invalid.js:27:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter is later overwritten by an object member with the same name.
+  
+    25 │ const O5 = {
+    26 │     // Comment 1
+  > 27 │     get prop() { return 0 },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │     // Comment 2
+    29 │     get prop() { return 0 },
+  
+  i Overwritten with this getter.
+  
+    27 │     get prop() { return 0 },
+    28 │     // Comment 2
+  > 29 │     get prop() { return 0 },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ };
+    31 │ const O6 = {
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this getter.
+  
+    24 24 │   };
+    25 25 │   const O5 = {
+    26    │ - ····//·Comment·1
+    27    │ - ····get·prop()·{·return·0·},
+    28    │ - ····//·Comment·2
+       26 │ + ····//·Comment·1
+       27 │ + ····
+       28 │ + ····//·Comment·2
+    29 29 │       get prop() { return 0 },
+    30 30 │   };
+  
+
+```
+
+```
+invalid.js:33:5 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This setter is later overwritten by an object member with the same name.
+  
+    31 │ const O6 = {
+    32 │     // Comment 1
+  > 33 │     set prop(prop) {},
+       │     ^^^^^^^^^^^^^^^^^
+    34 │     // Comment 2
+    35 │     set prop(prop) {},
+  
+  i Overwritten with this setter.
+  
+    33 │     set prop(prop) {},
+    34 │     // Comment 2
+  > 35 │     set prop(prop) {},
+       │     ^^^^^^^^^^^^^^^^^
+    36 │ };
+    37 │ 
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this setter.
+  
+    30 30 │   };
+    31 31 │   const O6 = {
+    32    │ - ····//·Comment·1
+    33    │ - ····set·prop(prop)·{},
+    34    │ - ····//·Comment·2
+       32 │ + ····//·Comment·1
+       33 │ + ····
+       34 │ + ····//·Comment·2
+    35 35 │       set prop(prop) {},
+    36 36 │   };
+  
+
+```

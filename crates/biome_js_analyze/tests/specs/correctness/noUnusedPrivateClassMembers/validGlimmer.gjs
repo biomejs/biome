@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export default class MyComponent {
   #privateCount = 0;
   #privateName = "test";

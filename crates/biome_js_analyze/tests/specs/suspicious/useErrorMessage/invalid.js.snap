@@ -1,0 +1,511 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+throw new Error();
+throw Error();
+throw new Error("");
+throw new Error(``);
+
+new AggregateError()
+new EvalError()
+new InternalError()
+new RangeError()
+new ReferenceError()
+new SyntaxError()
+new TypeError()
+new URIError()
+
+throw new Error([]);
+throw new Error([foo]);
+throw new Error({});
+throw new Error({ foo });
+throw new Error(1);
+throw new Error(undefined);
+throw new Error(null);
+throw new Error(true);
+
+new AggregateError(errors);
+new AggregateError(errors);
+new AggregateError(errors, "");
+new AggregateError(errors, ``);
+new AggregateError(errors, "", extraArgument);
+
+new AggregateError(errors, []);
+new AggregateError(errors, [foo]);
+new AggregateError(errors, [0][0]);
+new AggregateError(errors, {});
+new AggregateError(errors, { foo });
+
+```
+
+# Diagnostics
+```
+invalid.js:1:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+  > 1 │ throw new Error();
+      │                ^^
+    2 │ throw Error();
+    3 │ throw new Error("");
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:2:12 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    1 │ throw new Error();
+  > 2 │ throw Error();
+      │            ^^
+    3 │ throw new Error("");
+    4 │ throw new Error(``);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:3:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should not be an empty string.
+  
+    1 │ throw new Error();
+    2 │ throw Error();
+  > 3 │ throw new Error("");
+      │                ^^^^
+    4 │ throw new Error(``);
+    5 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:4:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should not be an empty string.
+  
+    2 │ throw Error();
+    3 │ throw new Error("");
+  > 4 │ throw new Error(``);
+      │                ^^^^
+    5 │ 
+    6 │ new AggregateError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:6:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    4 │ throw new Error(``);
+    5 │ 
+  > 6 │ new AggregateError()
+      │                   ^^
+    7 │ new EvalError()
+    8 │ new InternalError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:7:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    6 │ new AggregateError()
+  > 7 │ new EvalError()
+      │              ^^
+    8 │ new InternalError()
+    9 │ new RangeError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:8:18 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+     6 │ new AggregateError()
+     7 │ new EvalError()
+   > 8 │ new InternalError()
+       │                  ^^
+     9 │ new RangeError()
+    10 │ new ReferenceError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:9:15 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+     7 │ new EvalError()
+     8 │ new InternalError()
+   > 9 │ new RangeError()
+       │               ^^
+    10 │ new ReferenceError()
+    11 │ new SyntaxError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:10:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+     8 │ new InternalError()
+     9 │ new RangeError()
+  > 10 │ new ReferenceError()
+       │                   ^^
+    11 │ new SyntaxError()
+    12 │ new TypeError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:11:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+     9 │ new RangeError()
+    10 │ new ReferenceError()
+  > 11 │ new SyntaxError()
+       │                ^^
+    12 │ new TypeError()
+    13 │ new URIError()
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:12:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    10 │ new ReferenceError()
+    11 │ new SyntaxError()
+  > 12 │ new TypeError()
+       │              ^^
+    13 │ new URIError()
+    14 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:13:13 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    11 │ new SyntaxError()
+    12 │ new TypeError()
+  > 13 │ new URIError()
+       │             ^^
+    14 │ 
+    15 │ throw new Error([]);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:15:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    13 │ new URIError()
+    14 │ 
+  > 15 │ throw new Error([]);
+       │                ^^^^
+    16 │ throw new Error([foo]);
+    17 │ throw new Error({});
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:16:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    15 │ throw new Error([]);
+  > 16 │ throw new Error([foo]);
+       │                ^^^^^^^
+    17 │ throw new Error({});
+    18 │ throw new Error({ foo });
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:17:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    15 │ throw new Error([]);
+    16 │ throw new Error([foo]);
+  > 17 │ throw new Error({});
+       │                ^^^^
+    18 │ throw new Error({ foo });
+    19 │ throw new Error(1);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:18:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    16 │ throw new Error([foo]);
+    17 │ throw new Error({});
+  > 18 │ throw new Error({ foo });
+       │                ^^^^^^^^^
+    19 │ throw new Error(1);
+    20 │ throw new Error(undefined);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:19:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    17 │ throw new Error({});
+    18 │ throw new Error({ foo });
+  > 19 │ throw new Error(1);
+       │                ^^^
+    20 │ throw new Error(undefined);
+    21 │ throw new Error(null);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:21:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    19 │ throw new Error(1);
+    20 │ throw new Error(undefined);
+  > 21 │ throw new Error(null);
+       │                ^^^^^^
+    22 │ throw new Error(true);
+    23 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:22:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    20 │ throw new Error(undefined);
+    21 │ throw new Error(null);
+  > 22 │ throw new Error(true);
+       │                ^^^^^^
+    23 │ 
+    24 │ new AggregateError(errors);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:24:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    22 │ throw new Error(true);
+    23 │ 
+  > 24 │ new AggregateError(errors);
+       │                   ^^^^^^^^
+    25 │ new AggregateError(errors);
+    26 │ new AggregateError(errors, "");
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:25:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an error message for the error.
+  
+    24 │ new AggregateError(errors);
+  > 25 │ new AggregateError(errors);
+       │                   ^^^^^^^^
+    26 │ new AggregateError(errors, "");
+    27 │ new AggregateError(errors, ``);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:26:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should not be an empty string.
+  
+    24 │ new AggregateError(errors);
+    25 │ new AggregateError(errors);
+  > 26 │ new AggregateError(errors, "");
+       │                   ^^^^^^^^^^^^
+    27 │ new AggregateError(errors, ``);
+    28 │ new AggregateError(errors, "", extraArgument);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:27:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should not be an empty string.
+  
+    25 │ new AggregateError(errors);
+    26 │ new AggregateError(errors, "");
+  > 27 │ new AggregateError(errors, ``);
+       │                   ^^^^^^^^^^^^
+    28 │ new AggregateError(errors, "", extraArgument);
+    29 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:28:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should not be an empty string.
+  
+    26 │ new AggregateError(errors, "");
+    27 │ new AggregateError(errors, ``);
+  > 28 │ new AggregateError(errors, "", extraArgument);
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ new AggregateError(errors, []);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:30:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    28 │ new AggregateError(errors, "", extraArgument);
+    29 │ 
+  > 30 │ new AggregateError(errors, []);
+       │                   ^^^^^^^^^^^^
+    31 │ new AggregateError(errors, [foo]);
+    32 │ new AggregateError(errors, [0][0]);
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:31:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    30 │ new AggregateError(errors, []);
+  > 31 │ new AggregateError(errors, [foo]);
+       │                   ^^^^^^^^^^^^^^^
+    32 │ new AggregateError(errors, [0][0]);
+    33 │ new AggregateError(errors, {});
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:33:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    31 │ new AggregateError(errors, [foo]);
+    32 │ new AggregateError(errors, [0][0]);
+  > 33 │ new AggregateError(errors, {});
+       │                   ^^^^^^^^^^^^
+    34 │ new AggregateError(errors, { foo });
+    35 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```
+
+```
+invalid.js:34:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error message should be a string.
+  
+    32 │ new AggregateError(errors, [0][0]);
+    33 │ new AggregateError(errors, {});
+  > 34 │ new AggregateError(errors, { foo });
+       │                   ^^^^^^^^^^^^^^^^^
+    35 │ 
+  
+  i Providing meaningful error messages leads to more readable and debuggable code.
+  
+
+```

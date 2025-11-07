@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: regressionRegularJs.js
+---
+# Input
+```js
+/* Regression test: ensure regular JS files still work correctly */
+function test() {
+  const used = 1;
+  const unused = 2;
+  return used;
+}
+
+```
+
+# Diagnostics
+```
+regressionRegularJs.js:2:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function test is unused.
+  
+    1 │ /* Regression test: ensure regular JS files still work correctly */
+  > 2 │ function test() {
+      │          ^^^^
+    3 │   const used = 1;
+    4 │   const unused = 2;
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend test with an underscore.
+  
+    1 1 │   /* Regression test: ensure regular JS files still work correctly */
+    2   │ - function·test()·{
+      2 │ + function·_test()·{
+    3 3 │     const used = 1;
+    4 4 │     const unused = 2;
+  
+
+```
+
+```
+regressionRegularJs.js:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable unused is unused.
+  
+    2 │ function test() {
+    3 │   const used = 1;
+  > 4 │   const unused = 2;
+      │         ^^^^^^
+    5 │   return used;
+    6 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+    2 2 │   function test() {
+    3 3 │     const used = 1;
+    4   │ - ··const·unused·=·2;
+      4 │ + ··const·_unused·=·2;
+    5 5 │     return used;
+    6 6 │   }
+  
+
+```

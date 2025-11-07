@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Empty JSON.stringify argument
+new Response(JSON.stringify())
+
+// Using JSON replacer function
+new Response(JSON.stringify({ value: 0 }, () => {}))
+
+new Response(JSON)
+
+new Response(JSON.stringify({ value: 0 }), {
+    Headers: {
+        // Non json content type
+        'Content-Type': 'application/json2',
+    },
+})
+
+new Response(JSON.stringify({ value: 0 }), {
+    Headers: {
+        'Content-Type': 'application/json',
+        // Extra header
+        'x-foo': 'additional-header',
+    },
+})
+
+new Response(JSON.stringify({ value: 0 }), {
+    Headers: {
+        'Content-Type': 'application/json',
+    },
+    // Additional property
+    status: 200,
+})
+
+
+{
+    class Response {}
+
+    new Response(JSON.stringify({ value: 0 }))
+}
+
+{
+    class JSON {
+        static stringify() {}
+    }
+
+    new Response(JSON.stringify({ value: 0 }))
+}
+
+
+new Response({ nonEmptyBody: true }, {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 302,
+})
+
+new Response('non empty', {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 302,
+})
+
+new Response(null, {
+    headers: {
+        location: 'https://example.com',
+        'x-foo': 'extra-header',
+    },
+    status: 302,
+})
+
+new Response(null, {
+    headers: {
+        location: '/relative/path',
+    },
+    status: 302,
+})
+
+new Response(null, {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 302,
+    extra: 'property',
+})
+
+new Response(null, {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 500,
+})
+```

@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-shadowing.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const Math = { min: () => {}, max: () => {} };
+
+Math.min(0, Math.max(100, x));
+
+```

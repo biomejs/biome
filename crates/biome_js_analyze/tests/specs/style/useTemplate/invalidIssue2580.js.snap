@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIssue2580.js
+---
+# Input
+```js
+// Issue https://github.com/biomejs/biome/issues/2580
+'```ts\n' + x + '\n```';
+```
+
+# Diagnostics
+```
+invalidIssue2580.js:2:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    1 │ // Issue https://github.com/biomejs/biome/issues/2580
+  > 2 │ '```ts\n' + x + '\n```';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Unsafe fix: Use a template literal.
+  
+    1 1 │   // Issue https://github.com/biomejs/biome/issues/2580
+    2   │ - '```ts\n'·+·x·+·'\n```';
+      2 │ + `\`\`\`ts\n${x}\n\`\`\``;
+  
+
+```

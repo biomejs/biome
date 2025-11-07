@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+require('node:fs')
+
+if (true) {
+    require('node:fs')
+}
+
+module.exports = 'path'
+exports.path = 'path'
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ESM imports instead of require.
+  
+  > 1 │ require('node:fs')
+      │ ^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ if (true) {
+  
+  i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
+  
+
+```
+
+```
+invalid.js:4:5 lint/style/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ESM imports instead of require.
+  
+    3 │ if (true) {
+  > 4 │     require('node:fs')
+      │     ^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
+  
+
+```
+
+```
+invalid.js:7:1 lint/style/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ESM exports instead of module.exports.
+  
+    5 │ }
+    6 │ 
+  > 7 │ module.exports = 'path'
+      │ ^^^^^^^^^^^^^^
+    8 │ exports.path = 'path'
+    9 │ 
+  
+  i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
+  
+
+```
+
+```
+invalid.js:8:1 lint/style/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ESM exports instead of module.exports.
+  
+    7 │ module.exports = 'path'
+  > 8 │ exports.path = 'path'
+      │ ^^^^^^^^^^^^
+    9 │ 
+  
+  i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
+  
+
+```

@@ -1,0 +1,331 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+interface Example {
+	(): string;
+}
+
+function foo(example: { (): number }): number {
+	return example();
+}
+
+// Interface with single call signature
+interface SingleCall {
+	(): number;
+}
+
+// Object type literal with single call signature
+let obj: { (): string };
+
+// Interface with a call signature and other properties
+interface MixedInterface {
+	(): void;
+	prop: number;
+}
+
+// Nested object types with call signatures
+let nestedObj: { inner: { (): boolean } };
+
+// Object type with call signature as a type union member
+type UnionWithCallSignature = { (): string } | string;
+
+// Object type with call signature as a type intersection member
+export type IntersectionCallSignature = { (): string } & string;
+
+// Object type with call signature as a type array
+export type ArrayCallSignature = readonly { (): string }[];
+
+// Generic object type with a call signature
+type GenericCallSignature<T> = { (arg: T): T };
+
+// Object type with optional call signature
+let optionalCall: { (): number | undefined };
+
+// Generic interface with a call signature
+interface GenericInterface<T> {
+	(value: T): boolean;
+}
+```
+
+# Diagnostics
+```
+invalid.ts:2:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    1 │ interface Example {
+  > 2 │ 	(): string;
+      │ 	^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Alias a function type instead of using an interface with a call signature.
+  
+     1    │ - interface·Example·{
+     2    │ - → ():·string;
+     3    │ - }
+        1 │ + type·Example·=·()·=>·string
+     4  2 │   
+     5  3 │   function foo(example: { (): number }): number {
+  
+
+```
+
+```
+invalid.ts:5:25 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function foo(example: { (): number }): number {
+      │                         ^^^^^^^^^^
+    6 │ 	return example();
+    7 │ }
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+     3  3 │   }
+     4  4 │   
+     5    │ - function·foo(example:·{·():·number·}):·number·{
+        5 │ + function·foo(example:·()·=>·number):·number·{
+     6  6 │   	return example();
+     7  7 │   }
+  
+
+```
+
+```
+invalid.ts:11:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+     9 │ // Interface with single call signature
+    10 │ interface SingleCall {
+  > 11 │ 	(): number;
+       │ 	^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Alias a function type instead of using an interface with a call signature.
+  
+     8  8 │   
+     9  9 │   // Interface with single call signature
+    10    │ - interface·SingleCall·{
+    11    │ - → ():·number;
+    12    │ - }
+       10 │ + type·SingleCall·=·()·=>·number
+    13 11 │   
+    14 12 │   // Object type literal with single call signature
+  
+
+```
+
+```
+invalid.ts:15:12 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    14 │ // Object type literal with single call signature
+  > 15 │ let obj: { (): string };
+       │            ^^^^^^^^^^
+    16 │ 
+    17 │ // Interface with a call signature and other properties
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    13 13 │   
+    14 14 │   // Object type literal with single call signature
+    15    │ - let·obj:·{·():·string·};
+       15 │ + let·obj:·()·=>·string;
+    16 16 │   
+    17 17 │   // Interface with a call signature and other properties
+  
+
+```
+
+```
+invalid.ts:24:27 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    23 │ // Nested object types with call signatures
+  > 24 │ let nestedObj: { inner: { (): boolean } };
+       │                           ^^^^^^^^^^^
+    25 │ 
+    26 │ // Object type with call signature as a type union member
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    22 22 │   
+    23 23 │   // Nested object types with call signatures
+    24    │ - let·nestedObj:·{·inner:·{·():·boolean·}·};
+       24 │ + let·nestedObj:·{·inner:·()·=>·boolean·};
+    25 25 │   
+    26 26 │   // Object type with call signature as a type union member
+  
+
+```
+
+```
+invalid.ts:27:33 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    26 │ // Object type with call signature as a type union member
+  > 27 │ type UnionWithCallSignature = { (): string } | string;
+       │                                 ^^^^^^^^^^
+    28 │ 
+    29 │ // Object type with call signature as a type intersection member
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    25 25 │   
+    26 26 │   // Object type with call signature as a type union member
+    27    │ - type·UnionWithCallSignature·=·{·():·string·}·|·string;
+       27 │ + type·UnionWithCallSignature·=·(()·=>·string)·|·string;
+    28 28 │   
+    29 29 │   // Object type with call signature as a type intersection member
+  
+
+```
+
+```
+invalid.ts:30:43 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    29 │ // Object type with call signature as a type intersection member
+  > 30 │ export type IntersectionCallSignature = { (): string } & string;
+       │                                           ^^^^^^^^^^
+    31 │ 
+    32 │ // Object type with call signature as a type array
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    28 28 │   
+    29 29 │   // Object type with call signature as a type intersection member
+    30    │ - export·type·IntersectionCallSignature·=·{·():·string·}·&·string;
+       30 │ + export·type·IntersectionCallSignature·=·(()·=>·string)·&·string;
+    31 31 │   
+    32 32 │   // Object type with call signature as a type array
+  
+
+```
+
+```
+invalid.ts:33:45 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    32 │ // Object type with call signature as a type array
+  > 33 │ export type ArrayCallSignature = readonly { (): string }[];
+       │                                             ^^^^^^^^^^
+    34 │ 
+    35 │ // Generic object type with a call signature
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    31 31 │   
+    32 32 │   // Object type with call signature as a type array
+    33    │ - export·type·ArrayCallSignature·=·readonly·{·():·string·}[];
+       33 │ + export·type·ArrayCallSignature·=·readonly·(()·=>·string)[];
+    34 34 │   
+    35 35 │   // Generic object type with a call signature
+  
+
+```
+
+```
+invalid.ts:36:34 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    35 │ // Generic object type with a call signature
+  > 36 │ type GenericCallSignature<T> = { (arg: T): T };
+       │                                  ^^^^^^^^^^^
+    37 │ 
+    38 │ // Object type with optional call signature
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    34 34 │   
+    35 35 │   // Generic object type with a call signature
+    36    │ - type·GenericCallSignature<T>·=·{·(arg:·T):·T·};
+       36 │ + type·GenericCallSignature<T>·=·(arg:·T)·=>·T;
+    37 37 │   
+    38 38 │   // Object type with optional call signature
+  
+
+```
+
+```
+invalid.ts:39:21 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    38 │ // Object type with optional call signature
+  > 39 │ let optionalCall: { (): number | undefined };
+       │                     ^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ // Generic interface with a call signature
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Use a function type instead of an object type with a call signature.
+  
+    37 37 │   
+    38 38 │   // Object type with optional call signature
+    39    │ - let·optionalCall:·{·():·number·|·undefined·};
+       39 │ + let·optionalCall:·()·=>·number·|·undefined;
+    40 40 │   
+    41 41 │   // Generic interface with a call signature
+  
+
+```
+
+```
+invalid.ts:43:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a function type instead of a call signature.
+  
+    41 │ // Generic interface with a call signature
+    42 │ interface GenericInterface<T> {
+  > 43 │ 	(value: T): boolean;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    44 │ }
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Alias a function type instead of using an interface with a call signature.
+  
+    40 40 │   
+    41 41 │   // Generic interface with a call signature
+    42    │ - interface·GenericInterface<T>·{
+    43    │ - → (value:·T):·boolean;
+    44    │ - }
+       42 │ + type·GenericInterface<T>·=·(value:·T)·=>·boolean
+  
+
+```

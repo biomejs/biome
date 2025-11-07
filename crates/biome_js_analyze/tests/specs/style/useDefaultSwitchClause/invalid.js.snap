@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+switch (a) {
+	case 1:
+		break;
+}
+
+switch (a) {
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default switch clause.
+  
+  > 1 │ switch (a) {
+      │ ^^^^^^^^^^^^
+  > 2 │ 	case 1:
+  > 3 │ 		break;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ switch (a) {
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+```
+
+```
+invalid.js:6:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default switch clause.
+  
+    4 │ }
+    5 │ 
+  > 6 │ switch (a) {
+      │ ^^^^^^^^^^^^
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+```

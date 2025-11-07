@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerPropertiesInvalid.gjs
+---
+# Input
+```js
+// unusedProperty is never used - should warn
+export default class MyComponent {
+  title = "Hello";
+  count = 0;
+  unusedProperty = "never used";
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

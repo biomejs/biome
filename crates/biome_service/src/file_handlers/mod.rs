@@ -1,5 +1,6 @@
+pub use self::glimmer::GlimmerFileHandler;
 use self::{
-    css::CssFileHandler, glimmer::GlimmerFileHandler, javascript::JsFileHandler,
+    css::CssFileHandler, javascript::JsFileHandler,
     json::JsonFileHandler, unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;

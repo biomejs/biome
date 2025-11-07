@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: duplicateDependencies.js
+---
+# Input
+```js
+import { useCallback } from "react";
+
+function Component1({ a }) {
+    const handle = useCallback(() => {
+      console.log(a);
+    }, [a, a]);
+}
+
+function Component2() {
+    const [local,SetLocal] = useState(0);
+    const handle = useCallback(() => {
+      console.log(local);
+    }, [local, local]);
+}
+```
+
+# Diagnostics
+```
+duplicateDependencies.js:4:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a
+  
+    3 │ function Component1({ a }) {
+  > 4 │     const handle = useCallback(() => {
+      │                    ^^^^^^^^^^^
+    5 │       console.log(a);
+    6 │     }, [a, a]);
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    4 │     const handle = useCallback(() => {
+    5 │       console.log(a);
+  > 6 │     }, [a, a]);
+      │            ^
+    7 │ }
+    8 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    6 │ ····},·[a,·a]);
+      │          ---   
+
+```
+
+```
+duplicateDependencies.js:11:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: local
+  
+     9 │ function Component2() {
+    10 │     const [local,SetLocal] = useState(0);
+  > 11 │     const handle = useCallback(() => {
+       │                    ^^^^^^^^^^^
+    12 │       console.log(local);
+    13 │     }, [local, local]);
+  
+  i This dependency can be removed from the list.
+  
+    11 │     const handle = useCallback(() => {
+    12 │       console.log(local);
+  > 13 │     }, [local, local]);
+       │                ^^^^^
+    14 │ }
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    13 │ ····},·[local,·local]);
+       │              -------   
+
+```

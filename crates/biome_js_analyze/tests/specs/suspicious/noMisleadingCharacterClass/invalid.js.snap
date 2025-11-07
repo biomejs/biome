@@ -1,0 +1,570 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+var r = /[👍]/;
+var r = /[\uD83D\uDC4D]/;
+var r = /[👍]\\a/;
+var r = /(?<=[👍])/;
+var r = /[Á]/;
+var r = /[Á]/u;
+var r = /[\u0041\u0301]/;
+var r = /[\u0041\u0301]/u;
+var r = /[\u{41}\u{301}]/u;
+var r = /[❇️]/;
+var r = /[❇️]/u;
+var r = /[\u2747\uFE0F]/;
+var r = /[\u2747\uFE0F]/u;
+var r = /[\u{2747}\u{FE0F}]/u;
+var r = /[👶🏻]/;
+var r = /[👶🏻]/u;
+var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+var r = /[\u{1F476}\u{1F3FB}]/u;
+var r = /[🇯🇵]/;
+var r = /[🇯🇵]/i;
+var r = /[🇯🇵]/u;
+var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+var r = /[\u{1F1EF}\u{1F1F5}]/u;
+var r = /[👨‍👩‍👦]/;
+var r = /[👨‍👩‍👦]/u;
+var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+
+/[\]👍]/;
+
+/[-\u0300]/;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+  > 1 │ var r = /[👍]/;
+      │           ^^
+    2 │ var r = /[\uD83D\uDC4D]/;
+    3 │ var r = /[👍]\\a/;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    1 │ var·r·=·/[👍]/u;
+      │               + 
+
+```
+
+```
+invalid.js:2:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    1 │ var r = /[👍]/;
+  > 2 │ var r = /[\uD83D\uDC4D]/;
+      │           ^^^^^^^^^^^^
+    3 │ var r = /[👍]\\a/;
+    4 │ var r = /(?<=[👍])/;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    2 │ var·r·=·/[\uD83D\uDC4D]/u;
+      │                         + 
+
+```
+
+```
+invalid.js:3:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    1 │ var r = /[👍]/;
+    2 │ var r = /[\uD83D\uDC4D]/;
+  > 3 │ var r = /[👍]\\a/;
+      │           ^^
+    4 │ var r = /(?<=[👍])/;
+    5 │ var r = /[A�]/;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    3 │ var·r·=·/[👍]\\a/u;
+      │                  + 
+
+```
+
+```
+invalid.js:4:15 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    2 │ var r = /[\uD83D\uDC4D]/;
+    3 │ var r = /[👍]\\a/;
+  > 4 │ var r = /(?<=[👍])/;
+      │               ^^
+    5 │ var r = /[A�]/;
+    6 │ var r = /[A�]/u;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    4 │ var·r·=·/(?<=[👍])/u;
+      │                    + 
+
+```
+
+```
+invalid.js:5:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    3 │ var r = /[👍]\\a/;
+    4 │ var r = /(?<=[👍])/;
+  > 5 │ var r = /[A�]/;
+      │           ^
+    6 │ var r = /[A�]/u;
+    7 │ var r = /[\u0041\u0301]/;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:6:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    4 │ var r = /(?<=[👍])/;
+    5 │ var r = /[A�]/;
+  > 6 │ var r = /[A�]/u;
+      │           ^
+    7 │ var r = /[\u0041\u0301]/;
+    8 │ var r = /[\u0041\u0301]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:7:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    5 │ var r = /[A�]/;
+    6 │ var r = /[A�]/u;
+  > 7 │ var r = /[\u0041\u0301]/;
+      │           ^^^^^^^^^^^^
+    8 │ var r = /[\u0041\u0301]/u;
+    9 │ var r = /[\u{41}\u{301}]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:8:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+     6 │ var r = /[A�]/u;
+     7 │ var r = /[\u0041\u0301]/;
+   > 8 │ var r = /[\u0041\u0301]/u;
+       │           ^^^^^^^^^^^^
+     9 │ var r = /[\u{41}\u{301}]/u;
+    10 │ var r = /[❇�]/;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:9:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+     7 │ var r = /[\u0041\u0301]/;
+     8 │ var r = /[\u0041\u0301]/u;
+   > 9 │ var r = /[\u{41}\u{301}]/u;
+       │           ^^^^^^^^^^^^^
+    10 │ var r = /[❇�]/;
+    11 │ var r = /[❇�]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:10:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+     8 │ var r = /[\u0041\u0301]/u;
+     9 │ var r = /[\u{41}\u{301}]/u;
+  > 10 │ var r = /[❇�]/;
+       │           ^
+    11 │ var r = /[❇�]/u;
+    12 │ var r = /[\u2747\uFE0F]/;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:11:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+     9 │ var r = /[\u{41}\u{301}]/u;
+    10 │ var r = /[❇�]/;
+  > 11 │ var r = /[❇�]/u;
+       │           ^
+    12 │ var r = /[\u2747\uFE0F]/;
+    13 │ var r = /[\u2747\uFE0F]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:12:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    10 │ var r = /[❇�]/;
+    11 │ var r = /[❇�]/u;
+  > 12 │ var r = /[\u2747\uFE0F]/;
+       │           ^^^^^^^^^^^^
+    13 │ var r = /[\u2747\uFE0F]/u;
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:13:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    11 │ var r = /[❇�]/u;
+    12 │ var r = /[\u2747\uFE0F]/;
+  > 13 │ var r = /[\u2747\uFE0F]/u;
+       │           ^^^^^^^^^^^^
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+    15 │ var r = /[👶🏻]/;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:14:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    12 │ var r = /[\u2747\uFE0F]/;
+    13 │ var r = /[\u2747\uFE0F]/u;
+  > 14 │ var r = /[\u{2747}\u{FE0F}]/u;
+       │           ^^^^^^^^^^^^^^^^
+    15 │ var r = /[👶🏻]/;
+    16 │ var r = /[👶🏻]/u;
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:15:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    13 │ var r = /[\u2747\uFE0F]/u;
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+  > 15 │ var r = /[👶🏻]/;
+       │           ^^
+    16 │ var r = /[👶🏻]/u;
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    15 │ var·r·=·/[👶🏻]/u;
+       │                 + 
+
+```
+
+```
+invalid.js:16:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match an emoji with a skin tone modifier.
+  
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+    15 │ var r = /[👶🏻]/;
+  > 16 │ var r = /[👶🏻]/u;
+       │           ^^^^
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+  
+  i Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:17:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match an emoji with a skin tone modifier.
+  
+    15 │ var r = /[👶🏻]/;
+    16 │ var r = /[👶🏻]/u;
+  > 17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 │ var r = /[🇯🇵]/;
+  
+  i Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:18:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match an emoji with a skin tone modifier.
+  
+    16 │ var r = /[👶🏻]/u;
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+  > 18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+       │           ^^^^^^^^^^^^^^^^^^
+    19 │ var r = /[🇯🇵]/;
+    20 │ var r = /[🇯🇵]/i;
+  
+  i Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:19:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+  > 19 │ var r = /[🇯🇵]/;
+       │           ^
+    20 │ var r = /[🇯🇵]/i;
+    21 │ var r = /[🇯🇵]/u;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    19 │ var·r·=·/[🇯🇵]/u;
+       │               + 
+
+```
+
+```
+invalid.js:20:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 │ var r = /[🇯🇵]/;
+  > 20 │ var r = /[🇯🇵]/i;
+       │           ^
+    21 │ var r = /[🇯🇵]/u;
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    18 18 │   var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 19 │   var r = /[🇯🇵]/;
+    20    │ - var·r·=·/[🇯🇵]/i;
+       20 │ + var·r·=·/[🇯🇵]/iu;
+    21 21 │   var r = /[🇯🇵]/u;
+    22 22 │   var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  
+
+```
+
+```
+invalid.js:21:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a pair of regional indicator symbols.
+  
+    19 │ var r = /[🇯🇵]/;
+    20 │ var r = /[🇯🇵]/i;
+  > 21 │ var r = /[🇯🇵]/u;
+       │           ^^
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+  
+  i A pair of regional indicator symbols encodes a country code. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:22:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a pair of regional indicator symbols.
+  
+    20 │ var r = /[🇯🇵]/i;
+    21 │ var r = /[🇯🇵]/u;
+  > 22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+    24 │ var r = /[👨�👩�👦]/;
+  
+  i A pair of regional indicator symbols encodes a country code. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:23:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a pair of regional indicator symbols.
+  
+    21 │ var r = /[🇯🇵]/u;
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  > 23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+       │           ^^^^^^^^^^^^^^^^^^
+    24 │ var r = /[👨�👩�👦]/;
+    25 │ var r = /[👨�👩�👦]/u;
+  
+  i A pair of regional indicator symbols encodes a country code. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:24:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+  > 24 │ var r = /[👨�👩�👦]/;
+       │           ^^
+    25 │ var r = /[👨�👩�👦]/u;
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    24 │ var·r·=·/[👨�👩�👦]/u;
+       │                   + 
+
+```
+
+```
+invalid.js:25:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a joined character sequence.
+  
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+    24 │ var r = /[👨�👩�👦]/;
+  > 25 │ var r = /[👨�👩�👦]/u;
+       │           ^^^^
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+  
+  i A zero width joiner composes several emojis into a new one. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:26:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a joined character sequence.
+  
+    24 │ var r = /[👨�👩�👦]/;
+    25 │ var r = /[👨�👩�👦]/u;
+  > 26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28 │ 
+  
+  i A zero width joiner composes several emojis into a new one. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:27:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a joined character sequence.
+  
+    25 │ var r = /[👨�👩�👦]/u;
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+  > 27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ /[\]👍]/;
+  
+  i A zero width joiner composes several emojis into a new one. Replace the character class with an alternation.
+  
+
+```
+
+```
+invalid.js:29:5 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28 │ 
+  > 29 │ /[\]👍]/;
+       │     ^^
+    30 │ 
+    31 │ /[-\u0300]/;
+  
+  i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    29 │ /[\]👍]/u;
+       │         + 
+
+```
+
+```
+invalid.js:31:3 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    29 │ /[\]👍]/;
+    30 │ 
+  > 31 │ /[-\u0300]/;
+       │   ^^^^^^^
+    32 │ 
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
+
+```

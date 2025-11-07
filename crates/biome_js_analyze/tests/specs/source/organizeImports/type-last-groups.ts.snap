@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: type-last-groups.ts
+---
+# Input
+```ts
+import type T1 from "bun:package";
+import type T2 from "node:package";
+import type T3 from "package";
+import V1 from "bun:package";
+import V2 from "node:package";
+import V3 from "package";
+
+```
+
+# Diagnostics
+```
+type-last-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import type T1 from "bun:package";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import type T2 from "node:package";
+    3 │ import type T3 from "package";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·type·T1·from·"bun:package";
+    2   │ - import·type·T2·from·"node:package";
+    3   │ - import·type·T3·from·"package";
+    4   │ - import·V1·from·"bun:package";
+    5   │ - import·V2·from·"node:package";
+    6   │ - import·V3·from·"package";
+      1 │ + import·V2·from·"node:package";
+      2 │ + import·V1·from·"bun:package";
+      3 │ + import·V3·from·"package";
+      4 │ + import·type·T2·from·"node:package";
+      5 │ + import·type·T1·from·"bun:package";
+      6 │ + import·type·T3·from·"package";
+    7 7 │   
+  
+
+```

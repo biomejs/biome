@@ -1,5 +1,5 @@
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::AstNode;
 

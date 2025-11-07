@@ -1,0 +1,254 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-combined.ts
+---
+# Input
+```ts
+// Leading comment
+import/*1*/A/*2*/
+// Comma comment
+,/*3*/{ B }/*4*/from/*5*/""/*6*/; // Trailing comment
+// Comment
+export type { A, B };
+
+import C, { D, E, F } from "";
+export { type C, type D, type E, F };
+
+import G, { type H, I } from "";
+export type { G, H, I };
+
+// Leading comment
+import /*1*/M/*2*/
+// Comma comment
+,/*3*/*/*4*/as/*5*/N/*6*/from/*7*/""/*8*/;/*9*/
+// Comment
+export type { M, N };
+
+import O, * as P from "";
+export { type O, P };
+
+import Q, * as R from "";
+export { Q, type R };
+
+import T, { U } from "";
+export { T, type U };
+
+```
+
+# Diagnostics
+```
+invalid-combined.ts:2:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ // Leading comment
+  > 2 │ import/*1*/A/*2*/
+      │            ^^^^^^
+  > 3 │ // Comma comment
+  > 4 │ ,/*3*/{ B }/*4*/from/*5*/""/*6*/; // Trailing comment
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ // Comment
+    6 │ export type { A, B };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     1  1 │   // Leading comment
+     2    │ - import/*1*/A/*2*/
+        2 │ + import/*1*/type·A/*2*/·from/*5*/""/*6*/;·//·Trailing·comment
+     3  3 │   // Comma comment
+     4    │ - ,/*3*/{·B·}/*4*/from/*5*/""/*6*/;·//·Trailing·comment
+        4 │ + import·type·/*3*/{·B·}/*4*/from·"";
+     5  5 │   // Comment
+     6  6 │   export type { A, B };
+  
+
+```
+
+```
+invalid-combined.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default import and some named imports are only used as types.
+  
+     6 │ export type { A, B };
+     7 │ 
+   > 8 │ import C, { D, E, F } from "";
+       │        ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ export { type C, type D, type E, F };
+    10 │ 
+  
+  i This import is only used as a type.
+  
+     6 │ export type { A, B };
+     7 │ 
+   > 8 │ import C, { D, E, F } from "";
+       │             ^
+     9 │ export { type C, type D, type E, F };
+    10 │ 
+  
+  i This import is only used as a type.
+  
+     6 │ export type { A, B };
+     7 │ 
+   > 8 │ import C, { D, E, F } from "";
+       │                ^
+     9 │ export { type C, type D, type E, F };
+    10 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     6  6 │   export type { A, B };
+     7  7 │   
+     8    │ - import·C,·{·D,·E,·F·}·from·"";
+        8 │ + import·type·C·from·"";
+        9 │ + import·{·type·D,·type·E,·F·}·from·""
+     9 10 │   export { type C, type D, type E, F };
+    10 11 │   
+  
+
+```
+
+```
+invalid-combined.ts:11:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+     9 │ export { type C, type D, type E, F };
+    10 │ 
+  > 11 │ import G, { type H, I } from "";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ export type { G, H, I };
+    13 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     9  9 │   export { type C, type D, type E, F };
+    10 10 │   
+    11    │ - import·G,·{·type·H,·I·}·from·"";
+       11 │ + import·type·G·from·"";
+       12 │ + import·type·{·H,·I·}·from·"";
+    12 13 │   export type { G, H, I };
+    13 14 │   
+  
+
+```
+
+```
+invalid-combined.ts:15:13 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    14 │ // Leading comment
+  > 15 │ import /*1*/M/*2*/
+       │             ^^^^^^
+  > 16 │ // Comma comment
+  > 17 │ ,/*3*/*/*4*/as/*5*/N/*6*/from/*7*/""/*8*/;/*9*/
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ // Comment
+    19 │ export type { M, N };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    13 13 │   
+    14 14 │   // Leading comment
+    15    │ - import·/*1*/M/*2*/
+       15 │ + import·/*1*/type·M/*2*/·from/*7*/""/*8*/;/*9*/
+    16 16 │   // Comma comment
+    17    │ - ,/*3*/*/*4*/as/*5*/N/*6*/from/*7*/""/*8*/;/*9*/
+       17 │ + import·type·/*3*/*/*4*/as/*5*/N/*6*/from·"";
+    18 18 │   // Comment
+    19 19 │   export type { M, N };
+  
+
+```
+
+```
+invalid-combined.ts:21:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default import is only used as a type.
+  
+    19 │ export type { M, N };
+    20 │ 
+  > 21 │ import O, * as P from "";
+       │        ^^^^^^^^^^^^^^^^^
+    22 │ export { type O, P };
+    23 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    19 19 │   export type { M, N };
+    20 20 │   
+    21    │ - import·O,·*·as·P·from·"";
+       21 │ + import·type·O·from·"";
+       22 │ + import·*·as·P·from·"";
+    22 23 │   export { type O, P };
+    23 24 │   
+  
+
+```
+
+```
+invalid-combined.ts:24:11 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This namespace import is only used as a type.
+  
+    22 │ export { type O, P };
+    23 │ 
+  > 24 │ import Q, * as R from "";
+       │           ^^^^^^
+    25 │ export { Q, type R };
+    26 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    22 22 │   export { type O, P };
+    23 23 │   
+    24    │ - import·Q,·*·as·R·from·"";
+       24 │ + import·Q·from·"";
+       25 │ + import·type·*·as·R·from·"";
+    25 26 │   export { Q, type R };
+    26 27 │   
+  
+
+```
+
+```
+invalid-combined.ts:27:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    25 │ export { Q, type R };
+    26 │ 
+  > 27 │ import T, { U } from "";
+       │        ^^^^^^^^^^^^^^^^
+    28 │ export { T, type U };
+    29 │ 
+  
+  i This import is only used as a type.
+  
+    25 │ export { Q, type R };
+    26 │ 
+  > 27 │ import T, { U } from "";
+       │             ^
+    28 │ export { T, type U };
+    29 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    27 │ import·T,·{·type·U·}·from·"";
+       │             +++++            
+
+```

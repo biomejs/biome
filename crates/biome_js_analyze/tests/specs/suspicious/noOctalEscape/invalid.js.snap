@@ -1,0 +1,285 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+0;
+"foo \01 bar";
+"foo \000 bar";
+"foo \377 bar";
+"foo \378 bar";
+"foo \37a bar";
+"foo \381 bar";
+"foo \3a1 bar";
+"foo \751 bar";
+"foo \258 bar";
+"foo \25a bar";
+
+const o = {
+    '\31': 0,
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:2:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    1 │ 0;
+  > 2 │ "foo \01 bar";
+      │      ^^^
+    3 │ "foo \000 bar";
+    4 │ "foo \377 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     1  1 │   0;
+     2    │ - "foo·\01·bar";
+        2 │ + "foo·\x01·bar";
+     3  3 │   "foo \000 bar";
+     4  4 │   "foo \377 bar";
+  
+
+```
+
+```
+invalid.js:3:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    1 │ 0;
+    2 │ "foo \01 bar";
+  > 3 │ "foo \000 bar";
+      │      ^^^^
+    4 │ "foo \377 bar";
+    5 │ "foo \378 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     1  1 │   0;
+     2  2 │   "foo \01 bar";
+     3    │ - "foo·\000·bar";
+        3 │ + "foo·\x00·bar";
+     4  4 │   "foo \377 bar";
+     5  5 │   "foo \378 bar";
+  
+
+```
+
+```
+invalid.js:4:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    2 │ "foo \01 bar";
+    3 │ "foo \000 bar";
+  > 4 │ "foo \377 bar";
+      │      ^^^^
+    5 │ "foo \378 bar";
+    6 │ "foo \37a bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     2  2 │   "foo \01 bar";
+     3  3 │   "foo \000 bar";
+     4    │ - "foo·\377·bar";
+        4 │ + "foo·\xff·bar";
+     5  5 │   "foo \378 bar";
+     6  6 │   "foo \37a bar";
+  
+
+```
+
+```
+invalid.js:5:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    3 │ "foo \000 bar";
+    4 │ "foo \377 bar";
+  > 5 │ "foo \378 bar";
+      │      ^^^
+    6 │ "foo \37a bar";
+    7 │ "foo \381 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     3  3 │   "foo \000 bar";
+     4  4 │   "foo \377 bar";
+     5    │ - "foo·\378·bar";
+        5 │ + "foo·\x1f8·bar";
+     6  6 │   "foo \37a bar";
+     7  7 │   "foo \381 bar";
+  
+
+```
+
+```
+invalid.js:6:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    4 │ "foo \377 bar";
+    5 │ "foo \378 bar";
+  > 6 │ "foo \37a bar";
+      │      ^^^
+    7 │ "foo \381 bar";
+    8 │ "foo \3a1 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     4  4 │   "foo \377 bar";
+     5  5 │   "foo \378 bar";
+     6    │ - "foo·\37a·bar";
+        6 │ + "foo·\x1fa·bar";
+     7  7 │   "foo \381 bar";
+     8  8 │   "foo \3a1 bar";
+  
+
+```
+
+```
+invalid.js:7:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    5 │ "foo \378 bar";
+    6 │ "foo \37a bar";
+  > 7 │ "foo \381 bar";
+      │      ^^
+    8 │ "foo \3a1 bar";
+    9 │ "foo \751 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     5  5 │   "foo \378 bar";
+     6  6 │   "foo \37a bar";
+     7    │ - "foo·\381·bar";
+        7 │ + "foo·\x0381·bar";
+     8  8 │   "foo \3a1 bar";
+     9  9 │   "foo \751 bar";
+  
+
+```
+
+```
+invalid.js:8:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+     6 │ "foo \37a bar";
+     7 │ "foo \381 bar";
+   > 8 │ "foo \3a1 bar";
+       │      ^^
+     9 │ "foo \751 bar";
+    10 │ "foo \258 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     6  6 │   "foo \37a bar";
+     7  7 │   "foo \381 bar";
+     8    │ - "foo·\3a1·bar";
+        8 │ + "foo·\x03a1·bar";
+     9  9 │   "foo \751 bar";
+    10 10 │   "foo \258 bar";
+  
+
+```
+
+```
+invalid.js:9:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+     7 │ "foo \381 bar";
+     8 │ "foo \3a1 bar";
+   > 9 │ "foo \751 bar";
+       │      ^^^^
+    10 │ "foo \258 bar";
+    11 │ "foo \25a bar";
+  
+  i Safe fix: Use unicode escape sequences instead.
+  
+     7  7 │   "foo \381 bar";
+     8  8 │   "foo \3a1 bar";
+     9    │ - "foo·\751·bar";
+        9 │ + "foo·\u01e9·bar";
+    10 10 │   "foo \258 bar";
+    11 11 │   "foo \25a bar";
+  
+
+```
+
+```
+invalid.js:10:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+     8 │ "foo \3a1 bar";
+     9 │ "foo \751 bar";
+  > 10 │ "foo \258 bar";
+       │      ^^^
+    11 │ "foo \25a bar";
+    12 │ 
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     8  8 │   "foo \3a1 bar";
+     9  9 │   "foo \751 bar";
+    10    │ - "foo·\258·bar";
+       10 │ + "foo·\x158·bar";
+    11 11 │   "foo \25a bar";
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+     9 │ "foo \751 bar";
+    10 │ "foo \258 bar";
+  > 11 │ "foo \25a bar";
+       │      ^^^
+    12 │ 
+    13 │ const o = {
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+     9  9 │   "foo \751 bar";
+    10 10 │   "foo \258 bar";
+    11    │ - "foo·\25a·bar";
+       11 │ + "foo·\x15a·bar";
+    12 12 │   
+    13 13 │   const o = {
+  
+
+```
+
+```
+invalid.js:14:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    13 │ const o = {
+  > 14 │     '\31': 0,
+       │      ^^^
+    15 │ };
+    16 │ 
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+    12 12 │   
+    13 13 │   const o = {
+    14    │ - ····'\31':·0,
+       14 │ + ····'\x19':·0,
+    15 15 │   };
+    16 16 │   
+  
+
+```

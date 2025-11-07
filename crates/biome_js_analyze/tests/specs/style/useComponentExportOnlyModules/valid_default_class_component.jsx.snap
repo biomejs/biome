@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_default_class_component.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+export default class Fuga extends React.Component {
+  render() {
+    return <></>
+  }
+};
+
+```

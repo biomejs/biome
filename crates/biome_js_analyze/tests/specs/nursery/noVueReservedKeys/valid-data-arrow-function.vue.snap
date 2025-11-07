@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-data-arrow-function.vue
+---
+# Input
+```ts
+export default {
+    props: ['foo'],
+    computed: {
+        bar () {
+        }
+    },
+    data: () => {
+        return {
+            dat: null
+        }
+    },
+    methods: {
+        _foo () {},
+        test () {
+        }
+    }
+};
+
+```

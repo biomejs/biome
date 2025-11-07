@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRestSiblings.js
+---
+# Input
+```js
+// With ignoreRestSiblings: false, unused variables should be reported
+const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+const { brand, year, ...other } = car;
+console.log(other);
+
+// Renamed properties
+const data = { foo: 1, bar: 2, baz: 3 };
+const { foo: renamedFoo, bar: renamedBar, ...remaining } = data;
+console.log(remaining);
+
+```
+
+# Diagnostics
+```
+invalidRestSiblings.js:3:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable brand is unused.
+  
+    1 │ // With ignoreRestSiblings: false, unused variables should be reported
+    2 │ const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+  > 3 │ const { brand, year, ...other } = car;
+      │         ^^^^^
+    4 │ console.log(other);
+    5 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  
+
+```
+
+```
+invalidRestSiblings.js:3:16 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable year is unused.
+  
+    1 │ // With ignoreRestSiblings: false, unused variables should be reported
+    2 │ const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+  > 3 │ const { brand, year, ...other } = car;
+      │                ^^^^
+    4 │ console.log(other);
+    5 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  
+
+```
+
+```
+invalidRestSiblings.js:8:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable renamedFoo is unused.
+  
+     6 │ // Renamed properties
+     7 │ const data = { foo: 1, bar: 2, baz: 3 };
+   > 8 │ const { foo: renamedFoo, bar: renamedBar, ...remaining } = data;
+       │              ^^^^^^^^^^
+     9 │ console.log(remaining);
+    10 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  
+
+```
+
+```
+invalidRestSiblings.js:8:31 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable renamedBar is unused.
+  
+     6 │ // Renamed properties
+     7 │ const data = { foo: 1, bar: 2, baz: 3 };
+   > 8 │ const { foo: renamedFoo, bar: renamedBar, ...remaining } = data;
+       │                               ^^^^^^^^^^
+     9 │ console.log(remaining);
+    10 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  
+
+```

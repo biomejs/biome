@@ -1,0 +1,294 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function foo(myVar) {
+    console.log('foo');
+}
+
+const data = [[1, 1], [2, 4], [3, 9], [4, 16], [5, 25]];
+data.filter(([k, v]) => v > 10);
+
+[{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+
+new Promise((accept, reject) => {
+    window.setTimeout(accept, 1000);
+});
+
+// parameter a is not used
+{(function (a) { })}
+{(function ({a}) { })}
+{(function ([a]) { })}
+(function (a, b) {
+    console.log(b);
+})
+
+// parameter b is not used
+(function (a, b) {
+    console.log(a);
+})
+
+function withSpread({ a: { x }, ...rest }) {
+    return rest;
+}
+
+function withArraySpread([a, ...rest]) {
+    return rest;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+  > 1 │ function foo(myVar) {
+      │              ^^^^^
+    2 │     console.log('foo');
+    3 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend myVar with an underscore.
+  
+     1    │ - function·foo(myVar)·{
+        1 │ + function·foo(_myVar)·{
+     2  2 │       console.log('foo');
+     3  3 │   }
+  
+
+```
+
+```
+invalid.js:6:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    5 │ const data = [[1, 1], [2, 4], [3, 9], [4, 16], [5, 25]];
+  > 6 │ data.filter(([k, v]) => v > 10);
+      │               ^
+    7 │ 
+    8 │ [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend k with an underscore.
+  
+     4  4 │   
+     5  5 │   const data = [[1, 1], [2, 4], [3, 9], [4, 16], [5, 25]];
+     6    │ - data.filter(([k,·v])·=>·v·>·10);
+        6 │ + data.filter(([_k,·v])·=>·v·>·10);
+     7  7 │   
+     8  8 │   [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+  
+
+```
+
+```
+invalid.js:8:33 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+     6 │ data.filter(([k, v]) => v > 10);
+     7 │ 
+   > 8 │ [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+       │                                 ^
+     9 │ 
+    10 │ new Promise((accept, reject) => {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.js:10:22 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+     8 │ [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+     9 │ 
+  > 10 │ new Promise((accept, reject) => {
+       │                      ^^^^^^
+    11 │     window.setTimeout(accept, 1000);
+    12 │ });
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend reject with an underscore.
+  
+     8  8 │   [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
+     9  9 │   
+    10    │ - new·Promise((accept,·reject)·=>·{
+       10 │ + new·Promise((accept,·_reject)·=>·{
+    11 11 │       window.setTimeout(accept, 1000);
+    12 12 │   });
+  
+
+```
+
+```
+invalid.js:15:13 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    14 │ // parameter a is not used
+  > 15 │ {(function (a) { })}
+       │             ^
+    16 │ {(function ({a}) { })}
+    17 │ {(function ([a]) { })}
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    13 13 │   
+    14 14 │   // parameter a is not used
+    15    │ - {(function·(a)·{·})}
+       15 │ + {(function·(_a)·{·})}
+    16 16 │   {(function ({a}) { })}
+    17 17 │   {(function ([a]) { })}
+  
+
+```
+
+```
+invalid.js:16:14 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    14 │ // parameter a is not used
+    15 │ {(function (a) { })}
+  > 16 │ {(function ({a}) { })}
+       │              ^
+    17 │ {(function ([a]) { })}
+    18 │ (function (a, b) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.js:17:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    15 │ {(function (a) { })}
+    16 │ {(function ({a}) { })}
+  > 17 │ {(function ([a]) { })}
+       │              ^
+    18 │ (function (a, b) {
+    19 │     console.log(b);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    15 15 │   {(function (a) { })}
+    16 16 │   {(function ({a}) { })}
+    17    │ - {(function·([a])·{·})}
+       17 │ + {(function·([_a])·{·})}
+    18 18 │   (function (a, b) {
+    19 19 │       console.log(b);
+  
+
+```
+
+```
+invalid.js:18:12 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    16 │ {(function ({a}) { })}
+    17 │ {(function ([a]) { })}
+  > 18 │ (function (a, b) {
+       │            ^
+    19 │     console.log(b);
+    20 │ })
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    16 16 │   {(function ({a}) { })}
+    17 17 │   {(function ([a]) { })}
+    18    │ - (function·(a,·b)·{
+       18 │ + (function·(_a,·b)·{
+    19 19 │       console.log(b);
+    20 20 │   })
+  
+
+```
+
+```
+invalid.js:23:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    22 │ // parameter b is not used
+  > 23 │ (function (a, b) {
+       │               ^
+    24 │     console.log(a);
+    25 │ })
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
+  
+    21 21 │   
+    22 22 │   // parameter b is not used
+    23    │ - (function·(a,·b)·{
+       23 │ + (function·(a,·_b)·{
+    24 24 │       console.log(a);
+    25 25 │   })
+  
+
+```
+
+```
+invalid.js:27:28 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    25 │ })
+    26 │ 
+  > 27 │ function withSpread({ a: { x }, ...rest }) {
+       │                            ^
+    28 │     return rest;
+    29 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.js:31:27 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    29 │ }
+    30 │ 
+  > 31 │ function withArraySpread([a, ...rest]) {
+       │                           ^
+    32 │     return rest;
+    33 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    29 29 │   }
+    30 30 │   
+    31    │ - function·withArraySpread([a,·...rest])·{
+       31 │ + function·withArraySpread([_a,·...rest])·{
+    32 32 │       return rest;
+    33 33 │   }
+  
+
+```

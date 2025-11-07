@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCatchParameter.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+try {} catch(e) {}
+
+try {} catch(_e) {}
+
+try {} catch(_) {}
+
+try {} catch(err) {}
+
+try {} catch(specificError) {}
+
+try {} catch(_specificError) {}
+
+```

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+enum MyEnum {
+	A = 123
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/style/noEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use enum
+  
+  > 1 │ enum MyEnum {
+      │ ^^^^^^^^^^^^^
+  > 2 │ 	A = 123
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i TypeScript enums are not a type-level extension to JavaScript like type annotations or definitions. Users may wish to disable non-type-level extensions to use bundlers or compilers that only strip types.
+  
+  i Use JavaScript objects or TypeScript unions instead.
+  
+
+```

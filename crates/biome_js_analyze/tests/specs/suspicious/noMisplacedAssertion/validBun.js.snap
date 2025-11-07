@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validBun.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import {test, expect} from "bun:test";
+
+test("something", () => {
+    expect("something").toBeTrue()
+})
+
+```

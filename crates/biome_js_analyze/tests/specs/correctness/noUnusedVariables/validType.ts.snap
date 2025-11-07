@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validType.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export type Classlike = new (arg: unknown) => string;
+```

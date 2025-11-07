@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-data-short-arrow-function.vue
+---
+# Input
+```ts
+export default {
+    data: () => ({
+        $el: '',
+        _foo: String,
+    })
+};
+
+```
+
+# Diagnostics
+```
+invalid-data-short-arrow-function.vue:3:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    1 │ export default {
+    2 │     data: () => ({
+  > 3 │         $el: '',
+      │         ^^^
+    4 │         _foo: String,
+    5 │     })
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-data-short-arrow-function.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Keys starting with an underscore are reserved in Vue.
+  
+    2 │     data: () => ({
+    3 │         $el: '',
+  > 4 │         _foo: String,
+      │         ^^^^
+    5 │     })
+    6 │ };
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

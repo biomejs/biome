@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const string1 = number.toFixed();
+const string2 = number.toFixed(/* comment */);
+Number(1).toFixed();
+
+// False positive cases
+const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();
+
+```
+
+# Diagnostics
+```
+invalid.js:1:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Specify the number of digits you want to appear after the decimal point.
+  
+  > 1 │ const string1 = number.toFixed();
+      │                               ^^
+    2 │ const string2 = number.toFixed(/* comment */);
+    3 │ Number(1).toFixed();
+  
+  i Unsafe fix: Add explicit digits argument to toFixed method.
+  
+    1 │ const·string1·=·number.toFixed(0);
+      │                                +  
+
+```
+
+```
+invalid.js:2:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Specify the number of digits you want to appear after the decimal point.
+  
+    1 │ const string1 = number.toFixed();
+  > 2 │ const string2 = number.toFixed(/* comment */);
+      │                               ^^^^^^^^^^^^^^^
+    3 │ Number(1).toFixed();
+    4 │ 
+  
+  i Unsafe fix: Add explicit digits argument to toFixed method.
+  
+    2 │ const·string2·=·number.toFixed(/*·comment·*/0);
+      │                                             +  
+
+```
+
+```
+invalid.js:3:18 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Specify the number of digits you want to appear after the decimal point.
+  
+    1 │ const string1 = number.toFixed();
+    2 │ const string2 = number.toFixed(/* comment */);
+  > 3 │ Number(1).toFixed();
+      │                  ^^
+    4 │ 
+    5 │ // False positive cases
+  
+  i Unsafe fix: Add explicit digits argument to toFixed method.
+  
+    3 │ Number(1).toFixed(0);
+      │                   +  
+
+```
+
+```
+invalid.js:6:70 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Specify the number of digits you want to appear after the decimal point.
+  
+    5 │ // False positive cases
+  > 6 │ const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();
+      │                                                                      ^^
+    7 │ 
+  
+  i Unsafe fix: Add explicit digits argument to toFixed method.
+  
+    6 │ const·bigNumber·=·new·BigNumber(1);·const·string3·=·bigNumber.toFixed(0);
+      │                                                                       +  
+
+```

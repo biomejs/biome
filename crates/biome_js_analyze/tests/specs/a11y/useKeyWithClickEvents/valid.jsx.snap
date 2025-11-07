@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+    <div onClick={() => {}} onKeyUp={handleKeyUp} />
+    <div onClick={() => {}} onKeyDown={handleKeyDown} />
+    <div onClick={() => {}} onKeyPress={handleKeyPress} />
+
+    <div onClick={() => void 0} onKeyDown={foo}/>;
+    <div onClick={() => void 0} onKeyUp={foo} />;
+    <div onClick={() => void 0} onKeyPress={foo}/>;
+    <div onClick={() => void 0} onKeyDown={foo} onKeyUp={bar} />;
+    <div onClick={() => void 0} onKeyDown={foo} {...props} />;
+    <div className="foo" />;
+    <div onClick={() => void 0} aria-hidden />;
+    <div onClick={() => void 0} aria-hidden={true} />;
+    <div onClick={() => void 0} aria-hidden={false} onKeyDown={foo} />;
+    <div onClick={() => void 0} onKeyDown={foo} aria-hidden={undefined} />;
+    <input type="text" onClick={() => void 0} />
+    <input onClick={() => void 0} />
+    <button onClick={() => void 0} className="foo" />
+    <option onClick={() => void 0} className="foo" />
+    <select onClick={() => void 0} className="foo" />
+    <textarea onClick={() => void 0} className="foo" />
+    <a onClick={() => void 0} href="http://x.y.z" />
+    <a onClick={() => void 0} href="http://x.y.z" tabIndex="0" />
+    <input onClick={() => void 0} type="hidden" />;
+    <div onClick={() => void 0} role="presentation" />;
+    <div onClick={() => void 0} role="none" />;
+    <TestComponent onClick={doFoo} />
+    <Button onClick={doFoo} />
+    <Footer onClick={doFoo} />
+</>
+```

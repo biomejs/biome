@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_component_and_variable_clause.jsx
+---
+# Input
+```jsx
+const foo = 4;
+const Bar = () => {};
+const baz = 4;
+export { foo, Bar, baz as qux }
+
+```
+
+# Diagnostics
+```
+invalid_component_and_variable_clause.jsx:4:10 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━
+
+  ! Exporting a non-component with components is not allowed.
+  
+    2 │ const Bar = () => {};
+    3 │ const baz = 4;
+  > 4 │ export { foo, Bar, baz as qux }
+      │          ^^^
+    5 │ 
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating non-component exports into a new file.
+  
+  i If it is a component, it may not be following the variable naming conventions.
+  
+
+```
+
+```
+invalid_component_and_variable_clause.jsx:4:27 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━
+
+  ! Exporting a non-component with components is not allowed.
+  
+    2 │ const Bar = () => {};
+    3 │ const baz = 4;
+  > 4 │ export { foo, Bar, baz as qux }
+      │                           ^^^
+    5 │ 
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating non-component exports into a new file.
+  
+  i If it is a component, it may not be following the variable naming conventions.
+  
+
+```

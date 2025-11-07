@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importPrivate.js
+---
+# Input
+```js
+// Importing private symbols is allowed only when importing from an index file
+// in the same folder or one of its parents:
+import { fooPrivateVariable } from "./index";
+
+```

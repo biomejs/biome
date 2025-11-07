@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validParameterProperty.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export default class {
+    constructor(
+        readonly p: unknown,
+        protected property: unknown,
+        public camelCase: unknown,
+        private _privateProperty: unknown,
+    ) {}
+}
+```

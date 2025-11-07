@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withJsxTextInvalid.jsx
+---
+# Input
+```jsx
+<>foo</>
+<Fragment>foo</Fragment>
+<React.Fragment>foo</React.Fragment>
+
+```

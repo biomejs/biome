@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div>Hello world!</div>
+
+<div class="greeting">Hello world!</div>
+
+<div class={"greeting"}>Hello world!</div>
+
+<div for="greeting">Hello world!</div>
+
+```

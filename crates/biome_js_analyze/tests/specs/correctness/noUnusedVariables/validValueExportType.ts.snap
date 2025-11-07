@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validValueExportType.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+class C {}
+enum E {}
+
+export type { C }
+export { type E }
+```

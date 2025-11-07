@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-unused-react-types.tsx
+---
+# Input
+```tsx
+import * as ReactTypes from "react";
+
+function Component() {
+    const onClick = (event: ReactTypes.MouseEvent) => { };
+
+    return <div onClick={onClick}></div>;
+}
+
+```
+
+# Diagnostics
+```
+invalid-unused-react-types.tsx:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+  > 1 │ import * as ReactTypes from "react";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ function Component() {
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    1 │ import·type·*·as·ReactTypes·from·"react";
+      │        +++++                             
+
+```

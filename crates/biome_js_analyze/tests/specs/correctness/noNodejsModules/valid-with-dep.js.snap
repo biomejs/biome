@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-with-dep.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import assert from "assert";
+
+```

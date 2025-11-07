@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+describe.skip("test", () => {});
+it.skip("test", () => {});
+test.skip("test", () => {});
+xdescribe('foo', () => {});
+xit('foo', () => {});
+xtest('foo', () => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+  > 1 │ describe.skip("test", () => {});
+      │          ^^^^
+    2 │ it.skip("test", () => {});
+    3 │ test.skip("test", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    1 │ describe.skip("test",·()·=>·{});
+      │         -----                   
+
+```
+
+```
+invalid.js:2:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ describe.skip("test", () => {});
+  > 2 │ it.skip("test", () => {});
+      │    ^^^^
+    3 │ test.skip("test", () => {});
+    4 │ xdescribe('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    2 │ it.skip("test",·()·=>·{});
+      │   -----                   
+
+```
+
+```
+invalid.js:3:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ describe.skip("test", () => {});
+    2 │ it.skip("test", () => {});
+  > 3 │ test.skip("test", () => {});
+      │      ^^^^
+    4 │ xdescribe('foo', () => {});
+    5 │ xit('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    3 │ test.skip("test",·()·=>·{});
+      │     -----                   
+
+```
+
+```
+invalid.js:4:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    2 │ it.skip("test", () => {});
+    3 │ test.skip("test", () => {});
+  > 4 │ xdescribe('foo', () => {});
+      │ ^^^^^^^^^
+    5 │ xit('foo', () => {});
+    6 │ xtest('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    2 2 │   it.skip("test", () => {});
+    3 3 │   test.skip("test", () => {});
+    4   │ - xdescribe('foo',·()·=>·{});
+      4 │ + describe('foo',·()·=>·{});
+    5 5 │   xit('foo', () => {});
+    6 6 │   xtest('foo', () => {});
+  
+
+```
+
+```
+invalid.js:5:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    3 │ test.skip("test", () => {});
+    4 │ xdescribe('foo', () => {});
+  > 5 │ xit('foo', () => {});
+      │ ^^^
+    6 │ xtest('foo', () => {});
+    7 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    3 3 │   test.skip("test", () => {});
+    4 4 │   xdescribe('foo', () => {});
+    5   │ - xit('foo',·()·=>·{});
+      5 │ + it('foo',·()·=>·{});
+    6 6 │   xtest('foo', () => {});
+    7 7 │   
+  
+
+```
+
+```
+invalid.js:6:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    4 │ xdescribe('foo', () => {});
+    5 │ xit('foo', () => {});
+  > 6 │ xtest('foo', () => {});
+      │ ^^^^^
+    7 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    4 4 │   xdescribe('foo', () => {});
+    5 5 │   xit('foo', () => {});
+    6   │ - xtest('foo',·()·=>·{});
+      6 │ + test('foo',·()·=>·{});
+    7 7 │   
+  
+
+```

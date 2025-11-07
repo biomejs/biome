@@ -1,0 +1,304 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+({ 1n: 1 });
+({ 0x1: 1 });
+({
+	0x1: 1
+});
+({ 0o12: 1 });
+({ 0b1: 1 });
+({ 0o1: 1 });
+({ 1_0: 1 });
+({ 0.1e1_2: "ed" });
+({ 11_1.11: "ee" });
+({ 0x1() {} });
+({ [0x1]() {} });
+({ get 0x1() { return this.a } });
+({ set 0x1(a) { this.a = a } });
+
+```
+
+# Diagnostics
+```
+invalid.js:1:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Bigint is not allowed here.
+  
+  > 1 │ ({ 1n: 1 });
+      │    ^^
+    2 │ ({ 0x1: 1 });
+    3 │ ({
+  
+  i Safe fix: Replace 1n with 1
+  
+     1    │ - ({·1n:·1·});
+        1 │ + ({·1:·1·});
+     2  2 │   ({ 0x1: 1 });
+     3  3 │   ({
+  
+
+```
+
+```
+invalid.js:2:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Hexadecimal number literal is not allowed here.
+  
+    1 │ ({ 1n: 1 });
+  > 2 │ ({ 0x1: 1 });
+      │    ^^^
+    3 │ ({
+    4 │ 	0x1: 1
+  
+  i Safe fix: Replace 0x1 with 1
+  
+     1  1 │   ({ 1n: 1 });
+     2    │ - ({·0x1:·1·});
+        2 │ + ({·1:·1·});
+     3  3 │   ({
+     4  4 │   	0x1: 1
+  
+
+```
+
+```
+invalid.js:4:2 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Hexadecimal number literal is not allowed here.
+  
+    2 │ ({ 0x1: 1 });
+    3 │ ({
+  > 4 │ 	0x1: 1
+      │ 	^^^
+    5 │ });
+    6 │ ({ 0o12: 1 });
+  
+  i Safe fix: Replace 0x1 with 1
+  
+     2  2 │   ({ 0x1: 1 });
+     3  3 │   ({
+     4    │ - → 0x1:·1
+        4 │ + → 1:·1
+     5  5 │   });
+     6  6 │   ({ 0o12: 1 });
+  
+
+```
+
+```
+invalid.js:6:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Octal number literal is not allowed here.
+  
+    4 │ 	0x1: 1
+    5 │ });
+  > 6 │ ({ 0o12: 1 });
+      │    ^^^^
+    7 │ ({ 0b1: 1 });
+    8 │ ({ 0o1: 1 });
+  
+  i Safe fix: Replace 0o12 with 9
+  
+     4  4 │   	0x1: 1
+     5  5 │   });
+     6    │ - ({·0o12:·1·});
+        6 │ + ({·9:·1·});
+     7  7 │   ({ 0b1: 1 });
+     8  8 │   ({ 0o1: 1 });
+  
+
+```
+
+```
+invalid.js:7:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Binary number literal in is not allowed here.
+  
+    5 │ });
+    6 │ ({ 0o12: 1 });
+  > 7 │ ({ 0b1: 1 });
+      │    ^^^
+    8 │ ({ 0o1: 1 });
+    9 │ ({ 1_0: 1 });
+  
+  i Safe fix: Replace 0b1 with 1
+  
+     5  5 │   });
+     6  6 │   ({ 0o12: 1 });
+     7    │ - ({·0b1:·1·});
+        7 │ + ({·1:·1·});
+     8  8 │   ({ 0o1: 1 });
+     9  9 │   ({ 1_0: 1 });
+  
+
+```
+
+```
+invalid.js:8:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Octal number literal is not allowed here.
+  
+     6 │ ({ 0o12: 1 });
+     7 │ ({ 0b1: 1 });
+   > 8 │ ({ 0o1: 1 });
+       │    ^^^
+     9 │ ({ 1_0: 1 });
+    10 │ ({ 0.1e1_2: "ed" });
+  
+  i Safe fix: Replace 0o1 with 1
+  
+     6  6 │   ({ 0o12: 1 });
+     7  7 │   ({ 0b1: 1 });
+     8    │ - ({·0o1:·1·});
+        8 │ + ({·1:·1·});
+     9  9 │   ({ 1_0: 1 });
+    10 10 │   ({ 0.1e1_2: "ed" });
+  
+
+```
+
+```
+invalid.js:9:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Number literal with underscore is not allowed here.
+  
+     7 │ ({ 0b1: 1 });
+     8 │ ({ 0o1: 1 });
+   > 9 │ ({ 1_0: 1 });
+       │    ^^^
+    10 │ ({ 0.1e1_2: "ed" });
+    11 │ ({ 11_1.11: "ee" });
+  
+  i Safe fix: Replace 1_0 with 10
+  
+     7  7 │   ({ 0b1: 1 });
+     8  8 │   ({ 0o1: 1 });
+     9    │ - ({·1_0:·1·});
+        9 │ + ({·10:·1·});
+    10 10 │   ({ 0.1e1_2: "ed" });
+    11 11 │   ({ 11_1.11: "ee" });
+  
+
+```
+
+```
+invalid.js:10:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Number literal with underscore is not allowed here.
+  
+     8 │ ({ 0o1: 1 });
+     9 │ ({ 1_0: 1 });
+  > 10 │ ({ 0.1e1_2: "ed" });
+       │    ^^^^^^^
+    11 │ ({ 11_1.11: "ee" });
+    12 │ ({ 0x1() {} });
+  
+  i Safe fix: Replace 0.1e1_2 with .1e12
+  
+     8  8 │   ({ 0o1: 1 });
+     9  9 │   ({ 1_0: 1 });
+    10    │ - ({·0.1e1_2:·"ed"·});
+       10 │ + ({·.1e12:·"ed"·});
+    11 11 │   ({ 11_1.11: "ee" });
+    12 12 │   ({ 0x1() {} });
+  
+
+```
+
+```
+invalid.js:11:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Number literal with underscore is not allowed here.
+  
+     9 │ ({ 1_0: 1 });
+    10 │ ({ 0.1e1_2: "ed" });
+  > 11 │ ({ 11_1.11: "ee" });
+       │    ^^^^^^^
+    12 │ ({ 0x1() {} });
+    13 │ ({ [0x1]() {} });
+  
+  i Safe fix: Replace 11_1.11 with 111.11
+  
+     9  9 │   ({ 1_0: 1 });
+    10 10 │   ({ 0.1e1_2: "ed" });
+    11    │ - ({·11_1.11:·"ee"·});
+       11 │ + ({·111.11:·"ee"·});
+    12 12 │   ({ 0x1() {} });
+    13 13 │   ({ [0x1]() {} });
+  
+
+```
+
+```
+invalid.js:12:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Hexadecimal number literal is not allowed here.
+  
+    10 │ ({ 0.1e1_2: "ed" });
+    11 │ ({ 11_1.11: "ee" });
+  > 12 │ ({ 0x1() {} });
+       │    ^^^
+    13 │ ({ [0x1]() {} });
+    14 │ ({ get 0x1() { return this.a } });
+  
+  i Safe fix: Replace 0x1 with 1
+  
+    10 10 │   ({ 0.1e1_2: "ed" });
+    11 11 │   ({ 11_1.11: "ee" });
+    12    │ - ({·0x1()·{}·});
+       12 │ + ({·1()·{}·});
+    13 13 │   ({ [0x1]() {} });
+    14 14 │   ({ get 0x1() { return this.a } });
+  
+
+```
+
+```
+invalid.js:14:8 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Hexadecimal number literal is not allowed here.
+  
+    12 │ ({ 0x1() {} });
+    13 │ ({ [0x1]() {} });
+  > 14 │ ({ get 0x1() { return this.a } });
+       │        ^^^
+    15 │ ({ set 0x1(a) { this.a = a } });
+    16 │ 
+  
+  i Safe fix: Replace 0x1 with 1
+  
+    12 12 │   ({ 0x1() {} });
+    13 13 │   ({ [0x1]() {} });
+    14    │ - ({·get·0x1()·{·return·this.a·}·});
+       14 │ + ({·get·1()·{·return·this.a·}·});
+    15 15 │   ({ set 0x1(a) { this.a = a } });
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:8 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Hexadecimal number literal is not allowed here.
+  
+    13 │ ({ [0x1]() {} });
+    14 │ ({ get 0x1() { return this.a } });
+  > 15 │ ({ set 0x1(a) { this.a = a } });
+       │        ^^^
+    16 │ 
+  
+  i Safe fix: Replace 0x1 with 1
+  
+    13 13 │   ({ [0x1]() {} });
+    14 14 │   ({ get 0x1() { return this.a } });
+    15    │ - ({·set·0x1(a)·{·this.a·=·a·}·});
+       15 │ + ({·set·1(a)·{·this.a·=·a·}·});
+    16 16 │   
+  
+
+```

@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-18.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const [x = y => y] = [].map(y => y);
+
+```

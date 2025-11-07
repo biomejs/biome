@@ -1,0 +1,533 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+throw Error()
+throw (Error)()
+throw lib.Error()
+throw lib.mod.Error()
+throw lib[mod].Error()
+throw (/**1**/lib.mod).Error()
+throw Error('foo')
+throw CustomError('foo')
+throw FooBarBazError('foo')
+throw ABCError('foo')
+throw Abc3Error('foo')
+throw TypeError()
+throw EvalError()
+throw RangeError()
+throw ReferenceError()
+throw /**1**/ SyntaxError() /**2**/
+throw URIError()
+throw /**1**/(( /**2**/URIError() ))
+throw (( URIError ))()
+throw getGlobalThis().Error()
+throw utils.getGlobalThis().Error()
+throw (( ((getGlobalThis())).Error ))()
+throw ( getGlobalThis().Error )()
+throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
+
+```
+
+# Diagnostics
+```
+invalid.js:1:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+  > 1 │ throw Error()
+      │       ^^^^^^^
+    2 │ throw (Error)()
+    3 │ throw lib.Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    1 │ throw·new·Error()
+      │       ++++       
+
+```
+
+```
+invalid.js:2:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    1 │ throw Error()
+  > 2 │ throw (Error)()
+      │       ^^^^^^^^^
+    3 │ throw lib.Error()
+    4 │ throw lib.mod.Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    2 │ throw·new·(Error)()
+      │       ++++         
+
+```
+
+```
+invalid.js:3:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    1 │ throw Error()
+    2 │ throw (Error)()
+  > 3 │ throw lib.Error()
+      │       ^^^^^^^^^^^
+    4 │ throw lib.mod.Error()
+    5 │ throw lib[mod].Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    3 │ throw·new·lib.Error()
+      │       ++++           
+
+```
+
+```
+invalid.js:4:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    2 │ throw (Error)()
+    3 │ throw lib.Error()
+  > 4 │ throw lib.mod.Error()
+      │       ^^^^^^^^^^^^^^^
+    5 │ throw lib[mod].Error()
+    6 │ throw (/**1**/lib.mod).Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    4 │ throw·new·lib.mod.Error()
+      │       ++++               
+
+```
+
+```
+invalid.js:5:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    3 │ throw lib.Error()
+    4 │ throw lib.mod.Error()
+  > 5 │ throw lib[mod].Error()
+      │       ^^^^^^^^^^^^^^^^
+    6 │ throw (/**1**/lib.mod).Error()
+    7 │ throw Error('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    5 │ throw·new·lib[mod].Error()
+      │       ++++                
+
+```
+
+```
+invalid.js:6:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    4 │ throw lib.mod.Error()
+    5 │ throw lib[mod].Error()
+  > 6 │ throw (/**1**/lib.mod).Error()
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ throw Error('foo')
+    8 │ throw CustomError('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    6 │ throw·new·(/**1**/lib.mod).Error()
+      │       ++++                        
+
+```
+
+```
+invalid.js:7:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    5 │ throw lib[mod].Error()
+    6 │ throw (/**1**/lib.mod).Error()
+  > 7 │ throw Error('foo')
+      │       ^^^^^^^^^^^^
+    8 │ throw CustomError('foo')
+    9 │ throw FooBarBazError('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    7 │ throw·new·Error('foo')
+      │       ++++            
+
+```
+
+```
+invalid.js:8:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new CustomError() instead of CustomError() when throwing an error.
+  
+     6 │ throw (/**1**/lib.mod).Error()
+     7 │ throw Error('foo')
+   > 8 │ throw CustomError('foo')
+       │       ^^^^^^^^^^^^^^^^^^
+     9 │ throw FooBarBazError('foo')
+    10 │ throw ABCError('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    8 │ throw·new·CustomError('foo')
+      │       ++++                  
+
+```
+
+```
+invalid.js:9:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new FooBarBazError() instead of FooBarBazError() when throwing an error.
+  
+     7 │ throw Error('foo')
+     8 │ throw CustomError('foo')
+   > 9 │ throw FooBarBazError('foo')
+       │       ^^^^^^^^^^^^^^^^^^^^^
+    10 │ throw ABCError('foo')
+    11 │ throw Abc3Error('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    9 │ throw·new·FooBarBazError('foo')
+      │       ++++                     
+
+```
+
+```
+invalid.js:10:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new ABCError() instead of ABCError() when throwing an error.
+  
+     8 │ throw CustomError('foo')
+     9 │ throw FooBarBazError('foo')
+  > 10 │ throw ABCError('foo')
+       │       ^^^^^^^^^^^^^^^
+    11 │ throw Abc3Error('foo')
+    12 │ throw TypeError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    10 │ throw·new·ABCError('foo')
+       │       ++++               
+
+```
+
+```
+invalid.js:11:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Abc3Error() instead of Abc3Error() when throwing an error.
+  
+     9 │ throw FooBarBazError('foo')
+    10 │ throw ABCError('foo')
+  > 11 │ throw Abc3Error('foo')
+       │       ^^^^^^^^^^^^^^^^
+    12 │ throw TypeError()
+    13 │ throw EvalError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    11 │ throw·new·Abc3Error('foo')
+       │       ++++                
+
+```
+
+```
+invalid.js:12:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new TypeError() instead of TypeError() when throwing an error.
+  
+    10 │ throw ABCError('foo')
+    11 │ throw Abc3Error('foo')
+  > 12 │ throw TypeError()
+       │       ^^^^^^^^^^^
+    13 │ throw EvalError()
+    14 │ throw RangeError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    12 │ throw·new·TypeError()
+       │       ++++           
+
+```
+
+```
+invalid.js:13:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new EvalError() instead of EvalError() when throwing an error.
+  
+    11 │ throw Abc3Error('foo')
+    12 │ throw TypeError()
+  > 13 │ throw EvalError()
+       │       ^^^^^^^^^^^
+    14 │ throw RangeError()
+    15 │ throw ReferenceError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    13 │ throw·new·EvalError()
+       │       ++++           
+
+```
+
+```
+invalid.js:14:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new RangeError() instead of RangeError() when throwing an error.
+  
+    12 │ throw TypeError()
+    13 │ throw EvalError()
+  > 14 │ throw RangeError()
+       │       ^^^^^^^^^^^^
+    15 │ throw ReferenceError()
+    16 │ throw /**1**/ SyntaxError() /**2**/
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    14 │ throw·new·RangeError()
+       │       ++++            
+
+```
+
+```
+invalid.js:15:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new ReferenceError() instead of ReferenceError() when throwing an error.
+  
+    13 │ throw EvalError()
+    14 │ throw RangeError()
+  > 15 │ throw ReferenceError()
+       │       ^^^^^^^^^^^^^^^^
+    16 │ throw /**1**/ SyntaxError() /**2**/
+    17 │ throw URIError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    15 │ throw·new·ReferenceError()
+       │       ++++                
+
+```
+
+```
+invalid.js:16:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new SyntaxError() instead of SyntaxError() when throwing an error.
+  
+    14 │ throw RangeError()
+    15 │ throw ReferenceError()
+  > 16 │ throw /**1**/ SyntaxError() /**2**/
+       │               ^^^^^^^^^^^^^
+    17 │ throw URIError()
+    18 │ throw /**1**/(( /**2**/URIError() ))
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    16 │ throw·/**1**/·new·SyntaxError()·/**2**/
+       │               ++++                     
+
+```
+
+```
+invalid.js:17:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new URIError() instead of URIError() when throwing an error.
+  
+    15 │ throw ReferenceError()
+    16 │ throw /**1**/ SyntaxError() /**2**/
+  > 17 │ throw URIError()
+       │       ^^^^^^^^^^
+    18 │ throw /**1**/(( /**2**/URIError() ))
+    19 │ throw (( URIError ))()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    17 │ throw·new·URIError()
+       │       ++++          
+
+```
+
+```
+invalid.js:18:24 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new URIError() instead of URIError() when throwing an error.
+  
+    16 │ throw /**1**/ SyntaxError() /**2**/
+    17 │ throw URIError()
+  > 18 │ throw /**1**/(( /**2**/URIError() ))
+       │                        ^^^^^^^^^^
+    19 │ throw (( URIError ))()
+    20 │ throw getGlobalThis().Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    18 │ throw·/**1**/((·/**2**/new·URIError()·))
+       │                        ++++             
+
+```
+
+```
+invalid.js:19:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new URIError() instead of URIError() when throwing an error.
+  
+    17 │ throw URIError()
+    18 │ throw /**1**/(( /**2**/URIError() ))
+  > 19 │ throw (( URIError ))()
+       │       ^^^^^^^^^^^^^^^^
+    20 │ throw getGlobalThis().Error()
+    21 │ throw utils.getGlobalThis().Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    19 │ throw·new·((·URIError·))()
+       │       ++++                
+
+```
+
+```
+invalid.js:20:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    18 │ throw /**1**/(( /**2**/URIError() ))
+    19 │ throw (( URIError ))()
+  > 20 │ throw getGlobalThis().Error()
+       │       ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ throw utils.getGlobalThis().Error()
+    22 │ throw (( ((getGlobalThis())).Error ))()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    20 │ throw·new·(getGlobalThis().Error)()
+       │       +++++                     +  
+
+```
+
+```
+invalid.js:21:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    19 │ throw (( URIError ))()
+    20 │ throw getGlobalThis().Error()
+  > 21 │ throw utils.getGlobalThis().Error()
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ throw (( ((getGlobalThis())).Error ))()
+    23 │ throw ( getGlobalThis().Error )()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    21 │ throw·new·(utils.getGlobalThis().Error)()
+       │       +++++                           +  
+
+```
+
+```
+invalid.js:22:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    20 │ throw getGlobalThis().Error()
+    21 │ throw utils.getGlobalThis().Error()
+  > 22 │ throw (( ((getGlobalThis())).Error ))()
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ throw ( getGlobalThis().Error )()
+    24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    22 │ throw·new·((·((getGlobalThis())).Error·))()
+       │       ++++                                 
+
+```
+
+```
+invalid.js:23:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    21 │ throw utils.getGlobalThis().Error()
+    22 │ throw (( ((getGlobalThis())).Error ))()
+  > 23 │ throw ( getGlobalThis().Error )()
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
+    25 │ 
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    23 │ throw·new·(·getGlobalThis().Error·)()
+       │       ++++                           
+
+```
+
+```
+invalid.js:24:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use new Error() instead of Error() when throwing an error.
+  
+    22 │ throw (( ((getGlobalThis())).Error ))()
+    23 │ throw ( getGlobalThis().Error )()
+  > 24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
+  i Unsafe fix: Add new keyword.
+  
+    24 │ throw·/**1**/·new·(·/**2**/·getGlobalThis().Error·/**3·**/·)()
+       │               ++++                                            
+
+```

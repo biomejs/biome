@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+Array.isArray(arr)
+arr instanceof Object
+a instanceof ns.Array
+a.x[2] instanceof foo()
+```

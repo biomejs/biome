@@ -1,0 +1,441 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+type Day =
+	| 'Monday'
+	| 'Tuesday'
+	| 'Wednesday'
+	| 'Thursday'
+	| 'Friday'
+	| 'Saturday'
+	| 'Sunday';
+
+const day: Day = 'Monday';
+let result = 0;
+
+switch (day) {
+	case 'Monday': {
+		result = 1;
+		break;
+	}
+}
+
+switch (day) {
+}
+
+type A = 'a';
+type B = 'b';
+type C = 'c';
+type Union = A | B | C;
+
+function test(value: Union): number {
+	switch (value) {
+		case 'a':
+			return 1;
+	}
+}
+
+const A = 'a';
+const B = 1;
+const C = true;
+
+type Union2 = typeof A | typeof B | typeof C;
+
+function test2(value: Union2): number {
+	switch (value) {
+		case 'a':
+			return 1;
+	}
+}
+
+type DiscriminatedUnion = { type: 'A'; a: 1 } | { type: 'B'; b: 2 };
+
+function test3(value: DiscriminatedUnion): number {
+	switch (value.type) {
+		case 'A':
+			return 1;
+	}
+}
+
+declare const value: 'literal';
+switch (value) {
+}
+
+declare const value2: 'literal' & { _brand: true };
+switch (value2) {
+}
+
+declare const value3: ('literal' & { _brand: true }) | 1;
+switch (value3) {
+	case 'literal':
+		break;
+}
+
+declare const value4: '1' | '2' | number;
+switch (value4) {
+	case '1':
+		break;
+}
+
+declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
+switch (value5) {
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    11 │ let result = 0;
+    12 │ 
+  > 13 │ switch (day) {
+       │ ^^^^^^^^^^^^^^
+  > 14 │ 	case 'Monday': {
+  > 15 │ 		result = 1;
+  > 16 │ 		break;
+  > 17 │ 	}
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ switch (day) {
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "Tuesday"
+  - "Wednesday"
+  - "Thursday"
+  - "Friday"
+  - "Saturday"
+  - "Sunday"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    15 15 │   		result = 1;
+    16 16 │   		break;
+    17    │ - → }
+       17 │ + → }
+       18 │ + → case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
+       19 │ + → case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
+       20 │ + → case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
+       21 │ + → case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
+       22 │ + → case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
+       23 │ + → case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
+    18 24 │   }
+    19 25 │   
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    18 │ }
+    19 │ 
+  > 20 │ switch (day) {
+       │ ^^^^^^^^^^^^^^
+  > 21 │ }
+       │ ^
+    22 │ 
+    23 │ type A = 'a';
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "Monday"
+  - "Tuesday"
+  - "Wednesday"
+  - "Thursday"
+  - "Friday"
+  - "Saturday"
+  - "Sunday"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    18 18 │   }
+    19 19 │   
+    20    │ - switch·(day)·{
+       20 │ + switch·(day)·{case·"Monday":·throw·new·Error("TODO:·Not·implemented·yet");
+       21 │ + ··case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
+       22 │ + ··case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
+       23 │ + ··case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
+       24 │ + ··case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
+       25 │ + ··case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
+       26 │ + ··case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
+    21 27 │   }
+    22 28 │   
+  
+
+```
+
+```
+invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    28 │ function test(value: Union): number {
+  > 29 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 30 │ 		case 'a':
+  > 31 │ 			return 1;
+  > 32 │ 	}
+       │ 	^
+    33 │ }
+    34 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "b"
+  - "c"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    29 29 │   	switch (value) {
+    30 30 │   		case 'a':
+    31    │ - → → → return·1;
+       31 │ + → → → return·1;
+       32 │ + → → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
+       33 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
+    32 34 │   	}
+    33 35 │   }
+  
+
+```
+
+```
+invalid.ts:42:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    41 │ function test2(value: Union2): number {
+  > 42 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 43 │ 		case 'a':
+  > 44 │ 			return 1;
+  > 45 │ 	}
+       │ 	^
+    46 │ }
+    47 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - 1
+  - true
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    42 42 │   	switch (value) {
+    43 43 │   		case 'a':
+    44    │ - → → → return·1;
+       44 │ + → → → return·1;
+       45 │ + → → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+       46 │ + → → case·true:·throw·new·Error("TODO:·Not·implemented·yet");
+    45 47 │   	}
+    46 48 │   }
+  
+
+```
+
+```
+invalid.ts:51:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    50 │ function test3(value: DiscriminatedUnion): number {
+  > 51 │ 	switch (value.type) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+  > 52 │ 		case 'A':
+  > 53 │ 			return 1;
+  > 54 │ 	}
+       │ 	^
+    55 │ }
+    56 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "B"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    51 51 │   	switch (value.type) {
+    52 52 │   		case 'A':
+    53    │ - → → → return·1;
+       53 │ + → → → return·1;
+       54 │ + → → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
+    54 55 │   	}
+    55 56 │   }
+  
+
+```
+
+```
+invalid.ts:58:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    57 │ declare const value: 'literal';
+  > 58 │ switch (value) {
+       │ ^^^^^^^^^^^^^^^^
+  > 59 │ }
+       │ ^
+    60 │ 
+    61 │ declare const value2: 'literal' & { _brand: true };
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "literal"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    58 │ switch·(value)·{case·"literal":·throw·new·Error("TODO:·Not·implemented·yet");
+       │                 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+```
+
+```
+invalid.ts:62:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    61 │ declare const value2: 'literal' & { _brand: true };
+  > 62 │ switch (value2) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 63 │ }
+       │ ^
+    64 │ 
+    65 │ declare const value3: ('literal' & { _brand: true }) | 1;
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "literal"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    62 │ switch·(value2)·{case·"literal":·throw·new·Error("TODO:·Not·implemented·yet");
+       │                  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+```
+
+```
+invalid.ts:66:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    65 │ declare const value3: ('literal' & { _brand: true }) | 1;
+  > 66 │ switch (value3) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 67 │ 	case 'literal':
+  > 68 │ 		break;
+  > 69 │ }
+       │ ^
+    70 │ 
+    71 │ declare const value4: '1' | '2' | number;
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - 1
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    66 66 │   switch (value3) {
+    67 67 │   	case 'literal':
+    68    │ - → → break;
+       68 │ + → → break;
+       69 │ + → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+    69 70 │   }
+    70 71 │   
+  
+
+```
+
+```
+invalid.ts:72:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    71 │ declare const value4: '1' | '2' | number;
+  > 72 │ switch (value4) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 73 │ 	case '1':
+  > 74 │ 		break;
+  > 75 │ }
+       │ ^
+    76 │ 
+    77 │ declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "2"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    72 72 │   switch (value4) {
+    73 73 │   	case '1':
+    74    │ - → → break;
+       74 │ + → → break;
+       75 │ + → case·"2":·throw·new·Error("TODO:·Not·implemented·yet");
+    75 76 │   }
+    76 77 │   
+  
+
+```
+
+```
+invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    77 │ declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
+  > 78 │ switch (value5) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 79 │ }
+       │ ^
+    80 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "1"
+  - 1
+  - null
+  - undefined
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    76 76 │   
+    77 77 │   declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
+    78    │ - switch·(value5)·{
+       78 │ + switch·(value5)·{case·"1":·throw·new·Error("TODO:·Not·implemented·yet");
+       79 │ + ··case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+       80 │ + ··case·null:·throw·new·Error("TODO:·Not·implemented·yet");
+       81 │ + ··case·undefined:·throw·new·Error("TODO:·Not·implemented·yet");
+    79 82 │   }
+    80 83 │   
+  
+
+```

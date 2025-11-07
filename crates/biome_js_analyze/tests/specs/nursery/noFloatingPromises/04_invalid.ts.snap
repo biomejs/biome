@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 04_invalid.ts
+---
+# Input
+```ts
+
+type Cheating<T extends 1> = T extends 1 ? Promise<string> : Promise<string>;
+
+async function promiseLike(): Cheating<1> {
+	return new Promise((res, _rej) => res('yep'));
+}
+
+promiseLike();
+
+```
+
+# Diagnostics
+```
+04_invalid.ts:8:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    6 │ }
+    7 │ 
+  > 8 │ promiseLike();
+      │ ^^^^^^^^^^^^^^
+    9 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

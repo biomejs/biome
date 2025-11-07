@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<article role="presentation"></article>
+	<Button role="button"></Button>
+	<span></span>
+</>;
+
+```

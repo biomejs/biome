@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue-5710.js
+---
+# Input
+```js
+// The last `inject` specifier is a bogus node.
+import { inject, Injectable, inject } from '@angular/core';
+
+// The last `key` attribute is a bogus node.
+import { names } from "module-name" with { key: "data", key2: "data2", key: "data3" };
+
+```
+
+# Diagnostics
+```
+issue-5710.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // The last `inject` specifier is a bogus node.
+  > 2 │ import { inject, Injectable, inject } from '@angular/core';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // The last `key` attribute is a bogus node.
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   // The last `inject` specifier is a bogus node.
+    2   │ - import·{·inject,·Injectable,·inject·}·from·'@angular/core';
+      2 │ + import·{·Injectable,·inject,·inject·}·from·'@angular/core';
+    3 3 │   
+    4 4 │   // The last `key` attribute is a bogus node.
+  
+
+```

@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const a = 1;
+const userName = 'testUser';
+const count = 10;
+const nonSecret = "hello world"
+const nonSecretLong = "hello world, this is a looong string which I needed to create for some reason"
+const dbUrl = `postgres://user:${process.env.DB_PASSWORD}@example.com:5432/dbname`;
+const NOT_A_SECRET = "I'm not a secret, I think";
+const NOT_A_SECRET_TEMPLATE = `A template that isn't a secret. ${1+1} = 2`;
+const CSS_CLASSNAME = "hey-it-s-a-css-class-not-a-secret and-neither-this-one";
+
+// From user tests
+const codeCheck = "\nconst DEFAULT_CONFIG = /* @__PURE__ */ bare.Config({})\n";
+const otpCheck = 'Verify OTP Google Mobile Authenticator (2FAS)'
+const bitcoinString = {
+  key: "0 USD,,. for {bitlocus|string}.",
+};
+const textString = {
+  key: 'Verifying takes 15 approved the following 3.'
+};
+const facebookAndAwsString = {
+  key: 'facebook.com |console.aws.amazon.com'
+};
+const IsoString = {
+  key: 'ISO-27001 information , GDPR'
+};
+
+const tailwindClassNames = 'whitespace-nowrap bg-base-4 px-1 text-[0.65rem] group-hover:w-auto group-hover:overflow-visible'
+const tailwindConfigOptions = {
+  theme: {
+    animation: {
+      slideDown: 'slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1)',
+    }
+  }
+}
+export const url = 'https://www.nytimes.com/2024/03/05/arts/design/pritzker-prize-riken-yamamoto-architecture.html'
+
+// TODO: Remove these false positives, they unfortunately hurt the user experience.
+// const NAMESPACE_CLASSNAME = 'Validation.JSONSchemaValidationUtilsImplFactory';
+// const BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+// const webpackFriendlyConsole = require('./config/webpack/webpackFriendlyConsole');
+// Postgres json path query
+// const isNumeric = '@.scoreDisplayMode == "numeric" || @.scoreDisplayMode == "metricSavings"'
+```

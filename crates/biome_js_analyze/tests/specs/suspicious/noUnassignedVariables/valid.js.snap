@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+let message = "hello";
+console.log(message);
+
+let user;
+user = getUser();
+console.log(user.name);
+
+let count;
+count = 1;
+count++;
+
+// Variable is unused (should be reported by `no-unused-vars` only)
+let temp;
+
+let error;
+if (somethingWentWrong) {
+  error = "Something went wrong";
+}
+console.log(error);
+
+let item;
+for (item of items) {
+  process(item);
+}
+
+let config;
+function setup() {
+  config = { debug: true };
+}
+setup();
+console.log(config);
+
+let one = undefined;
+if (one === two) {
+  // Noop
+}
+```

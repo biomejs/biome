@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_hooked_component.jsx
+---
+# Input
+```jsx
+const Fuga = () => <></>
+export default hoge(Fuga)
+
+```
+
+# Diagnostics
+```
+invalid_hooked_component.jsx:1:7 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Components should be exported.
+  
+  > 1 │ const Fuga = () => <></>
+      │       ^^^^
+    2 │ export default hoge(Fuga)
+    3 │ 
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating component exports into a new file.
+  
+  i If it is not a component, it may not be following the variable naming conventions.
+  
+
+```

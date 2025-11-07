@@ -1,0 +1,307 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+import React from "react";
+import {
+	useEffect,
+	useSyncExternalStore,
+	useRef,
+	useState,
+	useContext,
+	useReducer,
+	useCallback,
+	useMemo,
+	useTransition,
+	useId,
+    useEffectEvent,
+} from "react";
+import { useRef as uR } from "react"
+import doSomething from 'a';
+
+// No captures
+function MyComponent1() {
+    useEffect(() => {
+    }, []);
+}
+
+// All needed captures in the dependency list
+function MyComponent2() {
+    let a = 1;
+    const b = 1;
+    const c = a + 1;
+    useEffect(() => {
+        console.log(a, b, c);
+    }, [a, c]);
+}
+
+// capturing declarations
+function doSomething() { }
+class A {}
+
+function MyComponent3() {
+    useEffect(() => {
+        doSomething();
+        console.log(new A ());
+    }, []);
+}
+
+// interaction with other react hooks
+function MyComponent4() {
+    const [name, setName] = useState(0);
+    const ref = useRef();
+    const theme = useContext();
+    const [state, dispatch] = useReducer();
+    const memoizedCallback = useCallback();
+    const memoizedValue = useMemo();
+    const [isPending, startTransition] = useTransition();
+    const id = useId();
+    const externalStore = useSyncExternalStore();
+    const event = useEffectEvent(() => {});
+    useEffect(() => {
+        console.log(name);
+        setName(1);
+
+        console.log(ref);
+
+        console.log(theme);
+
+        console.log(state);
+        dispatch(1)
+
+        memoizedCallback();
+        console.log(memoizedValue);
+
+        console.log(isPending);
+        startTransition();
+
+        console.log(id);
+
+        console.log(externalStore);
+
+        event();
+    }, [name, state, memoizedCallback, memoizedValue, isPending, externalStore, id, theme]);
+}
+
+// all hooks with dependencies
+function MyComponent5() {
+    let a = 1;
+    useEffect(() => console.log(a), [a]);
+    useCallback(() => console.log(a), [a]);
+    useMemo(() => console.log(a), [a]);
+    useImperativeHandle(ref, () => console.log(a), [a]);
+    useLayoutEffect(() => console.log(a), [a]);
+    useInsertionEffect(() => console.log(a), [a]);
+}
+
+// inner closures
+function MyComponent5() {
+    let a = 1;
+    useEffect(() => {
+        let b = 2;
+        return () => console.log(a, b)
+    }, [a]);
+}
+
+// from import
+function MyComponent6() {
+    useEffect(() => {
+        doSomething();
+    });
+}
+
+// Capturing an object property
+function MyComponent7() {
+    let someObj = getObj();
+    useEffect(() => {
+        console.log(
+					someObj
+							.name
+				);
+        console.log(someObj["age"])
+    }, [someObj.name, someObj.age]);
+}
+
+// Specified dependency cover captures
+function MyComponent8({ a }) {
+    useEffect(() => {
+      console.log(
+				a
+			  		.b
+			);
+    }, [a]);
+}l
+
+// Capturing const outside of component
+// https://github.com/rome/tools/issues/3727
+const outside = f();
+function MyComponent9() {
+    useEffect(() => {
+      console.log(outside);
+    }, []);
+}
+
+// Memoized Components
+const MyComponent10 = React.memo(function () {
+    useEffect(() => {
+        console.log(outside);
+    }, []);
+});
+
+const MyComponent11 = React.memo(() => {
+    useEffect(() => {
+        console.log(outside);
+    }, []);
+});
+
+// exported functions
+export function MyComponent12() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    }, [a]);
+}
+
+export default function MyComponent13() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    }, [a]);
+}
+
+// named function
+function MyComponent14() {
+    let a = 1;
+    useEffect(function inner() {
+        console.log(a);
+    }, [a]);
+}
+
+function MyComponent15() {
+    let a = 1;
+    useEffect(async function inner() {
+        console.log(a);
+    }, [a]);
+}
+
+// React.useXXX case
+function MyComponent16() {
+    let a = 1;
+    React.useEffect(() => {
+        console.log(a);
+    }, [a]);
+}
+
+// https://github.com/biomejs/biome/issues/609
+function MyComponent17() {
+  const data = useSyncExternalStore(subscribe, getSnapshot);
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+}
+
+// https://github.com/biomejs/biome/issues/607
+function MyComponent18() {
+  const obj = Math.random() > 0.5 ? { a: 1, b: 2 } : undefined;
+
+  return useMemo(() => {
+    return obj?.a === 1 && obj.b === 2;
+  }, [obj?.a, obj?.b]);
+}
+
+// Captures without dependency array
+// https://github.com/biomejs/biome/issues/608
+function MyComponent19() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    });
+}
+
+// Namespaced imports
+// https://github.com/biomejs/biome/issues/578
+function MyComponent20() {
+	const ref = React.useRef()
+	React.useEffect(() => {
+		console.log(ref.current)
+	}, [])
+}
+
+// Aliased imports
+function MyComponent21() {
+	const ref = uR()
+	useEffect(() => {
+			console.log(ref.current)
+	}, [])
+}
+
+let outer = false;
+
+// Capture from outer scope
+// https://github.com/biomejs/biome/issues/651
+function MyComponent22() {
+  useEffect(() => {
+    outer = true;
+  }, [])
+}
+
+// Dynamic computed property access
+// https://github.com/biomejs/biome/issues/1637
+function MyComponent23 ({ arr })  {
+  useMemo(() => {
+    for (let i = 0; i < arr.length; i++) {
+       if (i + 1 === arr.length) {
+          // Do something with the last item
+       } else {
+           const _nextItem = arr[i + 1]
+       }
+    }
+  }, [arr])
+}
+
+// https://github.com/biomejs/biome/issues/2361
+function ComponentWithRecursiveCallback() {
+    const fib = useCallback((num) => {
+      if (num < 2) {
+        return num;
+      }
+      return fib(num - 1) + fib(num - 2);
+    }, []);
+}
+
+function func() {
+    setValue("some")
+}
+
+function OutsideFunctionDeclaration() {
+    useEffect(() => {
+      func()
+    }, [])
+}
+
+// Specific ignored dependencies
+// https://github.com/biomejs/biome/discussions/2509
+function IgnoredDependencies() {
+    const [foo, setFoo] = useState(1);
+    // biome-ignore lint/correctness/useExhaustiveDependencies(foo): foo should be listed, but we override it
+    // biome-ignore lint/correctness/useExhaustiveDependencies(setFoo): setFoo shouldn't be listed, but we override it
+    useEffect(() => {
+        setFoo(foo + 1);
+    }, [setFoo]);
+}
+
+// Make sure ignoring without specific value also works for this rule.
+function IgnoredDependencies2() {
+    const [foo, setFoo] = useState(1);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: both are ignored.
+    useEffect(() => {
+        setFoo(foo + 1);
+    }, [setFoo]);
+}
+
+```

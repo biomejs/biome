@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<input accessKey={undefined} />;
+<input accessKey={null} />;
+<button>Next</button>;
+<Input accessKey="s" />;
+<Button accessKey="n" />;
+<RadioGroup.Radio accessKey="a" />;
+<context.Provider accessKey={key} />;
+
+```

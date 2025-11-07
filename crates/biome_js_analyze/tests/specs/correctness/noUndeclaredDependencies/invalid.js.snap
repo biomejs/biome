@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import "notInstalled";
+import("notInstalled");
+require("notInstalled")
+
+import "@testing-library/react";
+import("@testing-library/react");
+require("@testing-library/react");
+
+```
+
+# Diagnostics
+```
+invalid.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency notInstalled isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+  > 1 │ import "notInstalled";
+      │        ^^^^^^^^^^^^^^
+    2 │ import("notInstalled");
+    3 │ require("notInstalled")
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```
+invalid.js:2:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency notInstalled isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+    1 │ import "notInstalled";
+  > 2 │ import("notInstalled");
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ require("notInstalled")
+    4 │ 
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```
+invalid.js:3:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency notInstalled isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+    1 │ import "notInstalled";
+    2 │ import("notInstalled");
+  > 3 │ require("notInstalled")
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ import "@testing-library/react";
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```
+invalid.js:5:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency @testing-library/react isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+    3 │ require("notInstalled")
+    4 │ 
+  > 5 │ import "@testing-library/react";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import("@testing-library/react");
+    7 │ require("@testing-library/react");
+  
+  i @testing-library/react is part of your devDependencies, but it's not intended to be used in this file.
+  
+  i You may want to consider moving it to the dependencies section.
+  
+
+```
+
+```
+invalid.js:6:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency @testing-library/react isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+    5 │ import "@testing-library/react";
+  > 6 │ import("@testing-library/react");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ require("@testing-library/react");
+    8 │ 
+  
+  i @testing-library/react is part of your devDependencies, but it's not intended to be used in this file.
+  
+  i You may want to consider moving it to the dependencies section.
+  
+
+```
+
+```
+invalid.js:7:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Dependency @testing-library/react isn't specified in tests/specs/correctness/noUndeclaredDependencies/package.json.
+  
+    5 │ import "@testing-library/react";
+    6 │ import("@testing-library/react");
+  > 7 │ require("@testing-library/react");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i @testing-library/react is part of your devDependencies, but it's not intended to be used in this file.
+  
+  i You may want to consider moving it to the dependencies section.
+  
+
+```

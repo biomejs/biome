@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4041.jsx
+---
+# Input
+```jsx
+<div className={`${test} ${test}`}/>
+
+```

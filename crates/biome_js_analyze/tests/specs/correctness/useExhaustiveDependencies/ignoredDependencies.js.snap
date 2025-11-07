@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoredDependencies.js
+---
+# Input
+```js
+import { useEffect } from "react";
+
+// Make sure disabling a single dependency doesn't disable all.
+function IgnoredDependencies1() {
+    let a = 1;
+    let b = 2;
+    // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
+    useEffect(() => {
+        console.log(a + b);
+    }, []);
+}
+
+// Make sure an unnecessarily ignored dependency triggers a diagnostic.
+function IgnoredDependencies2() {
+    let a = 1;
+    // biome-ignore lint/correctness/useExhaustiveDependencies(a): `a` is correctly specified, so we shouldn't ignore it
+    useEffect(() => {
+        console.log(a);
+    }, [a]);
+}
+
+```
+
+# Diagnostics
+```
+ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+     6 │     let b = 2;
+     7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
+   > 8 │     useEffect(() => {
+       │     ^^^^^^^^^
+     9 │         console.log(a + b);
+    10 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
+     8 │     useEffect(() => {
+   > 9 │         console.log(a + b);
+       │                     ^
+    10 │     }, []);
+    11 │ }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    10 │ ····},·[a]);
+       │         +   
+
+```
+
+```
+ignoredDependencies.js:16:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    14 │ function IgnoredDependencies2() {
+    15 │     let a = 1;
+  > 16 │     // biome-ignore lint/correctness/useExhaustiveDependencies(a): `a` is correctly specified, so we shouldn't ignore it
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │     useEffect(() => {
+    18 │         console.log(a);
+  
+
+```

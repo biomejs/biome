@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+var a = 3; var b = function() { var a = 10; };
+```
+
+# Input
+```cjs
+var a = 3; a = 10;
+```
+
+# Input
+```cjs
+if (true) {
+    let b = 2;
+} else {    
+let b = 3;
+}
+```
+
+# Input
+```cjs
+var a; class C { static { var a; } }
+```
+
+# Input
+```cjs
+class C { static { var a; } } var a; 
+```
+
+# Input
+```cjs
+function a(){} class C { static { var a; } }
+```
+
+# Input
+```cjs
+var a; class C { static { function a(){} } }
+```
+
+# Input
+```cjs
+class C { static { var a; } static { var a; } }
+```
+
+# Input
+```cjs
+class C { static { function a(){} } static { function a(){} } }
+```
+
+# Input
+```cjs
+class C { static { var a; { let a; } } }
+```
+
+# Input
+```cjs
+class C { static { let a; { let a; } } }
+```
+
+# Input
+```cjs
+class C { static { { let a; } { let a; } } }
+```
+
+# Input
+```cjs
+interface A { [index: string]: string; [index: number]: string; }
+```
+
+# Input
+```cjs
+const foo = function foo() { const foo = 0; }
+```

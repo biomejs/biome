@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-object.vue
+---
+# Input
+```ts
+defineProps({
+    ref: String,
+    key: String,
+    foo: String,
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-props-object.vue:2:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps({
+  > 2 │     ref: String,
+      │     ^^^
+    3 │     key: String,
+    4 │     foo: String,
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-define-props-object.vue:3:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps({
+    2 │     ref: String,
+  > 3 │     key: String,
+      │     ^^^
+    4 │     foo: String,
+    5 │ });
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: disallowNoReferrer.jsx
+---
+# Input
+```jsx
+<>
+    <a href="https://example.com" target="_blank" rel="noreferrer"></a>
+    <area target="_blank" rel="noreferrer" href="https://example.com"></area>
+    <form target="_blank" rel="noreferrer" action="https://example.com"></form>
+</>
+
+```
+
+# Diagnostics
+```
+disallowNoReferrer.jsx:2:35 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener".
+  
+    1 │ <>
+  > 2 │     <a href="https://example.com" target="_blank" rel="noreferrer"></a>
+      │                                   ^^^^^^^^^^^^^^^
+    3 │     <area target="_blank" rel="noreferrer" href="https://example.com"></area>
+    4 │     <form target="_blank" rel="noreferrer" action="https://example.com"></form>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    2 │ ····<a·href="https://example.com"·target="_blank"·rel="noopener·noreferrer"></a>
+      │                                                        +++++++++                
+
+```
+
+```
+disallowNoReferrer.jsx:3:11 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener".
+  
+    1 │ <>
+    2 │     <a href="https://example.com" target="_blank" rel="noreferrer"></a>
+  > 3 │     <area target="_blank" rel="noreferrer" href="https://example.com"></area>
+      │           ^^^^^^^^^^^^^^^
+    4 │     <form target="_blank" rel="noreferrer" action="https://example.com"></form>
+    5 │ </>
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    3 │ ····<area·target="_blank"·rel="noopener·noreferrer"·href="https://example.com"></area>
+      │                                +++++++++                                              
+
+```
+
+```
+disallowNoReferrer.jsx:4:11 lint/security/noBlankTarget  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using target="_blank" without rel="noopener".
+  
+    2 │     <a href="https://example.com" target="_blank" rel="noreferrer"></a>
+    3 │     <area target="_blank" rel="noreferrer" href="https://example.com"></area>
+  > 4 │     <form target="_blank" rel="noreferrer" action="https://example.com"></form>
+      │           ^^^^^^^^^^^^^^^
+    5 │ </>
+    6 │ 
+  
+  i Opening external links in new tabs without rel="noopener" is a security risk. See the explanation for more details.
+  
+  i Safe fix: Add the "noopener" to the existing attribute.
+  
+    4 │ ····<form·target="_blank"·rel="noopener·noreferrer"·action="https://example.com"></form>
+      │                                +++++++++                                                
+
+```

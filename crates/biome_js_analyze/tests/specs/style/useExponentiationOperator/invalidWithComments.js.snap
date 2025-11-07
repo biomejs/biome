@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithComments.js
+---
+# Input
+```js
+/* comment */Math.pow(a, b)
+Math.pow(a, b)/* comment */;
+Math.pow(a, b)// comment
+
+Math.pow(/**/a/**/, /**/b/**/)
+
+Math/**/.pow/**/(a, b)
+
+
+Math // 0
+    .pow( // 1
+        // 2
+        a, // 3
+        // 4
+        b, // 5
+    // 6
+    ) // 5
+
+```
+
+# Diagnostics
+```
+invalidWithComments.js:1:14 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+  > 1 │ /* comment */Math.pow(a, b)
+      │              ^^^^^^^^^^^^^^
+    2 │ Math.pow(a, b)/* comment */;
+    3 │ Math.pow(a, b)// comment
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     1    │ - /*·comment·*/Math.pow(a,·b)
+        1 │ + /*·comment·*/a·**·b
+     2  2 │   Math.pow(a, b)/* comment */;
+     3  3 │   Math.pow(a, b)// comment
+  
+
+```
+
+```
+invalidWithComments.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    1 │ /* comment */Math.pow(a, b)
+  > 2 │ Math.pow(a, b)/* comment */;
+      │ ^^^^^^^^^^^^^^
+    3 │ Math.pow(a, b)// comment
+    4 │ 
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     1  1 │   /* comment */Math.pow(a, b)
+     2    │ - Math.pow(a,·b)/*·comment·*/;
+        2 │ + a·**·b/*·comment·*/;
+     3  3 │   Math.pow(a, b)// comment
+     4  4 │   
+  
+
+```
+
+```
+invalidWithComments.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    1 │ /* comment */Math.pow(a, b)
+    2 │ Math.pow(a, b)/* comment */;
+  > 3 │ Math.pow(a, b)// comment
+      │ ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ Math.pow(/**/a/**/, /**/b/**/)
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     1  1 │   /* comment */Math.pow(a, b)
+     2  2 │   Math.pow(a, b)/* comment */;
+     3    │ - Math.pow(a,·b)//·comment
+        3 │ + a·**·b//·comment
+     4  4 │   
+     5  5 │   Math.pow(/**/a/**/, /**/b/**/)
+  
+
+```
+
+```
+invalidWithComments.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    3 │ Math.pow(a, b)// comment
+    4 │ 
+  > 5 │ Math.pow(/**/a/**/, /**/b/**/)
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ Math/**/.pow/**/(a, b)
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     3  3 │   Math.pow(a, b)// comment
+     4  4 │   
+     5    │ - Math.pow(/**/a/**/,·/**/b/**/)
+        5 │ + /**/a/**/·**·/**/b/**/
+     6  6 │   
+     7  7 │   Math/**/.pow/**/(a, b)
+  
+
+```
+
+```
+invalidWithComments.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    5 │ Math.pow(/**/a/**/, /**/b/**/)
+    6 │ 
+  > 7 │ Math/**/.pow/**/(a, b)
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     5  5 │   Math.pow(/**/a/**/, /**/b/**/)
+     6  6 │   
+     7    │ - Math/**/.pow/**/(a,·b)
+        7 │ + a·**·b
+     8  8 │   
+     9  9 │   
+  
+
+```
+
+```
+invalidWithComments.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+  > 10 │ Math // 0
+       │ ^^^^^^^^^
+  > 11 │     .pow( // 1
+        ...
+  > 15 │         b, // 5
+  > 16 │     // 6
+  > 17 │     ) // 5
+       │     ^
+    18 │ 
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+     8  8 │   
+     9  9 │   
+    10    │ - Math·//·0
+    11    │ - ····.pow(·//·1
+       10 │ + ·//·1
+    12 11 │           // 2
+    13    │ - ········a,·//·3
+       12 │ + ········a·**·//·3
+    14 13 │           // 4
+    15    │ - ········b,·//·5
+       14 │ + ········b·//·5
+    16 15 │       // 6
+    17    │ - ····)·//·5
+       16 │ + ·····//·5
+    18 17 │   
+  
+
+```

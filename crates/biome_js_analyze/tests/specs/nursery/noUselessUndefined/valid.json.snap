@@ -1,0 +1,258 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```cjs
+function foo() {return;}
+```
+
+# Input
+```cjs
+const foo = () => {};
+```
+
+# Input
+```cjs
+let foo;
+```
+
+# Input
+```cjs
+var foo;
+```
+
+# Input
+```cjs
+const foo = undefined;
+```
+
+# Input
+```cjs
+foo();
+```
+
+# Input
+```cjs
+foo(bar,);
+```
+
+# Input
+```cjs
+foo(undefined, bar);
+```
+
+# Input
+```cjs
+const {foo} = {};
+```
+
+# Input
+```cjs
+function foo({bar} = {}) {}
+```
+
+# Input
+```cjs
+function foo(bar) {}
+```
+
+# Input
+```cjs
+function* foo() {yield* undefined;}
+```
+
+# Input
+```cjs
+if (Object.is(foo, undefined)){}
+```
+
+# Input
+```cjs
+t.is(foo, undefined)
+```
+
+# Input
+```cjs
+assert.equal(foo, undefined, message)
+```
+
+# Input
+```cjs
+assert.notEqual(foo, undefined, message)
+```
+
+# Input
+```cjs
+assert.strictEqual(foo, undefined, message)
+```
+
+# Input
+```cjs
+assert.notStrictEqual(foo, undefined, message)
+```
+
+# Input
+```cjs
+assert.propertyVal(foo, 'bar', undefined, message)
+```
+
+# Input
+```cjs
+assert.notPropertyVal(foo, 'bar', undefined, message)
+```
+
+# Input
+```cjs
+expect(foo).not(undefined)
+```
+
+# Input
+```cjs
+expect(foo).to.have.property('bar', undefined)
+```
+
+# Input
+```cjs
+expect(foo).toBe(undefined)
+```
+
+# Input
+```cjs
+expect(foo).toContain(undefined)
+```
+
+# Input
+```cjs
+expect(foo).toContainEqual(undefined)
+```
+
+# Input
+```cjs
+expect(foo).toEqual(undefined)
+```
+
+# Input
+```cjs
+t.same(foo, undefined)
+```
+
+# Input
+```cjs
+t.notSame(foo, undefined)
+```
+
+# Input
+```cjs
+t.strictSame(foo, undefined)
+```
+
+# Input
+```cjs
+t.strictNotSame(foo, undefined)
+```
+
+# Input
+```cjs
+expect(someFunction).toHaveBeenCalledWith(1, 2, undefined);
+```
+
+# Input
+```cjs
+set.add(undefined);
+```
+
+# Input
+```cjs
+map.set(foo, undefined);
+```
+
+# Input
+```cjs
+array.push(foo, undefined);
+```
+
+# Input
+```cjs
+array.push(undefined);
+```
+
+# Input
+```cjs
+array.unshift(foo, undefined);
+```
+
+# Input
+```cjs
+array.unshift(undefined);
+```
+
+# Input
+```cjs
+createContext(undefined);
+```
+
+# Input
+```cjs
+React.createContext(undefined);
+```
+
+# Input
+```cjs
+setState(undefined)
+```
+
+# Input
+```cjs
+setState?.(undefined)
+```
+
+# Input
+```cjs
+props.setState(undefined)
+```
+
+# Input
+```cjs
+props.setState?.(undefined)
+```
+
+# Input
+```cjs
+array.includes(undefined)
+```
+
+# Input
+```cjs
+set.has(undefined)
+```
+
+# Input
+```cjs
+foo.bind(bar, undefined)
+```
+
+# Input
+```cjs
+foo.bind(...bar, undefined)
+```
+
+# Input
+```cjs
+foo.bind(...[], undefined)
+```
+
+# Input
+```cjs
+foo.bind(...[undefined], undefined)
+```
+
+# Input
+```cjs
+foo.bind(bar, baz, undefined)
+```
+
+# Input
+```cjs
+foo?.bind(bar, undefined)
+```

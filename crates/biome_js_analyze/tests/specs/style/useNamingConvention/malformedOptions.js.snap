@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: malformedOptions.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+malformedOptions.options:9:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `enumMemberCase`.
+  
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"enumMemberCase": "kebab-case"
+       │ 						^^^^^^^^^^^^^^^^
+    10 │ 					}
+    11 │ 				}
+  
+  i Known keys:
+  
+  - strictCase
+  - requireAscii
+  - conventions
+  
+
+```

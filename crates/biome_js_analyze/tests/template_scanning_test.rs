@@ -5,7 +5,7 @@
 
 #[test]
 fn test_template_component_detection() {
-    use biome_html_parser::{parse_html, HtmlParseOptions};
+    use biome_html_parser::{HtmlParseOptions, parse_html};
     use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
     use biome_rowan::AstNode;
 
@@ -37,14 +37,20 @@ fn test_template_component_detection() {
     println!("Found components: {:?}", components);
 
     // Should find Button and Card
-    assert!(components.contains(&"Button".to_string()), "Should find Button component");
-    assert!(components.contains(&"Card".to_string()), "Should find Card component");
+    assert!(
+        components.contains(&"Button".to_string()),
+        "Should find Button component"
+    );
+    assert!(
+        components.contains(&"Card".to_string()),
+        "Should find Card component"
+    );
     assert_eq!(components.len(), 2, "Should find exactly 2 components");
 }
 
 #[test]
 fn test_template_with_regular_and_self_closing() {
-    use biome_html_parser::{parse_html, HtmlParseOptions};
+    use biome_html_parser::{HtmlParseOptions, parse_html};
     use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
     use biome_rowan::AstNode;
 

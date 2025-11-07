@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5449_valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+export const ModelSelector = () => {
+	return (
+		<Select
+			onChange={({ value }) => {
+				console.log(value)
+			}}
+		/>
+	)
+}
+
+```

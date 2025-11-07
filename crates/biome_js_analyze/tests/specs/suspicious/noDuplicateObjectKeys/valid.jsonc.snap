@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+({ 0x1: 1, 1: 2 });
+```
+
+# Input
+```cjs
+({ 012: 1, 10: 2 });
+```
+
+# Input
+```cjs
+({ 0b1: 1, 1: 2 });
+```
+
+# Input
+```cjs
+({ 0o1: 1, 1: 2 });
+```
+
+# Input
+```cjs
+({ 1n: 1, 1: 2 });
+```
+
+# Input
+```cjs
+({ 1_0: 1, 10: 2 });
+```
+
+# Input
+```cjs
+({ a: 1, b: 1 });
+```
+
+# Input
+```cjs
+({ '': 1, ' ': 1 });
+```
+
+# Input
+```cjs
+({ 012: 1, 12: 1 });
+```
+
+# Input
+```cjs
+({ 1_0: 1, 1: 1 });
+```
+
+# Input
+```cjs
+({ a: 1, [a]: 1 });
+```
+
+# Input
+```cjs
+({ [a]: 1, [a]: 1 });
+```
+
+# Input
+```cjs
+({ get a() {}, set a(v) {} });
+```
+
+# Input
+```cjs
+({ a: 1, ...a });
+```
+
+# Input
+```cjs
+({ a: 1, b: { a: 1, b: 1 } });
+```
+
+# Input
+```cjs
+var { a, a } = obj;
+```

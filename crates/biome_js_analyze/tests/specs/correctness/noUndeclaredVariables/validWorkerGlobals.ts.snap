@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validWorkerGlobals.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// web worker
+const syncReader = new FileReaderSync();
+// service worker
+const e = new ExtendableEvent();
+
+```

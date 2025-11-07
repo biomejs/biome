@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRecursiveFunctions.js
+---
+# Input
+```js
+function f() {
+    f();
+}
+
+const g = () => {
+    g();
+}
+
+const h = function() {
+    h();
+}
+
+```
+
+# Diagnostics
+```
+invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function f is unused.
+  
+  > 1 │ function f() {
+      │          ^
+    2 │     f();
+    3 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+     1    │ - function·f()·{
+     2    │ - ····f();
+        1 │ + function·_f()·{
+        2 │ + ····_f();
+     3  3 │   }
+     4  4 │   
+  
+
+```
+
+```
+invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable g is unused.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const g = () => {
+      │       ^
+    6 │     g();
+    7 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend g with an underscore.
+  
+     3  3 │   }
+     4  4 │   
+     5    │ - const·g·=·()·=>·{
+     6    │ - ····g();
+        5 │ + const·_g·=·()·=>·{
+        6 │ + ····_g();
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable h is unused.
+  
+     7 │ }
+     8 │ 
+   > 9 │ const h = function() {
+       │       ^
+    10 │     h();
+    11 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend h with an underscore.
+  
+     7  7 │   }
+     8  8 │   
+     9    │ - const·h·=·function()·{
+    10    │ - ····h();
+        9 │ + const·_h·=·function()·{
+       10 │ + ····_h();
+    11 11 │   }
+    12 12 │   
+  
+
+```

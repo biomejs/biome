@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<input type="text" autocomplete="foo" />
+	<input type="text" autocomplete="name invalid" />
+	<input type="text" autocomplete="invalid name" />
+	<input type="text" autocomplete="home url" />
+	<Bar autocomplete="baz"></Bar>
+	<Input type="text" autocomplete="baz" />
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    1 │ <>
+  > 2 │ 	<input type="text" autocomplete="foo" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^
+    3 │ 	<input type="text" autocomplete="name invalid" />
+    4 │ 	<input type="text" autocomplete="invalid name" />
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:3:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    1 │ <>
+    2 │ 	<input type="text" autocomplete="foo" />
+  > 3 │ 	<input type="text" autocomplete="name invalid" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<input type="text" autocomplete="invalid name" />
+    5 │ 	<input type="text" autocomplete="home url" />
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:4:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    2 │ 	<input type="text" autocomplete="foo" />
+    3 │ 	<input type="text" autocomplete="name invalid" />
+  > 4 │ 	<input type="text" autocomplete="invalid name" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<input type="text" autocomplete="home url" />
+    6 │ 	<Bar autocomplete="baz"></Bar>
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:5:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    3 │ 	<input type="text" autocomplete="name invalid" />
+    4 │ 	<input type="text" autocomplete="invalid name" />
+  > 5 │ 	<input type="text" autocomplete="home url" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<Bar autocomplete="baz"></Bar>
+    7 │ 	<Input type="text" autocomplete="baz" />
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    4 │ 	<input type="text" autocomplete="invalid name" />
+    5 │ 	<input type="text" autocomplete="home url" />
+  > 6 │ 	<Bar autocomplete="baz"></Bar>
+      │ 	     ^^^^^^^^^^^^^^^^^^
+    7 │ 	<Input type="text" autocomplete="baz" />
+    8 │ </>
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:7:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+    5 │ 	<input type="text" autocomplete="home url" />
+    6 │ 	<Bar autocomplete="baz"></Bar>
+  > 7 │ 	<Input type="text" autocomplete="baz" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^
+    8 │ </>
+    9 │ 
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```

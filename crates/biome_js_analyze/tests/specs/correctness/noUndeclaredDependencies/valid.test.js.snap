@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.test.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import "@testing-library/react";
+import("@testing-library/react");
+require("@testing-library/react");
+
+```

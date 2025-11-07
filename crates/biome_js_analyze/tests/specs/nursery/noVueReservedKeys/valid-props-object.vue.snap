@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-props-object.vue
+---
+# Input
+```ts
+export default {
+    props: {
+        foo: String,
+    }
+};
+
+```

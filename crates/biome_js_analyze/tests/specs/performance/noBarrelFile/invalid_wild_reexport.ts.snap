@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_wild_reexport.ts
+---
+# Input
+```ts
+export * from "foo";
+
+```
+
+# Diagnostics
+```
+invalid_wild_reexport.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export * from "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```

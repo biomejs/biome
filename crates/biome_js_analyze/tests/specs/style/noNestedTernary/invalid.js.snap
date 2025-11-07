@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+var thing = foo ? bar : baz === qux ? quxx : foobar;
+
+foo ? baz === qux ? quxx() : foobar() : bar();
+```
+
+# Diagnostics
+```
+invalid.js:1:25 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not nest ternary expressions.
+  
+  > 1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ foo ? baz === qux ? quxx() : foobar() : bar();
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+```
+
+```
+invalid.js:3:7 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not nest ternary expressions.
+  
+    1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
+    2 │ 
+  > 3 │ foo ? baz === qux ? quxx() : foobar() : bar();
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+```

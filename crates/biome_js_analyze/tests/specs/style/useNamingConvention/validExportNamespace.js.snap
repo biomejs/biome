@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExportNamespace.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export * as x from ""
+
+export * as camelCase from ""
+
+export * as $ from ""
+
+export * as _ from ""
+```

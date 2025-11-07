@@ -1,0 +1,739 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const ts = new Date().getTime();
+const ts1 = (new Date()).getTime();
+const ts2 = (new Date().getTime());
+const ts3 = new Date().valueOf();
+const ts4 = (new Date()).valueOf();
+const ts5 = (new Date().valueOf());
+
+// `Number()` and `BigInt()`
+const ts6 = /* 1 */ Number(/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */); /* 6 */
+const tsBigInt = /* 1 */ BigInt(
+	/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */
+); /* 6 */
+
+// `BinaryExpression`
+const ts10 = new Date() - 0;
+const bar = bar - new Date();
+const bar1 = new Date() * bar;
+const ts11 = new Date() / 1;
+const ts12 = new Date() % Infinity;
+const ts13 = new Date() ** 1;
+const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+
+// `AssignmentExpression`
+foo -= new Date();
+foo *= new Date();
+foo /= new Date();
+foo %= new Date();
+foo **= (new Date());
+
+
+`UnaryExpression`
+const ts7 = +(/* 1 */ new Date());
+const ts8 = -(/* 1 */ new Date());
+
+function foo() {
+	return +new Date();
+}
+function foo() {
+	return -new Date();
+}
+await +new Date();
+typeof+new Date();
+```
+
+# Diagnostics
+```
+invalid.js:1:12 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().getTime().
+  
+  > 1 │ const ts = new Date().getTime();
+      │            ^^^^^^^^^^^^^^^^^^^^
+    2 │ const ts1 = (new Date()).getTime();
+    3 │ const ts2 = (new Date().getTime());
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     1    │ - const·ts·=·new·Date().getTime();
+        1 │ + const·ts·=·Date.now();
+     2  2 │   const ts1 = (new Date()).getTime();
+     3  3 │   const ts2 = (new Date().getTime());
+  
+
+```
+
+```
+invalid.js:2:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().getTime().
+  
+    1 │ const ts = new Date().getTime();
+  > 2 │ const ts1 = (new Date()).getTime();
+      │             ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const ts2 = (new Date().getTime());
+    4 │ const ts3 = new Date().valueOf();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     1  1 │   const ts = new Date().getTime();
+     2    │ - const·ts1·=·(new·Date()).getTime();
+        2 │ + const·ts1·=·Date.now();
+     3  3 │   const ts2 = (new Date().getTime());
+     4  4 │   const ts3 = new Date().valueOf();
+  
+
+```
+
+```
+invalid.js:3:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().getTime().
+  
+    1 │ const ts = new Date().getTime();
+    2 │ const ts1 = (new Date()).getTime();
+  > 3 │ const ts2 = (new Date().getTime());
+      │              ^^^^^^^^^^^^^^^^^^^^
+    4 │ const ts3 = new Date().valueOf();
+    5 │ const ts4 = (new Date()).valueOf();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     1  1 │   const ts = new Date().getTime();
+     2  2 │   const ts1 = (new Date()).getTime();
+     3    │ - const·ts2·=·(new·Date().getTime());
+        3 │ + const·ts2·=·(Date.now());
+     4  4 │   const ts3 = new Date().valueOf();
+     5  5 │   const ts4 = (new Date()).valueOf();
+  
+
+```
+
+```
+invalid.js:4:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().valueOf().
+  
+    2 │ const ts1 = (new Date()).getTime();
+    3 │ const ts2 = (new Date().getTime());
+  > 4 │ const ts3 = new Date().valueOf();
+      │             ^^^^^^^^^^^^^^^^^^^^
+    5 │ const ts4 = (new Date()).valueOf();
+    6 │ const ts5 = (new Date().valueOf());
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     2  2 │   const ts1 = (new Date()).getTime();
+     3  3 │   const ts2 = (new Date().getTime());
+     4    │ - const·ts3·=·new·Date().valueOf();
+        4 │ + const·ts3·=·Date.now();
+     5  5 │   const ts4 = (new Date()).valueOf();
+     6  6 │   const ts5 = (new Date().valueOf());
+  
+
+```
+
+```
+invalid.js:5:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().valueOf().
+  
+    3 │ const ts2 = (new Date().getTime());
+    4 │ const ts3 = new Date().valueOf();
+  > 5 │ const ts4 = (new Date()).valueOf();
+      │             ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const ts5 = (new Date().valueOf());
+    7 │ 
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     3  3 │   const ts2 = (new Date().getTime());
+     4  4 │   const ts3 = new Date().valueOf();
+     5    │ - const·ts4·=·(new·Date()).valueOf();
+        5 │ + const·ts4·=·Date.now();
+     6  6 │   const ts5 = (new Date().valueOf());
+     7  7 │   
+  
+
+```
+
+```
+invalid.js:6:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().valueOf().
+  
+    4 │ const ts3 = new Date().valueOf();
+    5 │ const ts4 = (new Date()).valueOf();
+  > 6 │ const ts5 = (new Date().valueOf());
+      │              ^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // `Number()` and `BigInt()`
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     4  4 │   const ts3 = new Date().valueOf();
+     5  5 │   const ts4 = (new Date()).valueOf();
+     6    │ - const·ts5·=·(new·Date().valueOf());
+        6 │ + const·ts5·=·(Date.now());
+     7  7 │   
+     8  8 │   // `Number()` and `BigInt()`
+  
+
+```
+
+```
+invalid.js:9:21 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of Number(new Date()).
+  
+     8 │ // `Number()` and `BigInt()`
+   > 9 │ const ts6 = /* 1 */ Number(/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */); /* 6 */
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const tsBigInt = /* 1 */ BigInt(
+    11 │ 	/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     7  7 │   
+     8  8 │   // `Number()` and `BigInt()`
+     9    │ - const·ts6·=·/*·1·*/·Number(/*·2·*/·new·/*·3·*/·Date(/*·4·*/)·/*·5·*/);·/*·6·*/
+        9 │ + const·ts6·=·/*·1·*/·Date.now();·/*·6·*/
+    10 10 │   const tsBigInt = /* 1 */ BigInt(
+    11 11 │   	/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */
+  
+
+```
+
+```
+invalid.js:10:26 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of Number(new Date()).
+  
+     8 │ // `Number()` and `BigInt()`
+     9 │ const ts6 = /* 1 */ Number(/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */); /* 6 */
+  > 10 │ const tsBigInt = /* 1 */ BigInt(
+       │                          ^^^^^^^
+  > 11 │ 	/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */
+  > 12 │ ); /* 6 */
+       │ ^
+    13 │ 
+    14 │ // `BinaryExpression`
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+     8  8 │   // `Number()` and `BigInt()`
+     9  9 │   const ts6 = /* 1 */ Number(/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */); /* 6 */
+    10    │ - const·tsBigInt·=·/*·1·*/·BigInt(
+    11    │ - → /*·2·*/·new·/*·3·*/·Date(/*·4·*/)·/*·5·*/
+    12    │ - );·/*·6·*/
+       10 │ + const·tsBigInt·=·/*·1·*/·Date.now();·/*·6·*/
+    13 11 │   
+    14 12 │   // `BinaryExpression`
+  
+
+```
+
+```
+invalid.js:15:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    14 │ // `BinaryExpression`
+  > 15 │ const ts10 = new Date() - 0;
+       │              ^^^^^^^^^^
+    16 │ const bar = bar - new Date();
+    17 │ const bar1 = new Date() * bar;
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    13 13 │   
+    14 14 │   // `BinaryExpression`
+    15    │ - const·ts10·=·new·Date()·-·0;
+       15 │ + const·ts10·=·Date.now()-·0;
+    16 16 │   const bar = bar - new Date();
+    17 17 │   const bar1 = new Date() * bar;
+  
+
+```
+
+```
+invalid.js:16:19 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    14 │ // `BinaryExpression`
+    15 │ const ts10 = new Date() - 0;
+  > 16 │ const bar = bar - new Date();
+       │                   ^^^^^^^^^^
+    17 │ const bar1 = new Date() * bar;
+    18 │ const ts11 = new Date() / 1;
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    14 14 │   // `BinaryExpression`
+    15 15 │   const ts10 = new Date() - 0;
+    16    │ - const·bar·=·bar·-·new·Date();
+       16 │ + const·bar·=·bar·-·Date.now();
+    17 17 │   const bar1 = new Date() * bar;
+    18 18 │   const ts11 = new Date() / 1;
+  
+
+```
+
+```
+invalid.js:17:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    15 │ const ts10 = new Date() - 0;
+    16 │ const bar = bar - new Date();
+  > 17 │ const bar1 = new Date() * bar;
+       │              ^^^^^^^^^^
+    18 │ const ts11 = new Date() / 1;
+    19 │ const ts12 = new Date() % Infinity;
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    15 15 │   const ts10 = new Date() - 0;
+    16 16 │   const bar = bar - new Date();
+    17    │ - const·bar1·=·new·Date()·*·bar;
+       17 │ + const·bar1·=·Date.now()*·bar;
+    18 18 │   const ts11 = new Date() / 1;
+    19 19 │   const ts12 = new Date() % Infinity;
+  
+
+```
+
+```
+invalid.js:18:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    16 │ const bar = bar - new Date();
+    17 │ const bar1 = new Date() * bar;
+  > 18 │ const ts11 = new Date() / 1;
+       │              ^^^^^^^^^^
+    19 │ const ts12 = new Date() % Infinity;
+    20 │ const ts13 = new Date() ** 1;
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    16 16 │   const bar = bar - new Date();
+    17 17 │   const bar1 = new Date() * bar;
+    18    │ - const·ts11·=·new·Date()·/·1;
+       18 │ + const·ts11·=·Date.now()/·1;
+    19 19 │   const ts12 = new Date() % Infinity;
+    20 20 │   const ts13 = new Date() ** 1;
+  
+
+```
+
+```
+invalid.js:19:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    17 │ const bar1 = new Date() * bar;
+    18 │ const ts11 = new Date() / 1;
+  > 19 │ const ts12 = new Date() % Infinity;
+       │              ^^^^^^^^^^
+    20 │ const ts13 = new Date() ** 1;
+    21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    17 17 │   const bar1 = new Date() * bar;
+    18 18 │   const ts11 = new Date() / 1;
+    19    │ - const·ts12·=·new·Date()·%·Infinity;
+       19 │ + const·ts12·=·Date.now()%·Infinity;
+    20 20 │   const ts13 = new Date() ** 1;
+    21 21 │   const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+  
+
+```
+
+```
+invalid.js:20:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    18 │ const ts11 = new Date() / 1;
+    19 │ const ts12 = new Date() % Infinity;
+  > 20 │ const ts13 = new Date() ** 1;
+       │              ^^^^^^^^^^
+    21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+    22 │ 
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    18 18 │   const ts11 = new Date() / 1;
+    19 19 │   const ts12 = new Date() % Infinity;
+    20    │ - const·ts13·=·new·Date()·**·1;
+       20 │ + const·ts13·=·Date.now()**·1;
+    21 21 │   const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    19 │ const ts12 = new Date() % Infinity;
+    20 │ const ts13 = new Date() ** 1;
+  > 21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+       │              ^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // `AssignmentExpression`
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    19 19 │   const ts12 = new Date() % Infinity;
+    20 20 │   const ts13 = new Date() ** 1;
+    21    │ - const·zero·=·new·Date(/*·1·*/)·/*·2·*/·/*·3·*/·-·/*·4·*/·new·Date();
+       21 │ + const·zero·=·Date.now()-·/*·4·*/·new·Date();
+    22 22 │   
+    23 23 │   // `AssignmentExpression`
+  
+
+```
+
+```
+invalid.js:21:58 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    19 │ const ts12 = new Date() % Infinity;
+    20 │ const ts13 = new Date() ** 1;
+  > 21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
+       │                                                          ^^^^^^^^^^
+    22 │ 
+    23 │ // `AssignmentExpression`
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    19 19 │   const ts12 = new Date() % Infinity;
+    20 20 │   const ts13 = new Date() ** 1;
+    21    │ - const·zero·=·new·Date(/*·1·*/)·/*·2·*/·/*·3·*/·-·/*·4·*/·new·Date();
+       21 │ + const·zero·=·new·Date(/*·1·*/)·/*·2·*/·/*·3·*/·-·/*·4·*/·Date.now();
+    22 22 │   
+    23 23 │   // `AssignmentExpression`
+  
+
+```
+
+```
+invalid.js:24:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    23 │ // `AssignmentExpression`
+  > 24 │ foo -= new Date();
+       │        ^^^^^^^^^^
+    25 │ foo *= new Date();
+    26 │ foo /= new Date();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    22 22 │   
+    23 23 │   // `AssignmentExpression`
+    24    │ - foo·-=·new·Date();
+       24 │ + foo·-=·Date.now();
+    25 25 │   foo *= new Date();
+    26 26 │   foo /= new Date();
+  
+
+```
+
+```
+invalid.js:25:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    23 │ // `AssignmentExpression`
+    24 │ foo -= new Date();
+  > 25 │ foo *= new Date();
+       │        ^^^^^^^^^^
+    26 │ foo /= new Date();
+    27 │ foo %= new Date();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    23 23 │   // `AssignmentExpression`
+    24 24 │   foo -= new Date();
+    25    │ - foo·*=·new·Date();
+       25 │ + foo·*=·Date.now();
+    26 26 │   foo /= new Date();
+    27 27 │   foo %= new Date();
+  
+
+```
+
+```
+invalid.js:26:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    24 │ foo -= new Date();
+    25 │ foo *= new Date();
+  > 26 │ foo /= new Date();
+       │        ^^^^^^^^^^
+    27 │ foo %= new Date();
+    28 │ foo **= (new Date());
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    24 24 │   foo -= new Date();
+    25 25 │   foo *= new Date();
+    26    │ - foo·/=·new·Date();
+       26 │ + foo·/=·Date.now();
+    27 27 │   foo %= new Date();
+    28 28 │   foo **= (new Date());
+  
+
+```
+
+```
+invalid.js:27:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    25 │ foo *= new Date();
+    26 │ foo /= new Date();
+  > 27 │ foo %= new Date();
+       │        ^^^^^^^^^^
+    28 │ foo **= (new Date());
+    29 │ 
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    25 25 │   foo *= new Date();
+    26 26 │   foo /= new Date();
+    27    │ - foo·%=·new·Date();
+       27 │ + foo·%=·Date.now();
+    28 28 │   foo **= (new Date());
+    29 29 │   
+  
+
+```
+
+```
+invalid.js:28:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    26 │ foo /= new Date();
+    27 │ foo %= new Date();
+  > 28 │ foo **= (new Date());
+       │         ^^^^^^^^^^^^
+    29 │ 
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    26 26 │   foo /= new Date();
+    27 27 │   foo %= new Date();
+    28    │ - foo·**=·(new·Date());
+       28 │ + foo·**=·Date.now();
+    29 29 │   
+    30 30 │   
+  
+
+```
+
+```
+invalid.js:32:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    31 │ `UnaryExpression`
+  > 32 │ const ts7 = +(/* 1 */ new Date());
+       │             ^^^^^^^^^^^^^^^^^^^^^
+    33 │ const ts8 = -(/* 1 */ new Date());
+    34 │ 
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    30 30 │   
+    31 31 │   `UnaryExpression`
+    32    │ - const·ts7·=·+(/*·1·*/·new·Date());
+       32 │ + const·ts7·=·Date.now();
+    33 33 │   const ts8 = -(/* 1 */ new Date());
+    34 34 │   
+  
+
+```
+
+```
+invalid.js:33:23 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    31 │ `UnaryExpression`
+    32 │ const ts7 = +(/* 1 */ new Date());
+  > 33 │ const ts8 = -(/* 1 */ new Date());
+       │                       ^^^^^^^^^^
+    34 │ 
+    35 │ function foo() {
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    31 31 │   `UnaryExpression`
+    32 32 │   const ts7 = +(/* 1 */ new Date());
+    33    │ - const·ts8·=·-(/*·1·*/·new·Date());
+       33 │ + const·ts8·=·-(/*·1·*/·Date.now());
+    34 34 │   
+    35 35 │   function foo() {
+  
+
+```
+
+```
+invalid.js:36:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    35 │ function foo() {
+  > 36 │ 	return +new Date();
+       │ 	       ^^^^^^^^^^^
+    37 │ }
+    38 │ function foo() {
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    34 34 │   
+    35 35 │   function foo() {
+    36    │ - → return·+new·Date();
+       36 │ + → return··Date.now();
+    37 37 │   }
+    38 38 │   function foo() {
+  
+
+```
+
+```
+invalid.js:39:10 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    37 │ }
+    38 │ function foo() {
+  > 39 │ 	return -new Date();
+       │ 	        ^^^^^^^^^^
+    40 │ }
+    41 │ await +new Date();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    37 37 │   }
+    38 38 │   function foo() {
+    39    │ - → return·-new·Date();
+       39 │ + → return·-Date.now();
+    40 40 │   }
+    41 41 │   await +new Date();
+  
+
+```
+
+```
+invalid.js:41:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    39 │ 	return -new Date();
+    40 │ }
+  > 41 │ await +new Date();
+       │       ^^^^^^^^^^^
+    42 │ typeof+new Date();
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    39 39 │   	return -new Date();
+    40 40 │   }
+    41    │ - await·+new·Date();
+       41 │ + await··Date.now();
+    42 42 │   typeof+new Date();
+  
+
+```
+
+```
+invalid.js:42:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Date.now() instead of new Date().
+  
+    40 │ }
+    41 │ await +new Date();
+  > 42 │ typeof+new Date();
+       │       ^^^^^^^^^^^
+  
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
+  
+  i Unsafe fix: Replace with Date.now().
+  
+    40 40 │   }
+    41 41 │   await +new Date();
+    42    │ - typeof+new·Date();
+       42 │ + typeof·Date.now();
+  
+
+```

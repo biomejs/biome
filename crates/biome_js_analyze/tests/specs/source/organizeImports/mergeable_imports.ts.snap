@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable_imports.ts
+---
+# Input
+```ts
+// Comment 1
+import type { T4, T2 } from "mod";
+// Comment 2
+import type { T3, T1 } from "mod";
+// Comment 3
+import { A, D } from "mod";
+// Comment 4
+import { B, C } from "mod";
+// Comment 5
+import { E, F } from "mod";
+// Comment 6
+import G, { H } from "mod";
+// Comment 7
+import I from "mod";
+import * as ns from "mod";
+
+```
+
+# Diagnostics
+```
+mergeable_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // Comment 1
+  > 2 │ import type { T4, T2 } from "mod";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ // Comment 2
+    4 │ import type { T3, T1 } from "mod";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   // Comment 1
+     2    │ - import·type·{·T4,·T2·}·from·"mod";
+     3    │ - //·Comment·2
+     4    │ - import·type·{·T3,·T1·}·from·"mod";
+     5    │ - //·Comment·3
+     6    │ - import·{·A,·D·}·from·"mod";
+     7    │ - //·Comment·4
+     8    │ - import·{·B,·C·}·from·"mod";
+     9    │ - //·Comment·5
+    10    │ - import·{·E,·F·}·from·"mod";
+    11    │ - //·Comment·6
+    12    │ - import·G,·{·H·}·from·"mod";
+    13    │ - //·Comment·7
+    14    │ - import·I·from·"mod";
+    15    │ - import·*·as·ns·from·"mod";
+        2 │ + //·Comment·2
+        3 │ + import·type·{·T1,·T2,·T3,·T4·}·from·"mod";
+        4 │ + //·Comment·7
+        5 │ + import·I,·*·as·ns·from·"mod";
+        6 │ + //·Comment·6
+        7 │ + //·Comment·3
+        8 │ + //·Comment·4
+        9 │ + //·Comment·5
+       10 │ + import·G,·{·A,·B,·C,·D,·E,·F,·H·}·from·"mod";
+    16 11 │   
+  
+
+```

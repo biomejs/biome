@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import 'node:fs'
+import { join } from 'node:path'
+
+import('node:fs/promises')
+
+const require = () => {}
+
+require('node:fs')
+
+const module = {}
+module.exports = 'path'
+
+const exports = {}
+exports.path = 'path'
+```

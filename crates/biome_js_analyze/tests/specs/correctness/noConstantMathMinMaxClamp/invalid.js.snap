@@ -1,0 +1,349 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+Math.min(0, Math.max(100, x));
+
+Math.max(100, Math.min(0, x));
+
+Math.max(100, Math.min(x, 0));
+
+window.Math.min(0, window.Math.max(100, x));
+
+window.Math.min(0, Math.max(100, x));
+
+Math.min(0, window.Math.max(100, x));
+
+globalThis.Math.min(0, globalThis.Math.max(100, x));
+
+globalThis.Math.min(0, Math.max(100, x));
+
+Math.min(0, globalThis.Math.max(100, x));
+
+foo(Math.min(0, Math.max(100, x)));
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+  > 1 │ Math.min(0, Math.max(100, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ Math.max(100, Math.min(0, x));
+  
+  i It always evaluates to 0.
+  
+  > 1 │ Math.min(0, Math.max(100, x));
+      │          ^
+    2 │ 
+    3 │ Math.max(100, Math.min(0, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+     1    │ - Math.min(0,·Math.max(100,·x));
+        1 │ + Math.min(100,·Math.max(0,·x));
+     2  2 │   
+     3  3 │   Math.max(100, Math.min(0, x));
+  
+
+```
+
+```
+invalid.js:3:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    1 │ Math.min(0, Math.max(100, x));
+    2 │ 
+  > 3 │ Math.max(100, Math.min(0, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ Math.max(100, Math.min(x, 0));
+  
+  i It always evaluates to 100.
+  
+    1 │ Math.min(0, Math.max(100, x));
+    2 │ 
+  > 3 │ Math.max(100, Math.min(0, x));
+      │          ^^^
+    4 │ 
+    5 │ Math.max(100, Math.min(x, 0));
+  
+  i Unsafe fix: Swap 100 with 0.
+  
+     1  1 │   Math.min(0, Math.max(100, x));
+     2  2 │   
+     3    │ - Math.max(100,·Math.min(0,·x));
+        3 │ + Math.max(0,·Math.min(100,·x));
+     4  4 │   
+     5  5 │   Math.max(100, Math.min(x, 0));
+  
+
+```
+
+```
+invalid.js:5:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    3 │ Math.max(100, Math.min(0, x));
+    4 │ 
+  > 5 │ Math.max(100, Math.min(x, 0));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ window.Math.min(0, window.Math.max(100, x));
+  
+  i It always evaluates to 100.
+  
+    3 │ Math.max(100, Math.min(0, x));
+    4 │ 
+  > 5 │ Math.max(100, Math.min(x, 0));
+      │          ^^^
+    6 │ 
+    7 │ window.Math.min(0, window.Math.max(100, x));
+  
+  i Unsafe fix: Swap 100 with 0.
+  
+     3  3 │   Math.max(100, Math.min(0, x));
+     4  4 │   
+     5    │ - Math.max(100,·Math.min(x,·0));
+        5 │ + Math.max(0,·Math.min(x,·100));
+     6  6 │   
+     7  7 │   window.Math.min(0, window.Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:7:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    5 │ Math.max(100, Math.min(x, 0));
+    6 │ 
+  > 7 │ window.Math.min(0, window.Math.max(100, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ window.Math.min(0, Math.max(100, x));
+  
+  i It always evaluates to 0.
+  
+    5 │ Math.max(100, Math.min(x, 0));
+    6 │ 
+  > 7 │ window.Math.min(0, window.Math.max(100, x));
+      │                 ^
+    8 │ 
+    9 │ window.Math.min(0, Math.max(100, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+     5  5 │   Math.max(100, Math.min(x, 0));
+     6  6 │   
+     7    │ - window.Math.min(0,·window.Math.max(100,·x));
+        7 │ + window.Math.min(100,·window.Math.max(0,·x));
+     8  8 │   
+     9  9 │   window.Math.min(0, Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:9:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+     7 │ window.Math.min(0, window.Math.max(100, x));
+     8 │ 
+   > 9 │ window.Math.min(0, Math.max(100, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ Math.min(0, window.Math.max(100, x));
+  
+  i It always evaluates to 0.
+  
+     7 │ window.Math.min(0, window.Math.max(100, x));
+     8 │ 
+   > 9 │ window.Math.min(0, Math.max(100, x));
+       │                 ^
+    10 │ 
+    11 │ Math.min(0, window.Math.max(100, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+     7  7 │   window.Math.min(0, window.Math.max(100, x));
+     8  8 │   
+     9    │ - window.Math.min(0,·Math.max(100,·x));
+        9 │ + window.Math.min(100,·Math.max(0,·x));
+    10 10 │   
+    11 11 │   Math.min(0, window.Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:11:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+     9 │ window.Math.min(0, Math.max(100, x));
+    10 │ 
+  > 11 │ Math.min(0, window.Math.max(100, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+  
+  i It always evaluates to 0.
+  
+     9 │ window.Math.min(0, Math.max(100, x));
+    10 │ 
+  > 11 │ Math.min(0, window.Math.max(100, x));
+       │          ^
+    12 │ 
+    13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+     9  9 │   window.Math.min(0, Math.max(100, x));
+    10 10 │   
+    11    │ - Math.min(0,·window.Math.max(100,·x));
+       11 │ + Math.min(100,·window.Math.max(0,·x));
+    12 12 │   
+    13 13 │   globalThis.Math.min(0, globalThis.Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:13:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    11 │ Math.min(0, window.Math.max(100, x));
+    12 │ 
+  > 13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ globalThis.Math.min(0, Math.max(100, x));
+  
+  i It always evaluates to 0.
+  
+    11 │ Math.min(0, window.Math.max(100, x));
+    12 │ 
+  > 13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+       │                     ^
+    14 │ 
+    15 │ globalThis.Math.min(0, Math.max(100, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+    11 11 │   Math.min(0, window.Math.max(100, x));
+    12 12 │   
+    13    │ - globalThis.Math.min(0,·globalThis.Math.max(100,·x));
+       13 │ + globalThis.Math.min(100,·globalThis.Math.max(0,·x));
+    14 14 │   
+    15 15 │   globalThis.Math.min(0, Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:15:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+    14 │ 
+  > 15 │ globalThis.Math.min(0, Math.max(100, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ Math.min(0, globalThis.Math.max(100, x));
+  
+  i It always evaluates to 0.
+  
+    13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
+    14 │ 
+  > 15 │ globalThis.Math.min(0, Math.max(100, x));
+       │                     ^
+    16 │ 
+    17 │ Math.min(0, globalThis.Math.max(100, x));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+    13 13 │   globalThis.Math.min(0, globalThis.Math.max(100, x));
+    14 14 │   
+    15    │ - globalThis.Math.min(0,·Math.max(100,·x));
+       15 │ + globalThis.Math.min(100,·Math.max(0,·x));
+    16 16 │   
+    17 17 │   Math.min(0, globalThis.Math.max(100, x));
+  
+
+```
+
+```
+invalid.js:17:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    15 │ globalThis.Math.min(0, Math.max(100, x));
+    16 │ 
+  > 17 │ Math.min(0, globalThis.Math.max(100, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ foo(Math.min(0, Math.max(100, x)));
+  
+  i It always evaluates to 0.
+  
+    15 │ globalThis.Math.min(0, Math.max(100, x));
+    16 │ 
+  > 17 │ Math.min(0, globalThis.Math.max(100, x));
+       │          ^
+    18 │ 
+    19 │ foo(Math.min(0, Math.max(100, x)));
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+    15 15 │   globalThis.Math.min(0, Math.max(100, x));
+    16 16 │   
+    17    │ - Math.min(0,·globalThis.Math.max(100,·x));
+       17 │ + Math.min(100,·globalThis.Math.max(0,·x));
+    18 18 │   
+    19 19 │   foo(Math.min(0, Math.max(100, x)));
+  
+
+```
+
+```
+invalid.js:19:5 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    17 │ Math.min(0, globalThis.Math.max(100, x));
+    18 │ 
+  > 19 │ foo(Math.min(0, Math.max(100, x)));
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+  
+  i It always evaluates to 0.
+  
+    17 │ Math.min(0, globalThis.Math.max(100, x));
+    18 │ 
+  > 19 │ foo(Math.min(0, Math.max(100, x)));
+       │              ^
+    20 │ 
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+    17 17 │   Math.min(0, globalThis.Math.max(100, x));
+    18 18 │   
+    19    │ - foo(Math.min(0,·Math.max(100,·x)));
+       19 │ + foo(Math.min(100,·Math.max(0,·x)));
+    20 20 │   
+  
+
+```

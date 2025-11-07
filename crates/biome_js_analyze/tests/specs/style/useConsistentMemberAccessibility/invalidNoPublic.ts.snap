@@ -1,0 +1,490 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoPublic.ts
+---
+# Input
+```ts
+class InvalidNoPublic {
+  public name: string;
+  public x?: string;
+  public getX() {
+    return this.x;
+  }
+}
+
+class InvalidNoPublic2 {
+  protected name: string;
+  public x?: string;
+  getX() {
+    return this.x;
+  }
+}
+
+class InvalidNoPublic3 {
+  public x: number;
+  public getX() {
+    return this.x;
+  }
+}
+
+class InvalidNoPublic4 {
+  protected constructor(public x: number) {}
+  public foo(): string {
+    return 'foo';
+  }
+}
+
+class InvalidNoPublic5 {
+  constructor(public readonly x: number) {}
+}
+
+class InvalidNoPublic6 {
+  public x = 2;
+  private y = 2;
+}
+
+class InvalidNoPublic7 {
+  public /*public*/ constructor(private foo: string) {}
+}
+
+class InvalidNoPublic8 {
+  @public
+  public foo() {}
+}
+
+class InvalidNoPublic9 {
+  @public
+  public foo;
+}
+
+class InvalidNoPublic10 {
+  public foo = '';
+}
+
+class InvalidNoPublic11 {
+  constructor(public /* Hi there */ readonly foo) {}
+}
+
+class InvalidNoPublic12 {
+  constructor(public readonly foo: string) {}
+}
+
+class InvalidNoPublic13 {
+  public constructor() {}
+}
+
+class InvalidNoPublic14 {
+  public /* */ constructor() {}
+}
+
+class InvalidNoPublic15 {
+  public 'foo' = 1;
+  public 'foo foo' = 2;
+  public 'bar'() {}
+  public 'bar bar'() {}
+}
+
+abstract class InvalidNoPublic16 {
+  public abstract method(): string;
+}
+
+abstract class InvalidNoPublic17 {
+  public abstract x: string;
+}
+
+```
+
+# Diagnostics
+```
+invalidNoPublic.ts:2:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    1 │ class InvalidNoPublic {
+  > 2 │   public name: string;
+      │   ^^^^^^
+    3 │   public x?: string;
+    4 │   public getX() {
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:3:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    1 │ class InvalidNoPublic {
+    2 │   public name: string;
+  > 3 │   public x?: string;
+      │   ^^^^^^
+    4 │   public getX() {
+    5 │     return this.x;
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:4:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    2 │   public name: string;
+    3 │   public x?: string;
+  > 4 │   public getX() {
+      │   ^^^^^^
+    5 │     return this.x;
+    6 │   }
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:11:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+     9 │ class InvalidNoPublic2 {
+    10 │   protected name: string;
+  > 11 │   public x?: string;
+       │   ^^^^^^
+    12 │   getX() {
+    13 │     return this.x;
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:18:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    17 │ class InvalidNoPublic3 {
+  > 18 │   public x: number;
+       │   ^^^^^^
+    19 │   public getX() {
+    20 │     return this.x;
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:19:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    17 │ class InvalidNoPublic3 {
+    18 │   public x: number;
+  > 19 │   public getX() {
+       │   ^^^^^^
+    20 │     return this.x;
+    21 │   }
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:25:25 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    24 │ class InvalidNoPublic4 {
+  > 25 │   protected constructor(public x: number) {}
+       │                         ^^^^^^
+    26 │   public foo(): string {
+    27 │     return 'foo';
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:26:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    24 │ class InvalidNoPublic4 {
+    25 │   protected constructor(public x: number) {}
+  > 26 │   public foo(): string {
+       │   ^^^^^^
+    27 │     return 'foo';
+    28 │   }
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:32:15 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    31 │ class InvalidNoPublic5 {
+  > 32 │   constructor(public readonly x: number) {}
+       │               ^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:36:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    35 │ class InvalidNoPublic6 {
+  > 36 │   public x = 2;
+       │   ^^^^^^
+    37 │   private y = 2;
+    38 │ }
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:41:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    40 │ class InvalidNoPublic7 {
+  > 41 │   public /*public*/ constructor(private foo: string) {}
+       │   ^^^^^^
+    42 │ }
+    43 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:46:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    44 │ class InvalidNoPublic8 {
+    45 │   @public
+  > 46 │   public foo() {}
+       │   ^^^^^^
+    47 │ }
+    48 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:51:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    49 │ class InvalidNoPublic9 {
+    50 │   @public
+  > 51 │   public foo;
+       │   ^^^^^^
+    52 │ }
+    53 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:55:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    54 │ class InvalidNoPublic10 {
+  > 55 │   public foo = '';
+       │   ^^^^^^
+    56 │ }
+    57 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:59:15 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    58 │ class InvalidNoPublic11 {
+  > 59 │   constructor(public /* Hi there */ readonly foo) {}
+       │               ^^^^^^
+    60 │ }
+    61 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:63:15 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    62 │ class InvalidNoPublic12 {
+  > 63 │   constructor(public readonly foo: string) {}
+       │               ^^^^^^
+    64 │ }
+    65 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:67:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    66 │ class InvalidNoPublic13 {
+  > 67 │   public constructor() {}
+       │   ^^^^^^
+    68 │ }
+    69 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:71:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    70 │ class InvalidNoPublic14 {
+  > 71 │   public /* */ constructor() {}
+       │   ^^^^^^
+    72 │ }
+    73 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:75:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    74 │ class InvalidNoPublic15 {
+  > 75 │   public 'foo' = 1;
+       │   ^^^^^^
+    76 │   public 'foo foo' = 2;
+    77 │   public 'bar'() {}
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:76:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    74 │ class InvalidNoPublic15 {
+    75 │   public 'foo' = 1;
+  > 76 │   public 'foo foo' = 2;
+       │   ^^^^^^
+    77 │   public 'bar'() {}
+    78 │   public 'bar bar'() {}
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:77:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    75 │   public 'foo' = 1;
+    76 │   public 'foo foo' = 2;
+  > 77 │   public 'bar'() {}
+       │   ^^^^^^
+    78 │   public 'bar bar'() {}
+    79 │ }
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:78:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    76 │   public 'foo foo' = 2;
+    77 │   public 'bar'() {}
+  > 78 │   public 'bar bar'() {}
+       │   ^^^^^^
+    79 │ }
+    80 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:82:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    81 │ abstract class InvalidNoPublic16 {
+  > 82 │   public abstract method(): string;
+       │   ^^^^^^
+    83 │ }
+    84 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```
+
+```
+invalidNoPublic.ts:86:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The public modifier is disallowed.
+  
+    85 │ abstract class InvalidNoPublic17 {
+  > 86 │   public abstract x: string;
+       │   ^^^^^^
+    87 │ }
+    88 │ 
+  
+  i Remove the accessibility modifier.
+  
+
+```

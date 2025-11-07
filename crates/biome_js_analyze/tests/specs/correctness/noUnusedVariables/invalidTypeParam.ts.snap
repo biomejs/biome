@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeParam.ts
+---
+# Input
+```ts
+export function f<T>() {}
+export class C<T> {}
+export type Alias<T> = number
+export type Inferred<T> = T extends (infer I)[] ? number : never;
+export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+```
+
+# Diagnostics
+```
+invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+  > 1 │ export function f<T>() {}
+      │                   ^
+    2 │ export class C<T> {}
+    3 │ export type Alias<T> = number
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1   │ - export·function·f<T>()·{}
+      1 │ + export·function·f<_T>()·{}
+    2 2 │   export class C<T> {}
+    3 3 │   export type Alias<T> = number
+  
+
+```
+
+```
+invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    1 │ export function f<T>() {}
+  > 2 │ export class C<T> {}
+      │                ^
+    3 │ export type Alias<T> = number
+    4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1 1 │   export function f<T>() {}
+    2   │ - export·class·C<T>·{}
+      2 │ + export·class·C<_T>·{}
+    3 3 │   export type Alias<T> = number
+    4 4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+
+```
+
+```
+invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    1 │ export function f<T>() {}
+    2 │ export class C<T> {}
+  > 3 │ export type Alias<T> = number
+      │                   ^
+    4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+    5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1 1 │   export function f<T>() {}
+    2 2 │   export class C<T> {}
+    3   │ - export·type·Alias<T>·=·number
+      3 │ + export·type·Alias<_T>·=·number
+    4 4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+    5 5 │   export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+  
+
+```
+
+```
+invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable I is unused.
+  
+    2 │ export class C<T> {}
+    3 │ export type Alias<T> = number
+  > 4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+      │                                            ^
+    5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```
+
+```
+invalidTypeParam.ts:5:62 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable B is unused.
+  
+    3 │ export type Alias<T> = number
+    4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+  > 5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+      │                                                              ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```
