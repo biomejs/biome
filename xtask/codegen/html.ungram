@@ -196,6 +196,7 @@ AnySvelteBlock =
 	| SvelteRenderBlock
 	| SvelteHtmlBlock
 	| SvelteConstBlock
+	| SvelteIfBlock
 
 // {@debug}
 // ^^^^^^^^
@@ -263,6 +264,51 @@ SvelteConstBlock =
 	'const'
   expression: HtmlTextExpression
   '}'
+
+// {#if ..} {:else if ..} {:else} {/if}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteIfBlock =
+	opening_block: SvelteIfOpeningBlock
+	else_if_clauses: SvelteElseIfClauseList
+	else_clause: SvelteElseClause?
+	closing_block: SvelteIfClosingBlock
+
+// {#if ..} {:else if ..} {:else} {/if}
+// ^^^^^^^^
+SvelteIfOpeningBlock =
+	'{#'
+	'if'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+SvelteElseIfClauseList = SvelteElseIfClause*
+
+// {#if ..} {:else if ..} {:else} {/if}
+//          ^^^^^^^^^^^^^
+SvelteElseIfClause =
+	'{:'
+	'else'
+	'if'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+
+// {#if ..} {:else if ..} {:else} {/if}
+//                        ^^^^^^^
+SvelteElseClause =
+	'{:'
+	'else'
+	'}'
+	children: HtmlElementList
+
+// {#if ..} {:else if ..} {:else} {/if}
+//                                ^^^^^
+SvelteIfClosingBlock =
+	'{/'
+	'if'
+	'}'
 
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'

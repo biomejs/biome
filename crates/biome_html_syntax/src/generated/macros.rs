@@ -105,8 +105,28 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteDebugBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_ELSE_CLAUSE => {
+                    let $pattern = unsafe { $crate::SvelteElseClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE => {
+                    let $pattern = unsafe { $crate::SvelteElseIfClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_HTML_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteHtmlBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_IF_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteIfBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_IF_CLOSING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteIfClosingBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_IF_OPENING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteIfOpeningBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::SVELTE_KEY_BLOCK => {
@@ -163,6 +183,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_BINDING_LIST => {
                     let $pattern = unsafe { $crate::SvelteBindingList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
+                    let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),
