@@ -4985,7 +4985,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssSelector::can_cast(element.kind())
+                    && CssSelectorList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
