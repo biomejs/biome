@@ -15,6 +15,18 @@ pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
         ],
     ))
 }
+pub fn css_at_rule_declarator(
+    at_token: SyntaxToken,
+    declarator: AnyCssAtRuleDeclarator,
+) -> CssAtRuleDeclarator {
+    CssAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_AT_RULE_DECLARATOR,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+        ],
+    ))
+}
 pub fn css_attribute_matcher(
     operator_token: SyntaxToken,
     value: CssAttributeMatcherValue,
@@ -175,16 +187,26 @@ pub fn css_color(hash_token: SyntaxToken, value_token: SyntaxToken) -> CssColor 
     ))
 }
 pub fn css_color_profile_at_rule(
-    color_profile_token: SyntaxToken,
-    name: CssCustomIdentifier,
+    declarator: CssColorProfileAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssColorProfileAtRule {
     CssColorProfileAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_color_profile_at_rule_declarator(
+    color_profile_token: SyntaxToken,
+    name: CssCustomIdentifier,
+) -> CssColorProfileAtRuleDeclarator {
+    CssColorProfileAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(color_profile_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -303,37 +325,45 @@ pub fn css_container_and_query(
     ))
 }
 pub fn css_container_at_rule(
+    declarator: CssContainerAtRuleDeclarator,
+    block: AnyCssConditionalBlock,
+) -> CssContainerAtRule {
+    CssContainerAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_at_rule_declarator(
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssConditionalBlock,
-) -> CssContainerAtRuleBuilder {
-    CssContainerAtRuleBuilder {
+) -> CssContainerAtRuleDeclaratorBuilder {
+    CssContainerAtRuleDeclaratorBuilder {
         container_token,
         query,
-        block,
         name: None,
     }
 }
-pub struct CssContainerAtRuleBuilder {
+pub struct CssContainerAtRuleDeclaratorBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssConditionalBlock,
     name: Option<CssCustomIdentifier>,
 }
-impl CssContainerAtRuleBuilder {
+impl CssContainerAtRuleDeclaratorBuilder {
     pub fn with_name(mut self, name: CssCustomIdentifier) -> Self {
         self.name = Some(name);
         self
     }
-    pub fn build(self) -> CssContainerAtRule {
-        CssContainerAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_CONTAINER_AT_RULE,
+    pub fn build(self) -> CssContainerAtRuleDeclarator {
+        CssContainerAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_CONTAINER_AT_RULE_DECLARATOR,
             [
                 Some(SyntaxElement::Token(self.container_token)),
                 self.name
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.query.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
             ],
         ))
     }
@@ -463,16 +493,26 @@ pub fn css_container_style_query_in_parens(
     ))
 }
 pub fn css_counter_style_at_rule(
-    counter_style_token: SyntaxToken,
-    name: CssCustomIdentifier,
+    declarator: CssCounterStyleAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssCounterStyleAtRule {
     CssCounterStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_counter_style_at_rule_declarator(
+    counter_style_token: SyntaxToken,
+    name: CssCustomIdentifier,
+) -> CssCounterStyleAtRuleDeclarator {
+    CssCounterStyleAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(counter_style_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -653,15 +693,23 @@ pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaratio
     ))
 }
 pub fn css_font_face_at_rule(
-    font_face_token: SyntaxToken,
+    declarator: CssFontFaceAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssFontFaceAtRule {
     CssFontFaceAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
         [
-            Some(SyntaxElement::Token(font_face_token)),
+            Some(SyntaxElement::Node(declarator.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_font_face_at_rule_declarator(
+    font_face_token: SyntaxToken,
+) -> CssFontFaceAtRuleDeclarator {
+    CssFontFaceAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FACE_AT_RULE_DECLARATOR,
+        [Some(SyntaxElement::Token(font_face_token))],
     ))
 }
 pub fn css_font_family_name(names: CssCustomIdentifierList) -> CssFontFamilyName {
@@ -713,16 +761,26 @@ pub fn css_font_feature_values_item(
     ))
 }
 pub fn css_font_palette_values_at_rule(
-    font_palette_values_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    declarator: CssFontPaletteValuesAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssFontPaletteValuesAtRule {
     CssFontPaletteValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_font_palette_values_at_rule_declarator(
+    font_palette_values_token: SyntaxToken,
+    name: CssDashedIdentifier,
+) -> CssFontPaletteValuesAtRuleDeclarator {
+    CssFontPaletteValuesAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(font_palette_values_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -1043,16 +1101,26 @@ pub fn css_media_and_type_query(
     ))
 }
 pub fn css_media_at_rule(
-    media_token: SyntaxToken,
-    queries: CssMediaQueryList,
+    declarator: CssMediaAtRuleDeclarator,
     block: AnyCssConditionalBlock,
 ) -> CssMediaAtRule {
     CssMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_media_at_rule_declarator(
+    media_token: SyntaxToken,
+    queries: CssMediaQueryList,
+) -> CssMediaAtRuleDeclarator {
+    CssMediaAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(media_token)),
             Some(SyntaxElement::Node(queries.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -1365,30 +1433,50 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
     ))
 }
 pub fn css_position_try_at_rule(
-    position_try_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    declarator: CssPositionTryAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssPositionTryAtRule {
     CssPositionTryAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_POSITION_TRY_AT_RULE,
         [
-            Some(SyntaxElement::Token(position_try_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(declarator.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
-pub fn css_property_at_rule(
-    property_token: SyntaxToken,
+pub fn css_position_try_at_rule_declarator(
+    position_try_token: SyntaxToken,
     name: CssDashedIdentifier,
+) -> CssPositionTryAtRuleDeclarator {
+    CssPositionTryAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_POSITION_TRY_AT_RULE_DECLARATOR,
+        [
+            Some(SyntaxElement::Token(position_try_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_property_at_rule(
+    declarator: CssPropertyAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssPropertyAtRule {
     CssPropertyAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PROPERTY_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_property_at_rule_declarator(
+    property_token: SyntaxToken,
+    name: CssDashedIdentifier,
+) -> CssPropertyAtRuleDeclarator {
+    CssPropertyAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PROPERTY_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(property_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -1929,33 +2017,39 @@ pub fn css_rule_block(
     ))
 }
 pub fn css_scope_at_rule(
-    scope_token: SyntaxToken,
+    declarator: CssScopeAtRuleDeclarator,
     block: AnyCssConditionalBlock,
-) -> CssScopeAtRuleBuilder {
-    CssScopeAtRuleBuilder {
+) -> CssScopeAtRule {
+    CssScopeAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SCOPE_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_scope_at_rule_declarator(scope_token: SyntaxToken) -> CssScopeAtRuleDeclaratorBuilder {
+    CssScopeAtRuleDeclaratorBuilder {
         scope_token,
-        block,
         range: None,
     }
 }
-pub struct CssScopeAtRuleBuilder {
+pub struct CssScopeAtRuleDeclaratorBuilder {
     scope_token: SyntaxToken,
-    block: AnyCssConditionalBlock,
     range: Option<AnyCssScopeRange>,
 }
-impl CssScopeAtRuleBuilder {
+impl CssScopeAtRuleDeclaratorBuilder {
     pub fn with_range(mut self, range: AnyCssScopeRange) -> Self {
         self.range = Some(range);
         self
     }
-    pub fn build(self) -> CssScopeAtRule {
-        CssScopeAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_SCOPE_AT_RULE,
+    pub fn build(self) -> CssScopeAtRuleDeclarator {
+        CssScopeAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_SCOPE_AT_RULE_DECLARATOR,
             [
                 Some(SyntaxElement::Token(self.scope_token)),
                 self.range
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
             ],
         ))
     }
@@ -2004,15 +2098,23 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
     ))
 }
 pub fn css_starting_style_at_rule(
-    starting_style_token: SyntaxToken,
+    declarator: CssStartingStyleAtRuleDeclarator,
     block: AnyCssConditionalBlock,
 ) -> CssStartingStyleAtRule {
     CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,
         [
-            Some(SyntaxElement::Token(starting_style_token)),
+            Some(SyntaxElement::Node(declarator.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_starting_style_at_rule_declarator(
+    starting_style_token: SyntaxToken,
+) -> CssStartingStyleAtRuleDeclarator {
+    CssStartingStyleAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE_DECLARATOR,
+        [Some(SyntaxElement::Token(starting_style_token))],
     ))
 }
 pub fn css_string(value_token: SyntaxToken) -> CssString {
@@ -2036,16 +2138,26 @@ pub fn css_supports_and_condition(
     ))
 }
 pub fn css_supports_at_rule(
-    supports_token: SyntaxToken,
-    condition: AnyCssSupportsCondition,
+    declarator: CssSupportsAtRuleDeclarator,
     block: AnyCssConditionalBlock,
 ) -> CssSupportsAtRule {
     CssSupportsAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SUPPORTS_AT_RULE,
         [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_supports_at_rule_declarator(
+    supports_token: SyntaxToken,
+    condition: AnyCssSupportsCondition,
+) -> CssSupportsAtRuleDeclarator {
+    CssSupportsAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_AT_RULE_DECLARATOR,
+        [
             Some(SyntaxElement::Token(supports_token)),
             Some(SyntaxElement::Node(condition.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -2369,15 +2481,23 @@ pub fn css_value_at_rule_named_import_specifier(
     ))
 }
 pub fn css_view_transition_at_rule(
-    view_transition_token: SyntaxToken,
+    declarator: CssViewTransitionAtRuleDeclarator,
     block: AnyCssDeclarationBlock,
 ) -> CssViewTransitionAtRule {
     CssViewTransitionAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE,
         [
-            Some(SyntaxElement::Token(view_transition_token)),
+            Some(SyntaxElement::Node(declarator.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_view_transition_at_rule_declarator(
+    view_transition_token: SyntaxToken,
+) -> CssViewTransitionAtRuleDeclarator {
+    CssViewTransitionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR,
+        [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
 pub fn tw_apply_at_rule(
@@ -2424,7 +2544,7 @@ pub fn tw_custom_variant_at_rule(
 }
 pub fn tw_custom_variant_shorthand(
     l_paren_token: SyntaxToken,
-    selector: CssSelectorList,
+    selector: AnyTwCustomVariantShorthand,
     r_paren_token: SyntaxToken,
     semicolon_token: SyntaxToken,
 ) -> TwCustomVariantShorthand {

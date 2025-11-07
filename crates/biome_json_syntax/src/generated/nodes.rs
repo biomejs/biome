@@ -963,24 +963,24 @@ impl AstNode for AnyJsonValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::JsonArrayValue(it) => &it.syntax,
-            Self::JsonBogusValue(it) => &it.syntax,
-            Self::JsonBooleanValue(it) => &it.syntax,
-            Self::JsonNullValue(it) => &it.syntax,
-            Self::JsonNumberValue(it) => &it.syntax,
-            Self::JsonObjectValue(it) => &it.syntax,
-            Self::JsonStringValue(it) => &it.syntax,
+            Self::JsonArrayValue(it) => it.syntax(),
+            Self::JsonBogusValue(it) => it.syntax(),
+            Self::JsonBooleanValue(it) => it.syntax(),
+            Self::JsonNullValue(it) => it.syntax(),
+            Self::JsonNumberValue(it) => it.syntax(),
+            Self::JsonObjectValue(it) => it.syntax(),
+            Self::JsonStringValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::JsonArrayValue(it) => it.syntax,
-            Self::JsonBogusValue(it) => it.syntax,
-            Self::JsonBooleanValue(it) => it.syntax,
-            Self::JsonNullValue(it) => it.syntax,
-            Self::JsonNumberValue(it) => it.syntax,
-            Self::JsonObjectValue(it) => it.syntax,
-            Self::JsonStringValue(it) => it.syntax,
+            Self::JsonArrayValue(it) => it.into_syntax(),
+            Self::JsonBogusValue(it) => it.into_syntax(),
+            Self::JsonBooleanValue(it) => it.into_syntax(),
+            Self::JsonNullValue(it) => it.into_syntax(),
+            Self::JsonNumberValue(it) => it.into_syntax(),
+            Self::JsonObjectValue(it) => it.into_syntax(),
+            Self::JsonStringValue(it) => it.into_syntax(),
         }
     }
 }
@@ -1000,13 +1000,13 @@ impl std::fmt::Debug for AnyJsonValue {
 impl From<AnyJsonValue> for SyntaxNode {
     fn from(n: AnyJsonValue) -> Self {
         match n {
-            AnyJsonValue::JsonArrayValue(it) => it.into(),
-            AnyJsonValue::JsonBogusValue(it) => it.into(),
-            AnyJsonValue::JsonBooleanValue(it) => it.into(),
-            AnyJsonValue::JsonNullValue(it) => it.into(),
-            AnyJsonValue::JsonNumberValue(it) => it.into(),
-            AnyJsonValue::JsonObjectValue(it) => it.into(),
-            AnyJsonValue::JsonStringValue(it) => it.into(),
+            AnyJsonValue::JsonArrayValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonBogusValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonBooleanValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonNullValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonNumberValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonObjectValue(it) => it.into_syntax(),
+            AnyJsonValue::JsonStringValue(it) => it.into_syntax(),
         }
     }
 }

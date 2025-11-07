@@ -26,9 +26,22 @@ pub(crate) fn parse_position_try_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    parse_position_try_at_rule_declarator(p).ok();
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_POSITION_TRY_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_position_try_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_position_try_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
     p.bump(T![position_try]);
 
-    let kind = if parse_dashed_identifier(p)
+    let decl_kind = if parse_dashed_identifier(p)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, POSITION_TRY_RECOVERY_SET)
@@ -37,14 +50,12 @@ pub(crate) fn parse_position_try_at_rule(p: &mut CssParser) -> ParsedSyntax {
         )
         .is_ok()
     {
-        CSS_POSITION_TRY_AT_RULE
+        CSS_POSITION_TRY_AT_RULE_DECLARATOR
     } else {
-        CSS_BOGUS_AT_RULE
+        CSS_BOGUS
     };
 
-    parse_declaration_block(p);
-
-    Present(m.complete(p, kind))
+    Present(m.complete(p, decl_kind))
 }
 
 const POSITION_TRY_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];

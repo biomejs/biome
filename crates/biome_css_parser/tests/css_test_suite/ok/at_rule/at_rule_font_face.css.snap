@@ -18,7 +18,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
                     declarations: CssDeclarationList [],
@@ -40,7 +42,8 @@ CssRoot {
     0: CSS_AT_RULE@0..13
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FACE_AT_RULE@1..13
-        0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@1..11
+          0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@11..13
           0: L_CURLY@11..12 "{" [] []
           1: CSS_DECLARATION_LIST@12..12
