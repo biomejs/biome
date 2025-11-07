@@ -80,6 +80,23 @@ declare_lint_rule! {
     /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `checkForEach`
+    ///
+    /// Default: `true`
+    ///
+    /// When set to `false`, rule will skip reporting `forEach` callbacks that return a value.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "checkForEach": true
+    ///     }
+    /// }
+    /// ```
+    ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
         name: "useIterableCallbackReturn",
@@ -127,6 +144,10 @@ impl Rule for UseIterableCallbackReturn {
             .ok()
             .and_then(|member| member.as_js_name().cloned())
             .and_then(|name| name.value_token().ok())?;
+
+        if !ctx.options().check_for_each() && member_name.text_trimmed() == "forEach" {
+            return None;
+        }
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 

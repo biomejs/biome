@@ -8721,7 +8721,12 @@ export interface UseGetterReturnOptions {}
 export interface UseGoogleFontDisplayOptions {}
 export interface UseGuardForInOptions {}
 export interface UseIsArrayOptions {}
-export interface UseIterableCallbackReturnOptions {}
+export interface UseIterableCallbackReturnOptions {
+	/**
+	 * When set to `false`, rule will skip reporting `forEach` callbacks that return a value.
+	 */
+	checkForEach?: boolean;
+}
 export interface UseNamespaceKeywordOptions {}
 export interface UseNumberToFixedDigitsArgumentOptions {}
 export interface UseStaticResponseMethodsOptions {}
