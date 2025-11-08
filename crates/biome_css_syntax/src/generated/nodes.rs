@@ -7042,8 +7042,8 @@ impl TwCustomVariantShorthand {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn selector(&self) -> SyntaxResult<AnyCssSelector> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn selector(&self) -> CssSelectorList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -7063,7 +7063,7 @@ impl Serialize for TwCustomVariantShorthand {
 #[derive(Serialize)]
 pub struct TwCustomVariantShorthandFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub selector: SyntaxResult<AnyCssSelector>,
+    pub selector: CssSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -18366,7 +18366,7 @@ impl std::fmt::Debug for TwCustomVariantShorthand {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field("selector", &self.selector())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),

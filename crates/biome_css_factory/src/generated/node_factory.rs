@@ -2424,7 +2424,7 @@ pub fn tw_custom_variant_at_rule(
 }
 pub fn tw_custom_variant_shorthand(
     l_paren_token: SyntaxToken,
-    selector: AnyCssSelector,
+    selector: CssSelectorList,
     r_paren_token: SyntaxToken,
     semicolon_token: SyntaxToken,
 ) -> TwCustomVariantShorthand {

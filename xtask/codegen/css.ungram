@@ -1930,7 +1930,7 @@ AnyTwCustomVariantSelector =
 
 TwCustomVariantShorthand =
   '('
-  selector: AnyCssSelector
+  selector: CssSelectorList
   ')'
   ';'
 
