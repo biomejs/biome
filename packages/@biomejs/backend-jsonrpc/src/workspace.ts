@@ -1673,6 +1673,18 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
+	 * Disallow the accesskey attribute on HTML elements and components.
+	 */
+	noEmberAccesskeyAttribute?: RuleConfiguration_for_NoEmberAccesskeyAttributeOptions;
+	/**
+	 * Disallow importing files from /mixins/ directories.
+	 */
+	noEmberMixins?: RuleConfiguration_for_NoEmberMixinsOptions;
+	/**
+	 * Disallow usage of pauseTest in tests.
+	 */
+	noEmberPauseTest?: RuleConfiguration_for_NoEmberPauseTestOptions;
+	/**
 	 * Disallow empty sources.
 	 */
 	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
@@ -1728,10 +1740,6 @@ export interface Nursery {
 	 * Disallow expression statements that are neither a function call nor an assignment.
 	 */
 	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
-	/**
-	 * Disallow importing components that are never used in Glimmer templates.
-	 */
-	noUnusedGlimmerComponents?: RuleConfiguration_for_NoUnusedGlimmerComponentsOptions;
 	/**
 	 * Disallow unused catch bindings.
 	 */
@@ -3071,6 +3079,15 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmberAccesskeyAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberAccesskeyAttributeOptions;
+export type RuleConfiguration_for_NoEmberMixinsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberMixinsOptions;
+export type RuleConfiguration_for_NoEmberPauseTestOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberPauseTestOptions;
 export type RuleConfiguration_for_NoEmptySourceOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmptySourceOptions;
@@ -3113,9 +3130,6 @@ export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 export type RuleConfiguration_for_NoUnusedExpressionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnusedExpressionsOptions;
-export type RuleConfiguration_for_NoUnusedGlimmerComponentsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnusedGlimmerComponentsOptions;
 export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
@@ -5521,6 +5535,36 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 */
 	options: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithOptions_for_NoEmberAccesskeyAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberAccesskeyAttributeOptions;
+}
+export interface RuleWithOptions_for_NoEmberMixinsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberMixinsOptions;
+}
+export interface RuleWithOptions_for_NoEmberPauseTestOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberPauseTestOptions;
+}
 export interface RuleWithOptions_for_NoEmptySourceOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5676,16 +5720,6 @@ export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
 	 * Rule's options
 	 */
 	options: NoUnusedExpressionsOptions;
-}
-export interface RuleWithOptions_for_NoUnusedGlimmerComponentsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedGlimmerComponentsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
@@ -8320,6 +8354,9 @@ export interface UseYieldOptions {}
 export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
+export interface NoEmberAccesskeyAttributeOptions {}
+export interface NoEmberMixinsOptions {}
+export interface NoEmberPauseTestOptions {}
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
@@ -8364,7 +8401,6 @@ export interface NoUnknownAttributeOptions {
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnusedExpressionsOptions {}
-export interface NoUnusedGlimmerComponentsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
@@ -9134,6 +9170,9 @@ export type Category =
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noEmberAccesskeyAttribute"
+	| "lint/nursery/noEmberMixins"
+	| "lint/nursery/noEmberPauseTest"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
@@ -9143,7 +9182,6 @@ export type Category =
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"
-	| "lint/nursery/noUnusedGlimmerComponents"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"

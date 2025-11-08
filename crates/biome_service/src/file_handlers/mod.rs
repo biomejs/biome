@@ -1,7 +1,7 @@
 pub use self::glimmer::GlimmerFileHandler;
 use self::{
-    css::CssFileHandler, javascript::JsFileHandler,
-    json::JsonFileHandler, unknown::UnknownFileHandler,
+    css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
+    unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};

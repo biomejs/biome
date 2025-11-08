@@ -3155,6 +3155,33 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmberAccesskeyAttributeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberAccesskeyAttributeOptions" }
+			]
+		},
+		"NoEmberAccesskeyAttributeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberMixinsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberMixinsOptions" }
+			]
+		},
+		"NoEmberMixinsOptions": { "type": "object", "additionalProperties": false },
+		"NoEmberPauseTestConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberPauseTestOptions" }
+			]
+		},
+		"NoEmberPauseTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyBlockConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4738,16 +4765,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoUnusedGlimmerComponentsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoUnusedGlimmerComponentsOptions" }
-			]
-		},
-		"NoUnusedGlimmerComponentsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUnusedImportsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5151,6 +5168,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmberAccesskeyAttribute": {
+					"description": "Disallow the accesskey attribute on HTML elements and components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberAccesskeyAttributeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberMixins": {
+					"description": "Disallow importing files from /mixins/ directories.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberMixinsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberPauseTest": {
+					"description": "Disallow usage of pauseTest in tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberPauseTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptySource": {
 					"description": "Disallow empty sources.",
 					"anyOf": [
@@ -5248,13 +5286,6 @@
 					"description": "Disallow expression statements that are neither a function call nor an assignment.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedGlimmerComponents": {
-					"description": "Disallow importing components that are never used in Glimmer templates.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUnusedGlimmerComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7022,6 +7053,53 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoDynamicNamespaceImportAccessOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberAccesskeyAttributeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoEmberAccesskeyAttributeOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberMixinsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberMixinsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberPauseTestOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberPauseTestOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9419,23 +9497,6 @@
 					"description": "Rule's options",
 					"allOf": [
 						{ "$ref": "#/definitions/NoUnusedFunctionParametersOptions" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoUnusedGlimmerComponentsOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoUnusedGlimmerComponentsOptions" }
 					]
 				}
 			},

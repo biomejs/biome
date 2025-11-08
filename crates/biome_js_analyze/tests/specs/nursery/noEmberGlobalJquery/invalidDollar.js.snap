@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDollar.js
+---
+# Input
+```js
+// Using global $ should trigger the rule
+$('.selector').hide();
+
+function myFunction() {
+  $('.another-selector').show();
+}
+
+```
+
+# Diagnostics
+```
+invalidDollar.js:2:1 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global $.
+  
+    1 │ // Using global $ should trigger the rule
+  > 2 │ $('.selector').hide();
+      │ ^
+    3 │ 
+    4 │ function myFunction() {
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```
+
+```
+invalidDollar.js:5:3 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global $.
+  
+    4 │ function myFunction() {
+  > 5 │   $('.another-selector').show();
+      │   ^
+    6 │ }
+    7 │ 
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```

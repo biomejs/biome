@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { pauseTest } from '@ember/test-helpers';
+
+pauseTest();
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noEmberPauseTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use pauseTest in tests.
+  
+    1 │ import { pauseTest } from '@ember/test-helpers';
+    2 │ 
+  > 3 │ pauseTest();
+      │ ^^^^^^^^^^^
+    4 │ 
+  
+  i pauseTest is a debugging utility that pauses test execution and should not be committed to the codebase.
+  
+  i Remove the pauseTest() call before committing your code.
+  
+
+```

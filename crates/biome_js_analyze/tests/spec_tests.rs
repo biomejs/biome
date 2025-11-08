@@ -129,13 +129,20 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         };
 
         // Transform embedded language files before parsing
-        let (transformed_code, original_source): (Cow<str>, _) = if source_type.as_embedding_kind().is_vue() {
-            (VueFileHandler::input(&input_code).into(), Some(input_code.to_string()))
-        } else if source_type.as_embedding_kind().is_glimmer() {
-            (GlimmerFileHandler::extract_js_content(&input_code).into(), Some(input_code.to_string()))
-        } else {
-            (Cow::Borrowed(input_code.as_str()), None)
-        };
+        let (transformed_code, original_source): (Cow<str>, _) =
+            if source_type.as_embedding_kind().is_vue() {
+                (
+                    VueFileHandler::input(&input_code).into(),
+                    Some(input_code.to_string()),
+                )
+            } else if source_type.as_embedding_kind().is_glimmer() {
+                (
+                    GlimmerFileHandler::extract_js_content(&input_code).into(),
+                    Some(input_code.to_string()),
+                )
+            } else {
+                (Cow::Borrowed(input_code.as_str()), None)
+            };
         let input_code = transformed_code.as_ref();
 
         analyze_and_snap(

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNonTest.js
+---
+# Input
+```js
+// should not generate diagnostics
+// pauseTest from a different package should not trigger
+import { pauseTest } from 'some-other-package';
+
+pauseTest();
+
+```
