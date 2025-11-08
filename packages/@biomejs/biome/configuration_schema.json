@@ -3165,6 +3165,36 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmberAutofocusConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberAutofocusOptions" }
+			]
+		},
+		"NoEmberAutofocusOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberGetWithDefaultConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberGetWithDefaultOptions" }
+			]
+		},
+		"NoEmberGetWithDefaultOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberGlobalJqueryConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberGlobalJqueryOptions" }
+			]
+		},
+		"NoEmberGlobalJqueryOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmberMixinsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3172,6 +3202,16 @@
 			]
 		},
 		"NoEmberMixinsOptions": { "type": "object", "additionalProperties": false },
+		"NoEmberOldShimsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberOldShimsOptions" }
+			]
+		},
+		"NoEmberOldShimsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmberPauseTestConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5175,10 +5215,38 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmberAutofocus": {
+					"description": "Disallow the autofocus attribute on HTML elements and components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberAutofocusConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberGetWithDefault": {
+					"description": "Disallow usage of the deprecated getWithDefault() method.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberGetWithDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberGlobalJquery": {
+					"description": "Disallow usage of global $ or jQuery objects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberGlobalJqueryConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmberMixins": {
 					"description": "Disallow importing files from /mixins/ directories.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoEmberMixinsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberOldShims": {
+					"description": "Disallow importing from deprecated Ember shim modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberOldShimsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7074,6 +7142,51 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoEmberAutofocusOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberAutofocusOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberGetWithDefaultOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberGetWithDefaultOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberGlobalJqueryOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberGlobalJqueryOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoEmberMixinsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -7085,6 +7198,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmberMixinsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberOldShimsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberOldShimsOptions" }]
 				}
 			},
 			"additionalProperties": false

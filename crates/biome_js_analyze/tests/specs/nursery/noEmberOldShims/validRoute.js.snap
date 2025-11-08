@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validRoute.js
+---
+# Input
+```js
+// should not generate diagnostics
+import Route from '@ember/routing/route';
+
+export default class MyRoute extends Route {
+  model() {
+    return this.store.findAll('post');
+  }
+}
+
+```

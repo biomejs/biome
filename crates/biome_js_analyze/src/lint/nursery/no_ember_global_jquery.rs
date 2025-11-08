@@ -1,7 +1,7 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{global_identifier, AnyJsExpression};
+use biome_js_syntax::{AnyJsExpression, global_identifier};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {

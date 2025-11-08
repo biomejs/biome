@@ -1677,9 +1677,25 @@ export interface Nursery {
 	 */
 	noEmberAccesskeyAttribute?: RuleConfiguration_for_NoEmberAccesskeyAttributeOptions;
 	/**
+	 * Disallow the autofocus attribute on HTML elements and components.
+	 */
+	noEmberAutofocus?: RuleConfiguration_for_NoEmberAutofocusOptions;
+	/**
+	 * Disallow usage of the deprecated getWithDefault() method.
+	 */
+	noEmberGetWithDefault?: RuleConfiguration_for_NoEmberGetWithDefaultOptions;
+	/**
+	 * Disallow usage of global $ or jQuery objects.
+	 */
+	noEmberGlobalJquery?: RuleConfiguration_for_NoEmberGlobalJqueryOptions;
+	/**
 	 * Disallow importing files from /mixins/ directories.
 	 */
 	noEmberMixins?: RuleConfiguration_for_NoEmberMixinsOptions;
+	/**
+	 * Disallow importing from deprecated Ember shim modules.
+	 */
+	noEmberOldShims?: RuleConfiguration_for_NoEmberOldShimsOptions;
 	/**
 	 * Disallow usage of pauseTest in tests.
 	 */
@@ -3082,9 +3098,21 @@ export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 export type RuleConfiguration_for_NoEmberAccesskeyAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberAccesskeyAttributeOptions;
+export type RuleConfiguration_for_NoEmberAutofocusOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberAutofocusOptions;
+export type RuleConfiguration_for_NoEmberGetWithDefaultOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGetWithDefaultOptions;
+export type RuleConfiguration_for_NoEmberGlobalJqueryOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGlobalJqueryOptions;
 export type RuleConfiguration_for_NoEmberMixinsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberMixinsOptions;
+export type RuleConfiguration_for_NoEmberOldShimsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberOldShimsOptions;
 export type RuleConfiguration_for_NoEmberPauseTestOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberPauseTestOptions;
@@ -5545,6 +5573,36 @@ export interface RuleWithOptions_for_NoEmberAccesskeyAttributeOptions {
 	 */
 	options: NoEmberAccesskeyAttributeOptions;
 }
+export interface RuleWithOptions_for_NoEmberAutofocusOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberAutofocusOptions;
+}
+export interface RuleWithOptions_for_NoEmberGetWithDefaultOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGetWithDefaultOptions;
+}
+export interface RuleWithOptions_for_NoEmberGlobalJqueryOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGlobalJqueryOptions;
+}
 export interface RuleWithOptions_for_NoEmberMixinsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5554,6 +5612,16 @@ export interface RuleWithOptions_for_NoEmberMixinsOptions {
 	 * Rule's options
 	 */
 	options: NoEmberMixinsOptions;
+}
+export interface RuleWithOptions_for_NoEmberOldShimsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberOldShimsOptions;
 }
 export interface RuleWithOptions_for_NoEmberPauseTestOptions {
 	/**
@@ -8355,7 +8423,11 @@ export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmberAccesskeyAttributeOptions {}
+export interface NoEmberAutofocusOptions {}
+export interface NoEmberGetWithDefaultOptions {}
+export interface NoEmberGlobalJqueryOptions {}
 export interface NoEmberMixinsOptions {}
+export interface NoEmberOldShimsOptions {}
 export interface NoEmberPauseTestOptions {}
 export interface NoEmptySourceOptions {
 	/**
@@ -9171,7 +9243,11 @@ export type Category =
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noEmberAccesskeyAttribute"
+	| "lint/nursery/noEmberAutofocus"
+	| "lint/nursery/noEmberGetWithDefault"
+	| "lint/nursery/noEmberGlobalJquery"
 	| "lint/nursery/noEmberMixins"
+	| "lint/nursery/noEmberOldShims"
 	| "lint/nursery/noEmberPauseTest"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"

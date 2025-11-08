@@ -8,13 +8,14 @@ use regex::Regex;
 use std::sync::LazyLock;
 
 declare_lint_rule! {
-    /// Disallow the `accesskey` attribute on HTML elements and components.
+    /// Disallow the `autofocus` attribute on HTML elements and components.
     ///
-    /// The `accesskey` attribute defines keyboard shortcuts to activate or focus elements.
+    /// The `autofocus` attribute automatically focuses an element when the page loads.
     /// However, it should be avoided because:
-    /// - Keyboard shortcuts vary across browsers and operating systems
-    /// - Screen readers may have conflicts with the shortcuts
-    /// - Shortcuts may conflict with assistive technology shortcuts
+    /// - It can cause accessibility issues for screen reader users
+    /// - It can create unexpected behavior when pages load
+    /// - It can interfere with user navigation
+    /// - It may cause issues with single-page applications
     ///
     /// ## Examples
     ///
@@ -22,13 +23,13 @@ declare_lint_rule! {
     ///
     /// ```js,ignore
     /// <template>
-    ///   <button accesskey="s">Save</button>
+    ///   <input autofocus />
     /// </template>
     /// ```
     ///
     /// ```js,ignore
     /// <template>
-    ///   <Button accesskey="s" />
+    ///   <button autofocus>Click me</button>
     /// </template>
     /// ```
     ///
@@ -36,14 +37,14 @@ declare_lint_rule! {
     ///
     /// ```js,ignore
     /// <template>
-    ///   <button>Save</button>
-    ///   <button aria-label="Save">S</button>
+    ///   <input />
+    ///   <button>Click me</button>
     /// </template>
     /// ```
     ///
-    pub NoEmberAccesskeyAttribute {
+    pub NoEmberAutofocus {
         version: "next",
-        name: "noEmberAccesskeyAttribute",
+        name: "noEmberAutofocus",
         language: "js",
         recommended: true,
     }
@@ -55,14 +56,14 @@ static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 #[derive(Debug)]
-pub struct AccesskeyViolation {
+pub struct AutofocusViolation {
     range: TextRange,
     element_name: String,
 }
 
-impl Rule for NoEmberAccesskeyAttribute {
+impl Rule for NoEmberAutofocus {
     type Query = Ast<JsModule>;
-    type State = Vec<AccesskeyViolation>;
+    type State = Vec<AutofocusViolation>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -79,7 +80,7 @@ impl Rule for NoEmberAccesskeyAttribute {
         let source = module.syntax().text_with_trivia().to_string();
 
         // Find all violations in template blocks
-        let violations = find_accesskey_violations(&source);
+        let violations = find_autofocus_violations(&source);
 
         if violations.is_empty() {
             None
@@ -96,21 +97,21 @@ impl Rule for NoEmberAccesskeyAttribute {
                 rule_category!(),
                 violation.range,
                 markup! {
-                    "Avoid using the "<Emphasis>"accesskey"</Emphasis>" attribute."
+                    "Avoid using the "<Emphasis>"autofocus"</Emphasis>" attribute."
                 },
             )
             .note(markup! {
-                "Keyboard shortcuts using the "<Emphasis>"accesskey"</Emphasis>" attribute are inconsistent across browsers and operating systems."
+                "Autofocusing elements can cause accessibility and usability issues."
             })
             .note(markup! {
-                "Consider using a more accessible approach like visible buttons with clear labels or keyboard event handlers."
+                "Consider using JavaScript to manage focus programmatically when needed."
             }),
         )
     }
 }
 
-/// Find all accesskey attribute violations in the source text
-fn find_accesskey_violations(source: &str) -> Vec<AccesskeyViolation> {
+/// Find all autofocus attribute violations in the source text
+fn find_autofocus_violations(source: &str) -> Vec<AutofocusViolation> {
     let mut violations = Vec::new();
 
     // Find all <template> blocks
@@ -129,8 +130,8 @@ fn find_accesskey_violations(source: &str) -> Vec<AccesskeyViolation> {
         // Traverse all HTML elements
         for node in root_node.descendants() {
             if let Some(element) = AnyHtmlElement::cast(node) {
-                // Check if element has accesskey attribute
-                if let Some(attr) = element.find_attribute_by_name("accesskey") {
+                // Check if element has autofocus attribute
+                if let Some(attr) = element.find_attribute_by_name("autofocus") {
                     // Get the element name for better diagnostics
                     let element_name = element
                         .name()
@@ -146,7 +147,7 @@ fn find_accesskey_violations(source: &str) -> Vec<AccesskeyViolation> {
                         .try_into()
                         .unwrap();
 
-                    violations.push(AccesskeyViolation {
+                    violations.push(AutofocusViolation {
                         range: TextRange::new(absolute_start.into(), absolute_end.into()),
                         element_name,
                     });

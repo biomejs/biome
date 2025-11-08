@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRouting.js
+---
+# Input
+```js
+import Route from 'ember-routing/route';
+
+export default Route.extend({
+  model() {
+    return {};
+  }
+});
+
+```
+
+# Diagnostics
+```
+invalidRouting.js:1:1 lint/nursery/noEmberOldShims ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from deprecated Ember shim modules.
+  
+  > 1 │ import Route from 'ember-routing/route';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export default Route.extend({
+  
+  i Use modern Ember module imports instead.
+  
+  i See: https://github.com/ember-cli/ember-rfc176-data
+  
+
+```

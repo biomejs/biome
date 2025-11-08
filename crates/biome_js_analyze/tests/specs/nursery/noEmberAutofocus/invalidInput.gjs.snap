@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInput.gjs
+---
+# Input
+```js
+// autofocus attribute on input element
+import Component from '@glimmer/component';
+
+export default class MyForm extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

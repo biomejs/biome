@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validGet.js
+---
+# Input
+```js
+// should not generate diagnostics
+import { get } from '@ember/object';
+
+class MyComponent {
+  someMethod() {
+    return this.property ?? 'fallback';
+  }
+}
+
+```
