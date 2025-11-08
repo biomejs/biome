@@ -9598,7 +9598,18 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind =
+	| "Vue"
+	| "Svelte"
+	| "None"
+	| {
+			Astro: {
+				/**
+				 * Whether the script is inside Astro frontmatter
+				 */
+				frontmatter: boolean;
+			};
+	  };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };

@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true, "indentScriptAndStyle": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import Foo from "./Foo.astro";
+const bar = 123;
+if (bar > 1) {
+	console.log(bar + 1);
+}
+---
+<Foo>{bar}</Foo>
+
+<style>
+	#id {
+		font-family: comic-sans;
+	}
+	.class {
+		background: red;
+	}
+</style>
+
+<script>
+	function foo() {
+		console.log("Hello");
+	}
+</script>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
