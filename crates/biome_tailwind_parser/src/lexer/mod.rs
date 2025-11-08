@@ -139,8 +139,18 @@ impl<'src> TailwindLexer<'src> {
             .rfind(|&name| source_from_position.starts_with(name));
 
         if let Some(base_name) = base_name {
-            self.advance(base_name.len());
-            return TW_BASE;
+            // we need to make sure that either the base is followed by a `-` to signify a value is coming, or a whitespace/end of input to signify the end of the base
+            match self.byte_at(base_name.len()) {
+                Some(b'-') | None => {
+                    self.advance(base_name.len());
+                    return TW_BASE;
+                }
+                Some(b) if b.is_ascii_whitespace() => {
+                    self.advance(base_name.len());
+                    return TW_BASE;
+                }
+                _ => {}
+            }
         }
 
         while let Some(byte) = self.current_byte() {
