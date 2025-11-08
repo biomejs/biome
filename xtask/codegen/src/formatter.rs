@@ -567,6 +567,7 @@ enum NodeDialect {
     Astro,
     Svelte,
     Tailwind,
+    Yaml,
 }
 
 impl NodeDialect {
@@ -580,6 +581,7 @@ impl NodeDialect {
             Self::Grit,
             Self::Graphql,
             Self::Html,
+            Self::Yaml,
         ]
     }
 
@@ -600,6 +602,7 @@ impl NodeDialect {
             Self::Astro => "astro",
             Self::Svelte => "svelte",
             Self::Tailwind => "tailwind",
+            Self::Yaml => "yaml",
         }
     }
 
@@ -616,6 +619,7 @@ impl NodeDialect {
             "Astro" => Self::Astro,
             "Svelte" => Self::Svelte,
             "Tw" => Self::Tailwind,
+            "Yaml" => Self::Yaml,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js

@@ -47,6 +47,7 @@ use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
 use tracing::{debug, error, info, instrument, warn};
+use uuid::Uuid;
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -702,6 +703,36 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
+        let progress_token = lsp_types::ProgressToken::String(Uuid::new_v4().to_string());
+        let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
+            params
+                .client_capabilities
+                .window
+                .as_ref()
+                .is_some_and(|window| window.work_done_progress == Some(true))
+        });
+
+        // Let the user know the scanning is taking long time using the $/progress notification.
+        let progress = if is_work_done_progress_supported
+            && self
+                .client
+                .send_request::<lsp_types::request::WorkDoneProgressCreate>(
+                    lsp_types::WorkDoneProgressCreateParams {
+                        token: progress_token.clone(),
+                    },
+                )
+                .await
+                .is_ok()
+        {
+            let progress = self
+                .client
+                .progress(progress_token.clone(), "Biome is scanning the project");
+
+            Some(progress.begin().await)
+        } else {
+            None
+        };
+
         let session = self.clone();
 
         spawn_blocking(move || {
@@ -738,6 +769,10 @@ impl Session {
         })
         .await
         .unwrap();
+
+        if let Some(progress) = progress {
+            progress.finish().await;
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
