@@ -121,6 +121,7 @@ impl Language {
 )]
 pub enum EmbeddingKind {
     Astro {
+        /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
     },
     Vue,
