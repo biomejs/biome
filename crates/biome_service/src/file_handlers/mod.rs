@@ -814,7 +814,7 @@ impl Features {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro => self.astro.capabilities(),
+                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
