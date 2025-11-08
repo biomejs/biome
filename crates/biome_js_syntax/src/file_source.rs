@@ -121,6 +121,9 @@ impl Language {
 )]
 pub enum EmbeddingKind {
     Astro,
+    // This variant is currently only used to record whether it is an Astro frontmatter,
+    // and in that case, the `indentScriptAndStyle` setting is ignored.
+    AstroFrontmatter,
     Vue,
     Svelte,
     #[default]

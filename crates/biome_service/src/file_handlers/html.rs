@@ -445,7 +445,7 @@ pub(crate) fn parse_astro_embedded_script(
     settings: &Settings,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let content = element.content_token()?;
-    let file_source = JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro);
+    let file_source = JsFileSource::ts().with_embedding_kind(EmbeddingKind::AstroFrontmatter);
     let document_file_source = DocumentFileSource::Js(file_source);
     let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
     let parse = parse_js_with_offset_and_cache(
@@ -672,8 +672,8 @@ fn format_embedded(
         let mut iter = embedded_nodes.iter();
         let node = iter.find(|node| node.range == range)?;
 
-        let wrap_document = |document: Document| {
-            if indent_script_and_style {
+        let wrap_document = |document: Document, is_astro_frontmatter: bool| {
+            if indent_script_and_style && !is_astro_frontmatter {
                 let elements = vec![
                     FormatElement::Line(LineMode::Hard),
                     FormatElement::Tag(Tag::StartIndent),
@@ -693,12 +693,16 @@ fn format_embedded(
         };
 
         match node.source {
-            DocumentFileSource::Js(_) => {
+            DocumentFileSource::Js(file_source) => {
                 let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
                 let node = node.node.clone().embedded_syntax::<JsLanguage>().clone();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+
+                Some(wrap_document(
+                    formatted.into_document(),
+                    file_source.as_embedding_kind() == &EmbeddingKind::AstroFrontmatter,
+                ))
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
@@ -706,14 +710,14 @@ fn format_embedded(
                 let node = node.node.clone().embedded_syntax::<JsonLanguage>().clone();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+                Some(wrap_document(formatted.into_document(), false))
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
                 let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+                Some(wrap_document(formatted.into_document(), false))
             }
             _ => None,
         }
