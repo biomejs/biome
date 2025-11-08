@@ -259,38 +259,44 @@ info: html/tags/tags.html
  <li>
    12345678901234567890123456789012345678901234567890123456789012345678901234567890
  </li>
-@@ -166,9 +190,7 @@
+@@ -166,12 +190,13 @@
    <router-outlet></router-outlet>
    <app-footer [input]="something"></app-footer>
  </div>
 -<x:root
 -  ><span>tag name in other namespace should also lower cased</span></x:root
 ->
-+<x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
++<x:root>
++  <span>tag name in other namespace should also lower cased</span>
++</x:root>
+ <div>
+-  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+-  "<strong>seddoeiusmod</strong>".
++  Lorem ipsum dolor sit amet, consectetur adipiscing elit, "<strong
++    >seddoeiusmod</strong
++  >".
+ </div>
  <div>
    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-   "<strong>seddoeiusmod</strong>".
-@@ -184,14 +206,11 @@
- </span>
- 
- <!-- #5810 -->
--<table>
--  <tr></tr>
--</table>
--<div>Should not insert empty line before this div</div>
-+<table><tr>
-+</tr>
-+</table><div>Should not insert empty line before this div</div>
+@@ -190,8 +215,14 @@
+ <div>Should not insert empty line before this div</div>
  
  <!-- self-closing -->
 -<span><input type="checkbox" /> </span>
--<span
+ <span
 -  ><span><input type="checkbox" /></span
 -></span>
 -<span><input type="checkbox" /></span>
-+<span><input type="checkbox"/> </span>
-+<span><span><input type="checkbox"/></span></span>
-+<span><input type="checkbox"/></span>
++  ><input type="checkbox" />
++</span>
++<span
++  ><span
++    ><input type="checkbox" /></span
++  ></span
++>
++<span
++  ><input type="checkbox" /></span
++>
 ```
 
 # Output
@@ -488,10 +494,13 @@ info: html/tags/tags.html
   <router-outlet></router-outlet>
   <app-footer [input]="something"></app-footer>
 </div>
-<x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
+<x:root>
+  <span>tag name in other namespace should also lower cased</span>
+</x:root>
 <div>
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-  "<strong>seddoeiusmod</strong>".
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, "<strong
+    >seddoeiusmod</strong
+  >".
 </div>
 <div>
   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
@@ -504,84 +513,23 @@ info: html/tags/tags.html
 </span>
 
 <!-- #5810 -->
-<table><tr>
-</tr>
-</table><div>Should not insert empty line before this div</div>
+<table>
+  <tr></tr>
+</table>
+<div>Should not insert empty line before this div</div>
 
 <!-- self-closing -->
-<span><input type="checkbox"/> </span>
-<span><span><input type="checkbox"/></span></span>
-<span><input type="checkbox"/></span>
-```
-
-# Errors
-```
-tags.html:102:76 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `>` but instead found `:`
-  
-    100 │ <app-footer [input]="something"></app-footer>
-    101 │ </div>
-  > 102 │ <x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
-        │                                                                            ^
-    103 │ <div>
-    104 │   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-  
-  i Remove :
-  
-tags.html:102:73 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a matching closing tag but instead found '</x'.
-  
-    100 │ <app-footer [input]="something"></app-footer>
-    101 │ </div>
-  > 102 │ <x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
-        │                                                                         ^^^
-    103 │ <div>
-    104 │   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-  
-  i Expected a matching closing tag here.
-  
-    100 │ <app-footer [input]="something"></app-footer>
-    101 │ </div>
-  > 102 │ <x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
-        │                                                                         ^^^
-    103 │ <div>
-    104 │   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-  
-tags.html:102:76 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    100 │ <app-footer [input]="something"></app-footer>
-    101 │ </div>
-  > 102 │ <x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
-        │                                                                            ^^^^^^
-    103 │ <div>
-    104 │   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-  
-  i Expected one of:
-  
-  - element
-  - text
-  
-tags.html:126:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a closing tag but instead found the end of the file.
-  
-    124 │ <span><span><input type="checkbox"/></span></span>
-    125 │ <span><input type="checkbox"/></span>
-  > 126 │ 
-        │ 
-  
-  i Expected a closing tag here.
-  
-    124 │ <span><span><input type="checkbox"/></span></span>
-    125 │ <span><input type="checkbox"/></span>
-  > 126 │ 
-        │ 
-  
-
+<span
+  ><input type="checkbox" />
+</span>
+<span
+  ><span
+    ><input type="checkbox" /></span
+  ></span
+>
+<span
+  ><input type="checkbox" /></span
+>
 ```
 
 # Lines exceeding max width of 80 characters
@@ -594,5 +542,4 @@ tags.html:126:1 parse ━━━━━━━━━━━━━━━━━━━�
    41:   attribute="very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value"
   132:   src="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
   178:   12345678901234567890123456789012345678901234567890123456789012345678901234567890
-  193: <x:root><SPAN>tag name in other namespace should also lower cased</SPAN></x:root>
 ```
