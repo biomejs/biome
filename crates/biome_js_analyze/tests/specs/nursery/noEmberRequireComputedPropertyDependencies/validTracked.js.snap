@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTracked.js
+---
+# Input
+```js
+// should not generate diagnostics
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+
+export default class MyComponent extends Component {
+  @tracked firstName;
+  @tracked lastName;
+
+  // Native getter with tracked properties
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+
+```

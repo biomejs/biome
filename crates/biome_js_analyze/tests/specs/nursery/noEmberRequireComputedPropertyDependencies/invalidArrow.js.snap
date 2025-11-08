@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidArrow.js
+---
+# Input
+```js
+import { computed } from '@ember/object';
+
+const MyMixin = {
+  // Arrow function without dependencies
+  displayName: computed(() => {
+    return 'No dependencies';
+  })
+};
+
+```
+
+# Diagnostics
+```
+invalidArrow.js:5:16 lint/nursery/noEmberRequireComputedPropertyDependencies ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Computed properties require dependency keys.
+  
+    3 │ const MyMixin = {
+    4 │   // Arrow function without dependencies
+  > 5 │   displayName: computed(() => {
+      │                ^^^^^^^^^^^^^^^^
+  > 6 │     return 'No dependencies';
+  > 7 │   })
+      │   ^^
+    8 │ };
+    9 │ 
+  
+  i Add the property keys this computed depends on, or use a native getter with @tracked properties.
+  
+  i Example: computed('firstName', 'lastName', function() { ... })
+  
+
+```

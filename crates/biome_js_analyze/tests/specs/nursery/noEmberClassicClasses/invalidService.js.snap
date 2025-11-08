@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidService.js
+---
+# Input
+```js
+import Service from '@ember/service';
+
+export default Service.extend({
+  init() {
+    this._super(...arguments);
+    this.setupService();
+  }
+});
+
+```
+
+# Diagnostics
+```
+invalidService.js:3:16 lint/nursery/noEmberClassicClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use classic Ember classes with .extend().
+  
+    1 │ import Service from '@ember/service';
+    2 │ 
+  > 3 │ export default Service.extend({
+      │                ^^^^^^^^^^^^^^^^
+  > 4 │   init() {
+  > 5 │     this._super(...arguments);
+  > 6 │     this.setupService();
+  > 7 │   }
+  > 8 │ });
+      │ ^^
+    9 │ 
+  
+  i Use native JavaScript class syntax instead.
+  
+  i See: https://guides.emberjs.com/release/upgrading/current-edition/native-classes/
+  
+
+```

@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRoute.js
+---
+# Input
+```js
+import Route from '@ember/routing/route';
+
+export default Route.extend({
+  model() {
+    return this.store.findAll('post');
+  }
+});
+
+```
+
+# Diagnostics
+```
+invalidRoute.js:3:16 lint/nursery/noEmberClassicClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use classic Ember classes with .extend().
+  
+    1 │ import Route from '@ember/routing/route';
+    2 │ 
+  > 3 │ export default Route.extend({
+      │                ^^^^^^^^^^^^^^
+  > 4 │   model() {
+  > 5 │     return this.store.findAll('post');
+  > 6 │   }
+  > 7 │ });
+      │ ^^
+    8 │ 
+  
+  i Use native JavaScript class syntax instead.
+  
+  i See: https://guides.emberjs.com/release/upgrading/current-edition/native-classes/
+  
+
+```

@@ -3175,6 +3175,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmberClassicClassesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberClassicClassesOptions" }
+			]
+		},
+		"NoEmberClassicClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmberGetWithDefaultConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3192,6 +3202,16 @@
 			]
 		},
 		"NoEmberGlobalJqueryOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberInlineStylesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberInlineStylesOptions" }
+			]
+		},
+		"NoEmberInlineStylesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3219,6 +3239,18 @@
 			]
 		},
 		"NoEmberPauseTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberRequireComputedPropertyDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoEmberRequireComputedPropertyDependenciesOptions"
+				}
+			]
+		},
+		"NoEmberRequireComputedPropertyDependenciesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5222,6 +5254,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmberClassicClasses": {
+					"description": "Disallow usage of classic Ember classes created with .extend().",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberClassicClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmberGetWithDefault": {
 					"description": "Disallow usage of the deprecated getWithDefault() method.",
 					"anyOf": [
@@ -5233,6 +5272,13 @@
 					"description": "Disallow usage of global $ or jQuery objects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoEmberGlobalJqueryConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberInlineStyles": {
+					"description": "Disallow inline style attributes in Glimmer templates.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberInlineStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5254,6 +5300,15 @@
 					"description": "Disallow usage of pauseTest in tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoEmberPauseTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberRequireComputedPropertyDependencies": {
+					"description": "Require dependencies for computed properties.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoEmberRequireComputedPropertyDependenciesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -7157,6 +7212,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoEmberClassicClassesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberClassicClassesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoEmberGetWithDefaultOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -7183,6 +7253,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmberGlobalJqueryOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberInlineStylesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberInlineStylesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7228,6 +7313,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmberPauseTestOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberRequireComputedPropertyDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{
+							"$ref": "#/definitions/NoEmberRequireComputedPropertyDependenciesOptions"
+						}
+					]
 				}
 			},
 			"additionalProperties": false
