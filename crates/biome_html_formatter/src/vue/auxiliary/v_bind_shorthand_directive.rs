@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_html_syntax::VueVBindShorthandDirective;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{VueVBindShorthandDirective, VueVBindShorthandDirectiveFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatVueVBindShorthandDirective;
 impl FormatNodeRule<VueVBindShorthandDirective> for FormatVueVBindShorthandDirective {
@@ -9,6 +10,12 @@ impl FormatNodeRule<VueVBindShorthandDirective> for FormatVueVBindShorthandDirec
         node: &VueVBindShorthandDirective,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        let VueVBindShorthandDirectiveFields {
+            arg,
+            modifiers,
+            initializer,
+        } = node.as_fields();
+
+        write!(f, [arg.format(), modifiers.format(), initializer.format()])
     }
 }
