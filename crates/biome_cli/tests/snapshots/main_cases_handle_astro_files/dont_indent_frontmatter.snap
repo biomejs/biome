@@ -24,6 +24,7 @@ if (bar > 1) {
 	console.log(bar + 1);
 }
 ---
+
 <Foo>{bar}</Foo>
 
 <style>
