@@ -223,6 +223,9 @@ let schema = z.object().optional();
 schema + sure()
 ---
 
+
+
+
 <html><head><title>Astro</title></head><body></body></html>
 
 <style>
