@@ -514,7 +514,7 @@ impl<T: Deserializable> Deserializable for Vec<T> {
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                let mut result = Vec::with_capacity(values.len());
+                let mut result = Self::Output::with_capacity(values.len());
                 result.extend(
                     values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
                 );
@@ -553,11 +553,11 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                )
+                let mut result = Self::Output::with_capacity(values.len());
+                result.extend(
+                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
+                );
+                Some(result)
             }
         }
         value.deserialize(ctx, Visitor(PhantomData), name)
@@ -583,11 +583,11 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                )
+                let mut result = Self::Output::with_capacity_and_hasher(values.len(), S::default());
+                result.extend(
+                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
+                );
+                Some(result)
             }
         }
         value.deserialize(ctx, Visitor(PhantomData), name)
@@ -640,7 +640,7 @@ impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                let mut result = indexmap::IndexSet::with_capacity(values.len());
+                let mut result = Self::Output::with_capacity(values.len());
                 result.extend(
                     values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
                 );
@@ -674,7 +674,8 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                let mut result = Self::Output::default();
+                let mut result =
+                    Self::Output::with_capacity_and_hasher(members.len(), S::default());
                 for (key, value) in members.flatten() {
                     let key = Deserializable::deserialize(ctx, &key, "");
                     let value = Deserializable::deserialize(ctx, &value, "");
@@ -747,7 +748,8 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                let mut result = Self::Output::default();
+                let mut result =
+                    Self::Output::with_capacity_and_hasher(members.len(), S::default());
                 for (key, value) in members.flatten() {
                     let key = Deserializable::deserialize(ctx, &key, "");
                     let value = Deserializable::deserialize(ctx, &value, "");
