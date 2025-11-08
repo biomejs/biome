@@ -683,6 +683,19 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListElement
             trailing_separator: separator,
         })
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.slots.len();
+        // Each element typically consumes 2 slots (node + separator),
+        // but the last element may have only 1 slot (node without trailing separator)
+        let len = len.div_ceil(2);
+        (len, Some(len))
+    }
+}
+
+impl<L: Language, N: AstNode<Language = L>> ExactSizeIterator
+    for AstSeparatedListElementsIterator<L, N>
+{
 }
 
 impl<L: Language, N: AstNode<Language = L>> FusedIterator
@@ -736,6 +749,15 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListNodesIt
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next().map(|element| element.node)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl<L: Language, N: AstNode<Language = L>> ExactSizeIterator
+    for AstSeparatedListNodesIterator<L, N>
+{
 }
 
 impl<L: Language, N: AstNode<Language = L>> FusedIterator for AstSeparatedListNodesIterator<L, N> {}

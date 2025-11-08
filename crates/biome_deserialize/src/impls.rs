@@ -510,15 +510,15 @@ impl<T: Deserializable> Deserializable for Vec<T> {
             fn visit_array(
                 self,
                 ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                )
+                let mut result = Vec::with_capacity(values.len());
+                result.extend(
+                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
+                );
+                Some(result)
             }
         }
         value.deserialize(ctx, Visitor(PhantomData), name)
@@ -549,7 +549,7 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
             fn visit_array(
                 self,
                 ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -579,7 +579,7 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
             fn visit_array(
                 self,
                 ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -607,7 +607,7 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
             fn visit_array(
                 self,
                 ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -636,15 +636,15 @@ impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
             fn visit_array(
                 self,
                 ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                )
+                let mut result = indexmap::IndexSet::with_capacity(values.len());
+                result.extend(
+                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
+                );
+                Some(result)
             }
         }
         value.deserialize(ctx, Visitor(PhantomData), name)
@@ -668,7 +668,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             fn visit_map(
                 self,
                 ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
+                members: impl ExactSizeIterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
@@ -702,7 +702,7 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
             fn visit_map(
                 self,
                 ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
+                members: impl ExactSizeIterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
@@ -741,7 +741,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             fn visit_map(
                 self,
                 ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
+                members: impl ExactSizeIterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
