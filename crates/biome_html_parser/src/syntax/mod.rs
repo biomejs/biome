@@ -9,7 +9,9 @@ use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
 };
-use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
+use crate::token_source::{
+    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::Parser;
@@ -568,6 +570,21 @@ impl TextExpression {
     }
 }
 
+fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.at(EOF) || p.at(T![<]) || p.at(T!['}']) || p.cur_text().trim().is_empty() {
+        return Absent;
+    }
+    let m = p.start();
+
+    if p.at(SVELTE_IDENT) {
+        p.re_lex(HtmlReLexContext::SingleTextExpression);
+    } else {
+        p.bump_remap(HTML_LITERAL);
+    }
+
+    Present(m.complete(p, HTML_TEXT_EXPRESSION))
+}
+
 impl TextExpression {
     fn parse_element(&mut self, p: &mut HtmlParser) -> ParsedSyntax {
         if p.at(EOF) || p.at(T![<]) {
@@ -583,7 +600,7 @@ impl TextExpression {
                         HtmlLexContext::TextExpression(self.kind),
                     );
                 } else if !p.at(T!['}']) {
-                    p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
+                    p.bump_remap(HTML_LITERAL);
                 } else {
                     m.abandon(p);
                     return Absent;

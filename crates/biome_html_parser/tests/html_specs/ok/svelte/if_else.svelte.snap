@@ -1,0 +1,162 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+<!-- if / else -->
+{#if porridge.temperature > 100}
+	<p>too hot!</p>
+{:else}
+	<p>too cold!</p>
+{/if}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteIfBlock {
+            opening_block: SvelteIfOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..21 "{#" [Comments("<!-- if / else -->"), Newline("\n")] [],
+                if_token: IF_KW@21..23 "if" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@23..50 " porridge.temperature > 100" [] [],
+                },
+                r_curly_token: R_CURLY@50..51 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@51..54 "<" [Newline("\n"), Whitespace("\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@54..55 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@55..56 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@56..64 "too hot!" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@64..65 "<" [] [],
+                            slash_token: SLASH@65..66 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@66..67 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@67..68 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            else_if_clauses: SvelteElseIfClauseList [],
+            else_clause: SvelteElseClause {
+                sv_curly_colon_token: SV_CURLY_COLON@68..71 "{:" [Newline("\n")] [],
+                else_token: ELSE_KW@71..75 "else" [] [],
+                r_curly_token: R_CURLY@75..76 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@79..80 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@80..81 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@81..90 "too cold!" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@90..91 "<" [] [],
+                            slash_token: SLASH@91..92 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@92..93 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@93..94 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            closing_block: SvelteIfClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@94..97 "{/" [Newline("\n")] [],
+                if_token: IF_KW@97..99 "if" [] [],
+                r_curly_token: R_CURLY@99..100 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..101
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..100
+    0: SVELTE_IF_BLOCK@0..100
+      0: SVELTE_IF_OPENING_BLOCK@0..68
+        0: SV_CURLY_HASH@0..21 "{#" [Comments("<!-- if / else -->"), Newline("\n")] []
+        1: IF_KW@21..23 "if" [] []
+        2: HTML_TEXT_EXPRESSION@23..50
+          0: HTML_LITERAL@23..50 " porridge.temperature > 100" [] []
+        3: R_CURLY@50..51 "}" [] []
+        4: HTML_ELEMENT_LIST@51..68
+          0: HTML_ELEMENT@51..68
+            0: HTML_OPENING_ELEMENT@51..56
+              0: L_ANGLE@51..54 "<" [Newline("\n"), Whitespace("\t")] []
+              1: HTML_TAG_NAME@54..55
+                0: HTML_LITERAL@54..55 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@55..55
+              3: R_ANGLE@55..56 ">" [] []
+            1: HTML_ELEMENT_LIST@56..64
+              0: HTML_CONTENT@56..64
+                0: HTML_LITERAL@56..64 "too hot!" [] []
+            2: HTML_CLOSING_ELEMENT@64..68
+              0: L_ANGLE@64..65 "<" [] []
+              1: SLASH@65..66 "/" [] []
+              2: HTML_TAG_NAME@66..67
+                0: HTML_LITERAL@66..67 "p" [] []
+              3: R_ANGLE@67..68 ">" [] []
+      1: SVELTE_ELSE_IF_CLAUSE_LIST@68..68
+      2: SVELTE_ELSE_CLAUSE@68..94
+        0: SV_CURLY_COLON@68..71 "{:" [Newline("\n")] []
+        1: ELSE_KW@71..75 "else" [] []
+        2: R_CURLY@75..76 "}" [] []
+        3: HTML_ELEMENT_LIST@76..94
+          0: HTML_ELEMENT@76..94
+            0: HTML_OPENING_ELEMENT@76..81
+              0: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] []
+              1: HTML_TAG_NAME@79..80
+                0: HTML_LITERAL@79..80 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@80..80
+              3: R_ANGLE@80..81 ">" [] []
+            1: HTML_ELEMENT_LIST@81..90
+              0: HTML_CONTENT@81..90
+                0: HTML_LITERAL@81..90 "too cold!" [] []
+            2: HTML_CLOSING_ELEMENT@90..94
+              0: L_ANGLE@90..91 "<" [] []
+              1: SLASH@91..92 "/" [] []
+              2: HTML_TAG_NAME@92..93
+                0: HTML_LITERAL@92..93 "p" [] []
+              3: R_ANGLE@93..94 ">" [] []
+      3: SVELTE_IF_CLOSING_BLOCK@94..100
+        0: SV_CURLY_SLASH@94..97 "{/" [Newline("\n")] []
+        1: IF_KW@97..99 "if" [] []
+        2: R_CURLY@99..100 "}" [] []
+  4: EOF@100..101 "" [Newline("\n")] []
+
+```

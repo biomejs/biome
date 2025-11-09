@@ -23,6 +23,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     keywords: &[
         "null", "true", "false", "doctype", "html", "debug", "key", "render", "const", "attach",
+        "else", "if",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
@@ -69,6 +70,12 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_ATTACH_ATTRIBUTE",
         "SVELTE_HTML_BLOCK",
         "SVELTE_CONST_BLOCK",
+        "SVELTE_IF_BLOCK",
+        "SVELTE_IF_OPENING_BLOCK",
+        "SVELTE_ELSE_IF_CLAUSE_LIST",
+        "SVELTE_ELSE_CLAUSE",
+        "SVELTE_IF_CLOSING_BLOCK",
+        "SVELTE_ELSE_IF_CLAUSE",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

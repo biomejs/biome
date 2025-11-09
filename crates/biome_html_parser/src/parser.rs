@@ -1,4 +1,6 @@
-use crate::token_source::{HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind};
+use crate::token_source::{
+    HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind,
+};
 use biome_html_factory::HtmlSyntaxFactory;
 use biome_html_syntax::{
     HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
@@ -64,6 +66,12 @@ impl<'source> HtmlParser<'source> {
         // `state` is not checkpointed because it (currently) only contains
         // scoped properties that aren't only dependent on checkpoints and
         // should be reset manually when the scope of their use is exited.
+    }
+
+    /// Re-lexes the current token in the specified context. Returns the kind
+    /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
+    pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
+        self.source_mut().re_lex(context)
     }
 }
 

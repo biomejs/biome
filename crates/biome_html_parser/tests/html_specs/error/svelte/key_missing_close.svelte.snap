@@ -22,9 +22,9 @@ HtmlRoot {
         SvelteKeyBlock {
             opening_block: SvelteKeyOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                key_token: KEY_KW@2..6 "key" [] [Whitespace(" ")],
+                key_token: KEY_KW@2..5 "key" [] [],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@6..16 "expression" [] [],
+                    html_literal_token: HTML_LITERAL@5..16 " expression" [] [],
                 },
                 r_curly_token: R_CURLY@16..17 "}" [] [],
             },
@@ -51,9 +51,9 @@ HtmlRoot {
     0: SVELTE_KEY_BLOCK@0..28
       0: SVELTE_KEY_OPENING_BLOCK@0..17
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: KEY_KW@2..6 "key" [] [Whitespace(" ")]
-        2: HTML_TEXT_EXPRESSION@6..16
-          0: HTML_LITERAL@6..16 "expression" [] []
+        1: KEY_KW@2..5 "key" [] []
+        2: HTML_TEXT_EXPRESSION@5..16
+          0: HTML_LITERAL@5..16 " expression" [] []
         3: R_CURLY@16..17 "}" [] []
       1: HTML_ELEMENT_LIST@17..28
         0: HTML_CONTENT@17..28
@@ -77,9 +77,9 @@ key_missing_close.svelte:3:1 parse ━━━━━━━━━━━━━━━
   
   i This is where the block started.
   
-  > 1 │ {#key expression}
-      │ ^^^^^^^^^^^^^^^^^
+    1 │ {#key expression}
     2 │ 	something
-    3 │ 
+  > 3 │ 
+      │ 
   
 ```

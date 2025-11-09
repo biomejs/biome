@@ -830,6 +830,82 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteDebugBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteElseClause>
+    for crate::svelte::auxiliary::else_clause::FormatSvelteElseClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteElseClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteElseClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseClause,
+        crate::svelte::auxiliary::else_clause::FormatSvelteElseClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_clause::FormatSvelteElseClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseClause,
+        crate::svelte::auxiliary::else_clause::FormatSvelteElseClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_clause::FormatSvelteElseClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteElseIfClause>
+    for crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteElseIfClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteElseIfClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseIfClause,
+        crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseIfClause,
+        crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteHtmlBlock>
     for crate::svelte::auxiliary::html_block::FormatSvelteHtmlBlock
 {
@@ -865,6 +941,120 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteHtmlBlock {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::auxiliary::html_block::FormatSvelteHtmlBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfBlock>
+    for crate::svelte::auxiliary::if_block::FormatSvelteIfBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfBlock,
+        crate::svelte::auxiliary::if_block::FormatSvelteIfBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_block::FormatSvelteIfBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfBlock,
+        crate::svelte::auxiliary::if_block::FormatSvelteIfBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_block::FormatSvelteIfBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfClosingBlock>
+    for crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfClosingBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfClosingBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfClosingBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfClosingBlock,
+        crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfClosingBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfClosingBlock,
+        crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfOpeningBlock>
+    for crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfOpeningBlock,
+        crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfOpeningBlock,
+        crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock::default(),
         )
     }
 }
@@ -1126,6 +1316,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::lists::binding_list::FormatSvelteBindingList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClauseList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseIfClauseList,
+        crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClauseList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseIfClauseList,
+        crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList::default(),
         )
     }
 }

@@ -1,14 +1,16 @@
 mod tests;
 
-use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
+use crate::token_source::{
+    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+};
 use biome_html_syntax::HtmlSyntaxKind::{
-    ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL,
-    HTML_STRING_LITERAL, KEY_KW, NEWLINE, RENDER_KW, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM,
-    WHITESPACE,
+    ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW,
+    HTML_LITERAL, HTML_STRING_LITERAL, IF_KW, KEY_KW, NEWLINE, RENDER_KW, SVELTE_IDENT, TOMBSTONE,
+    UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
+use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
 use biome_unicode_table::lookup_byte;
@@ -17,22 +19,14 @@ use std::ops::{Add, AddAssign};
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
     source: &'src str,
-
     /// The start byte position in the source text of the next token.
     position: usize,
-
     current_kind: HtmlSyntaxKind,
-
     current_start: TextSize,
-
     diagnostics: Vec<ParseDiagnostic>,
-
     current_flags: TokenFlags,
-
     preceding_line_break: bool,
-
     after_newline: bool,
-
     unicode_bom_length: usize,
 }
 
@@ -99,9 +93,6 @@ impl<'src> HtmlLexer<'src> {
             }
             _ if (self.current_kind != T![<] && is_attribute_name_byte(current)) => {
                 self.consume_identifier(current, IdentifierContext::None)
-            }
-            _ if is_at_svelte_start_identifier(current) => {
-                self.consume_identifier(current, IdentifierContext::Svelte)
             }
             _ => self.consume_unexpected_character(),
         }
@@ -423,25 +414,17 @@ impl<'src> HtmlLexer<'src> {
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
-            buffer if context.is_svelte() => {
-                if self.current_kind == T!["{@"] {
-                    match buffer {
-                        b"debug" => DEBUG_KW,
-                        b"attach" => ATTACH_KW,
-                        b"const" => CONST_KW,
-                        b"render" => RENDER_KW,
-                        b"html" => HTML_KW,
-                        _ => SVELTE_IDENT,
-                    }
-                } else if self.current_kind == T!["{#"] || self.current_kind == T!["{/"] {
-                    match buffer {
-                        b"key" => KEY_KW,
-                        _ => SVELTE_IDENT,
-                    }
-                } else {
-                    SVELTE_IDENT
-                }
-            }
+            buffer if context.is_svelte() => match buffer {
+                b"debug" => DEBUG_KW,
+                b"attach" => ATTACH_KW,
+                b"const" => CONST_KW,
+                b"render" => RENDER_KW,
+                b"html" => HTML_KW,
+                b"key" => KEY_KW,
+                b"if" => IF_KW,
+                b"else" => ELSE_KW,
+                _ => SVELTE_IDENT,
+            },
             _ => HTML_LITERAL,
         }
     }
@@ -869,7 +852,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
     const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = HtmlSyntaxKind;
     type LexContext = HtmlLexContext;
-    type ReLexContext = ();
+    type ReLexContext = HtmlReLexContext;
 
     fn source(&self) -> &'src str {
         self.source
@@ -972,6 +955,30 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
 
     fn advance(&mut self, n: usize) {
         self.position += n;
+    }
+}
+
+impl<'src> ReLexer<'src> for HtmlLexer<'src> {
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match self.current_byte() {
+            Some(current) => match context {
+                HtmlReLexContext::Svelte => self.consume_svelte(current),
+                HtmlReLexContext::SingleTextExpression => self.consume_single_text_expression(),
+            },
+            None => EOF,
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
     }
 }
 

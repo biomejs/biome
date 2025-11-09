@@ -97,6 +97,12 @@ impl LexContext for HtmlLexContext {
     }
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum HtmlReLexContext {
+    Svelte,
+    SingleTextExpression,
+}
+
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
 
 impl<'source> HtmlTokenSource<'source> {
@@ -157,6 +163,10 @@ impl<'source> HtmlTokenSource<'source> {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
         self.lexer.rewind(checkpoint.lexer_checkpoint);
+    }
+
+    pub fn re_lex(&mut self, mode: HtmlReLexContext) -> HtmlSyntaxKind {
+        self.lexer.re_lex(mode)
     }
 }
 
