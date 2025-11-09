@@ -28,19 +28,11 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("#", "HASH"),
     ],
     keywords: &[
-        "null", "true", "false", "doctype", "html", "debug", "key", "render", "const", "attach",
-        "else", "if",
+        "null", "true", "false", "doctype", "html", // Svelte keywords
+        "debug", "key", "render", "const", "attach", "else", "if", "as", "each",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
-    tokens: &[
-        "ERROR_TOKEN",
-        "NEWLINE",
-        "WHITESPACE",
-        "IDENT",
-        "HTML_IDENT",
-        "SVELTE_IDENT",
-        "VUE_IDENT",
-    ],
+    tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
     nodes: &[
         "HTML_ROOT",
         "HTML_DIRECTIVE",
@@ -83,6 +75,11 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_ELSE_CLAUSE",
         "SVELTE_IF_CLOSING_BLOCK",
         "SVELTE_ELSE_IF_CLAUSE",
+        "SVELTE_EACH_BLOCK",
+        "SVELTE_EACH_OPENING_BLOCK",
+        "SVELTE_EACH_ITEM",
+        "SVELTE_EACH_INDEX",
+        "SVELTE_EACH_CLOSING_BLOCK",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",

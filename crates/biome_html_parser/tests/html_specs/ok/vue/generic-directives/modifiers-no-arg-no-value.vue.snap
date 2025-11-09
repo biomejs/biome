@@ -28,7 +28,7 @@ HtmlRoot {
                 },
                 attributes: HtmlAttributeList [
                     VueDirective {
-                        name_token: VUE_IDENT@3..8 "v-foo" [] [],
+                        name_token: IDENT@3..8 "v-foo" [] [],
                         arg: missing (optional),
                         modifiers: VueModifierList [
                             VueModifier {
@@ -70,7 +70,7 @@ HtmlRoot {
                         },
                     },
                     VueDirective {
-                        name_token: VUE_IDENT@34..39 "v-foo" [] [],
+                        name_token: IDENT@34..39 "v-foo" [] [],
                         arg: missing (optional),
                         modifiers: VueModifierList [
                             VueModifier {
@@ -101,7 +101,7 @@ HtmlRoot {
                 },
                 attributes: HtmlAttributeList [
                     VueDirective {
-                        name_token: VUE_IDENT@52..57 "v-foo" [] [],
+                        name_token: IDENT@52..57 "v-foo" [] [],
                         arg: missing (optional),
                         modifiers: VueModifierList [
                             VueModifier {
@@ -155,7 +155,7 @@ HtmlRoot {
           0: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@3..12
           0: VUE_DIRECTIVE@3..12
-            0: VUE_IDENT@3..8 "v-foo" [] []
+            0: IDENT@3..8 "v-foo" [] []
             1: (empty)
             2: VUE_MODIFIER_LIST@8..12
               0: VUE_MODIFIER@8..12
@@ -184,7 +184,7 @@ HtmlRoot {
               1: HTML_STRING@27..34
                 0: HTML_STRING_LITERAL@27..34 "\"flex\"" [] [Whitespace(" ")]
           1: VUE_DIRECTIVE@34..43
-            0: VUE_IDENT@34..39 "v-foo" [] []
+            0: IDENT@34..39 "v-foo" [] []
             1: (empty)
             2: VUE_MODIFIER_LIST@39..43
               0: VUE_MODIFIER@39..43
@@ -206,7 +206,7 @@ HtmlRoot {
           0: HTML_LITERAL@50..52 "p" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@52..74
           0: VUE_DIRECTIVE@52..62
-            0: VUE_IDENT@52..57 "v-foo" [] []
+            0: IDENT@52..57 "v-foo" [] []
             1: (empty)
             2: VUE_MODIFIER_LIST@57..62
               0: VUE_MODIFIER@57..62

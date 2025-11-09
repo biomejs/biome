@@ -25,15 +25,15 @@ HtmlRoot {
             debug_token: DEBUG_KW@2..7 "debug" [] [],
             bindings: SvelteBindingList [
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@7..10 "{@" [Newline("\n")] [],
+                    ident_token: IDENT@7..10 "{@" [Newline("\n")] [],
                 },
                 missing separator,
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@10..16 "debug" [] [Whitespace(" ")],
+                    ident_token: IDENT@10..16 "debug" [] [Whitespace(" ")],
                 },
                 missing separator,
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@16..25 "something" [] [],
+                    ident_token: IDENT@16..25 "something" [] [],
                 },
             ],
             r_curly_token: R_CURLY@25..26 "}" [] [],
@@ -43,7 +43,7 @@ HtmlRoot {
             debug_token: DEBUG_KW@29..35 "debug" [] [Whitespace(" ")],
             bindings: SvelteBindingList [
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@35..40 "debug" [] [],
+                    ident_token: IDENT@35..40 "debug" [] [],
                 },
             ],
             r_curly_token: R_CURLY@40..41 "}" [] [],
@@ -66,20 +66,20 @@ HtmlRoot {
       1: DEBUG_KW@2..7 "debug" [] []
       2: SVELTE_BINDING_LIST@7..25
         0: SVELTE_NAME@7..10
-          0: SVELTE_IDENT@7..10 "{@" [Newline("\n")] []
+          0: IDENT@7..10 "{@" [Newline("\n")] []
         1: (empty)
         2: SVELTE_NAME@10..16
-          0: SVELTE_IDENT@10..16 "debug" [] [Whitespace(" ")]
+          0: IDENT@10..16 "debug" [] [Whitespace(" ")]
         3: (empty)
         4: SVELTE_NAME@16..25
-          0: SVELTE_IDENT@16..25 "something" [] []
+          0: IDENT@16..25 "something" [] []
       3: R_CURLY@25..26 "}" [] []
     1: SVELTE_DEBUG_BLOCK@26..41
       0: SV_CURLY_AT@26..29 "{@" [Newline("\n")] []
       1: DEBUG_KW@29..35 "debug" [] [Whitespace(" ")]
       2: SVELTE_BINDING_LIST@35..40
         0: SVELTE_NAME@35..40
-          0: SVELTE_IDENT@35..40 "debug" [] []
+          0: IDENT@35..40 "debug" [] []
       3: R_CURLY@40..41 "}" [] []
   4: EOF@41..42 "" [Newline("\n")] []
 

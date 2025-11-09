@@ -90,7 +90,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@23..28 "v-for" [] [],
+                                        name_token: IDENT@23..28 "v-for" [] [],
                                         arg: missing (optional),
                                         modifiers: VueModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
@@ -164,7 +164,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@118..123 "v-for" [] [],
+                                name_token: IDENT@118..123 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -203,7 +203,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@153..158 "v-for" [] [],
+                                name_token: IDENT@153..158 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -252,7 +252,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@219..224 "v-for" [] [],
+                                name_token: IDENT@219..224 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -263,7 +263,7 @@ HtmlRoot {
                                 },
                             },
                             VueDirective {
-                                name_token: VUE_IDENT@244..248 "v-if" [] [],
+                                name_token: IDENT@244..248 "v-if" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -312,7 +312,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@323..328 "v-for" [] [],
+                                        name_token: IDENT@323..328 "v-for" [] [],
                                         arg: missing (optional),
                                         modifiers: VueModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
@@ -371,7 +371,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@418..423 "v-for" [] [],
+                                        name_token: IDENT@418..423 "v-for" [] [],
                                         arg: missing (optional),
                                         modifiers: VueModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
@@ -445,7 +445,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@538..543 "v-for" [] [],
+                                name_token: IDENT@538..543 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -494,7 +494,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@669..674 "v-for" [] [],
+                                name_token: IDENT@669..674 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -558,7 +558,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@808..813 "v-for" [] [],
+                                name_token: IDENT@808..813 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -632,7 +632,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@926..931 "v-for" [] [],
+                            name_token: IDENT@926..931 "v-for" [] [],
                             arg: missing (optional),
                             modifiers: VueModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -694,7 +694,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@1000..1005 "v-for" [] [],
+                                        name_token: IDENT@1000..1005 "v-for" [] [],
                                         arg: missing (optional),
                                         modifiers: VueModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
@@ -731,7 +731,7 @@ HtmlRoot {
                                         },
                                         attributes: HtmlAttributeList [
                                             VueDirective {
-                                                name_token: VUE_IDENT@1056..1061 "v-for" [] [],
+                                                name_token: IDENT@1056..1061 "v-for" [] [],
                                                 arg: missing (optional),
                                                 modifiers: VueModifierList [],
                                                 initializer: HtmlAttributeInitializerClause {
@@ -805,7 +805,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@1173..1178 "v-for" [] [],
+                                name_token: IDENT@1173..1178 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -816,7 +816,7 @@ HtmlRoot {
                                 },
                             },
                             VueDirective {
-                                name_token: VUE_IDENT@1189..1193 "v-if" [] [],
+                                name_token: IDENT@1189..1193 "v-if" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -870,7 +870,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@1247..1253 "v-else" [] [],
+                                name_token: IDENT@1247..1253 "v-else" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: missing (optional),
@@ -900,7 +900,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@1329..1334 "v-for" [] [],
+                                name_token: IDENT@1329..1334 "v-for" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -992,7 +992,7 @@ HtmlRoot {
                   0: HTML_LITERAL@20..23 "li" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@23..68
                   0: VUE_DIRECTIVE@23..54
-                    0: VUE_IDENT@23..28 "v-for" [] []
+                    0: IDENT@23..28 "v-for" [] []
                     1: (empty)
                     2: VUE_MODIFIER_LIST@28..28
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@28..54
@@ -1042,7 +1042,7 @@ HtmlRoot {
               0: HTML_LITERAL@114..118 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@118..132
               0: VUE_DIRECTIVE@118..132
-                0: VUE_IDENT@118..123 "v-for" [] []
+                0: IDENT@118..123 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@123..123
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@123..132
@@ -1069,7 +1069,7 @@ HtmlRoot {
               0: HTML_LITERAL@149..153 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@153..183
               0: VUE_DIRECTIVE@153..183
-                0: VUE_IDENT@153..158 "v-for" [] []
+                0: IDENT@153..158 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@158..158
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@158..183
@@ -1103,7 +1103,7 @@ HtmlRoot {
               0: HTML_LITERAL@215..219 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@219..262
               0: VUE_DIRECTIVE@219..244
-                0: VUE_IDENT@219..224 "v-for" [] []
+                0: IDENT@219..224 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@224..224
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@224..244
@@ -1111,7 +1111,7 @@ HtmlRoot {
                   1: HTML_STRING@225..244
                     0: HTML_STRING_LITERAL@225..244 "\"(foo, i) of foos\"" [] [Whitespace(" ")]
               1: VUE_DIRECTIVE@244..262
-                0: VUE_IDENT@244..248 "v-if" [] []
+                0: IDENT@244..248 "v-if" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@248..248
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@248..262
@@ -1146,7 +1146,7 @@ HtmlRoot {
                   0: HTML_LITERAL@320..323 "li" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@323..344
                   0: VUE_DIRECTIVE@323..344
-                    0: VUE_IDENT@323..328 "v-for" [] []
+                    0: IDENT@323..328 "v-for" [] []
                     1: (empty)
                     2: VUE_MODIFIER_LIST@328..328
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@328..344
@@ -1187,7 +1187,7 @@ HtmlRoot {
                   0: HTML_LITERAL@415..418 "li" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@418..461
                   0: VUE_DIRECTIVE@418..449
-                    0: VUE_IDENT@418..423 "v-for" [] []
+                    0: IDENT@418..423 "v-for" [] []
                     1: (empty)
                     2: VUE_MODIFIER_LIST@423..423
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@423..449
@@ -1237,7 +1237,7 @@ HtmlRoot {
               0: HTML_LITERAL@534..538 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@538..565
               0: VUE_DIRECTIVE@538..565
-                0: VUE_IDENT@538..543 "v-for" [] []
+                0: IDENT@538..543 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@543..543
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@543..565
@@ -1271,7 +1271,7 @@ HtmlRoot {
               0: HTML_LITERAL@665..669 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@669..728
               0: VUE_DIRECTIVE@669..704
-                0: VUE_IDENT@669..674 "v-for" [] []
+                0: IDENT@669..674 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@674..674
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@674..704
@@ -1315,7 +1315,7 @@ HtmlRoot {
               0: HTML_LITERAL@799..808 "template" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@808..833
               0: VUE_DIRECTIVE@808..833
-                0: VUE_IDENT@808..813 "v-for" [] []
+                0: IDENT@808..813 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@813..813
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@813..833
@@ -1365,7 +1365,7 @@ HtmlRoot {
             0: HTML_LITERAL@916..926 "component" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@926..961
             0: VUE_DIRECTIVE@926..942
-              0: VUE_IDENT@926..931 "v-for" [] []
+              0: IDENT@926..931 "v-for" [] []
               1: (empty)
               2: VUE_MODIFIER_LIST@931..931
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@931..942
@@ -1409,7 +1409,7 @@ HtmlRoot {
                   0: HTML_LITERAL@997..1000 "li" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@1000..1045
                   0: VUE_DIRECTIVE@1000..1033
-                    0: VUE_IDENT@1000..1005 "v-for" [] []
+                    0: IDENT@1000..1005 "v-for" [] []
                     1: (empty)
                     2: VUE_MODIFIER_LIST@1005..1005
                     3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1005..1033
@@ -1435,7 +1435,7 @@ HtmlRoot {
                       0: HTML_LITERAL@1051..1056 "span" [] [Whitespace(" ")]
                     2: HTML_ATTRIBUTE_LIST@1056..1091
                       0: VUE_DIRECTIVE@1056..1083
-                        0: VUE_IDENT@1056..1061 "v-for" [] []
+                        0: IDENT@1056..1061 "v-for" [] []
                         1: (empty)
                         2: VUE_MODIFIER_LIST@1061..1061
                         3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1061..1083
@@ -1484,7 +1484,7 @@ HtmlRoot {
               0: HTML_LITERAL@1169..1173 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@1173..1220
               0: VUE_DIRECTIVE@1173..1189
-                0: VUE_IDENT@1173..1178 "v-for" [] []
+                0: IDENT@1173..1178 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@1178..1178
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1178..1189
@@ -1492,7 +1492,7 @@ HtmlRoot {
                   1: HTML_STRING@1179..1189
                     0: HTML_STRING_LITERAL@1179..1189 "\"x in xs\"" [] [Whitespace(" ")]
               1: VUE_DIRECTIVE@1189..1206
-                0: VUE_IDENT@1189..1193 "v-if" [] []
+                0: IDENT@1189..1193 "v-if" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@1193..1193
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1193..1206
@@ -1529,7 +1529,7 @@ HtmlRoot {
               0: HTML_LITERAL@1243..1247 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@1247..1253
               0: VUE_DIRECTIVE@1247..1253
-                0: VUE_IDENT@1247..1253 "v-else" [] []
+                0: IDENT@1247..1253 "v-else" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@1253..1253
                 3: (empty)
@@ -1550,7 +1550,7 @@ HtmlRoot {
               0: HTML_LITERAL@1325..1329 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@1329..1370
               0: VUE_DIRECTIVE@1329..1356
-                0: VUE_IDENT@1329..1334 "v-for" [] []
+                0: IDENT@1329..1334 "v-for" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@1334..1334
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1334..1356

@@ -106,7 +106,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@244..245 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -166,7 +166,7 @@ HtmlRoot {
                                         },
                                     },
                                     VueDirective {
-                                        name_token: VUE_IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@331..332 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -301,7 +301,7 @@ HtmlRoot {
                                     },
                                 },
                                 VueDirective {
-                                    name_token: VUE_IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                    name_token: IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
                                     arg: VueDirectiveArgument {
                                         colon_token: COLON@631..632 ":" [] [],
                                         arg: VueDynamicArgument {
@@ -335,7 +335,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@763..764 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -358,7 +358,7 @@ HtmlRoot {
                                         },
                                     },
                                     VueDirective {
-                                        name_token: VUE_IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@800..801 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -381,7 +381,7 @@ HtmlRoot {
                                         },
                                     },
                                     VueDirective {
-                                        name_token: VUE_IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@836..837 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -459,7 +459,7 @@ HtmlRoot {
                                 },
                                 attributes: HtmlAttributeList [
                                     VueDirective {
-                                        name_token: VUE_IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@1032..1033 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -595,7 +595,7 @@ HtmlRoot {
                                         },
                                     },
                                     VueDirective {
-                                        name_token: VUE_IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name_token: IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
                                         arg: VueDirectiveArgument {
                                             colon_token: COLON@1285..1286 ":" [] [],
                                             arg: VueDynamicArgument {
@@ -751,7 +751,7 @@ HtmlRoot {
                   0: HTML_LITERAL@228..234 "button" [] []
                 2: HTML_ATTRIBUTE_LIST@234..425
                   0: VUE_DIRECTIVE@234..274
-                    0: VUE_IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@244..254
                       0: COLON@244..245 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@245..254
@@ -792,7 +792,7 @@ HtmlRoot {
                       1: HTML_STRING@318..323
                         0: HTML_STRING_LITERAL@318..323 "\"'0'\"" [] []
                   3: VUE_DIRECTIVE@323..359
-                    0: VUE_IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@331..337
                       0: COLON@331..332 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@332..337
@@ -885,7 +885,7 @@ HtmlRoot {
                     1: HTML_STRING@614..623
                       0: HTML_STRING_LITERAL@614..623 "\"onEnter\"" [] []
                 2: VUE_DIRECTIVE@623..659
-                  0: VUE_IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                  0: IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
                   1: VUE_DIRECTIVE_ARGUMENT@631..640
                     0: COLON@631..632 ":" [] []
                     1: VUE_DYNAMIC_ARGUMENT@632..640
@@ -909,7 +909,7 @@ HtmlRoot {
                   0: HTML_LITERAL@742..753 "component-x" [] []
                 2: HTML_ATTRIBUTE_LIST@753..912
                   0: VUE_DIRECTIVE@753..790
-                    0: VUE_IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@763..774
                       0: COLON@763..764 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@764..774
@@ -925,7 +925,7 @@ HtmlRoot {
                       1: HTML_STRING@781..790
                         0: HTML_STRING_LITERAL@781..790 "\"propVal\"" [] []
                   1: VUE_DIRECTIVE@790..828
-                    0: VUE_IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@800..811
                       0: COLON@800..801 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@801..811
@@ -941,7 +941,7 @@ HtmlRoot {
                       1: HTML_STRING@818..828
                         0: HTML_STRING_LITERAL@818..828 "\"styleVal\"" [] []
                   2: VUE_DIRECTIVE@828..863
-                    0: VUE_IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@836..848
                       0: COLON@836..837 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@837..848
@@ -995,7 +995,7 @@ HtmlRoot {
                   0: HTML_LITERAL@1021..1022 "a" [] []
                 2: HTML_ATTRIBUTE_LIST@1022..1129
                   0: VUE_DIRECTIVE@1022..1054
-                    0: VUE_IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@1032..1042
                       0: COLON@1032..1033 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@1033..1042
@@ -1088,7 +1088,7 @@ HtmlRoot {
                       1: HTML_STRING@1271..1277
                         0: HTML_STRING_LITERAL@1271..1277 "\"valB\"" [] []
                   2: VUE_DIRECTIVE@1277..1319
-                    0: VUE_IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    0: IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
                     1: VUE_DIRECTIVE_ARGUMENT@1285..1296
                       0: COLON@1285..1286 ":" [] []
                       1: VUE_DYNAMIC_ARGUMENT@1286..1296

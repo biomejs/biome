@@ -8,7 +8,7 @@ use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpress
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+    is_at_svelte_keyword, parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
@@ -259,6 +259,14 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             // we remap to HTML_LITERAL
             let m = p.start();
             p.bump_remap(HTML_LITERAL);
+            Present(m.complete(p, HTML_CONTENT))
+        }
+        // At this position, we shouldn't have svelte keyword, so we relex everything
+        // as text
+        _ if is_at_svelte_keyword(p) => {
+            let m = p.start();
+            p.re_lex(HtmlReLexContext::HtmlText);
+            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
             Present(m.complete(p, HTML_CONTENT))
         }
         HTML_LITERAL => {
@@ -634,11 +642,7 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    if p.at(SVELTE_IDENT) {
-        p.re_lex(HtmlReLexContext::SingleTextExpression);
-    } else {
-        p.bump_remap(HTML_LITERAL);
-    }
+    p.bump_remap(HTML_LITERAL);
 
     Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }

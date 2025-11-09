@@ -5,11 +5,12 @@ use crate::syntax::parse_error::{
 use crate::syntax::{parse_html_element, parse_single_text_expression_content};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, SVELTE_ATTACH_ATTRIBUTE, SVELTE_BINDING_LIST,
-    SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK, SVELTE_ELSE_CLAUSE,
-    SVELTE_ELSE_IF_CLAUSE, SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK, SVELTE_IDENT,
-    SVELTE_IF_BLOCK, SVELTE_IF_CLOSING_BLOCK, SVELTE_IF_OPENING_BLOCK, SVELTE_KEY_BLOCK,
-    SVELTE_KEY_CLOSING_BLOCK, SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME, SVELTE_RENDER_BLOCK,
+    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, IDENT, SVELTE_ATTACH_ATTRIBUTE,
+    SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK,
+    SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK, SVELTE_EACH_OPENING_BLOCK, SVELTE_ELSE_CLAUSE,
+    SVELTE_ELSE_IF_CLAUSE, SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK, SVELTE_IF_BLOCK,
+    SVELTE_IF_CLOSING_BLOCK, SVELTE_IF_OPENING_BLOCK, SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK,
+    SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME, SVELTE_RENDER_BLOCK,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -28,6 +29,7 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T![key] => parse_key_block(p, m),
         T![if] => parse_if_block(p, m),
+        T![each] => parse_each_block(p, m),
         _ => {
             m.abandon(p);
             Absent
@@ -146,6 +148,44 @@ pub(crate) fn parse_else_clause(p: &mut HtmlParser) -> ParsedSyntax {
     p.expect(T!['}']);
     SvelteElementList::new().parse_list(p);
     Present(m.complete(p, SVELTE_ELSE_CLAUSE))
+}
+
+fn parse_each_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
+    if !p.at(T![each]) {
+        parent_marker.abandon(p);
+        return Absent;
+    }
+
+    let result = parse_each_opening_block(p, parent_marker);
+    let m = result.precede(p);
+
+    SvelteElementList::new().parse_list(p);
+
+    parse_closing_block(p, T![each], SVELTE_EACH_CLOSING_BLOCK).or_add_diagnostic(p, |p, range| {
+        expected_svelte_closing_block(p, range)
+            .with_detail(range.sub(m.start()), "This is where the block started.")
+    });
+    Present(m.complete(p, SVELTE_EACH_BLOCK))
+}
+
+fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
+    if !p.at(T![each]) {
+        parent_marker.abandon(p);
+        return Absent;
+    }
+
+    p.bump_with_context(T![each], HtmlLexContext::single_expression());
+
+    // It should stop at `as`
+    parse_single_text_expression_content(p).ok();
+
+    p.expect_with_context(T![as], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p).ok();
+
+    p.expect(T!['}']);
+
+    Present(parent_marker.complete(p, SVELTE_EACH_OPENING_BLOCK))
 }
 
 /// Parses a `{#<keyword> expression }` block.
@@ -330,7 +370,7 @@ impl ParseSeparatedList for BindingList {
 
 fn parse_name(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_remap_with_context(SVELTE_IDENT, HtmlLexContext::Svelte);
+    p.bump_remap_with_context(IDENT, HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_NAME))
 }
@@ -400,22 +440,8 @@ impl ParseNodeList for SvelteElseIfClauseLit {
         if closing {
             return true;
         }
-        // Here we need to get creative. At the moment svelte keywords are correctly lexed
-        // only when we use the `Svelte` context. To retrieve them, we use the relex
-        // feature to bump two tokens, and relex them with the proper context.
-        // Once we retrieved the relexed tokens, we rewind the parser.
-        let curly_colon = p.at(T!["{:"]);
-        let checkpoint = p.checkpoint();
-        p.bump_any();
-        p.re_lex(HtmlReLexContext::Svelte);
-        let at_else = p.at(T![else]);
-        p.bump_any();
-        p.re_lex(HtmlReLexContext::Svelte);
-        let at_if = p.at(T![if]);
 
-        let condition = curly_colon && at_else && !at_if;
-        p.rewind(checkpoint);
-        condition
+        p.at(T!["{:"]) && p.nth_at(1, T![else]) && !p.nth_at(2, T![if])
     }
 
     fn recover(
@@ -432,4 +458,19 @@ impl ParseNodeList for SvelteElseIfClauseLit {
             expected_child_or_block,
         )
     }
+}
+
+pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
+    matches!(
+        p.cur(),
+        T![if]
+            | T![else]
+            | T![each]
+            | T![debug]
+            | T![const]
+            | T![attach]
+            | T![render]
+            | T![key]
+            | T![as]
+    )
 }

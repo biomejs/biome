@@ -103,6 +103,8 @@ impl LexContext for HtmlLexContext {
 pub(crate) enum HtmlReLexContext {
     Svelte,
     SingleTextExpression,
+    /// Relex tokens using `HtmlLexer::consume_html_text`
+    HtmlText,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

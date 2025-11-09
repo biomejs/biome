@@ -4,8 +4,8 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"
-        <div v-bind:[dynamicArg]="val"></div>
+    let code = r#"{#each items as item}
+    {/each}
     "#;
 
     let options = HtmlParseOptions::default().with_vue();

@@ -395,6 +395,54 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_each_block(
+    opening_block: SvelteEachOpeningBlock,
+    children: HtmlElementList,
+    closing_block: SvelteEachClosingBlock,
+) -> SvelteEachBlock {
+    SvelteEachBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_each_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    each_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteEachClosingBlock {
+    SvelteEachClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_each_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    each_token: SyntaxToken,
+    list: HtmlTextExpression,
+    as_token: SyntaxToken,
+    item: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteEachOpeningBlock {
+    SvelteEachOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_hash_token)),
+            Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Node(list.into_syntax())),
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(item.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn svelte_else_clause(
     sv_curly_colon_token: SyntaxToken,
     else_token: SyntaxToken,
@@ -559,10 +607,10 @@ pub fn svelte_key_opening_block(
         ],
     ))
 }
-pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
+pub fn svelte_name(ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
-        [Some(SyntaxElement::Token(svelte_ident_token))],
+        [Some(SyntaxElement::Token(ident_token))],
     ))
 }
 pub fn svelte_render_block(
