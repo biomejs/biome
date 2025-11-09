@@ -221,7 +221,7 @@ impl Rule for NoBannedTypes {
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             banned_type_range,
-            markup! {"Don't use '"{banned_type.to_string()}"' as a type."}.to_owned(),
+            markup! {"Don't use '"<Emphasis>{banned_type.to_string()}</Emphasis>"' as a type."}.to_owned(),
         )
         .note(banned_type.message())
         // TODO: Update this if/when the rule gets split up or has individual disabling options added
@@ -303,23 +303,25 @@ impl BannedType {
 
                 markup! {
                     "Prefer using lowercase primitive types instead of uppercase \"boxed object\" types."
-                    "\n`"{ self.to_string() }"` accepts anything that implements the corresponding interface - both primitives and \"primitive-like\" objects."
-                    "\nIt is considered best practice to use `"{ primitive_str }"` instead in nearly all circumstances."
+                    "\n'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"anything"</Emphasis>" that implements the corresponding interface "
+                    "- both primitives and \"primitive-like\" objects."
+                    "\nIt is considered best practice to use '"<Emphasis>{ primitive_str }</Emphasis>"' instead in nearly all circumstances."
                 }.to_owned()
             }
             Self::Function => {
                 markup! {
-                    "The `Function` type is unsafe and accepts any arbitrary function or \"function-like\" value."
-                    "\nExplicitly defining the function shape helps prevent mismatching argument types and return values."
-                    "\nIf a generic \"catch-all\" callback type is required, consider using a \"top type\" like `(...args: never) => unknown` instead."
+                    "The '"<Emphasis>"Function"</Emphasis>"' type is unsafe and accepts any arbitrary function or \"function-like\" value."
+                    "\nExplicitly defining the function's shape helps prevent mismatching argument types and return values."
+                    "\nIf a generic \"catch-all\" callback type is required, consider using a \"top type\" like '"<Emphasis>"(...args: never) => unknown"</Emphasis>"' instead."
                 }.to_owned()
             }
             Self::Object | Self::EmptyObject => {
                 markup! {
-                    "`"{ self.to_string() }"` accepts _any non-nullable value_, including non-object primitives like `123` and `true`."
-                    "\n- If you want a type meaning \"any arbitrary object\", use `object` instead."
-                    "\n- If you want a type meaning \"any value\", use `unknown` instead."
-                    "\n- If you want a type meaning \"an object without any properties\", use `{ [k: string]: never }` or `Record<string, never>` instead."
+                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullable value, including non-object primitives like '123' and 'true'."
+                    "\n- If you want a type meaning \"any arbitrary object\", use '"<Emphasis>"object"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"any value\", use '"<Emphasis>"unknown"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object without any properties\", use "
+                    "'"<Emphasis>"{ [k: string]: never }"</Emphasis>"' or '"<Emphasis>"Record<string, never>"</Emphasis>"' instead."
                 }.to_owned()
             }
         }

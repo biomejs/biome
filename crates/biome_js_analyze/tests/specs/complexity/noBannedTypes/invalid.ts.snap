@@ -64,8 +64,8 @@ invalid.ts:1:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
     3 │ let e: Object;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -91,10 +91,10 @@ invalid.ts:3:8 lint/complexity/noBannedTypes ━━━━━━━━━━━�
     4 │ 
     5 │ let b: { c: String };
   
-  i `Object` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -114,8 +114,8 @@ invalid.ts:5:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
     7 │ function foo(a: String) {}
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -144,8 +144,8 @@ invalid.ts:7:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
     9 │ 'a' as String;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -174,8 +174,8 @@ invalid.ts:9:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
     11 │ class Foo<T = String> extends Bar<String> implements Baz<Object> {
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -204,8 +204,8 @@ invalid.ts:11:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     13 │ 
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -234,8 +234,8 @@ invalid.ts:11:35 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     13 │ 
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -263,10 +263,10 @@ invalid.ts:11:58 lint/complexity/noBannedTypes ━━━━━━━━━━━
     12 │   constructor(foo: String | Object) {}
     13 │ 
   
-  i `Object` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -285,8 +285,8 @@ invalid.ts:12:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     14 │   exit(): Array<String> {
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -313,10 +313,10 @@ invalid.ts:12:29 lint/complexity/noBannedTypes ━━━━━━━━━━━
     13 │ 
     14 │   exit(): Array<String> {
   
-  i `Object` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -336,8 +336,8 @@ invalid.ts:14:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     16 │   }
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -365,8 +365,8 @@ invalid.ts:15:16 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     17 │ }
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -394,8 +394,8 @@ invalid.ts:15:30 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     17 │ }
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -424,8 +424,8 @@ invalid.ts:19:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     21 │ let z = true as Boolean;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `Boolean` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `boolean` instead in nearly all circumstances.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -454,8 +454,8 @@ invalid.ts:21:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     23 │ type Props = {};
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `Boolean` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `boolean` instead in nearly all circumstances.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -483,10 +483,10 @@ invalid.ts:23:14 lint/complexity/noBannedTypes ━━━━━━━━━━━
     24 │ 
     25 │ let fn: Function = () => true
   
-  i `{}` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -505,9 +505,9 @@ invalid.ts:25:9 lint/complexity/noBannedTypes ━━━━━━━━━━━�
     26 │ 
     27 │ const str: String = 'foo';
   
-  i The `Function` type is unsafe and accepts any arbitrary function or "function-like" value.
-    Explicitly defining the function shape helps prevent mismatching argument types and return values.
-    If a generic "catch-all" callback type is required, consider using a "top type" like `(...args: never) => unknown` instead.
+  i The 'Function' type is unsafe and accepts any arbitrary function or "function-like" value.
+    Explicitly defining the function's shape helps prevent mismatching argument types and return values.
+    If a generic "catch-all" callback type is required, consider using a "top type" like '(...args: never) => unknown' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -527,8 +527,8 @@ invalid.ts:27:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     29 │ const bool: Boolean = true;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `String` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `string` instead in nearly all circumstances.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -557,8 +557,8 @@ invalid.ts:29:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     31 │ const num: Number = 1;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `Boolean` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `boolean` instead in nearly all circumstances.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -587,8 +587,8 @@ invalid.ts:31:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     33 │ const symb: Symbol = Symbol('foo');
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `Number` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `number` instead in nearly all circumstances.
+    'Number' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'number' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -617,8 +617,8 @@ invalid.ts:33:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     35 │ const bigInt: BigInt = 1n;
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `Symbol` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `symbol` instead in nearly all circumstances.
+    'Symbol' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'symbol' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -647,8 +647,8 @@ invalid.ts:35:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     37 │ const lowerObj: Object = {};
   
   i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
-    `BigInt` accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
-    It is considered best practice to use `bigint` instead in nearly all circumstances.
+    'BigInt' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'bigint' instead in nearly all circumstances.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -676,10 +676,10 @@ invalid.ts:37:17 lint/complexity/noBannedTypes ━━━━━━━━━━━
     38 │ 
     39 │ const capitalObj: Object = { a: 'string' };
   
-  i `Object` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -698,10 +698,10 @@ invalid.ts:39:19 lint/complexity/noBannedTypes ━━━━━━━━━━━
     40 │ 
     41 │ const curly1: {
   
-  i `Object` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -723,10 +723,10 @@ invalid.ts:41:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
     44 │ 
     45 │ const curly2: {} = { a: 'string' };
   
-  i `{}` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
@@ -744,10 +744,10 @@ invalid.ts:45:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
        │               ^^
     46 │ 
   
-  i `{}` accepts _any non-nullable value_, including non-object primitives like `123` and `true`.
-    - If you want a type meaning "any arbitrary object", use `object` instead.
-    - If you want a type meaning "any value", use `unknown` instead.
-    - If you want a type meaning "an object without any properties", use `{ [k: string]: never }` or `Record<string, never>` instead.
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
   
   i If that's really what you want, use an inline disable comment.
   
