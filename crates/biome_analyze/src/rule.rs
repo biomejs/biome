@@ -393,7 +393,14 @@ impl RuleSource {
 
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
-        !matches!(self, Self::Clippy(_) | Self::Eslint(_) | Self::Stylelint(_))
+        !matches!(
+            self,
+            Self::Clippy(_)
+                | Self::DenoLint(_)
+                | Self::Eslint(_)
+                | Self::GraphqlSchemaLinter(_)
+                | Self::Stylelint(_)
+        )
     }
 
     pub const fn is_stylelint(&self) -> bool {
