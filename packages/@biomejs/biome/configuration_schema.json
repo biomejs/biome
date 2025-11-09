@@ -1392,6 +1392,22 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomClasses": {
+			"type": "object",
+			"properties": {
+				"components": {
+					"description": "Custom component classes to be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"utilities": {
+					"description": "Custom utility classes to be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"CustomRestrictedElements": {
 			"type": "object",
 			"minProperties": 1,
@@ -14687,6 +14703,13 @@
 					"description": "Additional attributes that will be sorted.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				},
+				"classes": {
+					"description": "Custom utility and component classes to be sorted.",
+					"anyOf": [
+						{ "$ref": "#/definitions/CustomClasses" },
+						{ "type": "null" }
+					]
 				},
 				"functions": {
 					"description": "Names of the functions or tagged templates that will be sorted.",

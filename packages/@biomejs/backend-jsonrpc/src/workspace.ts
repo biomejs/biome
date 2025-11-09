@@ -8269,6 +8269,10 @@ export interface UseSortedClassesOptions {
 	 */
 	attributes?: string[];
 	/**
+	 * Custom utility and component classes to be sorted.
+	 */
+	classes?: CustomClasses;
+	/**
 	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
@@ -8615,6 +8619,16 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
+export interface CustomClasses {
+	/**
+	 * Custom component classes to be sorted.
+	 */
+	components?: string[];
+	/**
+	 * Custom utility classes to be sorted.
+	 */
+	utilities?: string[];
+}
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
