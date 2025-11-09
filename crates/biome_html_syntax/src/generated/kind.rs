@@ -55,6 +55,7 @@ pub enum HtmlSyntaxKind {
     IDENT,
     HTML_IDENT,
     SVELTE_IDENT,
+    VUE_IDENT,
     HTML_ROOT,
     HTML_DIRECTIVE,
     HTML_SELF_CLOSING_TAG,

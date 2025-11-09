@@ -56,7 +56,6 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
     token_set!(T![<], T![>], T!['}'], T!["}}"]);
-const VUE_DIRECTIVE_CHARS: TokenSet<HtmlSyntaxKind> = token_set![T![@], T![.], T![:]];
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
@@ -315,7 +314,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(EOF) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(
@@ -336,7 +335,6 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let chpt = p.checkpoint();
     match p.cur() {
         T!["{{"] => {
             let m = p.start();
@@ -381,20 +379,13 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             |p| parse_attach_attribute(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
         ),
+        _ if p.cur_text().starts_with("v-") => {
+            HtmlSyntaxFeatures::Vue
+                .parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
+        }
         _ => {
             let m = p.start();
             parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
-            // Here we harness cases where we parse an attribute like: <i class.bind="icon">
-            // The parser correctly reads class, but then we find `.`, which we know to be a Vue syntax
-            if p.at_ts(VUE_DIRECTIVE_CHARS) {
-                m.abandon(p);
-                p.rewind(chpt);
-                return HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
-                    p,
-                    parse_vue_directive,
-                    |p, m| disabled_vue(p, m.range(p)),
-                );
-            }
 
             if p.at(T![=]) {
                 parse_attribute_initializer(p).ok();

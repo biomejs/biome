@@ -1160,7 +1160,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == HTML_LITERAL
+                    && element.kind() == VUE_IDENT
                 {
                     slots.mark_present();
                     current_element = elements.next();

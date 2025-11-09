@@ -334,7 +334,7 @@ AnyVueDirective =
 // <div v-bind:href="url" />
 //      ^^^^^^^^^^^^^^^^^
 VueDirective =
-  name: 'html_literal'
+  name: 'vue_ident'
   arg: VueDirectiveArgument?
   modifiers: VueModifierList
 	initializer: HtmlAttributeInitializerClause?

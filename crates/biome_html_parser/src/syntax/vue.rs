@@ -12,10 +12,15 @@ use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
-pub fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
+pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
+
     let m = p.start();
 
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    // FIXME: Ideally, the lexer would just lex VUE_IDENT directly
+    p.bump_remap_with_context(VUE_IDENT, HtmlLexContext::InsideTagVue);
     if p.at(T![:]) {
         parse_vue_directive_argument(p).ok();
     }
@@ -27,7 +32,7 @@ pub fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, VUE_DIRECTIVE))
 }
 
-pub fn parse_vue_v_bind_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax {
+pub(crate) fn parse_vue_v_bind_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![:]) {
         return Absent;
     }
@@ -49,7 +54,7 @@ pub fn parse_vue_v_bind_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax 
     Present(m.complete(p, VUE_V_BIND_SHORTHAND_DIRECTIVE))
 }
 
-pub fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax {
+pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![@]) {
         return Absent;
     }
@@ -98,7 +103,7 @@ fn parse_vue_dynamic_argument(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.expect_with_context(T!['['], HtmlLexContext::InsideTagVue);
+    p.bump_with_context(T!['['], HtmlLexContext::InsideTagVue);
     p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
     p.expect_with_context(T![']'], HtmlLexContext::InsideTagVue);
 
@@ -117,7 +122,7 @@ impl ParseNodeList for VueModifierList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![=])
+        p.at(T![=]) || p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(
@@ -127,7 +132,10 @@ impl ParseNodeList for VueModifierList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(VUE_BOGUS_DIRECTIVE, token_set![T![.], T![>]]),
+            &ParseRecoveryTokenSet::new(
+                VUE_BOGUS_DIRECTIVE,
+                token_set![T![.], T![>], T![/], T!['}']],
+            ),
             expected_attribute,
         )
     }

@@ -38,6 +38,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "IDENT",
         "HTML_IDENT",
         "SVELTE_IDENT",
+        "VUE_IDENT",
     ],
     nodes: &[
         "HTML_ROOT",

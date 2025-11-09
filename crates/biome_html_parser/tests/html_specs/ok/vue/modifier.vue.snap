@@ -7,8 +7,7 @@ expression: snapshot
 ```vue
 <template>
 	<div v-bind:bar.lower="'FOO'"></div>
-</template>>
-
+</template>
 ```
 
 
@@ -38,7 +37,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: HTML_LITERAL@17..23 "v-bind" [] [],
+                                name_token: VUE_IDENT@17..23 "v-bind" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@23..24 ":" [] [],
                                     arg: VueStaticArgument {
@@ -81,22 +80,19 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@59..60 ">" [] [],
             },
         },
-        HtmlContent {
-            value_token: HTML_LITERAL@60..61 ">" [] [],
-        },
     ],
-    eof_token: EOF@61..62 "" [Newline("\n")] [],
+    eof_token: EOF@60..60 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..62
+0: HTML_ROOT@0..60
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..61
+  3: HTML_ELEMENT_LIST@0..60
     0: HTML_ELEMENT@0..60
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
@@ -112,7 +108,7 @@ HtmlRoot {
               0: HTML_LITERAL@13..17 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@17..41
               0: VUE_DIRECTIVE@17..41
-                0: HTML_LITERAL@17..23 "v-bind" [] []
+                0: VUE_IDENT@17..23 "v-bind" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@23..27
                   0: COLON@23..24 ":" [] []
                   1: VUE_STATIC_ARGUMENT@24..27
@@ -139,8 +135,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@51..59
           0: HTML_LITERAL@51..59 "template" [] []
         3: R_ANGLE@59..60 ">" [] []
-    1: HTML_CONTENT@60..61
-      0: HTML_LITERAL@60..61 ">" [] []
-  4: EOF@61..62 "" [Newline("\n")] []
+  4: EOF@60..60 "" [] []
 
 ```
