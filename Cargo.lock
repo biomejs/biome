@@ -1644,11 +1644,13 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
