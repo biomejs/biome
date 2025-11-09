@@ -9,6 +9,7 @@ pub enum LanguageKind {
     Json,
     Css,
     Graphql,
+    Html,
 }
 
 impl LanguageKind {
@@ -18,6 +19,7 @@ impl LanguageKind {
             Self::Json => "json",
             Self::Css => "css",
             Self::Graphql => "graphql",
+            Self::Html => "html",
         }
     }
 }
@@ -30,6 +32,7 @@ impl FromStr for LanguageKind {
             "json" => Ok(Self::Json),
             "css" => Ok(Self::Css),
             "graphql" => Ok(Self::Graphql),
+            "html" => Ok(Self::Html),
             _ => Err("Unsupported value"),
         }
     }
@@ -345,6 +348,79 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
 
 impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<GraphqlRoot>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = {rule_name_upper_camel}Options;
+
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                    "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
+        LanguageKind::Html => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_html_syntax::HtmlRoot;
+use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
+
+{macro_name}! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```html,expect_diagnostic
+    /// <div></div>
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```html
+    /// <div>foo</div>
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "html",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<HtmlRoot>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
