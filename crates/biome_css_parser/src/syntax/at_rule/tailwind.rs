@@ -1,5 +1,6 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::at_rule::parse_at_rule_declarator;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
@@ -131,10 +132,14 @@ fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    let mut selector_list = SelectorList::default()
-        .with_end_kind_ts(token_set![T![')']])
-        .with_recovery_ts(token_set![T![')'], T![,], T![;]]);
-    selector_list.parse_list(p);
+    if p.at(T![@]) {
+        parse_at_rule_declarator(p).ok();
+    } else {
+        let mut selector_list = SelectorList::default()
+            .with_end_kind_ts(token_set![T![')']])
+            .with_recovery_ts(token_set![T![')'], T![,], T![;]]);
+        selector_list.parse_list(p);
+    }
     p.expect(T![')']);
     p.expect(T![;]);
 

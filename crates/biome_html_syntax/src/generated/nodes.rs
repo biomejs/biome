@@ -3626,14 +3626,14 @@ impl AstNode for AnyAstroFrontmatterElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::AstroBogusFrontmatter(it) => &it.syntax,
-            Self::AstroFrontmatterElement(it) => &it.syntax,
+            Self::AstroBogusFrontmatter(it) => it.syntax(),
+            Self::AstroFrontmatterElement(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::AstroBogusFrontmatter(it) => it.syntax,
-            Self::AstroFrontmatterElement(it) => it.syntax,
+            Self::AstroBogusFrontmatter(it) => it.into_syntax(),
+            Self::AstroFrontmatterElement(it) => it.into_syntax(),
         }
     }
 }
@@ -3648,8 +3648,8 @@ impl std::fmt::Debug for AnyAstroFrontmatterElement {
 impl From<AnyAstroFrontmatterElement> for SyntaxNode {
     fn from(n: AnyAstroFrontmatterElement) -> Self {
         match n {
-            AnyAstroFrontmatterElement::AstroBogusFrontmatter(it) => it.into(),
-            AnyAstroFrontmatterElement::AstroFrontmatterElement(it) => it.into(),
+            AnyAstroFrontmatterElement::AstroBogusFrontmatter(it) => it.into_syntax(),
+            AnyAstroFrontmatterElement::AstroFrontmatterElement(it) => it.into_syntax(),
         }
     }
 }
@@ -3720,20 +3720,20 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlAttribute(it) => &it.syntax,
-            Self::HtmlBogusAttribute(it) => &it.syntax,
-            Self::HtmlDoubleTextExpression(it) => &it.syntax,
-            Self::HtmlSingleTextExpression(it) => &it.syntax,
-            Self::SvelteAttachAttribute(it) => &it.syntax,
+            Self::HtmlAttribute(it) => it.syntax(),
+            Self::HtmlBogusAttribute(it) => it.syntax(),
+            Self::HtmlDoubleTextExpression(it) => it.syntax(),
+            Self::HtmlSingleTextExpression(it) => it.syntax(),
+            Self::SvelteAttachAttribute(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlAttribute(it) => it.syntax,
-            Self::HtmlBogusAttribute(it) => it.syntax,
-            Self::HtmlDoubleTextExpression(it) => it.syntax,
-            Self::HtmlSingleTextExpression(it) => it.syntax,
-            Self::SvelteAttachAttribute(it) => it.syntax,
+            Self::HtmlAttribute(it) => it.into_syntax(),
+            Self::HtmlBogusAttribute(it) => it.into_syntax(),
+            Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
+            Self::HtmlSingleTextExpression(it) => it.into_syntax(),
+            Self::SvelteAttachAttribute(it) => it.into_syntax(),
         }
     }
 }
@@ -3751,11 +3751,11 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
-            AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
-            AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
-            AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into(),
-            AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into(),
-            AnyHtmlAttribute::SvelteAttachAttribute(it) => it.into(),
+            AnyHtmlAttribute::HtmlAttribute(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttribute::HtmlSingleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttribute::SvelteAttachAttribute(it) => it.into_syntax(),
         }
     }
 }
@@ -3794,14 +3794,14 @@ impl AstNode for AnyHtmlAttributeInitializer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlSingleTextExpression(it) => &it.syntax,
-            Self::HtmlString(it) => &it.syntax,
+            Self::HtmlSingleTextExpression(it) => it.syntax(),
+            Self::HtmlString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlSingleTextExpression(it) => it.syntax,
-            Self::HtmlString(it) => it.syntax,
+            Self::HtmlSingleTextExpression(it) => it.into_syntax(),
+            Self::HtmlString(it) => it.into_syntax(),
         }
     }
 }
@@ -3816,8 +3816,8 @@ impl std::fmt::Debug for AnyHtmlAttributeInitializer {
 impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
     fn from(n: AnyHtmlAttributeInitializer) -> Self {
         match n {
-            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(it) => it.into(),
-            AnyHtmlAttributeInitializer::HtmlString(it) => it.into(),
+            AnyHtmlAttributeInitializer::HtmlSingleTextExpression(it) => it.into_syntax(),
+            AnyHtmlAttributeInitializer::HtmlString(it) => it.into_syntax(),
         }
     }
 }
@@ -3864,15 +3864,15 @@ impl AstNode for AnyHtmlContent {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlContent(it) => &it.syntax,
-            Self::HtmlEmbeddedContent(it) => &it.syntax,
+            Self::HtmlContent(it) => it.syntax(),
+            Self::HtmlEmbeddedContent(it) => it.syntax(),
             Self::AnyHtmlTextExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlContent(it) => it.syntax,
-            Self::HtmlEmbeddedContent(it) => it.syntax,
+            Self::HtmlContent(it) => it.into_syntax(),
+            Self::HtmlEmbeddedContent(it) => it.into_syntax(),
             Self::AnyHtmlTextExpression(it) => it.into_syntax(),
         }
     }
@@ -3889,9 +3889,9 @@ impl std::fmt::Debug for AnyHtmlContent {
 impl From<AnyHtmlContent> for SyntaxNode {
     fn from(n: AnyHtmlContent) -> Self {
         match n {
-            AnyHtmlContent::AnyHtmlTextExpression(it) => it.into(),
-            AnyHtmlContent::HtmlContent(it) => it.into(),
-            AnyHtmlContent::HtmlEmbeddedContent(it) => it.into(),
+            AnyHtmlContent::AnyHtmlTextExpression(it) => it.into_syntax(),
+            AnyHtmlContent::HtmlContent(it) => it.into_syntax(),
+            AnyHtmlContent::HtmlEmbeddedContent(it) => it.into_syntax(),
         }
     }
 }
@@ -3956,19 +3956,19 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlBogusElement(it) => &it.syntax,
-            Self::HtmlCdataSection(it) => &it.syntax,
-            Self::HtmlElement(it) => &it.syntax,
-            Self::HtmlSelfClosingElement(it) => &it.syntax,
+            Self::HtmlBogusElement(it) => it.syntax(),
+            Self::HtmlCdataSection(it) => it.syntax(),
+            Self::HtmlElement(it) => it.syntax(),
+            Self::HtmlSelfClosingElement(it) => it.syntax(),
             Self::AnyHtmlContent(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlBogusElement(it) => it.syntax,
-            Self::HtmlCdataSection(it) => it.syntax,
-            Self::HtmlElement(it) => it.syntax,
-            Self::HtmlSelfClosingElement(it) => it.syntax,
+            Self::HtmlBogusElement(it) => it.into_syntax(),
+            Self::HtmlCdataSection(it) => it.into_syntax(),
+            Self::HtmlElement(it) => it.into_syntax(),
+            Self::HtmlSelfClosingElement(it) => it.into_syntax(),
             Self::AnyHtmlContent(it) => it.into_syntax(),
         }
     }
@@ -3987,11 +3987,11 @@ impl std::fmt::Debug for AnyHtmlElement {
 impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> Self {
         match n {
-            AnyHtmlElement::AnyHtmlContent(it) => it.into(),
-            AnyHtmlElement::HtmlBogusElement(it) => it.into(),
-            AnyHtmlElement::HtmlCdataSection(it) => it.into(),
-            AnyHtmlElement::HtmlElement(it) => it.into(),
-            AnyHtmlElement::HtmlSelfClosingElement(it) => it.into(),
+            AnyHtmlElement::AnyHtmlContent(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlSelfClosingElement(it) => it.into_syntax(),
         }
     }
 }
@@ -4053,17 +4053,17 @@ impl AstNode for AnyHtmlTextExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlBogusTextExpression(it) => &it.syntax,
-            Self::HtmlDoubleTextExpression(it) => &it.syntax,
-            Self::HtmlSingleTextExpression(it) => &it.syntax,
+            Self::HtmlBogusTextExpression(it) => it.syntax(),
+            Self::HtmlDoubleTextExpression(it) => it.syntax(),
+            Self::HtmlSingleTextExpression(it) => it.syntax(),
             Self::AnySvelteBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlBogusTextExpression(it) => it.syntax,
-            Self::HtmlDoubleTextExpression(it) => it.syntax,
-            Self::HtmlSingleTextExpression(it) => it.syntax,
+            Self::HtmlBogusTextExpression(it) => it.into_syntax(),
+            Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
+            Self::HtmlSingleTextExpression(it) => it.into_syntax(),
             Self::AnySvelteBlock(it) => it.into_syntax(),
         }
     }
@@ -4081,10 +4081,10 @@ impl std::fmt::Debug for AnyHtmlTextExpression {
 impl From<AnyHtmlTextExpression> for SyntaxNode {
     fn from(n: AnyHtmlTextExpression) -> Self {
         match n {
-            AnyHtmlTextExpression::AnySvelteBlock(it) => it.into(),
-            AnyHtmlTextExpression::HtmlBogusTextExpression(it) => it.into(),
-            AnyHtmlTextExpression::HtmlDoubleTextExpression(it) => it.into(),
-            AnyHtmlTextExpression::HtmlSingleTextExpression(it) => it.into(),
+            AnyHtmlTextExpression::AnySvelteBlock(it) => it.into_syntax(),
+            AnyHtmlTextExpression::HtmlBogusTextExpression(it) => it.into_syntax(),
+            AnyHtmlTextExpression::HtmlDoubleTextExpression(it) => it.into_syntax(),
+            AnyHtmlTextExpression::HtmlSingleTextExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -4165,24 +4165,24 @@ impl AstNode for AnySvelteBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::SvelteBogusBlock(it) => &it.syntax,
-            Self::SvelteConstBlock(it) => &it.syntax,
-            Self::SvelteDebugBlock(it) => &it.syntax,
-            Self::SvelteHtmlBlock(it) => &it.syntax,
-            Self::SvelteIfBlock(it) => &it.syntax,
-            Self::SvelteKeyBlock(it) => &it.syntax,
-            Self::SvelteRenderBlock(it) => &it.syntax,
+            Self::SvelteBogusBlock(it) => it.syntax(),
+            Self::SvelteConstBlock(it) => it.syntax(),
+            Self::SvelteDebugBlock(it) => it.syntax(),
+            Self::SvelteHtmlBlock(it) => it.syntax(),
+            Self::SvelteIfBlock(it) => it.syntax(),
+            Self::SvelteKeyBlock(it) => it.syntax(),
+            Self::SvelteRenderBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::SvelteBogusBlock(it) => it.syntax,
-            Self::SvelteConstBlock(it) => it.syntax,
-            Self::SvelteDebugBlock(it) => it.syntax,
-            Self::SvelteHtmlBlock(it) => it.syntax,
-            Self::SvelteIfBlock(it) => it.syntax,
-            Self::SvelteKeyBlock(it) => it.syntax,
-            Self::SvelteRenderBlock(it) => it.syntax,
+            Self::SvelteBogusBlock(it) => it.into_syntax(),
+            Self::SvelteConstBlock(it) => it.into_syntax(),
+            Self::SvelteDebugBlock(it) => it.into_syntax(),
+            Self::SvelteHtmlBlock(it) => it.into_syntax(),
+            Self::SvelteIfBlock(it) => it.into_syntax(),
+            Self::SvelteKeyBlock(it) => it.into_syntax(),
+            Self::SvelteRenderBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -4202,13 +4202,13 @@ impl std::fmt::Debug for AnySvelteBlock {
 impl From<AnySvelteBlock> for SyntaxNode {
     fn from(n: AnySvelteBlock) -> Self {
         match n {
-            AnySvelteBlock::SvelteBogusBlock(it) => it.into(),
-            AnySvelteBlock::SvelteConstBlock(it) => it.into(),
-            AnySvelteBlock::SvelteDebugBlock(it) => it.into(),
-            AnySvelteBlock::SvelteHtmlBlock(it) => it.into(),
-            AnySvelteBlock::SvelteIfBlock(it) => it.into(),
-            AnySvelteBlock::SvelteKeyBlock(it) => it.into(),
-            AnySvelteBlock::SvelteRenderBlock(it) => it.into(),
+            AnySvelteBlock::SvelteBogusBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteConstBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteDebugBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteHtmlBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteIfBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteKeyBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteRenderBlock(it) => it.into_syntax(),
         }
     }
 }

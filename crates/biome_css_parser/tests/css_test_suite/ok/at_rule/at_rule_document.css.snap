@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -334,34 +333,36 @@ CssRoot {
                         CssAtRule {
                             at_token: AT@478..481 "@" [Newline("\n"), Whitespace("\t")] [],
                             rule: CssMediaAtRule {
-                                media_token: MEDIA_KW@481..487 "media" [] [Whitespace(" ")],
-                                queries: CssMediaQueryList [
-                                    CssMediaAndTypeQuery {
-                                        left: CssMediaTypeQuery {
-                                            modifier: missing (optional),
-                                            ty: CssMediaType {
-                                                value: CssIdentifier {
-                                                    value_token: IDENT@487..494 "screen" [] [Whitespace(" ")],
+                                declarator: CssMediaAtRuleDeclarator {
+                                    media_token: MEDIA_KW@481..487 "media" [] [Whitespace(" ")],
+                                    queries: CssMediaQueryList [
+                                        CssMediaAndTypeQuery {
+                                            left: CssMediaTypeQuery {
+                                                modifier: missing (optional),
+                                                ty: CssMediaType {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@487..494 "screen" [] [Whitespace(" ")],
+                                                    },
                                                 },
                                             },
-                                        },
-                                        and_token: AND_KW@494..498 "and" [] [Whitespace(" ")],
-                                        right: CssMediaFeatureInParens {
-                                            l_paren_token: L_PAREN@498..499 "(" [] [],
-                                            feature: CssQueryFeaturePlain {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@499..508 "min-width" [] [],
+                                            and_token: AND_KW@494..498 "and" [] [Whitespace(" ")],
+                                            right: CssMediaFeatureInParens {
+                                                l_paren_token: L_PAREN@498..499 "(" [] [],
+                                                feature: CssQueryFeaturePlain {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@499..508 "min-width" [] [],
+                                                    },
+                                                    colon_token: COLON@508..510 ":" [] [Whitespace(" ")],
+                                                    value: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@510..513 "900" [] [],
+                                                        unit_token: IDENT@513..515 "px" [] [],
+                                                    },
                                                 },
-                                                colon_token: COLON@508..510 ":" [] [Whitespace(" ")],
-                                                value: CssRegularDimension {
-                                                    value_token: CSS_NUMBER_LITERAL@510..513 "900" [] [],
-                                                    unit_token: IDENT@513..515 "px" [] [],
-                                                },
+                                                r_paren_token: R_PAREN@515..517 ")" [] [Whitespace(" ")],
                                             },
-                                            r_paren_token: R_PAREN@515..517 ")" [] [Whitespace(" ")],
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                                 block: CssDeclarationOrRuleBlock {
                                     l_curly_token: L_CURLY@517..518 "{" [] [],
                                     items: CssDeclarationOrRuleList [
@@ -996,26 +997,27 @@ CssRoot {
             0: CSS_AT_RULE@478..560
               0: AT@478..481 "@" [Newline("\n"), Whitespace("\t")] []
               1: CSS_MEDIA_AT_RULE@481..560
-                0: MEDIA_KW@481..487 "media" [] [Whitespace(" ")]
-                1: CSS_MEDIA_QUERY_LIST@487..517
-                  0: CSS_MEDIA_AND_TYPE_QUERY@487..517
-                    0: CSS_MEDIA_TYPE_QUERY@487..494
-                      0: (empty)
-                      1: CSS_MEDIA_TYPE@487..494
-                        0: CSS_IDENTIFIER@487..494
-                          0: IDENT@487..494 "screen" [] [Whitespace(" ")]
-                    1: AND_KW@494..498 "and" [] [Whitespace(" ")]
-                    2: CSS_MEDIA_FEATURE_IN_PARENS@498..517
-                      0: L_PAREN@498..499 "(" [] []
-                      1: CSS_QUERY_FEATURE_PLAIN@499..515
-                        0: CSS_IDENTIFIER@499..508
-                          0: IDENT@499..508 "min-width" [] []
-                        1: COLON@508..510 ":" [] [Whitespace(" ")]
-                        2: CSS_REGULAR_DIMENSION@510..515
-                          0: CSS_NUMBER_LITERAL@510..513 "900" [] []
-                          1: IDENT@513..515 "px" [] []
-                      2: R_PAREN@515..517 ")" [] [Whitespace(" ")]
-                2: CSS_DECLARATION_OR_RULE_BLOCK@517..560
+                0: CSS_MEDIA_AT_RULE_DECLARATOR@481..517
+                  0: MEDIA_KW@481..487 "media" [] [Whitespace(" ")]
+                  1: CSS_MEDIA_QUERY_LIST@487..517
+                    0: CSS_MEDIA_AND_TYPE_QUERY@487..517
+                      0: CSS_MEDIA_TYPE_QUERY@487..494
+                        0: (empty)
+                        1: CSS_MEDIA_TYPE@487..494
+                          0: CSS_IDENTIFIER@487..494
+                            0: IDENT@487..494 "screen" [] [Whitespace(" ")]
+                      1: AND_KW@494..498 "and" [] [Whitespace(" ")]
+                      2: CSS_MEDIA_FEATURE_IN_PARENS@498..517
+                        0: L_PAREN@498..499 "(" [] []
+                        1: CSS_QUERY_FEATURE_PLAIN@499..515
+                          0: CSS_IDENTIFIER@499..508
+                            0: IDENT@499..508 "min-width" [] []
+                          1: COLON@508..510 ":" [] [Whitespace(" ")]
+                          2: CSS_REGULAR_DIMENSION@510..515
+                            0: CSS_NUMBER_LITERAL@510..513 "900" [] []
+                            1: IDENT@513..515 "px" [] []
+                        2: R_PAREN@515..517 ")" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_BLOCK@517..560
                   0: L_CURLY@517..518 "{" [] []
                   1: CSS_DECLARATION_OR_RULE_LIST@518..557
                     0: CSS_NESTED_QUALIFIED_RULE@518..557

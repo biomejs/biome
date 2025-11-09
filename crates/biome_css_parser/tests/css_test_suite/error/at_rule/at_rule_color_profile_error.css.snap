@@ -24,10 +24,14 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssBogusAtRule {
                 items: [
-                    COLOR_PROFILE_KW@1..15 "color-profile" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")],
+                            COLOR_PROFILE_KW@1..15 "color-profile" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -42,10 +46,14 @@ CssRoot {
             at_token: AT@26..28 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    COLOR_PROFILE_KW@28..42 "color-profile" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")],
+                            COLOR_PROFILE_KW@28..42 "color-profile" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -60,7 +68,11 @@ CssRoot {
             at_token: AT@55..57 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")],
+                    CssBogus {
+                        items: [
+                            COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")],
+                        ],
+                    },
                     CssDeclarationBlock {
                         l_curly_token: L_CURLY@72..75 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
@@ -72,9 +84,11 @@ CssRoot {
         CssAtRule {
             at_token: AT@76..78 "@" [Newline("\n")] [],
             rule: CssColorProfileAtRule {
-                color_profile_token: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@92..103 "DEVICE-CMYK" [] [],
+                declarator: CssColorProfileAtRuleDeclarator {
+                    color_profile_token: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@92..103 "DEVICE-CMYK" [] [],
+                    },
                 },
                 block: CssBogusBlock {
                     items: [],
@@ -85,7 +99,11 @@ CssRoot {
             at_token: AT@103..105 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    COLOR_PROFILE_KW@105..118 "color-profile" [] [],
+                    CssBogus {
+                        items: [
+                            COLOR_PROFILE_KW@105..118 "color-profile" [] [],
+                        ],
+                    },
                     CssBogusBlock {
                         items: [],
                     },
@@ -106,27 +124,30 @@ CssRoot {
     0: CSS_AT_RULE@0..26
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..26
-        0: COLOR_PROFILE_KW@1..15 "color-profile" [] [Whitespace(" ")]
-        1: CSS_BOGUS@15..22
-          0: CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@22..26
+        0: CSS_BOGUS@1..22
+          0: COLOR_PROFILE_KW@1..15 "color-profile" [] [Whitespace(" ")]
+          1: CSS_BOGUS@15..22
+            0: CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
           2: R_CURLY@25..26 "}" [] []
     1: CSS_AT_RULE@26..55
       0: AT@26..28 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@28..55
-        0: COLOR_PROFILE_KW@28..42 "color-profile" [] [Whitespace(" ")]
-        1: CSS_BOGUS@42..51
-          0: CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@51..55
+        0: CSS_BOGUS@28..51
+          0: COLOR_PROFILE_KW@28..42 "color-profile" [] [Whitespace(" ")]
+          1: CSS_BOGUS@42..51
+            0: CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@51..55
           0: L_CURLY@51..54 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@54..54
           2: R_CURLY@54..55 "}" [] []
     2: CSS_AT_RULE@55..76
       0: AT@55..57 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@57..76
-        0: COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")]
+        0: CSS_BOGUS@57..72
+          0: COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")]
         1: CSS_DECLARATION_BLOCK@72..76
           0: L_CURLY@72..75 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@75..75
@@ -134,14 +155,16 @@ CssRoot {
     3: CSS_AT_RULE@76..103
       0: AT@76..78 "@" [Newline("\n")] []
       1: CSS_COLOR_PROFILE_AT_RULE@78..103
-        0: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@92..103
-          0: IDENT@92..103 "DEVICE-CMYK" [] []
-        2: CSS_BOGUS_BLOCK@103..103
+        0: CSS_COLOR_PROFILE_AT_RULE_DECLARATOR@78..103
+          0: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@92..103
+            0: IDENT@92..103 "DEVICE-CMYK" [] []
+        1: CSS_BOGUS_BLOCK@103..103
     4: CSS_AT_RULE@103..118
       0: AT@103..105 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@105..118
-        0: COLOR_PROFILE_KW@105..118 "color-profile" [] []
+        0: CSS_BOGUS@105..118
+          0: COLOR_PROFILE_KW@105..118 "color-profile" [] []
         1: CSS_BOGUS_BLOCK@118..118
   2: EOF@118..119 "" [Newline("\n")] []
 
