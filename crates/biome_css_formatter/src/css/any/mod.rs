@@ -1,6 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod at_rule;
+pub(crate) mod at_rule_declarator;
 pub(crate) mod attribute_matcher_value;
 pub(crate) mod composes_import_source;
 pub(crate) mod compound_selector;

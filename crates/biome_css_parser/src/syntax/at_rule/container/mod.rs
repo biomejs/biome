@@ -72,6 +72,19 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    parse_container_at_rule_declarator(p).ok();
+    parse_conditional_block(p);
+
+    Present(m.complete(p, CSS_CONTAINER_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_container_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_container_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
     p.bump(T![container]);
 
     if !is_at_container_style_query_in_parens(p) {
@@ -90,13 +103,12 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_any_container_query(p)
         .or_recover(p, &AnyQueryParseRecovery, expected_any_container_query)
         .ok();
-    parse_conditional_block(p);
 
-    Present(m.complete(p, CSS_CONTAINER_AT_RULE))
+    Present(m.complete(p, CSS_CONTAINER_AT_RULE_DECLARATOR))
 }
 
 #[inline]
-fn parse_any_container_query(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_container_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_container_not_query(p) {
         parse_container_not_query(p)
     } else {

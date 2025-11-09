@@ -23,13 +23,25 @@ pub(crate) fn parse_scope_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump(T![scope]);
-
-    parse_any_scope_range(p).ok(); // it's optional
-
+    parse_scope_at_rule_declarator(p).ok();
     parse_conditional_block(p);
 
     Present(m.complete(p, CSS_SCOPE_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_scope_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scope_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![scope]);
+
+    // Optional scope range
+    parse_any_scope_range(p).ok();
+
+    Present(m.complete(p, CSS_SCOPE_AT_RULE_DECLARATOR))
 }
 
 const SCOPE_RANGE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
