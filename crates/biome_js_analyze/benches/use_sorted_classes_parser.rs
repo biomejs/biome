@@ -1,9 +1,5 @@
-//! Benchmark for the Tailwind CSS class parser in `use_sorted_classes` rule.
-//!
-//! Useful for comparing performance to the newer (and hopefully better) `biome_tailwind_parser` crate.
-
 use biome_js_analyze::lint::nursery::use_sorted_classes::class_lexer::tokenize_class;
-use divan::{Bencher, counter::BytesCount};
+use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -21,11 +17,8 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
 
-fn main() {
-    // Run registered benchmarks.
-    divan::main();
-}
-
+/// Benchmark for the Tailwind CSS class parser in `use_sorted_classes` rule,
+/// ported from divan to criterion.
 const CLASS_STRING_FIXTURES: &[(&str, &str)] = &[
     (
         "simple_classes",
@@ -46,23 +39,28 @@ const CLASS_STRING_FIXTURES: &[(&str, &str)] = &[
     ),
 ];
 
-fn class_string_cases() -> impl Iterator<Item = &'static str> {
-    CLASS_STRING_FIXTURES.iter().map(|(name, _)| *name)
+fn bench_use_sorted_classes_parser(c: &mut Criterion) {
+    let mut group = c.benchmark_group("use_sorted_classes_parser");
+
+    for (name, content) in CLASS_STRING_FIXTURES {
+        let len = content.len() as u64;
+        group.throughput(Throughput::Bytes(len));
+
+        group.bench_with_input(
+            BenchmarkId::new("class_strings", name),
+            content,
+            |b, input| {
+                b.iter(|| {
+                    for class in input.split_whitespace() {
+                        black_box(tokenize_class(black_box(class)));
+                    }
+                });
+            },
+        );
+    }
+
+    group.finish();
 }
 
-#[divan::bench(name = "class_strings", args = class_string_cases(), sample_size=10)]
-fn bench_class_strings(bencher: Bencher, name: &str) {
-    bencher
-        .with_inputs(|| {
-            CLASS_STRING_FIXTURES
-                .iter()
-                .find_map(|(case_name, content)| (*case_name == name).then_some(*content))
-                .expect("cannot find test case")
-        })
-        .input_counter(BytesCount::of_str)
-        .bench_local_values(|content| {
-            for class in content.split_whitespace() {
-                divan::black_box(tokenize_class(divan::black_box(class)));
-            }
-        });
-}
+criterion_group!(use_sorted_classes_parser, bench_use_sorted_classes_parser);
+criterion_main!(use_sorted_classes_parser);

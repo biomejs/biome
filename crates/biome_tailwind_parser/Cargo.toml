@@ -28,7 +28,7 @@ tracing                = { workspace = true }
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
 camino            = { workspace = true }
-divan             = { package = "codspeed-divan-compat", version = "4.0.4" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

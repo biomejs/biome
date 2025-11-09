@@ -1,7 +1,9 @@
+use std::fs;
+use std::path::Path;
+
 use biome_rowan::NodeCache;
 use biome_tailwind_parser::{parse_tailwind, parse_tailwind_with_cache};
-use divan::{Bencher, counter::BytesCount};
-use std::path::Path;
+use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -19,57 +21,57 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
 
-fn main() {
-    divan::main();
-}
+/// Load fixture files from `benches/fixtures` returning (file_name, content).
+fn load_fixtures() -> Vec<(String, String)> {
+    let fixtures_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("benches/fixtures");
+    let mut fixtures = Vec::new();
 
-fn fixture_names() -> impl Iterator<Item = String> {
-    let fixtures_dir = Path::new("benches/fixtures");
-    let mut names = Vec::new();
-
-    if let Ok(entries) = std::fs::read_dir(fixtures_dir) {
+    if let Ok(entries) = fs::read_dir(&fixtures_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_file()
-                && let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
-                    names.push(file_name.to_string());
-                }
+                && let Some(file_name) = path.file_name().and_then(|n| n.to_str())
+            {
+                let content = fs::read_to_string(&path).expect("Failed to read fixture file");
+                fixtures.push((file_name.to_string(), content));
+            }
         }
     }
 
-    names.into_iter()
+    fixtures
 }
 
-#[divan::bench(name = "uncached", args = fixture_names(), sample_size=10)]
-fn bench_uncached(bencher: Bencher, filename: &str) {
-    let fixtures_dir = Path::new("benches/fixtures");
-    let path = fixtures_dir.join(filename);
-    let code = std::fs::read_to_string(&path).unwrap_or_default();
+fn bench_tailwind(c: &mut Criterion) {
+    let fixtures = load_fixtures();
 
-    bencher
-        .with_inputs(|| code.clone())
-        .input_counter(BytesCount::of_str)
-        .bench_local_values(|code| {
-            let result = parse_tailwind(&code);
-            divan::black_box(result);
+    let mut group = c.benchmark_group("tailwind_parser");
+
+    for (name, content) in &fixtures {
+        let len = content.len() as u64;
+
+        group.throughput(Throughput::Bytes(len));
+        group.bench_with_input(BenchmarkId::new("uncached", name), content, |b, code| {
+            b.iter(|| {
+                let result = parse_tailwind(black_box(code));
+                black_box(result);
+            });
         });
-}
 
-#[divan::bench(name = "cached", args = fixture_names(), sample_size=10)]
-fn bench_cached(bencher: Bencher, filename: &str) {
-    let fixtures_dir = Path::new("benches/fixtures");
-    let path = fixtures_dir.join(filename);
-    let code = std::fs::read_to_string(&path).unwrap_or_default();
-
-    bencher
-        .with_inputs(|| {
+        group.throughput(Throughput::Bytes(len));
+        group.bench_with_input(BenchmarkId::new("cached", name), content, |b, code| {
             let mut cache = NodeCache::default();
-            // Warm-up parse to populate cache.
-            let _ = parse_tailwind_with_cache(&code, &mut cache);
-            (cache, code.clone())
-        })
-        .input_counter(|(_cache, code)| BytesCount::of_str(code))
-        .bench_local_values(|(mut cache, code)| {
-            divan::black_box(parse_tailwind_with_cache(&code, &mut cache));
+            // Warm-up parse to populate cache (excluded from measurement).
+            let _ = parse_tailwind_with_cache(code, &mut cache);
+
+            b.iter(|| {
+                let result = parse_tailwind_with_cache(black_box(code), &mut cache);
+                black_box(result);
+            });
         });
+    }
+
+    group.finish();
 }
+
+criterion_group!(tailwind_parser, bench_tailwind);
+criterion_main!(tailwind_parser);
