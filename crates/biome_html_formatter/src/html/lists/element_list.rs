@@ -137,10 +137,10 @@ pub(crate) enum FormatChildrenResult {
 impl Format<HtmlFormatContext> for FormatChildrenResult {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match self {
-            FormatChildrenResult::ForceMultiline(multiline) => {
+            Self::ForceMultiline(multiline) => {
                 write!(f, [multiline])
             }
-            FormatChildrenResult::BestFitting {
+            Self::BestFitting {
                 flat_children,
                 expanded_children,
                 group_id,
