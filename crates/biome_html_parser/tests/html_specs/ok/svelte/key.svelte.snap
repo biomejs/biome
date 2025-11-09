@@ -27,9 +27,9 @@ HtmlRoot {
         SvelteKeyBlock {
             opening_block: SvelteKeyOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                key_token: KEY_KW@2..6 "key" [] [Whitespace(" ")],
+                key_token: KEY_KW@2..5 "key" [] [],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@6..16 "expression" [] [],
+                    html_literal_token: HTML_LITERAL@5..16 " expression" [] [],
                 },
                 r_curly_token: R_CURLY@16..17 "}" [] [],
             },
@@ -47,9 +47,9 @@ HtmlRoot {
         SvelteKeyBlock {
             opening_block: SvelteKeyOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@35..39 "{#" [Newline("\n"), Newline("\n")] [],
-                key_token: KEY_KW@39..43 "key" [] [Whitespace(" ")],
+                key_token: KEY_KW@39..42 "key" [] [],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@43..46 "key" [] [],
+                    html_literal_token: HTML_LITERAL@42..46 " key" [] [],
                 },
                 r_curly_token: R_CURLY@46..47 "}" [] [],
             },
@@ -80,9 +80,9 @@ HtmlRoot {
     0: SVELTE_KEY_BLOCK@0..35
       0: SVELTE_KEY_OPENING_BLOCK@0..17
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: KEY_KW@2..6 "key" [] [Whitespace(" ")]
-        2: HTML_TEXT_EXPRESSION@6..16
-          0: HTML_LITERAL@6..16 "expression" [] []
+        1: KEY_KW@2..5 "key" [] []
+        2: HTML_TEXT_EXPRESSION@5..16
+          0: HTML_LITERAL@5..16 " expression" [] []
         3: R_CURLY@16..17 "}" [] []
       1: HTML_ELEMENT_LIST@17..28
         0: HTML_CONTENT@17..28
@@ -94,9 +94,9 @@ HtmlRoot {
     1: SVELTE_KEY_BLOCK@35..65
       0: SVELTE_KEY_OPENING_BLOCK@35..47
         0: SV_CURLY_HASH@35..39 "{#" [Newline("\n"), Newline("\n")] []
-        1: KEY_KW@39..43 "key" [] [Whitespace(" ")]
-        2: HTML_TEXT_EXPRESSION@43..46
-          0: HTML_LITERAL@43..46 "key" [] []
+        1: KEY_KW@39..42 "key" [] []
+        2: HTML_TEXT_EXPRESSION@42..46
+          0: HTML_LITERAL@42..46 " key" [] []
         3: R_CURLY@46..47 "}" [] []
       1: HTML_ELEMENT_LIST@47..58
         0: HTML_CONTENT@47..58

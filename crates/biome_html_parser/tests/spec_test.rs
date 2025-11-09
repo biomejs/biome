@@ -142,8 +142,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{@html '<div>'}content{@html '</div>'}
-
+    let code = r#"{@debug something,}
     "#;
 
     let root = parse_html(code, (&HtmlFileSource::svelte()).into());

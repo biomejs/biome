@@ -37,6 +37,10 @@ pub(crate) fn expected_text_expression(p: &HtmlParser, range: TextRange) -> Pars
 }
 
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(&["element", "text"], range).into_diagnostic(p)
+}
+
+pub(crate) fn expected_child_or_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["element", "text", "closing block"], range).into_diagnostic(p)
 }
 

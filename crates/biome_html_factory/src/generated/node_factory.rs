@@ -395,6 +395,42 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_else_clause(
+    sv_curly_colon_token: SyntaxToken,
+    else_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteElseClause {
+    SvelteElseClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_ELSE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_else_if_clause(
+    sv_curly_colon_token: SyntaxToken,
+    else_token: SyntaxToken,
+    if_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteElseIfClause {
+    SvelteElseIfClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_html_block(
     sv_curly_at_token: SyntaxToken,
     html_token: SyntaxToken,
@@ -408,6 +444,74 @@ pub fn svelte_html_block(
             Some(SyntaxElement::Token(html_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_if_block(
+    opening_block: SvelteIfOpeningBlock,
+    else_if_clauses: SvelteElseIfClauseList,
+    closing_block: SvelteIfClosingBlock,
+) -> SvelteIfBlockBuilder {
+    SvelteIfBlockBuilder {
+        opening_block,
+        else_if_clauses,
+        closing_block,
+        else_clause: None,
+    }
+}
+pub struct SvelteIfBlockBuilder {
+    opening_block: SvelteIfOpeningBlock,
+    else_if_clauses: SvelteElseIfClauseList,
+    closing_block: SvelteIfClosingBlock,
+    else_clause: Option<SvelteElseClause>,
+}
+impl SvelteIfBlockBuilder {
+    pub fn with_else_clause(mut self, else_clause: SvelteElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> SvelteIfBlock {
+        SvelteIfBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_IF_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Node(self.else_if_clauses.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.closing_block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_if_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    if_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteIfClosingBlock {
+    SvelteIfClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_IF_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_if_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    if_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteIfOpeningBlock {
+    SvelteIfOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_IF_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_hash_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
         ],
     ))
 }
@@ -520,6 +624,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn svelte_else_if_clause_list<I>(items: I) -> SvelteElseIfClauseList
+where
+    I: IntoIterator<Item = SvelteElseIfClause>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter
