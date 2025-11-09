@@ -221,7 +221,8 @@ impl Rule for NoBannedTypes {
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             banned_type_range,
-            markup! {"Don't use '"<Emphasis>{banned_type.to_string()}</Emphasis>"' as a type."}.to_owned(),
+            markup! {"Don't use '"<Emphasis>{banned_type.to_string()}</Emphasis>"' as a type."}
+                .to_owned(),
         )
         .note(banned_type.message())
         // TODO: Update this if/when the rule gets split up or has individual disabling options added
