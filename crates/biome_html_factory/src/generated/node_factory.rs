@@ -581,6 +581,152 @@ pub fn svelte_render_block(
         ],
     ))
 }
+pub fn vue_directive(name_token: SyntaxToken, modifiers: VueModifierList) -> VueDirectiveBuilder {
+    VueDirectiveBuilder {
+        name_token,
+        modifiers,
+        arg: None,
+        initializer: None,
+    }
+}
+pub struct VueDirectiveBuilder {
+    name_token: SyntaxToken,
+    modifiers: VueModifierList,
+    arg: Option<VueDirectiveArgument>,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl VueDirectiveBuilder {
+    pub fn with_arg(mut self, arg: VueDirectiveArgument) -> Self {
+        self.arg = Some(arg);
+        self
+    }
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> VueDirective {
+        VueDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_DIRECTIVE,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                self.arg
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn vue_directive_argument(
+    colon_token: SyntaxToken,
+    arg: AnyVueDirectiveArgument,
+) -> VueDirectiveArgument {
+    VueDirectiveArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(arg.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_dynamic_argument(
+    l_brack_token: SyntaxToken,
+    name_token: SyntaxToken,
+    r_brack_token: SyntaxToken,
+) -> VueDynamicArgument {
+    VueDynamicArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DYNAMIC_ARGUMENT,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn vue_modifier(dot_token: SyntaxToken, modifier_token: SyntaxToken) -> VueModifier {
+    VueModifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_MODIFIER,
+        [
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Token(modifier_token)),
+        ],
+    ))
+}
+pub fn vue_static_argument(name_token: SyntaxToken) -> VueStaticArgument {
+    VueStaticArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_STATIC_ARGUMENT,
+        [Some(SyntaxElement::Token(name_token))],
+    ))
+}
+pub fn vue_v_bind_shorthand_directive(
+    arg: VueDirectiveArgument,
+    modifiers: VueModifierList,
+) -> VueVBindShorthandDirectiveBuilder {
+    VueVBindShorthandDirectiveBuilder {
+        arg,
+        modifiers,
+        initializer: None,
+    }
+}
+pub struct VueVBindShorthandDirectiveBuilder {
+    arg: VueDirectiveArgument,
+    modifiers: VueModifierList,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl VueVBindShorthandDirectiveBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> VueVBindShorthandDirective {
+        VueVBindShorthandDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_BIND_SHORTHAND_DIRECTIVE,
+            [
+                Some(SyntaxElement::Node(self.arg.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn vue_v_on_shorthand_directive(
+    at_token: SyntaxToken,
+    arg: AnyVueDirectiveArgument,
+    modifiers: VueModifierList,
+) -> VueVOnShorthandDirectiveBuilder {
+    VueVOnShorthandDirectiveBuilder {
+        at_token,
+        arg,
+        modifiers,
+        initializer: None,
+    }
+}
+pub struct VueVOnShorthandDirectiveBuilder {
+    at_token: SyntaxToken,
+    arg: AnyVueDirectiveArgument,
+    modifiers: VueModifierList,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl VueVOnShorthandDirectiveBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> VueVOnShorthandDirective {
+        VueVOnShorthandDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_ON_SHORTHAND_DIRECTIVE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Node(self.arg.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,
@@ -633,6 +779,18 @@ where
 {
     SvelteElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn vue_modifier_list<I>(items: I) -> VueModifierList
+where
+    I: IntoIterator<Item = VueModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    VueModifierList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_MODIFIER_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
@@ -692,6 +850,26 @@ where
 {
     SvelteBogusBlock::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_BOGUS_BLOCK,
+        slots,
+    ))
+}
+pub fn vue_bogus_directive<I>(slots: I) -> VueBogusDirective
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    VueBogusDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE,
+        slots,
+    ))
+}
+pub fn vue_bogus_directive_argument<I>(slots: I) -> VueBogusDirectiveArgument
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    VueBogusDirectiveArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE_ARGUMENT,
         slots,
     ))
 }
