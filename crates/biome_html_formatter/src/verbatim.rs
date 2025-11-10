@@ -4,8 +4,8 @@ use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
-    Tag, dynamic_text, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
-    should_nestle_adjacent_doc_comments, soft_line_break_or_space, space,
+    Tag, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
+    should_nestle_adjacent_doc_comments, soft_line_break_or_space, space, text,
 };
 
 use biome_formatter::{
@@ -139,7 +139,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             },
         );
 
-        dynamic_text(
+        text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
             self.node.text_trimmed_range().start(),
         )

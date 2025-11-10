@@ -1,0 +1,273 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	<div v-foo:bar.baz="5"></div>
+	<div :bar.baz="5"></div>
+	<div @bar.baz="5"></div>
+</template>
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@13..17 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueDirective {
+                                name_token: VUE_IDENT@17..22 "v-foo" [] [],
+                                arg: VueDirectiveArgument {
+                                    colon_token: COLON@22..23 ":" [] [],
+                                    arg: VueStaticArgument {
+                                        name_token: HTML_LITERAL@23..26 "bar" [] [],
+                                    },
+                                },
+                                modifiers: VueModifierList [
+                                    VueModifier {
+                                        dot_token: DOT@26..27 "." [] [],
+                                        modifier_token: HTML_LITERAL@27..30 "baz" [] [],
+                                    },
+                                ],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@30..31 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@31..34 "\"5\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@34..35 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@35..36 "<" [] [],
+                        slash_token: SLASH@36..37 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@37..40 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@40..41 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@41..44 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@44..48 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueVBindShorthandDirective {
+                                arg: VueDirectiveArgument {
+                                    colon_token: COLON@48..49 ":" [] [],
+                                    arg: VueStaticArgument {
+                                        name_token: HTML_LITERAL@49..52 "bar" [] [],
+                                    },
+                                },
+                                modifiers: VueModifierList [
+                                    VueModifier {
+                                        dot_token: DOT@52..53 "." [] [],
+                                        modifier_token: HTML_LITERAL@53..56 "baz" [] [],
+                                    },
+                                ],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@56..57 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@57..60 "\"5\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@60..61 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@61..62 "<" [] [],
+                        slash_token: SLASH@62..63 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@63..66 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@66..67 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@67..70 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@70..74 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueVOnShorthandDirective {
+                                at_token: AT@74..75 "@" [] [],
+                                arg: VueStaticArgument {
+                                    name_token: HTML_LITERAL@75..78 "bar" [] [],
+                                },
+                                modifiers: VueModifierList [
+                                    VueModifier {
+                                        dot_token: DOT@78..79 "." [] [],
+                                        modifier_token: HTML_LITERAL@79..82 "baz" [] [],
+                                    },
+                                ],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@82..83 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@83..86 "\"5\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@86..87 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@87..88 "<" [] [],
+                        slash_token: SLASH@88..89 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@89..92 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@92..93 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@93..95 "<" [Newline("\n")] [],
+                slash_token: SLASH@95..96 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@96..104 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@104..105 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@105..105 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..105
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..105
+    0: HTML_ELEMENT@0..105
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..93
+        0: HTML_ELEMENT@10..41
+          0: HTML_OPENING_ELEMENT@10..35
+            0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@13..17
+              0: HTML_LITERAL@13..17 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@17..34
+              0: VUE_DIRECTIVE@17..34
+                0: VUE_IDENT@17..22 "v-foo" [] []
+                1: VUE_DIRECTIVE_ARGUMENT@22..26
+                  0: COLON@22..23 ":" [] []
+                  1: VUE_STATIC_ARGUMENT@23..26
+                    0: HTML_LITERAL@23..26 "bar" [] []
+                2: VUE_MODIFIER_LIST@26..30
+                  0: VUE_MODIFIER@26..30
+                    0: DOT@26..27 "." [] []
+                    1: HTML_LITERAL@27..30 "baz" [] []
+                3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..34
+                  0: EQ@30..31 "=" [] []
+                  1: HTML_STRING@31..34
+                    0: HTML_STRING_LITERAL@31..34 "\"5\"" [] []
+            3: R_ANGLE@34..35 ">" [] []
+          1: HTML_ELEMENT_LIST@35..35
+          2: HTML_CLOSING_ELEMENT@35..41
+            0: L_ANGLE@35..36 "<" [] []
+            1: SLASH@36..37 "/" [] []
+            2: HTML_TAG_NAME@37..40
+              0: HTML_LITERAL@37..40 "div" [] []
+            3: R_ANGLE@40..41 ">" [] []
+        1: HTML_ELEMENT@41..67
+          0: HTML_OPENING_ELEMENT@41..61
+            0: L_ANGLE@41..44 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@44..48
+              0: HTML_LITERAL@44..48 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@48..60
+              0: VUE_V_BIND_SHORTHAND_DIRECTIVE@48..60
+                0: VUE_DIRECTIVE_ARGUMENT@48..52
+                  0: COLON@48..49 ":" [] []
+                  1: VUE_STATIC_ARGUMENT@49..52
+                    0: HTML_LITERAL@49..52 "bar" [] []
+                1: VUE_MODIFIER_LIST@52..56
+                  0: VUE_MODIFIER@52..56
+                    0: DOT@52..53 "." [] []
+                    1: HTML_LITERAL@53..56 "baz" [] []
+                2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@56..60
+                  0: EQ@56..57 "=" [] []
+                  1: HTML_STRING@57..60
+                    0: HTML_STRING_LITERAL@57..60 "\"5\"" [] []
+            3: R_ANGLE@60..61 ">" [] []
+          1: HTML_ELEMENT_LIST@61..61
+          2: HTML_CLOSING_ELEMENT@61..67
+            0: L_ANGLE@61..62 "<" [] []
+            1: SLASH@62..63 "/" [] []
+            2: HTML_TAG_NAME@63..66
+              0: HTML_LITERAL@63..66 "div" [] []
+            3: R_ANGLE@66..67 ">" [] []
+        2: HTML_ELEMENT@67..93
+          0: HTML_OPENING_ELEMENT@67..87
+            0: L_ANGLE@67..70 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@70..74
+              0: HTML_LITERAL@70..74 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@74..86
+              0: VUE_V_ON_SHORTHAND_DIRECTIVE@74..86
+                0: AT@74..75 "@" [] []
+                1: VUE_STATIC_ARGUMENT@75..78
+                  0: HTML_LITERAL@75..78 "bar" [] []
+                2: VUE_MODIFIER_LIST@78..82
+                  0: VUE_MODIFIER@78..82
+                    0: DOT@78..79 "." [] []
+                    1: HTML_LITERAL@79..82 "baz" [] []
+                3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@82..86
+                  0: EQ@82..83 "=" [] []
+                  1: HTML_STRING@83..86
+                    0: HTML_STRING_LITERAL@83..86 "\"5\"" [] []
+            3: R_ANGLE@86..87 ">" [] []
+          1: HTML_ELEMENT_LIST@87..87
+          2: HTML_CLOSING_ELEMENT@87..93
+            0: L_ANGLE@87..88 "<" [] []
+            1: SLASH@88..89 "/" [] []
+            2: HTML_TAG_NAME@89..92
+              0: HTML_LITERAL@89..92 "div" [] []
+            3: R_ANGLE@92..93 ">" [] []
+      2: HTML_CLOSING_ELEMENT@93..105
+        0: L_ANGLE@93..95 "<" [Newline("\n")] []
+        1: SLASH@95..96 "/" [] []
+        2: HTML_TAG_NAME@96..104
+          0: HTML_LITERAL@96..104 "template" [] []
+        3: R_ANGLE@104..105 ">" [] []
+  4: EOF@105..105 "" [] []
+
+```

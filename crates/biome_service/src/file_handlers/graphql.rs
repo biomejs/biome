@@ -4,6 +4,7 @@ use super::{
     SearchCapabilities, is_diagnostic_error,
 };
 use crate::WorkspaceError;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -16,7 +17,9 @@ use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleError};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
+};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
@@ -167,15 +170,18 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_analyzer_options(
-        _global: &Settings,
+        global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
+        let configuration =
+            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
+            .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
 

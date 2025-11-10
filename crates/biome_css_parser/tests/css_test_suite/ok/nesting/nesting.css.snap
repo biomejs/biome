@@ -3053,25 +3053,27 @@ CssRoot {
                     CssAtRule {
                         at_token: AT@1886..1889 "@" [Newline("\n"), Whitespace("\t")] [],
                         rule: CssMediaAtRule {
-                            media_token: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")],
-                            queries: CssMediaQueryList [
-                                CssMediaConditionQuery {
-                                    condition: CssMediaFeatureInParens {
-                                        l_paren_token: L_PAREN@1895..1896 "(" [] [],
-                                        feature: CssQueryFeaturePlain {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1896..1905 "min-width" [] [],
+                            declarator: CssMediaAtRuleDeclarator {
+                                media_token: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")],
+                                queries: CssMediaQueryList [
+                                    CssMediaConditionQuery {
+                                        condition: CssMediaFeatureInParens {
+                                            l_paren_token: L_PAREN@1895..1896 "(" [] [],
+                                            feature: CssQueryFeaturePlain {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1896..1905 "min-width" [] [],
+                                                },
+                                                colon_token: COLON@1905..1907 ":" [] [Whitespace(" ")],
+                                                value: CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@1907..1910 "480" [] [],
+                                                    unit_token: IDENT@1910..1912 "px" [] [],
+                                                },
                                             },
-                                            colon_token: COLON@1905..1907 ":" [] [Whitespace(" ")],
-                                            value: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@1907..1910 "480" [] [],
-                                                unit_token: IDENT@1910..1912 "px" [] [],
-                                            },
+                                            r_paren_token: R_PAREN@1912..1914 ")" [] [Whitespace(" ")],
                                         },
-                                        r_paren_token: R_PAREN@1912..1914 ")" [] [Whitespace(" ")],
                                     },
-                                },
-                            ],
+                                ],
+                            },
                             block: CssDeclarationOrRuleBlock {
                                 l_curly_token: L_CURLY@1914..1915 "{" [] [],
                                 items: CssDeclarationOrRuleList [
@@ -5028,20 +5030,21 @@ CssRoot {
           1: CSS_AT_RULE@1886..1953
             0: AT@1886..1889 "@" [Newline("\n"), Whitespace("\t")] []
             1: CSS_MEDIA_AT_RULE@1889..1953
-              0: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")]
-              1: CSS_MEDIA_QUERY_LIST@1895..1914
-                0: CSS_MEDIA_CONDITION_QUERY@1895..1914
-                  0: CSS_MEDIA_FEATURE_IN_PARENS@1895..1914
-                    0: L_PAREN@1895..1896 "(" [] []
-                    1: CSS_QUERY_FEATURE_PLAIN@1896..1912
-                      0: CSS_IDENTIFIER@1896..1905
-                        0: IDENT@1896..1905 "min-width" [] []
-                      1: COLON@1905..1907 ":" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@1907..1912
-                        0: CSS_NUMBER_LITERAL@1907..1910 "480" [] []
-                        1: IDENT@1910..1912 "px" [] []
-                    2: R_PAREN@1912..1914 ")" [] [Whitespace(" ")]
-              2: CSS_DECLARATION_OR_RULE_BLOCK@1914..1953
+              0: CSS_MEDIA_AT_RULE_DECLARATOR@1889..1914
+                0: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")]
+                1: CSS_MEDIA_QUERY_LIST@1895..1914
+                  0: CSS_MEDIA_CONDITION_QUERY@1895..1914
+                    0: CSS_MEDIA_FEATURE_IN_PARENS@1895..1914
+                      0: L_PAREN@1895..1896 "(" [] []
+                      1: CSS_QUERY_FEATURE_PLAIN@1896..1912
+                        0: CSS_IDENTIFIER@1896..1905
+                          0: IDENT@1896..1905 "min-width" [] []
+                        1: COLON@1905..1907 ":" [] [Whitespace(" ")]
+                        2: CSS_REGULAR_DIMENSION@1907..1912
+                          0: CSS_NUMBER_LITERAL@1907..1910 "480" [] []
+                          1: IDENT@1910..1912 "px" [] []
+                      2: R_PAREN@1912..1914 ")" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1914..1953
                 0: L_CURLY@1914..1915 "{" [] []
                 1: CSS_DECLARATION_OR_RULE_LIST@1915..1950
                   0: CSS_NESTED_QUALIFIED_RULE@1915..1950

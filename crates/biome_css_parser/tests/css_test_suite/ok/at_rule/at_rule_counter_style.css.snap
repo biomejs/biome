@@ -19,9 +19,11 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssCounterStyleAtRule {
-                counter_style_token: COUNTER_STYLE_KW@1..15 "counter-style" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@15..22 "thumbs" [] [Whitespace(" ")],
+                declarator: CssCounterStyleAtRuleDeclarator {
+                    counter_style_token: COUNTER_STYLE_KW@1..15 "counter-style" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@15..22 "thumbs" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
@@ -44,10 +46,11 @@ CssRoot {
     0: CSS_AT_RULE@0..26
       0: AT@0..1 "@" [] []
       1: CSS_COUNTER_STYLE_AT_RULE@1..26
-        0: COUNTER_STYLE_KW@1..15 "counter-style" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@15..22
-          0: IDENT@15..22 "thumbs" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@22..26
+        0: CSS_COUNTER_STYLE_AT_RULE_DECLARATOR@1..22
+          0: COUNTER_STYLE_KW@1..15 "counter-style" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@15..22
+            0: IDENT@15..22 "thumbs" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
           2: R_CURLY@25..26 "}" [] []

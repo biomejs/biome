@@ -335,32 +335,47 @@ fn cdata_full() {
 #[test]
 fn svelte_openings() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::Regular,
         "{@debug}",
         SV_CURLY_AT: 2,
         HTML_LITERAL: 6,
     }
 
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::Regular,
         "{/debug}",
         SV_CURLY_SLASH: 2,
         HTML_LITERAL: 6,
     }
 
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::Regular,
         "{:debug}",
         SV_CURLY_COLON: 2,
         HTML_LITERAL: 6,
     }
 
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::Regular,
         "{#debug}",
         SV_CURLY_HASH: 2,
         HTML_LITERAL: 6,
     }
+}
+
+#[test]
+fn single_text_expression() {
+    assert_lex!(
+        HtmlLexContext::single_expression(),
+        "expression",
+        HTML_LITERAL: 10,
+    );
+
+    assert_lex!(
+        HtmlLexContext::single_expression(),
+        "'expression'",
+        HTML_LITERAL: 12,
+    );
 }
 
 #[test]
@@ -379,14 +394,14 @@ fn svelte_keywords() {
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
         WHITESPACE: 1,
-        SVELTE_IDENT: 5,
+        DEBUG_KW: 5,
     );
 
     assert_lex!(
         HtmlLexContext::Svelte,
         "  debug  ",
         WHITESPACE: 2,
-        SVELTE_IDENT: 5,
+        DEBUG_KW: 5,
         WHITESPACE: 2,
     )
 }
