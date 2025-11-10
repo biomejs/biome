@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseArraySortCompare {
-        version: "next",
+        version: "2.3.5",
         name: "useArraySortCompare",
         language: "js",
         recommended: false,
