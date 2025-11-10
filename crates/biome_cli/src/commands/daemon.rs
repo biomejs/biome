@@ -5,7 +5,9 @@ use crate::{
 use biome_console::{ConsoleExt, markup};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
-use biome_service::{TransportError, Watcher, WorkspaceError, workspace::WorkspaceClient};
+use biome_service::{
+    TransportError, Watcher, WatcherConfiguration, WorkspaceError, workspace::WorkspaceClient,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::{env, fs, process};
 use tokio::io;
@@ -23,11 +25,17 @@ use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
     session: CliSession,
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    let did_spawn = rt.block_on(ensure_daemon(false, log_path, log_file_name_prefix))?;
+    let did_spawn = rt.block_on(ensure_daemon(
+        false,
+        watcher_configuration,
+        log_path,
+        log_file_name_prefix,
+    ))?;
 
     if did_spawn {
         session.app.console.log(markup! {
@@ -68,12 +76,13 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
 
 pub(crate) fn run_server(
     stop_on_disconnect: bool,
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(watcher_configuration)?;
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
@@ -114,11 +123,17 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
 }
 
 pub(crate) fn lsp_proxy(
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt, log_path, log_file_name_prefix))?;
+    rt.block_on(start_lsp_proxy(
+        &rt,
+        watcher_configuration,
+        log_path,
+        log_file_name_prefix,
+    ))?;
 
     Ok(())
 }
@@ -128,10 +143,11 @@ pub(crate) fn lsp_proxy(
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
     rt: &Runtime,
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true, log_path, log_file_name_prefix).await?;
+    ensure_daemon(true, watcher_configuration, log_path, log_file_name_prefix).await?;
 
     match open_socket().await? {
         Some((mut owned_read_half, mut owned_write_half)) => {

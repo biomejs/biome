@@ -74,7 +74,13 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Start {
                 log_path,
                 log_prefix_name,
-            } => commands::daemon::start(self, Some(log_path), Some(log_prefix_name)),
+                watcher_configuration,
+            } => commands::daemon::start(
+                self,
+                watcher_configuration,
+                Some(log_path),
+                Some(log_prefix_name),
+            ),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 write,
@@ -244,8 +250,13 @@ impl<'app> CliSession<'app> {
             BiomeCommand::LspProxy {
                 log_path,
                 log_prefix_name,
-                ..
-            } => commands::daemon::lsp_proxy(Some(log_path), Some(log_prefix_name)),
+                watcher_configuration,
+                stdio: _,
+            } => commands::daemon::lsp_proxy(
+                watcher_configuration,
+                Some(log_path),
+                Some(log_prefix_name),
+            ),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
@@ -286,8 +297,10 @@ impl<'app> CliSession<'app> {
                 stop_on_disconnect,
                 log_path,
                 log_prefix_name,
+                watcher_configuration,
             } => commands::daemon::run_server(
                 stop_on_disconnect,
+                watcher_configuration,
                 Some(log_path),
                 Some(log_prefix_name),
             ),

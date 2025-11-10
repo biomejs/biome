@@ -1,4 +1,5 @@
 use biome_lsp::{ServerConnection, ServerFactory};
+use biome_service::WatcherConfiguration;
 use camino::Utf8PathBuf;
 use std::{
     convert::Infallible,
@@ -53,6 +54,7 @@ async fn try_connect() -> io::Result<UnixStream> {
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<Child> {
@@ -61,6 +63,15 @@ fn spawn_daemon(
     let mut cmd = Command::new(binary);
     debug!("command {:?}", &cmd);
     cmd.arg("__run_server");
+
+    cmd.arg(format!(
+        "--watcher-kind={}",
+        watcher_configuration.watcher_kind
+    ));
+    cmd.arg(format!(
+        "--polling-interval={}",
+        watcher_configuration.polling_interval
+    ));
 
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
@@ -120,6 +131,7 @@ pub(crate) async fn open_socket() -> io::Result<Option<(OwnedReadHalf, OwnedWrit
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
+    watcher_configuration: WatcherConfiguration,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<bool> {
@@ -162,6 +174,7 @@ pub(crate) async fn ensure_daemon(
                     // it to become ready then retry the connection
                     current_child = Some(spawn_daemon(
                         stop_on_disconnect,
+                        watcher_configuration.clone(),
                         log_path.clone(),
                         log_file_name_prefix.clone(),
                     )?);
@@ -181,7 +194,7 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global socket name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None, None).await?;
+    ensure_daemon(true, WatcherConfiguration::default(), None, None).await?;
     println!("{}", get_socket_name().as_str());
     Ok(())
 }

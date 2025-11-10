@@ -1577,6 +1577,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
+ "bpaf",
  "camino",
  "crossbeam",
  "enumflags2",

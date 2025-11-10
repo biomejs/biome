@@ -21,6 +21,8 @@ pub struct BiomeEnv {
     pub biome_log_prefix_name: BiomeEnvVariable,
     pub biome_config_path: BiomeEnvVariable,
     pub biome_threads: BiomeEnvVariable,
+    pub biome_watcher_kind: BiomeEnvVariable,
+    pub biome_watcher_polling_interval: BiomeEnvVariable,
 }
 
 pub static BIOME_ENV: OnceLock<BiomeEnv> = OnceLock::new();
@@ -43,6 +45,14 @@ impl BiomeEnv {
             biome_threads: BiomeEnvVariable::new(
                 "BIOME_THREADS",
                 "The number of threads to use in CI.",
+            ),
+            biome_watcher_kind: BiomeEnvVariable::new(
+                "BIOME_WATCHER_KIND",
+                "The kind of watcher to use. Possible values: polling, recommended, none. Default: recommended.",
+            ),
+            biome_watcher_polling_interval: BiomeEnvVariable::new(
+                "BIOME_WATCHER_POLLING_INTERVAL",
+                "The polling interval in milliseconds. This only applicable when using the polling watcher. Default: 2000.",
             ),
         }
     }
