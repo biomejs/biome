@@ -360,12 +360,24 @@ impl SemanticModelBuilder {
     /// so that rules like noUnusedImports see template references
     pub fn add_synthetic_reference(&mut self, binding_id: BindingId, range: TextRange) {
         let binding = &mut self.bindings[binding_id.index()];
+        let binding_range_start = binding.range.start();
 
         // Add a Read reference (template usage is always a read)
         binding.references.push(SemanticModelReference {
             range_start: range.start(),
             ty: SemanticModelReferenceType::Read { hoisted: false },
         });
+
+        // Get the binding's declaration node from binding_node_by_start
+        // Synthetic references don't have their own syntax nodes, so we point to the binding
+        if let Some(binding_node) = self.binding_node_by_start.get(&binding_range_start) {
+            let binding_node = binding_node.clone();
+
+            // Add the binding node to binding_node_by_start so reference.syntax() works
+            // This maps the synthetic reference's range to the original binding (import) node
+            self.binding_node_by_start
+                .insert(range.start(), binding_node);
+        }
     }
 
     #[inline]

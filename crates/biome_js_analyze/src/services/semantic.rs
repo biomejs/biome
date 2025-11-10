@@ -227,18 +227,50 @@ fn add_template_references(builder: &mut SemanticModelBuilder, source: &str) {
 
         // 1. Find all HTML elements (component references) in the template
         for node in root_node.descendants() {
+            use biome_html_syntax::{HtmlElement, HtmlSelfClosingElement};
+
             if AnyHtmlElement::can_cast(node.kind()) {
                 let element = AnyHtmlElement::unwrap_cast(node.clone());
 
-                // Get the element name (works for both regular and self-closing elements)
-                if let Some(name_token) = element.name() {
-                    let tag_name = name_token.to_string();
+                // Get the name token (SyntaxToken) and tag name string
+                let name_token_data: Option<(biome_rowan::SyntaxToken<biome_html_syntax::HtmlLanguage>, String)> = (|| {
+                    match &element {
+                        AnyHtmlElement::HtmlElement(el) => {
+                            let opening = el.opening_element().ok()?;
+                            let name_node = opening.name().ok()?;
+                            let token = name_node.value_token().ok()?;
+                            let text = token.token_text_trimmed().to_string();
+                            Some((token, text))
+                        }
+                        AnyHtmlElement::HtmlSelfClosingElement(el) => {
+                            let name_node = el.name().ok()?;
+                            let token = name_node.value_token().ok()?;
+                            let text = token.token_text_trimmed().to_string();
+                            Some((token, text))
+                        }
+                        _ => None,
+                    }
+                })();
 
+                if let Some((name_token, tag_name)) = name_token_data {
                     // Component references are PascalCase
                     if is_pascal_case(&tag_name) {
                         // Find the binding (import) for this component
                         if let Some(binding_id) = builder.find_binding_by_name(&tag_name) {
-                            builder.add_synthetic_reference(binding_id, template_range);
+                            // Calculate the absolute position of the component name within the original source
+                            let name_range = name_token.text_range();
+                            let absolute_start: u32 =
+                                (template_match.start() + usize::from(name_range.start()))
+                                    .try_into()
+                                    .unwrap();
+                            let absolute_end: u32 =
+                                (template_match.start() + usize::from(name_range.end()))
+                                    .try_into()
+                                    .unwrap();
+
+                            let component_range =
+                                TextRange::new(absolute_start.into(), absolute_end.into());
+                            builder.add_synthetic_reference(binding_id, component_range);
                         }
                     }
                 }
