@@ -3165,6 +3165,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmberActionsHashConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberActionsHashOptions" }
+			]
+		},
+		"NoEmberActionsHashOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmberAutofocusConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3185,6 +3195,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmberGetConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberGetOptions" }
+			]
+		},
+		"NoEmberGetOptions": { "type": "object", "additionalProperties": false },
 		"NoEmberGetWithDefaultConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3239,6 +3256,16 @@
 			]
 		},
 		"NoEmberPauseTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmberPositiveTabindexConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmberPositiveTabindexOptions" }
+			]
+		},
+		"NoEmberPositiveTabindexOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5247,6 +5274,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmberActionsHash": {
+					"description": "Disallow the classic actions hash pattern in Ember classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberActionsHashConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmberAutofocus": {
 					"description": "Disallow the autofocus attribute on HTML elements and components.",
 					"anyOf": [
@@ -5258,6 +5292,13 @@
 					"description": "Disallow usage of classic Ember classes created with .extend().",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoEmberClassicClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberGet": {
+					"description": "Disallow usage of get() to access properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberGetConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5300,6 +5341,13 @@
 					"description": "Disallow usage of pauseTest in tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoEmberPauseTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmberPositiveTabindex": {
+					"description": "Disallow positive tabindex values in Glimmer templates.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmberPositiveTabindexConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7197,6 +7245,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoEmberActionsHashOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberActionsHashOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoEmberAutofocusOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -7223,6 +7286,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmberClassicClassesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberGetOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberGetOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7313,6 +7391,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmberPauseTestOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmberPositiveTabindexOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmberPositiveTabindexOptions" }]
 				}
 			},
 			"additionalProperties": false

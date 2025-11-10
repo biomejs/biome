@@ -1681,6 +1681,14 @@ export interface Nursery {
 	 */
 	noEmberAutofocus?: RuleConfiguration_for_NoEmberAutofocusOptions;
 	/**
+	 * Disallow usage of classic Ember classes created with .extend().
+	 */
+	noEmberClassicClasses?: RuleConfiguration_for_NoEmberClassicClassesOptions;
+	/**
+	 * Disallow usage of get() to access properties.
+	 */
+	noEmberGet?: RuleConfiguration_for_NoEmberGetOptions;
+	/**
 	 * Disallow usage of the deprecated getWithDefault() method.
 	 */
 	noEmberGetWithDefault?: RuleConfiguration_for_NoEmberGetWithDefaultOptions;
@@ -1688,6 +1696,10 @@ export interface Nursery {
 	 * Disallow usage of global $ or jQuery objects.
 	 */
 	noEmberGlobalJquery?: RuleConfiguration_for_NoEmberGlobalJqueryOptions;
+	/**
+	 * Disallow inline style attributes in Glimmer templates.
+	 */
+	noEmberInlineStyles?: RuleConfiguration_for_NoEmberInlineStylesOptions;
 	/**
 	 * Disallow importing files from /mixins/ directories.
 	 */
@@ -1700,6 +1712,14 @@ export interface Nursery {
 	 * Disallow usage of pauseTest in tests.
 	 */
 	noEmberPauseTest?: RuleConfiguration_for_NoEmberPauseTestOptions;
+	/**
+	 * Disallow positive tabindex values in Glimmer templates.
+	 */
+	noEmberPositiveTabindex?: RuleConfiguration_for_NoEmberPositiveTabindexOptions;
+	/**
+	 * Require dependencies for computed properties.
+	 */
+	noEmberRequireComputedPropertyDependencies?: RuleConfiguration_for_NoEmberRequireComputedPropertyDependenciesOptions;
 	/**
 	 * Disallow empty sources.
 	 */
@@ -3101,12 +3121,21 @@ export type RuleConfiguration_for_NoEmberAccesskeyAttributeOptions =
 export type RuleConfiguration_for_NoEmberAutofocusOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberAutofocusOptions;
+export type RuleConfiguration_for_NoEmberClassicClassesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberClassicClassesOptions;
+export type RuleConfiguration_for_NoEmberGetOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGetOptions;
 export type RuleConfiguration_for_NoEmberGetWithDefaultOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberGetWithDefaultOptions;
 export type RuleConfiguration_for_NoEmberGlobalJqueryOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberGlobalJqueryOptions;
+export type RuleConfiguration_for_NoEmberInlineStylesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberInlineStylesOptions;
 export type RuleConfiguration_for_NoEmberMixinsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberMixinsOptions;
@@ -3116,6 +3145,12 @@ export type RuleConfiguration_for_NoEmberOldShimsOptions =
 export type RuleConfiguration_for_NoEmberPauseTestOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmberPauseTestOptions;
+export type RuleConfiguration_for_NoEmberPositiveTabindexOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberPositiveTabindexOptions;
+export type RuleConfiguration_for_NoEmberRequireComputedPropertyDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberRequireComputedPropertyDependenciesOptions;
 export type RuleConfiguration_for_NoEmptySourceOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmptySourceOptions;
@@ -5583,6 +5618,26 @@ export interface RuleWithOptions_for_NoEmberAutofocusOptions {
 	 */
 	options: NoEmberAutofocusOptions;
 }
+export interface RuleWithOptions_for_NoEmberClassicClassesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberClassicClassesOptions;
+}
+export interface RuleWithOptions_for_NoEmberGetOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGetOptions;
+}
 export interface RuleWithOptions_for_NoEmberGetWithDefaultOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5602,6 +5657,16 @@ export interface RuleWithOptions_for_NoEmberGlobalJqueryOptions {
 	 * Rule's options
 	 */
 	options: NoEmberGlobalJqueryOptions;
+}
+export interface RuleWithOptions_for_NoEmberInlineStylesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberInlineStylesOptions;
 }
 export interface RuleWithOptions_for_NoEmberMixinsOptions {
 	/**
@@ -5632,6 +5697,26 @@ export interface RuleWithOptions_for_NoEmberPauseTestOptions {
 	 * Rule's options
 	 */
 	options: NoEmberPauseTestOptions;
+}
+export interface RuleWithOptions_for_NoEmberPositiveTabindexOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberPositiveTabindexOptions;
+}
+export interface RuleWithOptions_for_NoEmberRequireComputedPropertyDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberRequireComputedPropertyDependenciesOptions;
 }
 export interface RuleWithOptions_for_NoEmptySourceOptions {
 	/**
@@ -8424,11 +8509,16 @@ export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmberAccesskeyAttributeOptions {}
 export interface NoEmberAutofocusOptions {}
+export interface NoEmberClassicClassesOptions {}
+export interface NoEmberGetOptions {}
 export interface NoEmberGetWithDefaultOptions {}
 export interface NoEmberGlobalJqueryOptions {}
+export interface NoEmberInlineStylesOptions {}
 export interface NoEmberMixinsOptions {}
 export interface NoEmberOldShimsOptions {}
 export interface NoEmberPauseTestOptions {}
+export interface NoEmberPositiveTabindexOptions {}
+export interface NoEmberRequireComputedPropertyDependenciesOptions {}
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
@@ -9243,12 +9333,18 @@ export type Category =
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noEmberAccesskeyAttribute"
+	| "lint/nursery/noEmberActionsHash"
 	| "lint/nursery/noEmberAutofocus"
+	| "lint/nursery/noEmberClassicClasses"
+	| "lint/nursery/noEmberGet"
 	| "lint/nursery/noEmberGetWithDefault"
 	| "lint/nursery/noEmberGlobalJquery"
+	| "lint/nursery/noEmberInlineStyles"
 	| "lint/nursery/noEmberMixins"
 	| "lint/nursery/noEmberOldShims"
 	| "lint/nursery/noEmberPauseTest"
+	| "lint/nursery/noEmberPositiveTabindex"
+	| "lint/nursery/noEmberRequireComputedPropertyDependencies"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
