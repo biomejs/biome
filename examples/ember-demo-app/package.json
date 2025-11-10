@@ -1,0 +1,18 @@
+{
+  "name": "ember-demo-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo Ember app showcasing Biome Ember lint rules",
+  "scripts": {
+    "lint": "../../target/debug/biome check app/",
+    "lint:fix": "../../target/debug/biome check --write app/",
+    "lint:verbose": "../../target/debug/biome check --verbose app/"
+  },
+  "devDependencies": {
+    "@ember/object": "^3.12.0",
+    "@ember/component": "^4.0.0",
+    "@ember/test-helpers": "^3.0.0",
+    "@glimmer/component": "^1.1.0",
+    "@glimmer/tracking": "^1.1.0"
+  }
+}
