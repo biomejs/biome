@@ -205,6 +205,7 @@ define_categories! {
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useQwikMethodUsage": "https://biomejs.dev/linter/rules/use-qwik-method-usage",
     "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
+    "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useVueDefineMacrosOrder": "https://biomejs.dev/linter/rules/use-vue-define-macros-order",
     "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",

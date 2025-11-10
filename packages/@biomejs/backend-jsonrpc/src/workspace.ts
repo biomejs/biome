@@ -1785,6 +1785,10 @@ export interface Nursery {
 	 */
 	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
 	/**
+	 * Enforce RegExp#exec over String#match if no global flag is provided.
+	 */
+	useRegexpExec?: RuleConfiguration_for_UseRegexpExecOptions;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
@@ -3148,6 +3152,9 @@ export type RuleConfiguration_for_UseQwikMethodUsageOptions =
 export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
+export type RuleConfiguration_for_UseRegexpExecOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseRegexpExecOptions;
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
@@ -5820,6 +5827,16 @@ export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
 	 */
 	options: UseQwikValidLexicalScopeOptions;
 }
+export interface RuleWithOptions_for_UseRegexpExecOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseRegexpExecOptions;
+}
 export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -8384,6 +8401,7 @@ export interface UseMaxParamsOptions {
 }
 export interface UseQwikMethodUsageOptions {}
 export interface UseQwikValidLexicalScopeOptions {}
+export interface UseRegexpExecOptions {}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -9146,6 +9164,7 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
