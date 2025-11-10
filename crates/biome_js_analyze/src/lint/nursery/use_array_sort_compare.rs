@@ -70,11 +70,19 @@ impl Rule for UseArraySortCompare {
             return None;
         }
 
-        if node.arguments().ok()?.args().len() != 0 {
-            return None;
+        let arguments = node.arguments().ok()?.args();
+        if arguments.is_empty() {
+            return Some(());
         }
 
-        Some(())
+        let binding = arguments.first()?.ok()?;
+        let first_arg = binding.as_any_js_expression()?;
+        let ty = ctx.type_of_expression(first_arg);
+        if ty.is_undefined() || ty.is_null() {
+            return Some(());
+        }
+
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -88,7 +96,10 @@ impl Rule for UseArraySortCompare {
                 },
             )
             .note(markup! {
-                "When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units. Make sure to add a compare function to prevent unexpected sorting."
+                "When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units."
+            })
+            .note(markup! {
+                "Add a compare function to prevent unexpected sorting."
             }),
         )
     }
