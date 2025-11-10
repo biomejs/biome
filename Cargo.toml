@@ -216,7 +216,7 @@ hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.25"
 indexmap             = { version = "2.12.0" }
 insta                = "1.43.2"
-jiff                 = "0.2.15"
+jiff                 = "0.2.16"
 libc                 = "0.2.177"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
