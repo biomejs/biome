@@ -4,6 +4,7 @@ use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_js_syntax::{JsFileSource, JsModule};
 use biome_rowan::{AstNode, TextRange};
+use crate::services::semantic::OriginalSourceText;
 use regex::Regex;
 use std::sync::LazyLock;
 
@@ -59,34 +60,33 @@ pub struct InlineStyleViolation {
 
 impl Rule for NoEmberInlineStyles {
     type Query = Ast<JsModule>;
-    type State = Vec<InlineStyleViolation>;
-    type Signals = Option<Self::State>;
+    type State = InlineStyleViolation;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module = ctx.query();
+        let _module = ctx.query();
 
         // Check if this is a Glimmer file (.gjs/.gts)
         let source_type = ctx.source_type::<JsFileSource>();
         if !source_type.as_embedding_kind().is_glimmer() {
-            return None;
+            return vec![];
         }
 
-        // Get the source text
-        let source = module.syntax().text_with_trivia().to_string();
+        // Get the ORIGINAL source text (before template extraction)
+        // This is crucial because the parsed module has templates replaced with
+        // placeholders like __BIOME_GLIMMER_TEMPLATE_0__
+        let Some(original_source) = ctx.get_service::<OriginalSourceText>() else {
+            return vec![];
+        };
+        let source = original_source.text();
 
         // Find all violations in template blocks
-        let violations = find_inline_style_violations(&source);
-
-        if violations.is_empty() {
-            None
-        } else {
-            Some(violations)
-        }
+        find_inline_style_violations(source)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let violation = state.first()?;
+        let violation = state;
 
         Some(
             RuleDiagnostic::new(
