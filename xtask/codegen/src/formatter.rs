@@ -566,6 +566,7 @@ enum NodeDialect {
     Html,
     Astro,
     Svelte,
+    Vue,
     Tailwind,
     Yaml,
 }
@@ -601,6 +602,7 @@ impl NodeDialect {
             Self::Html => "html",
             Self::Astro => "astro",
             Self::Svelte => "svelte",
+            Self::Vue => "vue",
             Self::Tailwind => "tailwind",
             Self::Yaml => "yaml",
         }
@@ -618,6 +620,7 @@ impl NodeDialect {
             "Html" => Self::Html,
             "Astro" => Self::Astro,
             "Svelte" => Self::Svelte,
+            "Vue" => Self::Vue,
             "Tw" => Self::Tailwind,
             "Yaml" => Self::Yaml,
             _ => {

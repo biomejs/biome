@@ -149,6 +149,35 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteRenderBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::VueDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT => {
+                    let $pattern = unsafe { $crate::VueDirectiveArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DYNAMIC_ARGUMENT => {
+                    let $pattern = unsafe { $crate::VueDynamicArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_MODIFIER => {
+                    let $pattern = unsafe { $crate::VueModifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_STATIC_ARGUMENT => {
+                    let $pattern = unsafe { $crate::VueStaticArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_BIND_SHORTHAND_DIRECTIVE => {
+                    let $pattern =
+                        unsafe { $crate::VueVBindShorthandDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_ON_SHORTHAND_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::VueVOnShorthandDirective::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
                     let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
@@ -173,6 +202,15 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteBogusBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::VueBogusDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE_ARGUMENT => {
+                    let $pattern =
+                        unsafe { $crate::VueBogusDirectiveArgument::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {
                     let $pattern = unsafe { $crate::HtmlAttributeList::new_unchecked(node) };
                     $body
@@ -187,6 +225,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {
+                    let $pattern = unsafe { $crate::VueModifierList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),
