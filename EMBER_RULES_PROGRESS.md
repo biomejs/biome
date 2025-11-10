@@ -60,7 +60,7 @@ All rules are in the `nursery` lint group and use the `noEmber*` naming conventi
    - Query: `Ast<JsModule>`
    - Tests: 4 .gjs test files
 
-#### Batch 4 (Commit: 6f4b067c41) ✨ LATEST
+#### Batch 4 (Commit: 6f4b067c41)
 10. **noEmberActionsHash** - Disallow `actions: {}` hash pattern
     - Type: AST analysis (checks object properties)
     - Query: `Ast<JsPropertyObjectMember>`
@@ -83,6 +83,74 @@ All rules are in the `nursery` lint group and use the `noEmber*` naming conventi
     - Type: Import path checking
     - Query: `Ast<JsImport>`
     - Foundation rule (implemented first)
+
+### Bug Fixes (Commits: 3e4b9d0269, 4669c3cd71) ✨ LATEST
+
+#### Fix 1: Semantic Model Synthetic Reference Panic (Commit: 3e4b9d0269)
+
+**Problem**: When linting .gjs files with Glimmer component usage in templates, the semantic model would panic with "no entry found for key" when looking up synthetic references.
+
+**Root Causes**:
+1. In `semantic.rs`: Using entire template range instead of specific component name token range when adding synthetic references
+2. In `builder.rs`: Not adding entries to `binding_node_by_start` HashMap for synthetic references
+
+**Solution**:
+- Updated `semantic.rs` (`crates/biome_js_analyze/src/services/semantic.rs:228-291`) to:
+  - Properly extract component name token from HTML AST
+  - Calculate absolute position of component name in original source (not entire template)
+  - Use closure pattern to enable `?` operator in match expression
+
+- Updated `builder.rs` (`crates/biome_js_semantic/src/semantic_model/builder.rs:358-381`) to:
+  - Look up binding's declaration node from `binding_node_by_start` HashMap
+  - Add synthetic reference entries to HashMap so `reference.syntax()` works correctly
+
+**Impact**: Fixes panic and enables proper integration with `noUnusedImports` rule
+
+#### Fix 2: Template Rules Not Detecting Violations (Commit: 4669c3cd71)
+
+**Problem 1**: Template rules (accesskey, autofocus, inline-styles, positive-tabindex) were not detecting violations in .gjs files because they accessed transformed source code via `module.syntax().text_with_trivia()`, which contains placeholders like `__BIOME_GLIMMER_TEMPLATE_0__` instead of actual template content.
+
+**Problem 2**: Template rules were only reporting the first violation per rule even when multiple violations existed, using `type Signals = Option<Vec<State>>` pattern and calling `state.first()` in diagnostic function.
+
+**Solution**:
+- Updated all 4 template rules to use `OriginalSourceText` service:
+  ```rust
+  use crate::services::semantic::OriginalSourceText;
+
+  let Some(original_source) = ctx.get_service::<OriginalSourceText>() else {
+      return vec![];
+  };
+  let source = original_source.text();
+  ```
+
+- Changed signal pattern from `Option<Vec<State>>` to `Vec<State>`:
+  ```rust
+  type State = Violation;  // Not Vec<Violation>
+  type Signals = Vec<Self::State>;  // Not Option
+
+  fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+      // Return vec directly, not wrapped in Option
+      find_violations(source)
+  }
+
+  fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+      let violation = state;  // Not state.first()?
+      // ...
+  }
+  ```
+
+**Impact**:
+- Template rules now correctly detect all violations (e.g., 4 violations instead of 3)
+- Integration with semantic model works without panics
+- `noUnusedImports` correctly respects template component usage
+
+**Files Modified**:
+- `crates/biome_js_analyze/src/lint/nursery/no_ember_accesskey_attribute.rs`
+- `crates/biome_js_analyze/src/lint/nursery/no_ember_autofocus.rs`
+- `crates/biome_js_analyze/src/lint/nursery/no_ember_inline_styles.rs`
+- `crates/biome_js_analyze/src/lint/nursery/no_ember_positive_tabindex.rs`
+- `crates/biome_js_analyze/src/services/semantic.rs`
+- `crates/biome_js_semantic/src/semantic_model/builder.rs`
 
 ## Established Workflow
 
@@ -202,9 +270,12 @@ impl Rule for NoEmberExample {
 
 Used for rules that need to analyze HTML in `<template>` blocks.
 
+**IMPORTANT**: Must use `OriginalSourceText` service to access pre-transformation source code. The parsed JS module has templates replaced with placeholders like `__BIOME_GLIMMER_TEMPLATE_0__`.
+
 ```rust
 use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use crate::services::semantic::OriginalSourceText;
 use regex::Regex;
 use std::sync::LazyLock;
 
@@ -214,23 +285,32 @@ static GLIMMER_TEMPLATE: LazyLock<Regex> = LazyLock::new(|| {
 
 impl Rule for NoEmberExample {
     type Query = Ast<JsModule>;
-    type State = Vec<Violation>;
-    type Signals = Option<Self::State>;
+    type State = Violation;  // NOT Vec<Violation>
+    type Signals = Vec<Self::State>;  // NOT Option<Self::State>
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module = ctx.query();
+        let _module = ctx.query();
 
         // Check if this is a Glimmer file
         let source_type = ctx.source_type::<JsFileSource>();
         if !source_type.as_embedding_kind().is_glimmer() {
-            return None;
+            return vec![];  // NOT None
         }
 
-        let source = module.syntax().text_with_trivia().to_string();
-        let violations = find_violations(&source);
+        // Get ORIGINAL source text (before template extraction)
+        let Some(original_source) = ctx.get_service::<OriginalSourceText>() else {
+            return vec![];
+        };
+        let source = original_source.text();
 
-        if violations.is_empty() { None } else { Some(violations) }
+        // Return vec directly to report all violations
+        find_violations(source)
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let violation = state;  // NOT state.first()?
+        // ... diagnostic implementation
     }
 }
 
@@ -344,6 +424,31 @@ impl Rule for NoEmberExample {
   - `crates/biome_diagnostics_categories/src/categories.rs` (diagnostic categories)
   - `crates/biome_rule_options/src/*.rs` (options files)
   - JSON schemas and TypeScript definitions
+
+### Semantic Model Integration (Glimmer Components)
+
+The semantic model automatically tracks Glimmer component usage in templates:
+
+- When a PascalCase component is used in a template (e.g., `<Button />`), the semantic model creates a **synthetic reference** to the imported component binding
+- This enables `noUnusedImports` and similar rules to correctly understand that template usage counts as a reference
+- Implementation in `crates/biome_js_analyze/src/services/semantic.rs`
+
+**Key Implementation Details**:
+- Scans `<template>` blocks for PascalCase HTML elements
+- Extracts the specific component name token (not entire template range)
+- Calculates absolute position in original source file
+- Adds synthetic reference to semantic model's `binding_node_by_start` HashMap
+- Works seamlessly with existing semantic analysis rules
+
+**Testing Integration**:
+Create a test file with an imported but only-in-template-used component to verify `noUnusedImports` doesn't flag it:
+```javascript
+import UsedInTemplate from './component';
+export default class MyComponent extends Component {
+  <template><UsedInTemplate /></template>
+}
+// Should NOT flag UsedInTemplate as unused
+```
 
 ### Known Warnings
 
