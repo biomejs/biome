@@ -159,7 +159,7 @@ impl Display for BiomeEnv {
                     .with_padding(padding)
                     .fmt(fmt)?;
             }
-        }
+        };
 
         match self.biome_config_path.value() {
             None => {
