@@ -135,7 +135,7 @@ impl Rule for NoParametersOnlyUsedInRecursion {
                 &parent_function,
                 name_text,
             )
-            .unwrap_or(false)
+            .unwrap_or_default()
             {
                 refs_in_recursion += 1;
             } else {
