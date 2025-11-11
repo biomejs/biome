@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 432
 expression: redactor(content)
 ---
 ## `package.json`
@@ -27,7 +26,7 @@ describe("foo", () => {
 		someFn();
 	});
 });
-
+    
 ```
 
 # Termination Message
@@ -36,7 +35,7 @@ describe("foo", () => {
 lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-
+  
 
 
 ```
@@ -47,7 +46,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate beforeEach hook found.
-
+  
     3 │ 	beforeEach(() => {
     4 │ 	});
   > 5 │ 	beforeEach(() => {
@@ -56,9 +55,9 @@ test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━�
       │ 	^^
     7 │ 	test("bar", () => {
     8 │ 		someFn();
-
+  
   i Remove this duplicate hook or consolidate the logic into a single hook.
-
+  
 
 ```
 
