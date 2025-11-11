@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: valid.js
 ---
 # Input
@@ -88,5 +89,48 @@ describe("hello", () => {
 	);
 });
 
+describe("something", () => {
+  beforeEach(() => {});
+  
+  describe("something", () => {
+    beforeEach(() => {});
+  });
+
+  describe.skip.each([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  describe.for([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  describe.todo("something", () => {
+    beforeEach(() => {});
+  });
+
+  describe.todo.each([])("something", () => {
+    beforeEach(() => {});
+  });
+});
+
+describe("something", () => {
+  beforeEach(() => {});
+  
+  describe("something", () => {
+    beforeEach(() => {});
+  });
+
+  test.describe.skip.each([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  xdescribe.for([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  fdescribe.todo("something", () => {
+    beforeEach(() => {});
+  });
+});
 
 ```
