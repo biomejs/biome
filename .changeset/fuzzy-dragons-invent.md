@@ -2,5 +2,5 @@
 "@biomejs/biome": minor
 ---
 
-The linter, with `checkAllProperties` enabled, was fixed and remove unwanted new line.
+The linter, with `checkAllProperties` enabled, was fixed to remove unwanted trivia.
 fix: https://github.com/biomejs/biome/pull/8075
