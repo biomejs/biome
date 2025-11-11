@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 The linter, with `checkAllProperties` enabled, was fixed to remove unwanted trivia.
