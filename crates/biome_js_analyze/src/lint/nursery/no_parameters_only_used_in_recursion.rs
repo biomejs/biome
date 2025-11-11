@@ -424,10 +424,10 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Binary operations: a + 1, a - b
         // Add both sides to worklist
         if let Some(bin_expr) = current_expr.as_js_binary_expression() {
-            if let Some(left) = bin_expr.left().ok() {
+            if let Ok(left) = bin_expr.left() {
                 to_check.push(left);
             }
-            if let Some(right) = bin_expr.right().ok() {
+            if let Ok(right) = bin_expr.right() {
                 to_check.push(right);
             }
             continue;
@@ -436,10 +436,10 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Logical operations: a && b, a || b, a ?? b
         // Add both sides to worklist
         if let Some(logical_expr) = current_expr.as_js_logical_expression() {
-            if let Some(left) = logical_expr.left().ok() {
+            if let Ok(left) = logical_expr.left() {
                 to_check.push(left);
             }
-            if let Some(right) = logical_expr.right().ok() {
+            if let Ok(right) = logical_expr.right() {
                 to_check.push(right);
             }
             continue;
@@ -448,13 +448,13 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Conditional expression: cond ? a : b
         // Add all three parts to worklist (test, consequent, alternate)
         if let Some(cond_expr) = current_expr.as_js_conditional_expression() {
-            if let Some(test) = cond_expr.test().ok() {
+            if let Ok(test) = cond_expr.test() {
                 to_check.push(test);
             }
-            if let Some(consequent) = cond_expr.consequent().ok() {
+            if let Ok(consequent) = cond_expr.consequent() {
                 to_check.push(consequent);
             }
-            if let Some(alternate) = cond_expr.alternate().ok() {
+            if let Ok(alternate) = cond_expr.alternate() {
                 to_check.push(alternate);
             }
             continue;
@@ -463,7 +463,7 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {
-            if let Some(argument) = unary_expr.argument().ok() {
+            if let Ok(argument) = unary_expr.argument() {
                 to_check.push(argument);
             }
             continue;
@@ -471,10 +471,10 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
 
         // Static member access: obj.field
         // Add object to worklist
-        if let Some(member_expr) = current_expr.as_js_static_member_expression() {
-            if let Some(object) = member_expr.object().ok() {
-                to_check.push(object);
-            }
+        if let Some(member_expr) = current_expr.as_js_static_member_expression()
+            && let Ok(object) = member_expr.object()
+        {
+            to_check.push(object);
         }
 
         // Any other expression - not safe to trace
