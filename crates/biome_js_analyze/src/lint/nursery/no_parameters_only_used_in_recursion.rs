@@ -412,16 +412,13 @@ fn is_recursive_call(
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        // First check for a matching name
         let name_matches = ref_id.name().ok().is_some_and(|n| n.text() == name.text());
         if !name_matches {
             return false;
         }
 
-        // Try to resolve the binding of the reference
         let called_binding = model.binding(&ref_id);
 
-        // Compare bindings
         match (parent_function_binding, called_binding) {
             // Both have bindings - compare them directly
             (Some(parent_binding), Some(called_binding)) => {
