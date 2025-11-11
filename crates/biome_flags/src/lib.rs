@@ -23,6 +23,8 @@ pub struct BiomeEnv {
     pub biome_threads: BiomeEnvVariable,
     pub biome_watcher_kind: BiomeEnvVariable,
     pub biome_watcher_polling_interval: BiomeEnvVariable,
+    pub biome_log_level: BiomeEnvVariable,
+    pub biome_log_kind: BiomeEnvVariable,
 }
 
 pub static BIOME_ENV: OnceLock<BiomeEnv> = OnceLock::new();
@@ -53,6 +55,14 @@ impl BiomeEnv {
             biome_watcher_polling_interval: BiomeEnvVariable::new(
                 "BIOME_WATCHER_POLLING_INTERVAL",
                 "The polling interval in milliseconds. This only applicable when using the polling watcher. Default: 2000.",
+            ),
+            biome_log_level: BiomeEnvVariable::new(
+                "BIOME_LOG_LEVEL",
+                "The level of logging. Possible values: none, debug, info, warn, error. Default: info.",
+            ),
+            biome_log_kind: BiomeEnvVariable::new(
+                "BIOME_LOG_KIND",
+                "What the log should look like. Possible values: pretty, compact, json. Default: pretty.",
             ),
         }
     }

@@ -1,5 +1,3 @@
-use crate::LoggingLevel;
-use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
@@ -60,33 +58,6 @@ pub struct CliOptions {
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
-
-    /// Optional path to redirect log messages to.
-    ///
-    /// If omitted, logs are printed to stdout.
-    #[bpaf(long("log-file"))]
-    pub log_file: Option<String>,
-
-    /// The level of logging. In order, from the most verbose to the least
-    /// verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
-    #[bpaf(
-        long("log-level"),
-        argument("none|debug|info|warn|error"),
-        fallback(LoggingLevel::default()),
-        display_fallback
-    )]
-    pub log_level: LoggingLevel,
-
-    /// How the log should look like.
-    #[bpaf(
-        long("log-kind"),
-        argument("pretty|compact|json"),
-        fallback(LoggingKind::default()),
-        display_fallback
-    )]
-    pub log_kind: LoggingKind,
 
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(

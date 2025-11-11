@@ -2,7 +2,8 @@ use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
 use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
-use crate::logging::LoggingKind;
+use crate::logging::log_options;
+use crate::logging::{LogOptions, LoggingKind};
 use crate::{
     CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, execute_mode,
     setup_cli_subscriber,
@@ -49,7 +50,7 @@ use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     FixFileMode, OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
-use biome_service::{WatcherConfiguration, Workspace, WorkspaceError, watcher_configuration};
+use biome_service::{WatcherOptions, Workspace, WorkspaceError, watcher_options};
 use bpaf::Bpaf;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
@@ -82,6 +83,7 @@ pub enum BiomeCommand {
     /// Prints information for debugging.
     Rage(
         #[bpaf(external(cli_options), hide_usage)] CliOptions,
+        #[bpaf(external(log_options), hide_usage)] LogOptions,
         /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
@@ -95,29 +97,11 @@ pub enum BiomeCommand {
     /// Starts the Biome daemon server process.
     #[bpaf(command)]
     Start {
-        /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
 
-        /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
-        )]
-        log_path: Utf8PathBuf,
-
-        #[bpaf(external(watcher_configuration))]
-        watcher_configuration: WatcherConfiguration,
+        #[bpaf(external(watcher_options))]
+        watcher_configuration: WatcherOptions,
     },
 
     /// Stops the Biome daemon server process.
@@ -174,6 +158,8 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
         /// Use this option when you want to format code piped from `stdin`, and
         /// print the output to `stdout`.
         ///
@@ -262,6 +248,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         /// Run only the given rule, group of rules or domain.
         /// If the severity level of a rule is `off`,
@@ -358,6 +347,9 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
+
         /// Writes formatted files to a file system.
         #[bpaf(long("write"), switch)]
         write: bool,
@@ -421,6 +413,9 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -457,37 +452,24 @@ pub enum BiomeCommand {
     /// Acts as a server for the Language Server Protocol over stdin/stdout.
     #[bpaf(command("lsp-proxy"))]
     LspProxy {
-        /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
-        /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
-        )]
-        log_path: Utf8PathBuf,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
 
-        #[bpaf(external(watcher_configuration))]
-        watcher_configuration: WatcherConfiguration,
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
+
+        #[bpaf(external(watcher_options))]
+        watcher_configuration: WatcherOptions,
     },
     /// Updates the configuration when there are breaking changes.
     #[bpaf(command)]
     Migrate {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
@@ -516,6 +498,9 @@ pub enum BiomeCommand {
     Search {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         #[bpaf(external(files_configuration), optional, hide_usage)]
         files_configuration: Option<FilesConfiguration>,
@@ -582,33 +567,14 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
-        /// Allows changing the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
-        /// Allows changing the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(
-                biome_fs::ensure_cache_dir().join("biome-logs")
-            ),
-        )]
-        log_path: Utf8PathBuf,
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
 
-        #[bpaf(external(watcher_configuration))]
-        watcher_configuration: WatcherConfiguration,
+        #[bpaf(external(watcher_options))]
+        watcher_configuration: WatcherOptions,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -663,6 +629,28 @@ impl BiomeCommand {
         }
     }
 
+    const fn log_options(&self) -> Option<&LogOptions> {
+        match self {
+            Self::Check { log_options, .. }
+            | Self::Lint { log_options, .. }
+            | Self::Ci { log_options, .. }
+            | Self::Format { log_options, .. }
+            | Self::Migrate { log_options, .. }
+            | Self::Rage(_, log_options, ..)
+            | Self::Search { log_options, .. } => Some(log_options),
+            Self::Version(_)
+            | Self::LspProxy { .. }
+            | Self::Start { .. }
+            | Self::Stop
+            | Self::Init(_)
+            | Self::Explain { .. }
+            | Self::RunServer { .. }
+            | Self::Clean { .. }
+            | Self::PrintSocket => None,
+            Self::WhereAmI => None,
+        }
+    }
+
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self.cli_options() {
             Some(cli_options) => {
@@ -702,13 +690,13 @@ impl BiomeCommand {
     }
 
     pub fn log_level(&self) -> LoggingLevel {
-        self.cli_options()
-            .map_or(LoggingLevel::default(), |cli_options| cli_options.log_level)
+        self.log_options()
+            .map_or(LoggingLevel::default(), |log_options| log_options.log_level)
     }
 
     pub fn log_kind(&self) -> LoggingKind {
-        self.cli_options()
-            .map_or(LoggingKind::default(), |cli_options| cli_options.log_kind)
+        self.log_options()
+            .map_or(LoggingKind::default(), |log_options| log_options.log_kind)
     }
 }
 
@@ -906,11 +894,16 @@ pub(crate) trait CommandRunner: Sized {
     const COMMAND_NAME: &'static str;
 
     /// The main command to use.
-    fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
+    fn run(
+        &mut self,
+        session: CliSession,
+        log_options: &LogOptions,
+        cli_options: &CliOptions,
+    ) -> Result<(), CliDiagnostic> {
         setup_cli_subscriber(
-            cli_options.log_file.as_deref(),
-            cli_options.log_level,
-            cli_options.log_kind,
+            log_options.log_file.as_deref(),
+            log_options.log_level,
+            log_options.log_kind,
             cli_options.colors.as_ref(),
         );
         let console = &mut *session.app.console;

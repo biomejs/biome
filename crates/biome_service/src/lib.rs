@@ -27,9 +27,7 @@ use biome_resolver::FsWithResolverProxy;
 
 pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
-pub use scanner::{
-    Watcher, WatcherConfiguration, WatcherInstruction, WatcherKind, watcher_configuration,
-};
+pub use scanner::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
 pub use workspace::{Workspace, WorkspaceServer};
 
 /// This is the main entrypoint of the application.

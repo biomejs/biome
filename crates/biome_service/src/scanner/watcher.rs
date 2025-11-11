@@ -17,11 +17,11 @@ use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
 use std::time::Duration;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 /// Controls various aspects of the Biome Daemon.
 #[derive(Clone, Debug, Eq, PartialEq, Bpaf, Default)]
-pub struct WatcherConfiguration {
+pub struct WatcherOptions {
     /// Controls how the Biome file watcher should behave.
     #[bpaf(
         env("BIOME_WATCHER_KIND"),
@@ -58,9 +58,9 @@ pub enum WatcherKind {
 impl Display for WatcherKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            WatcherKind::Polling => write!(f, "polling"),
-            WatcherKind::Recommended => write!(f, "recommended"),
-            WatcherKind::None => write!(f, "none"),
+            Self::Polling => write!(f, "polling"),
+            Self::Recommended => write!(f, "recommended"),
+            Self::None => write!(f, "none"),
         }
     }
 }
@@ -69,9 +69,9 @@ impl FromStr for WatcherKind {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "polling" => Ok(WatcherKind::Polling),
-            "recommended" => Ok(WatcherKind::Recommended),
-            "none" => Ok(WatcherKind::None),
+            "polling" => Ok(Self::Polling),
+            "recommended" => Ok(Self::Recommended),
+            "none" => Ok(Self::None),
             _ => Err("Invalid watcherKind. Valid values are: polling, recommended, none"),
         }
     }
@@ -140,7 +140,7 @@ impl Watcher {
     /// Returns the watcher as well as a channel for sending instructions to the
     /// watcher.
     pub fn new(
-        watcher_configuration: WatcherConfiguration,
+        watcher_configuration: WatcherOptions,
     ) -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
@@ -151,6 +151,11 @@ impl Watcher {
         // The actual size of the buffer is an arbitrary choice that we can
         // tweak if we find a need for it.
         let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(128);
+
+        info!(
+            "Starting file watcher with kind \"{}\" with interval \"{}\"",
+            watcher_configuration.watcher_kind, watcher_configuration.polling_interval
+        );
 
         let watcher: Option<Box<dyn NotifyWatcher + Send>> =
             match &watcher_configuration.watcher_kind {

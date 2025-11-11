@@ -10,13 +10,13 @@ use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
-use biome_service::Watcher;
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
     OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
     ScanProjectResult,
 };
+use biome_service::{Watcher, WatcherOptions};
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
 use futures::{Sink, SinkExt, Stream, StreamExt};
@@ -3394,7 +3394,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3605,7 +3605,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("utils/bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3774,7 +3774,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut fs = TemporaryFs::new("should_open_and_update_nested_files");
     fs.create_file(FILE_PATH, FILE_CONTENT_BEFORE);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());

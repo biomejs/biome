@@ -29,9 +29,7 @@ use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
 
-pub use watcher::{
-    Watcher, WatcherConfiguration, WatcherInstruction, WatcherKind, watcher_configuration,
-};
+pub use watcher::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
 pub(crate) use workspace_bridges::{
     ScannerWatcherBridge, WorkspaceScannerBridge, WorkspaceWatcherBridge,
 };
