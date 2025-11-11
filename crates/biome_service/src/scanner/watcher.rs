@@ -20,7 +20,7 @@ use std::time::Duration;
 use tracing::{debug, error, info, warn};
 
 /// Controls various aspects of the Biome Daemon.
-#[derive(Clone, Debug, Eq, PartialEq, Bpaf, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Bpaf)]
 pub struct WatcherOptions {
     /// Controls how the Biome file watcher should behave.
     #[bpaf(
@@ -41,6 +41,15 @@ pub struct WatcherOptions {
         display_fallback
     )]
     pub polling_interval: u32,
+}
+
+impl Default for WatcherOptions {
+    fn default() -> Self {
+        Self {
+            watcher_kind: WatcherKind::Recommended,
+            polling_interval: 2000,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Bpaf, Default)]

@@ -31,7 +31,7 @@ use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
 pub use crate::commands::{BiomeCommand, biome_command};
-use crate::logging::{LogOptions, log_options};
+use crate::logging::LogOptions;
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 pub use diagnostics::CliDiagnostic;
 pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};

@@ -103,50 +103,124 @@ pub fn biome_env() -> &'static BiomeEnv {
 
 impl Display for BiomeEnv {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        let padding = 35usize;
         match self.biome_log_path.value() {
             None => {
-                KeyValuePair(self.biome_log_path.name, markup! { <Dim>"unset"</Dim> }).fmt(fmt)?;
+                KeyValuePair::new(self.biome_log_path.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
             }
             Some(value) => {
-                KeyValuePair(self.biome_log_path.name, markup! {{DebugDisplay(value)}}).fmt(fmt)?;
+                KeyValuePair::new(self.biome_log_path.name, markup! {{DebugDisplay(value)}})
+                    .with_padding(padding)
+                    .fmt(fmt)?;
             }
         };
         match self.biome_log_prefix_name.value() {
             None => {
-                KeyValuePair(
+                KeyValuePair::new(
                     self.biome_log_prefix_name.name,
                     markup! { <Dim>"unset"</Dim> },
                 )
+                .with_padding(padding)
                 .fmt(fmt)?;
             }
             Some(value) => {
-                KeyValuePair(
+                KeyValuePair::new(
                     self.biome_log_prefix_name.name,
                     markup! {{DebugDisplay(value)}},
                 )
+                .with_padding(padding)
                 .fmt(fmt)?;
             }
         };
 
-        match self.biome_config_path.value() {
+        match self.biome_log_level.value() {
             None => {
-                KeyValuePair(self.biome_config_path.name, markup! { <Dim>"unset"</Dim> })
+                KeyValuePair::new(self.biome_log_level.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
                     .fmt(fmt)?;
             }
             Some(value) => {
-                KeyValuePair(self.biome_config_path.name, markup! {{DebugDisplay(value)}})
+                KeyValuePair::new(self.biome_log_level.name, markup! {{DebugDisplay(value)}})
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+        };
+
+        match self.biome_log_kind.value() {
+            None => {
+                KeyValuePair::new(self.biome_log_kind.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(self.biome_log_kind.name, markup! {{DebugDisplay(value)}})
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+        }
+
+        match self.biome_config_path.value() {
+            None => {
+                KeyValuePair::new(self.biome_config_path.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(self.biome_config_path.name, markup! {{DebugDisplay(value)}})
+                    .with_padding(padding)
                     .fmt(fmt)?;
             }
         };
 
         match self.biome_threads.value() {
             None => {
-                KeyValuePair(self.biome_threads.name, markup! { <Dim>"unset"</Dim> }).fmt(fmt)?;
+                KeyValuePair::new(self.biome_threads.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
             }
             Some(value) => {
-                KeyValuePair(self.biome_threads.name, markup! {{DebugDisplay(value)}}).fmt(fmt)?;
+                KeyValuePair::new(self.biome_threads.name, markup! {{DebugDisplay(value)}})
+                    .with_padding(padding)
+                    .fmt(fmt)?;
             }
-        }
+        };
+
+        match self.biome_watcher_kind.value() {
+            None => {
+                KeyValuePair::new(self.biome_watcher_kind.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(
+                    self.biome_watcher_kind.name,
+                    markup! {{DebugDisplay(value)}},
+                )
+                .with_padding(padding)
+                .fmt(fmt)?;
+            }
+        };
+
+        match self.biome_watcher_polling_interval.value() {
+            None => {
+                KeyValuePair::new(
+                    self.biome_watcher_polling_interval.name,
+                    markup! { <Dim>"unset"</Dim> },
+                )
+                .with_padding(padding)
+                .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(
+                    self.biome_watcher_polling_interval.name,
+                    markup! {{DebugDisplay(value)}},
+                )
+                .with_padding(padding)
+                .fmt(fmt)?;
+            }
+        };
 
         Ok(())
     }

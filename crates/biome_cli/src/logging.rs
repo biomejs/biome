@@ -13,7 +13,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
 
 /// Options to control logging (CLI and Daemon)
-#[derive(Default, Debug, Clone, Bpaf)]
+#[derive(Debug, Clone, Bpaf)]
 pub struct LogOptions {
     /// Optional path/file to redirect log messages to. This option is applicable only to the CLI.
     ///
@@ -43,7 +43,6 @@ pub struct LogOptions {
         argument("PATH"),
         fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         display_fallback
-        ali
     )]
     pub log_path: Utf8PathBuf,
 
@@ -69,6 +68,18 @@ pub struct LogOptions {
         display_fallback
     )]
     pub log_kind: LoggingKind,
+}
+
+impl Default for LogOptions {
+    fn default() -> Self {
+        Self {
+            log_file: None,
+            log_prefix_name: String::from("server.log"),
+            log_path: biome_fs::ensure_cache_dir().join("biome-logs"),
+            log_level: LoggingLevel::default(),
+            log_kind: LoggingKind::default(),
+        }
+    }
 }
 
 pub fn setup_cli_subscriber(

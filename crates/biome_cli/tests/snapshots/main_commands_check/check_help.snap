@@ -240,7 +240,8 @@ Options to control logging (CLI and Daemon)
                               [env:BIOME_LOG_FILE: N/A]
         --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
                               [default: server.log]
-        --log-path=PATH       Allows to change the folder where logs are stored.
+        --log-path=PATH       Allows changing the folder where logs are stored. This option is
+                              applicable only to the daemon.
                               [env:BIOME_LOG_PATH: N/A]
                               [default: <BIOME_DIR>/biome-logs]
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most

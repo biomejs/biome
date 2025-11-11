@@ -74,14 +74,17 @@ pub(crate) fn run_server(
     watcher_options: WatcherOptions,
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
+    setup_tracing_subscriber(
+        log_options.log_path.clone(),
+        log_options.log_prefix_name.clone(),
+    );
+
     let span = debug_span!(
         "Running Server",
         pid = std::process::id(),
         log_path = &log_options.log_path.as_str(),
         log_file_name_prefix = &log_options.log_prefix_name.as_str(),
     );
-
-    setup_tracing_subscriber(log_options.log_path, log_options.log_prefix_name);
 
     let (watcher, instruction_channel) = Watcher::new(watcher_options)?;
 
