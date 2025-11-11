@@ -1,0 +1,9 @@
+# should not generate diagnostics
+enum EnumValue {
+	"basic"
+	BASIC
+	"fluent"
+	FLUENT
+	"native"
+	NATIVE
+}

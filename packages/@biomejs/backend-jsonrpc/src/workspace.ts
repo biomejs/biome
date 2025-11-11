@@ -946,7 +946,7 @@ export type SeverityOrGroup_for_Performance =
 	| GroupPlainConfiguration
 	| Performance;
 export type SeverityOrGroup_for_Security = GroupPlainConfiguration | Security;
-export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style;
+export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style2;
 export type SeverityOrGroup_for_Suspicious =
 	| GroupPlainConfiguration
 	| Suspicious;
@@ -1765,6 +1765,10 @@ export interface Nursery {
 	 */
 	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
 	/**
+	 * Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
+	 */
+	useConsistentGraphqlDescriptions?: RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions;
+	/**
 	 * Require the @deprecated directive to specify a deletion date.
 	 */
 	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
@@ -1890,7 +1894,7 @@ export interface Security {
 /**
  * A list of rules that belong to this group
  */
-export interface Style {
+export interface Style2 {
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -3137,6 +3141,9 @@ export type RuleConfiguration_for_UseArraySortCompareOptions =
 export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
+export type RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions;
 export type RuleConfiguration_for_UseDeprecatedDateOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseDeprecatedDateOptions;
@@ -5773,6 +5780,16 @@ export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	 */
 	options: UseConsistentArrowReturnOptions;
 }
+export interface RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentGraphqlDescriptionsOptions;
+}
 export interface RuleWithOptions_for_UseDeprecatedDateOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8389,6 +8406,12 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 */
 	style?: UseConsistentArrowReturnStyle;
 }
+export interface UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The description style to enforce. Defaults to "block"
+	 */
+	style?: Style;
+}
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
@@ -8573,7 +8596,7 @@ export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
-	style?: Style2;
+	style?: Style3;
 }
 export interface UseLiteralEnumMembersOptions {}
 /**
@@ -8775,6 +8798,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
+export type Style = "block" | "inline";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -8791,7 +8815,7 @@ export type Regex = string;
 /**
  * Rule's options.
  */
-export type Style2 = "auto" | "inlineType" | "separatedType";
+export type Style3 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -9156,6 +9180,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"

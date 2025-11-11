@@ -270,6 +270,7 @@ pub mod use_consistent_array_type;
 pub mod use_consistent_arrow_return;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
+pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_member_accessibility;
 pub mod use_consistent_object_definitions;
 pub mod use_consistent_type_definitions;

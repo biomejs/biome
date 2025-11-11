@@ -5301,6 +5301,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentGraphqlDescriptions": {
+					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentGraphqlDescriptionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useDeprecatedDate": {
 					"description": "Require the @deprecated directive to specify a deletion date.",
 					"anyOf": [
@@ -10504,6 +10513,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentGraphqlDescriptionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentGraphqlDescriptionsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -12429,7 +12455,7 @@
 		"SeverityOrGroup_for_Style": {
 			"anyOf": [
 				{ "$ref": "#/definitions/GroupPlainConfiguration" },
-				{ "$ref": "#/definitions/Style" }
+				{ "$ref": "#/definitions/Style2" }
 			]
 		},
 		"SeverityOrGroup_for_Suspicious": {
@@ -12524,6 +12550,20 @@
 			]
 		},
 		"Style": {
+			"oneOf": [
+				{
+					"description": "Requires triple-quoted block descriptions (`\"\"\"...\"\"\"`)",
+					"type": "string",
+					"enum": ["block"]
+				},
+				{
+					"description": "Requires single-quoted inline descriptions (`\"...\"`)",
+					"type": "string",
+					"enum": ["inline"]
+				}
+			]
+		},
+		"Style2": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
@@ -13055,7 +13095,7 @@
 			},
 			"additionalProperties": false
 		},
-		"Style2": {
+		"Style3": {
 			"description": "Rule's options.",
 			"oneOf": [
 				{
@@ -14068,6 +14108,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConsistentGraphqlDescriptionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseConsistentGraphqlDescriptionsOptions"
+				}
+			]
+		},
+		"UseConsistentGraphqlDescriptionsOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The description style to enforce. Defaults to \"block\"",
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Style" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -14508,7 +14567,7 @@
 			"properties": {
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
-					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Style3" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
