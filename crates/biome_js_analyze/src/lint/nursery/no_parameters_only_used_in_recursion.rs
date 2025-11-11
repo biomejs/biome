@@ -290,9 +290,7 @@ fn get_function_binding(
                     && let Some(id_assignment) = left.as_any_js_assignment()
                     && let Some(js_id_assignment) = id_assignment.as_js_identifier_assignment()
                 {
-                    // For assignment expressions, resolve the assignment target to its binding.
-                    // JsIdentifierAssignment implements HasDeclarationAstNode, so model.binding()
-                    // can resolve write references to their bindings.
+                    // Resolve assignment target to its binding
                     return model.binding(js_id_assignment);
                 }
 
@@ -302,9 +300,7 @@ fn get_function_binding(
             }
             None
         }
-        // Methods are property names, not bindings.
-        // In these cases, rely on the name-based comparison
-        // because methods are scoped to the object or class
+        // Methods are property names, not bindings - use name-based comparison
         _ => None,
     }
 }
