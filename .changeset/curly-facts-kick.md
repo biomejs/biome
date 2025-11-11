@@ -41,7 +41,7 @@ Environment variable alias: `BIOME_LOG_KIND`
 #### Reduce dumping of LSP logs
 
 When you use a Biome editor extension, Biome's Daemon dumps its logs using the `debug` level. If you want to reduce
-the quantity of these logs, you can know customise it:
+the quantity of these logs, you can now customize it:
 
 ```shell
 BIOME_LOG_LEVEL=info biome lsp-proxy
