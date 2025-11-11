@@ -424,39 +424,57 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool>
         // Binary operations: a + 1, a - b
         // Add both sides to worklist
         if let Some(bin_expr) = current_expr.as_js_binary_expression() {
-            to_check.push(bin_expr.left().ok()?);
-            to_check.push(bin_expr.right().ok()?);
+            if let Some(left) = bin_expr.left().ok() {
+                to_check.push(left);
+            }
+            if let Some(right) = bin_expr.right().ok() {
+                to_check.push(right);
+            }
             continue;
         }
 
         // Logical operations: a && b, a || b, a ?? b
         // Add both sides to worklist
         if let Some(logical_expr) = current_expr.as_js_logical_expression() {
-            to_check.push(logical_expr.left().ok()?);
-            to_check.push(logical_expr.right().ok()?);
+            if let Some(left) = logical_expr.left().ok() {
+                to_check.push(left);
+            }
+            if let Some(right) = logical_expr.right().ok() {
+                to_check.push(right);
+            }
             continue;
         }
 
         // Conditional expression: cond ? a : b
         // Add all three parts to worklist (test, consequent, alternate)
         if let Some(cond_expr) = current_expr.as_js_conditional_expression() {
-            to_check.push(cond_expr.test().ok()?);
-            to_check.push(cond_expr.consequent().ok()?);
-            to_check.push(cond_expr.alternate().ok()?);
+            if let Some(test) = cond_expr.test().ok() {
+                to_check.push(test);
+            }
+            if let Some(consequent) = cond_expr.consequent().ok() {
+                to_check.push(consequent);
+            }
+            if let Some(alternate) = cond_expr.alternate().ok() {
+                to_check.push(alternate);
+            }
             continue;
         }
 
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {
-            to_check.push(unary_expr.argument().ok()?);
+            if let Some(argument) = unary_expr.argument().ok() {
+                to_check.push(argument);
+            }
             continue;
         }
 
         // Static member access: obj.field
         // Add object to worklist
         if let Some(member_expr) = current_expr.as_js_static_member_expression() {
-            to_check.push(member_expr.object().ok()?);
+            if let Some(object) = member_expr.object().ok() {
+                to_check.push(object);
+            }
         }
 
         // Any other expression - not safe to trace
@@ -484,7 +502,9 @@ fn is_recursive_call_with_param_usage(
     let arguments = call.arguments().ok()?;
 
     for arg in arguments.args() {
-        let arg_node = arg.ok()?;
+        let Some(arg_node) = arg.ok() else {
+            continue;
+        };
 
         // Skip spread arguments (conservative)
         if arg_node.as_js_spread().is_some() {
