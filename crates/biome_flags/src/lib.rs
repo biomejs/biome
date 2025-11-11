@@ -58,7 +58,7 @@ impl BiomeEnv {
             ),
             biome_log_level: BiomeEnvVariable::new(
                 "BIOME_LOG_LEVEL",
-                "The level of logging. Possible values: none, debug, info, warn, error. Default: info.",
+                "The level of logging. Possible values: none, tracing, debug, info, warn, error. Default: info.",
             ),
             biome_log_kind: BiomeEnvVariable::new(
                 "BIOME_LOG_KIND",
