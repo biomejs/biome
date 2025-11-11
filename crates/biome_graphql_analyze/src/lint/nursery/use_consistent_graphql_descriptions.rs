@@ -9,7 +9,7 @@ use biome_rule_options::use_consistent_graphql_descriptions::{
 };
 
 declare_lint_rule! {
-    /// Require all descriptions to follow the same style (either block or inline)
+    /// Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
     ///
     /// ## Examples
     ///

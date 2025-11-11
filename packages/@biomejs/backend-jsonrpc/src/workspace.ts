@@ -1765,7 +1765,7 @@ export interface Nursery {
 	 */
 	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
 	/**
-	 * Require all descriptions to follow the same style (either block or inline)
+	 * Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
 	 */
 	useConsistentGraphqlDescriptions?: RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions;
 	/**
