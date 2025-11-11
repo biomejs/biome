@@ -101,7 +101,7 @@ pub enum BiomeCommand {
         log_options: LogOptions,
 
         #[bpaf(external(watcher_options))]
-        watcher_configuration: WatcherOptions,
+        watcher_options: WatcherOptions,
     },
 
     /// Stops the Biome daemon server process.
@@ -460,7 +460,7 @@ pub enum BiomeCommand {
         log_options: LogOptions,
 
         #[bpaf(external(watcher_options))]
-        watcher_configuration: WatcherOptions,
+        watcher_options: WatcherOptions,
     },
     /// Updates the configuration when there are breaking changes.
     #[bpaf(command)]
@@ -574,7 +574,7 @@ pub enum BiomeCommand {
         stop_on_disconnect: bool,
 
         #[bpaf(external(watcher_options))]
-        watcher_configuration: WatcherOptions,
+        watcher_options: WatcherOptions,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,

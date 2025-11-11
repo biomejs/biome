@@ -74,8 +74,8 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
                 log_options,
-                watcher_configuration,
-            } => commands::daemon::start(self, watcher_configuration, log_options),
+                watcher_options,
+            } => commands::daemon::start(self, watcher_options, log_options),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 write,
@@ -251,10 +251,10 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy {
-                watcher_configuration,
+                watcher_options,
                 stdio: _,
                 log_options,
-            } => commands::daemon::lsp_proxy(watcher_configuration, log_options),
+            } => commands::daemon::lsp_proxy(watcher_options, log_options),
             BiomeCommand::Migrate {
                 cli_options,
                 log_options,
@@ -297,11 +297,9 @@ impl<'app> CliSession<'app> {
             ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
-                watcher_configuration,
+                watcher_options,
                 log_options,
-            } => {
-                commands::daemon::run_server(stop_on_disconnect, watcher_configuration, log_options)
-            }
+            } => commands::daemon::run_server(stop_on_disconnect, watcher_options, log_options),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
             BiomeCommand::WhereAmI => {
                 if let Ok(path) = env::current_exe() {
