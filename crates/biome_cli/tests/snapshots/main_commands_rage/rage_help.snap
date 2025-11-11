@@ -47,8 +47,7 @@ Options to control logging (CLI and Daemon)
                               [default: server.log]
         --log-path=PATH       Allows changing the folder where logs are stored. This option is
                               applicable only to the daemon.
-                              [env:BIOME_LOG_PATH =
-                              "<TEMP_DIR>/biome-rage-test"]
+                              [env:BIOME_LOG_PATH: N/A]
                               [default: <BIOME_DIR>/biome-logs]
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
