@@ -1804,6 +1804,10 @@ export interface Nursery {
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
+	/**
+	 * Forbids v-bind directives with missing arguments or invalid modifiers.
+	 */
+	useVueValidVBind?: RuleConfiguration_for_UseVueValidVBindOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -3171,6 +3175,9 @@ export type RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions =
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
+export type RuleConfiguration_for_UseVueValidVBindOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVBindOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -5892,6 +5899,16 @@ export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	 */
 	options: UseVueMultiWordComponentNamesOptions;
 }
+export interface RuleWithOptions_for_UseVueValidVBindOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVBindOptions;
+}
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8451,6 +8468,7 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores: string[];
 }
+export interface UseVueValidVBindOptions {}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
 export interface NoBarrelFileOptions {}
@@ -9177,6 +9195,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
+	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
