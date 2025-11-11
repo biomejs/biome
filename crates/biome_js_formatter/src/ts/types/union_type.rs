@@ -120,11 +120,11 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
                     f,
                     [
                         indent(&format_args![
-                            if_group_breaks(&format_args![text("("), soft_line_break()]),
+                            if_group_breaks(&format_args![token("("), soft_line_break()]),
                             types
                         ]),
                         soft_line_break(),
-                        if_group_breaks(&text(")"))
+                        if_group_breaks(&token(")"))
                     ]
                 )
             } else if should_indent {
@@ -176,7 +176,7 @@ impl Format<JsFormatContext> for FormatTypeSetLeadingSeparator<'_> {
                     if self.leading_soft_line_break_or_space {
                         write!(f, [soft_line_break_or_space()])?;
                     }
-                    write!(f, [text(self.separator), space()])
+                    write!(f, [token(self.separator), space()])
                 });
 
                 write!(f, [if_group_breaks(&content)])

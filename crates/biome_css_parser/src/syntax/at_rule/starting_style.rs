@@ -47,9 +47,20 @@ pub(crate) fn parse_starting_style_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump(T![starting_style]);
-
+    parse_starting_style_at_rule_declarator(p).ok();
     parse_conditional_block(p);
 
     Present(m.complete(p, CSS_STARTING_STYLE_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_starting_style_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_starting_style_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![starting_style]);
+
+    Present(m.complete(p, CSS_STARTING_STYLE_AT_RULE_DECLARATOR))
 }

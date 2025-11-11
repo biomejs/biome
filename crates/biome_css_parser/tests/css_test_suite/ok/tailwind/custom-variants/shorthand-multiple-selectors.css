@@ -1,0 +1,3 @@
+@custom-variant foobar (.foo, .bar);
+
+@custom-variant cell (th:has(&), td:has(&));

@@ -398,7 +398,7 @@ pub trait DeserializationVisitor: Sized {
     fn visit_array(
         self,
         ctx: &mut impl DeserializationContext,
-        _items: impl Iterator<Item = Option<impl DeserializableValue>>,
+        _items: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
@@ -422,7 +422,9 @@ pub trait DeserializationVisitor: Sized {
     fn visit_map(
         self,
         ctx: &mut impl DeserializationContext,
-        _members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _members: impl ExactSizeIterator<
+            Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+        >,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {

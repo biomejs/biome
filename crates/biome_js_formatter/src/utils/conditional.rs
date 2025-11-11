@@ -90,9 +90,9 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
                 write!(
                     f,
                     [
-                        if_group_fits_on_line(&text("(")),
+                        if_group_fits_on_line(&token("(")),
                         consequent,
-                        if_group_fits_on_line(&text(")"))
+                        if_group_fits_on_line(&token(")"))
                     ]
                 )?;
             } else {
@@ -802,9 +802,9 @@ impl Format<JsFormatContext> for FormatJsxChainExpression<'_> {
             write!(
                 f,
                 [
-                    if_group_breaks(&text("(")),
+                    if_group_breaks(&token("(")),
                     soft_block_indent(&format_expression),
-                    if_group_breaks(&text(")"))
+                    if_group_breaks(&token(")"))
                 ]
             )
         }

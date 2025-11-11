@@ -42,7 +42,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssStartingStyleAtRule {
-                starting_style_token: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")],
+                declarator: CssStartingStyleAtRuleDeclarator {
+                    starting_style_token: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")],
+                },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@16..17 "{" [] [],
                     rules: CssRuleList [
@@ -101,7 +103,9 @@ CssRoot {
                                             CssAtRule {
                                                 at_token: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] [],
                                                 rule: CssStartingStyleAtRule {
-                                                    starting_style_token: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")],
+                                                    declarator: CssStartingStyleAtRuleDeclarator {
+                                                        starting_style_token: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")],
+                                                    },
                                                     block: CssDeclarationOrRuleBlock {
                                                         l_curly_token: L_CURLY@93..94 "{" [] [],
                                                         items: CssDeclarationOrRuleList [
@@ -197,7 +201,9 @@ CssRoot {
                             CssAtRule {
                                 at_token: AT@193..196 "@" [Newline("\n"), Whitespace("\t")] [],
                                 rule: CssStartingStyleAtRule {
-                                    starting_style_token: STARTING_STYLE_KW@196..211 "starting-style" [] [Whitespace(" ")],
+                                    declarator: CssStartingStyleAtRuleDeclarator {
+                                        starting_style_token: STARTING_STYLE_KW@196..211 "starting-style" [] [Whitespace(" ")],
+                                    },
                                     block: CssDeclarationOrRuleBlock {
                                         l_curly_token: L_CURLY@211..212 "{" [] [],
                                         items: CssDeclarationOrRuleList [
@@ -273,7 +279,8 @@ CssRoot {
     0: CSS_AT_RULE@0..168
       0: AT@0..1 "@" [] []
       1: CSS_STARTING_STYLE_AT_RULE@1..168
-        0: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")]
+        0: CSS_STARTING_STYLE_AT_RULE_DECLARATOR@1..16
+          0: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@16..168
           0: L_CURLY@16..17 "{" [] []
           1: CSS_RULE_LIST@17..166
@@ -316,7 +323,8 @@ CssRoot {
                       0: CSS_AT_RULE@74..132
                         0: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] []
                         1: CSS_STARTING_STYLE_AT_RULE@78..132
-                          0: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")]
+                          0: CSS_STARTING_STYLE_AT_RULE_DECLARATOR@78..93
+                            0: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")]
                           1: CSS_DECLARATION_OR_RULE_BLOCK@93..132
                             0: L_CURLY@93..94 "{" [] []
                             1: CSS_DECLARATION_OR_RULE_LIST@94..128
@@ -376,7 +384,8 @@ CssRoot {
               0: CSS_AT_RULE@193..261
                 0: AT@193..196 "@" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_STARTING_STYLE_AT_RULE@196..261
-                  0: STARTING_STYLE_KW@196..211 "starting-style" [] [Whitespace(" ")]
+                  0: CSS_STARTING_STYLE_AT_RULE_DECLARATOR@196..211
+                    0: STARTING_STYLE_KW@196..211 "starting-style" [] [Whitespace(" ")]
                   1: CSS_DECLARATION_OR_RULE_BLOCK@211..261
                     0: L_CURLY@211..212 "{" [] []
                     1: CSS_DECLARATION_OR_RULE_LIST@212..258

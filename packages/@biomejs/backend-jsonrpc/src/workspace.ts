@@ -1757,6 +1757,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Require Array#sort and Array#toSorted calls to always provide a compareFunction.
+	 */
+	useArraySortCompare?: RuleConfiguration_for_UseArraySortCompareOptions;
+	/**
 	 * Enforce consistent arrow function bodies.
 	 */
 	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
@@ -3131,6 +3135,9 @@ export type RuleConfiguration_for_NoVueReservedKeysOptions =
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
+export type RuleConfiguration_for_UseArraySortCompareOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseArraySortCompareOptions;
 export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
@@ -5748,6 +5755,16 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 * Rule's options
 	 */
 	options: NoVueReservedPropsOptions;
+}
+export interface RuleWithOptions_for_UseArraySortCompareOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseArraySortCompareOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	/**
@@ -8373,6 +8390,7 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
+export interface UseArraySortCompareOptions {}
 /**
  * Options for the `useConsistentArrowReturn` rule.
  */
@@ -9158,6 +9176,7 @@ export type Category =
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
@@ -9619,7 +9638,18 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind =
+	| "Vue"
+	| "Svelte"
+	| "None"
+	| {
+			Astro: {
+				/**
+				 * Whether the script is inside Astro frontmatter
+				 */
+				frontmatter: boolean;
+			};
+	  };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };

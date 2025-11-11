@@ -445,7 +445,8 @@ pub(crate) fn parse_astro_embedded_script(
     settings: &Settings,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let content = element.content_token()?;
-    let file_source = JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro);
+    let file_source =
+        JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
     let document_file_source = DocumentFileSource::Js(file_source);
     let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
     let parse = parse_js_with_offset_and_cache(
@@ -479,6 +480,10 @@ pub(crate) fn parse_embedded_script(
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
                 JsFileSource::ts()
+            } else if element.is_jsx_lang() {
+                JsFileSource::jsx()
+            } else if element.is_tsx_lang() {
+                JsFileSource::tsx()
             } else {
                 JsFileSource::js_module()
             };
@@ -489,7 +494,7 @@ pub(crate) fn parse_embedded_script(
             }
             file_source
         } else if html_file_source.is_astro() {
-            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro)
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false })
         } else {
             let is_module = element.is_javascript_module().unwrap_or_default();
             if is_module {
@@ -668,8 +673,8 @@ fn format_embedded(
         let mut iter = embedded_nodes.iter();
         let node = iter.find(|node| node.range == range)?;
 
-        let wrap_document = |document: Document| {
-            if indent_script_and_style {
+        let wrap_document = |document: Document, should_indent: bool| {
+            if indent_script_and_style && should_indent {
                 let elements = vec![
                     FormatElement::Line(LineMode::Hard),
                     FormatElement::Tag(Tag::StartIndent),
@@ -689,12 +694,16 @@ fn format_embedded(
         };
 
         match node.source {
-            DocumentFileSource::Js(_) => {
+            DocumentFileSource::Js(file_source) => {
                 let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
                 let node = node.node.clone().embedded_syntax::<JsLanguage>().clone();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+
+                Some(wrap_document(
+                    formatted.into_document(),
+                    !file_source.as_embedding_kind().is_astro_frontmatter(),
+                ))
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
@@ -702,14 +711,14 @@ fn format_embedded(
                 let node = node.node.clone().embedded_syntax::<JsonLanguage>().clone();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+                Some(wrap_document(formatted.into_document(), true))
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
                 let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document()))
+                Some(wrap_document(formatted.into_document(), true))
             }
             _ => None,
         }
