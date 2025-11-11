@@ -274,7 +274,6 @@ fn get_function_binding(
             // For arrow functions, find the binding from the surrounding context
             let arrow_syntax = arrow.syntax();
             for ancestor in arrow_syntax.ancestors().skip(1) {
-
                 // Check for variable declarator: const foo = () => ...
                 if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor)
                     && let Ok(id) = declarator.id()
