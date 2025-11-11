@@ -8,7 +8,7 @@ use crate::{
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
 use serde::Serialize;
-use std::any::{TypeId, type_name};
+use std::any::{Any, TypeId, type_name};
 use std::fmt::{Debug, Formatter};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -885,7 +885,7 @@ impl EmbeddedSendNode {
     /// Downcast this handle into a [SyntaxNodeWithOffset]
     pub fn into_node<L>(self) -> SyntaxNodeWithOffset<L>
     where
-        L: Language + 'static,
+        L: Language,
     {
         SyntaxNodeWithOffset {
             node: SyntaxNode::new_root(self.green),
@@ -1148,7 +1148,10 @@ pub struct SyntaxNodeWithOffset<L: Language> {
     pub offset: TextSize,
 }
 
-impl<L: Language> SyntaxNodeWithOffset<L> {
+impl<L> SyntaxNodeWithOffset<L>
+where
+    L: Language,
+{
     pub fn new(node: SyntaxNode<L>, offset: TextSize) -> Self {
         Self { node, offset }
     }
@@ -1203,6 +1206,32 @@ impl<L: Language> SyntaxNodeWithOffset<L> {
         EmbeddedSendNode {
             green: self.node.green_node(),
             offset: self.offset,
+        }
+    }
+}
+
+/// Marker trait to prevent unrelated types to be contained in the [`crate::ErasedSyntaxNode`] struct.
+pub trait AsSyntaxNode: Any {}
+
+impl<L: Language + 'static> AsSyntaxNode for SyntaxNode<L> {}
+
+/// Opaque struct for [`SyntaxNode`] without the `L: Language` constraint.
+#[derive(Debug)]
+pub struct AnySyntaxNode {
+    raw: Box<dyn Any>,
+}
+
+impl AnySyntaxNode {
+    #[inline]
+    pub fn downcast_ref<T: AsSyntaxNode>(&self) -> Option<&T> {
+        self.raw.downcast_ref()
+    }
+}
+
+impl<L: Language + 'static> From<SyntaxNode<L>> for AnySyntaxNode {
+    fn from(value: SyntaxNode<L>) -> Self {
+        Self {
+            raw: Box::new(value),
         }
     }
 }

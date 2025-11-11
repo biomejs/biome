@@ -9,8 +9,16 @@ use std::ops::Deref;
 pub struct NoRestrictedElementsOptions {
     /// Elements to restrict.
     /// Each key is the element name, and the value is the message to show when the element is used.
-    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    pub elements: CustomRestrictedElements,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub elements: Option<CustomRestrictedElements>,
+}
+
+impl biome_deserialize::Merge for NoRestrictedElementsOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(elements) = other.elements {
+            self.elements = Some(elements);
+        }
+    }
 }
 
 #[derive(

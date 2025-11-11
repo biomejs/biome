@@ -22,6 +22,8 @@ pub(crate) enum TailwindLexContext {
     /// The default state.
     #[default]
     Regular,
+    /// The parser just encountered a `-` before a basename, e.g. in `-mt-4`. That meant that the next token should be a basename.
+    SawNegative,
     /// The lexer has encountered a `[` and the parser has yet to encounter the matching `]`.
     Arbitrary,
     /// Like Arbitrary, but specifically for arbitrary variants.

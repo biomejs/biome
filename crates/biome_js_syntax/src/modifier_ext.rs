@@ -199,6 +199,14 @@ impl From<&TsMethodSignatureModifierList> for enumflags2::BitFlags<Modifier> {
             .fold(Self::empty(), |acc, m| acc | m)
     }
 }
+impl From<&crate::TsPropertyParameterModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &crate::TsPropertyParameterModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
+    }
+}
 
 /// Helpful data structure to make the order of type parameter modifiers predictable inside the formatter
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]

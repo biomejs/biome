@@ -17,8 +17,10 @@ use crate::JsRuleAction;
 declare_lint_rule! {
     /// Disallow unnecessary concatenation of string or template literals.
     ///
-    /// This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.
-    /// Concatenation of multiple strings is allowed when the strings are spread over multiple lines in order to prevent exceeding the maximum line width.
+    /// This rule aims to flag concatenation of string or template literals when they could be combined into a single literal.
+    /// Notably, this also includes concatenating a string with a number (unlike the derivative ESLint rule).
+    ///
+    /// Concatenation of multiple strings is allowed for multi-line strings (such as ones used to prevent exceeding the maximum line width).
     ///
     /// ## Examples
     ///
@@ -26,6 +28,10 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const a = "a" + "b";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = "string" + 123;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -58,9 +64,17 @@ declare_lint_rule! {
     /// const a = 'foo' + bar;
     /// ```
     ///
+    /// Multi-line strings are ignored:
+    ///
     /// ```js
-    /// const a = 'foo' +
+    /// const multiline = 'foo' + // formatting
     ///           'bar'
+    /// ```
+    ///
+    /// ```js
+    /// const alsoMultiline = 'foo'
+    ///           + 'bar'
+    ///           + `baz`
     /// ```
     pub NoUselessStringConcat {
         version: "1.8.0",
@@ -84,13 +98,13 @@ impl Rule for NoUselessStringConcat {
         let parent_binary_expression = get_parent_binary_expression(node);
 
         // Prevent duplicated error reportings when the parent is a useless concatenation too, i.e.: "a" + "b" + "c"
-        if parent_binary_expression.is_some()
-            && get_useless_concat(&parent_binary_expression?).is_some()
+        if parent_binary_expression
+            .is_some_and(|parent_expression| get_concatenation_range(&parent_expression).is_some())
         {
             return None;
         }
 
-        get_useless_concat(node)
+        get_concatenation_range(node)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -173,12 +187,35 @@ impl Rule for NoUselessStringConcat {
     }
 }
 
-fn get_useless_concat(node: &JsBinaryExpression) -> Option<TextRange> {
-    if is_stylistic_concatenation(node) {
-        return None;
-    }
+/// Returns if the passed `JsBinaryExpression` is the concatenation of two string literals.
+fn is_string_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+    let left = binary_expression.left().ok();
+    let right = binary_expression.right().ok();
+    let has_left_string_expression = is_string_expression(&left)
+        || is_binary_expression_with_literal_string(&left)
+        || is_parenthesized_concatenation(&left);
+    let has_right_string_expression = is_string_expression(&right)
+        || is_binary_expression_with_literal_string(&right)
+        || is_parenthesized_concatenation(&right);
+    let has_left_numeric_expression = is_numeric_expression(&left) || is_numeric_calculation(&left);
+    let has_right_numeric_expression =
+        is_numeric_expression(&right) || is_numeric_calculation(&right);
+    let has_string_expression = match (
+        has_left_string_expression,
+        has_left_numeric_expression,
+        has_right_string_expression,
+        has_right_numeric_expression,
+    ) {
+        (true, _, true, _) => true,     // "a" + "b"
+        (false, true, true, _) => true, // 1 + "a"
+        (true, _, false, true) => true, // "a" + 1
+        _ => false,
+    };
 
-    is_concatenation(node)
+    let operator = binary_expression.operator().ok();
+    let has_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
+
+    has_plus_operator && has_string_expression
 }
 
 fn is_string_expression(expression: &Option<AnyJsExpression>) -> bool {
@@ -232,59 +269,55 @@ fn is_binary_expression_with_literal_string(expression: &Option<AnyJsExpression>
     false
 }
 
-fn is_concatenation(binary_expression: &JsBinaryExpression) -> Option<TextRange> {
-    let left = binary_expression.left().ok();
-    let right = binary_expression.right().ok();
-    let has_left_string_expression = is_string_expression(&left)
-        || is_binary_expression_with_literal_string(&left)
-        || is_parenthesized_concatenation(&left);
-    let has_right_string_expression = is_string_expression(&right)
-        || is_binary_expression_with_literal_string(&right)
-        || is_parenthesized_concatenation(&right);
-    let has_left_numeric_expression = is_numeric_expression(&left) || is_numeric_calculation(&left);
-    let has_right_numeric_expression =
-        is_numeric_expression(&right) || is_numeric_calculation(&right);
-    let operator = binary_expression.operator().ok();
-
-    let has_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
-    let has_string_expression = match (
-        has_left_string_expression,
-        has_left_numeric_expression,
-        has_right_string_expression,
-        has_right_numeric_expression,
-    ) {
-        (true, _, true, _) => true,     // "a" + "b"
-        (false, true, true, _) => true, // 1 + "a"
-        (true, _, false, true) => true, // "a" + 1
-        _ => false,
-    };
-
-    if has_plus_operator && has_string_expression {
-        let range_start = if is_binary_expression_with_literal_string(&left) {
-            match left {
-                Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)) => {
-                    extract_concat_range(&left_binary_expression)
-                }
-                _ => None,
-            }
-        } else {
-            left.map(|left| left.range().start())
-        };
-        let range_end = right.map(|right| right.range().end());
-
-        return match (range_start, range_end) {
-            (Some(range_start), Some(range_end)) => Some(TextRange::new(range_start, range_end)),
-            _ => None,
-        };
+fn is_parenthesized_concatenation(expression: &Option<AnyJsExpression>) -> bool {
+    if let Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) = expression {
+        return is_binary_expression_with_literal_string(
+            &parenthesized_expression.expression().ok(),
+        );
     }
 
-    None
+    false
 }
 
-/// Returns if the passed `JsBinaryExpression` has a multiline string concatenation
+/// Returns the diagnostic range of the passed `JsBinaryExpression`, or `None` if it is either
+/// not a string concatenation or stylistically exempt.
+fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<TextRange> {
+    if !is_string_concatenation(binary_expression) {
+        return None;
+    }
+
+    if is_stylistic_concatenation(binary_expression) {
+        return None;
+    }
+
+    let left = binary_expression.left().ok();
+    let right = binary_expression.right().ok();
+    let range_start = if is_binary_expression_with_literal_string(&left) {
+        match left {
+            Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)) => {
+                extract_concat_range(&left_binary_expression)
+            }
+            _ => None,
+        }
+    } else {
+        left.map(|left| left.range().start())
+    };
+    let range_end = right.map(|right| right.range().end());
+
+    match (range_start, range_end) {
+        (Some(range_start), Some(range_end)) => Some(TextRange::new(range_start, range_end)),
+        _ => None,
+    }
+}
+
+/// Returns if the passed `JsBinaryExpression` is a multiline string concatenation,
+/// meaning either the operator or RHS have a leading newline.
+/// Assumes the expression is known to be a valid concatenation that will otherwise trigger the rule.
 fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
-    let operator = binary_expression.operator().ok();
-    let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
+    // TODO: Review desired rule behavior if the first operand is a number
+    let has_newline_in_operator = binary_expression
+        .operator_token()
+        .is_ok_and(|operator| operator.has_leading_newline());
     let has_newline_in_right = binary_expression.right().is_ok_and(|right| {
         match (
             right.as_any_js_literal_expression(),
@@ -305,17 +338,7 @@ fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
         }
     });
 
-    is_plus_operator && has_newline_in_right
-}
-
-fn is_parenthesized_concatenation(expression: &Option<AnyJsExpression>) -> bool {
-    if let Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) = expression {
-        return is_binary_expression_with_literal_string(
-            &parenthesized_expression.expression().ok(),
-        );
-    }
-
-    false
+    has_newline_in_operator || has_newline_in_right
 }
 
 fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> {

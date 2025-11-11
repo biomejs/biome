@@ -55,6 +55,7 @@ mod client;
 mod document;
 mod server;
 
+pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -65,7 +66,7 @@ use std::{
 };
 
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::{Configuration, analyzer::RuleSelector};
+use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
@@ -85,9 +86,6 @@ use smallvec::SmallVec;
 use tokio::sync::watch;
 use tracing::debug;
 
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
-
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -95,9 +93,10 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
+#[cfg(feature = "schema")]
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use document::{EmbeddedCssContent, EmbeddedJsContent};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -131,8 +130,9 @@ pub struct SupportsFeatureResult {
 pub struct FeaturesSupported([SupportKind; NUM_FEATURE_KINDS]);
 
 impl FeaturesSupported {
-    /// By default, all features are not supported by a file.
+    /// By default, a file does not support all features.
     const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
+        SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
@@ -219,6 +219,12 @@ impl FeaturesSupported {
             }
         }
 
+        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+            && experimental_full_html_support.value()
+        {
+            self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
+        }
+
         debug!("The file has the following feature sets: {:?}", &self);
 
         self
@@ -266,6 +272,11 @@ impl FeaturesSupported {
 
     pub fn supports_search(&self) -> bool {
         self.supports(FeatureKind::Search)
+    }
+
+    // TODO: remove once html full support is stable
+    pub fn supports_full_html_support(&self) -> bool {
+        self.supports(FeatureKind::HtmlFullSupport)
     }
 
     /// Returns the [`SupportKind`] for the given `feature`, but only if it is
@@ -353,11 +364,12 @@ impl Default for FeaturesSupported {
 
 impl Display for FeaturesSupported {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut dbg = f.debug_map();
         for (index, support_kind) in self.0.iter().enumerate() {
             let feature = FeatureKind::from_index(index);
-            write!(f, "{feature}: {support_kind}")?;
+            dbg.key(&feature).value(&support_kind);
         }
-        Ok(())
+        dbg.finish()
     }
 }
 
@@ -536,9 +548,11 @@ pub enum FeatureKind {
     Search,
     Assist,
     Debug,
+    // TODO: remove once full HTML support is stable
+    HtmlFullSupport,
 }
 
-pub const NUM_FEATURE_KINDS: usize = 5;
+pub const NUM_FEATURE_KINDS: usize = 6;
 
 impl Display for FeatureKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -548,6 +562,7 @@ impl Display for FeatureKind {
             Self::Search => write!(f, "Search"),
             Self::Assist => write!(f, "Assist"),
             Self::Debug => write!(f, "Debug"),
+            Self::HtmlFullSupport => write!(f, "HtmlFullSupport"),
         }
     }
 }
@@ -565,6 +580,7 @@ impl FeatureKind {
             2 => Self::Search,
             3 => Self::Assist,
             4 => Self::Debug,
+            5 => Self::HtmlFullSupport,
             _ => unreachable!("invalid index for FeatureKind"),
         }
     }
@@ -578,6 +594,7 @@ impl FeatureKind {
             Self::Search => 2,
             Self::Assist => 3,
             Self::Debug => 4,
+            Self::HtmlFullSupport => 5,
         }
     }
 }
@@ -606,6 +623,7 @@ impl Debug for FeatureName {
                 FeatureKind::Search => list.entry(&"Search"),
                 FeatureKind::Assist => list.entry(&"Assist"),
                 FeatureKind::Debug => list.entry(&"Debug"),
+                FeatureKind::HtmlFullSupport => list.entry(&"HtmlFullSupport"),
             };
         }
         list.finish()
@@ -750,6 +768,12 @@ pub struct OpenFileParams {
     #[serde(default)]
     pub persist_node_cache: bool,
 }
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct OpenFileResult {
+    diagnostics: Vec<Diagnostic>,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -876,6 +900,13 @@ pub struct ChangeFileParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct ChangeFileResult {
+    diagnostics: Vec<Diagnostic>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -905,12 +936,12 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply on top of the configuration
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
 }
@@ -933,11 +964,11 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub suppression_reason: Option<String>,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
 }
@@ -956,6 +987,7 @@ pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
     pub suggestion: CodeSuggestion,
+    pub offset: Option<TextSize>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1006,12 +1038,12 @@ pub struct FixFileParams {
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply to the file
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
@@ -1212,7 +1244,7 @@ pub struct PathIsIgnoredParams {
     /// Controls how to ignore check should be done
     pub ignore_kind: IgnoreKind,
 }
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum IgnoreKind {
@@ -1365,7 +1397,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
 
     /// Checks if `file_path` exists in the workspace.
     ///
@@ -1405,7 +1437,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
     /// Changes the content of an open file.
-    fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
 
     /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
@@ -1600,7 +1632,11 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {
+    pub fn change_file(
+        &self,
+        version: i32,
+        content: String,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
             project_key: self.project_key,
             path: self.path.clone(),
@@ -1619,8 +1655,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -1637,10 +1673,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_actions(
         &self,
         range: Option<TextRange>,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
-        enabled_rules: Vec<RuleSelector>,
+        enabled_rules: Vec<AnalyzerSelector>,
         categories: RuleCategories,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
@@ -1690,8 +1726,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         fix_file_mode: FixFileMode,
         should_format: bool,
         rule_categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {

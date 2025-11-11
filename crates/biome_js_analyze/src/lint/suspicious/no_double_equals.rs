@@ -98,7 +98,8 @@ impl Rule for NoDoubleEquals {
         }
 
         // TODO: Implement SyntaxResult helpers to make this cleaner
-        if ctx.options().ignore_null && (is_null_literal(&n.left()) || is_null_literal(&n.right()))
+        if ctx.options().ignore_null()
+            && (is_null_literal(&n.left()) || is_null_literal(&n.right()))
         {
             return None;
         }
@@ -116,7 +117,7 @@ impl Rule for NoDoubleEquals {
             },
         );
 
-        Some(if ctx.options().ignore_null {
+        Some(if ctx.options().ignore_null() {
             diagnostic
                 .note(markup! {
                     <Emphasis>{text_trimmed}</Emphasis>" is only allowed when comparing against "<Emphasis>"null"</Emphasis>"."

@@ -724,6 +724,14 @@ pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
     is_canonical_html_tag_name(tag_name.text_trimmed())
 }
 
+/// Whether a tag should be lowercased in the current formatting context.
+///
+/// Returns `true` only for canonical HTML tags in pure HTML files (.html).
+/// Component frameworks preserve tag name casing.
+pub(crate) fn should_lowercase_html_tag(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
+    f.options().file_source().is_html() && is_canonical_html_tag(tag_name)
+}
+
 /// Whether the given attribute name is a known HTML attribute for the given tag name.
 ///
 /// See [`HTML_ATTRIBUTES_BY_TAG`], [`HTML_GLOBAL_ATTRIBUTES`].

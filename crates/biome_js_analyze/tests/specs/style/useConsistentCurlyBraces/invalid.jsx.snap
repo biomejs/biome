@@ -18,6 +18,20 @@ expression: invalid.jsx
 <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
 
 <Foo>{x}{'y'}{z}</Foo>
+
+<Foo foo={' '}></Foo>
+
+{/* https://github.com/biomejs/biome/issues/7320 */}
+<ConnectedFieldTemplate
+	description1=
+		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+	description2={
+		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+	}
+	className={
+		"d-block"
+	}
+/>
 </>
 
 ```
@@ -151,8 +165,8 @@ invalid.jsx:14:9 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━�
     13 │ 
   > 14 │ <Foo>{x}{'y'}{z}</Foo>
        │         ^^^^^
-    15 │ </>
-    16 │ 
+    15 │ 
+    16 │ <Foo foo={' '}></Foo>
   
   i JSX child does not need to be wrapped in curly braces.
   
@@ -160,5 +174,88 @@ invalid.jsx:14:9 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━�
   
     14 │ <Foo>{x}{'y'}{z}</Foo>
        │         -- --         
+
+```
+
+```
+invalid.jsx:16:10 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should not have curly braces around expression.
+  
+    14 │ <Foo>{x}{'y'}{z}</Foo>
+    15 │ 
+  > 16 │ <Foo foo={' '}></Foo>
+       │          ^^^^^
+    17 │ 
+    18 │ {/* https://github.com/biomejs/biome/issues/7320 */}
+  
+  i JSX attribute value does not need to be wrapped in curly braces.
+  
+  i Unsafe fix: Remove curly braces around the expression.
+  
+    16 │ <Foo·foo={'·'}></Foo>
+       │          -   -       
+
+```
+
+```
+invalid.jsx:22:15 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should not have curly braces around expression.
+  
+    20 │ 	description1=
+    21 │ 		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+  > 22 │ 	description2={
+       │ 	             ^
+  > 23 │ 		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+  > 24 │ 	}
+       │ 	^
+    25 │ 	className={
+    26 │ 		"d-block"
+  
+  i JSX attribute value does not need to be wrapped in curly braces.
+  
+  i Unsafe fix: Remove curly braces around the expression.
+  
+    20 20 │   	description1=
+    21 21 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    22    │ - → description2={
+       22 │ + → description2=
+    23 23 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    24    │ - → }
+    25 24 │   	className={
+    26 25 │   		"d-block"
+  
+
+```
+
+```
+invalid.jsx:25:12 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should not have curly braces around expression.
+  
+    23 │ 		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    24 │ 	}
+  > 25 │ 	className={
+       │ 	          ^
+  > 26 │ 		"d-block"
+  > 27 │ 	}
+       │ 	^
+    28 │ />
+    29 │ </>
+  
+  i JSX attribute value does not need to be wrapped in curly braces.
+  
+  i Unsafe fix: Remove curly braces around the expression.
+  
+    23 23 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    24 24 │   	}
+    25    │ - → className={
+       25 │ + → className=
+    26 26 │   		"d-block"
+    27    │ - → }
+    28 27 │   />
+    29 28 │   </>
+  
 
 ```

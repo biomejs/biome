@@ -21,3 +21,8 @@ new Boolean(!!x);
 !!!x;
 
 !Boolean(x);
+
+// Test case for issue #7225 - should preserve parentheses
+const b0 = false;
+const b1 = false;
+const boolean = !Boolean(b0 && b1);

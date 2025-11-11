@@ -128,14 +128,14 @@ impl Rule for UseConsistentObjectDefinitions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
-        let options = ctx.options();
+        let syntax = ctx.options().syntax.unwrap_or_default();
         match binding {
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => match options.syntax {
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => match syntax {
                 // Shorthand properties should error when explicit is expected
                 ObjectPropertySyntax::Shorthand => None,
                 ObjectPropertySyntax::Explicit => Some(()),
             },
-            AnyJsObjectMember::JsMethodObjectMember(_) => match options.syntax {
+            AnyJsObjectMember::JsMethodObjectMember(_) => match syntax {
                 // Shorthand methods should error when explicit is expected
                 ObjectPropertySyntax::Shorthand => None,
                 ObjectPropertySyntax::Explicit => Some(()),
@@ -150,7 +150,7 @@ impl Rule for UseConsistentObjectDefinitions {
                     }
                     AnyJsExpression::JsFunctionExpression(_function_token) => {
                         // Functions are always shorthandable
-                        match options.syntax {
+                        match syntax {
                             ObjectPropertySyntax::Shorthand => return Some(()),
                             ObjectPropertySyntax::Explicit => return None,
                         }
@@ -160,7 +160,7 @@ impl Rule for UseConsistentObjectDefinitions {
                 let name_token = source.name().ok()?;
                 match name_token {
                     AnyJsObjectMemberName::JsLiteralMemberName(literal_token) => {
-                        match options.syntax {
+                        match syntax {
                             ObjectPropertySyntax::Shorthand => {
                                 // Throw shorthand error if the value is the same as the property name
                                 // We use `text_trimmed` to preserve quotes when comparing, we need this
@@ -179,7 +179,7 @@ impl Rule for UseConsistentObjectDefinitions {
                         // Computed is always shorthandable if the value is a function, else never
                         match reference_token {
                             AnyJsExpression::JsFunctionExpression(_function_token) => {
-                                match options.syntax {
+                                match syntax {
                                     ObjectPropertySyntax::Shorthand => Some(()),
                                     ObjectPropertySyntax::Explicit => None,
                                 }
@@ -196,16 +196,16 @@ impl Rule for UseConsistentObjectDefinitions {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let options = ctx.options();
+        let syntax = ctx.options().syntax.unwrap_or_default();
 
-        let title = match options.syntax {
+        let title = match syntax {
             ObjectPropertySyntax::Shorthand => {
                 "Do not use explicit object property syntax when shorthand syntax is possible."
             }
             ObjectPropertySyntax::Explicit => "Do not use shorthand object property syntax.",
         };
 
-        let note = match options.syntax {
+        let note = match syntax {
             ObjectPropertySyntax::Shorthand => {
                 "Using shorthand object property syntax makes object definitions more concise."
             }
@@ -327,7 +327,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
         mutation.replace_node(node.clone(), new_node);
 
-        let message = match options.syntax {
+        let message = match options.syntax.unwrap_or_default() {
             ObjectPropertySyntax::Explicit => {
                 markup! { "Use explicit object property syntax." }.to_owned()
             }

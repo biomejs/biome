@@ -1,0 +1,26 @@
+/* Simple Tailwind CSS 4.0 integration test */
+
+@theme {
+  --color-primary: #3b82f6;
+  --spacing-base: 1rem;
+}
+
+@utility center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@variant dark {
+  background: black;
+  color: white;
+}
+
+@apply text-lg font-bold;
+
+@source "./base.css";
+
+.example {
+  color: rgb(255 0 0 / --alpha(0.5));
+  margin: --spacing(4);
+}

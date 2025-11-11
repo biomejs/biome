@@ -235,6 +235,7 @@ impl Rule for NoDuplicateTestHooks {
         let node = ctx.query();
         let callee = node.callee().ok()?;
         let node_name = callee.get_callee_object_name()?;
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

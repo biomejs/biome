@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_module_graph"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
@@ -14,6 +15,8 @@ version              = "0.0.1"
 workspace = true
 
 [dependencies]
+biome_console        = { workspace = true }
+biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
 biome_js_semantic    = { workspace = true }
@@ -43,7 +46,7 @@ biome_js_parser    = { workspace = true }
 biome_json_parser  = { workspace = true }
 biome_json_value   = { workspace = true }
 biome_test_utils   = { workspace = true }
-divan              = { package = "codspeed-divan-compat", version = "*" }
+divan              = { package = "codspeed-divan-compat", version = "=4.0.4" }
 insta              = { workspace = true }
 walkdir            = { workspace = true }
 

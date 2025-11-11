@@ -58,7 +58,7 @@ impl<'src> TailwindLexer<'src> {
             b'-' => self.consume_byte(T![-]),
             b'!' => self.consume_byte(T![!]),
             b'/' => self.consume_byte(T![/]),
-            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ if current.is_ascii_alphanumeric() => self.consume_base(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -68,6 +68,21 @@ impl<'src> TailwindLexer<'src> {
                 }
                 self.consume_unexpected_character()
             }
+        }
+    }
+
+    fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
+            b':' => self.consume_byte(T![:]),
+            b'-' => self.consume_byte(T![-]),
+            b'!' => self.consume_byte(T![!]),
+            b'/' => self.consume_byte(T![/]),
+            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -124,8 +139,18 @@ impl<'src> TailwindLexer<'src> {
             .rfind(|&name| source_from_position.starts_with(name));
 
         if let Some(base_name) = base_name {
-            self.advance(base_name.len());
-            return TW_BASE;
+            // we need to make sure that either the base is followed by a `-` to signify a value is coming, or a whitespace/end of input to signify the end of the base
+            match self.byte_at(base_name.len()) {
+                Some(b'-') | None => {
+                    self.advance(base_name.len());
+                    return TW_BASE;
+                }
+                Some(b) if b.is_ascii_whitespace() => {
+                    self.advance(base_name.len());
+                    return TW_BASE;
+                }
+                _ => {}
+            }
         }
 
         while let Some(byte) = self.current_byte() {
@@ -252,6 +277,7 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     TailwindLexContext::Regular => self.consume_token(current),
+                    TailwindLexContext::SawNegative => self.consume_token_saw_negative(current),
                     TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
                     TailwindLexContext::ArbitraryVariant => {
                         self.consume_token_arbitrary_variant(current)

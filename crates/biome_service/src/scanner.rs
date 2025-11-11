@@ -10,12 +10,6 @@ mod workspace_bridges;
 #[cfg(test)]
 mod test_utils;
 
-use std::collections::BTreeSet;
-use std::panic::catch_unwind;
-use std::sync::{Mutex, RwLock};
-use std::time::Duration;
-use std::{mem, thread};
-
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
@@ -25,6 +19,11 @@ use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::{HashMap, HashSet};
 use rayon::Scope;
 use rustc_hash::FxHashSet;
+use std::collections::BTreeSet;
+use std::panic::catch_unwind;
+use std::sync::{Mutex, RwLock};
+use std::time::Duration;
+use std::{mem, thread};
 use tracing::instrument;
 
 use crate::diagnostics::Panic;
@@ -197,7 +196,7 @@ impl Scanner {
         workspace: &W,
         project_key: ProjectKey,
         path: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let (scan_kind, watch) = self
             .projects
             .pin()
@@ -217,17 +216,17 @@ impl Scanner {
             watch,
         };
 
-        self.scan(
+        let result = self.scan(
             workspace,
             project_key,
             path,
             IndexTrigger::Update,
             scan_options,
-        )
-        .map(|_| ())
+        )?;
 
         // No need to notify after this scan, because the individual file
         // updates will already trigger notifications.
+        Ok(result.diagnostics)
     }
 
     pub fn index_dependencies<W: WorkspaceScannerBridge>(
@@ -237,7 +236,7 @@ impl Scanner {
         project_path: &Utf8Path,
         dependencies: ModuleDependencies,
         trigger: IndexTrigger,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let scan_kind = self
             .get_scan_kind_for_project(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -247,7 +246,7 @@ impl Scanner {
         let (diagnostics_sender, diagnostics_receiver) = unbounded();
         let collector = DiagnosticsCollector::new(false);
 
-        thread::scope(|scope| {
+        let diagnostics = thread::scope(|scope| {
             let handler = thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
@@ -270,21 +269,18 @@ impl Scanner {
             let (_duration, folders_to_watch) =
                 scan_dependencies(project_path, dependencies, &mut ctx);
 
-            for folder_to_watch in folders_to_watch {
-                let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                    folder_to_watch,
-                    ctx.scan_kind.clone_without_targeting_info(),
-                ));
-            }
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
 
             // Make sure the diagnostics sender is dropped.
             drop(ctx);
 
             // Wait for the collector thread to finish.
-            handler.join().unwrap();
+            handler.join().unwrap()
         });
 
-        Ok(())
+        Ok(diagnostics)
     }
 
     /// Updates the index of the file with the given `path`.
@@ -376,12 +372,9 @@ impl Scanner {
 
                 duration += dependencies_duration;
 
-                for folder_to_watch in folders_to_watch {
-                    let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                        folder_to_watch,
-                        ctx.scan_kind.clone_without_targeting_info(),
-                    ));
-                }
+                let _ = self
+                    .watcher_tx
+                    .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
             }
 
             // Make sure the diagnostics sender is dropped.
@@ -404,7 +397,10 @@ impl Scanner {
                 ..
             } = self.scan_folder(folder, &ctx);
 
+            // Close the diagnostics channel before collecting to avoid a deadlock on WASM.
+            drop(ctx);
             let diagnostics = collector.run(diagnostics_receiver);
+
             (duration, diagnostics, configuration_files)
         };
 
@@ -437,6 +433,7 @@ impl Scanner {
         let mut manifests = Vec::new();
         let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
         let mut ignore_paths = Vec::new();
+        let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
@@ -449,14 +446,14 @@ impl Scanner {
             } else if path.is_ignore() {
                 ignore_paths.push(path);
             } else if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
-                let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                    path.into(),
-                    ctx.scan_kind.clone_without_targeting_info(),
-                ));
+                folders_to_watch.insert(path.into());
             } else {
                 handleable_paths.push(path);
             }
         }
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
         fs.traversal(Box::new(|scope: &dyn TraversalScope| {
             for path in &configs {
                 scope.handle(ctx, path.to_path_buf());
@@ -642,7 +639,7 @@ impl DiagnosticsCollector {
 
     /// Checks whether the given `diagnostic` should be collected or not.
     fn should_collect(&self, diagnostic: &Diagnostic) -> bool {
-        diagnostic.severity() >= self.diagnostic_level
+        diagnostic.severity() >= self.diagnostic_level || diagnostic.tags().is_internal()
     }
 
     fn run(&self, receiver: Receiver<Diagnostic>) -> Vec<Diagnostic> {
@@ -814,13 +811,20 @@ fn open_file<W: WorkspaceScannerBridge>(
         ctx.workspace
             .index_file(ctx.project_key, path.clone(), trigger)
     }) {
-        Ok(Ok(dependencies)) => dependencies,
+        Ok(Ok((dependencies, diagnostics))) => {
+            for diagnostic in diagnostics {
+                ctx.push_diagnostic(diagnostic.with_file_path(path.as_str()));
+            }
+            dependencies
+        }
         Ok(Err(err)) => {
             let mut error: Error = err.into();
-            if !path.is_config() && error.severity() == Severity::Error {
-                error = error.with_severity(Severity::Warning);
+            if !path.is_config() && error.severity() >= Severity::Error {
+                error = error
+                    .with_severity(Severity::Warning)
+                    .with_file_path(path.as_str());
             }
-            ctx.send_diagnostic(Diagnostic::new(error));
+            ctx.push_diagnostic(error);
 
             Default::default()
         }

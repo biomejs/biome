@@ -320,27 +320,6 @@ impl JsBinaryExpression {
             Ok(T![>] | T![<] | T![>=] | T![<=] | T![==] | T![===] | T![!=] | T![!==])
         )
     }
-
-    /// Whether this is a comparison operation similar to the optional chain
-    /// ```js
-    /// foo !== undefined;
-    /// foo != undefined;
-    /// foo !== null;
-    /// foo != null;
-    ///```
-    pub fn is_optional_chain_like(&self) -> SyntaxResult<bool> {
-        if matches!(
-            self.operator(),
-            Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
-        ) {
-            Ok(self
-                .right()?
-                .as_static_value()
-                .is_some_and(|x| x.is_null_or_undefined()))
-        } else {
-            Ok(false)
-        }
-    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
@@ -1692,7 +1671,7 @@ impl AnyJsObjectMember {
             Self::JsShorthandPropertyObjectMember(member) => {
                 return Some(member.name().ok()?.value_token().ok()?.token_text_trimmed());
             }
-            Self::JsBogusMember(_) | Self::JsSpread(_) => {
+            Self::JsBogusMember(_) | Self::JsSpread(_) | Self::JsMetavariable(_) => {
                 return None;
             }
         };

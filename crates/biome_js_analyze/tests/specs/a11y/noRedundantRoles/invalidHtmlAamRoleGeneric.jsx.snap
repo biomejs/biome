@@ -1,0 +1,256 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHtmlAamRoleGeneric.jsx
+---
+# Input
+```jsx
+// https://github.com/web-platform-tests/wpt/blob/master/html-aam/roles-generic.html
+<>
+	<b role="generic">x</b>
+	<bdi role="generic">x</bdi>
+	<bdo role="generic">x</bdo>
+	<data value="1" role="generic">
+		x
+	</data>
+	<div open role="generic">
+		x
+	</div>
+	<i role="generic">x</i>
+	<pre role="generic">x</pre>
+	<q role="generic">x</q>
+	<samp role="generic">x</samp>
+	<small role="generic">x</small>
+	<span role="generic">x</span>
+	<u role="generic">x</u>
+</>;
+
+```
+
+# Diagnostics
+```
+invalidHtmlAamRoleGeneric.jsx:3:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'b' element is redundant, because it is implied by its semantic.
+  
+    1 │ // https://github.com/web-platform-tests/wpt/blob/master/html-aam/roles-generic.html
+    2 │ <>
+  > 3 │ 	<b role="generic">x</b>
+      │ 	        ^^^^^^^^^
+    4 │ 	<bdi role="generic">x</bdi>
+    5 │ 	<bdo role="generic">x</bdo>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ → <b·role="generic">x</b>
+      │      --------------      
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:4:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'bdi' element is redundant, because it is implied by its semantic.
+  
+    2 │ <>
+    3 │ 	<b role="generic">x</b>
+  > 4 │ 	<bdi role="generic">x</bdi>
+      │ 	          ^^^^^^^^^
+    5 │ 	<bdo role="generic">x</bdo>
+    6 │ 	<data value="1" role="generic">
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ → <bdi·role="generic">x</bdi>
+      │        --------------        
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:5:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'bdo' element is redundant, because it is implied by its semantic.
+  
+    3 │ 	<b role="generic">x</b>
+    4 │ 	<bdi role="generic">x</bdi>
+  > 5 │ 	<bdo role="generic">x</bdo>
+      │ 	          ^^^^^^^^^
+    6 │ 	<data value="1" role="generic">
+    7 │ 		x
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ → <bdo·role="generic">x</bdo>
+      │        --------------        
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:6:23 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'data' element is redundant, because it is implied by its semantic.
+  
+    4 │ 	<bdi role="generic">x</bdi>
+    5 │ 	<bdo role="generic">x</bdo>
+  > 6 │ 	<data value="1" role="generic">
+      │ 	                     ^^^^^^^^^
+    7 │ 		x
+    8 │ 	</data>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    6 │ → <data·value="1"·role="generic">
+      │                   -------------- 
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:9:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'div' element is redundant, because it is implied by its semantic.
+  
+     7 │ 		x
+     8 │ 	</data>
+   > 9 │ 	<div open role="generic">
+       │ 	               ^^^^^^^^^
+    10 │ 		x
+    11 │ 	</div>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    9 │ → <div·open·role="generic">
+      │             -------------- 
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:12:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'i' element is redundant, because it is implied by its semantic.
+  
+    10 │ 		x
+    11 │ 	</div>
+  > 12 │ 	<i role="generic">x</i>
+       │ 	        ^^^^^^^^^
+    13 │ 	<pre role="generic">x</pre>
+    14 │ 	<q role="generic">x</q>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    12 │ → <i·role="generic">x</i>
+       │      --------------      
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:13:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'pre' element is redundant, because it is implied by its semantic.
+  
+    11 │ 	</div>
+    12 │ 	<i role="generic">x</i>
+  > 13 │ 	<pre role="generic">x</pre>
+       │ 	          ^^^^^^^^^
+    14 │ 	<q role="generic">x</q>
+    15 │ 	<samp role="generic">x</samp>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    13 │ → <pre·role="generic">x</pre>
+       │        --------------        
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:14:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'q' element is redundant, because it is implied by its semantic.
+  
+    12 │ 	<i role="generic">x</i>
+    13 │ 	<pre role="generic">x</pre>
+  > 14 │ 	<q role="generic">x</q>
+       │ 	        ^^^^^^^^^
+    15 │ 	<samp role="generic">x</samp>
+    16 │ 	<small role="generic">x</small>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    14 │ → <q·role="generic">x</q>
+       │      --------------      
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:15:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'samp' element is redundant, because it is implied by its semantic.
+  
+    13 │ 	<pre role="generic">x</pre>
+    14 │ 	<q role="generic">x</q>
+  > 15 │ 	<samp role="generic">x</samp>
+       │ 	           ^^^^^^^^^
+    16 │ 	<small role="generic">x</small>
+    17 │ 	<span role="generic">x</span>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    15 │ → <samp·role="generic">x</samp>
+       │         --------------         
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:16:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'small' element is redundant, because it is implied by its semantic.
+  
+    14 │ 	<q role="generic">x</q>
+    15 │ 	<samp role="generic">x</samp>
+  > 16 │ 	<small role="generic">x</small>
+       │ 	            ^^^^^^^^^
+    17 │ 	<span role="generic">x</span>
+    18 │ 	<u role="generic">x</u>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    16 │ → <small·role="generic">x</small>
+       │          --------------          
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:17:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'span' element is redundant, because it is implied by its semantic.
+  
+    15 │ 	<samp role="generic">x</samp>
+    16 │ 	<small role="generic">x</small>
+  > 17 │ 	<span role="generic">x</span>
+       │ 	           ^^^^^^^^^
+    18 │ 	<u role="generic">x</u>
+    19 │ </>;
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    17 │ → <span·role="generic">x</span>
+       │         --------------         
+
+```
+
+```
+invalidHtmlAamRoleGeneric.jsx:18:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'generic' on the 'u' element is redundant, because it is implied by its semantic.
+  
+    16 │ 	<small role="generic">x</small>
+    17 │ 	<span role="generic">x</span>
+  > 18 │ 	<u role="generic">x</u>
+       │ 	        ^^^^^^^^^
+    19 │ </>;
+    20 │ 
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    18 │ → <u·role="generic">x</u>
+       │      --------------      
+
+```

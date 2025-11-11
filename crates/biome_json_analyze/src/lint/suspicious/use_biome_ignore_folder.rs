@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBiomeIgnoreFolder {
-        version: "next",
+        version: "2.2.0",
         name: "useBiomeIgnoreFolder",
         language: "json",
         recommended: true,

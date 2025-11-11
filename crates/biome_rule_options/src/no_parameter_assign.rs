@@ -1,12 +1,12 @@
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoParameterAssignOptions {
     /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
-    #[serde(default)]
-    pub property_assignment: PropertyAssignmentMode,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub property_assignment: Option<PropertyAssignmentMode>,
 }
 
 #[derive(Copy, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -22,4 +22,9 @@ pub enum PropertyAssignmentMode {
     /// Disallows property assignments on function parameters.
     /// Enforces stricter immutability to prevent unintended side effects.
     Deny,
+}
+impl biome_deserialize::Merge for PropertyAssignmentMode {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
 }

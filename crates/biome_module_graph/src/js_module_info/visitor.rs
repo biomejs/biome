@@ -18,6 +18,14 @@ use crate::{
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
 
+/// Extensions to try to resolve based on the extension in the import specifier.
+/// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
+const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
+    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
+    ("mjs", &["mts", "d.mts", "mjs"]),
+    ("cjs", &["cts", "d.cts", "cjs"]),
+];
+
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
@@ -227,10 +235,18 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExpression,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
-        let ty = TypeReference::from(collector.register_and_resolve(type_data));
+        match node {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                let local_name = ident.name().ok()?.name().ok()?;
+                collector.register_export(JsCollectedExport::ExportNamedDefault { local_name });
+            }
+            _ => {
+                let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
+                let ty = TypeReference::from(collector.register_and_resolve(type_data));
+                collector.register_export(JsCollectedExport::ExportDefault { ty });
+            }
+        }
 
-        collector.register_export(JsCollectedExport::ExportDefault { ty });
         Some(())
     }
 
@@ -393,7 +409,7 @@ impl<'a> JsModuleVisitor<'a> {
                             if let Ok(binding) = node.pattern() {
                                 self.visit_binding_pattern(
                                     binding,
-                                   collector,
+                                    collector,
                                 );
                             }
                         }
@@ -442,6 +458,7 @@ impl<'a> JsModuleVisitor<'a> {
             condition_names: &["types", "import", "default"],
             default_files: &["index"],
             extensions: SUPPORTED_EXTENSIONS,
+            extension_aliases: EXTENSION_ALIASES,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

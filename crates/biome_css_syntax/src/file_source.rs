@@ -13,8 +13,10 @@ pub struct CssFileSource {
 
 /// The style of CSS contained in the file.
 ///
-/// Currently, Biome only supports plain CSS, and aims to be compatible with
+/// Currently, Biome aims to be compatible with
 /// the latest Recommendation level standards.
+///
+/// It also supports Tailwind CSS syntax additions, when the parser option is enabled.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
@@ -56,6 +58,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
+            "tailwindcss" => Ok(Self::css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

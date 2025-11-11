@@ -1,5 +1,5 @@
-use crate::FormatHtmlSyntaxToken;
 use crate::prelude::HtmlFormatContext;
+use crate::{FormatHtmlSyntaxToken, HtmlFormatter};
 use biome_formatter::formatter::Formatter;
 use biome_formatter::trivia::FormatToken;
 use biome_formatter::{Argument, Format, FormatResult};
@@ -38,4 +38,12 @@ impl<'a> Format<HtmlFormatContext> for FormatReplaced<'a> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         FormatHtmlSyntaxToken.format_replaced(self.token, &self.content, f)
     }
+}
+
+pub(crate) fn on_skipped(token: &HtmlSyntaxToken, f: &mut HtmlFormatter) -> FormatResult<()> {
+    FormatHtmlSyntaxToken.format_skipped_token_trivia(token, f)
+}
+
+pub(crate) fn on_removed(token: &HtmlSyntaxToken, f: &mut HtmlFormatter) -> FormatResult<()> {
+    FormatHtmlSyntaxToken.format_removed(token, f)
 }

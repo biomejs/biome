@@ -92,11 +92,11 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     parser_options: JsParserOptions,
 ) {
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
 
     let mut transformations = vec![];
     let (_, errors) =
@@ -107,7 +107,7 @@ pub(crate) fn analyze_and_snap(
                     input_code,
                     source_type,
                     &transformation,
-                    parser_options.clone(),
+                    parser_options,
                 );
                 let node = transformation.mutation.commit();
 

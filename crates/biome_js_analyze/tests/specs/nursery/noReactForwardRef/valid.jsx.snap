@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+const Component1 = ({ ref, ...props }) => {
+	return <div ref={ref} />;
+};
+
+const Component2 = ({ foo, bar, ref }) => {
+	return <div ref={ref} />;
+};
+
+const Component3 = React.memo(({ ref, ...props }) => {
+	return <div ref={ref} />;
+});
+
+function Component4({ ref, ...props }) {
+	return <div ref={ref} />;
+}
+
+```

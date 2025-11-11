@@ -226,7 +226,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAltText": {
@@ -666,7 +666,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrowFunction": {
@@ -974,6 +974,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssignments": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -1180,7 +1187,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
@@ -1201,6 +1208,13 @@
 					"description": "Enforce that all React hooks are being called from the Top Level component functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseHookAtTopLevelConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1236,6 +1250,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1350,7 +1371,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"description": "The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -1381,11 +1402,14 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"tailwindDirectives": {
+					"description": "Enables parsing of Tailwind CSS 4.0 directives and functions.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
@@ -1486,12 +1510,12 @@
 			"type": "object",
 			"properties": {
 				"experimentalScannerIgnores": {
-					"description": "Set of file and folder names that should be unconditionally ignored by Biome's scanner.\n\nBiome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.\n\nThis is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.\n\nEntries must be file or folder *names*. Specific paths and globs are not supported.\n\nExamples where this may be useful:\n\n```jsonc { \"files\": { \"experimentalScannerIgnores\": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: \".git\",\n\n// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: \"node_modules\",\n\n// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: \"RedisCommander.d.ts\", ], } } ```\n\nPlease be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned.",
+					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"ignoreUnknown": {
-					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
+					"description": "Tells Biome to not emit diagnostics when handling files that it doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1569,7 +1593,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"description": "Whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1668,7 +1692,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to GraphQL files.",
+					"description": "The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
@@ -1839,14 +1863,42 @@
 			},
 			"additionalProperties": false
 		},
+		"HtmlAssistConfiguration": {
+			"description": "Options that changes how the HTML assist behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assist for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"HtmlConfiguration": {
 			"description": "Options applied to HTML files",
 			"type": "object",
 			"properties": {
+				"assist": {
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"experimentalFullSupportEnabled": {
+					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "HTML formatter options",
 					"anyOf": [
 						{ "$ref": "#/definitions/HtmlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "HTML linter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1898,7 +1950,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to HTML (and its super languages) files.",
+					"description": "The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -1918,6 +1970,17 @@
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlLinterConfiguration": {
+			"description": "Options that changes how the HTML linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2080,7 +2143,7 @@
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
+					"description": "The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2150,7 +2213,7 @@
 			"additionalProperties": false
 		},
 		"JsonAssistConfiguration": {
-			"description": "Linter options specific to the JSON linter",
+			"description": "Assist options specific to the JSON linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
@@ -2222,7 +2285,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files.",
+					"description": "The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2399,6 +2462,11 @@
 					"description": "Carriage Return character only (\\r), used very rarely",
 					"type": "string",
 					"enum": ["cr"]
+				},
+				{
+					"description": "Automatically use CRLF on Windows and LF on other platforms",
+					"type": "string",
+					"enum": ["auto"]
 				}
 			]
 		},
@@ -2611,7 +2679,7 @@
 			"properties": {
 				"allow": {
 					"description": "Allows a list of bitwise operators to be used as exceptions.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2633,8 +2701,7 @@
 				},
 				"allowNoReferrer": {
 					"description": "Whether `noreferrer` is allowed in addition to `noopener`.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -2708,7 +2775,7 @@
 			"properties": {
 				"allowedLabels": {
 					"description": "A list of (non-confusing) labels that should be allowed",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2735,7 +2802,7 @@
 			"properties": {
 				"allow": {
 					"description": "Allowed calls on the console object.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -2795,6 +2862,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoContinueConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoContinueOptions" }
+			]
+		},
+		"NoContinueOptions": { "type": "object", "additionalProperties": false },
 		"NoControlCharactersInRegexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2851,6 +2925,16 @@
 			]
 		},
 		"NoDeleteOptions": { "type": "object", "additionalProperties": false },
+		"NoDeprecatedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDeprecatedImportsOptions" }
+			]
+		},
+		"NoDeprecatedImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2912,7 +2996,7 @@
 			"properties": {
 				"ignoreNull": {
 					"description": "If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.\n\nIf `false`, no such exception will be made.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -2954,6 +3038,16 @@
 			]
 		},
 		"NoDuplicateCustomPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDuplicateDependenciesOptions" }
+			]
+		},
+		"NoDuplicateDependenciesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3108,6 +3202,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptySourceConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmptySourceOptions" }
+			]
+		},
+		"NoEmptySourceOptions": {
+			"type": "object",
+			"properties": {
+				"allowComments": {
+					"description": "Whether comments are considered meaningful",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEmptyTypeParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3148,8 +3258,7 @@
 			"properties": {
 				"maxAllowedComplexity": {
 					"description": "The maximum complexity score that we allow. Anything higher is considered excessive.",
-					"default": 15,
-					"type": "integer",
+					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 1.0
 				}
@@ -3167,20 +3276,17 @@
 			"properties": {
 				"maxLines": {
 					"description": "The maximum number of lines allowed in a function body.",
-					"default": 50,
-					"type": "integer",
-					"format": "uint8",
+					"type": ["integer", "null"],
+					"format": "uint16",
 					"minimum": 1.0
 				},
 				"skipBlankLines": {
 					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"skipIifes": {
 					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3293,8 +3399,7 @@
 			"properties": {
 				"allowedIdentifiers": {
 					"description": "A list of variable names allowed for `forEach` calls.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -3446,8 +3551,7 @@
 			"properties": {
 				"ignoreTypes": {
 					"description": "Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -3470,6 +3574,22 @@
 		},
 		"NoImportantStylesOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoIncrementDecrementConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoIncrementDecrementOptions" }
+			]
+		},
+		"NoIncrementDecrementOptions": {
+			"type": "object",
+			"properties": {
+				"allowForLoopAfterthoughts": {
+					"description": "Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoInferrableTypesConfiguration": {
@@ -3576,6 +3696,31 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLiteralsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoJsxLiteralsOptions" }
+			]
+		},
+		"NoJsxLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedStrings": {
+					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreProps": {
+					"description": "When enabled, strings inside props are always ignored",
+					"type": ["boolean", "null"]
+				},
+				"noStrings": {
+					"description": "When enabled, also flag string literals inside JSX expressions and attributes",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelVarConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3594,20 +3739,17 @@
 			"properties": {
 				"inputComponents": {
 					"description": "Array of component names that should be considered the same as an `input` element.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"labelAttributes": {
 					"description": "Array of attributes that should be treated as the `label` accessible text content.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"labelComponents": {
 					"description": "Array of component names that should be considered the same as a `label` element.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -3836,8 +3978,10 @@
 			"properties": {
 				"propertyAssignment": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.",
-					"default": "allow",
-					"allOf": [{ "$ref": "#/definitions/PropertyAssignmentMode" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/PropertyAssignmentMode" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3849,6 +3993,18 @@
 			]
 		},
 		"NoParameterPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoParametersOnlyUsedInRecursionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoParametersOnlyUsedInRecursionOptions"
+				}
+			]
+		},
+		"NoParametersOnlyUsedInRecursionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3883,8 +4039,7 @@
 			"properties": {
 				"defaultVisibility": {
 					"description": "The default visibility to assume for symbols without visibility tag.\n\nDefault: **public**.",
-					"default": "public",
-					"allOf": [{ "$ref": "#/definitions/Visibility" }]
+					"anyOf": [{ "$ref": "#/definitions/Visibility" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -3951,6 +4106,16 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
+		"NoReactForwardRefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoReactForwardRefOptions" }
+			]
+		},
+		"NoReactForwardRefOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4029,7 +4194,10 @@
 			"properties": {
 				"elements": {
 					"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
-					"allOf": [{ "$ref": "#/definitions/CustomRestrictedElements" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/CustomRestrictedElements" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4045,7 +4213,7 @@
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": { "type": "string" }
 				}
 			},
@@ -4062,7 +4230,7 @@
 			"properties": {
 				"paths": {
 					"description": "A list of import paths that should trigger the rule.",
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/Paths" }
 				},
 				"patterns": {
@@ -4083,8 +4251,7 @@
 			"type": "object",
 			"properties": {
 				"types": {
-					"default": {},
-					"type": "object",
+					"type": ["object", "null"],
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedType"
 					}
@@ -4103,7 +4270,6 @@
 			"properties": {
 				"entropyThreshold": {
 					"description": "Set entropy threshold (default is 41).",
-					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint16",
 					"minimum": 0.0
@@ -4324,18 +4490,24 @@
 			"properties": {
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				},
 				"optionalDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				},
 				"peerDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
-					"default": true,
-					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/DependencyAvailability" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4351,8 +4523,7 @@
 			"properties": {
 				"checkTypes": {
 					"description": "Check undeclared types.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -4365,6 +4536,26 @@
 		},
 		"NoUnknownAtRulesOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown at-rule names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnknownAttributeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnknownAttributeOptions" }
+			]
+		},
+		"NoUnknownAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": { "type": ["array", "null"], "items": { "type": "string" } }
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
@@ -4521,6 +4712,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnusedExpressionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedExpressionsOptions" }
+			]
+		},
+		"NoUnusedExpressionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedFunctionParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4532,8 +4733,7 @@
 			"properties": {
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -4589,8 +4789,7 @@
 			"properties": {
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -4602,6 +4801,17 @@
 			]
 		},
 		"NoUnwantedPolyfillioOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUselessCatchBindingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUselessCatchBindingOptions" }
+			]
+		},
+		"NoUselessCatchBindingOptions": {
+			"description": "Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).",
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4855,6 +5065,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDuplicateKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDuplicateKeysOptions" }
+			]
+		},
+		"NoVueDuplicateKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4900,6 +5120,34 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noContinue": {
+					"description": "Disallow continue statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoContinueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDeprecatedImports": {
+					"description": "Restrict imports of deprecated exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDeprecatedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateDependencies": {
+					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptySource": {
+					"description": "Disallow empty sources.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptySourceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -4911,6 +5159,20 @@
 					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIncrementDecrement": {
+					"description": "Disallows the usage of the unary operators ++ and --.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoIncrementDecrementConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxLiterals": {
+					"description": "Disallow string literals inside JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4928,26 +5190,19 @@
 						{ "type": "null" }
 					]
 				},
-				"noNonNullAssertedOptionalChain": {
-					"description": "Disallow non-null assertions after optional chaining expressions.",
+				"noParametersOnlyUsedInRecursion": {
+					"description": "Disallow function parameters that are only used in recursive calls.",
 					"anyOf": [
 						{
-							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+							"$ref": "#/definitions/NoParametersOnlyUsedInRecursionConfiguration"
 						},
 						{ "type": "null" }
 					]
 				},
-				"noQwikUseVisibleTask": {
-					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+				"noReactForwardRef": {
+					"description": "Replaces usages of forwardRef with passing ref as a prop.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSecrets": {
-					"description": "Disallow usage of sensitive data such as API keys and tokens.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoSecretsConfiguration" },
+						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4955,6 +5210,13 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAttribute": {
+					"description": "Disallow unknown DOM properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnknownAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4972,6 +5234,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedExpressions": {
+					"description": "Disallow expression statements that are neither a function call nor an assignment.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessCatchBinding": {
+					"description": "Disallow unused catch bindings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessCatchBindingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefined": {
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
@@ -4983,6 +5259,13 @@
 					"description": "Enforce that Vue component data options are declared as functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateKeys": {
+					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDuplicateKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5001,22 +5284,27 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAnchorHref": {
-					"description": "Enforces href attribute for \\<a> elements.",
+				"useArraySortCompare": {
+					"description": "Require Array#sort and Array#toSorted calls to always provide a compareFunction.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "$ref": "#/definitions/UseArraySortCompareConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useConsistentTypeDefinitions": {
-					"description": "Enforce type definitions to consistently use either interface or type.",
+				"useConsistentArrowReturn": {
+					"description": "Enforce consistent arrow function bodies.",
 					"anyOf": [
-						{
-							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
-						},
+						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5034,13 +5322,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useImageSize": {
-					"description": "Enforces that \\<img> elements have both width and height attributes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.",
 					"anyOf": [
@@ -5048,17 +5329,17 @@
 						{ "type": "null" }
 					]
 				},
-				"useQwikClasslist": {
-					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+				"useQwikMethodUsage": {
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
+						{ "$ref": "#/definitions/UseQwikMethodUsageConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useReactFunctionComponents": {
-					"description": "Enforce that components are defined as functions and never as classes.",
+				"useQwikValidLexicalScope": {
+					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
+						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5066,6 +5347,22 @@
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueDefineMacrosOrder": {
+					"description": "Enforce specific order of Vue compiler macros.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueDefineMacrosOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueMultiWordComponentNames": {
+					"description": "Enforce multi-word component names in Vue components.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseVueMultiWordComponentNamesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				}
@@ -5100,12 +5397,13 @@
 			"type": "object",
 			"properties": {
 				"groups": {
-					"default": [],
-					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ImportGroups" },
+						{ "type": "null" }
+					]
 				},
 				"identifierOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -5434,7 +5732,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useGoogleFontPreconnect": {
@@ -5635,7 +5933,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "It enables only the recommended rules for this domain",
+					"description": "Enables only the recommended rules for this domain",
 					"type": "string",
 					"enum": ["recommended"]
 				}
@@ -6253,6 +6551,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoContinueOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoContinueOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoControlCharactersInRegexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -6355,6 +6668,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDeleteOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDeprecatedImportsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDeprecatedImportsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -6515,6 +6843,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoDuplicateCustomPropertiesOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDuplicateDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDuplicateDependenciesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -6750,6 +7093,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmptyPatternOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmptySourceOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmptySourceOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7320,6 +7678,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoIncrementDecrementOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoIncrementDecrementOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoInferrableTypesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -7494,6 +7867,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoIrregularWhitespaceOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoJsxLiteralsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoJsxLiteralsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7927,6 +8315,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoParametersOnlyUsedInRecursionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoParametersOnlyUsedInRecursionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoPositiveTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8074,6 +8483,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoReExportAllOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoReactForwardRefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoReactForwardRefOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -8687,6 +9115,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUnknownAttributeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnknownAttributeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUnknownFunctionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8935,6 +9378,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUnusedExpressionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedExpressionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUnusedFunctionParametersOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9064,6 +9522,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnwantedPolyfillioOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUselessCatchBindingOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUselessCatchBindingOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9550,6 +10027,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueDuplicateKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueDuplicateKeysOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoVueReservedKeysOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9665,21 +10157,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseAnchorHrefOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9750,6 +10227,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseArrayLiteralsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseArraySortCompareOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseArraySortCompareOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9953,6 +10445,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentArrowReturnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10137,6 +10648,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseDefaultSwitchClauseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseDeprecatedDateOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDeprecatedDateOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -11075,6 +11601,36 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseQwikMethodUsageOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikMethodUsageOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikValidLexicalScopeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseReactFunctionComponentsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11622,6 +12178,42 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueDefineMacrosOrderOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueDefineMacrosOrderOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseVueMultiWordComponentNamesOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11750,8 +12342,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -11854,7 +12453,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
@@ -11867,7 +12466,7 @@
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sorts the keys of a JSON object in natural order",
+					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/RuleAssistConfiguration_for_UseSortedKeysOptions"
@@ -12111,7 +12710,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrayLiterals": {
@@ -12202,6 +12801,15 @@
 					"anyOf": [
 						{
 							"$ref": "#/definitions/UseConsistentObjectDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
 						},
 						{ "type": "null" }
 					]
@@ -12357,6 +12965,13 @@
 					"description": "Prefer object spread over Object.assign() when constructing new objects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseObjectSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12873,6 +13488,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
@@ -13037,7 +13661,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAdjacentOverloadSignatures": {
@@ -13206,13 +13830,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseAnchorHrefConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
-			]
-		},
-		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13252,6 +13869,16 @@
 			]
 		},
 		"UseArrayLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseArraySortCompareConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseArraySortCompareOptions" }
+			]
+		},
+		"UseArraySortCompareOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13347,12 +13974,12 @@
 			"properties": {
 				"allowConstantExport": {
 					"description": "Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)",
-					"default": false,
-					"type": "boolean"
+					"default": null,
+					"type": ["boolean", "null"]
 				},
 				"allowExportNames": {
 					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -13368,11 +13995,56 @@
 			"type": "object",
 			"properties": {
 				"syntax": {
-					"default": "shorthand",
-					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ConsistentArrayType" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentArrowReturnOptions" }
+			]
+		},
+		"UseConsistentArrowReturnOptions": {
+			"description": "Options for the `useConsistentArrowReturn` rule.",
+			"type": "object",
+			"properties": {
+				"requireForObjectLiteral": {
+					"description": "Determines whether the rule enforces a consistent style when the return value is an object literal.\n\nThis option is only applicable when used in conjunction with the `asNeeded` option.",
+					"type": ["boolean", "null"]
+				},
+				"style": {
+					"description": "The style to enforce for arrow function return statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnStyle": {
+			"oneOf": [
+				{
+					"description": "Enforces no braces where they can be omitted (default).",
+					"type": "string",
+					"enum": ["asNeeded"]
+				},
+				{
+					"description": "Enforces braces around the function body.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Enforces no braces around the function body (constrains arrow functions to the role of returning an expression).",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"anyOf": [
@@ -13409,8 +14081,10 @@
 			"properties": {
 				"accessibility": {
 					"description": "The kind of accessibility you want to enforce. Default to \"noPublic\"",
-					"default": "noPublic",
-					"allOf": [{ "$ref": "#/definitions/Accessibility" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/Accessibility" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13428,8 +14102,10 @@
 			"properties": {
 				"syntax": {
 					"description": "The preferred syntax to enforce.",
-					"default": "shorthand",
-					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ObjectPropertySyntax" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13444,8 +14120,10 @@
 			"type": "object",
 			"properties": {
 				"style": {
-					"default": "interface",
-					"allOf": [{ "$ref": "#/definitions/ConsistentTypeDefinition" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/ConsistentTypeDefinition" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13494,6 +14172,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseDeprecatedDateConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDeprecatedDateOptions" }
+			]
+		},
+		"UseDeprecatedDateOptions": {
+			"type": "object",
+			"properties": { "argumentName": { "type": ["string", "null"] } },
+			"additionalProperties": false
+		},
 		"UseDeprecatedReasonConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13535,19 +14224,16 @@
 			"properties": {
 				"hooks": {
 					"description": "List of hooks of which the dependencies should be validated.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/Hook" }
 				},
 				"reportMissingDependenciesArray": {
 					"description": "Whether to report an error when a hook has no dependencies array.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
-					"default": true,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -13620,7 +14306,10 @@
 			"properties": {
 				"filenameCases": {
 					"description": "Allowed cases for file names.",
-					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/FilenameCases" },
+						{ "type": "null" }
+					]
 				},
 				"match": {
 					"description": "Regular expression to enforce",
@@ -13628,11 +14317,11 @@
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -13803,8 +14492,7 @@
 			"properties": {
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -13820,8 +14508,7 @@
 			"properties": {
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
-					"default": "auto",
-					"allOf": [{ "$ref": "#/definitions/Style2" }]
+					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -13878,8 +14565,7 @@
 			"properties": {
 				"checkShorthandFragments": {
 					"description": "Set to `true` to check shorthand fragments (`<></>`)",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -13935,8 +14621,7 @@
 			"properties": {
 				"max": {
 					"description": "Maximum number of parameters allowed (default: 4)",
-					"default": 4,
-					"type": "integer",
+					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				}
@@ -13975,16 +14660,16 @@
 			"properties": {
 				"conventions": {
 					"description": "Custom conventions.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/Convention" }
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14091,6 +14776,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseQwikMethodUsageConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikMethodUsageOptions" }
+			]
+		},
+		"UseQwikMethodUsageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikValidLexicalScopeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikValidLexicalScopeOptions" }
+			]
+		},
+		"UseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseReactFunctionComponentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -14112,7 +14817,7 @@
 			"properties": {
 				"checkAllProperties": {
 					"description": "When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.",
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14135,9 +14840,7 @@
 		},
 		"UseSelfClosingElementsOptions": {
 			"type": "object",
-			"properties": {
-				"ignoreHtmlElements": { "default": false, "type": "boolean" }
-			},
+			"properties": { "ignoreHtmlElements": { "type": ["boolean", "null"] } },
 			"additionalProperties": false
 		},
 		"UseSemanticElementsConfiguration": {
@@ -14224,8 +14927,7 @@
 			"type": "object",
 			"properties": {
 				"sortOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -14256,8 +14958,7 @@
 			"type": "object",
 			"properties": {
 				"sortOrder": {
-					"default": "natural",
-					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+					"anyOf": [{ "$ref": "#/definitions/SortOrder" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -14361,8 +15062,7 @@
 			"properties": {
 				"excludedComponents": {
 					"description": "Component names that accept an `id` prop that does not translate to a DOM element id.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" },
 					"uniqueItems": true
 				}
@@ -14400,14 +15100,12 @@
 			"properties": {
 				"allowInvalidRoles": {
 					"description": "It allows specifying a list of roles that might be invalid otherwise",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"ignoreNonDom": {
 					"description": "Use this option to ignore non-DOM elements, such as custom components",
-					"default": false,
-					"type": "boolean"
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -14433,8 +15131,7 @@
 			"properties": {
 				"inputComponents": {
 					"description": "`input` like custom components that should be checked.",
-					"default": [],
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -14465,6 +15162,40 @@
 		},
 		"UseValidTypeofOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueDefineMacrosOrderConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueDefineMacrosOrderOptions" }
+			]
+		},
+		"UseVueDefineMacrosOrderOptions": {
+			"type": "object",
+			"properties": {
+				"order": {
+					"description": "The order of the Vue define macros.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueMultiWordComponentNamesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueMultiWordComponentNamesOptions" }
+			]
+		},
+		"UseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"ignores": {
+					"description": "Component names to ignore (allowed to be single-word).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

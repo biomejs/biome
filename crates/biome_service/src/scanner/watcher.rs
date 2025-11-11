@@ -1,5 +1,10 @@
 use std::path::PathBuf;
 
+use super::WorkspaceWatcherBridge;
+use crate::WorkspaceError;
+use crate::diagnostics::WatchError;
+use biome_diagnostics::PrintDescription;
+use biome_diagnostics::serde::Diagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use notify::event::{CreateKind, ModifyKind, RemoveKind, RenameMode};
@@ -8,18 +13,16 @@ use notify::{
     Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode, Result as NotifyResult,
     Watcher as NotifyWatcher,
 };
-use tracing::{debug, warn};
-
-use crate::WorkspaceError;
-use crate::diagnostics::WatchError;
-use crate::workspace::ScanKind;
-
-use super::WorkspaceWatcherBridge;
+use rustc_hash::FxHashSet;
+use tracing::{debug, error, warn};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
 pub enum WatcherInstruction {
-    WatchFolder(Utf8PathBuf, ScanKind),
+    /// Watches the specified paths non-recursively.
+    WatchFolders(FxHashSet<Utf8PathBuf>),
+
+    /// Unwatches the watched paths starting with the specified path.
     UnwatchFolder(Utf8PathBuf),
 
     /// Re-indexes a file after it was closed by a client.
@@ -45,12 +48,12 @@ impl Drop for WatcherInstructionChannel {
     }
 }
 
-/// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
+/// Watcher to keep the [crate::WorkspaceServer] in sync with the filesystem state.
 ///
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
 /// The watcher watches the same directories as those scanned by the scanner, so
 /// the watcher is also instructed to watch folders that were scanned through
-/// `WorkspaceServer::scan_project()`.
+/// [crate::Workspace::scan_project].
 ///
 /// When watch events are received, they are handed back to the workspace. If
 /// this results in opening new documents, we say they were opened by the
@@ -113,7 +116,13 @@ impl Watcher {
         loop {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
-                    Ok(Ok(event)) => Self::handle_notify_event(workspace, event),
+                    Ok(Ok(event)) => {
+                        // TODO: Improve error propagation.
+                        let diagnostics = Self::handle_notify_event(workspace, event);
+                        for diagnostic in diagnostics {
+                            error!("{}", PrintDescription(&diagnostic));
+                        }
+                    }
                     Ok(Err(error)) => {
                         // TODO: Improve error propagation.
                         warn!("Watcher error: {error}");
@@ -126,8 +135,8 @@ impl Watcher {
                     }
                 },
                 recv(self.instruction_rx) -> instruction => match instruction {
-                    Ok(WatcherInstruction::WatchFolder(path, scan_kind)) => {
-                        self.watch_folder(workspace, path, scan_kind);
+                    Ok(WatcherInstruction::WatchFolders(paths)) => {
+                        self.watch_folders(workspace, paths);
                     }
                     Ok(WatcherInstruction::UnwatchFolder(path)) => {
                         self.unwatch_folder(workspace, path);
@@ -147,14 +156,17 @@ impl Watcher {
     }
 
     #[tracing::instrument(level = "trace", skip(workspace))]
-    fn handle_notify_event(workspace: &impl WorkspaceWatcherBridge, event: NotifyEvent) {
+    fn handle_notify_event(
+        workspace: &impl WorkspaceWatcherBridge,
+        event: NotifyEvent,
+    ) -> Vec<Diagnostic> {
         let paths = Self::watched_paths(workspace, event.paths);
         if paths.is_empty() {
-            return;
+            return vec![];
         };
 
         let result = match event.kind {
-            EventKind::Access(_) => Ok(()),
+            EventKind::Access(_) => Ok(vec![]),
             EventKind::Create(create_kind) => match create_kind {
                 CreateKind::Folder => Self::index_folders(workspace, paths),
                 _ => Self::index_paths(workspace, paths),
@@ -177,25 +189,31 @@ impl Watcher {
                             Self::unload_paths(workspace, paths)
                         }
                     }
-                    _ => Ok(()),
+                    _ => Ok(vec![]),
                 },
                 // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
                 // Without it, we'll miss events on Windows or macOS.
                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
-                    Self::index_paths(workspace, paths)
+                    // It's possible to receive Modify(Data) event after the file is removed on macOS.
+                    if paths[0].exists() {
+                        Self::index_paths(workspace, paths)
+                    } else {
+                        Self::unload_paths(workspace, paths)
+                    }
                 }
-                _ => Ok(()),
+                _ => Ok(vec![]),
             },
             EventKind::Remove(remove_kind) => match remove_kind {
                 RemoveKind::File => Self::unload_files(workspace, paths),
                 _ => Self::unload_paths(workspace, paths),
             },
-            EventKind::Any | EventKind::Other => Ok(()),
+            EventKind::Any | EventKind::Other => Ok(vec![]),
         };
-        if let Err(error) = result {
-            // TODO: Improve error propagation.
+        result.unwrap_or_else(|error| {
+            // TODO: improve error propagation
             warn!("Error processing watch event: {error}");
-        }
+            vec![]
+        })
     }
 
     /// Filters the paths to make sure only paths within watched folders remain.
@@ -222,12 +240,14 @@ impl Watcher {
     fn index_folders(
         workspace: &impl WorkspaceWatcherBridge,
         paths: Vec<Utf8PathBuf>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = vec![];
         for path in paths {
-            workspace.index_folder(&path)?;
+            let result = workspace.index_folder(&path)?;
+            diagnostics.extend(result);
         }
 
-        Ok(())
+        Ok(diagnostics)
     }
 
     /// Indexes open one or more files or folders.
@@ -237,12 +257,14 @@ impl Watcher {
     fn index_paths(
         workspace: &impl WorkspaceWatcherBridge,
         paths: Vec<Utf8PathBuf>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = vec![];
         for path in paths {
-            Self::index_path(workspace, &path)?;
+            let result = Self::index_path(workspace, &path)?;
+            diagnostics.extend(result);
         }
 
-        Ok(())
+        Ok(diagnostics)
     }
 
     /// Indexes an individual file or folder.
@@ -253,12 +275,12 @@ impl Watcher {
     fn index_path(
         workspace: &impl WorkspaceWatcherBridge,
         path: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         if workspace.fs().path_is_dir(path) {
             workspace.index_folder(path)
         } else {
             let Some(project_key) = workspace.find_project_for_path(path) else {
-                return Ok(()); // file events outside our projects can be safely ignored.
+                return Ok(vec![]); // file events outside our projects can be safely ignored.
             };
 
             workspace.index_file(project_key, path)
@@ -269,12 +291,13 @@ impl Watcher {
     fn unload_files(
         workspace: &impl WorkspaceWatcherBridge,
         paths: Vec<Utf8PathBuf>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = vec![];
         for path in paths {
-            workspace.unload_file(&path)?;
+            diagnostics.extend(workspace.unload_file(&path)?);
         }
 
-        Ok(())
+        Ok(diagnostics)
     }
 
     /// Unloads the given `paths` from the workspace index.
@@ -284,21 +307,29 @@ impl Watcher {
     fn unload_paths(
         workspace: &impl WorkspaceWatcherBridge,
         paths: Vec<Utf8PathBuf>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = vec![];
         for path in &paths {
-            workspace.unload_path(path)?;
+            let result = workspace.unload_path(path)?;
+            diagnostics.extend(result);
         }
 
-        Ok(())
+        Ok(diagnostics)
     }
 
     fn rename_path(
         workspace: &impl WorkspaceWatcherBridge,
         from: &Utf8Path,
         to: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
-        workspace.unload_path(from)?;
-        Self::index_path(workspace, to)
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        let mut diagnostics = vec![];
+        if workspace.fs().path_is_file(from) {
+            diagnostics.extend(workspace.unload_file(from)?);
+        } else {
+            diagnostics.extend(workspace.unload_path(from)?);
+        }
+        diagnostics.extend(Self::index_path(workspace, to)?);
+        Ok(diagnostics)
     }
 
     /// Reindexes an individual file if the watcher (still) has interest in it.
@@ -315,28 +346,38 @@ impl Watcher {
     }
 
     #[tracing::instrument(level = "debug", skip(self, workspace))]
-    fn watch_folder(
+    fn watch_folders(
         &mut self,
         workspace: &impl WorkspaceWatcherBridge,
-        path: Utf8PathBuf,
-        scan_kind: ScanKind,
+        paths: FxHashSet<Utf8PathBuf>,
     ) {
-        let std_path = path.as_std_path();
-        if !workspace.insert_watched_folder(path.clone()) {
-            return; // Already watching.
+        let mut watcher_paths = self.watcher.paths_mut();
+
+        for path in paths {
+            let std_path = path.as_std_path();
+            if !workspace.insert_watched_folder(path.clone()) {
+                continue; // Already watching.
+            }
+
+            if let Err(error) = watcher_paths.add(std_path, RecursiveMode::NonRecursive) {
+                // TODO: Improve error propagation.
+                warn!("Error watching path {path}: {error}");
+            }
         }
 
-        if let Err(error) = self.watcher.watch(std_path, RecursiveMode::NonRecursive) {
+        if let Err(error) = watcher_paths.commit() {
             // TODO: Improve error propagation.
-            warn!("Error watching path {path}: {error}");
+            warn!("Error committing the watched paths: {error}");
         }
     }
 
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     fn unwatch_folder(&mut self, workspace: &impl WorkspaceWatcherBridge, path: Utf8PathBuf) {
+        let mut watcher_paths = self.watcher.paths_mut();
+
         workspace.remove_watched_folders(|watched_path| {
             if watched_path.starts_with(path.as_std_path()) {
-                if let Err(error) = self.watcher.unwatch(watched_path.as_std_path()) {
+                if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
                     // TODO: Improve error propagation.
                     warn!("Error unwatching path {}: {error}", watched_path);
                 }
@@ -345,6 +386,11 @@ impl Watcher {
                 false
             }
         });
+
+        if let Err(error) = watcher_paths.commit() {
+            // TODO: Improve error propagation.
+            warn!("Error committing the watched paths: {error}");
+        }
     }
 }
 

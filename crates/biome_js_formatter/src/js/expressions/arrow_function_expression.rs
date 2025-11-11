@@ -109,9 +109,9 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                     formatted_signature,
                                     group(&format_args![indent(&format_args![
                                         hard_line_break(),
-                                        text("("),
+                                        token("("),
                                         soft_block_indent(&format_body),
-                                        text(")")
+                                        token(")")
                                     ]),])
                                 ])]
                             );
@@ -122,9 +122,9 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                 formatted_signature,
                                 group(&format_args![
                                     space(),
-                                    text("("),
+                                    token("("),
                                     soft_block_indent(&format_body),
-                                    text(")")
+                                    token(")")
                                 ])
                             ])]
                         );
@@ -155,13 +155,13 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                 group(&format_args![
                                     soft_line_indent_or_hard_space(&format_with(|f| {
                                         if should_add_parens {
-                                            write!(f, [if_group_fits_on_line(&text("("))])?;
+                                            write!(f, [if_group_fits_on_line(&token("("))])?;
                                         }
 
                                         write!(f, [format_body])?;
 
                                         if should_add_parens {
-                                            write!(f, [if_group_fits_on_line(&text(")"))])?;
+                                            write!(f, [if_group_fits_on_line(&token(")"))])?;
                                         }
 
                                         Ok(())
@@ -180,13 +180,13 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                 group(&format_args![
                                     soft_line_indent_or_space(&format_with(|f| {
                                         if should_add_parens {
-                                            write!(f, [if_group_fits_on_line(&text("("))])?;
+                                            write!(f, [if_group_fits_on_line(&token("("))])?;
                                         }
 
                                         write!(f, [format_body])?;
 
                                         if should_add_parens {
-                                            write!(f, [if_group_fits_on_line(&text(")"))])?;
+                                            write!(f, [if_group_fits_on_line(&token(")"))])?;
                                         }
 
                                         Ok(())
@@ -253,7 +253,7 @@ fn format_signature(
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
 
                     if !parentheses_not_needed {
-                        write!(f, [text("(")])?;
+                        write!(f, [token("(")])?;
                     }
 
                     if should_hug || parentheses_not_needed {
@@ -269,7 +269,7 @@ fn format_signature(
                     }
 
                     if !parentheses_not_needed {
-                        write!(f, [text(")")])?;
+                        write!(f, [token(")")])?;
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
@@ -658,18 +658,18 @@ impl Format<JsFormatContext> for ArrowChain {
                         f,
                         [group(&format_args![indent(&format_args![
                             hard_line_break(),
-                            text("("),
+                            token("("),
                             soft_block_indent(&format_tail_body),
-                            text(")")
+                            token(")")
                         ]),])]
                     )?;
                 } else {
                     write!(
                         f,
                         [group(&format_args![
-                            text("("),
+                            token("("),
                             soft_block_indent(&format_tail_body),
-                            text(")")
+                            token(")")
                         ])]
                     )?;
                 }
@@ -679,9 +679,9 @@ impl Format<JsFormatContext> for ArrowChain {
                     write!(
                         f,
                         [
-                            if_group_fits_on_line(&text("(")),
+                            if_group_fits_on_line(&token("(")),
                             format_tail_body,
-                            if_group_fits_on_line(&text(")"))
+                            if_group_fits_on_line(&token(")"))
                         ]
                     )?;
                 } else {

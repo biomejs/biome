@@ -315,6 +315,7 @@ impl FormatLanguage for GraphqlFormatLanguage {
         self,
         root: &GraphqlSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &GraphqlCommentStyle, source_map.as_ref());
         GraphqlFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -347,7 +348,7 @@ pub fn format_node(
     options: GraphqlFormatOptions,
     root: &GraphqlSyntaxNode,
 ) -> FormatResult<Formatted<GraphqlFormatContext>> {
-    biome_formatter::format_node(root, GraphqlFormatLanguage::new(options))
+    biome_formatter::format_node(root, GraphqlFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.

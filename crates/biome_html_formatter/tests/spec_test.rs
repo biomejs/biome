@@ -51,7 +51,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 
     let source_type: HtmlFileSource = test_file.input_file().as_path().try_into().unwrap();
 
-    let options = HtmlFormatOptions::new(HtmlFileSource::html());
+    let options = HtmlFormatOptions::new(source_type);
     let language = language::HtmlTestFormatLanguage::new(source_type);
 
     let snapshot = SpecSnapshot::new(

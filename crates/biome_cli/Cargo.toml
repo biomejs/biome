@@ -34,6 +34,7 @@ biome_glob               = { workspace = true }
 biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_grit_patterns      = { workspace = true }
+biome_html_analyze       = { workspace = true }
 biome_html_formatter     = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true }
@@ -66,11 +67,11 @@ tokio                    = { workspace = true, features = ["io-std", "io-util", 
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.4.0"
+tracing-tree             = "0.4.1"
 
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.174"
+libc  = "0.2.177"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
@@ -89,7 +90,8 @@ regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen    = ["bpaf/docgen"]
+js_plugin = ["biome_service/js_plugin"]
 
 [lints]
 workspace = true

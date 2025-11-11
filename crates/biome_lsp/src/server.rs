@@ -6,7 +6,6 @@ use crate::session::{
 };
 use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
-use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
@@ -154,6 +153,20 @@ impl LSPServer {
                                 }),
                                 kind: Some(WatchKind::all()),
                             },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.gitignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.ignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
                         ]
                     })
                     .collect();
@@ -175,6 +188,15 @@ impl LSPServer {
                                 "{}/.editorconfig",
                                 base_path.as_path().as_str()
                             )),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.gitignore".to_string()),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.ignore".to_string()),
+
                             kind: Some(WatchKind::all()),
                         },
                     ],
@@ -310,14 +332,12 @@ impl LanguageServer for LSPServer {
     }
 
     #[tracing::instrument(level = "debug", skip_all)]
-    async fn initialized(&self, params: InitializedParams) {
-        let _ = params;
-
+    async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-
         self.session.load_extension_settings().await;
-        self.session.load_workspace_settings().await;
+        self.session.load_workspace_settings(false).await;
 
+        self.session.set_initialized();
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
             .client
@@ -354,11 +374,15 @@ impl LanguageServer for LSPServer {
             if let Some(base_path) = base_path {
                 let possible_biome_json = file_path.strip_prefix(&base_path);
                 if let Ok(watched_file) = possible_biome_json
-                    && (ConfigName::file_names().contains(&&*watched_file.display().to_string())
-                        || watched_file.ends_with(".editorconfig"))
+                    && (ConfigName::file_names()
+                        .iter()
+                        .any(|file_name| watched_file.ends_with(file_name))
+                        || (watched_file.ends_with(".editorconfig"))
+                        || watched_file.ends_with(".gitignore")
+                        || watched_file.ends_with(".ignore"))
                 {
                     self.session.load_extension_settings().await;
-                    self.session.load_workspace_settings().await;
+                    self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;
                     self.session.update_all_diagnostics().await;
                     // for now we are only interested to the configuration file,
@@ -409,18 +433,9 @@ impl LanguageServer for LSPServer {
             }
         }
 
-        for added in &params.event.added {
-            if let Ok(project_path) = self.session.file_path(&added.uri) {
-                let status = self
-                    .session
-                    .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
-                        project_path.to_path_buf(),
-                    ))
-                    .await;
-                debug!("Configuration status: {status:?}");
-                self.session.set_configuration_status(status);
-            }
-        }
+        self.session
+            .update_workspace_folders(params.event.added, params.event.removed);
+        self.session.load_workspace_settings(true).await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {

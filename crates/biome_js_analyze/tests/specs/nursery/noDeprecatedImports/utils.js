@@ -1,0 +1,15 @@
+/** @deprecated */
+export const DEPRECATED_CONSTANT = 0;
+
+// @deprecated
+export const NOT_REALLY_DEPRECATED_CONSTANT = 1;
+
+/**
+ * @deprecated This method has been deprecated for a long time and you should
+ *             really consider using `modernUtil()` instead.
+ * 
+ * Does stuff.
+ */
+export function deprecatedUtil() {}
+
+export function modernUtil() {}

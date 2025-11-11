@@ -8,7 +8,13 @@ export interface SupportsFeatureParams {
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
 export type ProjectKey = number;
-export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export interface FileFeaturesResult {
 	featuresSupported: FeaturesSupported;
 }
@@ -139,27 +145,13 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
-	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: <https://biomejs.dev/reference/configuration/#filesincludes>
 
-Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
-
-This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
-
-Entries must be file or folder *names*. Specific paths and globs are not supported.
-
-Examples where this may be useful:
-
-```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
-
-// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
-
-// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
-
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
-	 * Tells Biome to not emit diagnostics when handling files that doesn't know
+	 * Tells Biome to not emit diagnostics when handling files that it doesn't know
 	 */
 	ignoreUnknown?: Bool;
 	/**
@@ -193,7 +185,7 @@ export interface FormatterConfiguration {
 	 */
 	expand?: Expand;
 	/**
-	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
+	 * Whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -258,10 +250,19 @@ export interface GritConfiguration {
  * Options applied to HTML files
  */
 export interface HtmlConfiguration {
+	assist?: HtmlAssistConfiguration;
+	/**
+	 * Enables full support for HTML, Vue, Svelte and Astro files.
+	 */
+	experimentalFullSupportEnabled?: Bool;
 	/**
 	 * HTML formatter options
 	 */
 	formatter?: HtmlFormatterConfiguration;
+	/**
+	 * HTML linter options
+	 */
+	linter?: HtmlLinterConfiguration;
 	/**
 	 * HTML parsing options
 	 */
@@ -404,7 +405,7 @@ export interface CssFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to CSS (and its super languages) files.
+	 * The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -437,6 +438,10 @@ export interface CssParserConfiguration {
 	 * Enables parsing of CSS Modules specific features.
 	 */
 	cssModules?: Bool;
+	/**
+	 * Enables parsing of Tailwind CSS 4.0 directives and functions.
+	 */
+	tailwindDirectives?: Bool;
 }
 export type MaxSize = number;
 export type AttributePosition = "auto" | "multiline";
@@ -448,7 +453,7 @@ export type BracketSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
-export type LineEnding = "lf" | "crlf" | "cr";
+export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 /**
 	* Validated value for the `line_width` formatter options
 
@@ -485,7 +490,7 @@ export interface GraphqlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to GraphQL files.
+	 * The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -541,6 +546,15 @@ export interface GritLinterConfiguration {
 	enabled?: Bool;
 }
 /**
+ * Options that changes how the HTML assist behaves
+ */
+export interface HtmlAssistConfiguration {
+	/**
+	 * Control the assist for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
+}
+/**
  * Options that changes how the HTML formatter behaves
  */
 export interface HtmlFormatterConfiguration {
@@ -569,7 +583,7 @@ export interface HtmlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to HTML (and its super languages) files.
+	 * The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -584,6 +598,15 @@ export interface HtmlFormatterConfiguration {
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
+}
+/**
+ * Options that changes how the HTML linter behaves
+ */
+export interface HtmlLinterConfiguration {
+	/**
+	 * Control the linter for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
 }
 /**
  * Options that changes how the HTML parser behaves
@@ -644,7 +667,7 @@ export interface JsFormatterConfiguration {
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * The type of line ending applied to JavaScript (and its super languages) files.
+	 * The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -707,7 +730,7 @@ These decorators belong to an old proposal, and they are subject to change.
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
 /**
- * Linter options specific to the JSON linter
+ * Assist options specific to the JSON linter
  */
 export interface JsonAssistConfiguration {
 	/**
@@ -737,7 +760,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to JSON (and its super languages) files.
+	 * The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -847,7 +870,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_OrganizeImportsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -855,7 +878,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
 	/**
-	 * Sorts the keys of a JSON object in natural order
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
 	/**
@@ -1083,7 +1106,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_NoSvgWithoutTitleOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1304,7 +1327,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_NoVoidOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1449,6 +1472,10 @@ export interface Correctness {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Disallow useVisibleTask$() functions in Qwik components.
+	 */
+	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssignments?: RuleConfiguration_for_NoReactPropAssignmentsOptions;
@@ -1565,7 +1592,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_NoVoidTypeReturnOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1580,6 +1607,10 @@ export interface Correctness {
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
 	useHookAtTopLevel?: RuleConfiguration_for_UseHookAtTopLevelOptions;
+	/**
+	 * Enforces that \<img> elements have both width and height attributes.
+	 */
+	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
@@ -1600,6 +1631,10 @@ export interface Correctness {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
+	 * Prefer using the class prop as a classlist over the classnames helper.
+	 */
+	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
 	 * Enforce JSDoc comment lines to start with a single asterisk, except for the first one.
 	 */
@@ -1626,6 +1661,22 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow continue statements.
+	 */
+	noContinue?: RuleConfiguration_for_NoContinueOptions;
+	/**
+	 * Restrict imports of deprecated exports.
+	 */
+	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
+	/**
+	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
+	 */
+	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
+	/**
+	 * Disallow empty sources.
+	 */
+	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -1633,6 +1684,14 @@ export interface Nursery {
 	 * Prevent import cycles.
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
+	/**
+	 * Disallows the usage of the unary operators ++ and --.
+	 */
+	noIncrementDecrement?: RuleConfiguration_for_NoIncrementDecrementOptions;
+	/**
+	 * Disallow string literals inside JSX elements.
+	 */
+	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
 	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
@@ -1642,21 +1701,21 @@ export interface Nursery {
 	 */
 	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
 	/**
-	 * Disallow non-null assertions after optional chaining expressions.
+	 * Disallow function parameters that are only used in recursive calls.
 	 */
-	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	noParametersOnlyUsedInRecursion?: RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions;
 	/**
-	 * Disallow useVisibleTask$() functions in Qwik components.
+	 * Replaces usages of forwardRef with passing ref as a prop.
 	 */
-	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
-	/**
-	 * Disallow usage of sensitive data such as API keys and tokens.
-	 */
-	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
+	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
 	/**
 	 * Disallow variable declarations from shadowing variables declared in the outer scope.
 	 */
 	noShadow?: RuleConfiguration_for_NoShadowOptions;
+	/**
+	 * Disallow unknown DOM properties.
+	 */
+	noUnknownAttribute?: RuleConfiguration_for_NoUnknownAttributeOptions;
 	/**
 	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
 	 */
@@ -1666,6 +1725,14 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
+	 * Disallow expression statements that are neither a function call nor an assignment.
+	 */
+	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
+	/**
+	 * Disallow unused catch bindings.
+	 */
+	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
+	/**
 	 * Disallow the use of useless undefined.
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
@@ -1673,6 +1740,10 @@ export interface Nursery {
 	 * Enforce that Vue component data options are declared as functions.
 	 */
 	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
+	/**
+	 * Disallow duplicate keys in Vue component data, methods, computed properties, and other options.
+	 */
+	noVueDuplicateKeys?: RuleConfiguration_for_NoVueDuplicateKeysOptions;
 	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
@@ -1682,17 +1753,21 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
-	 * Enforces href attribute for \<a> elements.
+	 * Require Array#sort and Array#toSorted calls to always provide a compareFunction.
 	 */
-	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	useArraySortCompare?: RuleConfiguration_for_UseArraySortCompareOptions;
 	/**
-	 * Enforce type definitions to consistently use either interface or type.
+	 * Enforce consistent arrow function bodies.
 	 */
-	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
+	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
+	/**
+	 * Require the @deprecated directive to specify a deletion date.
+	 */
+	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -1702,25 +1777,29 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_UseExplicitTypeOptions;
 	/**
-	 * Enforces that \<img> elements have both width and height attributes.
-	 */
-	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
-	/**
 	 * Enforce a maximum number of parameters in function definitions.
 	 */
 	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
 	/**
-	 * Prefer using the class prop as a classlist over the classnames helper.
+	 * Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
 	 */
-	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
+	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
 	/**
-	 * Enforce that components are defined as functions and never as classes.
+	 * Disallow unserializable expressions in Qwik dollar ($) scopes.
 	 */
-	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
+	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
+	/**
+	 * Enforce specific order of Vue compiler macros.
+	 */
+	useVueDefineMacrosOrder?: RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions;
+	/**
+	 * Enforce multi-word component names in Vue components.
+	 */
+	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -1763,7 +1842,7 @@ export interface Performance {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1800,7 +1879,11 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_NoGlobalEvalOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Disallow usage of sensitive data such as API keys and tokens.
+	 */
+	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
+	/**
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1913,7 +1996,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_NoYodaExpressionOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1964,6 +2047,10 @@ export interface Style {
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinitions?: RuleFixConfiguration_for_UseConsistentObjectDefinitionsOptions;
+	/**
+	 * Enforce type definitions to consistently use either interface or type.
+	 */
+	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
 	 * Require const declarations for variables that are only assigned once.
 	 */
@@ -2052,6 +2139,10 @@ export interface Style {
 	 * Prefer object spread over Object.assign() when constructing new objects.
 	 */
 	useObjectSpread?: RuleFixConfiguration_for_UseObjectSpreadOptions;
+	/**
+	 * Enforce that components are defined as functions and never as classes.
+	 */
+	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
 	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
@@ -2330,6 +2421,10 @@ export interface Suspicious {
 	 */
 	noMisrefactoredShorthandAssign?: RuleFixConfiguration_for_NoMisrefactoredShorthandAssignOptions;
 	/**
+	 * Disallow non-null assertions after optional chaining expressions.
+	 */
+	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	/**
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleFixConfiguration_for_NoOctalEscapeOptions;
@@ -2422,7 +2517,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_NoWithOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2832,6 +2927,9 @@ export type RuleConfiguration_for_NoPrivateImportsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoReactPropAssignmentsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignmentsOptions;
@@ -2928,6 +3026,9 @@ export type RuleFixConfiguration_for_UseGraphqlNamedOperationsOptions =
 export type RuleConfiguration_for_UseHookAtTopLevelOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseHookAtTopLevelOptions;
+export type RuleConfiguration_for_UseImageSizeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseImageSizeOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -2943,6 +3044,9 @@ export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
+export type RuleConfiguration_for_UseQwikClasslistOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikClasslistOptions;
 export type RuleFixConfiguration_for_UseSingleJsDocAsteriskOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSingleJsDocAsteriskOptions;
@@ -2958,75 +3062,108 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoContinueOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoContinueOptions;
+export type RuleConfiguration_for_NoDeprecatedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDeprecatedImportsOptions;
+export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmptySourceOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmptySourceOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
+export type RuleConfiguration_for_NoIncrementDecrementOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoIncrementDecrementOptions;
+export type RuleConfiguration_for_NoJsxLiteralsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoJsxLiteralsOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
 export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
-export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
+export type RuleFixConfiguration_for_NoParametersOnlyUsedInRecursionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
-export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
+	| RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions;
+export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
-export type RuleConfiguration_for_NoSecretsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSecretsOptions;
+	| RuleWithFixOptions_for_NoReactForwardRefOptions;
 export type RuleConfiguration_for_NoShadowOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoShadowOptions;
+export type RuleConfiguration_for_NoUnknownAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnknownAttributeOptions;
 export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
+export type RuleConfiguration_for_NoUnusedExpressionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnusedExpressionsOptions;
+export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
 export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
+export type RuleConfiguration_for_NoVueDuplicateKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueDuplicateKeysOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
-export type RuleConfiguration_for_UseAnchorHrefOptions =
+export type RuleConfiguration_for_UseArraySortCompareOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAnchorHrefOptions;
-export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RuleWithOptions_for_UseArraySortCompareOptions;
+export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
+export type RuleConfiguration_for_UseDeprecatedDateOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDeprecatedDateOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
 export type RuleConfiguration_for_UseExplicitTypeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExplicitTypeOptions;
-export type RuleConfiguration_for_UseImageSizeOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseImageSizeOptions;
 export type RuleConfiguration_for_UseMaxParamsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseMaxParamsOptions;
-export type RuleConfiguration_for_UseQwikClasslistOptions =
+export type RuleConfiguration_for_UseQwikMethodUsageOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseQwikClasslistOptions;
-export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
+	| RuleWithOptions_for_UseQwikMethodUsageOptions;
+export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
+	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions;
+export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -3075,6 +3212,9 @@ export type RuleConfiguration_for_NoDangerouslySetInnerHtmlWithChildrenOptions =
 export type RuleConfiguration_for_NoGlobalEvalOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoGlobalEvalOptions;
+export type RuleConfiguration_for_NoSecretsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoSecretsOptions;
 export type RuleConfiguration_for_NoCommonJsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoCommonJsOptions;
@@ -3189,6 +3329,9 @@ export type RuleConfiguration_for_UseConsistentMemberAccessibilityOptions =
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionsOptions;
+export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
 export type RuleFixConfiguration_for_UseConstOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConstOptions;
@@ -3255,6 +3398,9 @@ export type RuleFixConfiguration_for_UseNumericSeparatorsOptions =
 export type RuleFixConfiguration_for_UseObjectSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseObjectSpreadOptions;
+export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -3459,6 +3605,9 @@ export type RuleConfiguration_for_NoMisplacedAssertionOptions =
 export type RuleFixConfiguration_for_NoMisrefactoredShorthandAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisrefactoredShorthandAssignOptions;
+export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
 export type RuleFixConfiguration_for_NoOctalEscapeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoOctalEscapeOptions;
@@ -4828,6 +4977,16 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 */
 	options: NoProcessGlobalOptions;
 }
+export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQwikUseVisibleTaskOptions;
+}
 export interface RuleWithOptions_for_NoReactPropAssignmentsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5188,6 +5347,16 @@ export interface RuleWithOptions_for_UseHookAtTopLevelOptions {
 	 */
 	options: UseHookAtTopLevelOptions;
 }
+export interface RuleWithOptions_for_UseImageSizeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImageSizeOptions;
+}
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5254,6 +5423,16 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	 */
 	options: UseParseIntRadixOptions;
 }
+export interface RuleWithOptions_for_UseQwikClasslistOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikClasslistOptions;
+}
 export interface RuleWithFixOptions_for_UseSingleJsDocAsteriskOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5312,6 +5491,46 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoContinueOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoContinueOptions;
+}
+export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDeprecatedImportsOptions;
+}
+export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDuplicateDependenciesOptions;
+}
+export interface RuleWithOptions_for_NoEmptySourceOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmptySourceOptions;
+}
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5335,6 +5554,26 @@ export interface RuleWithOptions_for_NoImportCyclesOptions {
 	 * Rule's options
 	 */
 	options: NoImportCyclesOptions;
+}
+export interface RuleWithOptions_for_NoIncrementDecrementOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoIncrementDecrementOptions;
+}
+export interface RuleWithOptions_for_NoJsxLiteralsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoJsxLiteralsOptions;
 }
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
@@ -5360,7 +5599,11 @@ export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
 	 */
 	options: NoNextAsyncClientComponentOptions;
 }
-export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
+export interface RuleWithFixOptions_for_NoParametersOnlyUsedInRecursionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5368,9 +5611,13 @@ export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoNonNullAssertedOptionalChainOptions;
+	options: NoParametersOnlyUsedInRecursionOptions;
 }
-export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
+export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5378,17 +5625,7 @@ export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoQwikUseVisibleTaskOptions;
-}
-export interface RuleWithOptions_for_NoSecretsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSecretsOptions;
+	options: NoReactForwardRefOptions;
 }
 export interface RuleWithOptions_for_NoShadowOptions {
 	/**
@@ -5399,6 +5636,16 @@ export interface RuleWithOptions_for_NoShadowOptions {
 	 * Rule's options
 	 */
 	options: NoShadowOptions;
+}
+export interface RuleWithOptions_for_NoUnknownAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnknownAttributeOptions;
 }
 export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
 	/**
@@ -5419,6 +5666,30 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 * Rule's options
 	 */
 	options: NoUnresolvedImportsOptions;
+}
+export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedExpressionsOptions;
+}
+export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUselessCatchBindingOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	/**
@@ -5448,6 +5719,16 @@ export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
 	 */
 	options: NoVueDataObjectDeclarationOptions;
 }
+export interface RuleWithOptions_for_NoVueDuplicateKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDuplicateKeysOptions;
+}
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5468,7 +5749,7 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 */
 	options: NoVueReservedPropsOptions;
 }
-export interface RuleWithOptions_for_UseAnchorHrefOptions {
+export interface RuleWithOptions_for_UseArraySortCompareOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5476,9 +5757,9 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseAnchorHrefOptions;
+	options: UseArraySortCompareOptions;
 }
-export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5490,7 +5771,17 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentTypeDefinitionsOptions;
+	options: UseConsistentArrowReturnOptions;
+}
+export interface RuleWithOptions_for_UseDeprecatedDateOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseDeprecatedDateOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -5516,16 +5807,6 @@ export interface RuleWithOptions_for_UseExplicitTypeOptions {
 	 */
 	options: UseExplicitTypeOptions;
 }
-export interface RuleWithOptions_for_UseImageSizeOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseImageSizeOptions;
-}
 export interface RuleWithOptions_for_UseMaxParamsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5536,7 +5817,7 @@ export interface RuleWithOptions_for_UseMaxParamsOptions {
 	 */
 	options: UseMaxParamsOptions;
 }
-export interface RuleWithOptions_for_UseQwikClasslistOptions {
+export interface RuleWithOptions_for_UseQwikMethodUsageOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5544,9 +5825,9 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseQwikClasslistOptions;
+	options: UseQwikMethodUsageOptions;
 }
-export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
+export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5554,7 +5835,7 @@ export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseReactFunctionComponentsOptions;
+	options: UseQwikValidLexicalScopeOptions;
 }
 export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	/**
@@ -5569,6 +5850,30 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 * Rule's options
 	 */
 	options: UseSortedClassesOptions;
+}
+export interface RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueDefineMacrosOrderOptions;
+}
+export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueMultiWordComponentNamesOptions;
 }
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
@@ -5741,6 +6046,16 @@ export interface RuleWithOptions_for_NoGlobalEvalOptions {
 	 * Rule's options
 	 */
 	options: NoGlobalEvalOptions;
+}
+export interface RuleWithOptions_for_NoSecretsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoSecretsOptions;
 }
 export interface RuleWithOptions_for_NoCommonJsOptions {
 	/**
@@ -6202,6 +6517,20 @@ export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionsOptions {
 	 */
 	options: UseConsistentObjectDefinitionsOptions;
 }
+export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentTypeDefinitionsOptions;
+}
 export interface RuleWithFixOptions_for_UseConstOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -6477,6 +6806,16 @@ export interface RuleWithFixOptions_for_UseObjectSpreadOptions {
 	 * Rule's options
 	 */
 	options: UseObjectSpreadOptions;
+}
+export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseReactFunctionComponentsOptions;
 }
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
@@ -7258,6 +7597,16 @@ export interface RuleWithFixOptions_for_NoMisrefactoredShorthandAssignOptions {
 	 */
 	options: NoMisrefactoredShorthandAssignOptions;
 }
+export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNonNullAssertedOptionalChainOptions;
+}
 export interface RuleWithFixOptions_for_NoOctalEscapeOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7862,13 +8211,14 @@ Default: **public**.
 	defaultVisibility?: Visibility;
 }
 export interface NoProcessGlobalOptions {}
+export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignmentsOptions {}
 export interface NoRenderReturnValueOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
 	 */
-	elements: CustomRestrictedElements;
+	elements?: CustomRestrictedElements;
 }
 export interface NoSelfAssignOptions {}
 export interface NoSetterReturnOptions {}
@@ -7940,6 +8290,7 @@ export interface UseExhaustiveDependenciesOptions {
 }
 export interface UseGraphqlNamedOperationsOptions {}
 export interface UseHookAtTopLevelOptions {}
+export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
 	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
@@ -7955,6 +8306,7 @@ export interface UseJsxKeyInIterableOptions {
 	checkShorthandFragments?: boolean;
 }
 export interface UseParseIntRadixOptions {}
+export interface UseQwikClasslistOptions {}
 export interface UseSingleJsDocAsteriskOptions {}
 export interface UseUniqueElementIdsOptions {
 	/**
@@ -7965,6 +8317,15 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoContinueOptions {}
+export interface NoDeprecatedImportsOptions {}
+export interface NoDuplicateDependenciesOptions {}
+export interface NoEmptySourceOptions {
+	/**
+	 * Whether comments are considered meaningful
+	 */
+	allowComments?: boolean;
+}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
@@ -7972,38 +8333,75 @@ export interface NoImportCyclesOptions {
 	 */
 	ignoreTypes?: boolean;
 }
+export interface NoIncrementDecrementOptions {
+	/**
+	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
+	 */
+	allowForLoopAfterthoughts?: boolean;
+}
+export interface NoJsxLiteralsOptions {
+	/**
+	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+	 */
+	allowedStrings?: string[];
+	/**
+	 * When enabled, strings inside props are always ignored
+	 */
+	ignoreProps?: boolean;
+	/**
+	 * When enabled, also flag string literals inside JSX expressions and attributes
+	 */
+	noStrings?: boolean;
+}
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
-export interface NoNonNullAssertedOptionalChainOptions {}
-export interface NoQwikUseVisibleTaskOptions {}
-export interface NoSecretsOptions {
-	/**
-	 * Set entropy threshold (default is 41).
-	 */
-	entropyThreshold?: number;
-}
+export interface NoParametersOnlyUsedInRecursionOptions {}
+export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
+export interface NoUnknownAttributeOptions {
+	ignore?: string[];
+}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+export interface NoUnusedExpressionsOptions {}
+/**
+ * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
+ */
+export interface NoUselessCatchBindingOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
+export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
-export type UseAnchorHrefOptions = null;
-export interface UseConsistentTypeDefinitionsOptions {
-	style?: ConsistentTypeDefinition;
+export interface UseArraySortCompareOptions {}
+/**
+ * Options for the `useConsistentArrowReturn` rule.
+ */
+export interface UseConsistentArrowReturnOptions {
+	/**
+	* Determines whether the rule enforces a consistent style when the return value is an object literal.
+
+This option is only applicable when used in conjunction with the `asNeeded` option. 
+	 */
+	requireForObjectLiteral?: boolean;
+	/**
+	 * The style to enforce for arrow function return statements.
+	 */
+	style?: UseConsistentArrowReturnStyle;
+}
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
-export type UseImageSizeOptions = null;
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
 	 */
 	max?: number;
 }
-export interface UseQwikClasslistOptions {}
-export interface UseReactFunctionComponentsOptions {}
+export interface UseQwikMethodUsageOptions {}
+export interface UseQwikValidLexicalScopeOptions {}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -8013,6 +8411,18 @@ export interface UseSortedClassesOptions {
 	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
+}
+export interface UseVueDefineMacrosOrderOptions {
+	/**
+	 * The order of the Vue define macros.
+	 */
+	order?: string[];
+}
+export interface UseVueMultiWordComponentNamesOptions {
+	/**
+	 * Component names to ignore (allowed to be single-word).
+	 */
+	ignores: string[];
 }
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
@@ -8039,6 +8449,12 @@ export interface NoBlankTargetOptions {
 export interface NoDangerouslySetInnerHtmlOptions {}
 export interface NoDangerouslySetInnerHtmlWithChildrenOptions {}
 export interface NoGlobalEvalOptions {}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
+}
 export interface NoCommonJsOptions {}
 export interface NoDefaultExportOptions {}
 export interface NoDescendingSpecificityOptions {}
@@ -8065,13 +8481,13 @@ export interface NoRestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: Record<string, string>;
+	deniedGlobals?: Record<string, string>;
 }
 export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, Paths>;
+	paths?: Record<string, Paths>;
 	/**
 	 * gitignore-style patterns that should trigger the rule.
 	 */
@@ -8100,7 +8516,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	/**
 	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
 	 */
-	allowExportNames: string[];
+	allowExportNames?: string[];
 }
 export interface UseConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -8119,6 +8535,9 @@ export interface UseConsistentObjectDefinitionsOptions {
 	 */
 	syntax?: ObjectPropertySyntax;
 }
+export interface UseConsistentTypeDefinitionsOptions {
+	style?: ConsistentTypeDefinition;
+}
 export interface UseConstOptions {}
 export interface UseDefaultParameterLastOptions {}
 export interface UseDefaultSwitchClauseOptions {}
@@ -8132,7 +8551,7 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * Allowed cases for file names.
 	 */
-	filenameCases: FilenameCases;
+	filenameCases?: FilenameCases;
 	/**
 	 * Regular expression to enforce
 	 */
@@ -8140,11 +8559,11 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
@@ -8164,26 +8583,27 @@ export interface UseNamingConventionOptions {
 	/**
 	 * Custom conventions.
 	 */
-	conventions: Convention[];
+	conventions?: Convention[];
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
 export interface UseNumberNamespaceOptions {}
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
+export interface UseReactFunctionComponentsOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
 	 */
-	checkAllProperties: boolean;
+	checkAllProperties?: boolean;
 }
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
@@ -8207,7 +8627,7 @@ export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoCatchAssignOptions {}
 export interface NoClassAssignOptions {}
@@ -8217,14 +8637,14 @@ export interface NoConfusingLabelsOptions {
 	/**
 	 * A list of (non-confusing) labels that should be allowed
 	 */
-	allowedLabels: string[];
+	allowedLabels?: string[];
 }
 export interface NoConfusingVoidTypeOptions {}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoConstEnumOptions {}
 export interface NoConstantBinaryExpressionsOptions {}
@@ -8238,7 +8658,7 @@ export interface NoDoubleEqualsOptions {
 
 If `false`, no such exception will be made. 
 	 */
-	ignoreNull: boolean;
+	ignoreNull?: boolean;
 }
 export interface NoDuplicateAtImportRulesOptions {}
 export interface NoDuplicateCaseOptions {}
@@ -8276,6 +8696,7 @@ export interface NoMisleadingCharacterClassOptions {}
 export interface NoMisleadingInstantiatorOptions {}
 export interface NoMisplacedAssertionOptions {}
 export interface NoMisrefactoredShorthandAssignOptions {}
+export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoOctalEscapeOptions {}
 export interface NoPrototypeBuiltinsOptions {}
 export interface NoQuickfixBiomeOptions {
@@ -8297,7 +8718,12 @@ export interface NoTemplateCurlyInStringOptions {}
 export interface NoThenPropertyOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
-export interface NoUnknownAtRulesOptions {}
+export interface NoUnknownAtRulesOptions {
+	/**
+	 * A list of unknown at-rule names to ignore (case-insensitive).
+	 */
+	ignore: string[];
+}
 export interface NoUnsafeDeclarationMergingOptions {}
 export interface NoUnsafeNegationOptions {}
 export interface NoUselessEscapeInStringOptions {}
@@ -8348,7 +8774,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
-export type ConsistentTypeDefinition = "interface" | "type";
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -8359,6 +8785,7 @@ export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
 /**
@@ -8650,6 +9077,7 @@ export type Category =
 	| "lint/correctness/noPrecisionLoss"
 	| "lint/correctness/noPrivateImports"
 	| "lint/correctness/noProcessGlobal"
+	| "lint/correctness/noQwikUseVisibleTask"
 	| "lint/correctness/noReactPropAssignments"
 	| "lint/correctness/noRenderReturnValue"
 	| "lint/correctness/noRestrictedElements"
@@ -8681,51 +9109,65 @@ export type Category =
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useExhaustiveDependencies"
+	| "lint/correctness/useGraphqlNamedOperations"
 	| "lint/correctness/useHookAtTopLevel"
+	| "lint/correctness/useImageSize"
 	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsonImportAttributes"
 	| "lint/correctness/useJsxKeyInIterable"
-	| "lint/correctness/useGraphqlNamedOperations"
 	| "lint/correctness/useParseIntRadix"
+	| "lint/correctness/useQwikClasslist"
 	| "lint/correctness/useSingleJsDocAsterisk"
 	| "lint/correctness/useUniqueElementIds"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noContinue"
+	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
-	| "lint/nursery/noNonNullAssertedOptionalChain"
-	| "lint/nursery/noQwikUseVisibleTask"
-	| "lint/nursery/noSecrets"
+	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnusedExpressions"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCatchBinding"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
+	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
-	| "lint/nursery/useConsistentTypeDefinitions"
+	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
-	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
-	| "lint/nursery/useQwikClasslist"
-	| "lint/nursery/useReactFunctionComponents"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useVueDefineMacrosOrder"
+	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
@@ -8742,6 +9184,7 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
+	| "lint/security/noSecrets"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
 	| "lint/style/noDescendingSpecificity"
@@ -8780,6 +9223,7 @@ export type Category =
 	| "lint/style/useConsistentCurlyBraces"
 	| "lint/style/useConsistentMemberAccessibility"
 	| "lint/style/useConsistentObjectDefinitions"
+	| "lint/style/useConsistentTypeDefinitions"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useDefaultSwitchClause"
@@ -8802,6 +9246,7 @@ export type Category =
 	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericSeparators"
 	| "lint/style/useObjectSpread"
+	| "lint/style/useReactFunctionComponents"
 	| "lint/style/useReadonlyClassProperties"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
@@ -8872,6 +9317,7 @@ export type Category =
 	| "lint/suspicious/noMisleadingInstantiator"
 	| "lint/suspicious/noMisplacedAssertion"
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
+	| "lint/suspicious/noNonNullAssertedOptionalChain"
 	| "lint/suspicious/noOctalEscape"
 	| "lint/suspicious/noPrototypeBuiltins"
 	| "lint/suspicious/noQuickfixBiome"
@@ -8891,20 +9337,20 @@ export type Category =
 	| "lint/suspicious/noUnknownAtRules"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
-	| "lint/suspicious/noUselessRegexBackrefs"
 	| "lint/suspicious/noUselessEscapeInString"
+	| "lint/suspicious/noUselessRegexBackrefs"
 	| "lint/suspicious/noVar"
 	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useBiomeIgnoreFolder"
-	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useErrorMessage"
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useGoogleFontDisplay"
 	| "lint/suspicious/useGuardForIn"
 	| "lint/suspicious/useIsArray"
+	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
@@ -8922,6 +9368,7 @@ export type Category =
 	| "check"
 	| "ci"
 	| "stdin"
+	| "init"
 	| "configuration"
 	| "assist"
 	| "migrate"
@@ -9141,7 +9588,7 @@ export type DocumentFileSource =
 	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
-	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 * Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -9166,7 +9613,18 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind =
+	| "Vue"
+	| "Svelte"
+	| "None"
+	| {
+			Astro: {
+				/**
+				 * Whether the script is inside Astro frontmatter
+				 */
+				frontmatter: boolean;
+			};
+	  };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -9188,7 +9646,9 @@ export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+Currently, Biome aims to be compatible with the latest Recommendation level standards.
+
+It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard";
 /**
@@ -9202,11 +9662,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+export interface OpenFileResult {
+	diagnostics: Diagnostic[];
+}
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	version: number;
+}
+export interface ChangeFileResult {
+	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
 	path: BiomePath;
@@ -9315,18 +9781,18 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: RuleCode[];
+	skip?: AnalyzerSelector[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
+export type AnalyzerSelector = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9335,12 +9801,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: RuleCode[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9348,6 +9814,7 @@ export interface PullActionsResult {
 }
 export interface CodeAction {
 	category: ActionCategory;
+	offset?: TextSize;
 	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }
@@ -9435,14 +9902,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: RuleCode[];
+	enabledRules?: AnalyzerSelector[];
 	fixFileMode: FixFileMode;
-	only?: RuleCode[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: RuleCode[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 /**
@@ -9522,8 +9989,8 @@ export interface Workspace {
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	scanProject(params: ScanProjectParams): Promise<ScanProjectResult>;
-	openFile(params: OpenFileParams): Promise<void>;
-	changeFile(params: ChangeFileParams): Promise<void>;
+	openFile(params: OpenFileParams): Promise<OpenFileResult>;
+	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;

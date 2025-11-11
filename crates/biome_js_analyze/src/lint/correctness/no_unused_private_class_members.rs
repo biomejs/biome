@@ -10,16 +10,15 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
-    JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
-    TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
+    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
     declare_node_union,
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
-use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
     /// Disallow unused private class members
@@ -65,6 +64,21 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Caveats
+    ///
+    /// The rule currently considers that all TypeScript private members are used if it encounters a computed access.
+    /// In the following example `member` is not reported. It is considered as used.
+    ///
+    /// ```ts
+    ///  class TsBioo {
+    ///    private member: number;
+    ///
+    ///    set_with_name(name: string, value: number) {
+    ///      this[name] = value;
+    ///    }
+    ///  }
+    /// ```
+    ///
     pub NoUnusedPrivateClassMembers {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
@@ -106,9 +120,9 @@ impl Rule for NoUnusedPrivateClassMembers {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let private_members: FxHashSet<AnyMember> = get_all_declared_private_members(node);
+        let private_members: Vec<AnyMember> = get_all_declared_private_members(node).collect();
         if private_members.is_empty() {
-            Vec::new()
+            Box::default()
         } else {
             let mut results = Vec::new();
             let unused_members = traverse_members_usage(node.syntax(), private_members);
@@ -129,9 +143,8 @@ impl Rule for NoUnusedPrivateClassMembers {
                     }
                 }
             }
-            results
+            results.into_boxed_slice()
         }
-        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -232,43 +245,61 @@ impl Rule for NoUnusedPrivateClassMembers {
 /// if the member usage is found, we remove it from the hashmap
 fn traverse_members_usage(
     syntax: &JsSyntaxNode,
-    mut private_members: FxHashSet<AnyMember>,
+    mut private_members: Vec<AnyMember>,
 ) -> Vec<AnyMember> {
-    let iter = syntax.preorder();
+    // `true` is at least one member is a TypeScript private member like `private member`.
+    // The other private members are sharp members `#member`.
+    let mut ts_private_count = private_members
+        .iter()
+        .filter(|member| !member.is_private_sharp())
+        .count();
 
-    for event in iter {
-        match event {
-            biome_rowan::WalkEvent::Enter(node) => {
-                if let Some(js_name) = AnyJsName::cast(node) {
-                    private_members.retain(|private_member| {
-                        let member_being_used =
-                            private_member.match_js_name(&js_name) == Some(true);
+    for node in syntax.descendants() {
+        match AnyJsName::try_cast(node) {
+            Ok(js_name) => {
+                private_members.retain(|private_member| {
+                    let member_being_used = private_member.match_js_name(&js_name) == Some(true);
 
-                        if !member_being_used {
-                            return true;
-                        }
-
-                        let is_write_only =
-                            is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
-                        let is_in_update_expression = is_in_update_expression(&js_name);
-
-                        if is_in_update_expression || is_write_only {
-                            return true;
-                        }
-
-                        false
-                    });
-
-                    if private_members.is_empty() {
-                        break;
+                    if !member_being_used {
+                        return true;
                     }
+
+                    let is_write_only =
+                        is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
+                    let is_in_update_expression = is_in_update_expression(&js_name);
+
+                    if is_in_update_expression || is_write_only {
+                        return true;
+                    }
+
+                    if !private_member.is_private_sharp() {
+                        ts_private_count -= 1;
+                    }
+
+                    false
+                });
+
+                if private_members.is_empty() {
+                    break;
                 }
             }
-            biome_rowan::WalkEvent::Leave(_) => {}
+            Err(node) => {
+                if ts_private_count != 0
+                    && let Some(computed_member) = AnyJsComputedMember::cast(node)
+                    && matches!(
+                        computed_member.object(),
+                        Ok(AnyJsExpression::JsThisExpression(_))
+                    )
+                {
+                    // We consider that all TypeScript private members are used in expressions like `this[something]`.
+                    private_members.retain(|private_member| private_member.is_private_sharp());
+                    ts_private_count = 0;
+                }
+            }
         }
     }
 
-    private_members.into_iter().collect()
+    private_members
 }
 
 /// Check if a TsPropertyParameter is also unused as a function parameter
@@ -309,41 +340,38 @@ fn check_ts_property_parameter_usage(
 
 fn get_all_declared_private_members(
     class_declaration: &JsClassDeclaration,
-) -> FxHashSet<AnyMember> {
+) -> impl Iterator<Item = AnyMember> {
     class_declaration
         .members()
         .iter()
         .map(AnyMember::AnyJsClassMember)
         .chain(get_constructor_params(class_declaration))
         .filter(|member| member.is_private() == Some(true))
-        .collect()
 }
 
-fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<AnyMember> {
-    let constructor_member = class_declaration
+fn get_constructor_params(
+    class_declaration: &JsClassDeclaration,
+) -> impl Iterator<Item = AnyMember> {
+    class_declaration
         .members()
         .iter()
         .find_map(|member| match member {
             AnyJsClassMember::JsConstructorClassMember(member) => Some(member),
             _ => None,
-        });
-
-    if let Some(constructor_member) = constructor_member
-        && let Ok(constructor_params) = constructor_member.parameters()
-    {
-        return constructor_params
-            .parameters()
-            .iter()
-            .filter_map(|param| match param.ok()? {
-                biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(ts_property) => {
-                    Some(ts_property.into())
-                }
-                _ => None,
-            })
-            .collect();
-    }
-
-    FxHashSet::default()
+        })
+        .and_then(|constructor_member| constructor_member.parameters().ok())
+        .into_iter()
+        .flat_map(|constructor_params| {
+            constructor_params
+                .parameters()
+                .iter()
+                .filter_map(|param| match param.ok()? {
+                    biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(
+                        ts_property,
+                    ) => Some(ts_property.into()),
+                    _ => None,
+                })
+        })
 }
 
 /// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
@@ -407,6 +435,18 @@ impl AnyMember {
             self.syntax().kind(),
             JsSyntaxKind::JS_SETTER_CLASS_MEMBER | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
         )
+    }
+
+    /// Returns `true` if it is a private property starting with `#`.
+    fn is_private_sharp(&self) -> bool {
+        if let Self::AnyJsClassMember(member) = self {
+            matches!(
+                member.name(),
+                Ok(Some(AnyJsClassMemberName::JsPrivateClassMemberName(_)))
+            )
+        } else {
+            false
+        }
     }
 
     fn is_private(&self) -> Option<bool> {

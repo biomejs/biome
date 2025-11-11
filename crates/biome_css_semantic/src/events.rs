@@ -1,10 +1,11 @@
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule,
-    CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
+    CssRelativeSelector, CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
+use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
     model::{CssProperty, CssPropertyInitialValue},
     semantic_model::model::Specificity,
@@ -15,10 +16,10 @@ const ROOT_SELECTOR: &str = ":root";
 
 #[derive(Debug)]
 pub enum SemanticEvent {
-    RuleStart(CssSyntaxNode),
+    RuleStart(AnyRuleStart),
     RuleEnd,
     SelectorDeclaration {
-        node: CssSyntaxNode,
+        node: AnyCssSelectorLike,
         specificity: Specificity,
     },
     PropertyDeclaration {
@@ -62,10 +63,14 @@ impl SemanticEventExtractor {
             // allowing for proper scoping and inheritance of styles.
             kind if kind == CSS_QUALIFIED_RULE
                 || kind == CSS_NESTED_QUALIFIED_RULE
+                || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
-                self.stash.push_back(SemanticEvent::RuleStart(node.clone()));
+                if let Some(start) = AnyRuleStart::cast(node.clone()) {
+                    self.stash.push_back(SemanticEvent::RuleStart(start));
+                }
             }
             CSS_SELECTOR_LIST => {
                 if !matches!(
@@ -125,6 +130,12 @@ impl SemanticEventExtractor {
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
                                 }
+                                AnyCssDeclarationName::TwValueThemeReference(name) => {
+                                    let Ok(ident) = name.reference() else {
+                                        return;
+                                    };
+                                    CssProperty::from(ident)
+                                }
                             };
 
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
@@ -179,7 +190,7 @@ impl SemanticEventExtractor {
     /// @property --my-other-property {}
     /// ```
     fn process_at_property(&mut self, node: CssPropertyAtRule) {
-        let Ok(property_name) = node.name() else {
+        let Ok(property_name) = node.declarator().and_then(|d| d.name()) else {
             return;
         };
         let Some(decls) = node
@@ -207,10 +218,14 @@ impl SemanticEventExtractor {
                         initial_value = Some(CssPropertyInitialValue::from(prop.value()));
                     }
                     "syntax" => {
-                        syntax = Some(prop.value().to_trimmed_string().to_string());
+                        syntax = Some(prop.value().to_trimmed_string().clone());
                     }
                     "inherits" => {
-                        inherits = Some(prop.value().to_trimmed_string() == "true");
+                        inherits = Some(
+                            prop.value()
+                                .to_trimmed_string()
+                                .eq_ignore_ascii_case("true"),
+                        );
                     }
                     _ => {}
                 }
@@ -226,7 +241,7 @@ impl SemanticEventExtractor {
         });
     }
 
-    fn add_selector_event(&mut self, node: CssSyntaxNode, specificity: Specificity) {
+    fn add_selector_event(&mut self, node: AnyCssSelectorLike, specificity: Specificity) {
         self.stash
             .push_back(SemanticEvent::SelectorDeclaration { node, specificity });
     }

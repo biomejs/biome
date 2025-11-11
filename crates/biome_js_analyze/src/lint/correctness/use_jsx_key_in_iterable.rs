@@ -427,7 +427,7 @@ fn handle_jsx_child(
                 }
             }
             AnyJsxChild::JsxFragment(node) => {
-                if options.check_shorthand_fragments {
+                if options.check_shorthand_fragments() {
                     ranges.push(node.range())
                 }
             }

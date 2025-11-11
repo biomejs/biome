@@ -12,6 +12,7 @@ pub mod workspace;
 pub mod workspace_types;
 
 mod scanner;
+mod utils;
 
 #[cfg(test)]
 mod test_utils;

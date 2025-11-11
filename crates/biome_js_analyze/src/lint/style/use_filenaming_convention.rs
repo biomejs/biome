@@ -155,7 +155,7 @@ impl Rule for UseFilenamingConvention {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
-        if options.require_ascii && !file_name.is_ascii() {
+        if options.require_ascii() && !file_name.is_ascii() {
             return Some(FileNamingConventionState::Ascii);
         }
         let first_char = file_name.bytes().next()?;
@@ -228,11 +228,12 @@ impl Rule for UseFilenamingConvention {
             };
             (name, split)
         };
-        let allowed_cases = options.filename_cases.cases;
+        let filename_cases = options.filename_cases.unwrap_or_default();
+        let allowed_cases = filename_cases.cases;
         let allowed_extension_cases = allowed_cases | Case::Lower;
         // Check extension case
         if extensions.any(|extension| {
-            !allowed_extension_cases.contains(Case::identify(extension, options.strict_case))
+            !allowed_extension_cases.contains(Case::identify(extension, options.strict_case()))
         }) {
             return Some(FileNamingConventionState::Extension);
         }
@@ -242,12 +243,12 @@ impl Rule for UseFilenamingConvention {
         // Check filename case
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
-            let case = Case::identify(trimmed_name, options.strict_case);
+            let case = Case::identify(trimmed_name, options.strict_case());
             if (allowed_cases | Case::Uni).contains(case) {
                 return None;
             }
         }
-        if options.filename_cases.allow_export {
+        if filename_cases.allow_export {
             // If no exported binding has the file name, then reports the filename
             ctx.model()
                 .all_exported_bindings()
@@ -272,6 +273,7 @@ impl Rule for UseFilenamingConvention {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
+        let filename_cases = options.filename_cases.unwrap_or_default();
         match state {
             FileNamingConventionState::Ascii => {
                 Some(RuleDiagnostic::new(
@@ -285,9 +287,9 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Filename => {
-                let allowed_cases = options.filename_cases.cases;
+                let allowed_cases = filename_cases.cases;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
-                let allowed_case_names = if options.filename_cases.allow_export {
+                let allowed_case_names = if filename_cases.allow_export {
                     allowed_case_names
                         .chain(["equal to the name of an export".to_string()])
                         .collect::<SmallVec<[_; 4]>>()
@@ -313,7 +315,7 @@ impl Rule for UseFilenamingConvention {
                 } else {
                     markup! {""}.to_owned()
                 };
-                if options.strict_case && options.filename_cases.cases.contains(Case::Camel) {
+                if options.strict_case() && filename_cases.cases.contains(Case::Camel) {
                     let case_type = Case::identify(trimmed_name, false);
                     let case_strict = Case::identify(trimmed_name, true);
                     if case_type == Case::Camel && case_strict == Case::Unknown {
@@ -331,7 +333,7 @@ impl Rule for UseFilenamingConvention {
                 let mut suggested_filenames = allowed_cases
                     .into_iter()
                     .map(|case| case.convert(trimmed_name).into_boxed_str())
-                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case)))
+                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case())))
                     .collect::<SmallVec<[_; 4]>>();
                 // We sort and deduplicate the suggested names
                 suggested_filenames.sort();
@@ -355,7 +357,7 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Extension => {
-                let allowed_cases = options.filename_cases.cases | Case::Lower;
+                let allowed_cases = filename_cases.cases | Case::Lower;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
                 let allowed_case_names = allowed_case_names.collect::<SmallVec<[_; 4]>>().join(" or ");
                 Some(RuleDiagnostic::new(

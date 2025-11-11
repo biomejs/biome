@@ -5,6 +5,7 @@ mod css_kinds_src;
 mod formatter;
 mod generate_analyzer;
 pub mod generate_analyzer_rule_options;
+mod generate_grit_mappings;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
@@ -40,6 +41,7 @@ pub use self::generate_analyzer::generate_analyzer;
 pub use self::generate_analyzer_rule_options::{
     generate_analyzer_rule_options, get_analyzer_rule_options_path,
 };
+pub use self::generate_grit_mappings::generate_grit_mappings;
 pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
 

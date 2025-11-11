@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use rustc_hash::{FxHashMap, FxHashSet};
+
 use biome_analyze::{FixKind, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -7,22 +9,21 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression, T, TsTypeofType,
+    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression,
+    JsReferenceIdentifier, T, TsTypeofType,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
-use rustc_hash::{FxHashMap, FxHashSet};
+use biome_rule_options::use_exhaustive_dependencies::{
+    StableHookResult, UseExhaustiveDependenciesOptions,
+};
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
-
-use biome_rule_options::use_exhaustive_dependencies::{
-    StableHookResult, UseExhaustiveDependenciesOptions,
-};
 
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
@@ -47,6 +48,7 @@ declare_lint_rule! {
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
+    /// - `useEffectEvent`
     ///
     /// If you want to add more hooks to the rule, check the [options](#options).
     ///
@@ -302,6 +304,7 @@ impl Default for HookConfigMaps {
                 true,
             ),
             StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+            StableReactHookConfiguration::new("useEffectEvent", StableHookResult::Identity, true),
         ]);
 
         Self {
@@ -314,7 +317,7 @@ impl Default for HookConfigMaps {
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
-        for hook in &hooks.hooks {
+        for hook in hooks.hooks.iter().flatten() {
             if let Some(stable_result) = &hook.stable_result
                 && *stable_result != StableHookResult::None
             {
@@ -694,7 +697,7 @@ impl Rule for UseExhaustiveDependencies {
                         .into_boxed_slice();
                 }
                 None => {
-                    return if options.report_missing_dependencies_array {
+                    return if options.report_missing_dependencies_array() {
                         vec![Fix::MissingDependenciesArray {
                             function_name_range: result.function_name_range,
                         }]
@@ -827,7 +830,7 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            if options.report_unnecessary_dependencies && !excessive_deps.is_empty() {
+            if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
                     component_function,
@@ -1000,7 +1003,11 @@ impl Rule for UseExhaustiveDependencies {
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
                     node.ancestors()
-                        .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                        .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
+                            Some(node) => Some(make::js_identifier_expression(node).into()),
+                            _ => node.cast::<AnyJsExpression>(),
+                        })
+                        .and_then(|node| node.trim_trivia())
                         .map(AnyJsArrayElement::AnyJsExpression)
                 });
 

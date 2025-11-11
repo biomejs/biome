@@ -11,21 +11,8 @@ impl FormatNodeRule<CssFontPaletteValuesAtRule> for FormatCssFontPaletteValuesAt
         node: &CssFontPaletteValuesAtRule,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssFontPaletteValuesAtRuleFields {
-            font_palette_values_token,
-            name,
-            block,
-        } = node.as_fields();
+        let CssFontPaletteValuesAtRuleFields { declarator, block } = node.as_fields();
 
-        write!(
-            f,
-            [
-                font_palette_values_token.format(),
-                space(),
-                name.format(),
-                space(),
-                block.format()
-            ]
-        )
+        write!(f, [declarator.format(), space(), block.format()])
     }
 }

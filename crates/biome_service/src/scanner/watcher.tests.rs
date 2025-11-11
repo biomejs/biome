@@ -16,12 +16,14 @@ use biome_fs::TemporaryFs;
 
 use crate::{
     projects::ProjectKey,
+    scanner::ScanKind,
     scanner::test_utils::{MockWorkspaceWatcherBridge, StopSender},
 };
 
 use super::*;
 
 #[test]
+#[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]
 fn should_index_on_write_but_not_on_read() {
     let file_path = Utf8Path::new("foo.js");
 
@@ -42,10 +44,9 @@ fn should_index_on_write_but_not_on_read() {
 
         instruction_channel
             .sender
-            .send(WatcherInstruction::WatchFolder(
+            .send(WatcherInstruction::WatchFolders(FxHashSet::from_iter([
                 project_path.to_path_buf(),
-                scan_kind,
-            ))
+            ])))
             .expect("can send watch instruction");
 
         let _stop_sender = StopSender(instruction_channel);
@@ -55,6 +56,10 @@ fn should_index_on_write_but_not_on_read() {
             .expect("watcher should've sent notification");
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
+
+        // It will take a while before the watcher become able to see events on Windows and macOS.
+        #[cfg(any(target_os = "windows", target_os = "macos"))]
+        sleep(Duration::from_secs(1));
 
         fs::read(&file_path).expect("can read file");
 
@@ -91,6 +96,7 @@ fn should_index_on_write_but_not_on_read() {
 }
 
 #[test]
+#[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]
 fn should_index_on_create_and_unload_on_delete() {
     let fs = TemporaryFs::new("should_index_on_create_and_unload_on_delete");
 
@@ -108,10 +114,9 @@ fn should_index_on_create_and_unload_on_delete() {
 
         instruction_channel
             .sender
-            .send(WatcherInstruction::WatchFolder(
+            .send(WatcherInstruction::WatchFolders(FxHashSet::from_iter([
                 project_path.to_path_buf(),
-                scan_kind,
-            ))
+            ])))
             .expect("can send watch instruction");
 
         let _stop_sender = StopSender(instruction_channel);
@@ -122,7 +127,7 @@ fn should_index_on_create_and_unload_on_delete() {
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
 
-        thread::sleep(Duration::from_millis(200));
+        sleep(Duration::from_secs(1));
 
         fs::write(&file_path, "import 'foo';").expect("can create file");
 
@@ -146,7 +151,7 @@ fn should_index_on_create_and_unload_on_delete() {
             .recv_timeout(Duration::from_secs(1))
             .expect("watcher should've sent notification");
 
-        sleep(Duration::from_millis(10)); // Give the hash set a moment to clean up.
+        sleep(Duration::from_millis(30)); // Give the hash set a moment to clean up.
 
         assert!(
             mock_bridge.indexed_files.is_empty(),

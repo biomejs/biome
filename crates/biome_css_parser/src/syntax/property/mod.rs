@@ -6,11 +6,13 @@ use crate::parser::CssParser;
 use crate::syntax::css_modules::{
     composes_not_allowed, expected_classes_list, expected_composes_import_source,
 };
-use crate::syntax::parse_error::{expected_component_value, expected_identifier};
+use crate::syntax::parse_error::{
+    expected_component_value, expected_identifier, tailwind_disabled,
+};
 use crate::syntax::{
-    is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string, parse_any_value,
-    parse_custom_identifier_with_keywords, parse_dashed_identifier, parse_regular_identifier,
-    parse_string,
+    CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string,
+    parse_any_value, parse_custom_identifier_with_keywords, parse_dashed_identifier,
+    parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -18,7 +20,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -159,7 +161,12 @@ const END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
 
 #[inline]
 fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.nth_at(1, T![:])
+    is_at_identifier(p)
+        && (p.nth_at(1, T![:])
+        // handle --*:
+        || (p.nth_at(1, T![*]) && p.nth_at(2, T![:]))
+        // handle --color-*:
+        || (p.nth_at(1, T![-]) && p.nth_at(2, T![*]) && p.nth_at(3, T![:])))
 }
 
 #[inline]
@@ -171,7 +178,25 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     if is_at_dashed_identifier(p) {
-        parse_dashed_identifier(p).ok();
+        let ident = parse_dashed_identifier(p).ok();
+        if let Some(ident) = ident
+            && p.at_ts(token_set![T![-], T![*]])
+        {
+            CssSyntaxFeatures::Tailwind
+                .parse_exclusive_syntax(
+                    p,
+                    |p| {
+                        let m = ident.precede(p);
+                        if p.at(T![-]) {
+                            p.expect(T![-]);
+                        }
+                        p.expect(T![*]);
+                        Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
+                    },
+                    |p, m| tailwind_disabled(p, m.range(p)),
+                )
+                .ok();
+        }
     } else {
         parse_regular_identifier(p).ok();
     }

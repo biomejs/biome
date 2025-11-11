@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-asyncdata.vue
+---
+# Input
+```ts
+export default {
+  asyncData() {
+    return {
+      foo: 'bar'
+    }
+  },
+  data() {
+    return {
+      baz: 'qux'
+    }
+  },
+  methods: {
+    handleClick() {
+      console.log('click');
+    }
+  }
+}
+
+```

@@ -1,0 +1,206 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@plugin "my-plugin" {
+	debug: false;
+	threshold: 0.5;
+}
+
+@plugin "my-plugin" {
+	debug: false;
+	threshold: 0.5;
+};
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwPluginAtRule {
+                plugin_token: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@21..28 "debug" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@30..35 "false" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@35..36 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@36..47 "threshold" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@47..49 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@49..52 "0.5" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@52..53 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@53..55 "}" [Newline("\n")] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        CssAtRule {
+            at_token: AT@55..58 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwPluginAtRule {
+                plugin_token: PLUGIN_KW@58..65 "plugin" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@65..77 "\"my-plugin\"" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@77..78 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@78..85 "debug" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@85..87 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@87..92 "false" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@92..93 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@93..104 "threshold" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@104..106 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@106..109 "0.5" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@109..110 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@110..112 "}" [Newline("\n")] [],
+                },
+                semicolon_token: SEMICOLON@112..113 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..114
+  0: (empty)
+  1: CSS_RULE_LIST@0..113
+    0: CSS_AT_RULE@0..55
+      0: AT@0..1 "@" [] []
+      1: TW_PLUGIN_AT_RULE@1..55
+        0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
+        1: CSS_STRING@8..20
+          0: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_BLOCK@20..55
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_DECLARATION_LIST@21..53
+            0: CSS_DECLARATION_WITH_SEMICOLON@21..36
+              0: CSS_DECLARATION@21..35
+                0: CSS_GENERIC_PROPERTY@21..35
+                  0: CSS_IDENTIFIER@21..28
+                    0: IDENT@21..28 "debug" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@28..30 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@30..35
+                    0: CSS_IDENTIFIER@30..35
+                      0: IDENT@30..35 "false" [] []
+                1: (empty)
+              1: SEMICOLON@35..36 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@36..53
+              0: CSS_DECLARATION@36..52
+                0: CSS_GENERIC_PROPERTY@36..52
+                  0: CSS_IDENTIFIER@36..47
+                    0: IDENT@36..47 "threshold" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@47..49 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@49..52
+                    0: CSS_NUMBER@49..52
+                      0: CSS_NUMBER_LITERAL@49..52 "0.5" [] []
+                1: (empty)
+              1: SEMICOLON@52..53 ";" [] []
+          2: R_CURLY@53..55 "}" [Newline("\n")] []
+        3: (empty)
+    1: CSS_AT_RULE@55..113
+      0: AT@55..58 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_PLUGIN_AT_RULE@58..113
+        0: PLUGIN_KW@58..65 "plugin" [] [Whitespace(" ")]
+        1: CSS_STRING@65..77
+          0: CSS_STRING_LITERAL@65..77 "\"my-plugin\"" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_BLOCK@77..112
+          0: L_CURLY@77..78 "{" [] []
+          1: CSS_DECLARATION_LIST@78..110
+            0: CSS_DECLARATION_WITH_SEMICOLON@78..93
+              0: CSS_DECLARATION@78..92
+                0: CSS_GENERIC_PROPERTY@78..92
+                  0: CSS_IDENTIFIER@78..85
+                    0: IDENT@78..85 "debug" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@85..87 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@87..92
+                    0: CSS_IDENTIFIER@87..92
+                      0: IDENT@87..92 "false" [] []
+                1: (empty)
+              1: SEMICOLON@92..93 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@93..110
+              0: CSS_DECLARATION@93..109
+                0: CSS_GENERIC_PROPERTY@93..109
+                  0: CSS_IDENTIFIER@93..104
+                    0: IDENT@93..104 "threshold" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@104..106 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@106..109
+                    0: CSS_NUMBER@106..109
+                      0: CSS_NUMBER_LITERAL@106..109 "0.5" [] []
+                1: (empty)
+              1: SEMICOLON@109..110 ";" [] []
+          2: R_CURLY@110..112 "}" [Newline("\n")] []
+        3: SEMICOLON@112..113 ";" [] []
+  2: EOF@113..114 "" [Newline("\n")] []
+
+```

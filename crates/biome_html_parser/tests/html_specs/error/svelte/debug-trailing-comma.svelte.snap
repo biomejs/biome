@@ -1,0 +1,79 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{@debug something,}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteDebugBlock {
+            sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
+            debug_token: DEBUG_KW@2..8 "debug" [] [Whitespace(" ")],
+            bindings: SvelteBindingList [
+                SvelteName {
+                    svelte_ident_token: SVELTE_IDENT@8..17 "something" [] [],
+                },
+                COMMA@17..18 "," [] [],
+                SvelteName {
+                    svelte_ident_token: SVELTE_IDENT@18..19 "}" [] [],
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..20
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..19
+    0: SVELTE_DEBUG_BLOCK@0..19
+      0: SV_CURLY_AT@0..2 "{@" [] []
+      1: DEBUG_KW@2..8 "debug" [] [Whitespace(" ")]
+      2: SVELTE_BINDING_LIST@8..19
+        0: SVELTE_NAME@8..17
+          0: SVELTE_IDENT@8..17 "something" [] []
+        1: COMMA@17..18 "," [] []
+        2: SVELTE_NAME@18..19
+          0: SVELTE_IDENT@18..19 "}" [] []
+      3: (empty)
+  4: EOF@19..20 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+debug-trailing-comma.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ {@debug something,}
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ {@debug something,}
+  > 2 │ 
+      │ 
+  
+```

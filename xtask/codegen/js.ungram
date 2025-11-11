@@ -389,6 +389,8 @@ JsYieldArgument =
 
 JsImportCallExpression =
 	'import'
+	'.'?
+	phase: ('source' | 'defer')?
 	arguments: JsCallArguments
 
 // new target expression
@@ -542,6 +544,7 @@ AnyJsObjectMember =
 	| JsGetterObjectMember
 	| JsSetterObjectMember
 	| JsShorthandPropertyObjectMember
+	| JsMetavariable
 	| JsSpread
 	| JsBogusMember
 
@@ -2147,16 +2150,16 @@ TsImportTypeAssertion =
 
 // a: typeof import("mod", { with: { "resolution-mode": "import" } })
 //                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TsImportTypeAssertionBlock = 
+TsImportTypeAssertionBlock =
 	'{'
 	type_assertion: TsImportTypeAssertion
 	'}'
 
 // a: typeof import("mod", { with: { "resolution-mode": "import" } })
 //                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TsImportTypeArguments = 
-    '(' 
-    argument: AnyTsType 
+TsImportTypeArguments =
+    '('
+    argument: AnyTsType
 	(',' TsImportTypeAssertionBlock )?
 	')'
 

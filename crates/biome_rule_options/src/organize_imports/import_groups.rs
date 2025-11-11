@@ -39,6 +39,11 @@ impl ImportGroups {
             })
     }
 }
+impl biome_deserialize::Merge for ImportGroups {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
+}
 
 pub struct ImportCandidate<'a> {
     pub has_type_token: bool,

@@ -1,0 +1,88 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+<button {...props}>Click me</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlSingleTextExpression {
+                        l_curly_token: L_CURLY@8..9 "{" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@9..17 "...props" [] [],
+                        },
+                        r_curly_token: R_CURLY@17..18 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@18..19 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@19..27 "Click me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@27..28 "<" [] [],
+                slash_token: SLASH@28..29 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@29..35 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@35..36 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..37
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..36
+    0: HTML_ELEMENT@0..36
+      0: HTML_OPENING_ELEMENT@0..19
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..18
+          0: HTML_SINGLE_TEXT_EXPRESSION@8..18
+            0: L_CURLY@8..9 "{" [] []
+            1: HTML_TEXT_EXPRESSION@9..17
+              0: HTML_LITERAL@9..17 "...props" [] []
+            2: R_CURLY@17..18 "}" [] []
+        3: R_ANGLE@18..19 ">" [] []
+      1: HTML_ELEMENT_LIST@19..27
+        0: HTML_CONTENT@19..27
+          0: HTML_LITERAL@19..27 "Click me" [] []
+      2: HTML_CLOSING_ELEMENT@27..36
+        0: L_ANGLE@27..28 "<" [] []
+        1: SLASH@28..29 "/" [] []
+        2: HTML_TAG_NAME@29..35
+          0: HTML_LITERAL@29..35 "button" [] []
+        3: R_ANGLE@35..36 ">" [] []
+  4: EOF@36..37 "" [Newline("\n")] []
+
+```

@@ -10,11 +10,21 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseSortedClassesOptions {
     /// Additional attributes that will be sorted.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub attributes: Option<Box<[Box<str>]>>,
     /// Names of the functions or tagged templates that will be sorted.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub functions: Option<Vec<Box<str>>>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub functions: Option<Box<[Box<str>]>>,
+}
+impl biome_deserialize::Merge for UseSortedClassesOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(attributes) = other.attributes {
+            self.attributes = Some(attributes);
+        }
+        if let Some(functions) = other.functions {
+            self.functions = Some(functions);
+        }
+    }
 }
 
 impl UseSortedClassesOptions {

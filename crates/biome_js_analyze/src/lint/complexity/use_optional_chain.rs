@@ -1,11 +1,12 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
-    OperatorPrecedence, T,
+    AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsBinaryExpression, JsBinaryOperator,
+    JsLogicalExpression, JsLogicalOperator, JsUnaryOperator, OperatorPrecedence, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
 use biome_rule_options::use_optional_chain::UseOptionalChainOptions;
@@ -14,6 +15,7 @@ use std::collections::VecDeque;
 use std::iter;
 
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Enforce using concise optional chain instead of chained logical expressions.
@@ -89,22 +91,24 @@ pub enum UseOptionalChainState {
 }
 
 impl Rule for UseOptionalChain {
-    type Query = Ast<JsLogicalExpression>;
+    type Query = Semantic<JsLogicalExpression>;
     type State = UseOptionalChainState;
     type Signals = Option<Self::State>;
     type Options = UseOptionalChainOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let model = ctx.model();
         let logical = ctx.query();
         let operator = logical.operator().ok()?;
         match operator {
             JsLogicalOperator::LogicalAnd => {
                 let head = logical.right().ok()?;
                 let chain = LogicalAndChain::from_expression(head).ok()?;
-                if chain.is_inside_another_chain().ok()? {
+                if chain.is_inside_another_chain(model).ok()? {
                     return None;
                 }
-                let optional_chain_expression_nodes = chain.optional_chain_expression_nodes()?;
+                let optional_chain_expression_nodes =
+                    chain.optional_chain_expression_nodes(model)?;
                 Some(UseOptionalChainState::LogicalAnd(
                     optional_chain_expression_nodes,
                 ))
@@ -262,13 +266,167 @@ impl Rule for UseOptionalChain {
 
 /// Normalize optional chain like.
 /// E.g. `foo != null` is normalized to `foo`
-fn normalized_optional_chain_like(expression: AnyJsExpression) -> SyntaxResult<AnyJsExpression> {
-    if let AnyJsExpression::JsBinaryExpression(expression) = &expression
-        && expression.is_optional_chain_like()?
+fn normalized_optional_chain_like(
+    expression: AnyJsExpression,
+    model: &SemanticModel,
+) -> SyntaxResult<AnyJsExpression> {
+    if let AnyJsExpression::JsBinaryExpression(binary_expression) = &expression
+        && let Some(expr) = extract_optional_chain_like(binary_expression, model)?
     {
-        return expression.left();
+        return Ok(expr);
     }
     Ok(expression)
+}
+
+/// Extract the left or right operand of an optional chain-like expression.
+/// ```js
+/// foo !== undefined;
+/// typeof foo !== 'undefined';
+///```
+pub fn extract_optional_chain_like(
+    binary: &JsBinaryExpression,
+    model: &SemanticModel,
+) -> SyntaxResult<Option<AnyJsExpression>> {
+    if matches!(
+        binary.operator(),
+        Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
+    ) {
+        let left = binary.left()?;
+        let right = binary.right()?;
+        // nullish check: `foo !== undefined` -> return foo
+        if let Some(expr) = extract_optional_chain_like_nullish(&left, &right)? {
+            return Ok(Some(expr));
+        }
+        // typeof check: `typeof foo !== 'undefined'` -> return foo
+        if let Some(expr) = extract_optional_chain_like_typeof(&left, &right, model)? {
+            return Ok(Some(expr));
+        }
+        Ok(None)
+    } else {
+        Ok(None)
+    }
+}
+
+/// Extract the left or right operand of an optional chain-like expression comparing nullish.
+/// ```js
+/// foo !== undefined;  // -> Some(foo)
+/// foo != undefined;  // -> Some(foo)
+/// foo !== null;  // -> Some(foo)
+/// foo != null;  // -> Some(foo)
+/// undefined !== foo;  // -> Some(foo)
+/// undefined != foo;  // -> Some(foo)
+/// null !== foo;  // -> Some(foo)
+/// null != foo;  // -> Some(foo)
+/// foo !== bar;  // -> None
+/// foo != bar;  // -> None
+/// undefined !== null;  // -> None
+/// undefined != null;  // -> None
+/// null !== undefined;  // -> None
+/// null != undefined;  // -> None
+/// undefined !== undefined;  // -> None
+/// undefined != undefined;  // -> None
+/// null !== null;  // -> None
+/// null != null;  // -> None
+///```
+fn extract_optional_chain_like_nullish(
+    left: &AnyJsExpression,
+    right: &AnyJsExpression,
+) -> SyntaxResult<Option<AnyJsExpression>> {
+    fn is_nullish(expression: &AnyJsExpression) -> bool {
+        expression
+            .as_static_value()
+            .is_some_and(|x| x.is_null_or_undefined())
+    }
+    let left_is_nullish = is_nullish(left);
+    let right_is_nullish = is_nullish(right);
+    // right only nullish: `foo !== undefined` -> return foo (left)
+    if !left_is_nullish && right_is_nullish {
+        return Ok(Some(left.clone()));
+    }
+    // left only nullish: `undefined !== foo` -> return foo (right)
+    if left_is_nullish && !right_is_nullish {
+        return Ok(Some(right.clone()));
+    }
+    Ok(None)
+}
+
+/// Extract the left or right operand of an optional chain-like expression using `typeof`.
+/// ```js
+/// typeof foo !== 'undefined';  // -> Some(foo)
+/// typeof foo != 'undefined';  // -> Some(foo)
+/// 'undefined' !== typeof foo;  // -> Some(foo)
+/// 'undefined' != typeof foo;  // -> Some(foo)
+/// ”undefined” != typeof foo;  // -> Some(foo)
+/// `undefined` != typeof foo;  // -> Some(foo)
+/// typeof foo !== undefined;  // -> None
+/// typeof foo != undefined;  // -> None
+/// undefined !== typeof foo;  // -> None
+/// undefined != typeof foo;  // -> None
+///```
+fn extract_optional_chain_like_typeof(
+    left: &AnyJsExpression,
+    right: &AnyJsExpression,
+    model: &SemanticModel,
+) -> SyntaxResult<Option<AnyJsExpression>> {
+    fn is_string_literal_undefined(expression: &AnyJsExpression) -> bool {
+        expression
+            .as_static_value()
+            .is_some_and(|x| matches!(x.as_string_constant(), Some(s) if s == "undefined"))
+    }
+    fn typeof_argument(expression: &AnyJsExpression) -> SyntaxResult<Option<AnyJsExpression>> {
+        if let Some(unary) = expression.as_js_unary_expression() {
+            return Ok(match unary.operator()? {
+                JsUnaryOperator::Typeof => Some(unary.argument()?.omit_parentheses()),
+                _ => None,
+            });
+        }
+        Ok(None)
+    }
+    fn is_unbound_root(model: &SemanticModel, expr: &AnyJsExpression) -> SyntaxResult<bool> {
+        let mut current = expr.clone().omit_parentheses();
+        loop {
+            current = match current {
+                AnyJsExpression::JsStaticMemberExpression(e) => e.object()?,
+                AnyJsExpression::JsComputedMemberExpression(e) => e.object()?,
+                AnyJsExpression::JsCallExpression(e) => e.callee()?,
+                AnyJsExpression::JsParenthesizedExpression(e) => e.expression()?,
+                _ => {
+                    break;
+                }
+            }
+        }
+        Ok(match current.as_js_reference_identifier() {
+            Some(ident) => ident.binding(model).is_none(),
+            None => false,
+        })
+    }
+    let left_is_string_undefined = is_string_literal_undefined(left);
+    let right_is_string_undefined = is_string_literal_undefined(right);
+    // `typeof foo !== "undefined"` -> return foo
+    if !left_is_string_undefined && right_is_string_undefined {
+        let arg = typeof_argument(left);
+        // Unbound references are treated as global references and are not subject to optional chaining.
+        // `typeof window !== "undefined"` should not be converted to `window?.foo`
+        if let Ok(Some(arg)) = &arg
+            && is_unbound_root(model, arg)?
+        {
+            return Ok(None);
+        }
+        return arg;
+    }
+    // `"undefined" !== typeof foo` -> return foo
+    if left_is_string_undefined && !right_is_string_undefined {
+        let arg = typeof_argument(right);
+        // Unbound references are treated as global references and are not subject to optional chaining.
+        // `"undefined" !== typeof window` should not be converted to `window?.foo`
+        if let Ok(Some(arg)) = &arg
+            && is_unbound_root(model, arg)?
+        {
+            return Ok(None);
+        }
+        return arg;
+    }
+    Ok(None)
 }
 
 /// `LogicalAndChainOrdering` is the result of a comparison between two logical
@@ -411,7 +569,7 @@ impl LogicalAndChain {
 
     /// This function checks if `LogicalAndChain` is inside another parent
     /// `LogicalAndChain` and the chain is a sub-chain of the parent chain.
-    fn is_inside_another_chain(&self) -> SyntaxResult<bool> {
+    fn is_inside_another_chain(&self, model: &SemanticModel) -> SyntaxResult<bool> {
         // Because head of the chain is right expression of logical expression
         // we need to take a parent and a grand-parent.
         // E.g. `foo && foo.bar && foo.bar.baz`
@@ -429,8 +587,9 @@ impl LogicalAndChain {
             // Here we check that we came from the left side of the logical expression.
             // Because only the left-hand parts can be sub-chains.
             if grand_parent_logical_left.as_js_logical_expression() == Some(&parent) {
-                let grand_parent_right_chain =
-                    Self::from_expression(normalized_optional_chain_like(grand_parent.right()?)?)?;
+                let grand_parent_right_chain = Self::from_expression(
+                    normalized_optional_chain_like(grand_parent.right()?, model)?,
+                )?;
                 let result = grand_parent_right_chain.cmp_chain(self)?;
                 return match result {
                     LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => Ok(true),
@@ -539,7 +698,10 @@ impl LogicalAndChain {
 
     /// This function returns a list of `JsAnyExpression` which we need to
     /// transform into an optional chain expression.
-    fn optional_chain_expression_nodes(mut self) -> Option<VecDeque<AnyJsExpression>> {
+    fn optional_chain_expression_nodes(
+        mut self,
+        model: &SemanticModel,
+    ) -> Option<VecDeque<AnyJsExpression>> {
         let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
         // Take a head of a next sub-chain
         // E.g. `foo && foo.bar && foo.bar.baz`
@@ -561,10 +723,9 @@ impl LogicalAndChain {
                 // ```js
                 // foo && foo.bar;
                 // ```
-                AnyJsExpression::JsBinaryExpression(expression) => expression
-                    .is_optional_chain_like()
-                    .ok()?
-                    .then_some(expression.left().ok()?)?,
+                AnyJsExpression::JsBinaryExpression(expression) => {
+                    extract_optional_chain_like(&expression, model).ok()??
+                }
                 expression => expression,
             };
             let head = match expression {
@@ -583,7 +744,8 @@ impl LogicalAndChain {
                 | AnyJsExpression::JsCallExpression(_) => expression,
                 _ => return None,
             };
-            let branch = Self::from_expression(normalized_optional_chain_like(head).ok()?).ok()?;
+            let branch =
+                Self::from_expression(normalized_optional_chain_like(head, model).ok()?).ok()?;
             match self.cmp_chain(&branch).ok()? {
                 LogicalAndChainOrdering::SubChain => {
                     // If the previous branch had other expressions that already
