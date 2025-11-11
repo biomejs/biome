@@ -367,6 +367,13 @@ fn extract_property_member_name_trimmed_whitespace(
 
             Some(AnyJsClassMemberName::JsPrivateClassMemberName(trimmed))
         }
+        AnyJsClassMemberName::JsLiteralMemberName(name) => {
+            let value = name.value().ok()?;
+            let new_value = value.with_leading_trivia([]);
+            let trimmed = name.replace_token_discard_trivia(value, new_value)?;
+
+            Some(AnyJsClassMemberName::JsLiteralMemberName(trimmed))
+        }
         _ => Some(member_name),
     }
 }
