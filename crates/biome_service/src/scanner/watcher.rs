@@ -32,7 +32,7 @@ pub struct WatcherOptions {
     )]
     pub watcher_kind: WatcherKind,
 
-    /// The polling interval in milliseconds. This only applicable when using the polling watcher.
+    /// The polling interval in milliseconds. This is only applicable when using the polling watcher.
     #[bpaf(
         env("BIOME_WATCHER_POLLING_INTERVAL"),
         long("watcher-polling-interval"),

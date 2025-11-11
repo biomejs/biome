@@ -36,7 +36,7 @@ Controls various aspects of the Biome Daemon.
                            behave.
                            [env:BIOME_WATCHER_KIND: N/A]
                            [default: recommended]
-        --watcher-polling-interval=NUMBER  The polling interval in milliseconds. This only
+        --watcher-polling-interval=NUMBER  The polling interval in milliseconds. This is only
                            applicable when using the polling watcher.
                            [env:BIOME_WATCHER_POLLING_INTERVAL: N/A]
                            [default: 2000]

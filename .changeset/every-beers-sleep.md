@@ -19,6 +19,6 @@ The environment variable `BIOME_WATCHER_KIND` can be used as alias.
 
 #### `--watcher-polling-interval`
 
-The polling interval in milliseconds. This only applicable when using the `polling` watcher. It defaults to `2000` milliseconds.
+The polling interval in milliseconds. This is only applicable when using the `polling` watcher. It defaults to `2000` milliseconds.
 
 The environment variable `BIOME_WATCHER_POLLING_INTERVAL` can be used as alias.
