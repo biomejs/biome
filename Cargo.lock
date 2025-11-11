@@ -794,6 +794,7 @@ dependencies = [
  "biome_html_parser",
  "biome_html_syntax",
  "biome_rowan",
+ "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",

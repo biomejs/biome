@@ -5374,6 +5374,13 @@
 						},
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVBind": {
+					"description": "Forbids v-bind directives with missing arguments or invalid modifiers.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVBindConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12240,6 +12247,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueValidVBindOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVBindOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -15255,6 +15277,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueValidVBindConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVBindOptions" }
+			]
+		},
+		"UseVueValidVBindOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {
