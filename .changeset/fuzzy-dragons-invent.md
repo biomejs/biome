@@ -2,5 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-The linter, with `checkAllProperties` enabled, was fixed to remove unwanted trivia.
-fix: https://github.com/biomejs/biome/pull/8075
+Fixed [#7948](https://github.com/biomejs/biome/issues/7948): The `useReadonlyClassProperties` code fix when `checkAllProperties` is enabled will no longer insert a newline after `readonly` and the class property.
