@@ -219,7 +219,7 @@ impl Rule for UseReadonlyClassProperties {
                 );
 
                 if let Some(modified_member) =
-                    extract_property_member_name_trimmed_whitespace(member_name.clone())
+                    extract_class_member_name_trimmed_whitespace(member_name.clone())
                 {
                     let mut builder =
                         make::js_property_class_member(replace_modifiers, modified_member);
@@ -353,10 +353,10 @@ fn collect_non_readonly_constructor_parameters(
         .collect()
 }
 
-/// Removes leading whitespace from `#privateProperty` names. Without this, the name might include
-/// unwanted whitespace (e.g., "\n #privateProperty"). This ensures that when adding modifiers like
-/// `readonly`, they are appended correctly without being affected by the whitespace.
-fn extract_property_member_name_trimmed_whitespace(
+/// Removes leading trivia from class member names. Without this, the name might include
+/// unwanted trivia (e.g., "\n #privateProperty"). This ensures that when adding modifiers like
+/// `readonly`, they are appended correctly without being affected by the trivia.
+fn extract_class_member_name_trimmed_whitespace(
     member_name: AnyJsClassMemberName,
 ) -> Option<AnyJsClassMemberName> {
     match member_name {
