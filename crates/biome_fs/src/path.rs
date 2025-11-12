@@ -243,11 +243,11 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for BiomePath {
-    fn schema_name() -> String {
-        "BiomePath".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("BiomePath")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

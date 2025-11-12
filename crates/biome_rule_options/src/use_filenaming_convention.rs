@@ -97,10 +97,10 @@ impl From<FilenameCases> for SmallVec<[FilenameCase; 5]> {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FilenameCases {
-    fn schema_name() -> String {
-        "FilenameCases".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FilenameCases")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<FilenameCase>>::json_schema(generator)
     }
 }

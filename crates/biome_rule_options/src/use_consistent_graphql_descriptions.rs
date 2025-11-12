@@ -14,7 +14,6 @@ pub struct UseConsistentGraphqlDescriptionsOptions {
 #[derive(
     Clone, Copy, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum Style {
     /// Requires triple-quoted block descriptions (`"""..."""`)
@@ -22,6 +21,21 @@ pub enum Style {
     Block,
     /// Requires single-quoted inline descriptions (`"..."`)
     Inline,
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Style {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("UseConsistentGraphqlDescriptionsStyle")
+    }
+
+    fn json_schema(_generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["block", "inline"],
+            "description": "The GraphQL description style to enforce."
+        })
+    }
 }
 
 impl FromStr for Style {

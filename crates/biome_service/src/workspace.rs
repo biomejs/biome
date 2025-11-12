@@ -94,7 +94,7 @@ pub use crate::{
     settings::Settings,
 };
 #[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
+use schemars::{Schema, SchemaGenerator};
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
@@ -423,21 +423,23 @@ impl<'de> serde::Deserialize<'de> for FeaturesSupported {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeaturesSupported {
-    fn schema_name() -> String {
-        "FeaturesSupported".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeaturesSupported")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
-        use schemars::schema::*;
+        // Generate schemas for FeatureKind and SupportKind first
+        let _feature_kind_schema = generator.subschema_for::<FeatureKind>();
+        let _support_kind_schema = generator.subschema_for::<SupportKind>();
 
-        Schema::Object(SchemaObject {
-            instance_type: Some(InstanceType::Object.into()),
-            object: Some(Box::new(ObjectValidation {
-                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
-                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
-                ..Default::default()
-            })),
-            ..Default::default()
+        schemars::json_schema!({
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/components/schemas/FeatureKind"
+            },
+            "additionalProperties": {
+                "$ref": "#/components/schemas/SupportKind"
+            }
         })
     }
 }
@@ -668,8 +670,8 @@ impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeatureName {
-    fn schema_name() -> String {
-        String::from("FeatureName")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeatureName")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
