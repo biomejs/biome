@@ -1,0 +1,41 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+
+query user {
+  user {
+    id
+  }
+}
+
+query me {
+  me {
+    id
+  }
+}
+
+mutation updateUser {
+  updateUser {
+    id
+  }
+}
+
+mutation updateProfile {
+  updateProfile {
+    name
+  }
+}
+
+query {
+  field
+}
+
+subscription {
+  newMessage
+}
+
+```

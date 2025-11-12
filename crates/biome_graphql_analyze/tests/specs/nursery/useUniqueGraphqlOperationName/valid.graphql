@@ -1,0 +1,33 @@
+# should not generate diagnostics
+
+query user {
+  user {
+    id
+  }
+}
+
+query me {
+  me {
+    id
+  }
+}
+
+mutation updateUser {
+  updateUser {
+    id
+  }
+}
+
+mutation updateProfile {
+  updateProfile {
+    name
+  }
+}
+
+query {
+  field
+}
+
+subscription {
+  newMessage
+}

@@ -1831,6 +1831,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	 * Enforce unique operation names across a GraphQL document.
+	 */
+	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
+	/**
 	 * Enforce specific order of Vue compiler macros.
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
@@ -3203,6 +3207,9 @@ export type UseQwikValidLexicalScopeConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseUniqueGraphqlOperationNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUniqueGraphqlOperationNameOptions;
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
@@ -4600,6 +4607,10 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseUniqueGraphqlOperationNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseUniqueGraphqlOperationNameOptions;
+}
 export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5834,6 +5845,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseUniqueGraphqlOperationNameOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
 	/**
 	 * The order of the Vue define macros.
@@ -6612,6 +6624,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueValidVBind"
