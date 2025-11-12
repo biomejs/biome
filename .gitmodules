@@ -1,0 +1,3 @@
+[submodule "xtask/codegen/src/TypeScript"]
+	path = xtask/codegen/src/TypeScript
+	url = https://github.com/microsoft/TypeScript
