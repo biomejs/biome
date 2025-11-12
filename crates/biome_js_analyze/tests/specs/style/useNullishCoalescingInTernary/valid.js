@@ -1,0 +1,14 @@
+/* should not generate diagnostics */
+
+// Already using ??
+const a = x ?? y;
+
+// Not a nullish check
+const b = x !== 0 ? x : y;
+const c = x === true ? x : y;
+
+// Different variables
+const d = x !== null ? y : z;
+
+// Complex conditions that aren't simple nullish checks
+const e = x !== null && y !== undefined ? x : z;

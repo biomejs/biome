@@ -11548,6 +11548,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseNullishCoalescingInTernaryOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseNullishCoalescingInTernaryOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseNullishCoalescingOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13171,6 +13192,15 @@
 					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||) when providing default values.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNullishCoalescingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNullishCoalescingInTernary": {
+					"description": "Enforce using nullish coalescing operator (??) instead of ternary expressions that check for null or undefined.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseNullishCoalescingInTernaryConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -14946,8 +14976,25 @@
 				{ "$ref": "#/definitions/RuleWithUseNullishCoalescingOptions" }
 			]
 		},
+		"UseNullishCoalescingInTernaryConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseNullishCoalescingInTernaryOptions" }
+			]
+		},
+		"UseNullishCoalescingInTernaryOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseNullishCoalescingOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreConditionalTests": {
+					"description": "Ignore || in conditional test positions (if/while/for/ternary test) Default: true",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseNumberNamespaceConfiguration": {

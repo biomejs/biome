@@ -328,6 +328,7 @@ pub mod use_naming_convention;
 pub mod use_node_assert_strict;
 pub mod use_nodejs_import_protocol;
 pub mod use_nullish_coalescing;
+pub mod use_nullish_coalescing_in_ternary;
 pub mod use_number_namespace;
 pub mod use_number_to_fixed_digits_argument;
 pub mod use_numeric_literals;

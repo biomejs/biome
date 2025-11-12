@@ -1,0 +1,318 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Strict equality - positive check
+const a = x !== undefined && x !== null ? x : y;
+const b = x !== null && x !== undefined ? x : y;
+
+// Strict equality - negative check
+const c = x === undefined || x === null ? y : x;
+const d = x === null || x === undefined ? y : x;
+
+// Loose equality
+const e = x != null ? x : y;
+const f = x == null ? y : x;
+
+// Single checks
+const g = x !== null ? x : y;
+const h = x !== undefined ? x : y;
+
+// Complex expressions
+const i = obj?.prop !== null && obj?.prop !== undefined ? obj?.prop : fallback;
+
+// Nested
+function test(val) {
+  return val !== undefined && val !== null ? val : 'default';
+}
+
+// In array
+const arr = [
+  x !== null ? x : 'default'
+];
+
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    1 │ // Strict equality - positive check
+  > 2 │ const a = x !== undefined && x !== null ? x : y;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const b = x !== null && x !== undefined ? x : y;
+    4 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     1  1 │   // Strict equality - positive check
+     2    │ - const·a·=·x·!==·undefined·&&·x·!==·null·?·x·:·y;
+        2 │ + const·a·=·x··??·y;
+     3  3 │   const b = x !== null && x !== undefined ? x : y;
+     4  4 │   
+  
+
+```
+
+```
+invalid.js:3:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    1 │ // Strict equality - positive check
+    2 │ const a = x !== undefined && x !== null ? x : y;
+  > 3 │ const b = x !== null && x !== undefined ? x : y;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ // Strict equality - negative check
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     1  1 │   // Strict equality - positive check
+     2  2 │   const a = x !== undefined && x !== null ? x : y;
+     3    │ - const·b·=·x·!==·null·&&·x·!==·undefined·?·x·:·y;
+        3 │ + const·b·=·x··??·y;
+     4  4 │   
+     5  5 │   // Strict equality - negative check
+  
+
+```
+
+```
+invalid.js:6:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    5 │ // Strict equality - negative check
+  > 6 │ const c = x === undefined || x === null ? y : x;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const d = x === null || x === undefined ? y : x;
+    8 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     4  4 │   
+     5  5 │   // Strict equality - negative check
+     6    │ - const·c·=·x·===·undefined·||·x·===·null·?·y·:·x;
+        6 │ + const·c·=·x··??·y·;
+     7  7 │   const d = x === null || x === undefined ? y : x;
+     8  8 │   
+  
+
+```
+
+```
+invalid.js:7:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    5 │ // Strict equality - negative check
+    6 │ const c = x === undefined || x === null ? y : x;
+  > 7 │ const d = x === null || x === undefined ? y : x;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Loose equality
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     5  5 │   // Strict equality - negative check
+     6  6 │   const c = x === undefined || x === null ? y : x;
+     7    │ - const·d·=·x·===·null·||·x·===·undefined·?·y·:·x;
+        7 │ + const·d·=·x··??·y·;
+     8  8 │   
+     9  9 │   // Loose equality
+  
+
+```
+
+```
+invalid.js:10:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+     9 │ // Loose equality
+  > 10 │ const e = x != null ? x : y;
+       │           ^^^^^^^^^
+    11 │ const f = x == null ? y : x;
+    12 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     8  8 │   
+     9  9 │   // Loose equality
+    10    │ - const·e·=·x·!=·null·?·x·:·y;
+       10 │ + const·e·=·x··??·y;
+    11 11 │   const f = x == null ? y : x;
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+     9 │ // Loose equality
+    10 │ const e = x != null ? x : y;
+  > 11 │ const f = x == null ? y : x;
+       │           ^^^^^^^^^
+    12 │ 
+    13 │ // Single checks
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+     9  9 │   // Loose equality
+    10 10 │   const e = x != null ? x : y;
+    11    │ - const·f·=·x·==·null·?·y·:·x;
+       11 │ + const·f·=·x··??·y·;
+    12 12 │   
+    13 13 │   // Single checks
+  
+
+```
+
+```
+invalid.js:14:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    13 │ // Single checks
+  > 14 │ const g = x !== null ? x : y;
+       │           ^^^^^^^^^^
+    15 │ const h = x !== undefined ? x : y;
+    16 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+    12 12 │   
+    13 13 │   // Single checks
+    14    │ - const·g·=·x·!==·null·?·x·:·y;
+       14 │ + const·g·=·x··??·y;
+    15 15 │   const h = x !== undefined ? x : y;
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    13 │ // Single checks
+    14 │ const g = x !== null ? x : y;
+  > 15 │ const h = x !== undefined ? x : y;
+       │           ^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Complex expressions
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+    13 13 │   // Single checks
+    14 14 │   const g = x !== null ? x : y;
+    15    │ - const·h·=·x·!==·undefined·?·x·:·y;
+       15 │ + const·h·=·x··??·y;
+    16 16 │   
+    17 17 │   // Complex expressions
+  
+
+```
+
+```
+invalid.js:18:11 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    17 │ // Complex expressions
+  > 18 │ const i = obj?.prop !== null && obj?.prop !== undefined ? obj?.prop : fallback;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Nested
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+    16 16 │   
+    17 17 │   // Complex expressions
+    18    │ - const·i·=·obj?.prop·!==·null·&&·obj?.prop·!==·undefined·?·obj?.prop·:·fallback;
+       18 │ + const·i·=·obj?.prop··??·fallback;
+    19 19 │   
+    20 20 │   // Nested
+  
+
+```
+
+```
+invalid.js:22:10 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    20 │ // Nested
+    21 │ function test(val) {
+  > 22 │   return val !== undefined && val !== null ? val : 'default';
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+    20 20 │   // Nested
+    21 21 │   function test(val) {
+    22    │ - ··return·val·!==·undefined·&&·val·!==·null·?·val·:·'default';
+       22 │ + ··return·val··??·'default';
+    23 23 │   }
+    24 24 │   
+  
+
+```
+
+```
+invalid.js:27:3 lint/style/useNullishCoalescingInTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ternary expression with nullish check.
+  
+    25 │ // In array
+    26 │ const arr = [
+  > 27 │   x !== null ? x : 'default'
+       │   ^^^^^^^^^^
+    28 │ ];
+    29 │ 
+  
+  i Ternary expressions checking for null or undefined can be simplified using ??.
+  
+  i Safe fix: Use ?? instead of ternary.
+  
+    25 25 │   // In array
+    26 26 │   const arr = [
+    27    │ - ··x·!==·null·?·x·:·'default'
+       27 │ + ··
+       28 │ + ··x··??·'default'
+    28 29 │   ];
+    29 30 │   
+  
+
+```
