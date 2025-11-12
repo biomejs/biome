@@ -4,10 +4,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::ReferencesExtensions;
+use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsCallExpression, JsIdentifierBinding,
-    JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction,
+    JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction, function_ext::AnyFunctionLike,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
@@ -16,8 +16,6 @@ declare_lint_rule! {
     ///
     /// A parameter that is only passed to recursive calls is effectively unused
     /// and can be removed or replaced with a constant, simplifying the function.
-    ///
-    /// This rule is inspired by Rust Clippy's `only_used_in_recursion` lint.
     ///
     /// ## Examples
     ///
@@ -124,32 +122,26 @@ impl Rule for NoParametersOnlyUsedInRecursion {
         }
 
         // Get function name for recursion detection
-        let function_name = get_function_name(&parent_function);
+        let function_name = get_function_name(&parent_function)?;
 
         // Get function binding for semantic comparison
         let parent_function_binding = get_function_binding(&parent_function, model);
-
-        // Get all references to this parameter
-        let all_refs: Vec<_> = binding.all_references(model).collect();
-
-        // If no references, let noUnusedFunctionParameters handle it
-        if all_refs.is_empty() {
-            return None;
-        }
 
         // Classify references
         let mut refs_in_recursion = 0;
         let mut refs_elsewhere = 0;
 
-        for reference in all_refs {
+        for reference in binding.all_references(model) {
             if is_reference_in_recursive_call(
                 &reference,
-                function_name.as_ref(),
+                &function_name,
                 &parent_function,
                 name_text,
                 model,
                 parent_function_binding.as_ref(),
-            ) {
+            )
+            .unwrap_or_default()
+            {
                 refs_in_recursion += 1;
             } else {
                 refs_elsewhere += 1;
@@ -293,7 +285,7 @@ fn get_function_binding(
                     return model.binding(js_id_assignment);
                 }
 
-                if is_function_like(&ancestor) {
+                if AnyFunctionLike::can_cast(ancestor.kind()) {
                     break;
                 }
             }
@@ -343,7 +335,7 @@ fn get_arrow_function_name(
 
         // Stop searching if we hit a function boundary
         // (prevents extracting wrong name from outer scope)
-        if is_function_like(&ancestor) {
+        if AnyFunctionLike::can_cast(ancestor.kind()) {
             break;
         }
     }
@@ -351,21 +343,8 @@ fn get_arrow_function_name(
     None
 }
 
-/// Checks if a syntax node is a function-like boundary
-/// (we should stop searching for names beyond these)
-fn is_function_like(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
-    use biome_js_syntax::JsSyntaxKind::*;
-    matches!(
-        node.kind(),
-        JS_FUNCTION_DECLARATION
-            | JS_FUNCTION_EXPRESSION
-            | JS_ARROW_FUNCTION_EXPRESSION
-            | JS_METHOD_CLASS_MEMBER
-            | JS_METHOD_OBJECT_MEMBER
-            | JS_CONSTRUCTOR_CLASS_MEMBER
-    )
-}
-
+/// Returns true if the function is a TypeScript signature without an implementation body.
+/// Matches interface method signatures, call signatures, function types, and declared functions.
 fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool {
     matches!(
         parent_function,
@@ -384,27 +363,25 @@ fn is_function_signature(parent_function: &AnyJsParameterParentFunction) -> bool
     )
 }
 
+/// Checks if a call expression is a recursive call to the current function.
+/// Handles direct calls (`foo()`), method calls (`this.foo()`), and computed members (`this["foo"]()`).
+/// Uses a conservative approach to avoid false positives.
 fn is_recursive_call(
     call: &JsCallExpression,
     function_name: Option<&TokenText>,
     model: &biome_js_semantic::SemanticModel,
     parent_function_binding: Option<&biome_js_semantic::Binding>,
-) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-
-    let Some(name) = function_name else {
-        return false;
-    };
+) -> Option<bool> {
+    let callee = call.callee().ok()?;
 
     let expr = callee.omit_parentheses();
 
     // Simple identifier: foo()
     if let Some(ref_id) = expr.as_js_reference_identifier() {
-        let name_matches = ref_id.name().ok().is_some_and(|n| n.text() == name.text());
+        let name = ref_id.value_token().ok()?;
+        let name_matches = name.token_text_trimmed() == *function_name?;
         if !name_matches {
-            return false;
+            return Some(false);
         }
 
         let called_binding = model.binding(&ref_id);
@@ -412,20 +389,20 @@ fn is_recursive_call(
         match (parent_function_binding, called_binding) {
             // Both have bindings - compare them directly
             (Some(parent_binding), Some(called_binding)) => {
-                return called_binding == *parent_binding;
+                return Some(called_binding == *parent_binding);
             }
             // Parent has no binding (e.g. in the case of a method),
             // but call resolves to a binding
             (None, Some(_)) => {
-                return false;
+                return Some(false);
             }
             // Parent has binding but call doesn't resolve
             (Some(_), None) => {
-                return false;
+                return Some(false);
             }
             // Neither has a binding. Fall back to name comparison
             (None, None) => {
-                return name_matches;
+                return Some(name_matches);
             }
         }
     }
@@ -433,60 +410,48 @@ fn is_recursive_call(
     // Member expression: this.foo() or this?.foo()
     if let Some(member) = expr.as_js_static_member_expression() {
         // Check if object is 'this' (for method calls)
-        let is_this_call = member
-            .object()
-            .ok()
-            .is_some_and(|obj| obj.as_js_this_expression().is_some());
-
-        if !is_this_call {
-            return false;
+        let object = member.object().ok()?;
+        if object.as_js_this_expression().is_none() {
+            return Some(false);
         }
 
         // Check if member name matches function name
-        let member_name_matches = member.member().ok().is_some_and(|m| {
-            m.as_js_name()
-                .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed() == name.text())
-        });
-
-        return member_name_matches;
+        let member_node = member.member().ok()?;
+        let name = member_node.as_js_name()?;
+        let token = name.value_token().ok()?;
+        return Some(token.token_text_trimmed() == *function_name?);
     }
 
     // Computed member expression: this["foo"]() or this?.["foo"]()
     if let Some(computed) = expr.as_js_computed_member_expression() {
         // Check if object is 'this' (for method calls)
-        let is_this_call = computed
-            .object()
-            .ok()
-            .is_some_and(|obj| obj.as_js_this_expression().is_some());
-
-        if !is_this_call {
-            return false;
+        let object = computed.object().ok()?;
+        if object.as_js_this_expression().is_none() {
+            return Some(false);
         }
 
         // Conservative approach: only handle string literal members
-        if let Ok(member_expr) = computed.member()
-            && let Some(lit) = member_expr.as_any_js_literal_expression()
-            && let Some(string_lit) = lit.as_js_string_literal_expression()
-            && let Ok(text) = string_lit.inner_string_text()
-        {
-            return text.text() == name.text();
-        }
-
-        return false;
+        let member_expr = computed.member().ok()?;
+        let lit = member_expr.as_any_js_literal_expression()?;
+        let string_lit = lit.as_js_string_literal_expression()?;
+        let text = string_lit.inner_string_text().ok()?;
+        return Some(text == *function_name?);
     }
 
-    false
+    Some(false)
 }
 
+/// Checks if a parameter reference occurs within a recursive call expression.
+/// Walks up the syntax tree from the reference to find a recursive call that uses the parameter,
+/// stopping at the function boundary.
 fn is_reference_in_recursive_call(
-    reference: &biome_js_semantic::Reference,
-    function_name: Option<&TokenText>,
+    reference: &Reference,
+    function_name: &TokenText,
     parent_function: &AnyJsParameterParentFunction,
     param_name: &str,
     model: &biome_js_semantic::SemanticModel,
     parent_function_binding: Option<&biome_js_semantic::Binding>,
-) -> bool {
+) -> Option<bool> {
     let ref_node = reference.syntax();
 
     // Walk up the tree to find if we're inside a call expression
@@ -495,14 +460,14 @@ fn is_reference_in_recursive_call(
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
             // Check if this call is recursive AND uses our parameter
-            if is_recursive_call_with_param_usage(
+            if let Some(true) = is_recursive_call_with_param_usage(
                 &call_expr,
                 function_name,
                 param_name,
                 model,
                 parent_function_binding,
             ) {
-                return true;
+                return Some(true);
             }
         }
 
@@ -514,7 +479,7 @@ fn is_reference_in_recursive_call(
         current = node.parent();
     }
 
-    false
+    Some(false)
 }
 
 fn is_function_boundary(
@@ -530,7 +495,7 @@ fn is_function_boundary(
 ///
 /// Uses an iterative approach with a worklist to avoid stack overflow
 /// on deeply nested expressions.
-fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
+fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> Option<bool> {
     // Worklist of expressions to examine
     let mut to_check = vec![expr.clone()];
 
@@ -538,10 +503,10 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         // Omit parentheses
         let current_expr = current_expr.omit_parentheses();
 
-        // Direct parameter reference - found it!
         if let Some(ref_id) = current_expr.as_js_reference_identifier() {
-            if ref_id.name().ok().is_some_and(|n| n.text() == param_name) {
-                return true;
+            if ref_id.name().ok()?.text() == param_name {
+                // Found direct parameter reference
+                return Some(true);
             }
             continue;
         }
@@ -588,8 +553,8 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         // Unary operations: -a, !flag
         // Add argument to worklist
         if let Some(unary_expr) = current_expr.as_js_unary_expression() {
-            if let Ok(arg) = unary_expr.argument() {
-                to_check.push(arg);
+            if let Ok(argument) = unary_expr.argument() {
+                to_check.push(argument);
             }
             continue;
         }
@@ -597,9 +562,9 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
         // Static member access: obj.field
         // Add object to worklist
         if let Some(member_expr) = current_expr.as_js_static_member_expression()
-            && let Ok(obj) = member_expr.object()
+            && let Ok(object) = member_expr.object()
         {
-            to_check.push(obj);
+            to_check.push(object);
         }
 
         // Any other expression - not safe to trace
@@ -607,29 +572,31 @@ fn traces_to_parameter(expr: &AnyJsExpression, param_name: &str) -> bool {
     }
 
     // Didn't find the parameter anywhere
-    false
+    Some(false)
 }
 
-/// Enhanced version that checks if any argument traces to parameters
+/// Checks if a recursive call uses a specific parameter in its arguments.
+/// Examines each argument to see if it traces back to the parameter through transformations
+/// like arithmetic operations, unary operations, or member access.
 fn is_recursive_call_with_param_usage(
     call: &JsCallExpression,
-    function_name: Option<&TokenText>,
+    function_name: &TokenText,
     param_name: &str,
     model: &biome_js_semantic::SemanticModel,
     parent_function_binding: Option<&biome_js_semantic::Binding>,
-) -> bool {
+) -> Option<bool> {
     // First check if this is a recursive call at all
-    if !is_recursive_call(call, function_name, model, parent_function_binding) {
-        return false;
+    if !is_recursive_call(call, Some(function_name), model, parent_function_binding)? {
+        return Some(false);
     }
 
     // Check if any argument uses the parameter
-    let Ok(arguments) = call.arguments() else {
-        return false;
-    };
+    let arguments = call.arguments().ok()?;
 
     for arg in arguments.args() {
-        let Ok(arg_node) = arg else { continue };
+        let Some(arg_node) = arg.ok() else {
+            continue;
+        };
 
         // Skip spread arguments (conservative)
         if arg_node.as_js_spread().is_some() {
@@ -638,11 +605,11 @@ fn is_recursive_call_with_param_usage(
 
         // Check if argument expression uses the parameter
         if let Some(expr) = arg_node.as_any_js_expression()
-            && traces_to_parameter(expr, param_name)
+            && traces_to_parameter(expr, param_name)?
         {
-            return true;
+            return Some(true);
         }
     }
 
-    false
+    Some(false)
 }
