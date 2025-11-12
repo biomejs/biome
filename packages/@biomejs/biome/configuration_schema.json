@@ -11548,6 +11548,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseNullishCoalescingOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseNullishCoalescingOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseNumberNamespaceOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13145,6 +13164,13 @@
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNodejsImportProtocolConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNullishCoalescing": {
+					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||) when providing default values.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNullishCoalescingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14911,6 +14937,16 @@
 			]
 		},
 		"UseNodejsImportProtocolOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNullishCoalescingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseNullishCoalescingOptions" }
+			]
+		},
+		"UseNullishCoalescingOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

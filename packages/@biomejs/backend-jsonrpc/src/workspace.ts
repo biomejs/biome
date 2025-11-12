@@ -2160,6 +2160,10 @@ export interface Style2 {
 	 */
 	useNodejsImportProtocol?: RuleFixConfiguration_for_UseNodejsImportProtocolOptions;
 	/**
+	 * Enforce using nullish coalescing operator (??) instead of logical or (||) when providing default values.
+	 */
+	useNullishCoalescing?: RuleFixConfiguration_for_UseNullishCoalescingOptions;
+	/**
 	 * Use the Number properties instead of global ones.
 	 */
 	useNumberNamespace?: RuleFixConfiguration_for_UseNumberNamespaceOptions;
@@ -3445,6 +3449,9 @@ export type RuleFixConfiguration_for_UseNodeAssertStrictOptions =
 export type RuleFixConfiguration_for_UseNodejsImportProtocolOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNodejsImportProtocolOptions;
+export type RuleFixConfiguration_for_UseNullishCoalescingOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseNullishCoalescingOptions;
 export type RuleFixConfiguration_for_UseNumberNamespaceOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNumberNamespaceOptions;
@@ -6901,6 +6908,20 @@ export interface RuleWithFixOptions_for_UseNodejsImportProtocolOptions {
 	 */
 	options: UseNodejsImportProtocolOptions;
 }
+export interface RuleWithFixOptions_for_UseNullishCoalescingOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseNullishCoalescingOptions;
+}
 export interface RuleWithFixOptions_for_UseNumberNamespaceOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -8749,6 +8770,7 @@ export interface UseNamingConventionOptions {
 }
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
+export interface UseNullishCoalescingOptions {}
 export interface UseNumberNamespaceOptions {}
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
@@ -9408,6 +9430,7 @@ export type Category =
 	| "lint/style/useNamingConvention"
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
+	| "lint/style/useNullishCoalescing"
 	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericSeparators"
 	| "lint/style/useObjectSpread"
