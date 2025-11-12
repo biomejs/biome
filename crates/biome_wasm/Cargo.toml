@@ -22,11 +22,13 @@ default = ["console_error_panic_hook"]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_fs           = { workspace = true }
-biome_service      = { workspace = true }
+biome_service      = { workspace = true, features = ["schema"] }
 camino             = { workspace = true }
 js-sys             = "0.3.82"
+schemars           = { workspace = true }
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
+serde_json         = { workspace = true }
 wasm-bindgen       = { version = "0.2.105", features = ["serde-serialize"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

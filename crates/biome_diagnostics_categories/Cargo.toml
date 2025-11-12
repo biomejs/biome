@@ -12,14 +12,15 @@ repository.workspace = true
 version              = "0.5.7"
 
 [dependencies]
-schemars = { workspace = true, optional = true }
-serde    = { workspace = true, optional = true }
+schemars   = { workspace = true, optional = true }
+serde      = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 
 [build-dependencies]
 quote = "1.0.14"
 
 [features]
-schema = ["dep:schemars", "serde"]
+schema = ["dep:schemars", "dep:serde_json", "serde"]
 serde  = ["dep:serde"]
 
 [lints]
