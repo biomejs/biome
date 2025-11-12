@@ -13,6 +13,10 @@ declare_lint_rule! {
     /// This rule ensures that all GraphQL operations (queries, mutations, subscriptions) have unique names.
     /// Using unique operation names is essential for proper identification and reducing confusion.
     ///
+    /// :::note
+    /// This rule currently does not work across multiple files.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -101,10 +105,10 @@ impl Rule for UseUniqueGraphqlOperationName {
                 },
             )
             .note(markup! {
-                "Rename the operation to have a unique name."
+                "GraphQL operation names must be unique to ensure proper identification."
             })
             .note(markup! {
-                "GraphQL operation names must be unique to ensure proper identification."
+                "Rename the operation to have a unique name."
             }),
         )
     }
