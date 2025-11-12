@@ -5260,6 +5260,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUniqueGraphqlOperationName": {
+					"description": "Enforce unique operation names across a GraphQL document.",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUniqueGraphqlOperationNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefineMacrosOrder": {
 					"description": "Enforce specific order of Vue compiler macros.",
 					"anyOf": [
@@ -9152,6 +9159,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUniqueGraphqlOperationNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidAnchorOptions": {
 			"type": "object",
 			"properties": {
@@ -12081,6 +12097,16 @@
 					"uniqueItems": true
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseUniqueGraphqlOperationNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUniqueGraphqlOperationNameOptions" }
+			]
+		},
+		"UseUniqueGraphqlOperationNameOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseValidAnchorConfiguration": {
