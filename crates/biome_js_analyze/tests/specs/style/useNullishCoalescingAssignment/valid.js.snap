@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Already using ??=
+x ??= 'default';
+
+// Regular assignment
+x = x || 'default'; // This is covered by useNullishCoalescing
+
+// Other assignment operators
+x += 1;
+x -= 2;
+x *= 3;
+x /= 4;
+x &&= true;
+
+```

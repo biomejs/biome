@@ -175,8 +175,7 @@ fn is_positive_nullish_check(
         if let (Some(checked_left), Some(checked_right)) = (
             is_strict_not_nullish_check(&left),
             is_strict_not_nullish_check(&right),
-        )
-            && expressions_equivalent(&checked_left, &checked_right)
+        ) && expressions_equivalent(&checked_left, &checked_right)
             && expressions_equivalent(&checked_left, value)
         {
             return Some(checked_left);
@@ -215,8 +214,7 @@ fn is_negative_nullish_check(
         if let (Some(checked_left), Some(checked_right)) = (
             is_strict_nullish_check(&left),
             is_strict_nullish_check(&right),
-        )
-            && expressions_equivalent(&checked_left, &checked_right)
+        ) && expressions_equivalent(&checked_left, &checked_right)
             && expressions_equivalent(&checked_left, value)
         {
             return Some(checked_left);

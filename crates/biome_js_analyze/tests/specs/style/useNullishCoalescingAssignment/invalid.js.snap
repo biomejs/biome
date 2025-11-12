@@ -1,0 +1,286 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Basic assignment
+x ||= 'default';
+
+// Object property
+obj.prop ||= getValue();
+
+// Array element
+arr[0] ||= fallback;
+
+// Complex expressions
+user.settings.theme ||= 'light';
+
+// In function
+function init(config) {
+  config.timeout ||= 5000;
+}
+
+// Multiple assignments
+foo ||= 1;
+bar ||= 2;
+baz ||= 3;
+
+// Nested object access
+a.b.c ||= defaultValue;
+
+// Computed property
+obj[key] ||= computedDefault();
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    1 │ // Basic assignment
+  > 2 │ x ||= 'default';
+      │ ^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // Object property
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+     1  1 │   // Basic assignment
+     2    │ - x·||=·'default';
+        2 │ + x·??='default';
+     3  3 │   
+     4  4 │   // Object property
+  
+
+```
+
+```
+invalid.js:5:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    4 │ // Object property
+  > 5 │ obj.prop ||= getValue();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Array element
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+     3  3 │   
+     4  4 │   // Object property
+     5    │ - obj.prop·||=·getValue();
+        5 │ + obj.prop·??=getValue();
+     6  6 │   
+     7  7 │   // Array element
+  
+
+```
+
+```
+invalid.js:8:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+     7 │ // Array element
+   > 8 │ arr[0] ||= fallback;
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Complex expressions
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+     6  6 │   
+     7  7 │   // Array element
+     8    │ - arr[0]·||=·fallback;
+        8 │ + arr[0]·??=fallback;
+     9  9 │   
+    10 10 │   // Complex expressions
+  
+
+```
+
+```
+invalid.js:11:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    10 │ // Complex expressions
+  > 11 │ user.settings.theme ||= 'light';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // In function
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+     9  9 │   
+    10 10 │   // Complex expressions
+    11    │ - user.settings.theme·||=·'light';
+       11 │ + user.settings.theme·??='light';
+    12 12 │   
+    13 13 │   // In function
+  
+
+```
+
+```
+invalid.js:15:3 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    13 │ // In function
+    14 │ function init(config) {
+  > 15 │   config.timeout ||= 5000;
+       │   ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    13 13 │   // In function
+    14 14 │   function init(config) {
+    15    │ - ··config.timeout·||=·5000;
+       15 │ + ··config.timeout·??=5000;
+    16 16 │   }
+    17 17 │   
+  
+
+```
+
+```
+invalid.js:19:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    18 │ // Multiple assignments
+  > 19 │ foo ||= 1;
+       │ ^^^^^^^^^
+    20 │ bar ||= 2;
+    21 │ baz ||= 3;
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    17 17 │   
+    18 18 │   // Multiple assignments
+    19    │ - foo·||=·1;
+       19 │ + foo·??=1;
+    20 20 │   bar ||= 2;
+    21 21 │   baz ||= 3;
+  
+
+```
+
+```
+invalid.js:20:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    18 │ // Multiple assignments
+    19 │ foo ||= 1;
+  > 20 │ bar ||= 2;
+       │ ^^^^^^^^^
+    21 │ baz ||= 3;
+    22 │ 
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    18 18 │   // Multiple assignments
+    19 19 │   foo ||= 1;
+    20    │ - bar·||=·2;
+       20 │ + bar·??=2;
+    21 21 │   baz ||= 3;
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    19 │ foo ||= 1;
+    20 │ bar ||= 2;
+  > 21 │ baz ||= 3;
+       │ ^^^^^^^^^
+    22 │ 
+    23 │ // Nested object access
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    19 19 │   foo ||= 1;
+    20 20 │   bar ||= 2;
+    21    │ - baz·||=·3;
+       21 │ + baz·??=3;
+    22 22 │   
+    23 23 │   // Nested object access
+  
+
+```
+
+```
+invalid.js:24:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    23 │ // Nested object access
+  > 24 │ a.b.c ||= defaultValue;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ // Computed property
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    22 22 │   
+    23 23 │   // Nested object access
+    24    │ - a.b.c·||=·defaultValue;
+       24 │ + a.b.c·??=defaultValue;
+    25 25 │   
+    26 26 │   // Computed property
+  
+
+```
+
+```
+invalid.js:27:1 lint/style/useNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    26 │ // Computed property
+  > 27 │ obj[key] ||= computedDefault();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i The nullish coalescing assignment operator ??= only assigns when the value is null or undefined, which is safer than ||= which assigns for all falsy values.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    25 25 │   
+    26 26 │   // Computed property
+    27    │ - obj[key]·||=·computedDefault();
+       27 │ + obj[key]·??=computedDefault();
+    28 28 │   
+  
+
+```

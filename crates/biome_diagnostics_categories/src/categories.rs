@@ -295,6 +295,7 @@ define_categories! {
     "lint/style/useNodeAssertStrict": "https://biomejs.dev/linter/rules/use-node-assert-strict",
     "lint/style/useNodejsImportProtocol": "https://biomejs.dev/linter/rules/use-nodejs-import-protocol",
     "lint/style/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",
+    "lint/style/useNullishCoalescingAssignment": "https://biomejs.dev/linter/rules/use-nullish-coalescing-assignment",
     "lint/style/useNullishCoalescingInTernary": "https://biomejs.dev/linter/rules/use-nullish-coalescing-in-ternary",
     "lint/style/useNumberNamespace": "https://biomejs.dev/linter/rules/use-number-namespace",
     "lint/style/useNumericSeparators": "https://biomejs.dev/linter/rules/use-numeric-separators",
