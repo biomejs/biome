@@ -7,8 +7,8 @@ use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, FormatEmbedNode,
-    LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
+    Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
+    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
 use crate::projects::Projects;
 use crate::scanner::{
@@ -1561,6 +1561,96 @@ impl Workspace for WorkspaceServer {
             errors,
             skipped_diagnostics: skipped_diagnostics.into(),
         })
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        let PullDiagnosticsAndActionsParams {
+            project_key,
+            path,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+        } = params;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
+        let language =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        let capabilities = self.features.get_capabilities(language);
+        let result = if (categories.is_lint() || categories.is_assist())
+            && let Some(pull_diagnostics_and_actions) =
+                capabilities.analyzer.pull_diagnostics_and_actions
+        {
+            let plugins = if categories.is_lint() {
+                self.get_analyzer_plugins_for_project(
+                    settings.source_path().unwrap_or_default().as_path(),
+                    &settings.get_plugins_for_path(&path),
+                )
+                .map_err(WorkspaceError::plugin_errors)?
+            } else {
+                Vec::new()
+            };
+            let mut final_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
+                parse,
+                settings: &settings,
+                path: &path,
+                only: &only,
+                skip: &skip,
+                language,
+                categories,
+                module_graph: self.module_graph.clone(),
+                project_layout: self.project_layout.clone(),
+                suppression_reason: None,
+                enabled_selectors: &enabled_rules,
+                plugins: plugins.clone(),
+                _diagnostic_offset: None,
+            });
+
+            for embedded_node in embedded_snippets {
+                let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+                    continue;
+                };
+                let capabilities = self.features.get_capabilities(file_source);
+                let Some(pull_diagnostics_and_actions) =
+                    capabilities.analyzer.pull_diagnostics_and_actions
+                else {
+                    continue;
+                };
+
+                let snippet_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
+                    parse: embedded_node.parse().clone(),
+                    settings: &settings,
+                    path: &path,
+                    only: &only,
+                    skip: &skip,
+                    language,
+                    categories,
+                    module_graph: self.module_graph.clone(),
+                    project_layout: self.project_layout.clone(),
+                    suppression_reason: None,
+                    enabled_selectors: &enabled_rules,
+                    plugins: plugins.clone(),
+                    _diagnostic_offset: None,
+                });
+
+                final_result.diagnostics.extend(snippet_result.diagnostics);
+            }
+
+            final_result
+        } else {
+            // Parse diagnostics aren't fixable, so we return an empty list
+            PullDiagnosticsAndActionsResult {
+                diagnostics: vec![],
+            }
+        };
+
+        Ok(result)
     }
 
     /// Retrieves the list of code actions available for a given cursor

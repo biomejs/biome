@@ -55,16 +55,6 @@ mod client;
 mod document;
 mod server;
 
-pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
-use std::{
-    borrow::Cow,
-    fmt::{Debug, Display, Formatter},
-    panic::RefUnwindSafe,
-    str,
-    sync::Arc,
-    time::Duration,
-};
-
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
@@ -78,11 +68,20 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
+pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display, Formatter},
+    panic::RefUnwindSafe,
+    str,
+    sync::Arc,
+    time::Duration,
+};
 use tokio::sync::watch;
 use tracing::debug;
 
@@ -507,8 +506,8 @@ pub enum SupportKind {
     FileNotSupported,
 }
 
-impl std::fmt::Display for SupportKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for SupportKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Supported => write!(f, "Supported"),
             Self::Ignored => write!(f, "Ignored"),
@@ -950,7 +949,7 @@ pub struct PullDiagnosticsParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsResult {
-    pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
     pub skipped_diagnostics: u64,
 }
@@ -971,6 +970,29 @@ pub struct PullActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    #[serde(default)]
+    pub only: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub skip: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub categories: RuleCategories,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsResult {
+    pub diagnostics: Vec<(Diagnostic, Vec<CodeAction>)>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1449,6 +1471,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// position within a file.
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
+    /// Pulls diagnostics with their relative code actions
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code.
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
@@ -1571,7 +1599,7 @@ pub fn client<T>(
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {
-    Ok(Box::new(client::WorkspaceClient::new(transport, fs)?))
+    Ok(Box::new(WorkspaceClient::new(transport, fs)?))
 }
 
 /// [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)

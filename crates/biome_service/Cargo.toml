@@ -63,6 +63,7 @@ biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
+either                  = { workspace = true }
 enumflags2              = { workspace = true, features = ["serde"] }
 getrandom               = { workspace = true, features = ["js"] }
 ignore                  = { workspace = true }
