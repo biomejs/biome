@@ -3405,6 +3405,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForInConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForInOptions" }
+			]
+		},
+		"NoForInOptions": { "type": "object", "additionalProperties": false },
 		"NoFunctionAssignConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5152,6 +5159,13 @@
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoFloatingPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noForIn": {
+					"description": "Disallow iterating over an array with a for-in loop.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoForInConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7427,6 +7441,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoForInOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForInOptions" }]
 				}
 			},
 			"additionalProperties": false

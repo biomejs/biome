@@ -87,6 +87,7 @@ pub mod no_flat_map_identity;
 pub mod no_floating_promises;
 pub mod no_focused_tests;
 pub mod no_for_each;
+pub mod no_for_in;
 pub mod no_function_assign;
 pub mod no_global_assign;
 pub mod no_global_dirname_filename;
