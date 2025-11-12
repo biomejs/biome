@@ -1808,6 +1808,26 @@ export interface Nursery {
 	 * Forbids v-bind directives with missing arguments or invalid modifiers.
 	 */
 	useVueValidVBind?: RuleConfiguration_for_UseVueValidVBindOptions;
+	/**
+	 * Enforce valid usage of v-else.
+	 */
+	useVueValidVElse?: RuleConfiguration_for_UseVueValidVElseOptions;
+	/**
+	 * Enforce valid v-else-if directives.
+	 */
+	useVueValidVElseIf?: RuleConfiguration_for_UseVueValidVElseIfOptions;
+	/**
+	 * Enforce valid v-html directives.
+	 */
+	useVueValidVHtml?: RuleConfiguration_for_UseVueValidVHtmlOptions;
+	/**
+	 * Enforces valid v-if usage for Vue templates.
+	 */
+	useVueValidVIf?: RuleConfiguration_for_UseVueValidVIfOptions;
+	/**
+	 * Enforce valid v-on directives with proper arguments, modifiers, and handlers.
+	 */
+	useVueValidVOn?: RuleConfiguration_for_UseVueValidVOnOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -3178,6 +3198,21 @@ export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 export type RuleConfiguration_for_UseVueValidVBindOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueValidVBindOptions;
+export type RuleConfiguration_for_UseVueValidVElseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVElseOptions;
+export type RuleConfiguration_for_UseVueValidVElseIfOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVElseIfOptions;
+export type RuleConfiguration_for_UseVueValidVHtmlOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVHtmlOptions;
+export type RuleConfiguration_for_UseVueValidVIfOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVIfOptions;
+export type RuleConfiguration_for_UseVueValidVOnOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVOnOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -5909,6 +5944,56 @@ export interface RuleWithOptions_for_UseVueValidVBindOptions {
 	 */
 	options: UseVueValidVBindOptions;
 }
+export interface RuleWithOptions_for_UseVueValidVElseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVElseOptions;
+}
+export interface RuleWithOptions_for_UseVueValidVElseIfOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVElseIfOptions;
+}
+export interface RuleWithOptions_for_UseVueValidVHtmlOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVHtmlOptions;
+}
+export interface RuleWithOptions_for_UseVueValidVIfOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVIfOptions;
+}
+export interface RuleWithOptions_for_UseVueValidVOnOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVOnOptions;
+}
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8469,6 +8554,16 @@ export interface UseVueMultiWordComponentNamesOptions {
 	ignores: string[];
 }
 export interface UseVueValidVBindOptions {}
+export interface UseVueValidVElseOptions {}
+export interface UseVueValidVElseIfOptions {}
+export interface UseVueValidVHtmlOptions {}
+export interface UseVueValidVIfOptions {}
+export interface UseVueValidVOnOptions {
+	/**
+	 * Additional modifiers that should be considered valid
+	 */
+	modifiers?: string[];
+}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
 export interface NoBarrelFileOptions {}
@@ -9196,6 +9291,13 @@ export type Category =
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/useVueValidVBind"
+	| "lint/nursery/useVueValidVIf"
+	| "lint/nursery/useVueValidVElse"
+	| "lint/nursery/useVueValidVElseIf"
+	| "lint/nursery/useVueValidVFor"
+	| "lint/nursery/useVueValidVHtml"
+	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueValidVOn"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"

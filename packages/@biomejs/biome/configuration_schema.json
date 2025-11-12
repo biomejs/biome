@@ -5381,6 +5381,41 @@
 						{ "$ref": "#/definitions/UseVueValidVBindConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVElse": {
+					"description": "Enforce valid usage of v-else.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVElseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVElseIf": {
+					"description": "Enforce valid v-else-if directives.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVHtml": {
+					"description": "Enforce valid v-html directives.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVHtmlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVIf": {
+					"description": "Enforces valid v-if usage for Vue templates.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVOn": {
+					"description": "Enforce valid v-on directives with proper arguments, modifiers, and handlers.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueValidVOnConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12262,6 +12297,81 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueValidVElseIfOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVElseIfOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseVueValidVElseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVElseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseVueValidVHtmlOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVHtmlOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseVueValidVIfOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVIfOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseVueValidVOnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueValidVOnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -15292,6 +15402,64 @@
 		},
 		"UseVueValidVBindOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVElseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVElseOptions" }
+			]
+		},
+		"UseVueValidVElseIfConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVElseIfOptions" }
+			]
+		},
+		"UseVueValidVElseIfOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVElseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVHtmlConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVHtmlOptions" }
+			]
+		},
+		"UseVueValidVHtmlOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVIfConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVIfOptions" }
+			]
+		},
+		"UseVueValidVIfOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVOnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueValidVOnOptions" }
+			]
+		},
+		"UseVueValidVOnOptions": {
+			"type": "object",
+			"properties": {
+				"modifiers": {
+					"description": "Additional modifiers that should be considered valid",
+					"default": null,
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

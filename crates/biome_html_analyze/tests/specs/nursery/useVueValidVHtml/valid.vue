@@ -1,0 +1,25 @@
+<!-- should not generate diagnostics -->
+
+<template>
+  <!-- Basic valid v-html -->
+  <div v-html="htmlContent"></div>
+  
+  <!-- With variable -->
+  <div v-html="userProvidedHtml"></div>
+  
+  <!-- With expression -->
+  <div v-html="getFormattedHtml()"></div>
+  
+  <!-- With other directives -->
+  <div v-if="showContent" v-html="content" v-bind:class="{'dynamic': true}"></div>
+  
+  <!-- On different elements -->
+  <span v-html="spanContent"></span>
+  <p v-html="paragraphContent"></p>
+  
+  <!-- Self-closing -->
+  <br v-html="breakContent"/>
+  
+  <!-- With complex expressions -->
+  <div v-html="formatHtml(user.name, user.id)"></div>
+</template>
