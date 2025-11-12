@@ -246,7 +246,7 @@ tower-lsp-server     = "0.22.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
-unicode-width        = "0.1.12"
+unicode-width        = "0.2.2"
 ureq                 = "3.1.4"
 url                  = "2.5.7"
 walkdir              = "2.5.0"
