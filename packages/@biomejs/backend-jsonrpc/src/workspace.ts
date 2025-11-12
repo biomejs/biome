@@ -1681,6 +1681,10 @@ export interface Nursery {
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
 	/**
+	 * Disallow iterating using a for-in loop.
+	 */
+	noForIn?: RuleConfiguration_for_NoForInOptions;
+	/**
 	 * Prevent import cycles.
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
@@ -3105,6 +3109,9 @@ export type RuleConfiguration_for_NoEmptySourceOptions =
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
+export type RuleConfiguration_for_NoForInOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoForInOptions;
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
@@ -5593,6 +5600,16 @@ export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	 * Rule's options
 	 */
 	options: NoFloatingPromisesOptions;
+}
+export interface RuleWithOptions_for_NoForInOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoForInOptions;
 }
 export interface RuleWithOptions_for_NoImportCyclesOptions {
 	/**
@@ -8450,6 +8467,7 @@ export interface NoEmptySourceOptions {
 	allowComments?: boolean;
 }
 export interface NoFloatingPromisesOptions {}
+export interface NoForInOptions {}
 export interface NoImportCyclesOptions {
 	/**
 	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
@@ -9270,6 +9288,7 @@ export type Category =
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
+	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
@@ -9290,22 +9309,14 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
-	| "lint/nursery/useVueValidVBind"
-	| "lint/nursery/useVueValidVIf"
-	| "lint/nursery/useVueValidVElse"
-	| "lint/nursery/useVueValidVElseIf"
-	| "lint/nursery/useVueValidVFor"
-	| "lint/nursery/useVueValidVHtml"
-	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueValidVOn"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
-	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
@@ -9318,6 +9329,14 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueValidVBind"
+	| "lint/nursery/useVueValidVElse"
+	| "lint/nursery/useVueValidVElseIf"
+	| "lint/nursery/useVueValidVFor"
+	| "lint/nursery/useVueValidVHtml"
+	| "lint/nursery/useVueValidVIf"
+	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueValidVOn"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
