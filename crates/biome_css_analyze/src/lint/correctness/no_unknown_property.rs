@@ -79,9 +79,6 @@ impl Rule for NoUnknownProperty {
         let property_name = node.name().ok()?.to_trimmed_text();
         let property_name_lower = property_name.to_ascii_lowercase_cow();
         if !property_name_lower.starts_with("--")
-            // Ignore `composes` property.
-            // See https://github.com/css-modules/css-modules/blob/master/docs/composition.md for more details.
-            && property_name_lower != "composes"
             && !is_known_properties(&property_name_lower)
             && !vendor_prefixed(&property_name_lower)
         {

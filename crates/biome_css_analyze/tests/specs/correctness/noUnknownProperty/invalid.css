@@ -5,3 +5,14 @@ a {
 a {
   my-property: 1;
 }
+
+/* Composition is only valid when css-modules is enabled */
+.classA {
+  color: green;
+  background: red;
+}
+
+.classB {
+  composes: classA;
+  color: yellow;
+}

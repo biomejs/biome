@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+/* Composition */
+.classA {
+  color: green;
+  background: red;
+}
+
+.classB {
+  composes: classA;
+  color: yellow;
+}
