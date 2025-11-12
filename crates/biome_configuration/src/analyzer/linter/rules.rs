@@ -174,6 +174,7 @@ pub enum RuleName {
     NoFloatingPromises,
     NoFocusedTests,
     NoForEach,
+    NoForIn,
     NoFunctionAssign,
     NoGlobalAssign,
     NoGlobalDirnameFilename,
@@ -552,6 +553,7 @@ impl RuleName {
             Self::NoFloatingPromises => "noFloatingPromises",
             Self::NoFocusedTests => "noFocusedTests",
             Self::NoForEach => "noForEach",
+            Self::NoForIn => "noForIn",
             Self::NoFunctionAssign => "noFunctionAssign",
             Self::NoGlobalAssign => "noGlobalAssign",
             Self::NoGlobalDirnameFilename => "noGlobalDirnameFilename",
@@ -934,6 +936,7 @@ impl RuleName {
             Self::NoFloatingPromises => RuleGroup::Nursery,
             Self::NoFocusedTests => RuleGroup::Suspicious,
             Self::NoForEach => RuleGroup::Complexity,
+            Self::NoForIn => RuleGroup::Nursery,
             Self::NoFunctionAssign => RuleGroup::Suspicious,
             Self::NoGlobalAssign => RuleGroup::Suspicious,
             Self::NoGlobalDirnameFilename => RuleGroup::Correctness,
@@ -1317,6 +1320,7 @@ impl std::str::FromStr for RuleName {
             "noFloatingPromises" => Ok(Self::NoFloatingPromises),
             "noFocusedTests" => Ok(Self::NoFocusedTests),
             "noForEach" => Ok(Self::NoForEach),
+            "noForIn" => Ok(Self::NoForIn),
             "noFunctionAssign" => Ok(Self::NoFunctionAssign),
             "noGlobalAssign" => Ok(Self::NoGlobalAssign),
             "noGlobalDirnameFilename" => Ok(Self::NoGlobalDirnameFilename),
@@ -4744,7 +4748,7 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow continue statements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_continue : Option < RuleConfiguration < biome_rule_options :: no_continue :: NoContinueOptions >> , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallows the usage of the unary operators ++ and --."] # [serde (skip_serializing_if = "Option::is_none")] pub no_increment_decrement : Option < RuleConfiguration < biome_rule_options :: no_increment_decrement :: NoIncrementDecrementOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow function parameters that are only used in recursive calls."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameters_only_used_in_recursion : Option < RuleFixConfiguration < biome_rule_options :: no_parameters_only_used_in_recursion :: NoParametersOnlyUsedInRecursionOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unknown DOM properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_attribute : Option < RuleConfiguration < biome_rule_options :: no_unknown_attribute :: NoUnknownAttributeOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Require Array#sort and Array#toSorted calls to always provide a compareFunction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_sort_compare : Option < RuleConfiguration < biome_rule_options :: use_array_sort_compare :: UseArraySortCompareOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_graphql_descriptions : Option < RuleConfiguration < biome_rule_options :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce specific order of Vue compiler macros."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_define_macros_order : Option < RuleFixConfiguration < biome_rule_options :: use_vue_define_macros_order :: UseVueDefineMacrosOrderOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> , # [doc = "Forbids v-bind directives with missing arguments or invalid modifiers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_bind : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_bind :: UseVueValidVBindOptions >> , # [doc = "Enforce valid usage of v-else."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else :: UseVueValidVElseOptions >> , # [doc = "Enforce valid v-else-if directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else_if :: UseVueValidVElseIfOptions >> , # [doc = "Enforce valid v-html directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_html : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_html :: UseVueValidVHtmlOptions >> , # [doc = "Enforces valid v-if usage for Vue templates."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_if :: UseVueValidVIfOptions >> , # [doc = "Enforce valid v-on directives with proper arguments, modifiers, and handlers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_on : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_on :: UseVueValidVOnOptions >> }
+pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow continue statements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_continue : Option < RuleConfiguration < biome_rule_options :: no_continue :: NoContinueOptions >> , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Disallow iterating using a for-in loop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_for_in : Option < RuleConfiguration < biome_rule_options :: no_for_in :: NoForInOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallows the usage of the unary operators ++ and --."] # [serde (skip_serializing_if = "Option::is_none")] pub no_increment_decrement : Option < RuleConfiguration < biome_rule_options :: no_increment_decrement :: NoIncrementDecrementOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow function parameters that are only used in recursive calls."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameters_only_used_in_recursion : Option < RuleFixConfiguration < biome_rule_options :: no_parameters_only_used_in_recursion :: NoParametersOnlyUsedInRecursionOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unknown DOM properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_attribute : Option < RuleConfiguration < biome_rule_options :: no_unknown_attribute :: NoUnknownAttributeOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Require Array#sort and Array#toSorted calls to always provide a compareFunction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_sort_compare : Option < RuleConfiguration < biome_rule_options :: use_array_sort_compare :: UseArraySortCompareOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_graphql_descriptions : Option < RuleConfiguration < biome_rule_options :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce specific order of Vue compiler macros."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_define_macros_order : Option < RuleFixConfiguration < biome_rule_options :: use_vue_define_macros_order :: UseVueDefineMacrosOrderOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> , # [doc = "Forbids v-bind directives with missing arguments or invalid modifiers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_bind : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_bind :: UseVueValidVBindOptions >> , # [doc = "Enforce valid usage of v-else."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else :: UseVueValidVElseOptions >> , # [doc = "Enforce valid v-else-if directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else_if :: UseVueValidVElseIfOptions >> , # [doc = "Enforce valid v-html directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_html : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_html :: UseVueValidVHtmlOptions >> , # [doc = "Enforces valid v-if usage for Vue templates."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_if :: UseVueValidVIfOptions >> , # [doc = "Enforce valid v-on directives with proper arguments, modifiers, and handlers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_on : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_on :: UseVueValidVOnOptions >> }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -4753,6 +4757,7 @@ impl Nursery {
         "noDuplicateDependencies",
         "noEmptySource",
         "noFloatingPromises",
+        "noForIn",
         "noImportCycles",
         "noIncrementDecrement",
         "noJsxLiterals",
@@ -4833,6 +4838,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -4869,185 +4875,190 @@ impl RuleGroupExt for Nursery {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
-        if let Some(rule) = self.no_import_cycles.as_ref()
+        if let Some(rule) = self.no_for_in.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
-        if let Some(rule) = self.no_increment_decrement.as_ref()
+        if let Some(rule) = self.no_import_cycles.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
         }
-        if let Some(rule) = self.no_jsx_literals.as_ref()
+        if let Some(rule) = self.no_increment_decrement.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
         }
-        if let Some(rule) = self.no_misused_promises.as_ref()
+        if let Some(rule) = self.no_jsx_literals.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
         }
-        if let Some(rule) = self.no_next_async_client_component.as_ref()
+        if let Some(rule) = self.no_misused_promises.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
         }
-        if let Some(rule) = self.no_parameters_only_used_in_recursion.as_ref()
+        if let Some(rule) = self.no_next_async_client_component.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
         }
-        if let Some(rule) = self.no_react_forward_ref.as_ref()
+        if let Some(rule) = self.no_parameters_only_used_in_recursion.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
         }
-        if let Some(rule) = self.no_shadow.as_ref()
+        if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
         }
-        if let Some(rule) = self.no_unknown_attribute.as_ref()
+        if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
         }
-        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
+        if let Some(rule) = self.no_unknown_attribute.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref()
+        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
-        if let Some(rule) = self.no_unused_expressions.as_ref()
+        if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
-        if let Some(rule) = self.no_useless_catch_binding.as_ref()
+        if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref()
+        if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
-        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
+        if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
-        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
+        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref()
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
-        if let Some(rule) = self.use_array_sort_compare.as_ref()
+        if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
-        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+        if let Some(rule) = self.use_array_sort_compare.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
-        if let Some(rule) = self.use_consistent_graphql_descriptions.as_ref()
+        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
-        if let Some(rule) = self.use_deprecated_date.as_ref()
+        if let Some(rule) = self.use_consistent_graphql_descriptions.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+        if let Some(rule) = self.use_deprecated_date.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
-        if let Some(rule) = self.use_explicit_type.as_ref()
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
-        if let Some(rule) = self.use_max_params.as_ref()
+        if let Some(rule) = self.use_explicit_type.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
-        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+        if let Some(rule) = self.use_max_params.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
-        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+        if let Some(rule) = self.use_qwik_method_usage.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref()
+        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
-        if let Some(rule) = self.use_vue_define_macros_order.as_ref()
+        if let Some(rule) = self.use_sorted_classes.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
-        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+        if let Some(rule) = self.use_vue_define_macros_order.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
-        if let Some(rule) = self.use_vue_valid_v_bind.as_ref()
+        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
-        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_bind.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
         }
-        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
         }
-        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
         }
-        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
         }
-        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
         }
         index_set
     }
@@ -5078,185 +5089,190 @@ impl RuleGroupExt for Nursery {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
-        if let Some(rule) = self.no_import_cycles.as_ref()
+        if let Some(rule) = self.no_for_in.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
-        if let Some(rule) = self.no_increment_decrement.as_ref()
+        if let Some(rule) = self.no_import_cycles.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
         }
-        if let Some(rule) = self.no_jsx_literals.as_ref()
+        if let Some(rule) = self.no_increment_decrement.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
         }
-        if let Some(rule) = self.no_misused_promises.as_ref()
+        if let Some(rule) = self.no_jsx_literals.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
         }
-        if let Some(rule) = self.no_next_async_client_component.as_ref()
+        if let Some(rule) = self.no_misused_promises.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
         }
-        if let Some(rule) = self.no_parameters_only_used_in_recursion.as_ref()
+        if let Some(rule) = self.no_next_async_client_component.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
         }
-        if let Some(rule) = self.no_react_forward_ref.as_ref()
+        if let Some(rule) = self.no_parameters_only_used_in_recursion.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
         }
-        if let Some(rule) = self.no_shadow.as_ref()
+        if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
         }
-        if let Some(rule) = self.no_unknown_attribute.as_ref()
+        if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
         }
-        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
+        if let Some(rule) = self.no_unknown_attribute.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref()
+        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
-        if let Some(rule) = self.no_unused_expressions.as_ref()
+        if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
-        if let Some(rule) = self.no_useless_catch_binding.as_ref()
+        if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref()
+        if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
-        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
+        if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
-        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
+        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref()
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
-        if let Some(rule) = self.use_array_sort_compare.as_ref()
+        if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
-        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+        if let Some(rule) = self.use_array_sort_compare.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
-        if let Some(rule) = self.use_consistent_graphql_descriptions.as_ref()
+        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
-        if let Some(rule) = self.use_deprecated_date.as_ref()
+        if let Some(rule) = self.use_consistent_graphql_descriptions.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+        if let Some(rule) = self.use_deprecated_date.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
-        if let Some(rule) = self.use_explicit_type.as_ref()
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
-        if let Some(rule) = self.use_max_params.as_ref()
+        if let Some(rule) = self.use_explicit_type.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
-        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+        if let Some(rule) = self.use_max_params.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
-        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+        if let Some(rule) = self.use_qwik_method_usage.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref()
+        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
-        if let Some(rule) = self.use_vue_define_macros_order.as_ref()
+        if let Some(rule) = self.use_sorted_classes.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
-        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+        if let Some(rule) = self.use_vue_define_macros_order.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
-        if let Some(rule) = self.use_vue_valid_v_bind.as_ref()
+        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
-        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_bind.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
         }
-        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
         }
-        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
         }
-        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
         }
-        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
         }
         index_set
     }
@@ -5306,6 +5322,10 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noFloatingPromises" => self
                 .no_floating_promises
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noForIn" => self
+                .no_for_in
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noImportCycles" => self
@@ -5465,6 +5485,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_duplicate_dependencies: Some(value.into()),
             no_empty_source: Some(value.into()),
             no_floating_promises: Some(value.into()),
+            no_for_in: Some(value.into()),
             no_import_cycles: Some(value.into()),
             no_increment_decrement: Some(value.into()),
             no_jsx_literals: Some(value.into()),
