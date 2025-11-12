@@ -19,7 +19,6 @@ use std::ops::Deref;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration<T: Default + Merge> {
     Plain(RulePlainConfiguration),
@@ -99,8 +98,31 @@ impl<T: Default + Merge> From<GroupPlainConfiguration> for RuleConfiguration<T> 
     }
 }
 
+#[cfg(feature = "schema")]
+impl<T: Default + Merge> schemars::JsonSchema for RuleConfiguration<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleConfiguration_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        // Generate schemas for the inner types
+        let plain_schema = generator.subschema_for::<RulePlainConfiguration>();
+        let with_options_schema = generator.subschema_for::<RuleWithOptions<T>>();
+
+        // Create a oneOf schema combining both variants
+        schemars::json_schema!({
+            "oneOf": [
+                plain_schema,
+                with_options_schema,
+            ]
+        })
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleFixConfiguration<T: Default + Merge> {
     Plain(RulePlainConfiguration),
@@ -181,6 +203,31 @@ impl<T: Default + Merge> From<GroupPlainConfiguration> for RuleFixConfiguration<
         Self::from(RulePlainConfiguration::from(value))
     }
 }
+
+#[cfg(feature = "schema")]
+impl<T: Default + Merge> schemars::JsonSchema for RuleFixConfiguration<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleFixConfiguration_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        // Generate schemas for the inner types
+        let plain_schema = generator.subschema_for::<RulePlainConfiguration>();
+        let with_options_schema = generator.subschema_for::<RuleWithFixOptions<T>>();
+
+        // Create a oneOf schema combining both variants
+        schemars::json_schema!({
+            "oneOf": [
+                plain_schema,
+                with_options_schema,
+            ]
+        })
+    }
+}
+
 impl<T: Default + Merge> From<&RuleConfiguration<T>> for Severity {
     fn from(conf: &RuleConfiguration<T>) -> Self {
         match conf {
@@ -375,7 +422,6 @@ impl<T: Default> Merge for RuleAssistWithOptions<T> {
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
@@ -392,10 +438,36 @@ impl<T: Default + Merge> Merge for RuleWithOptions<T> {
     }
 }
 
+#[cfg(feature = "schema")]
+impl<T: Default + Merge> schemars::JsonSchema for RuleWithOptions<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleWithOptions_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        // Generate schemas for the inner types
+        let level_schema = generator.subschema_for::<RulePlainConfiguration>();
+        let options_schema = generator.subschema_for::<T>();
+
+        // Create an object schema with level and options properties
+        schemars::json_schema!({
+            "type": "object",
+            "properties": {
+                "level": level_schema,
+                "options": options_schema,
+            },
+            "required": ["level"],
+            "additionalProperties": false,
+        })
+    }
+}
+
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
@@ -413,6 +485,35 @@ impl<T: Default + Merge> Merge for RuleWithFixOptions<T> {
         self.level = other.level;
         self.fix = other.fix.or(self.fix);
         self.options.merge_with(other.options);
+    }
+}
+
+#[cfg(feature = "schema")]
+impl<T: Default + Merge> schemars::JsonSchema for RuleWithFixOptions<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleWithFixOptions_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        // Generate schemas for the inner types
+        let level_schema = generator.subschema_for::<RulePlainConfiguration>();
+        let fix_schema = generator.subschema_for::<Option<FixKind>>();
+        let options_schema = generator.subschema_for::<T>();
+
+        // Create an object schema with level, fix, and options properties
+        schemars::json_schema!({
+            "type": "object",
+            "properties": {
+                "level": level_schema,
+                "fix": fix_schema,
+                "options": options_schema,
+            },
+            "required": ["level"],
+            "additionalProperties": false,
+        })
     }
 }
 
@@ -502,10 +603,10 @@ impl<'de> serde::Deserialize<'de> for AnalyzerSelector {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for AnalyzerSelector {
-    fn schema_name() -> String {
-        "AnalyzerSelector".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("AnalyzerSelector")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -710,10 +811,10 @@ impl<'de> serde::Deserialize<'de> for RuleSelector {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleSelector {
-    fn schema_name() -> String {
-        "RuleCode".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("RuleCode")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
