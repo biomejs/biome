@@ -456,6 +456,11 @@ pub enum RuleName {
     UseVueDefineMacrosOrder,
     UseVueMultiWordComponentNames,
     UseVueValidVBind,
+    UseVueValidVElse,
+    UseVueValidVElseIf,
+    UseVueValidVHtml,
+    UseVueValidVIf,
+    UseVueValidVOn,
     UseWhile,
     UseYield,
 }
@@ -833,6 +838,11 @@ impl RuleName {
             Self::UseVueDefineMacrosOrder => "useVueDefineMacrosOrder",
             Self::UseVueMultiWordComponentNames => "useVueMultiWordComponentNames",
             Self::UseVueValidVBind => "useVueValidVBind",
+            Self::UseVueValidVElse => "useVueValidVElse",
+            Self::UseVueValidVElseIf => "useVueValidVElseIf",
+            Self::UseVueValidVHtml => "useVueValidVHtml",
+            Self::UseVueValidVIf => "useVueValidVIf",
+            Self::UseVueValidVOn => "useVueValidVOn",
             Self::UseWhile => "useWhile",
             Self::UseYield => "useYield",
         }
@@ -1206,6 +1216,11 @@ impl RuleName {
             Self::UseVueDefineMacrosOrder => RuleGroup::Nursery,
             Self::UseVueMultiWordComponentNames => RuleGroup::Nursery,
             Self::UseVueValidVBind => RuleGroup::Nursery,
+            Self::UseVueValidVElse => RuleGroup::Nursery,
+            Self::UseVueValidVElseIf => RuleGroup::Nursery,
+            Self::UseVueValidVHtml => RuleGroup::Nursery,
+            Self::UseVueValidVIf => RuleGroup::Nursery,
+            Self::UseVueValidVOn => RuleGroup::Nursery,
             Self::UseWhile => RuleGroup::Complexity,
             Self::UseYield => RuleGroup::Correctness,
         }
@@ -1588,6 +1603,11 @@ impl std::str::FromStr for RuleName {
             "useVueDefineMacrosOrder" => Ok(Self::UseVueDefineMacrosOrder),
             "useVueMultiWordComponentNames" => Ok(Self::UseVueMultiWordComponentNames),
             "useVueValidVBind" => Ok(Self::UseVueValidVBind),
+            "useVueValidVElse" => Ok(Self::UseVueValidVElse),
+            "useVueValidVElseIf" => Ok(Self::UseVueValidVElseIf),
+            "useVueValidVHtml" => Ok(Self::UseVueValidVHtml),
+            "useVueValidVIf" => Ok(Self::UseVueValidVIf),
+            "useVueValidVOn" => Ok(Self::UseVueValidVOn),
             "useWhile" => Ok(Self::UseWhile),
             "useYield" => Ok(Self::UseYield),
             _ => Err("This rule name doesn't exist."),
@@ -4724,7 +4744,7 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow continue statements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_continue : Option < RuleConfiguration < biome_rule_options :: no_continue :: NoContinueOptions >> , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallows the usage of the unary operators ++ and --."] # [serde (skip_serializing_if = "Option::is_none")] pub no_increment_decrement : Option < RuleConfiguration < biome_rule_options :: no_increment_decrement :: NoIncrementDecrementOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow function parameters that are only used in recursive calls."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameters_only_used_in_recursion : Option < RuleFixConfiguration < biome_rule_options :: no_parameters_only_used_in_recursion :: NoParametersOnlyUsedInRecursionOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unknown DOM properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_attribute : Option < RuleConfiguration < biome_rule_options :: no_unknown_attribute :: NoUnknownAttributeOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Require Array#sort and Array#toSorted calls to always provide a compareFunction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_sort_compare : Option < RuleConfiguration < biome_rule_options :: use_array_sort_compare :: UseArraySortCompareOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_graphql_descriptions : Option < RuleConfiguration < biome_rule_options :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce specific order of Vue compiler macros."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_define_macros_order : Option < RuleFixConfiguration < biome_rule_options :: use_vue_define_macros_order :: UseVueDefineMacrosOrderOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> , # [doc = "Forbids v-bind directives with missing arguments or invalid modifiers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_bind : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_bind :: UseVueValidVBindOptions >> }
+pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow continue statements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_continue : Option < RuleConfiguration < biome_rule_options :: no_continue :: NoContinueOptions >> , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallows the usage of the unary operators ++ and --."] # [serde (skip_serializing_if = "Option::is_none")] pub no_increment_decrement : Option < RuleConfiguration < biome_rule_options :: no_increment_decrement :: NoIncrementDecrementOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow function parameters that are only used in recursive calls."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameters_only_used_in_recursion : Option < RuleFixConfiguration < biome_rule_options :: no_parameters_only_used_in_recursion :: NoParametersOnlyUsedInRecursionOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unknown DOM properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_attribute : Option < RuleConfiguration < biome_rule_options :: no_unknown_attribute :: NoUnknownAttributeOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Require Array#sort and Array#toSorted calls to always provide a compareFunction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_sort_compare : Option < RuleConfiguration < biome_rule_options :: use_array_sort_compare :: UseArraySortCompareOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_graphql_descriptions : Option < RuleConfiguration < biome_rule_options :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce specific order of Vue compiler macros."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_define_macros_order : Option < RuleFixConfiguration < biome_rule_options :: use_vue_define_macros_order :: UseVueDefineMacrosOrderOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> , # [doc = "Forbids v-bind directives with missing arguments or invalid modifiers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_bind : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_bind :: UseVueValidVBindOptions >> , # [doc = "Enforce valid usage of v-else."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else :: UseVueValidVElseOptions >> , # [doc = "Enforce valid v-else-if directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_else_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_else_if :: UseVueValidVElseIfOptions >> , # [doc = "Enforce valid v-html directives."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_html : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_html :: UseVueValidVHtmlOptions >> , # [doc = "Enforces valid v-if usage for Vue templates."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_if : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_if :: UseVueValidVIfOptions >> , # [doc = "Enforce valid v-on directives with proper arguments, modifiers, and handlers."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_valid_v_on : Option < RuleConfiguration < biome_rule_options :: use_vue_valid_v_on :: UseVueValidVOnOptions >> }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -4764,6 +4784,11 @@ impl Nursery {
         "useVueDefineMacrosOrder",
         "useVueMultiWordComponentNames",
         "useVueValidVBind",
+        "useVueValidVElse",
+        "useVueValidVElseIf",
+        "useVueValidVHtml",
+        "useVueValidVIf",
+        "useVueValidVOn",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -4803,6 +4828,11 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -4994,6 +5024,31 @@ impl RuleGroupExt for Nursery {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
+        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
         index_set
     }
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -5178,6 +5233,31 @@ impl RuleGroupExt for Nursery {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
+        if let Some(rule) = self.use_vue_valid_v_else.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_else_if.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_html.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_if.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+        }
+        if let Some(rule) = self.use_vue_valid_v_on.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -5352,6 +5432,26 @@ impl RuleGroupExt for Nursery {
                 .use_vue_valid_v_bind
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useVueValidVElse" => self
+                .use_vue_valid_v_else
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useVueValidVElseIf" => self
+                .use_vue_valid_v_else_if
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useVueValidVHtml" => self
+                .use_vue_valid_v_html
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useVueValidVIf" => self
+                .use_vue_valid_v_if
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useVueValidVOn" => self
+                .use_vue_valid_v_on
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
     }
@@ -5396,6 +5496,11 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_vue_define_macros_order: Some(value.into()),
             use_vue_multi_word_component_names: Some(value.into()),
             use_vue_valid_v_bind: Some(value.into()),
+            use_vue_valid_v_else: Some(value.into()),
+            use_vue_valid_v_else_if: Some(value.into()),
+            use_vue_valid_v_html: Some(value.into()),
+            use_vue_valid_v_if: Some(value.into()),
+            use_vue_valid_v_on: Some(value.into()),
         }
     }
 }
