@@ -51,7 +51,7 @@ use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use rayon::iter::Either;
+use either::Either;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
