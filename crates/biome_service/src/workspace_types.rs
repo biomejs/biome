@@ -44,23 +44,32 @@ impl<'a> ModuleQueue<'a> {
 /// Rename complex type names with simpler ones.
 ///
 /// Complex names are generated from generic types.
-fn rename_type(name: &str) -> String {
+fn rename_type(name: &str) -> Option<String> {
     if let Some(stripped) = name.strip_prefix("RuleWithOptions_for_") {
-        format!("RuleWith{stripped}")
+        Some(format!("RuleWith{stripped}"))
     } else if let Some(stripped) = name.strip_prefix("RuleWithFixOptions_for_") {
-        format!("RuleWith{stripped}")
+        Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleAssistWithOptions_for_") {
+        Some(format!("RuleAssistWith{stripped}"))
     } else if let Some(stripped) = name
         .strip_prefix("RuleConfiguration_for_")
         .map(|x| x.strip_suffix("Options").unwrap_or(x))
     {
-        format!("{stripped}Configuration")
+        Some(format!("{stripped}Configuration"))
     } else if let Some(stripped) = name
         .strip_prefix("RuleFixConfiguration_for_")
         .map(|x| x.strip_suffix("Options").unwrap_or(x))
     {
-        format!("{stripped}Configuration")
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleAssistConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name.strip_prefix("SeverityOrGroup_for_") {
+        Some(format!("SeverityOr{stripped}"))
     } else {
-        name.to_string()
+        None
     }
 }
 
@@ -441,7 +450,7 @@ fn schema_object_type<'a>(
             queue.push_back((key, def_schema));
 
             // Apply type name renaming for the reference
-            let renamed_key = rename_type(key);
+            let renamed_key = rename_type(key).unwrap_or_else(|| key.to_string());
             Some(AnyTsType::from(
                 make::ts_reference_type(AnyTsName::from(make::js_reference_identifier(
                     make::ident(&renamed_key),
@@ -564,7 +573,7 @@ pub fn generate_type<'a>(
 
     while let Some((name, schema)) = queue.pop_front() {
         // Apply type name renaming for complex generic types
-        let name = rename_type(name);
+        let name = rename_type(name).unwrap_or_else(|| name.to_string());
         let name = name.as_str();
 
         // Skip generating type aliases for TypeScript reserved primitive type names
@@ -693,7 +702,7 @@ pub fn generate_type<'a>(
     }
 
     // Apply type name renaming for the root type reference
-    let renamed_root = rename_type(root_name);
+    let renamed_root = rename_type(root_name).unwrap_or_else(|| root_name.to_string());
     AnyTsType::TsReferenceType(
         make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
             make::js_reference_identifier(make::ident(&renamed_root)),

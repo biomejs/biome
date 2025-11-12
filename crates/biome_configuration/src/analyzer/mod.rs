@@ -296,7 +296,6 @@ pub enum RulePlainConfiguration {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleAssistConfiguration<T: Default> {
     Plain(RuleAssistPlainConfiguration),
@@ -365,6 +364,29 @@ impl<T: Default> Default for RuleAssistConfiguration<T> {
         Self::Plain(RuleAssistPlainConfiguration::Off)
     }
 }
+
+#[cfg(feature = "schema")]
+impl<T: Default> schemars::JsonSchema for RuleAssistConfiguration<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleAssistConfiguration_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        let plain_schema = generator.subschema_for::<RuleAssistPlainConfiguration>();
+        let with_options_schema = generator.subschema_for::<RuleAssistWithOptions<T>>();
+
+        schemars::json_schema!({
+            "oneOf": [
+                plain_schema,
+                with_options_schema,
+            ]
+        })
+    }
+}
+
 #[derive(
     Clone,
     Copy,
@@ -404,7 +426,6 @@ impl Merge for RuleAssistPlainConfiguration {
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
@@ -416,6 +437,30 @@ impl<T: Default> Merge for RuleAssistWithOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
         self.options = other.options;
+    }
+}
+
+#[cfg(feature = "schema")]
+impl<T: Default> schemars::JsonSchema for RuleAssistWithOptions<T>
+where
+    T: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("RuleAssistWithOptions_for_{}", T::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        let level_schema = generator.subschema_for::<RuleAssistPlainConfiguration>();
+        let options_schema = generator.subschema_for::<T>();
+
+        schemars::json_schema!({
+            "type": "object",
+            "required": ["level", "options"],
+            "properties": {
+                "level": level_schema,
+                "options": options_schema,
+            }
+        })
     }
 }
 
@@ -904,7 +949,6 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum SeverityOrGroup<G> {
     Plain(GroupPlainConfiguration),
@@ -924,6 +968,30 @@ impl<G> SeverityOrGroup<G> {
             Self::Plain(_) => panic!("Cannot unwrap a plain configuration"),
             Self::Group(group) => group,
         }
+    }
+}
+
+#[cfg(feature = "schema")]
+impl<G> schemars::JsonSchema for SeverityOrGroup<G>
+where
+    G: schemars::JsonSchema,
+{
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Owned(format!("SeverityOrGroup_for_{}", G::schema_name()))
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        // Generate schemas for the inner types
+        let plain_schema = generator.subschema_for::<GroupPlainConfiguration>();
+        let group_schema = generator.subschema_for::<G>();
+
+        // Create an anyOf schema combining both variants
+        schemars::json_schema!({
+            "anyOf": [
+                plain_schema,
+                group_schema,
+            ]
+        })
     }
 }
 

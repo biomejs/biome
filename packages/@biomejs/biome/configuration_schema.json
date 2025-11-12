@@ -2079,7 +2079,7 @@
 				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
-					"anyOf": [{ "$ref": "#/$defs/TrailingCommas" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2113,6 +2113,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"JsTrailingCommas": {
+			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files.",
+			"type": "string",
+			"enum": ["all", "es5", "none"]
 		},
 		"JsonAssistConfiguration": {
 			"description": "Assist options specific to the JSON linter",
@@ -2193,7 +2198,10 @@
 				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
-					"anyOf": [{ "$ref": "#/$defs/TrailingCommas2" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/JsonTrailingCommas" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -2223,6 +2231,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"JsonTrailingCommas": {
+			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.",
+			"type": "string",
+			"enum": ["none", "all"]
 		},
 		"JsxRuntime": {
 			"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
@@ -5271,35 +5284,35 @@
 				"useVueValidVElse": {
 					"description": "Enforce valid usage of v-else.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseVueValidVElseConfiguration" },
+						{ "$ref": "#/$defs/UseVueValidVElseConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useVueValidVElseIf": {
 					"description": "Enforce valid v-else-if directives.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseVueValidVElseIfConfiguration" },
+						{ "$ref": "#/$defs/UseVueValidVElseIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useVueValidVHtml": {
 					"description": "Enforce valid v-html directives.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseVueValidVHtmlConfiguration" },
+						{ "$ref": "#/$defs/UseVueValidVHtmlConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useVueValidVIf": {
 					"description": "Enforces valid v-if usage for Vue templates.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseVueValidVIfConfiguration" },
+						{ "$ref": "#/$defs/UseVueValidVIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useVueValidVOn": {
 					"description": "Enforce valid v-on directives with proper arguments, modifiers, and handlers.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseVueValidVOnConfiguration" },
+						{ "$ref": "#/$defs/UseVueValidVOnConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -5328,6 +5341,12 @@
 					"type": "string",
 					"const": "before"
 				}
+			]
+		},
+		"OrganizeImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithOrganizeImportsOptions" }
 			]
 		},
 		"OrganizeImportsOptions": {
@@ -5685,89 +5704,37 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithOptions" }
-			]
-		},
-		"RuleAssistConfiguration2": {
-			"anyOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithOptions2" }
-			]
-		},
-		"RuleAssistConfiguration3": {
-			"anyOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithOptions3" }
-			]
-		},
-		"RuleAssistConfiguration4": {
-			"anyOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithOptions4" }
-			]
-		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
-		"RuleAssistWithOptions": {
+		"RuleAssistWithOrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"$ref": "#/$defs/RuleAssistPlainConfiguration"
-				},
-				"options": {
-					"description": "Rule's options",
-					"$ref": "#/$defs/OrganizeImportsOptions"
-				}
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/OrganizeImportsOptions" }
 			},
-			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
-		"RuleAssistWithOptions2": {
+		"RuleAssistWithUseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"$ref": "#/$defs/RuleAssistPlainConfiguration"
-				},
-				"options": {
-					"description": "Rule's options",
-					"$ref": "#/$defs/UseSortedAttributesOptions"
-				}
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedAttributesOptions" }
 			},
-			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
-		"RuleAssistWithOptions3": {
+		"RuleAssistWithUseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"$ref": "#/$defs/RuleAssistPlainConfiguration"
-				},
-				"options": {
-					"description": "Rule's options",
-					"$ref": "#/$defs/UseSortedKeysOptions"
-				}
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedKeysOptions" }
 			},
-			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
-		"RuleAssistWithOptions4": {
+		"RuleAssistWithUseSortedPropertiesOptions": {
 			"type": "object",
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"$ref": "#/$defs/RuleAssistPlainConfiguration"
-				},
-				"options": {
-					"description": "Rule's options",
-					"$ref": "#/$defs/UseSortedPropertiesOptions"
-				}
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedPropertiesOptions" }
 			},
-			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
 		"RuleDomains": {
@@ -9296,78 +9263,48 @@
 		},
 		"RuleWithUseVueValidVElseIfOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueValidVElseIfOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVElseIfOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseVueValidVElseOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueValidVElseOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVElseOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseVueValidVHtmlOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueValidVHtmlOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVHtmlOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseVueValidVIfOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueValidVIfOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVIfOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseVueValidVOnOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseVueValidVOnOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVOnOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
@@ -9392,32 +9329,47 @@
 			"type": "object",
 			"properties": {
 				"a11y": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/$defs/SeverityOrA11y" }, { "type": "null" }]
 				},
 				"complexity": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup2" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/SeverityOrComplexity" },
+						{ "type": "null" }
+					]
 				},
 				"correctness": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup3" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/SeverityOrCorrectness" },
+						{ "type": "null" }
+					]
 				},
 				"nursery": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup4" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/$defs/SeverityOrNursery" }, { "type": "null" }]
 				},
 				"performance": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup5" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/SeverityOrPerformance" },
+						{ "type": "null" }
+					]
 				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
 				},
 				"security": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup6" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/SeverityOrSecurity" },
+						{ "type": "null" }
+					]
 				},
 				"style": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup7" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/$defs/SeverityOrStyle" }, { "type": "null" }]
 				},
 				"suspicious": {
-					"anyOf": [{ "$ref": "#/$defs/SeverityOrGroup8" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/SeverityOrSuspicious" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9503,49 +9455,49 @@
 			]
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
-		"SeverityOrGroup": {
+		"SeverityOrA11y": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/A11y" }
 			]
 		},
-		"SeverityOrGroup2": {
+		"SeverityOrComplexity": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Complexity" }
 			]
 		},
-		"SeverityOrGroup3": {
+		"SeverityOrCorrectness": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Correctness" }
 			]
 		},
-		"SeverityOrGroup4": {
+		"SeverityOrNursery": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Nursery" }
 			]
 		},
-		"SeverityOrGroup5": {
+		"SeverityOrPerformance": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Performance" }
 			]
 		},
-		"SeverityOrGroup6": {
+		"SeverityOrSecurity": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Security" }
 			]
 		},
-		"SeverityOrGroup7": {
+		"SeverityOrStyle": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
-				{ "$ref": "#/$defs/Style2" }
+				{ "$ref": "#/$defs/Style" }
 			]
 		},
-		"SeverityOrGroup8": {
+		"SeverityOrSuspicious": {
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Suspicious" }
@@ -9559,7 +9511,7 @@
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
-						{ "$ref": "#/$defs/RuleAssistConfiguration" },
+						{ "$ref": "#/$defs/OrganizeImportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9570,21 +9522,21 @@
 				"useSortedAttributes": {
 					"description": "Enforce attribute sorting in JSX elements.",
 					"anyOf": [
-						{ "$ref": "#/$defs/RuleAssistConfiguration2" },
+						{ "$ref": "#/$defs/UseSortedAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
-						{ "$ref": "#/$defs/RuleAssistConfiguration3" },
+						{ "$ref": "#/$defs/UseSortedKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedProperties": {
 					"description": "Enforce ordering of CSS properties and nested rules.",
 					"anyOf": [
-						{ "$ref": "#/$defs/RuleAssistConfiguration4" },
+						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -9629,20 +9581,6 @@
 			]
 		},
 		"Style": {
-			"oneOf": [
-				{
-					"description": "Requires triple-quoted block descriptions (`\"\"\"...\"\"\"`)",
-					"type": "string",
-					"const": "block"
-				},
-				{
-					"description": "Requires single-quoted inline descriptions (`\"...\"`)",
-					"type": "string",
-					"const": "inline"
-				}
-			]
-		},
-		"Style2": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
@@ -10165,26 +10103,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"Style3": {
-			"description": "Rule's options.",
-			"oneOf": [
-				{
-					"description": "Use the best fitting style according to the situation",
-					"type": "string",
-					"const": "auto"
-				},
-				{
-					"description": "Always use inline type keywords",
-					"type": "string",
-					"const": "inlineType"
-				},
-				{
-					"description": "Always separate types in a dedicated `import type`",
-					"type": "string",
-					"const": "separatedType"
-				}
-			]
 		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
@@ -10864,40 +10782,6 @@
 			},
 			"additionalProperties": false
 		},
-		"TrailingCommas": {
-			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
-			"oneOf": [
-				{
-					"description": "Trailing commas wherever possible (including function parameters and calls).",
-					"type": "string",
-					"const": "all"
-				},
-				{
-					"description": "Trailing commas where valid in ES5 (objects, arrays, etc.). No trailing commas in type parameters in TypeScript.",
-					"type": "string",
-					"const": "es5"
-				},
-				{
-					"description": "No trailing commas.",
-					"type": "string",
-					"const": "none"
-				}
-			]
-		},
-		"TrailingCommas2": {
-			"oneOf": [
-				{
-					"description": "The formatter will remove the trailing commas.",
-					"type": "string",
-					"const": "none"
-				},
-				{
-					"description": "The trailing commas are allowed and advised in JSON and JSONC files.",
-					"type": "string",
-					"const": "all"
-				}
-			]
-		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -11170,11 +11054,19 @@
 			"properties": {
 				"style": {
 					"description": "The description style to enforce. Defaults to \"block\"",
-					"anyOf": [{ "$ref": "#/$defs/Style" }, { "type": "null" }],
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsStyle" },
+						{ "type": "null" }
+					],
 					"default": null
 				}
 			},
 			"additionalProperties": false
+		},
+		"UseConsistentGraphqlDescriptionsStyle": {
+			"description": "The GraphQL description style to enforce.",
+			"type": "string",
+			"enum": ["block", "inline"]
 		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [
@@ -11606,10 +11498,18 @@
 			"properties": {
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
-					"anyOf": [{ "$ref": "#/$defs/Style3" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/$defs/UseImportTypeStyle" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
+		},
+		"UseImportTypeStyle": {
+			"description": "The style to apply when importing types.",
+			"type": "string",
+			"enum": ["auto", "inlineType", "separatedType"]
 		},
 		"UseIndexOfConfiguration": {
 			"oneOf": [
@@ -12020,6 +11920,12 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSortedAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedAttributesOptions" }
+			]
+		},
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -12051,6 +11957,12 @@
 			},
 			"additionalProperties": false
 		},
+		"UseSortedKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedKeysOptions" }
+			]
+		},
 		"UseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -12059,6 +11971,12 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"UseSortedPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedPropertiesOptions" }
+			]
 		},
 		"UseSortedPropertiesOptions": {
 			"type": "object",
@@ -12306,15 +12224,15 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVElseConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseVueValidVElseOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVElseOptions" }
 			]
 		},
 		"UseVueValidVElseIfConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseVueValidVElseIfOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVElseIfOptions" }
 			]
 		},
 		"UseVueValidVElseIfOptions": {
@@ -12326,9 +12244,9 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVHtmlConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseVueValidVHtmlOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVHtmlOptions" }
 			]
 		},
 		"UseVueValidVHtmlOptions": {
@@ -12336,9 +12254,9 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVIfConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseVueValidVIfOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVIfOptions" }
 			]
 		},
 		"UseVueValidVIfOptions": {
@@ -12346,9 +12264,9 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVOnConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseVueValidVOnOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVOnOptions" }
 			]
 		},
 		"UseVueValidVOnOptions": {
@@ -12356,8 +12274,8 @@
 			"properties": {
 				"modifiers": {
 					"description": "Additional modifiers that should be considered valid",
-					"default": null,
 					"type": ["array", "null"],
+					"default": null,
 					"items": { "type": "string" }
 				}
 			},

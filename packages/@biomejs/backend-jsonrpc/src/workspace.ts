@@ -717,7 +717,7 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
-	trailingCommas?: TrailingCommas;
+	trailingCommas?: JsTrailingCommas;
 }
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
@@ -800,7 +800,7 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
-	trailingCommas?: TrailingCommas2;
+	trailingCommas?: JsonTrailingCommas;
 }
 /**
  * Linter options specific to the JSON linter
@@ -826,18 +826,18 @@ export interface JsonParserConfiguration {
 }
 export type RuleDomains = { [K in any]?: any };
 export interface Rules {
-	a11y?: SeverityOrGroup;
-	complexity?: SeverityOrGroup2;
-	correctness?: SeverityOrGroup3;
-	nursery?: SeverityOrGroup4;
-	performance?: SeverityOrGroup5;
+	a11y?: SeverityOrA11y;
+	complexity?: SeverityOrComplexity;
+	correctness?: SeverityOrCorrectness;
+	nursery?: SeverityOrNursery;
+	performance?: SeverityOrPerformance;
 	/**
 	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
-	security?: SeverityOrGroup6;
-	style?: SeverityOrGroup7;
-	suspicious?: SeverityOrGroup8;
+	security?: SeverityOrSecurity;
+	style?: SeverityOrStyle;
+	suspicious?: SeverityOrSuspicious;
 }
 export interface OverridePattern {
 	/**
@@ -899,7 +899,7 @@ export interface Source {
 	/**
 	 * Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 	 */
-	organizeImports?: RuleAssistConfiguration;
+	organizeImports?: OrganizeImportsConfiguration;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -907,15 +907,15 @@ export interface Source {
 	/**
 	 * Enforce attribute sorting in JSX elements.
 	 */
-	useSortedAttributes?: RuleAssistConfiguration2;
+	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
 	 * Sort the keys of a JSON object in natural order.
 	 */
-	useSortedKeys?: RuleAssistConfiguration3;
+	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
 	 * Enforce ordering of CSS properties and nested rules.
 	 */
-	useSortedProperties?: RuleAssistConfiguration4;
+	useSortedProperties?: UseSortedPropertiesConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -959,18 +959,21 @@ export type OperatorLinebreak = "after" | "before";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
- * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+ * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files.
  */
-export type TrailingCommas = "all" | "es5" | "none";
-export type TrailingCommas2 = "none" | "all";
-export type SeverityOrGroup = GroupPlainConfiguration | A11y;
-export type SeverityOrGroup2 = GroupPlainConfiguration | Complexity;
-export type SeverityOrGroup3 = GroupPlainConfiguration | Correctness;
-export type SeverityOrGroup4 = GroupPlainConfiguration | Nursery;
-export type SeverityOrGroup5 = GroupPlainConfiguration | Performance;
-export type SeverityOrGroup6 = GroupPlainConfiguration | Security;
-export type SeverityOrGroup7 = GroupPlainConfiguration | Style2;
-export type SeverityOrGroup8 = GroupPlainConfiguration | Suspicious;
+export type JsTrailingCommas = "all" | "es5" | "none";
+/**
+ * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
+ */
+export type JsonTrailingCommas = "none" | "all";
+export type SeverityOrA11y = GroupPlainConfiguration | A11y;
+export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
+export type SeverityOrCorrectness = GroupPlainConfiguration | Correctness;
+export type SeverityOrNursery = GroupPlainConfiguration | Nursery;
+export type SeverityOrPerformance = GroupPlainConfiguration | Performance;
+export type SeverityOrSecurity = GroupPlainConfiguration | Security;
+export type SeverityOrStyle = GroupPlainConfiguration | Style;
+export type SeverityOrSuspicious = GroupPlainConfiguration | Suspicious;
 export interface OverrideAssistConfiguration {
 	/**
 	 * List of actions
@@ -1051,18 +1054,18 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
-export type RuleAssistConfiguration =
+export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions;
-export type RuleAssistConfiguration2 =
+	| RuleAssistWithOrganizeImportsOptions;
+export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions2;
-export type RuleAssistConfiguration3 =
+	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions3;
-export type RuleAssistConfiguration4 =
+	| RuleAssistWithUseSortedKeysOptions;
+export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions4;
+	| RuleAssistWithUseSortedPropertiesOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -1949,7 +1952,7 @@ export interface Security {
 /**
  * A list of rules that belong to this group
  */
-export interface Style2 {
+export interface Style {
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -2638,44 +2641,20 @@ export interface Suspicious {
 }
 export type Glob = string;
 export type RuleAssistPlainConfiguration = "off" | "on";
-export interface RuleAssistWithOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
+export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
 	options: OrganizeImportsOptions;
 }
-export interface RuleAssistWithOptions2 {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
+export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
 	options: UseSortedAttributesOptions;
 }
-export interface RuleAssistWithOptions3 {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
+export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
 	options: UseSortedKeysOptions;
 }
-export interface RuleAssistWithOptions4 {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
+export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
 	options: UseSortedPropertiesOptions;
 }
 export type NoAccessKeyConfiguration =
@@ -5830,7 +5809,7 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
 	 * The description style to enforce. Defaults to "block"
 	 */
-	style?: Style;
+	style?: UseConsistentGraphqlDescriptionsStyle;
 }
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
@@ -6029,7 +6008,7 @@ export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
-	style?: Style3;
+	style?: UseImportTypeStyle;
 }
 export type UseLiteralEnumMembersOptions = {};
 /**
@@ -6236,7 +6215,10 @@ while for `useState()` it would be `[1]`.
 	stableResult?: StableHookResult;
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
-export type Style = "block" | "inline";
+/**
+ * The GraphQL description style to enforce.
+ */
+export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -6251,9 +6233,9 @@ export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
 /**
- * Rule's options.
+ * The style to apply when importing types.
  */
-export type Style3 = "auto" | "inlineType" | "separatedType";
+export type UseImportTypeStyle = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce

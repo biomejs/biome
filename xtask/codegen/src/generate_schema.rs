@@ -32,15 +32,27 @@ fn rename_type(name: &str) -> Option<String> {
         Some(format!("RuleWith{stripped}"))
     } else if let Some(stripped) = name.strip_prefix("RuleWithFixOptions_for_") {
         Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleAssistWithOptions_for_") {
+        Some(format!("RuleAssistWith{stripped}"))
     } else if let Some(stripped) = name
         .strip_prefix("RuleConfiguration_for_")
         .map(|x| x.strip_suffix("Options").unwrap_or(x))
     {
         Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleFixConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleAssistConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name.strip_prefix("SeverityOrGroup_for_") {
+        Some(format!("SeverityOr{stripped}"))
     } else {
-        name.strip_prefix("RuleFixConfiguration_for_")
-            .map(|x| x.strip_suffix("Options").unwrap_or(x))
-            .map(|stripped| format!("{stripped}Configuration"))
+        None
     }
 }
 
