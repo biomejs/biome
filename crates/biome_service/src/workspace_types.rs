@@ -66,10 +66,9 @@ fn rename_type(name: &str) -> Option<String> {
         .map(|x| x.strip_suffix("Options").unwrap_or(x))
     {
         Some(format!("{stripped}Configuration"))
-    } else if let Some(stripped) = name.strip_prefix("SeverityOrGroup_for_") {
-        Some(format!("SeverityOr{stripped}"))
     } else {
-        None
+        name.strip_prefix("SeverityOrGroup_for_")
+            .map(|stripped| format!("SeverityOr{stripped}"))
     }
 }
 
