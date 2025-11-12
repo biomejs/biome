@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "Biome Developers and Contributors",
   "license": "MIT OR Apache-2.0",
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@10.22.0",
   "engines": {
     "pnpm": "10.19.0"
   },
