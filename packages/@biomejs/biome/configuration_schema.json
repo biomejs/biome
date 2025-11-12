@@ -5163,7 +5163,7 @@
 					]
 				},
 				"noForIn": {
-					"description": "Disallow iterating over an array with a for-in loop.",
+					"description": "Disallow iterating using a for-in loop.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForInConfiguration" },
 						{ "type": "null" }

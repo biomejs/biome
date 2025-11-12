@@ -1681,7 +1681,7 @@ export interface Nursery {
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
 	/**
-	 * Disallow iterating over an array with a for-in loop.
+	 * Disallow iterating using a for-in loop.
 	 */
 	noForIn?: RuleConfiguration_for_NoForInOptions;
 	/**
