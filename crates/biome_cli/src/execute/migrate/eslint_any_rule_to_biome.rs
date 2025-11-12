@@ -623,16 +623,27 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/prefer-nullish-coalescing" => {
             let group = rules.style.get_or_insert_with(Default::default);
+
+            // Enable useNullishCoalescing (always)
             let rule = group
                 .unwrap_group_as_mut()
                 .use_nullish_coalescing
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
 
+            // Enable inspired rules if requested
             if options.include_inspired {
+                // Enable useNullishCoalescingInTernary
                 let rule = group
                     .unwrap_group_as_mut()
                     .use_nullish_coalescing_in_ternary
+                    .get_or_insert(Default::default());
+                rule.set_level(rule.level().max(rule_severity.into()));
+
+                // Enable useIfAsNullishCoalescingAssignment
+                let rule = group
+                    .unwrap_group_as_mut()
+                    .use_if_as_nullish_coalescing_assignment
                     .get_or_insert(Default::default());
                 rule.set_level(rule.level().max(rule_severity.into()));
             }

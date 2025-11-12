@@ -307,6 +307,7 @@ pub mod use_guard_for_in;
 pub mod use_heading_content;
 pub mod use_hook_at_top_level;
 pub mod use_html_lang;
+pub mod use_if_as_nullish_coalescing_assignment;
 pub mod use_iframe_title;
 pub mod use_image_size;
 pub mod use_import_extensions;

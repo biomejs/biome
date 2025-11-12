@@ -2140,6 +2140,10 @@ export interface Style2 {
 	 */
 	useGroupedAccessorPairs?: RuleConfiguration_for_UseGroupedAccessorPairsOptions;
 	/**
+	 * Enforce using the nullish coalescing assignment operator (??=) instead of if statements for default value assignment.
+	 */
+	useIfAsNullishCoalescingAssignment?: RuleFixConfiguration_for_UseIfAsNullishCoalescingAssignmentOptions;
+	/**
 	 * Promotes the use of import type for types.
 	 */
 	useImportType?: RuleFixConfiguration_for_UseImportTypeOptions;
@@ -2163,6 +2167,10 @@ export interface Style2 {
 	 * Enforce using nullish coalescing operator (??) instead of logical or (||) when providing default values.
 	 */
 	useNullishCoalescing?: RuleFixConfiguration_for_UseNullishCoalescingOptions;
+	/**
+	 * Enforce using nullish coalescing assignment operator (??=) instead of logical OR assignment (||=).
+	 */
+	useNullishCoalescingAssignment?: RuleFixConfiguration_for_UseNullishCoalescingAssignmentOptions;
 	/**
 	 * Enforce using nullish coalescing operator (??) instead of ternary expressions that check for null or undefined.
 	 */
@@ -3438,6 +3446,9 @@ export type RuleConfiguration_for_UseGraphqlNamingConventionOptions =
 export type RuleConfiguration_for_UseGroupedAccessorPairsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseGroupedAccessorPairsOptions;
+export type RuleFixConfiguration_for_UseIfAsNullishCoalescingAssignmentOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseIfAsNullishCoalescingAssignmentOptions;
 export type RuleFixConfiguration_for_UseImportTypeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportTypeOptions;
@@ -3456,6 +3467,9 @@ export type RuleFixConfiguration_for_UseNodejsImportProtocolOptions =
 export type RuleFixConfiguration_for_UseNullishCoalescingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNullishCoalescingOptions;
+export type RuleFixConfiguration_for_UseNullishCoalescingAssignmentOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseNullishCoalescingAssignmentOptions;
 export type RuleFixConfiguration_for_UseNullishCoalescingInTernaryOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNullishCoalescingInTernaryOptions;
@@ -6849,6 +6863,20 @@ export interface RuleWithOptions_for_UseGroupedAccessorPairsOptions {
 	 */
 	options: UseGroupedAccessorPairsOptions;
 }
+export interface RuleWithFixOptions_for_UseIfAsNullishCoalescingAssignmentOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseIfAsNullishCoalescingAssignmentOptions;
+}
 export interface RuleWithFixOptions_for_UseImportTypeOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -6928,6 +6956,20 @@ export interface RuleWithFixOptions_for_UseNullishCoalescingOptions {
 	 * Rule's options
 	 */
 	options: UseNullishCoalescingOptions;
+}
+export interface RuleWithFixOptions_for_UseNullishCoalescingAssignmentOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseNullishCoalescingAssignmentOptions;
 }
 export interface RuleWithFixOptions_for_UseNullishCoalescingInTernaryOptions {
 	/**
@@ -8765,6 +8807,7 @@ export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
 export interface UseGraphqlNamingConventionOptions {}
 export interface UseGroupedAccessorPairsOptions {}
+export interface UseIfAsNullishCoalescingAssignmentOptions {}
 export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
@@ -8797,6 +8840,7 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreConditionalTests?: boolean;
 }
+export interface UseNullishCoalescingAssignmentOptions {}
 export interface UseNullishCoalescingInTernaryOptions {}
 export interface UseNumberNamespaceOptions {}
 export interface UseNumericSeparatorsOptions {}
@@ -9452,12 +9496,14 @@ export type Category =
 	| "lint/style/useFragmentSyntax"
 	| "lint/style/useGraphqlNamingConvention"
 	| "lint/style/useGroupedAccessorPairs"
+	| "lint/style/useIfAsNullishCoalescingAssignment"
 	| "lint/style/useImportType"
 	| "lint/style/useLiteralEnumMembers"
 	| "lint/style/useNamingConvention"
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNullishCoalescing"
+	| "lint/style/useNullishCoalescingAssignment"
 	| "lint/style/useNullishCoalescingInTernary"
 	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericSeparators"

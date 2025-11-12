@@ -11202,6 +11202,29 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseIfAsNullishCoalescingAssignmentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{
+							"$ref": "#/definitions/UseIfAsNullishCoalescingAssignmentOptions"
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseIframeTitleOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11544,6 +11567,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseNodejsImportProtocolOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseNullishCoalescingAssignmentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseNullishCoalescingAssignmentOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13153,6 +13197,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useIfAsNullishCoalescingAssignment": {
+					"description": "Enforce using the nullish coalescing assignment operator (??=) instead of if statements for default value assignment.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseIfAsNullishCoalescingAssignmentConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
 					"anyOf": [
@@ -13192,6 +13245,15 @@
 					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||) when providing default values.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNullishCoalescingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNullishCoalescingAssignment": {
+					"description": "Enforce using nullish coalescing assignment operator (??=) instead of logical OR assignment (||=).",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseNullishCoalescingAssignmentConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -14740,6 +14802,18 @@
 			]
 		},
 		"UseHtmlLangOptions": { "type": "object", "additionalProperties": false },
+		"UseIfAsNullishCoalescingAssignmentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseIfAsNullishCoalescingAssignmentOptions"
+				}
+			]
+		},
+		"UseIfAsNullishCoalescingAssignmentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseIframeTitleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -14967,6 +15041,18 @@
 			]
 		},
 		"UseNodejsImportProtocolOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNullishCoalescingAssignmentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseNullishCoalescingAssignmentOptions"
+				}
+			]
+		},
+		"UseNullishCoalescingAssignmentOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

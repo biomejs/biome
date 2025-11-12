@@ -289,6 +289,7 @@ define_categories! {
     "lint/style/useFragmentSyntax": "https://biomejs.dev/linter/rules/use-fragment-syntax",
     "lint/style/useGraphqlNamingConvention": "https://biomejs.dev/linter/rules/use-graphql-naming-convention",
     "lint/style/useGroupedAccessorPairs": "https://biomejs.dev/linter/rules/use-grouped-accessor-pairs",
+    "lint/style/useIfAsNullishCoalescingAssignment": "https://biomejs.dev/linter/rules/use-if-as-nullish-coalescing-assignment",
     "lint/style/useImportType": "https://biomejs.dev/linter/rules/use-import-type",
     "lint/style/useLiteralEnumMembers": "https://biomejs.dev/linter/rules/use-literal-enum-members",
     "lint/style/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
