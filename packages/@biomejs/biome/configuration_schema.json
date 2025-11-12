@@ -3310,9 +3310,9 @@
 			"additionalProperties": false
 		},
 		"NoForInConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoForInOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoForInOptions" }
 			]
 		},
 		"NoForInOptions": { "type": "object", "additionalProperties": false },
@@ -5056,7 +5056,7 @@
 				"noForIn": {
 					"description": "Disallow iterating using a for-in loop.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoForInConfiguration" },
+						{ "$ref": "#/$defs/NoForInConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6564,18 +6564,12 @@
 		},
 		"RuleWithNoForInOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoForInOptions" }]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoForInOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithNoFunctionAssignOptions": {
 			"type": "object",
