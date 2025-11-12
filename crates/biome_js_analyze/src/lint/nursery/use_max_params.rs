@@ -187,7 +187,7 @@ impl Rule for UseMaxParams {
         let parameters = parameters?;
         let parameter_count = count_parameters(&parameters);
 
-        (parameter_count > options.max as usize).then_some(UseMaxParamsState { parameter_count })
+        (parameter_count > options.max() as usize).then_some(UseMaxParamsState { parameter_count })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -202,7 +202,7 @@ impl Rule for UseMaxParams {
                 rule_category!(),
                 range,
                 markup! {
-                    "Function has "{state.parameter_count}" parameters, but only "{options.max}" are allowed."
+                    "Function has "{state.parameter_count}" parameters, but only "{options.max()}" are allowed."
                 },
             )
             .note(markup! {

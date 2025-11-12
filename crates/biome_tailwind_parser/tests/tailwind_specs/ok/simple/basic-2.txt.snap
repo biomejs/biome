@@ -1,0 +1,105 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+break-before-auto break-after-page mix-blend-normal
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..12 "break-before" [] [],
+                minus_token: DASH@12..13 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@13..17 "auto" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@17..18 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@18..29 "break-after" [] [],
+                minus_token: DASH@29..30 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@30..34 "page" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@34..35 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@35..44 "mix-blend" [] [],
+                minus_token: DASH@44..45 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@45..52 "normal" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@52..52 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..52
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..52
+    0: TW_FULL_CANDIDATE@0..17
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..17
+        0: TW_BASE@0..12 "break-before" [] []
+        1: DASH@12..13 "-" [] []
+        2: TW_NAMED_VALUE@13..17
+          0: TW_VALUE@13..17 "auto" [] []
+        3: (empty)
+      3: (empty)
+    1: WHITESPACE@17..18 " " [] []
+    2: TW_FULL_CANDIDATE@18..34
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@18..34
+        0: TW_BASE@18..29 "break-after" [] []
+        1: DASH@29..30 "-" [] []
+        2: TW_NAMED_VALUE@30..34
+          0: TW_VALUE@30..34 "page" [] []
+        3: (empty)
+      3: (empty)
+    3: WHITESPACE@34..35 " " [] []
+    4: TW_FULL_CANDIDATE@35..52
+      0: TW_VARIANT_LIST@35..35
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@35..52
+        0: TW_BASE@35..44 "mix-blend" [] []
+        1: DASH@44..45 "-" [] []
+        2: TW_NAMED_VALUE@45..52
+          0: TW_VALUE@45..52 "normal" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@52..52 "" [] []
+
+```

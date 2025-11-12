@@ -41,6 +41,9 @@ HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
 AstroBogusFrontmatter = SyntaxElement*
 HtmlBogusTextExpression = SyntaxElement*
+SvelteBogusBlock = SyntaxElement*
+VueBogusDirective = SyntaxElement*
+VueBogusDirectiveArgument = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
@@ -82,6 +85,7 @@ AnyHtmlContent =
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| AnySvelteBlock
 	| HtmlBogusTextExpression
 
 
@@ -160,6 +164,8 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| SvelteAttachAttribute
+	| AnyVueDirective
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -182,8 +188,199 @@ AnyHtmlAttributeInitializer =
 
 
 
+// ==================================
+// Svelte
+// ==================================
+
+AnySvelteBlock =
+	SvelteDebugBlock
+	| SvelteKeyBlock
+	| SvelteBogusBlock
+	| SvelteRenderBlock
+	| SvelteHtmlBlock
+	| SvelteConstBlock
+	| SvelteIfBlock
+
+// {@debug}
+// ^^^^^^^^
+SvelteDebugBlock =
+	'{@'
+	'debug'
+	bindings: SvelteBindingList
+	'}'
+
+// {#key ...} ... {/key}
+// ^^^^^^^^^^^^^^^^^^^^^
+SvelteKeyBlock =
+	opening_block: SvelteKeyOpeningBlock
+	children: HtmlElementList
+	closing_block: SvelteKeyClosingBlock
+
+// {#key ...} ... {/key}
+// ^^^^^^^^^^
+SvelteKeyOpeningBlock =
+ 	'{#'
+ 	'key'
+ 	expression: HtmlTextExpression
+ 	'}'
+
+// {#key ...} ... {/key}
+//                ^^^^^^
+SvelteKeyClosingBlock =
+ 	'{/'
+ 	'key'
+ 	'}'
+
+
+SvelteBindingList = (SvelteName (',' SvelteName)*)
+
+SvelteName = 'svelte_ident'
+
+// {@render ...}
+// ^^^^^^^^^^^^^
+SvelteRenderBlock =
+ 	'{@'
+ 	'render'
+ 	expression: HtmlTextExpression
+ 	'}'
+
+ // {@attach ...}
+ // ^^^^^^^^^^^^^
+SvelteAttachAttribute =
+	'{@'
+	'attach'
+  expression: HtmlTextExpression
+  '}'
+
+// {@html ...}
+// ^^^^^^^^^^^
+SvelteHtmlBlock =
+	'{@'
+	'html'
+  expression: HtmlTextExpression
+  '}'
+
+// {@const ...}
+// ^^^^^^^^^^^
+SvelteConstBlock =
+	'{@'
+	'const'
+  expression: HtmlTextExpression
+  '}'
+
+// {#if ..} {:else if ..} {:else} {/if}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteIfBlock =
+	opening_block: SvelteIfOpeningBlock
+	else_if_clauses: SvelteElseIfClauseList
+	else_clause: SvelteElseClause?
+	closing_block: SvelteIfClosingBlock
+
+// {#if ..} {:else if ..} {:else} {/if}
+// ^^^^^^^^
+SvelteIfOpeningBlock =
+	'{#'
+	'if'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+SvelteElseIfClauseList = SvelteElseIfClause*
+
+// {#if ..} {:else if ..} {:else} {/if}
+//          ^^^^^^^^^^^^^
+SvelteElseIfClause =
+	'{:'
+	'else'
+	'if'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+
+// {#if ..} {:else if ..} {:else} {/if}
+//                        ^^^^^^^
+SvelteElseClause =
+	'{:'
+	'else'
+	'}'
+	children: HtmlElementList
+
+// {#if ..} {:else if ..} {:else} {/if}
+//                                ^^^^^
+SvelteIfClosingBlock =
+	'{/'
+	'if'
+	'}'
+
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
 HtmlEmbeddedContent = value: 'html_literal'
+
+// ==================================
+// Vue
+// ==================================
+
+// reference: https://vuejs.org/guide/essentials/template-syntax
+
+AnyVueDirective =
+	VueDirective
+	| VueVBindShorthandDirective
+	| VueVOnShorthandDirective
+	| VueBogusDirective
+
+// <div v-bind:href="url" />
+//      ^^^^^^^^^^^^^^^^^
+VueDirective =
+  name: 'vue_ident'
+  arg: VueDirectiveArgument?
+  modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+// <div v-bind:href="url" />
+//            ^^^^^
+VueDirectiveArgument =
+	':'
+	arg: AnyVueDirectiveArgument
+
+// <div :href="url" />
+//      ^^^^^^^^^^^
+VueVBindShorthandDirective =
+	arg: VueDirectiveArgument
+	modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+// <div @click="onClick" />
+//      ^^^^^^^^^^^^^^^^
+VueVOnShorthandDirective =
+	'@'
+	arg: AnyVueDirectiveArgument
+	modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+AnyVueDirectiveArgument =
+	VueStaticArgument
+	| VueDynamicArgument
+	| VueBogusDirectiveArgument
+
+// <div v-bind:href="url" />
+//             ^^^^
+VueStaticArgument =
+	name: 'html_literal'
+
+// <div v-bind:[field]="url" />
+//             ^^^^^^^
+VueDynamicArgument =
+	'['
+	name: 'html_literal'
+	']'
+
+VueModifierList = VueModifier*
+
+// <div @click.prevent="onClick" />
+//            ^^^^^^^^
+VueModifier =
+	'.'
+	modifier: 'html_literal'

@@ -1,0 +1,128 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	<Foo @click="console.log('hello')"></Foo>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueVOnShorthandDirective {
+                                at_token: AT@17..18 "@" [] [],
+                                arg: VueStaticArgument {
+                                    name_token: HTML_LITERAL@18..23 "click" [] [],
+                                },
+                                modifiers: VueModifierList [],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@23..24 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@24..46 "\"console.log('hello')\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@46..47 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@47..48 "<" [] [],
+                        slash_token: SLASH@48..49 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@49..52 "Foo" [] [],
+                        },
+                        r_angle_token: R_ANGLE@52..53 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@53..55 "<" [Newline("\n")] [],
+                slash_token: SLASH@55..56 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@56..64 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@64..65 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..66
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..65
+    0: HTML_ELEMENT@0..65
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..53
+        0: HTML_ELEMENT@10..53
+          0: HTML_OPENING_ELEMENT@10..47
+            0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@13..17
+              0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@17..46
+              0: VUE_V_ON_SHORTHAND_DIRECTIVE@17..46
+                0: AT@17..18 "@" [] []
+                1: VUE_STATIC_ARGUMENT@18..23
+                  0: HTML_LITERAL@18..23 "click" [] []
+                2: VUE_MODIFIER_LIST@23..23
+                3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..46
+                  0: EQ@23..24 "=" [] []
+                  1: HTML_STRING@24..46
+                    0: HTML_STRING_LITERAL@24..46 "\"console.log('hello')\"" [] []
+            3: R_ANGLE@46..47 ">" [] []
+          1: HTML_ELEMENT_LIST@47..47
+          2: HTML_CLOSING_ELEMENT@47..53
+            0: L_ANGLE@47..48 "<" [] []
+            1: SLASH@48..49 "/" [] []
+            2: HTML_TAG_NAME@49..52
+              0: HTML_LITERAL@49..52 "Foo" [] []
+            3: R_ANGLE@52..53 ">" [] []
+      2: HTML_CLOSING_ELEMENT@53..65
+        0: L_ANGLE@53..55 "<" [Newline("\n")] []
+        1: SLASH@55..56 "/" [] []
+        2: HTML_TAG_NAME@56..64
+          0: HTML_LITERAL@56..64 "template" [] []
+        3: R_ANGLE@64..65 ">" [] []
+  4: EOF@65..66 "" [Newline("\n")] []
+
+```

@@ -140,7 +140,7 @@ impl Rule for UseReadonlyClassProperties {
 
         let ClassMemberReferences { writes, .. } = ctx.model.class_member_references(&members);
 
-        let private_only = !ctx.options().check_all_properties;
+        let private_only = !ctx.options().check_all_properties();
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(&members, private_only);
         let non_readonly_class_property_members =
@@ -219,7 +219,7 @@ impl Rule for UseReadonlyClassProperties {
                 );
 
                 if let Some(modified_member) =
-                    extract_property_member_name_trimmed_whitespace(member_name.clone())
+                    extract_class_member_name_trimmed_whitespace(member_name.clone())
                 {
                     let mut builder =
                         make::js_property_class_member(replace_modifiers, modified_member);
@@ -353,10 +353,10 @@ fn collect_non_readonly_constructor_parameters(
         .collect()
 }
 
-/// Removes leading whitespace from `#privateProperty` names. Without this, the name might include
-/// unwanted whitespace (e.g., "\n #privateProperty"). This ensures that when adding modifiers like
-/// `readonly`, they are appended correctly without being affected by the whitespace.
-fn extract_property_member_name_trimmed_whitespace(
+/// Removes leading trivia from class member names. Without this, the name might include
+/// unwanted trivia (e.g., "\n #privateProperty"). This ensures that when adding modifiers like
+/// `readonly`, they are appended correctly without being affected by the trivia.
+fn extract_class_member_name_trimmed_whitespace(
     member_name: AnyJsClassMemberName,
 ) -> Option<AnyJsClassMemberName> {
     match member_name {
@@ -366,6 +366,13 @@ fn extract_property_member_name_trimmed_whitespace(
             let trimmed = name.replace_token_discard_trivia(hash_token, new_hash_token)?;
 
             Some(AnyJsClassMemberName::JsPrivateClassMemberName(trimmed))
+        }
+        AnyJsClassMemberName::JsLiteralMemberName(name) => {
+            let value = name.value().ok()?;
+            let new_value = value.with_leading_trivia([]);
+            let trimmed = name.replace_token_discard_trivia(value, new_value)?;
+
+            Some(AnyJsClassMemberName::JsLiteralMemberName(trimmed))
         }
         _ => Some(member_name),
     }

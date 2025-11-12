@@ -24,6 +24,7 @@ import z from "zod";
 const schema = z.object().optional();
 schema + sure();
 ---
+
 <html>
 	<head>
 		<title>Astro</title>
@@ -56,15 +57,15 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.astro:13:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:16:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    12 │ <style>
-  > 13 │ #id { font-family: comic-sans } .class { background: red}
+    15 │ <style>
+  > 16 │ #id { font-family: comic-sans } .class { background: red}
        │                    ^^^^^^^^^^
-    14 │ </style>
-    15 │ 
+    17 │ </style>
+    18 │ 
   
   i Consider adding a generic font family as a fallback.
   

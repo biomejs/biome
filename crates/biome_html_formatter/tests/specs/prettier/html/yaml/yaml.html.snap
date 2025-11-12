@@ -24,15 +24,13 @@ hello:     world
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,6 @@
+@@ -1,5 +1,5 @@
  ---
 -hello: world
 +hello:     world
  ---
--
+ 
  <html>
-   <head></head>
-   <body></body>
 ```
 
 # Output
@@ -41,6 +39,7 @@ hello:     world
 ---
 hello:     world
 ---
+
 <html>
   <head></head>
   <body></body>

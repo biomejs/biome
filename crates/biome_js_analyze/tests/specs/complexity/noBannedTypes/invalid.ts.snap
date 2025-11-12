@@ -63,9 +63,13 @@ invalid.ts:1:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
     2 │ 
     3 │ let e: Object;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      1    │ - let·a:·String;
         1 │ + let·a:·string;
@@ -87,7 +91,12 @@ invalid.ts:3:8 lint/complexity/noBannedTypes ━━━━━━━━━━━�
     4 │ 
     5 │ let b: { c: String };
   
-  i Prefer explicitly define the object shape. This type means "any non-nullable value", which is slightly better than 'unknown', but it's still a broad type.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -104,9 +113,13 @@ invalid.ts:5:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
     6 │ 
     7 │ function foo(a: String) {}
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      3  3 │   let e: Object;
      4  4 │   
@@ -130,9 +143,13 @@ invalid.ts:7:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
     8 │ 
     9 │ 'a' as String;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      5  5 │   let b: { c: String };
      6  6 │   
@@ -156,9 +173,13 @@ invalid.ts:9:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
     10 │ 
     11 │ class Foo<T = String> extends Bar<String> implements Baz<Object> {
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      7  7 │   function foo(a: String) {}
      8  8 │   
@@ -182,9 +203,13 @@ invalid.ts:11:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     12 │   constructor(foo: String | Object) {}
     13 │ 
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      9  9 │   'a' as String;
     10 10 │   
@@ -208,9 +233,13 @@ invalid.ts:11:35 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     12 │   constructor(foo: String | Object) {}
     13 │ 
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
      9  9 │   'a' as String;
     10 10 │   
@@ -234,7 +263,12 @@ invalid.ts:11:58 lint/complexity/noBannedTypes ━━━━━━━━━━━
     12 │   constructor(foo: String | Object) {}
     13 │ 
   
-  i Prefer explicitly define the object shape. This type means "any non-nullable value", which is slightly better than 'unknown', but it's still a broad type.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -250,9 +284,13 @@ invalid.ts:12:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     13 │ 
     14 │   exit(): Array<String> {
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
     10 10 │   
     11 11 │   class Foo<T = String> extends Bar<String> implements Baz<Object> {
@@ -275,7 +313,12 @@ invalid.ts:12:29 lint/complexity/noBannedTypes ━━━━━━━━━━━
     13 │ 
     14 │   exit(): Array<String> {
   
-  i Prefer explicitly define the object shape. This type means "any non-nullable value", which is slightly better than 'unknown', but it's still a broad type.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -292,9 +335,13 @@ invalid.ts:14:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     15 │     const foo: String = 1 as String;
     16 │   }
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
     12 12 │     constructor(foo: String | Object) {}
     13 13 │   
@@ -317,9 +364,13 @@ invalid.ts:15:16 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     16 │   }
     17 │ }
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
     13 13 │   
     14 14 │     exit(): Array<String> {
@@ -342,9 +393,13 @@ invalid.ts:15:30 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     16 │   }
     17 │ }
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
     13 13 │   
     14 14 │     exit(): Array<String> {
@@ -368,9 +423,13 @@ invalid.ts:19:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     20 │ 
     21 │ let z = true as Boolean;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
-  i Safe fix: Use 'boolean' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'boolean' instead.
   
     17 17 │   }
     18 18 │   
@@ -394,9 +453,13 @@ invalid.ts:21:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     22 │ 
     23 │ type Props = {};
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
-  i Safe fix: Use 'boolean' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'boolean' instead.
   
     19 19 │   let baz: [boolean, Boolean] = [true, false];
     20 20 │   
@@ -420,7 +483,12 @@ invalid.ts:23:14 lint/complexity/noBannedTypes ━━━━━━━━━━━
     24 │ 
     25 │ let fn: Function = () => true
   
-  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -437,7 +505,11 @@ invalid.ts:25:9 lint/complexity/noBannedTypes ━━━━━━━━━━━�
     26 │ 
     27 │ const str: String = 'foo';
   
-  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  i The 'Function' type is unsafe and accepts any arbitrary function or "function-like" value.
+    Explicitly defining the function's shape helps prevent mismatching argument types and return values.
+    If a generic "catch-all" callback type is required, consider using a "top type" like '(...args: never) => unknown' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -454,9 +526,13 @@ invalid.ts:27:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     28 │ 
     29 │ const bool: Boolean = true;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'String' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'string' instead in nearly all circumstances.
   
-  i Safe fix: Use 'string' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'string' instead.
   
     25 25 │   let fn: Function = () => true
     26 26 │   
@@ -480,9 +556,13 @@ invalid.ts:29:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     30 │ 
     31 │ const num: Number = 1;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'Boolean' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'boolean' instead in nearly all circumstances.
   
-  i Safe fix: Use 'boolean' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'boolean' instead.
   
     27 27 │   const str: String = 'foo';
     28 28 │   
@@ -506,9 +586,13 @@ invalid.ts:31:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     32 │ 
     33 │ const symb: Symbol = Symbol('foo');
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'Number' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'number' instead in nearly all circumstances.
   
-  i Safe fix: Use 'number' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'number' instead.
   
     29 29 │   const bool: Boolean = true;
     30 30 │   
@@ -532,9 +616,13 @@ invalid.ts:33:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     34 │ 
     35 │ const bigInt: BigInt = 1n;
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'Symbol' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'symbol' instead in nearly all circumstances.
   
-  i Safe fix: Use 'symbol' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'symbol' instead.
   
     31 31 │   const num: Number = 1;
     32 32 │   
@@ -558,9 +646,13 @@ invalid.ts:35:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
     36 │ 
     37 │ const lowerObj: Object = {};
   
-  i Use lowercase primitives for consistency.
+  i Prefer using lowercase primitive types instead of uppercase "boxed object" types.
+    'BigInt' accepts anything that implements the corresponding interface - both primitives and "primitive-like" objects.
+    It is considered best practice to use 'bigint' instead in nearly all circumstances.
   
-  i Safe fix: Use 'bigint' instead
+  i If that's really what you want, use an inline disable comment.
+  
+  i Safe fix: Use 'bigint' instead.
   
     33 33 │   const symb: Symbol = Symbol('foo');
     34 34 │   
@@ -584,7 +676,12 @@ invalid.ts:37:17 lint/complexity/noBannedTypes ━━━━━━━━━━━
     38 │ 
     39 │ const capitalObj: Object = { a: 'string' };
   
-  i Prefer explicitly define the object shape. This type means "any non-nullable value", which is slightly better than 'unknown', but it's still a broad type.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -601,7 +698,12 @@ invalid.ts:39:19 lint/complexity/noBannedTypes ━━━━━━━━━━━
     40 │ 
     41 │ const curly1: {
   
-  i Prefer explicitly define the object shape. This type means "any non-nullable value", which is slightly better than 'unknown', but it's still a broad type.
+  i 'Object' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -621,7 +723,12 @@ invalid.ts:41:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
     44 │ 
     45 │ const curly2: {} = { a: 'string' };
   
-  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```
@@ -637,7 +744,12 @@ invalid.ts:45:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
        │               ^^
     46 │ 
   
-  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  i '{}' accepts any non-nullable value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object without any properties", use '{ [k: string]: never }' or 'Record<string, never>' instead.
+  
+  i If that's really what you want, use an inline disable comment.
   
 
 ```

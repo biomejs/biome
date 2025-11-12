@@ -22,9 +22,9 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(info: ImportInfo, groups: &ImportGroups) -> Self {
+    pub fn new(info: ImportInfo, groups: Option<&ImportGroups>) -> Self {
         Self {
-            group: groups.index(&((&info).into())),
+            group: groups.map_or(0, |groups| groups.index(&((&info).into()))),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,

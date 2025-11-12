@@ -1,5 +1,267 @@
 # @biomejs/biome
 
+## 2.3.5
+
+### Patch Changes
+
+- [#8023](https://github.com/biomejs/biome/pull/8023) [`96f3e77`](https://github.com/biomejs/biome/commit/96f3e778a38aa5f48e67eb44b545cba6330dc192) Thanks [@ematipico](https://github.com/ematipico)! - Added support Svelte syntax `{@html}`. Biome now is able to parse and format the Svelte syntax [`{@html}`](https://svelte.dev/docs/svelte/@html):
+
+  ```diff
+  -{@html   'div'}
+  +{@html 'div'}
+  ```
+
+  The contents of the expressions inside the `{@html <expression>}` aren't formatted yet.
+
+- [#8058](https://github.com/biomejs/biome/pull/8058) [`5f68bcc`](https://github.com/biomejs/biome/commit/5f68bcc9ae9208366bf5aed932b3ae3082ba21b1) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the Biome Language Server would enable its project file watcher even when no project rules were enabled.
+
+  Now the watching of nested configuration files and nested ignore files is delegated to the editor, if their LSP spec supports it.
+
+- [#8023](https://github.com/biomejs/biome/pull/8023) [`96f3e77`](https://github.com/biomejs/biome/commit/96f3e778a38aa5f48e67eb44b545cba6330dc192) Thanks [@ematipico](https://github.com/ematipico)! - Added support Svelte syntax `{@render}`. Biome now is able to parse and format the Svelte syntax [`{@render}`](https://svelte.dev/docs/svelte/@render):
+
+  ```diff
+  -{@render   sum(1, 2)   }
+  +{@render sum(1, 2)}
+  ```
+
+  The contents of the expressions inside the `{@render <expression>}` aren't formatted yet.
+
+- [#8006](https://github.com/biomejs/biome/pull/8006) [`f0612a5`](https://github.com/biomejs/biome/commit/f0612a511449944cacfe01f6884ca52b4f50e768) Thanks [@Bertie690](https://github.com/Bertie690)! - Updated documentation and diagnostic for `lint/complexity/noBannedTypes`. The rule should have a more detailed description and diagnostic error message.
+
+- [#8039](https://github.com/biomejs/biome/pull/8039) [`da70d8b`](https://github.com/biomejs/biome/commit/da70d8be5d8288397a60cdea52d2a6e5f976cace) Thanks [@PFiS1737](https://github.com/PFiS1737)! - Biome now keeps a blank line after the frontmatter section in Astro files.
+
+- [#8042](https://github.com/biomejs/biome/pull/8042) [`b7efa6f`](https://github.com/biomejs/biome/commit/b7efa6f783adc42864b15b7ff2cb2ed6803190e2) Thanks [@dyc3](https://github.com/dyc3)! - The CSS Parser, with `tailwindDirectives` enabled, will now accept at rules like `@media` and `@supports` in `@custom-variant` shorthand syntax.
+
+- [#8064](https://github.com/biomejs/biome/pull/8064) [`3ff9d45`](https://github.com/biomejs/biome/commit/3ff9d45df031b811333d40fe62b1b24a3c5d5f43) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Fixed [#7967](https://github.com/biomejs/biome/issues/7967): Fixed the issue with support for advanced SVG props
+
+- [#8023](https://github.com/biomejs/biome/pull/8023) [`96f3e77`](https://github.com/biomejs/biome/commit/96f3e778a38aa5f48e67eb44b545cba6330dc192) Thanks [@ematipico](https://github.com/ematipico)! - Added support Svelte syntax `{@attach}`. Biome now is able to parse and format the Svelte syntax [`{@attach}`](https://svelte.dev/docs/svelte/@attach):
+
+  ```diff
+  -<div {@attach    myAttachment   }>...</div>
+  +<div {@attach myAttachment}>...</div>
+  ```
+
+  The contents of the expressions inside the `{@attach <expression>}` aren't formatted yet.
+
+- [#8001](https://github.com/biomejs/biome/pull/8001) [`6e8a50e`](https://github.com/biomejs/biome/commit/6e8a50e720135012832e04728d6c0e38b8bb74a1) Thanks [@ematipico](https://github.com/ematipico)! - Added support Svelte syntax `{#key}`. Biome now is able to parse and format the Svelte syntax [`{#key}`](https://svelte.dev/docs/svelte/key):
+
+  ```diff
+  -{#key   expression} <div></div> {/key}
+  +{#key expression}
+  +  <div></div>
+  +{/key}
+  ```
+
+  The contents of the expressions inside the `{#key <expression>}` aren't formatted yet.
+
+- [#8023](https://github.com/biomejs/biome/pull/8023) [`96f3e77`](https://github.com/biomejs/biome/commit/96f3e778a38aa5f48e67eb44b545cba6330dc192) Thanks [@ematipico](https://github.com/ematipico)! - Added support Svelte syntax `{@const}`. Biome now is able to parse and format the Svelte syntax [`{@const}`](https://svelte.dev/docs/svelte/@const):
+
+  ```diff
+  -{@const   name = value}
+  +{@const name = value}
+  ```
+
+  The contents of the expressions inside the `{@const <expression>}` aren't formatted yet.
+
+- [#8044](https://github.com/biomejs/biome/pull/8044) [`8f77d4a`](https://github.com/biomejs/biome/commit/8f77d4a33ceb2c85867b09c0ffe589d1e66c8db7) Thanks [@Netail](https://github.com/Netail)! - Corrected rule source references. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#8065](https://github.com/biomejs/biome/pull/8065) [`1a2d1af`](https://github.com/biomejs/biome/commit/1a2d1af3604f36703da298017fd3cacf14e118a5) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useArraySortCompare`](https://biomejs.dev/linter/rules/use-array-sort-compare/). Require Array#sort and Array#toSorted calls to always provide a compareFunction.
+
+  **Invalid:**
+
+  ```js
+  const array = [];
+  array.sort();
+  ```
+
+  **Valid:**
+
+  ```js
+  const array = [];
+  array.sort((a, b) => a - b);
+  ```
+
+- [#7673](https://github.com/biomejs/biome/pull/7673) [`a3a713d`](https://github.com/biomejs/biome/commit/a3a713d5760821d58e065280d54e9826d18be7c3) Thanks [@dyc3](https://github.com/dyc3)! - The HTML parser is now able to parse vue directives. This enables us to write/port Vue lint rules that require inspecting the `<template>` section. However, this more complex parsing may result in parsing errors where there was none before. For those of you that have opted in to the experimental support (aka `experimentalFullSupportEnabled`), we greatly appreciate your help testing this out, and your bug reports.
+
+- [#8031](https://github.com/biomejs/biome/pull/8031) [`fa6798a`](https://github.com/biomejs/biome/commit/fa6798a62a2c13464bdb3eb61dfe6fd5e61c320e) Thanks [@ematipico](https://github.com/ematipico)! - Added support for the Svelte syntax `{#if}{/if}`. The Biome HTML parser is now able to parse and format the [`{#if}{/if} blocks`](https://svelte.dev/docs/svelte/if):
+
+  ```diff
+  <!-- if / else-if / else -->
+  {#if porridge.temperature > 100}
+  -<p>too hot!</p>
+  +  <p>too hot!</p>
+  {:else if 80 > porridge.temperature}
+  -<p>too cold!</p>
+  +  <p>too cold!</p>
+  {:else if 100 > porridge.temperature}
+  -<p>too too cold!</p>
+  +  <p>too too cold!</p>
+  {:else}
+  -<p>just right!</p>
+  +  <p>just right!</p>
+  {/if}
+  ```
+
+- [#8041](https://github.com/biomejs/biome/pull/8041) [`beeb7bb`](https://github.com/biomejs/biome/commit/beeb7bba7cce26e932b2b4047566c4762990caf3) Thanks [@dyc3](https://github.com/dyc3)! - The CSS parser, with `tailwindDirectives` enabled, will now accept lists of selectors in `@custom-variant` shorthand syntax.
+
+  ```css
+  @custom-variant cell (th:has(&), td:has(&));
+  ```
+
+- [#8028](https://github.com/biomejs/biome/pull/8028) [`c09e45c`](https://github.com/biomejs/biome/commit/c09e45c8670c9be0305f76cd4e443a4760daedec) Thanks [@fmajestic](https://github.com/fmajestic)! - The GitLab reporter now outputs format errors.
+
+- [#8037](https://github.com/biomejs/biome/pull/8037) [`78011b1`](https://github.com/biomejs/biome/commit/78011b16f9b698f65413b934df1672970505e640) Thanks [@PFiS1737](https://github.com/PFiS1737)! - `indentScriptAndStyle` no longer indents the frontmatter in Astro files.
+
+- [#8009](https://github.com/biomejs/biome/pull/8009) [`6374b1f`](https://github.com/biomejs/biome/commit/6374b1f6da778a132adefa17e37e9857bba7091c) Thanks [@tmcw](https://github.com/tmcw)! - Fixed an edge case in the [`useArrowFunction`](https://biomejs.dev/linter/rules/use-arrow-function/) rule.
+
+  The rule no longer emits diagnostics for or offers to fix functions that reference
+  the [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments),
+  because that object is undefined for arrow functions.
+
+  **Valid example:**
+
+  ```ts
+  // Valid: this function cannot be transformed into an arrow function because
+  // arguments is not defined for arrow functions.
+  const getFirstArg = function () {
+    return arguments[0];
+  };
+  ```
+
+## 2.3.4
+
+### Patch Changes
+
+- [#7989](https://github.com/biomejs/biome/pull/7989) [`4855c4a`](https://github.com/biomejs/biome/commit/4855c4a5c28d8381dd724449d43a9a60a860edaa) Thanks [@alissonlauffer](https://github.com/alissonlauffer)! - Fixed a regression in Astro frontmatter parsing where comments inside quoted strings were incorrectly detected as actual comments. This caused the parser to prematurely terminate frontmatter parsing when encountering strings like `const test = "//";`.
+  For example, the following Astro frontmatter now parses correctly:
+
+  ```astro
+  ---
+  const test = "// not a real comment";
+  ---
+  ```
+
+- [#7968](https://github.com/biomejs/biome/pull/7968) [`0b28f5f`](https://github.com/biomejs/biome/commit/0b28f5f47aa968bd2511224679ae1cfbcf708fd7) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Refactored formatter to use strict `Token` element for better performance. The new `Token` variant is optimized for static, ASCII-only text (keywords, operators, punctuation) with the following constraints:
+  - ASCII only (no Unicode characters)
+  - No newlines (`\n`, `\r`)
+  - No tab characters (`\t`)
+
+  This enables faster printing and fitting logic by using bulk string operations (`push_str`, `len()`) instead of character-by-character iteration with Unicode width calculations.
+
+- [#7941](https://github.com/biomejs/biome/pull/7941) [`19b8280`](https://github.com/biomejs/biome/commit/19b82805e013d5befc644f85f272df19ed1264ae) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7943](https://github.com/biomejs/biome/issues/7943). Rules' `options` are now properly merged with the inherited `options` from a shared configuration.
+
+  This means that you can now override a specific option from a rule without resetting the other options to their default.
+
+  Given the following shared configuration:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": {
+              "strictCase": false,
+              "conventions": [
+                {
+                  "selector": { "kind": "variable", "scope": "global" },
+                  "formats": ["CONSTANT_CASE"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  And the user configuration that extends this shared configuration:
+
+  ```json
+  {
+    "extends": ["shared.json"],
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": { "strictCase": true }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  The obtained merged configuration is now as follows:
+
+  ```json
+  {
+    "extends": ["shared.json"],
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": {
+              "strictCase": true,
+              "conventions": [
+                {
+                  "selector": { "kind": "variable", "scope": "global" },
+                  "formats": ["CONSTANT_CASE"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- [#7969](https://github.com/biomejs/biome/pull/7969) [`425963d`](https://github.com/biomejs/biome/commit/425963d636620d852547322f3f029df2ca05318c) Thanks [@ematipico](https://github.com/ematipico)! - Added support for the Svelte syntax `{@debug}`. The Biome HTML parser is now able to parse and format the blocks:
+
+  ```diff
+  -{@debug     foo,bar,    something}
+  +{@debug foo, bar, something}
+  ```
+
+- [#7986](https://github.com/biomejs/biome/pull/7986) [`3256f82`](https://github.com/biomejs/biome/commit/3256f824a15dedf6ac23485cdef2bbc92bfc7fd9) Thanks [@lisiur](https://github.com/lisiur)! - Fixed [#7981](https://github.com/biomejs/biome/issues/7981). Now Biome correctly detects and parses `lang='tsx'` and `lang='jsx'` languages when used inside in `.vue` files, when `.experimentalFullSupportEnabled` is enabled.
+
+- [#7921](https://github.com/biomejs/biome/pull/7921) [`547c2da`](https://github.com/biomejs/biome/commit/547c2da02590832d4941f017541142c17d1734a9) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7854](https://github.com/biomejs/biome/issues/7854): The CSS parser, with `tailwindDirectives` enabled, will now parse `@source inline("underline");`.
+
+- [#7856](https://github.com/biomejs/biome/pull/7856) [`c9e20c3`](https://github.com/biomejs/biome/commit/c9e20c3780b328ff59b63fa8917938d97b090148) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noContinue`](https://biomejs.dev/linter/rules/no-continue/). Disallowing the usage of the `continue` statement, structured control flow statements such as `if` should be used instead.
+
+  **Invalid:**
+
+  ```js
+  let sum = 0,
+    i;
+
+  for (i = 0; i < 10; i++) {
+    if (i >= 5) {
+      continue;
+    }
+
+    sum += i;
+  }
+  ```
+
+  **Valid:**
+
+  ```js
+  let sum = 0,
+    i;
+
+  for (i = 0; i < 10; i++) {
+    if (i < 5) {
+      sum += i;
+    }
+  }
+  ```
+
 ## 2.3.3
 
 ### Patch Changes

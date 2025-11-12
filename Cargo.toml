@@ -5,12 +5,20 @@ members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
 resolver = "2"
 
 [workspace.lints.rust]
-absolute_paths_not_starting_with_crate = "warn"
-dead_code                              = "warn"
-trivial_numeric_casts                  = "warn"
-unused_import_braces                   = "warn"
-unused_lifetimes                       = "warn"
-unused_macro_rules                     = "warn"
+# https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
+ambiguous-negative-literals    = "warn"
+dead_code                      = "warn"
+explicit-outlives-requirements = "warn"
+impl-trait-overcaptures        = "warn"
+impl-trait-redundant-captures  = "warn"
+missing-unsafe-on-extern       = "warn"
+redundant-lifetimes            = "warn"
+trivial_numeric_casts          = "warn"
+unit-bindings                  = "warn"
+unsafe-attr-outside-unsafe     = "warn"
+unused_import_braces           = "warn"
+unused_lifetimes               = "warn"
+unused_macro_rules             = "warn"
 
 [workspace.lints.clippy]
 allow_attributes        = "deny"
@@ -208,7 +216,7 @@ hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.25"
 indexmap             = { version = "2.12.0" }
 insta                = "1.43.2"
-jiff                 = "0.2.15"
+jiff                 = "0.2.16"
 libc                 = "0.2.177"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
@@ -217,7 +225,7 @@ proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.103"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
-quote                = "1.0.41"
+quote                = "1.0.42"
 rayon                = "1.11.0"
 regex                = "1.12.2"
 rust-lapper          = "1.2.0"
@@ -239,7 +247,7 @@ tracing              = { version = "0.1.41", default-features = false, features 
 tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.1.2"
+ureq                 = "3.1.4"
 url                  = "2.5.7"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"

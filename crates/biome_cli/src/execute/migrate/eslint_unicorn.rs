@@ -17,12 +17,12 @@ impl From<FilenameCaseOptions> for use_filenaming_convention::UseFilenamingConve
     fn from(val: FilenameCaseOptions) -> Self {
         let filename_cases: Option<use_filenaming_convention::FilenameCases> = val.cases.into();
         Self {
-            strict_case: true,
-            require_ascii: true,
+            strict_case: None,
+            require_ascii: None,
             matching: None,
-            filename_cases: filename_cases.unwrap_or_else(|| {
+            filename_cases: Some(filename_cases.unwrap_or_else(|| {
                 use_filenaming_convention::FilenameCases::from_iter([val.case.into()])
-            }),
+            })),
         }
     }
 }

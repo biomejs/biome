@@ -98,6 +98,12 @@ impl biome_deserialize::Deserializable for RestrictedRegex {
     }
 }
 
+impl biome_deserialize::Merge for RestrictedRegex {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
+}
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RestrictedRegex {
     fn schema_name() -> String {

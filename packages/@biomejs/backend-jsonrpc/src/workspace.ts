@@ -946,7 +946,7 @@ export type SeverityOrGroup_for_Performance =
 	| GroupPlainConfiguration
 	| Performance;
 export type SeverityOrGroup_for_Security = GroupPlainConfiguration | Security;
-export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style;
+export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style2;
 export type SeverityOrGroup_for_Suspicious =
 	| GroupPlainConfiguration
 	| Suspicious;
@@ -1661,6 +1661,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow continue statements.
+	 */
+	noContinue?: RuleConfiguration_for_NoContinueOptions;
+	/**
 	 * Restrict imports of deprecated exports.
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
@@ -1753,9 +1757,17 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Require Array#sort and Array#toSorted calls to always provide a compareFunction.
+	 */
+	useArraySortCompare?: RuleConfiguration_for_UseArraySortCompareOptions;
+	/**
 	 * Enforce consistent arrow function bodies.
 	 */
 	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
+	/**
+	 * Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
+	 */
+	useConsistentGraphqlDescriptions?: RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions;
 	/**
 	 * Require the @deprecated directive to specify a deletion date.
 	 */
@@ -1792,6 +1804,10 @@ export interface Nursery {
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
+	/**
+	 * Forbids v-bind directives with missing arguments or invalid modifiers.
+	 */
+	useVueValidVBind?: RuleConfiguration_for_UseVueValidVBindOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -1882,7 +1898,7 @@ export interface Security {
 /**
  * A list of rules that belong to this group
  */
-export interface Style {
+export interface Style2 {
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -3054,6 +3070,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoContinueOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoContinueOptions;
 export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDeprecatedImportsOptions;
@@ -3120,9 +3139,15 @@ export type RuleConfiguration_for_NoVueReservedKeysOptions =
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
+export type RuleConfiguration_for_UseArraySortCompareOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseArraySortCompareOptions;
 export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
+export type RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions;
 export type RuleConfiguration_for_UseDeprecatedDateOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseDeprecatedDateOptions;
@@ -3150,6 +3175,9 @@ export type RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions =
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
+export type RuleConfiguration_for_UseVueValidVBindOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueValidVBindOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -5477,6 +5505,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoContinueOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoContinueOptions;
+}
 export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5725,6 +5763,16 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 */
 	options: NoVueReservedPropsOptions;
 }
+export interface RuleWithOptions_for_UseArraySortCompareOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseArraySortCompareOptions;
+}
 export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5738,6 +5786,16 @@ export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentArrowReturnOptions;
+}
+export interface RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentGraphqlDescriptionsOptions;
 }
 export interface RuleWithOptions_for_UseDeprecatedDateOptions {
 	/**
@@ -5840,6 +5898,16 @@ export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	 * Rule's options
 	 */
 	options: UseVueMultiWordComponentNamesOptions;
+}
+export interface RuleWithOptions_for_UseVueValidVBindOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueValidVBindOptions;
 }
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
@@ -8184,7 +8252,7 @@ export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
 	 */
-	elements: CustomRestrictedElements;
+	elements?: CustomRestrictedElements;
 }
 export interface NoSelfAssignOptions {}
 export interface NoSetterReturnOptions {}
@@ -8283,6 +8351,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptySourceOptions {
@@ -8324,7 +8393,7 @@ export interface NoParametersOnlyUsedInRecursionOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoShadowOptions {}
 export interface NoUnknownAttributeOptions {
-	ignore: string[];
+	ignore?: string[];
 }
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
@@ -8338,6 +8407,7 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
+export interface UseArraySortCompareOptions {}
 /**
  * Options for the `useConsistentArrowReturn` rule.
  */
@@ -8352,6 +8422,12 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 * The style to enforce for arrow function return statements.
 	 */
 	style?: UseConsistentArrowReturnStyle;
+}
+export interface UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The description style to enforce. Defaults to "block"
+	 */
+	style?: Style;
 }
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
@@ -8388,6 +8464,7 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores: string[];
 }
+export interface UseVueValidVBindOptions {}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
 export interface NoBarrelFileOptions {}
@@ -8445,13 +8522,13 @@ export interface NoRestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: Record<string, string>;
+	deniedGlobals?: Record<string, string>;
 }
 export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, Paths>;
+	paths?: Record<string, Paths>;
 	/**
 	 * gitignore-style patterns that should trigger the rule.
 	 */
@@ -8480,7 +8557,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	/**
 	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
 	 */
-	allowExportNames: string[];
+	allowExportNames?: string[];
 }
 export interface UseConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -8515,7 +8592,7 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * Allowed cases for file names.
 	 */
-	filenameCases: FilenameCases;
+	filenameCases?: FilenameCases;
 	/**
 	 * Regular expression to enforce
 	 */
@@ -8523,11 +8600,11 @@ export interface UseFilenamingConventionOptions {
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
@@ -8537,7 +8614,7 @@ export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
-	style?: Style2;
+	style?: Style3;
 }
 export interface UseLiteralEnumMembersOptions {}
 /**
@@ -8547,15 +8624,15 @@ export interface UseNamingConventionOptions {
 	/**
 	 * Custom conventions.
 	 */
-	conventions: Convention[];
+	conventions?: Convention[];
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
-	requireAscii: boolean;
+	requireAscii?: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
-	strictCase: boolean;
+	strictCase?: boolean;
 }
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
@@ -8567,7 +8644,7 @@ export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
 	 */
-	checkAllProperties: boolean;
+	checkAllProperties?: boolean;
 }
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
@@ -8591,7 +8668,7 @@ export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoCatchAssignOptions {}
 export interface NoClassAssignOptions {}
@@ -8601,14 +8678,14 @@ export interface NoConfusingLabelsOptions {
 	/**
 	 * A list of (non-confusing) labels that should be allowed
 	 */
-	allowedLabels: string[];
+	allowedLabels?: string[];
 }
 export interface NoConfusingVoidTypeOptions {}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
 	 */
-	allow: string[];
+	allow?: string[];
 }
 export interface NoConstEnumOptions {}
 export interface NoConstantBinaryExpressionsOptions {}
@@ -8622,7 +8699,7 @@ export interface NoDoubleEqualsOptions {
 
 If `false`, no such exception will be made. 
 	 */
-	ignoreNull: boolean;
+	ignoreNull?: boolean;
 }
 export interface NoDuplicateAtImportRulesOptions {}
 export interface NoDuplicateCaseOptions {}
@@ -8739,6 +8816,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
+export type Style = "block" | "inline";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -8755,7 +8833,7 @@ export type Regex = string;
 /**
  * Rule's options.
  */
-export type Style2 = "auto" | "inlineType" | "separatedType";
+export type Style3 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -9088,6 +9166,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
@@ -9112,12 +9191,15 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueDuplicateKeys"
+	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
@@ -9575,7 +9657,18 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind =
+	| "Vue"
+	| "Svelte"
+	| "None"
+	| {
+			Astro: {
+				/**
+				 * Whether the script is inside Astro frontmatter
+				 */
+				frontmatter: boolean;
+			};
+	  };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };

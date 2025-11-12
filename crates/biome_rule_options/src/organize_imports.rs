@@ -3,13 +3,15 @@ pub mod import_source;
 
 use crate::organize_imports::import_groups::ImportGroups;
 pub use crate::shared::sort_order::SortOrder;
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct OrganizeImportsOptions {
-    pub groups: ImportGroups,
-    pub identifier_order: SortOrder,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub groups: Option<ImportGroups>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub identifier_order: Option<SortOrder>,
 }

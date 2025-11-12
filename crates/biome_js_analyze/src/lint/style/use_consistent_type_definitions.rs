@@ -90,26 +90,22 @@ impl Rule for UseConsistentTypeDefinitions {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query = ctx.query();
-        let options = ctx.options();
+        let style = ctx.options().style.unwrap_or_default();
 
-        match query {
-            AnyJsDeclarationClause::TsInterfaceDeclaration(interface_decl) => {
-                if options.style == ConsistentTypeDefinition::Type {
-                    // Check if interface can be converted to type alias
-                    if can_convert_interface_to_type(interface_decl) {
-                        return Some(DeclarationType::Interface(interface_decl.clone()));
-                    }
-                }
-                None
+        match (style, query) {
+            (
+                ConsistentTypeDefinition::Type,
+                AnyJsDeclarationClause::TsInterfaceDeclaration(interface_decl),
+                // Check if interface can be converted to type alias
+            ) if can_convert_interface_to_type(interface_decl) => {
+                Some(DeclarationType::Interface(interface_decl.clone()))
             }
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(type_alias) => {
-                if options.style == ConsistentTypeDefinition::Interface {
-                    // Check if type alias can be converted to interface
-                    if can_convert_type_to_interface(type_alias) {
-                        return Some(DeclarationType::TypeAlias(type_alias.clone()));
-                    }
-                }
-                None
+            (
+                ConsistentTypeDefinition::Interface,
+                AnyJsDeclarationClause::TsTypeAliasDeclaration(type_alias),
+                // Check if type alias can be converted to interface
+            ) if can_convert_type_to_interface(type_alias) => {
+                Some(DeclarationType::TypeAlias(type_alias.clone()))
             }
             _ => None,
         }

@@ -143,6 +143,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 FormatChildrenResult::BestFitting {
                     flat_children,
                     expanded_children,
+                    group_id: _,
                 } => {
                     let expanded_children = expanded_children.memoized();
                     write!(

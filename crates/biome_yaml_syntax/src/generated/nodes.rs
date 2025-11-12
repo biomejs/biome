@@ -3090,18 +3090,18 @@ impl AstNode for AnyYamlBlockHeader {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBlockKeepIndicator(it) => &it.syntax,
-            Self::YamlBlockStripIndicator(it) => &it.syntax,
-            Self::YamlBogusBlockHeader(it) => &it.syntax,
-            Self::YamlIndentationIndicator(it) => &it.syntax,
+            Self::YamlBlockKeepIndicator(it) => it.syntax(),
+            Self::YamlBlockStripIndicator(it) => it.syntax(),
+            Self::YamlBogusBlockHeader(it) => it.syntax(),
+            Self::YamlIndentationIndicator(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBlockKeepIndicator(it) => it.syntax,
-            Self::YamlBlockStripIndicator(it) => it.syntax,
-            Self::YamlBogusBlockHeader(it) => it.syntax,
-            Self::YamlIndentationIndicator(it) => it.syntax,
+            Self::YamlBlockKeepIndicator(it) => it.into_syntax(),
+            Self::YamlBlockStripIndicator(it) => it.into_syntax(),
+            Self::YamlBogusBlockHeader(it) => it.into_syntax(),
+            Self::YamlIndentationIndicator(it) => it.into_syntax(),
         }
     }
 }
@@ -3118,10 +3118,10 @@ impl std::fmt::Debug for AnyYamlBlockHeader {
 impl From<AnyYamlBlockHeader> for SyntaxNode {
     fn from(n: AnyYamlBlockHeader) -> Self {
         match n {
-            AnyYamlBlockHeader::YamlBlockKeepIndicator(it) => it.into(),
-            AnyYamlBlockHeader::YamlBlockStripIndicator(it) => it.into(),
-            AnyYamlBlockHeader::YamlBogusBlockHeader(it) => it.into(),
-            AnyYamlBlockHeader::YamlIndentationIndicator(it) => it.into(),
+            AnyYamlBlockHeader::YamlBlockKeepIndicator(it) => it.into_syntax(),
+            AnyYamlBlockHeader::YamlBlockStripIndicator(it) => it.into_syntax(),
+            AnyYamlBlockHeader::YamlBogusBlockHeader(it) => it.into_syntax(),
+            AnyYamlBlockHeader::YamlIndentationIndicator(it) => it.into_syntax(),
         }
     }
 }
@@ -3175,18 +3175,18 @@ impl AstNode for AnyYamlBlockInBlockNode {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBlockMapping(it) => &it.syntax,
-            Self::YamlBlockSequence(it) => &it.syntax,
-            Self::YamlFoldedScalar(it) => &it.syntax,
-            Self::YamlLiteralScalar(it) => &it.syntax,
+            Self::YamlBlockMapping(it) => it.syntax(),
+            Self::YamlBlockSequence(it) => it.syntax(),
+            Self::YamlFoldedScalar(it) => it.syntax(),
+            Self::YamlLiteralScalar(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBlockMapping(it) => it.syntax,
-            Self::YamlBlockSequence(it) => it.syntax,
-            Self::YamlFoldedScalar(it) => it.syntax,
-            Self::YamlLiteralScalar(it) => it.syntax,
+            Self::YamlBlockMapping(it) => it.into_syntax(),
+            Self::YamlBlockSequence(it) => it.into_syntax(),
+            Self::YamlFoldedScalar(it) => it.into_syntax(),
+            Self::YamlLiteralScalar(it) => it.into_syntax(),
         }
     }
 }
@@ -3203,10 +3203,10 @@ impl std::fmt::Debug for AnyYamlBlockInBlockNode {
 impl From<AnyYamlBlockInBlockNode> for SyntaxNode {
     fn from(n: AnyYamlBlockInBlockNode) -> Self {
         match n {
-            AnyYamlBlockInBlockNode::YamlBlockMapping(it) => it.into(),
-            AnyYamlBlockInBlockNode::YamlBlockSequence(it) => it.into(),
-            AnyYamlBlockInBlockNode::YamlFoldedScalar(it) => it.into(),
-            AnyYamlBlockInBlockNode::YamlLiteralScalar(it) => it.into(),
+            AnyYamlBlockInBlockNode::YamlBlockMapping(it) => it.into_syntax(),
+            AnyYamlBlockInBlockNode::YamlBlockSequence(it) => it.into_syntax(),
+            AnyYamlBlockInBlockNode::YamlFoldedScalar(it) => it.into_syntax(),
+            AnyYamlBlockInBlockNode::YamlLiteralScalar(it) => it.into_syntax(),
         }
     }
 }
@@ -3261,16 +3261,16 @@ impl AstNode for AnyYamlBlockMapEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBlockMapExplicitEntry(it) => &it.syntax,
-            Self::YamlBlockMapImplicitEntry(it) => &it.syntax,
-            Self::YamlBogusBlockMapEntry(it) => &it.syntax,
+            Self::YamlBlockMapExplicitEntry(it) => it.syntax(),
+            Self::YamlBlockMapImplicitEntry(it) => it.syntax(),
+            Self::YamlBogusBlockMapEntry(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBlockMapExplicitEntry(it) => it.syntax,
-            Self::YamlBlockMapImplicitEntry(it) => it.syntax,
-            Self::YamlBogusBlockMapEntry(it) => it.syntax,
+            Self::YamlBlockMapExplicitEntry(it) => it.into_syntax(),
+            Self::YamlBlockMapImplicitEntry(it) => it.into_syntax(),
+            Self::YamlBogusBlockMapEntry(it) => it.into_syntax(),
         }
     }
 }
@@ -3286,9 +3286,9 @@ impl std::fmt::Debug for AnyYamlBlockMapEntry {
 impl From<AnyYamlBlockMapEntry> for SyntaxNode {
     fn from(n: AnyYamlBlockMapEntry) -> Self {
         match n {
-            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => it.into(),
-            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => it.into(),
-            AnyYamlBlockMapEntry::YamlBogusBlockMapEntry(it) => it.into(),
+            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => it.into_syntax(),
+            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => it.into_syntax(),
+            AnyYamlBlockMapEntry::YamlBogusBlockMapEntry(it) => it.into_syntax(),
         }
     }
 }
@@ -3335,15 +3335,15 @@ impl AstNode for AnyYamlBlockNode {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBogusBlockNode(it) => &it.syntax,
-            Self::YamlFlowInBlockNode(it) => &it.syntax,
+            Self::YamlBogusBlockNode(it) => it.syntax(),
+            Self::YamlFlowInBlockNode(it) => it.syntax(),
             Self::AnyYamlBlockInBlockNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBogusBlockNode(it) => it.syntax,
-            Self::YamlFlowInBlockNode(it) => it.syntax,
+            Self::YamlBogusBlockNode(it) => it.into_syntax(),
+            Self::YamlFlowInBlockNode(it) => it.into_syntax(),
             Self::AnyYamlBlockInBlockNode(it) => it.into_syntax(),
         }
     }
@@ -3360,9 +3360,9 @@ impl std::fmt::Debug for AnyYamlBlockNode {
 impl From<AnyYamlBlockNode> for SyntaxNode {
     fn from(n: AnyYamlBlockNode) -> Self {
         match n {
-            AnyYamlBlockNode::AnyYamlBlockInBlockNode(it) => it.into(),
-            AnyYamlBlockNode::YamlBogusBlockNode(it) => it.into(),
-            AnyYamlBlockNode::YamlFlowInBlockNode(it) => it.into(),
+            AnyYamlBlockNode::AnyYamlBlockInBlockNode(it) => it.into_syntax(),
+            AnyYamlBlockNode::YamlBogusBlockNode(it) => it.into_syntax(),
+            AnyYamlBlockNode::YamlFlowInBlockNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3401,14 +3401,14 @@ impl AstNode for AnyYamlBlockSequenceEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBlockSequenceEntry(it) => &it.syntax,
-            Self::YamlBogus(it) => &it.syntax,
+            Self::YamlBlockSequenceEntry(it) => it.syntax(),
+            Self::YamlBogus(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBlockSequenceEntry(it) => it.syntax,
-            Self::YamlBogus(it) => it.syntax,
+            Self::YamlBlockSequenceEntry(it) => it.into_syntax(),
+            Self::YamlBogus(it) => it.into_syntax(),
         }
     }
 }
@@ -3423,8 +3423,8 @@ impl std::fmt::Debug for AnyYamlBlockSequenceEntry {
 impl From<AnyYamlBlockSequenceEntry> for SyntaxNode {
     fn from(n: AnyYamlBlockSequenceEntry) -> Self {
         match n {
-            AnyYamlBlockSequenceEntry::YamlBlockSequenceEntry(it) => it.into(),
-            AnyYamlBlockSequenceEntry::YamlBogus(it) => it.into(),
+            AnyYamlBlockSequenceEntry::YamlBlockSequenceEntry(it) => it.into_syntax(),
+            AnyYamlBlockSequenceEntry::YamlBogus(it) => it.into_syntax(),
         }
     }
 }
@@ -3460,14 +3460,14 @@ impl AstNode for AnyYamlDocument {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlBogus(it) => &it.syntax,
-            Self::YamlDocument(it) => &it.syntax,
+            Self::YamlBogus(it) => it.syntax(),
+            Self::YamlDocument(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlBogus(it) => it.syntax,
-            Self::YamlDocument(it) => it.syntax,
+            Self::YamlBogus(it) => it.into_syntax(),
+            Self::YamlDocument(it) => it.into_syntax(),
         }
     }
 }
@@ -3482,8 +3482,8 @@ impl std::fmt::Debug for AnyYamlDocument {
 impl From<AnyYamlDocument> for SyntaxNode {
     fn from(n: AnyYamlDocument) -> Self {
         match n {
-            AnyYamlDocument::YamlBogus(it) => it.into(),
-            AnyYamlDocument::YamlDocument(it) => it.into(),
+            AnyYamlDocument::YamlBogus(it) => it.into_syntax(),
+            AnyYamlDocument::YamlDocument(it) => it.into_syntax(),
         }
     }
 }
@@ -3527,14 +3527,14 @@ impl AstNode for AnyYamlFlowMapEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlFlowMapExplicitEntry(it) => &it.syntax,
-            Self::YamlFlowMapImplicitEntry(it) => &it.syntax,
+            Self::YamlFlowMapExplicitEntry(it) => it.syntax(),
+            Self::YamlFlowMapImplicitEntry(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlFlowMapExplicitEntry(it) => it.syntax,
-            Self::YamlFlowMapImplicitEntry(it) => it.syntax,
+            Self::YamlFlowMapExplicitEntry(it) => it.into_syntax(),
+            Self::YamlFlowMapImplicitEntry(it) => it.into_syntax(),
         }
     }
 }
@@ -3549,8 +3549,8 @@ impl std::fmt::Debug for AnyYamlFlowMapEntry {
 impl From<AnyYamlFlowMapEntry> for SyntaxNode {
     fn from(n: AnyYamlFlowMapEntry) -> Self {
         match n {
-            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => it.into(),
-            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => it.into(),
+            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => it.into_syntax(),
+            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => it.into_syntax(),
         }
     }
 }
@@ -3604,18 +3604,18 @@ impl AstNode for AnyYamlFlowNode {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlAliasNode(it) => &it.syntax,
-            Self::YamlBogusFlowNode(it) => &it.syntax,
-            Self::YamlFlowJsonNode(it) => &it.syntax,
-            Self::YamlFlowYamlNode(it) => &it.syntax,
+            Self::YamlAliasNode(it) => it.syntax(),
+            Self::YamlBogusFlowNode(it) => it.syntax(),
+            Self::YamlFlowJsonNode(it) => it.syntax(),
+            Self::YamlFlowYamlNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlAliasNode(it) => it.syntax,
-            Self::YamlBogusFlowNode(it) => it.syntax,
-            Self::YamlFlowJsonNode(it) => it.syntax,
-            Self::YamlFlowYamlNode(it) => it.syntax,
+            Self::YamlAliasNode(it) => it.into_syntax(),
+            Self::YamlBogusFlowNode(it) => it.into_syntax(),
+            Self::YamlFlowJsonNode(it) => it.into_syntax(),
+            Self::YamlFlowYamlNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3632,10 +3632,10 @@ impl std::fmt::Debug for AnyYamlFlowNode {
 impl From<AnyYamlFlowNode> for SyntaxNode {
     fn from(n: AnyYamlFlowNode) -> Self {
         match n {
-            AnyYamlFlowNode::YamlAliasNode(it) => it.into(),
-            AnyYamlFlowNode::YamlBogusFlowNode(it) => it.into(),
-            AnyYamlFlowNode::YamlFlowJsonNode(it) => it.into(),
-            AnyYamlFlowNode::YamlFlowYamlNode(it) => it.into(),
+            AnyYamlFlowNode::YamlAliasNode(it) => it.into_syntax(),
+            AnyYamlFlowNode::YamlBogusFlowNode(it) => it.into_syntax(),
+            AnyYamlFlowNode::YamlFlowJsonNode(it) => it.into_syntax(),
+            AnyYamlFlowNode::YamlFlowYamlNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3692,8 +3692,8 @@ impl std::fmt::Debug for AnyYamlFlowSequenceEntry {
 impl From<AnyYamlFlowSequenceEntry> for SyntaxNode {
     fn from(n: AnyYamlFlowSequenceEntry) -> Self {
         match n {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => it.into(),
-            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => it.into(),
+            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => it.into_syntax(),
+            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3754,18 +3754,18 @@ impl AstNode for AnyYamlJsonContent {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlDoubleQuotedScalar(it) => &it.syntax,
-            Self::YamlFlowMapping(it) => &it.syntax,
-            Self::YamlFlowSequence(it) => &it.syntax,
-            Self::YamlSingleQuotedScalar(it) => &it.syntax,
+            Self::YamlDoubleQuotedScalar(it) => it.syntax(),
+            Self::YamlFlowMapping(it) => it.syntax(),
+            Self::YamlFlowSequence(it) => it.syntax(),
+            Self::YamlSingleQuotedScalar(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlDoubleQuotedScalar(it) => it.syntax,
-            Self::YamlFlowMapping(it) => it.syntax,
-            Self::YamlFlowSequence(it) => it.syntax,
-            Self::YamlSingleQuotedScalar(it) => it.syntax,
+            Self::YamlDoubleQuotedScalar(it) => it.into_syntax(),
+            Self::YamlFlowMapping(it) => it.into_syntax(),
+            Self::YamlFlowSequence(it) => it.into_syntax(),
+            Self::YamlSingleQuotedScalar(it) => it.into_syntax(),
         }
     }
 }
@@ -3782,10 +3782,10 @@ impl std::fmt::Debug for AnyYamlJsonContent {
 impl From<AnyYamlJsonContent> for SyntaxNode {
     fn from(n: AnyYamlJsonContent) -> Self {
         match n {
-            AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => it.into(),
-            AnyYamlJsonContent::YamlFlowMapping(it) => it.into(),
-            AnyYamlJsonContent::YamlFlowSequence(it) => it.into(),
-            AnyYamlJsonContent::YamlSingleQuotedScalar(it) => it.into(),
+            AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => it.into_syntax(),
+            AnyYamlJsonContent::YamlFlowMapping(it) => it.into_syntax(),
+            AnyYamlJsonContent::YamlFlowSequence(it) => it.into_syntax(),
+            AnyYamlJsonContent::YamlSingleQuotedScalar(it) => it.into_syntax(),
         }
     }
 }
@@ -3822,14 +3822,14 @@ impl AstNode for AnyYamlMappingImplicitKey {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlFlowJsonNode(it) => &it.syntax,
-            Self::YamlFlowYamlNode(it) => &it.syntax,
+            Self::YamlFlowJsonNode(it) => it.syntax(),
+            Self::YamlFlowYamlNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlFlowJsonNode(it) => it.syntax,
-            Self::YamlFlowYamlNode(it) => it.syntax,
+            Self::YamlFlowJsonNode(it) => it.into_syntax(),
+            Self::YamlFlowYamlNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3844,8 +3844,8 @@ impl std::fmt::Debug for AnyYamlMappingImplicitKey {
 impl From<AnyYamlMappingImplicitKey> for SyntaxNode {
     fn from(n: AnyYamlMappingImplicitKey) -> Self {
         match n {
-            AnyYamlMappingImplicitKey::YamlFlowJsonNode(it) => it.into(),
-            AnyYamlMappingImplicitKey::YamlFlowYamlNode(it) => it.into(),
+            AnyYamlMappingImplicitKey::YamlFlowJsonNode(it) => it.into_syntax(),
+            AnyYamlMappingImplicitKey::YamlFlowYamlNode(it) => it.into_syntax(),
         }
     }
 }
@@ -3889,14 +3889,14 @@ impl AstNode for AnyYamlPropertiesCombination {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::YamlPropertiesAnchorFirst(it) => &it.syntax,
-            Self::YamlPropertiesTagFirst(it) => &it.syntax,
+            Self::YamlPropertiesAnchorFirst(it) => it.syntax(),
+            Self::YamlPropertiesTagFirst(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::YamlPropertiesAnchorFirst(it) => it.syntax,
-            Self::YamlPropertiesTagFirst(it) => it.syntax,
+            Self::YamlPropertiesAnchorFirst(it) => it.into_syntax(),
+            Self::YamlPropertiesTagFirst(it) => it.into_syntax(),
         }
     }
 }
@@ -3911,8 +3911,8 @@ impl std::fmt::Debug for AnyYamlPropertiesCombination {
 impl From<AnyYamlPropertiesCombination> for SyntaxNode {
     fn from(n: AnyYamlPropertiesCombination) -> Self {
         match n {
-            AnyYamlPropertiesCombination::YamlPropertiesAnchorFirst(it) => it.into(),
-            AnyYamlPropertiesCombination::YamlPropertiesTagFirst(it) => it.into(),
+            AnyYamlPropertiesCombination::YamlPropertiesAnchorFirst(it) => it.into_syntax(),
+            AnyYamlPropertiesCombination::YamlPropertiesTagFirst(it) => it.into_syntax(),
         }
     }
 }

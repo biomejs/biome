@@ -1,6 +1,6 @@
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoDoubleEqualsOptions {
@@ -8,25 +8,16 @@ pub struct NoDoubleEqualsOptions {
     /// both for `null` or `undefined`.
     ///
     /// If `false`, no such exception will be made.
-    #[serde(
-        default = "ignore_null_default",
-        skip_serializing_if = "is_ignore_null_default"
-    )]
-    pub ignore_null: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub ignore_null: Option<bool>,
 }
 
-impl Default for NoDoubleEqualsOptions {
-    fn default() -> Self {
-        Self {
-            ignore_null: ignore_null_default(),
-        }
+impl NoDoubleEqualsOptions {
+    pub const DEFAULT_IGNORE_NULL: bool = true;
+
+    /// Returns [`Self::ignore_null`] if it is set
+    /// Otherwise, returns [`Self::DEFAULT_IGNORE_NULL`].
+    pub fn ignore_null(&self) -> bool {
+        self.ignore_null.unwrap_or(Self::DEFAULT_IGNORE_NULL)
     }
-}
-
-fn ignore_null_default() -> bool {
-    true
-}
-
-fn is_ignore_null_default(value: &bool) -> bool {
-    value == &ignore_null_default()
 }
