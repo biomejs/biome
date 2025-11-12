@@ -23,11 +23,6 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// for (const i in array) {
-    ///   console.log(array[i]);
-    /// }
-    /// ```
-    /// ```js,expect_diagnostic
-    /// for (const i in array) {
     ///   console.log(i, array[i]);
     /// }
     /// ```
@@ -85,7 +80,7 @@ impl Rule for NoForIn {
                 },
             )
             .note(markup! {
-                "To prevent unexpected behavior if used incorrectly, use a regular for loop or forEach instead."
+                "For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead."
             }),
         )
     }

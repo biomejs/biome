@@ -32,7 +32,7 @@ invalid.js:3:1 lint/nursery/noForIn ━━━━━━━━━━━━━━�
     6 │ 
     7 │ for (const i in array) {
   
-  i To prevent unexpected behavior if used incorrectly, use a regular for loop or forEach instead.
+  i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
   
 
 ```
@@ -51,7 +51,7 @@ invalid.js:7:1 lint/nursery/noForIn ━━━━━━━━━━━━━━�
        │ ^
     10 │ 
   
-  i To prevent unexpected behavior if used incorrectly, use a regular for loop or forEach instead.
+  i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
   
 
 ```
