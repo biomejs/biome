@@ -273,8 +273,10 @@ HtmlRoot {
                                 name_token: VUE_IDENT@231..237 "v-bind" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@237..238 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@238..248 "[attrName]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@238..239 "[" [] [],
+                                        name_token: HTML_LITERAL@239..247 "attrName" [] [],
+                                        r_brack_token: R_BRACKET@247..248 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [],
@@ -308,8 +310,10 @@ HtmlRoot {
                             VueVBindShorthandDirective {
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@274..275 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@275..284 "[dataKey]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@275..276 "[" [] [],
+                                        name_token: HTML_LITERAL@276..283 "dataKey" [] [],
+                                        r_brack_token: R_BRACKET@283..284 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [],
@@ -403,8 +407,10 @@ HtmlRoot {
                                 name_token: VUE_IDENT@376..380 "v-on" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@380..381 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@381..386 "[evt]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@381..382 "[" [] [],
+                                        name_token: HTML_LITERAL@382..385 "evt" [] [],
+                                        r_brack_token: R_BRACKET@385..386 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [],
@@ -818,8 +824,10 @@ HtmlRoot {
                 0: VUE_IDENT@231..237 "v-bind" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@237..248
                   0: COLON@237..238 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@238..248
-                    0: HTML_LITERAL@238..248 "[attrName]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@238..248
+                    0: L_BRACKET@238..239 "[" [] []
+                    1: HTML_LITERAL@239..247 "attrName" [] []
+                    2: R_BRACKET@247..248 "]" [] []
                 2: VUE_MODIFIER_LIST@248..248
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@248..260
                   0: EQ@248..249 "=" [] []
@@ -842,8 +850,10 @@ HtmlRoot {
               0: VUE_V_BIND_SHORTHAND_DIRECTIVE@274..294
                 0: VUE_DIRECTIVE_ARGUMENT@274..284
                   0: COLON@274..275 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@275..284
-                    0: HTML_LITERAL@275..284 "[dataKey]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@275..284
+                    0: L_BRACKET@275..276 "[" [] []
+                    1: HTML_LITERAL@276..283 "dataKey" [] []
+                    2: R_BRACKET@283..284 "]" [] []
                 1: VUE_MODIFIER_LIST@284..284
                 2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@284..294
                   0: EQ@284..285 "=" [] []
@@ -908,8 +918,10 @@ HtmlRoot {
                 0: VUE_IDENT@376..380 "v-on" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@380..386
                   0: COLON@380..381 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@381..386
-                    0: HTML_LITERAL@381..386 "[evt]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@381..386
+                    0: L_BRACKET@381..382 "[" [] []
+                    1: HTML_LITERAL@382..385 "evt" [] []
+                    2: R_BRACKET@385..386 "]" [] []
                 2: VUE_MODIFIER_LIST@386..386
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@386..396
                   0: EQ@386..387 "=" [] []

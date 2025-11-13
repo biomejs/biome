@@ -1,0 +1,72 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<TodoItem
+  v-if="complete"
+  v-for="todo in todos"
+  :todo="todo"
+/>
+
+<TodoItem
+  v-for="todo in todos"
+  v-if="todo.shown"
+  :todo="todo"
+/>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:3 lint/nursery/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using v-if and v-for on the same element is discouraged.
+  
+    3 │ <TodoItem
+    4 │   v-if="complete"
+  > 5 │   v-for="todo in todos"
+      │   ^^^^^^^^^^^^^^^^^^^^^
+    6 │   :todo="todo"
+    7 │ />
+  
+  i This v-if should be moved to the wrapper element, or you should use a computed property to filter the list instead.
+  
+    3 │ <TodoItem
+  > 4 │   v-if="complete"
+      │   ^^^^^^^^^^^^^^^
+    5 │   v-for="todo in todos"
+    6 │   :todo="todo"
+  
+  i Using v-if and v-for on the same element can lead to unexpected behavior and performance issues.
+  
+
+```
+
+```
+invalid.vue:10:3 lint/nursery/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using v-if and v-for on the same element is discouraged.
+  
+     9 │ <TodoItem
+  > 10 │   v-for="todo in todos"
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    11 │   v-if="todo.shown"
+    12 │   :todo="todo"
+  
+  i This v-if should be moved to the wrapper element, or you should use a computed property to filter the list instead.
+  
+     9 │ <TodoItem
+    10 │   v-for="todo in todos"
+  > 11 │   v-if="todo.shown"
+       │   ^^^^^^^^^^^^^^^^^
+    12 │   :todo="todo"
+    13 │ />
+  
+  i Using v-if and v-for on the same element can lead to unexpected behavior and performance issues.
+  
+
+```

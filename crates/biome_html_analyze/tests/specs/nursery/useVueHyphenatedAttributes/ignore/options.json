@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "useVueHyphenatedAttributes": {
+          "level": "error",
+          "options": {
+            "ignore": [
+              "ignoredAttribute"
+            ],
+            "ignore_tags": [
+              "IgnoredComponent"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
