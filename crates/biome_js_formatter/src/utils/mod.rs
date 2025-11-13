@@ -264,7 +264,7 @@ impl Format<JsFormatContext> for FormatSemicolon<'_> {
                         });
 
                 if !is_after_bogus {
-                    write!(f, [text(";")])?;
+                    write!(f, [token(";")])?;
                 }
 
                 Ok(())

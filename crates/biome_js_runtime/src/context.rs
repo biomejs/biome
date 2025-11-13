@@ -2,7 +2,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use boa_engine::builtins::promise::PromiseState;
-use boa_engine::module::ModuleLoader;
 use boa_engine::object::builtins::JsFunction;
 use boa_engine::{
     Context, JsError, JsNativeError, JsResult, JsValue, Module, NativeFunction, Source, js_string,
@@ -83,7 +82,7 @@ impl JsExecContext {
             match promise_result.state() {
                 PromiseState::Pending => {
                     // Drive the job queue until the promise settles.
-                    ctx.run_jobs();
+                    let _ = ctx.run_jobs();
                 }
                 PromiseState::Fulfilled(_) => break Ok(module),
                 PromiseState::Rejected(err) => {

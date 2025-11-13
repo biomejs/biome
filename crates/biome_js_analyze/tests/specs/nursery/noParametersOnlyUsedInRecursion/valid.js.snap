@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Parameter used outside recursion
+function factorial(n, acc) {
+    console.log(acc);
+    if (n === 0) return acc;
+    return factorial(n - 1, acc * n);
+}
+
+// Parameter not used at all (handled by different rule)
+function foo(unused) {
+    return 42;
+}
+
+// Parameter used in condition
+function fn(n, threshold) {
+    if (n > threshold) return n;
+    return fn(n + 1, threshold);
+}
+
+// Parameter used in non-recursive call
+function fn2(n, logger) {
+    logger(n);
+    if (n === 0) return 0;
+    return fn2(n - 1, logger);
+}
+
+// Parameter used in return value
+function factorial2(n, acc) {
+    if (n === 0) return acc;  // acc used here, not just recursion
+    return factorial2(n - 1, acc * n);
+}
+
+// Parameter in condition with arithmetic
+function clamp(n, max) {
+    if (n > max) return max;  // max used in comparison
+    return clamp(n + 1, max);
+}
+
+// Assignment expression where parameter is used outside recursion
+bar = (n, threshold) => {
+    if (n > threshold) return threshold;
+    return bar(n + 1, threshold);
+};
+
+// Parameter used in condition with logical operator
+function fnValidLogical(n, threshold) {
+    if (n && threshold) return n;
+    return fnValidLogical(n + 1, threshold);
+}
+
+// Parameter used in return with logical operator
+function fnValidReturn(n, acc) {
+    if (n === 0) return acc || 0;
+    return fnValidReturn(n - 1, acc);
+}
+
+// Parameter used in condition that affects control flow
+function fnValidCond(n, threshold) {
+    if (n > threshold) return threshold;  // Used outside recursion
+    return fnValidCond(n + 1, threshold);
+}
+
+// Parameter used in return value of conditional expression
+function fnValidCondReturn(n, acc) {
+    if (n === 0) return n > 5 ? acc : 0;
+    return fnValidCondReturn(n - 1, acc * 2);
+}
+
+// Optional chaining with parameter used elsewhere
+class CounterValidOptional {
+    count(n, acc) {
+        console.log(acc);
+        if (n === 0) return 0;
+        return this?.count(n - 1, acc);
+    }
+}
+
+// Computed member with non-literal (should not match)
+class CounterNonLiteral {
+    count(n, acc) {
+        const methodName = "count";
+        if (n === 0) return 0;
+        return this[methodName](n - 1, acc);  // Won't be recognized as recursive
+    }
+}
+
+// Method calling outer function with same name (not recursive)
+function notRecursive(arg) {
+  return arg;
+}
+
+const obj = {
+  notRecursive(arg) {
+    return notRecursive(arg);  // Calls outer function, not self
+  }
+};
+
+```

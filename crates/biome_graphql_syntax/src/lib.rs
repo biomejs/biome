@@ -10,7 +10,7 @@ mod file_source;
 pub mod string_value_ext;
 mod syntax_node;
 
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use file_source::GraphqlFileSource;
@@ -113,4 +113,20 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
             Err(())
         }
     }
+}
+
+/// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
+pub fn inner_string_text(token: &GraphqlSyntaxToken) -> TokenText {
+    let text = token.token_text_trimmed();
+    if token.kind() != GraphqlSyntaxKind::GRAPHQL_STRING_LITERAL {
+        return text;
+    }
+    // remove string delimiters
+    // SAFETY: string literal token have a delimiters at the start and the end of the string
+    let slice = if text.starts_with("\"\"\"") && text.ends_with("\"\"\"") {
+        TextRange::new(3.into(), text.len() - TextSize::from(3))
+    } else {
+        TextRange::new(1.into(), text.len() - TextSize::from(1))
+    };
+    text.slice(slice)
 }

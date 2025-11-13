@@ -1,16 +1,17 @@
 use biome_console::fmt::Display;
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoPrivateImportsOptions {
     /// The default visibility to assume for symbols without visibility tag.
     ///
     /// Default: **public**.
-    pub default_visibility: Visibility,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub default_visibility: Option<Visibility>,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -21,6 +22,12 @@ pub enum Visibility {
     Public,
     Package,
     Private,
+}
+
+impl biome_deserialize::Merge for Visibility {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
 }
 
 impl Display for Visibility {

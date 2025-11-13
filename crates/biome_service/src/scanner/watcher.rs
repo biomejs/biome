@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use super::WorkspaceWatcherBridge;
 use crate::WorkspaceError;
 use crate::diagnostics::WatchError;
-use crate::workspace::ScanKind;
 use biome_diagnostics::PrintDescription;
 use biome_diagnostics::serde::Diagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -14,12 +13,16 @@ use notify::{
     Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode, Result as NotifyResult,
     Watcher as NotifyWatcher,
 };
+use rustc_hash::FxHashSet;
 use tracing::{debug, error, warn};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
 pub enum WatcherInstruction {
-    WatchFolder(Utf8PathBuf, ScanKind),
+    /// Watches the specified paths non-recursively.
+    WatchFolders(FxHashSet<Utf8PathBuf>),
+
+    /// Unwatches the watched paths starting with the specified path.
     UnwatchFolder(Utf8PathBuf),
 
     /// Re-indexes a file after it was closed by a client.
@@ -132,8 +135,8 @@ impl Watcher {
                     }
                 },
                 recv(self.instruction_rx) -> instruction => match instruction {
-                    Ok(WatcherInstruction::WatchFolder(path, scan_kind)) => {
-                        self.watch_folder(workspace, path, scan_kind);
+                    Ok(WatcherInstruction::WatchFolders(paths)) => {
+                        self.watch_folders(workspace, paths);
                     }
                     Ok(WatcherInstruction::UnwatchFolder(path)) => {
                         self.unwatch_folder(workspace, path);
@@ -343,28 +346,38 @@ impl Watcher {
     }
 
     #[tracing::instrument(level = "debug", skip(self, workspace))]
-    fn watch_folder(
+    fn watch_folders(
         &mut self,
         workspace: &impl WorkspaceWatcherBridge,
-        path: Utf8PathBuf,
-        scan_kind: ScanKind,
+        paths: FxHashSet<Utf8PathBuf>,
     ) {
-        let std_path = path.as_std_path();
-        if !workspace.insert_watched_folder(path.clone()) {
-            return; // Already watching.
+        let mut watcher_paths = self.watcher.paths_mut();
+
+        for path in paths {
+            let std_path = path.as_std_path();
+            if !workspace.insert_watched_folder(path.clone()) {
+                continue; // Already watching.
+            }
+
+            if let Err(error) = watcher_paths.add(std_path, RecursiveMode::NonRecursive) {
+                // TODO: Improve error propagation.
+                warn!("Error watching path {path}: {error}");
+            }
         }
 
-        if let Err(error) = self.watcher.watch(std_path, RecursiveMode::NonRecursive) {
+        if let Err(error) = watcher_paths.commit() {
             // TODO: Improve error propagation.
-            warn!("Error watching path {path}: {error}");
+            warn!("Error committing the watched paths: {error}");
         }
     }
 
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     fn unwatch_folder(&mut self, workspace: &impl WorkspaceWatcherBridge, path: Utf8PathBuf) {
+        let mut watcher_paths = self.watcher.paths_mut();
+
         workspace.remove_watched_folders(|watched_path| {
             if watched_path.starts_with(path.as_std_path()) {
-                if let Err(error) = self.watcher.unwatch(watched_path.as_std_path()) {
+                if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
                     // TODO: Improve error propagation.
                     warn!("Error unwatching path {}: {error}", watched_path);
                 }
@@ -373,6 +386,11 @@ impl Watcher {
                 false
             }
         });
+
+        if let Err(error) = watcher_paths.commit() {
+            // TODO: Improve error propagation.
+            warn!("Error committing the watched paths: {error}");
+        }
     }
 }
 

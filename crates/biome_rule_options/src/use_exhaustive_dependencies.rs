@@ -1,41 +1,71 @@
 use biome_console::markup;
 use biome_deserialize::{
     DeserializableTypes, DeserializableValidator, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange, non_empty,
+    DeserializationDiagnostic, DeserializationVisitor, IsEmpty, TextRange, non_empty,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseExhaustiveDependenciesOptions {
     /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
-    #[serde(default = "report_unnecessary_dependencies_default")]
-    pub report_unnecessary_dependencies: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub report_unnecessary_dependencies: Option<bool>,
 
     /// Whether to report an error when a hook has no dependencies array.
-    #[serde(default)]
-    pub report_missing_dependencies_array: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub report_missing_dependencies_array: Option<bool>,
 
     /// List of hooks of which the dependencies should be validated.
-    #[serde(default)]
-    #[deserializable(validate = "non_empty")]
-    pub hooks: Box<[Hook]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    #[deserializable(validate = "non_empty_optional")]
+    pub hooks: Option<Box<[Hook]>>,
 }
 
-fn report_unnecessary_dependencies_default() -> bool {
-    true
+fn non_empty_optional<T: IsEmpty>(
+    ctx: &mut impl DeserializationContext,
+    value: &Option<T>,
+    name: &str,
+    range: TextRange,
+) -> bool {
+    if let Some(value) = value {
+        non_empty(ctx, value, name, range)
+    } else {
+        true
+    }
 }
 
-impl Default for UseExhaustiveDependenciesOptions {
-    fn default() -> Self {
-        Self {
-            report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
-            report_missing_dependencies_array: false,
-            hooks: Vec::new().into_boxed_slice(),
+impl UseExhaustiveDependenciesOptions {
+    pub const DEFAULT_REPORT_UNNECESSARY_DEPENDENCIES: bool = true;
+    pub const DEFAULT_REPORT_MISSING_DEPENDENCIES_ARRAY: bool = false;
+
+    /// Returns [`Self::report_unnecessary_dependencies`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_REPORT_UNNECESSARY_DEPENDENCIES`].
+    pub fn report_unnecessary_dependencies(&self) -> bool {
+        self.report_unnecessary_dependencies
+            .unwrap_or(Self::DEFAULT_REPORT_UNNECESSARY_DEPENDENCIES)
+    }
+
+    /// Returns [`Self::report_missing_dependencies_array`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_REPORT_MISSING_DEPENDENCIES_ARRAY`].
+    pub fn report_missing_dependencies_array(&self) -> bool {
+        self.report_missing_dependencies_array
+            .unwrap_or(Self::DEFAULT_REPORT_MISSING_DEPENDENCIES_ARRAY)
+    }
+}
+
+impl biome_deserialize::Merge for UseExhaustiveDependenciesOptions {
+    fn merge_with(&mut self, other: Self) {
+        self.report_unnecessary_dependencies
+            .merge_with(other.report_unnecessary_dependencies);
+        self.report_missing_dependencies_array
+            .merge_with(other.report_missing_dependencies_array);
+        if let Some(hooks) = other.hooks {
+            self.hooks = Some(hooks);
         }
     }
 }
@@ -125,65 +155,37 @@ pub enum StableHookResult {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for StableHookResult {
-    fn schema_name() -> String {
-        "StableHookResult".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("StableHookResult")
     }
 
-    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-        Schema::Object(SchemaObject {
-            subschemas: Some(Box::new(SubschemaValidation {
-                one_of: Some(vec![
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Boolean.into()),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Whether the hook has a stable result.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::Integer.into()),
-                                format: Some("uint8".to_owned()),
-                                number: Some(Box::new(NumberValidation {
-                                    minimum: Some(0.),
-                                    maximum: Some(255.),
-                                    ..Default::default()
-                                })),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Used to indicate the hook returns an array and some of its indices have stable identities.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::String.into()),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Used to indicate the hook returns an object and some of its properties have stable identities.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                ]),
-                ..Default::default()
-            })),
-            ..Default::default()
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "oneOf": [
+                {
+                    "type": "boolean",
+                    "description": "Whether the hook has a stable result."
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "format": "uint8",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "minItems": 1,
+                    "description": "Used to indicate the hook returns an array and some of its indices have stable identities."
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "Used to indicate the hook returns an object and some of its properties have stable identities."
+                }
+            ]
         })
     }
 }

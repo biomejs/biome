@@ -1,0 +1,208 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+  // This is a comment
+  "key": "value"
+}
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.json:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property but instead found '// This is a comment'.
+  
+    1 │ {
+  > 2 │   // This is a comment
+      │   ^^^^^^^^^^^^^^^^^^^^
+    3 │   "key": "value"
+    4 │ }
+  
+  i Expected a property here.
+  
+    1 │ {
+  > 2 │   // This is a comment
+      │   ^^^^^^^^^^^^^^^^^^^^
+    3 │   "key": "value"
+    4 │ }
+  
+
+```
+
+```block
+file.json:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │   ^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │        ^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │          ^^^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │   // This is a comment
+    3 │   "key": "value"
+  > 4 │ }
+      │ ^
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property but instead found '// This is a comment'.
+  
+    1 │ {
+  > 2 │   // This is a comment
+      │   ^^^^^^^^^^^^^^^^^^^^
+    3 │   "key": "value"
+    4 │ }
+  
+  i Expected a property here.
+  
+    1 │ {
+  > 2 │   // This is a comment
+      │   ^^^^^^^^^^^^^^^^^^^^
+    3 │   "key": "value"
+    4 │ }
+  
+
+```
+
+```block
+file.json:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │   ^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │        ^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │   // This is a comment
+  > 3 │   "key": "value"
+      │          ^^^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │   // This is a comment
+    3 │   "key": "value"
+  > 4 │ }
+      │ ^
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+file.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 11 errors.
+```

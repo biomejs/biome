@@ -10,6 +10,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
     match node_name {
         // Native Biome AST patterns
         "CssAtRule" => lang::CssAtRule::KIND_SET.iter().next(),
+        "CssAtRuleDeclarator" => lang::CssAtRuleDeclarator::KIND_SET.iter().next(),
         "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
         "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
@@ -20,6 +21,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssClassSelector" => lang::CssClassSelector::KIND_SET.iter().next(),
         "CssColor" => lang::CssColor::KIND_SET.iter().next(),
         "CssColorProfileAtRule" => lang::CssColorProfileAtRule::KIND_SET.iter().next(),
+        "CssColorProfileAtRuleDeclarator" => lang::CssColorProfileAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssComplexSelector" => lang::CssComplexSelector::KIND_SET.iter().next(),
         "CssComposesImportSpecifier" => lang::CssComposesImportSpecifier::KIND_SET.iter().next(),
         "CssComposesProperty" => lang::CssComposesProperty::KIND_SET.iter().next(),
@@ -27,6 +31,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssCompoundSelector" => lang::CssCompoundSelector::KIND_SET.iter().next(),
         "CssContainerAndQuery" => lang::CssContainerAndQuery::KIND_SET.iter().next(),
         "CssContainerAtRule" => lang::CssContainerAtRule::KIND_SET.iter().next(),
+        "CssContainerAtRuleDeclarator" => {
+            lang::CssContainerAtRuleDeclarator::KIND_SET.iter().next()
+        }
         "CssContainerNotQuery" => lang::CssContainerNotQuery::KIND_SET.iter().next(),
         "CssContainerOrQuery" => lang::CssContainerOrQuery::KIND_SET.iter().next(),
         "CssContainerQueryInParens" => lang::CssContainerQueryInParens::KIND_SET.iter().next(),
@@ -41,6 +48,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             lang::CssContainerStyleQueryInParens::KIND_SET.iter().next()
         }
         "CssCounterStyleAtRule" => lang::CssCounterStyleAtRule::KIND_SET.iter().next(),
+        "CssCounterStyleAtRuleDeclarator" => lang::CssCounterStyleAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssCustomIdentifier" => lang::CssCustomIdentifier::KIND_SET.iter().next(),
         "CssDashedIdentifier" => lang::CssDashedIdentifier::KIND_SET.iter().next(),
         "CssDeclaration" => lang::CssDeclaration::KIND_SET.iter().next(),
@@ -53,11 +63,17 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
         "CssEmptyDeclaration" => lang::CssEmptyDeclaration::KIND_SET.iter().next(),
         "CssFontFaceAtRule" => lang::CssFontFaceAtRule::KIND_SET.iter().next(),
+        "CssFontFaceAtRuleDeclarator" => lang::CssFontFaceAtRuleDeclarator::KIND_SET.iter().next(),
         "CssFontFamilyName" => lang::CssFontFamilyName::KIND_SET.iter().next(),
         "CssFontFeatureValuesAtRule" => lang::CssFontFeatureValuesAtRule::KIND_SET.iter().next(),
         "CssFontFeatureValuesBlock" => lang::CssFontFeatureValuesBlock::KIND_SET.iter().next(),
         "CssFontFeatureValuesItem" => lang::CssFontFeatureValuesItem::KIND_SET.iter().next(),
         "CssFontPaletteValuesAtRule" => lang::CssFontPaletteValuesAtRule::KIND_SET.iter().next(),
+        "CssFontPaletteValuesAtRuleDeclarator" => {
+            lang::CssFontPaletteValuesAtRuleDeclarator::KIND_SET
+                .iter()
+                .next()
+        }
         "CssFunction" => lang::CssFunction::KIND_SET.iter().next(),
         "CssGenericDelimiter" => lang::CssGenericDelimiter::KIND_SET.iter().next(),
         "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
@@ -84,6 +100,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssMediaAndCondition" => lang::CssMediaAndCondition::KIND_SET.iter().next(),
         "CssMediaAndTypeQuery" => lang::CssMediaAndTypeQuery::KIND_SET.iter().next(),
         "CssMediaAtRule" => lang::CssMediaAtRule::KIND_SET.iter().next(),
+        "CssMediaAtRuleDeclarator" => lang::CssMediaAtRuleDeclarator::KIND_SET.iter().next(),
         "CssMediaConditionInParens" => lang::CssMediaConditionInParens::KIND_SET.iter().next(),
         "CssMediaConditionQuery" => lang::CssMediaConditionQuery::KIND_SET.iter().next(),
         "CssMediaFeatureInParens" => lang::CssMediaFeatureInParens::KIND_SET.iter().next(),
@@ -107,7 +124,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssParenthesizedExpression" => lang::CssParenthesizedExpression::KIND_SET.iter().next(),
         "CssPercentage" => lang::CssPercentage::KIND_SET.iter().next(),
         "CssPositionTryAtRule" => lang::CssPositionTryAtRule::KIND_SET.iter().next(),
+        "CssPositionTryAtRuleDeclarator" => {
+            lang::CssPositionTryAtRuleDeclarator::KIND_SET.iter().next()
+        }
         "CssPropertyAtRule" => lang::CssPropertyAtRule::KIND_SET.iter().next(),
+        "CssPropertyAtRuleDeclarator" => lang::CssPropertyAtRuleDeclarator::KIND_SET.iter().next(),
         "CssPseudoClassFunctionCompoundSelector" => {
             lang::CssPseudoClassFunctionCompoundSelector::KIND_SET
                 .iter()
@@ -160,14 +181,19 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
         "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
         "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),
+        "CssScopeAtRuleDeclarator" => lang::CssScopeAtRuleDeclarator::KIND_SET.iter().next(),
         "CssScopeEdge" => lang::CssScopeEdge::KIND_SET.iter().next(),
         "CssScopeRangeEnd" => lang::CssScopeRangeEnd::KIND_SET.iter().next(),
         "CssScopeRangeInterval" => lang::CssScopeRangeInterval::KIND_SET.iter().next(),
         "CssScopeRangeStart" => lang::CssScopeRangeStart::KIND_SET.iter().next(),
         "CssStartingStyleAtRule" => lang::CssStartingStyleAtRule::KIND_SET.iter().next(),
+        "CssStartingStyleAtRuleDeclarator" => lang::CssStartingStyleAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssString" => lang::CssString::KIND_SET.iter().next(),
         "CssSupportsAndCondition" => lang::CssSupportsAndCondition::KIND_SET.iter().next(),
         "CssSupportsAtRule" => lang::CssSupportsAtRule::KIND_SET.iter().next(),
+        "CssSupportsAtRuleDeclarator" => lang::CssSupportsAtRuleDeclarator::KIND_SET.iter().next(),
         "CssSupportsConditionInParens" => {
             lang::CssSupportsConditionInParens::KIND_SET.iter().next()
         }
@@ -204,6 +230,23 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "CssViewTransitionAtRule" => lang::CssViewTransitionAtRule::KIND_SET.iter().next(),
+        "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
+        "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
+        "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),
+        "TwCustomVariantAtRule" => lang::TwCustomVariantAtRule::KIND_SET.iter().next(),
+        "TwCustomVariantShorthand" => lang::TwCustomVariantShorthand::KIND_SET.iter().next(),
+        "TwFunctionalUtilityName" => lang::TwFunctionalUtilityName::KIND_SET.iter().next(),
+        "TwPluginAtRule" => lang::TwPluginAtRule::KIND_SET.iter().next(),
+        "TwReferenceAtRule" => lang::TwReferenceAtRule::KIND_SET.iter().next(),
+        "TwSlotAtRule" => lang::TwSlotAtRule::KIND_SET.iter().next(),
+        "TwSourceAtRule" => lang::TwSourceAtRule::KIND_SET.iter().next(),
+        "TwSourceInline" => lang::TwSourceInline::KIND_SET.iter().next(),
+        "TwThemeAtRule" => lang::TwThemeAtRule::KIND_SET.iter().next(),
+        "TwUtilityAtRule" => lang::TwUtilityAtRule::KIND_SET.iter().next(),
+        "TwValueThemeReference" => lang::TwValueThemeReference::KIND_SET.iter().next(),
+        "TwVariantAtRule" => lang::TwVariantAtRule::KIND_SET.iter().next(),
         _ => None,
     }
 }

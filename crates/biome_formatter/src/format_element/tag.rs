@@ -1,5 +1,6 @@
 use crate::format_element::PrintMode;
 use crate::{GroupId, TextSize};
+use biome_rowan::TextRange;
 use std::cell::Cell;
 use std::num::NonZeroU8;
 
@@ -67,6 +68,11 @@ pub enum Tag {
     /// See [crate::builders::labelled] for documentation.
     StartLabelled(LabelId),
     EndLabelled,
+
+    /// Content that will be formatted later by another formatter.
+    /// These tags must be removed during the second pass.
+    StartEmbedded(TextRange),
+    EndEmbedded,
 }
 
 impl Tag {
@@ -85,6 +91,7 @@ impl Tag {
                 | Self::StartLineSuffix
                 | Self::StartVerbatim(_)
                 | Self::StartLabelled(_)
+                | Self::StartEmbedded(_)
         )
     }
 
@@ -108,13 +115,14 @@ impl Tag {
             StartLineSuffix | EndLineSuffix => TagKind::LineSuffix,
             StartVerbatim(_) | EndVerbatim => TagKind::Verbatim,
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
+            StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
         }
     }
 }
 
-/// The kind of a [Tag].
+/// The kind of [Tag].
 ///
-/// Each start end tag pair has its own [tag kind](TagKind).
+/// Each start-end tag pair has its own [tag kind](TagKind).
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TagKind {
@@ -129,6 +137,7 @@ pub enum TagKind {
     LineSuffix,
     Verbatim,
     Labelled,
+    Embedded,
 }
 
 #[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]

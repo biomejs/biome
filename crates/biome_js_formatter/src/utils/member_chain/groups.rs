@@ -294,7 +294,7 @@ impl Format<JsFormatContext> for FormatMemberChainGroup<'_> {
         let format_entries = format_with(|f| f.join().entries(group.members.iter()).finish());
 
         if needs_parens {
-            write!(f, [text("("), format_entries, text(")")])
+            write!(f, [token("("), format_entries, token(")")])
         } else {
             write!(f, [format_entries])
         }

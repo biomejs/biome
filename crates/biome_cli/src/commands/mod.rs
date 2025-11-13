@@ -8,22 +8,32 @@ use crate::{
     setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
-use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
-use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
-use biome_configuration::formatter::FormatterEnabled;
+use biome_configuration::analyzer::{AnalyzerSelector, LinterEnabled};
+use biome_configuration::css::{
+    CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration,
+};
+use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_configuration};
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
-use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+use biome_configuration::json::{
+    JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
+};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
     FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
-    css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
-    formatter_configuration, graphql::graphql_formatter_configuration,
-    graphql::graphql_linter_configuration, javascript::js_formatter_configuration,
-    javascript::js_linter_configuration, json::json_formatter_configuration,
-    json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
+    css::{css_formatter_configuration, css_linter_configuration, css_parser_configuration},
+    files_configuration, formatter_configuration,
+    graphql::graphql_formatter_configuration,
+    graphql::graphql_linter_configuration,
+    javascript::js_formatter_configuration,
+    javascript::js_linter_configuration,
+    json::json_formatter_configuration,
+    json::json_linter_configuration,
+    json::json_parser_configuration,
+    linter_configuration,
+    vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
@@ -146,6 +156,17 @@ pub enum BiomeCommand {
         #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
         enforce_assist: bool,
 
+        /// Whether formatting should be allowed to proceed if a given file
+        /// has syntax errors
+        #[bpaf(long("format-with-errors"), argument("true|false"))]
+        format_with_errors: Option<FormatWithErrorsEnabled>,
+
+        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        css_parser: Option<CssParserConfiguration>,
+
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
@@ -209,6 +230,12 @@ pub enum BiomeCommand {
         #[bpaf(long("reason"), argument("STRING"))]
         suppression_reason: Option<String>,
 
+        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        css_parser: Option<CssParserConfiguration>,
+
         #[bpaf(external(linter_configuration), hide_usage, optional)]
         linter_configuration: Option<LinterConfiguration>,
 
@@ -233,20 +260,28 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule or group of rules.
+        /// Run only the given rule, group of rules or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
-        /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
-        #[bpaf(long("only"), argument("GROUP|RULE"))]
-        only: Vec<RuleSelector>,
+        /// Example:
+        ///
+        /// ```shell
+        /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
-        /// Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
-        #[bpaf(long("skip"), argument("GROUP|RULE"))]
-        skip: Vec<RuleSelector>,
+        /// Example:
+        ///
+        /// ```shell
+        /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
@@ -286,11 +321,17 @@ pub enum BiomeCommand {
         #[bpaf(external(json_formatter_configuration), optional, hide_usage)]
         json_formatter: Option<JsonFormatterConfiguration>,
 
-        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
-        css_formatter: Option<CssFormatterConfiguration>,
+        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        css_parser: Option<CssParserConfiguration>,
 
         #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
+
+        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
+        css_formatter: Option<CssFormatterConfiguration>,
 
         #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
         html_formatter: Option<HtmlFormatterConfiguration>,
@@ -356,6 +397,17 @@ pub enum BiomeCommand {
         /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
+
+        /// Whether formatting should be allowed to proceed if a given file
+        /// has syntax errors
+        #[bpaf(long("format-with-errors"), argument("true|false"))]
+        format_with_errors: Option<FormatWithErrorsEnabled>,
+
+        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        css_parser: Option<CssParserConfiguration>,
 
         /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
         #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]

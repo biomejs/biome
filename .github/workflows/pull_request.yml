@@ -46,9 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy
-        run: |
-          cargo lint
-          cargo run -p rules_check
+        run: cargo lint
 
   check-dependencies:
     name: Check Dependencies

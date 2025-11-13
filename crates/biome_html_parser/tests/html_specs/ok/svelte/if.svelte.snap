@@ -1,0 +1,336 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#if answer === 42}
+	<p>what was the question?</p>
+{/if}
+
+{#if answer === 42}
+	<p>what was the question?</p>
+	{#if answer === 42}
+  	<p>what was the question?</p>
+  	{#if answer === 42}
+    	<p>what was the question?</p>
+    {/if}
+  {/if}
+{/if}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteIfBlock {
+            opening_block: SvelteIfOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                if_token: IF_KW@2..4 "if" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@4..18 " answer === 42" [] [],
+                },
+                r_curly_token: R_CURLY@18..19 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@19..22 "<" [Newline("\n"), Whitespace("\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@22..23 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@23..24 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@24..46 "what was the question?" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@46..47 "<" [] [],
+                            slash_token: SLASH@47..48 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@48..49 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@49..50 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            else_if_clauses: SvelteElseIfClauseList [],
+            else_clause: missing (optional),
+            closing_block: SvelteIfClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@50..53 "{/" [Newline("\n")] [],
+                if_token: IF_KW@53..55 "if" [] [],
+                r_curly_token: R_CURLY@55..56 "}" [] [],
+            },
+        },
+        SvelteIfBlock {
+            opening_block: SvelteIfOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@56..60 "{#" [Newline("\n"), Newline("\n")] [],
+                if_token: IF_KW@60..62 "if" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@62..76 " answer === 42" [] [],
+                },
+                r_curly_token: R_CURLY@76..77 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@77..80 "<" [Newline("\n"), Whitespace("\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@80..81 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@81..82 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@82..104 "what was the question?" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@104..105 "<" [] [],
+                            slash_token: SLASH@105..106 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@106..107 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@107..108 ">" [] [],
+                        },
+                    },
+                    SvelteIfBlock {
+                        opening_block: SvelteIfOpeningBlock {
+                            sv_curly_hash_token: SV_CURLY_HASH@108..112 "{#" [Newline("\n"), Whitespace("\t")] [],
+                            if_token: IF_KW@112..114 "if" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@114..128 " answer === 42" [] [],
+                            },
+                            r_curly_token: R_CURLY@128..129 "}" [] [],
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@129..134 "<" [Newline("\n"), Whitespace("  \t")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@134..135 "p" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@135..136 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@136..158 "what was the question?" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@158..159 "<" [] [],
+                                        slash_token: SLASH@159..160 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@160..161 "p" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@161..162 ">" [] [],
+                                    },
+                                },
+                                SvelteIfBlock {
+                                    opening_block: SvelteIfOpeningBlock {
+                                        sv_curly_hash_token: SV_CURLY_HASH@162..168 "{#" [Newline("\n"), Whitespace("  \t")] [],
+                                        if_token: IF_KW@168..170 "if" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@170..184 " answer === 42" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@184..185 "}" [] [],
+                                        children: HtmlElementList [
+                                            HtmlElement {
+                                                opening_element: HtmlOpeningElement {
+                                                    l_angle_token: L_ANGLE@185..192 "<" [Newline("\n"), Whitespace("    \t")] [],
+                                                    name: HtmlTagName {
+                                                        value_token: HTML_LITERAL@192..193 "p" [] [],
+                                                    },
+                                                    attributes: HtmlAttributeList [],
+                                                    r_angle_token: R_ANGLE@193..194 ">" [] [],
+                                                },
+                                                children: HtmlElementList [
+                                                    HtmlContent {
+                                                        value_token: HTML_LITERAL@194..216 "what was the question?" [] [],
+                                                    },
+                                                ],
+                                                closing_element: HtmlClosingElement {
+                                                    l_angle_token: L_ANGLE@216..217 "<" [] [],
+                                                    slash_token: SLASH@217..218 "/" [] [],
+                                                    name: HtmlTagName {
+                                                        value_token: HTML_LITERAL@218..219 "p" [] [],
+                                                    },
+                                                    r_angle_token: R_ANGLE@219..220 ">" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    else_if_clauses: SvelteElseIfClauseList [],
+                                    else_clause: missing (optional),
+                                    closing_block: SvelteIfClosingBlock {
+                                        sv_curly_slash_token: SV_CURLY_SLASH@220..227 "{/" [Newline("\n"), Whitespace("    ")] [],
+                                        if_token: IF_KW@227..229 "if" [] [],
+                                        r_curly_token: R_CURLY@229..230 "}" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        else_if_clauses: SvelteElseIfClauseList [],
+                        else_clause: missing (optional),
+                        closing_block: SvelteIfClosingBlock {
+                            sv_curly_slash_token: SV_CURLY_SLASH@230..235 "{/" [Newline("\n"), Whitespace("  ")] [],
+                            if_token: IF_KW@235..237 "if" [] [],
+                            r_curly_token: R_CURLY@237..238 "}" [] [],
+                        },
+                    },
+                ],
+            },
+            else_if_clauses: SvelteElseIfClauseList [],
+            else_clause: missing (optional),
+            closing_block: SvelteIfClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@238..241 "{/" [Newline("\n")] [],
+                if_token: IF_KW@241..243 "if" [] [],
+                r_curly_token: R_CURLY@243..244 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@244..245 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..245
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..244
+    0: SVELTE_IF_BLOCK@0..56
+      0: SVELTE_IF_OPENING_BLOCK@0..50
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: IF_KW@2..4 "if" [] []
+        2: HTML_TEXT_EXPRESSION@4..18
+          0: HTML_LITERAL@4..18 " answer === 42" [] []
+        3: R_CURLY@18..19 "}" [] []
+        4: HTML_ELEMENT_LIST@19..50
+          0: HTML_ELEMENT@19..50
+            0: HTML_OPENING_ELEMENT@19..24
+              0: L_ANGLE@19..22 "<" [Newline("\n"), Whitespace("\t")] []
+              1: HTML_TAG_NAME@22..23
+                0: HTML_LITERAL@22..23 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@23..23
+              3: R_ANGLE@23..24 ">" [] []
+            1: HTML_ELEMENT_LIST@24..46
+              0: HTML_CONTENT@24..46
+                0: HTML_LITERAL@24..46 "what was the question?" [] []
+            2: HTML_CLOSING_ELEMENT@46..50
+              0: L_ANGLE@46..47 "<" [] []
+              1: SLASH@47..48 "/" [] []
+              2: HTML_TAG_NAME@48..49
+                0: HTML_LITERAL@48..49 "p" [] []
+              3: R_ANGLE@49..50 ">" [] []
+      1: SVELTE_ELSE_IF_CLAUSE_LIST@50..50
+      2: (empty)
+      3: SVELTE_IF_CLOSING_BLOCK@50..56
+        0: SV_CURLY_SLASH@50..53 "{/" [Newline("\n")] []
+        1: IF_KW@53..55 "if" [] []
+        2: R_CURLY@55..56 "}" [] []
+    1: SVELTE_IF_BLOCK@56..244
+      0: SVELTE_IF_OPENING_BLOCK@56..238
+        0: SV_CURLY_HASH@56..60 "{#" [Newline("\n"), Newline("\n")] []
+        1: IF_KW@60..62 "if" [] []
+        2: HTML_TEXT_EXPRESSION@62..76
+          0: HTML_LITERAL@62..76 " answer === 42" [] []
+        3: R_CURLY@76..77 "}" [] []
+        4: HTML_ELEMENT_LIST@77..238
+          0: HTML_ELEMENT@77..108
+            0: HTML_OPENING_ELEMENT@77..82
+              0: L_ANGLE@77..80 "<" [Newline("\n"), Whitespace("\t")] []
+              1: HTML_TAG_NAME@80..81
+                0: HTML_LITERAL@80..81 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@81..81
+              3: R_ANGLE@81..82 ">" [] []
+            1: HTML_ELEMENT_LIST@82..104
+              0: HTML_CONTENT@82..104
+                0: HTML_LITERAL@82..104 "what was the question?" [] []
+            2: HTML_CLOSING_ELEMENT@104..108
+              0: L_ANGLE@104..105 "<" [] []
+              1: SLASH@105..106 "/" [] []
+              2: HTML_TAG_NAME@106..107
+                0: HTML_LITERAL@106..107 "p" [] []
+              3: R_ANGLE@107..108 ">" [] []
+          1: SVELTE_IF_BLOCK@108..238
+            0: SVELTE_IF_OPENING_BLOCK@108..230
+              0: SV_CURLY_HASH@108..112 "{#" [Newline("\n"), Whitespace("\t")] []
+              1: IF_KW@112..114 "if" [] []
+              2: HTML_TEXT_EXPRESSION@114..128
+                0: HTML_LITERAL@114..128 " answer === 42" [] []
+              3: R_CURLY@128..129 "}" [] []
+              4: HTML_ELEMENT_LIST@129..230
+                0: HTML_ELEMENT@129..162
+                  0: HTML_OPENING_ELEMENT@129..136
+                    0: L_ANGLE@129..134 "<" [Newline("\n"), Whitespace("  \t")] []
+                    1: HTML_TAG_NAME@134..135
+                      0: HTML_LITERAL@134..135 "p" [] []
+                    2: HTML_ATTRIBUTE_LIST@135..135
+                    3: R_ANGLE@135..136 ">" [] []
+                  1: HTML_ELEMENT_LIST@136..158
+                    0: HTML_CONTENT@136..158
+                      0: HTML_LITERAL@136..158 "what was the question?" [] []
+                  2: HTML_CLOSING_ELEMENT@158..162
+                    0: L_ANGLE@158..159 "<" [] []
+                    1: SLASH@159..160 "/" [] []
+                    2: HTML_TAG_NAME@160..161
+                      0: HTML_LITERAL@160..161 "p" [] []
+                    3: R_ANGLE@161..162 ">" [] []
+                1: SVELTE_IF_BLOCK@162..230
+                  0: SVELTE_IF_OPENING_BLOCK@162..220
+                    0: SV_CURLY_HASH@162..168 "{#" [Newline("\n"), Whitespace("  \t")] []
+                    1: IF_KW@168..170 "if" [] []
+                    2: HTML_TEXT_EXPRESSION@170..184
+                      0: HTML_LITERAL@170..184 " answer === 42" [] []
+                    3: R_CURLY@184..185 "}" [] []
+                    4: HTML_ELEMENT_LIST@185..220
+                      0: HTML_ELEMENT@185..220
+                        0: HTML_OPENING_ELEMENT@185..194
+                          0: L_ANGLE@185..192 "<" [Newline("\n"), Whitespace("    \t")] []
+                          1: HTML_TAG_NAME@192..193
+                            0: HTML_LITERAL@192..193 "p" [] []
+                          2: HTML_ATTRIBUTE_LIST@193..193
+                          3: R_ANGLE@193..194 ">" [] []
+                        1: HTML_ELEMENT_LIST@194..216
+                          0: HTML_CONTENT@194..216
+                            0: HTML_LITERAL@194..216 "what was the question?" [] []
+                        2: HTML_CLOSING_ELEMENT@216..220
+                          0: L_ANGLE@216..217 "<" [] []
+                          1: SLASH@217..218 "/" [] []
+                          2: HTML_TAG_NAME@218..219
+                            0: HTML_LITERAL@218..219 "p" [] []
+                          3: R_ANGLE@219..220 ">" [] []
+                  1: SVELTE_ELSE_IF_CLAUSE_LIST@220..220
+                  2: (empty)
+                  3: SVELTE_IF_CLOSING_BLOCK@220..230
+                    0: SV_CURLY_SLASH@220..227 "{/" [Newline("\n"), Whitespace("    ")] []
+                    1: IF_KW@227..229 "if" [] []
+                    2: R_CURLY@229..230 "}" [] []
+            1: SVELTE_ELSE_IF_CLAUSE_LIST@230..230
+            2: (empty)
+            3: SVELTE_IF_CLOSING_BLOCK@230..238
+              0: SV_CURLY_SLASH@230..235 "{/" [Newline("\n"), Whitespace("  ")] []
+              1: IF_KW@235..237 "if" [] []
+              2: R_CURLY@237..238 "}" [] []
+      1: SVELTE_ELSE_IF_CLAUSE_LIST@238..238
+      2: (empty)
+      3: SVELTE_IF_CLOSING_BLOCK@238..244
+        0: SV_CURLY_SLASH@238..241 "{/" [Newline("\n")] []
+        1: IF_KW@241..243 "if" [] []
+        2: R_CURLY@243..244 "}" [] []
+  4: EOF@244..245 "" [Newline("\n")] []
+
+```

@@ -27,9 +27,9 @@ pub trait Buffer {
     /// let mut state = FormatState::new(SimpleFormatContext::default());
     /// let mut buffer = VecBuffer::new(&mut state);
     ///
-    /// buffer.write_element(FormatElement::StaticText { text: "test"}).unwrap();
+    /// buffer.write_element(FormatElement::Token { text: "test"}).unwrap();
     ///
-    /// assert_eq!(buffer.into_vec(), vec![FormatElement::StaticText { text: "test" }]);
+    /// assert_eq!(buffer.into_vec(), vec![FormatElement::Token { text: "test" }]);
     /// ```
     ///
     fn write_element(&mut self, element: FormatElement) -> FormatResult<()>;
@@ -53,9 +53,9 @@ pub trait Buffer {
     /// let mut state = FormatState::new(SimpleFormatContext::default());
     /// let mut buffer = VecBuffer::new(&mut state);
     ///
-    /// buffer.write_fmt(format_args!(text("Hello World"))).unwrap();
+    /// buffer.write_fmt(format_args!(token("Hello World"))).unwrap();
     ///
-    /// assert_eq!(buffer.into_vec(), vec![FormatElement::StaticText{ text: "Hello World" }]);
+    /// assert_eq!(buffer.into_vec(), vec![FormatElement::Token{ text: "Hello World" }]);
     /// ```
     fn write_fmt(mut self: &mut Self, arguments: Arguments<Self::Context>) -> FormatResult<()> {
         write(&mut self, arguments)
@@ -269,7 +269,7 @@ Make sure that you take and restore the snapshot in order and that this snapshot
 ///
 /// impl Format<SimpleFormatContext> for Preamble {
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
-///         write!(f, [text("# heading"), hard_line_break()])
+///         write!(f, [token("# heading"), hard_line_break()])
 ///     }
 /// }
 ///
@@ -280,7 +280,7 @@ Make sure that you take and restore the snapshot in order and that this snapshot
 /// {
 ///     let mut with_preamble = PreambleBuffer::new(&mut buffer, Preamble);
 ///
-///     write!(&mut with_preamble, [text("this text will be on a new line")])?;
+///     write!(&mut with_preamble, [token("this text will be on a new line")])?;
 /// }
 ///
 /// let formatted = Formatted::new(Document::from(buffer.into_vec()), SimpleFormatContext::default());
@@ -300,7 +300,7 @@ Make sure that you take and restore the snapshot in order and that this snapshot
 ///
 /// impl Format<SimpleFormatContext> for Preamble {
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
-///         write!(f, [text("# heading"), hard_line_break()])
+///         write!(f, [token("# heading"), hard_line_break()])
 ///     }
 /// }
 ///
@@ -455,11 +455,11 @@ where
 ///         write!(
 ///             buffer,
 ///             [
-///                 text("The next soft line or space gets replaced by a space"),
+///                 token("The next soft line or space gets replaced by a space"),
 ///                 soft_line_break_or_space(),
-///                 text("and the line here"),
+///                 token("and the line here"),
 ///                 soft_line_break(),
-///                 text("is removed entirely.")
+///                 token("is removed entirely.")
 ///             ]
 ///         )
 ///     })]
@@ -468,10 +468,10 @@ where
 /// assert_eq!(
 ///     formatted.document().as_ref(),
 ///     &[
-///         FormatElement::StaticText { text: "The next soft line or space gets replaced by a space" },
+///         FormatElement::Token { text: "The next soft line or space gets replaced by a space" },
 ///         FormatElement::Space,
-///         FormatElement::StaticText { text: "and the line here" },
-///         FormatElement::StaticText { text: "is removed entirely." }
+///         FormatElement::Token { text: "and the line here" },
+///         FormatElement::Token { text: "is removed entirely." }
 ///     ]
 /// );
 ///
@@ -706,19 +706,19 @@ pub trait BufferExtensions: Buffer + Sized {
     /// let formatted = format!(SimpleFormatContext::default(), [format_with(|f| {
     ///     let mut recording = f.start_recording();
     ///
-    ///     write!(recording, [text("A")])?;
-    ///     write!(recording, [text("B")])?;
+    ///     write!(recording, [token("A")])?;
+    ///     write!(recording, [token("B")])?;
     ///
-    ///     write!(recording, [format_with(|f| write!(f, [text("C"), text("D")]))])?;
+    ///     write!(recording, [format_with(|f| write!(f, [token("C"), token("D")]))])?;
     ///
     ///     let recorded = recording.stop();
     ///     assert_eq!(
     ///         recorded.deref(),
     ///         &[
-    ///             FormatElement::StaticText{ text: "A" },
-    ///             FormatElement::StaticText{ text: "B" },
-    ///             FormatElement::StaticText{ text: "C" },
-    ///             FormatElement::StaticText{ text: "D" }
+    ///             FormatElement::Token{ text: "A" },
+    ///             FormatElement::Token{ text: "B" },
+    ///             FormatElement::Token{ text: "C" },
+    ///             FormatElement::Token{ text: "D" }
     ///         ]
     ///     );
     ///

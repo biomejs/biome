@@ -1,0 +1,95 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**", "!!**/dist"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+
+```
+
+## `dist`
+
+```dist
+
+```
+
+# Emitted Messages
+
+```block
+init ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Welcome to Biome! Let's get you started...
+    
+    Files created 
+    
+      - biome.json
+        Your project configuration. See https://biomejs.dev/reference/configuration
+    
+    Found an ignore file. Biome enabled VCS integration.
+    
+    Found a dist/ folder. Biome ignored it using the double-exclude syntax.
+    
+    Next Steps 
+    
+      1. Setup an editor extension
+         Get live errors as you type and format when you save.
+         Learn more at https://biomejs.dev/guides/editors/first-party-extensions/
+    
+      2. Try a command
+         biome check  checks formatting, import sorting, and lint rules.
+         biome --help displays the available commands.
+    
+      3. Migrate from ESLint and Prettier
+         biome migrate eslint   migrates your ESLint configuration to Biome.
+         biome migrate prettier migrates your Prettier configuration to Biome.
+    
+      4. Read the documentation
+         Find guides and documentation at https://biomejs.dev/guides/getting-started/
+    
+      5. Get involved with the community
+         Ask questions and contribute on GitHub: https://github.com/biomejs/biome
+         Seek for help on Discord: https://biomejs.dev/chat
+  
+  
+
+```

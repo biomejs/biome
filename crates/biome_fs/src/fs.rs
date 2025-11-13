@@ -11,7 +11,7 @@ use std::panic::RefUnwindSafe;
 use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, io};
-use tracing::{error, info};
+use tracing::info;
 
 mod memory;
 mod os;
@@ -143,26 +143,33 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
-
         loop {
             // Iterate all possible file names
             for file_name in search_files {
                 let file_path = current_search_dir.join(file_name);
-                if let Ok(content) = self.read_file_from_path(&file_path) {
-                    if !predicate(&file_path, &content) {
-                        break;
+                match self.read_file_from_path(&file_path) {
+                    Ok(content) => {
+                        if !predicate(&file_path, &content) {
+                            break;
+                        }
+                        if is_searching_in_parent_dir {
+                            info!(
+                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                                current_search_dir
+                            );
+                        }
+                        return Some(AutoSearchResult {
+                            content,
+                            file_path,
+                            directory_path: current_search_dir,
+                        });
                     }
-                    if is_searching_in_parent_dir {
+                    Err(_) => {
                         info!(
-                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                            current_search_dir
+                            "Couldn't find the configuration file at {}.",
+                            file_path.as_str()
                         );
                     }
-                    return Some(AutoSearchResult {
-                        content,
-                        file_path,
-                        directory_path: current_search_dir,
-                    });
                 }
             }
 
@@ -191,32 +198,20 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 let mut content = String::new();
                 match file.read_to_string(&mut content) {
                     Ok(_) => Ok(content),
-                    Err(err) => {
-                        error!(
-                            "Biome couldn't read the file {:?}, reason:\n{:?}",
-                            file_path, err
-                        );
-                        Err(FileSystemDiagnostic {
-                            path: file_path.to_string(),
-                            severity: Severity::Error,
-                            error_kind: FsErrorKind::CantReadFile,
-                            source: Some(Error::from(IoError::from(err))),
-                        })
-                    }
+                    Err(err) => Err(FileSystemDiagnostic {
+                        path: file_path.to_string(),
+                        severity: Severity::Error,
+                        error_kind: FsErrorKind::CantReadFile,
+                        source: Some(Error::from(IoError::from(err))),
+                    }),
                 }
             }
-            Err(err) => {
-                error!(
-                    "Biome couldn't open the file {:?}, reason:\n{:?}",
-                    file_path, err
-                );
-                Err(FileSystemDiagnostic {
-                    path: file_path.to_string(),
-                    severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: Some(Error::from(IoError::from(err))),
-                })
-            }
+            Err(err) => Err(FileSystemDiagnostic {
+                path: file_path.to_string(),
+                severity: Severity::Error,
+                error_kind: FsErrorKind::CantReadFile,
+                source: Some(Error::from(IoError::from(err))),
+            }),
         }
     }
 

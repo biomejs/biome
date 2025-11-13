@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_console"
+publish              = true
 repository.workspace = true
 version              = "0.5.7"
 
@@ -22,7 +23,7 @@ unicode-segmentation = "1.12.0"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-trybuild = "=1.0.106"
+trybuild = "=1.0.114"
 
 
 [features]

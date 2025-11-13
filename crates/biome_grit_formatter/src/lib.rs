@@ -37,7 +37,7 @@ pub fn format_node(
     options: GritFormatOptions,
     root: &GritSyntaxNode,
 ) -> FormatResult<Formatted<GritFormatContext>> {
-    biome_formatter::format_node(root, GritFormatLanguage::new(options))
+    biome_formatter::format_node(root, GritFormatLanguage::new(options), false)
 }
 
 /// Formats a range within a file, supported by Biome
@@ -169,6 +169,7 @@ impl FormatLanguage for GritFormatLanguage {
         self,
         root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<biome_formatter::TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments: Comments<GritLanguage> =
             Comments::from_node(root, &GritCommentStyle, source_map.as_ref());

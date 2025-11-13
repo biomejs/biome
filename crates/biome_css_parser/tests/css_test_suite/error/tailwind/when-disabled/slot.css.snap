@@ -1,0 +1,61 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@slot;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    SLOT_KW@1..5 "slot" [] [],
+                    SEMICOLON@5..6 ";" [] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@6..7 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..7
+  0: (empty)
+  1: CSS_RULE_LIST@0..6
+    0: CSS_AT_RULE@0..6
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..6
+        0: SLOT_KW@1..5 "slot" [] []
+        1: SEMICOLON@5..6 ";" [] []
+  2: EOF@6..7 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+slot.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @slot;
+      │  ^^^^^
+    2 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

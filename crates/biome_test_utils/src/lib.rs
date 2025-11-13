@@ -1,5 +1,9 @@
 #![deny(clippy::use_self)]
 
+use std::ffi::c_int;
+use std::fmt::Write;
+use std::sync::{Arc, Once};
+
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;
@@ -7,13 +11,12 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
-use biome_js_analyze::JsAnalyzerServices;
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
-use biome_json_parser::{JsonParserOptions, ParseDiagnostic, parse_json};
+use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
-use biome_package::{PackageJson, TsConfigJson};
+use biome_package::{Manifest, PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -23,11 +26,6 @@ use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
-use std::collections::HashMap;
-use std::ffi::c_int;
-use std::fmt::Write;
-use std::hash::BuildHasher;
-use std::sync::{Arc, Once};
 
 mod bench_case;
 
@@ -88,7 +86,10 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             &L::lookup_settings(&settings.languages).linter,
             L::resolve_environment(&settings),
             &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(input_file),
+            &DocumentFileSource::from_path(
+                input_file,
+                settings.experimental_full_html_support_enabled(),
+            ),
             None,
         )
     }
@@ -132,7 +133,10 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let document_file_source = DocumentFileSource::from_path(input_file);
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
         settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
@@ -193,7 +197,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
             if path.is_dir() {
                 get_js_like_paths_in_dir(&path)
             } else {
-                DocumentFileSource::from_well_known(&path)
+                DocumentFileSource::from_well_known(&path, false)
                     .is_javascript_like()
                     .then(|| BiomePath::new(path))
                     .into_iter()
@@ -208,14 +212,11 @@ pub fn project_layout_for_test_file(
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
+    let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
-        );
+        let deserialized = PackageJson::read_manifest(&fs, &package_json_file);
         if deserialized.has_errors() {
             diagnostics.extend(
                 deserialized
@@ -242,13 +243,7 @@ pub fn project_layout_for_test_file(
 
     let tsconfig_file = input_file.with_extension("tsconfig.json");
     if let Ok(json) = std::fs::read_to_string(&tsconfig_file) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<TsConfigJson>(
-            json.as_str(),
-            JsonParserOptions::default()
-                .with_allow_comments()
-                .with_allow_trailing_commas(),
-            "",
-        );
+        let deserialized = TsConfigJson::read_manifest(&fs, &tsconfig_file);
         if deserialized.has_errors() {
             diagnostics.extend(
                 deserialized
@@ -608,65 +603,4 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
             }
         }
     }
-}
-
-/// Creates an in-memory module graph for the given files.
-/// Returns the services for analyzing a single code snippet, including module graph and project layout.
-/// The module graph will be empty if no `files` are provided.
-///
-/// # Arguments
-///
-/// * `file_source` - The file source to use for the returned analyzer services.
-/// * `files` - A map of file paths to their contents.
-pub fn get_test_services<S: BuildHasher>(
-    file_source: JsFileSource,
-    files: &HashMap<String, String, S>,
-) -> JsAnalyzerServices {
-    if files.is_empty() {
-        return JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
-    }
-
-    let fs = MemoryFileSystem::default();
-    let layout = ProjectLayout::default();
-
-    let mut added_paths = Vec::with_capacity(files.len());
-
-    for (path, src) in files.iter() {
-        let path_buf = Utf8PathBuf::from(path);
-        let biome_path = BiomePath::new(&path_buf);
-        if biome_path.is_manifest() {
-            match biome_path.file_name() {
-                Some("package.json") => {
-                    let parsed = parse_json(src, JsonParserOptions::default());
-                    layout.insert_serialized_node_manifest(
-                        path_buf.parent().unwrap().into(),
-                        &parsed.syntax().as_send().unwrap(),
-                    );
-                }
-                Some("tsconfig.json") => {
-                    let parsed = parse_json(
-                        src,
-                        JsonParserOptions::default()
-                            .with_allow_comments()
-                            .with_allow_trailing_commas(),
-                    );
-                    layout.insert_serialized_tsconfig(
-                        path_buf.parent().unwrap().into(),
-                        &parsed.syntax().as_send().unwrap(),
-                    );
-                }
-                _ => unimplemented!("Unhandled manifest: {biome_path}"),
-            }
-        } else {
-            added_paths.push(biome_path);
-        }
-
-        fs.insert(path_buf, src.as_bytes().to_vec());
-    }
-
-    let module_graph = ModuleGraph::default();
-    let added_paths = get_added_paths(&fs, &added_paths);
-    module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, &[]);
-
-    JsAnalyzerServices::from((Arc::new(module_graph), Arc::new(layout), file_source))
 }

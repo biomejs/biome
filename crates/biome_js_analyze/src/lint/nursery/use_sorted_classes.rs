@@ -1,6 +1,6 @@
 mod any_class_string_like;
 mod class_info;
-mod class_lexer;
+pub mod class_lexer;
 mod presets;
 mod sort;
 mod sort_config;
@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div class="hover:focus:m-2 foo hover:px-2 p-4">
+    /// <div class="hover:focus:m-2 foo hover:px-2 p-4" />
     /// ```
     ///
     /// ## Options

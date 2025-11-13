@@ -10,10 +10,13 @@ mod analyzer_js_plugin;
 #[cfg(feature = "js_plugin")]
 mod thread_local;
 
+mod configuration;
+
 #[cfg(feature = "js_plugin")]
 pub use analyzer_js_plugin::AnalyzerJsPlugin;
 
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
+pub use configuration::*;
 pub use diagnostics::PluginDiagnostic;
 pub use plugin_cache::*;
 

@@ -153,6 +153,20 @@ impl LSPServer {
                                 }),
                                 kind: Some(WatchKind::all()),
                             },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.gitignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.ignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
                         ]
                     })
                     .collect();
@@ -174,6 +188,15 @@ impl LSPServer {
                                 "{}/.editorconfig",
                                 base_path.as_path().as_str()
                             )),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.gitignore".to_string()),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.ignore".to_string()),
+
                             kind: Some(WatchKind::all()),
                         },
                     ],
@@ -314,6 +337,7 @@ impl LanguageServer for LSPServer {
         self.session.load_extension_settings().await;
         self.session.load_workspace_settings(false).await;
 
+        self.session.set_initialized();
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
             .client
@@ -353,7 +377,9 @@ impl LanguageServer for LSPServer {
                     && (ConfigName::file_names()
                         .iter()
                         .any(|file_name| watched_file.ends_with(file_name))
-                        || watched_file.ends_with(".editorconfig"))
+                        || (watched_file.ends_with(".editorconfig"))
+                        || watched_file.ends_with(".gitignore")
+                        || watched_file.ends_with(".ignore"))
                 {
                     self.session.load_extension_settings().await;
                     self.session.load_workspace_settings(true).await;
@@ -407,7 +433,8 @@ impl LanguageServer for LSPServer {
             }
         }
 
-        self.session.update_workspace_folders(params.event.added);
+        self.session
+            .update_workspace_folders(params.event.added, params.event.removed);
         self.session.load_workspace_settings(true).await;
     }
 

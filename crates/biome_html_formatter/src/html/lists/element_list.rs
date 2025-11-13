@@ -13,7 +13,7 @@ use crate::{
         metadata::is_element_whitespace_sensitive_from_element,
     },
 };
-use biome_formatter::{CstFormatContext, FormatRuleWithOptions, best_fitting, prelude::*};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, GroupId, best_fitting, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList,
@@ -23,10 +23,19 @@ use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
-    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    /// Whether the parent element that encapsulates this element list is whitespace sensitive.
     is_element_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
+
+    group: Option<GroupId>,
+}
+
+impl FormatHtmlElementList {
+    pub(crate) fn with_group_id(mut self, group: GroupId) -> Self {
+        self.group = Some(group);
+        self
+    }
 }
 
 pub(crate) struct FormatHtmlElementListOptions {
@@ -59,6 +68,20 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         if node.is_empty() {
             return Ok(());
         }
+
+        let should_delegate_fmt_embedded_nodes = f.context().should_delegate_fmt_embedded_nodes();
+        // early exit - If it's just a single HtmlEmbeddedContent node as the only child,
+        // we know the parser will only emit one of these. We can simply call its formatter and be done.
+        // This is also necessary for how we implement embedded language formatting.
+        if node.len() == 1
+            && should_delegate_fmt_embedded_nodes
+            && let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(
+                embedded_content,
+            ))) = node.first()
+        {
+            return embedded_content.format().fmt(f);
+        }
+
         let result = self.fmt_children(node, f)?;
         match result {
             FormatChildrenResult::ForceMultiline(format_multiline) => {
@@ -67,6 +90,7 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
             FormatChildrenResult::BestFitting {
                 flat_children,
                 expanded_children,
+                group_id: _,
             } => {
                 write!(f, [best_fitting![flat_children, expanded_children]])?;
             }
@@ -106,7 +130,40 @@ pub(crate) enum FormatChildrenResult {
     BestFitting {
         flat_children: FormatFlatChildren,
         expanded_children: FormatMultilineChildren,
+        group_id: Option<GroupId>,
     },
+}
+
+impl Format<HtmlFormatContext> for FormatChildrenResult {
+    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::ForceMultiline(multiline) => {
+                write!(f, [multiline])
+            }
+            Self::BestFitting {
+                flat_children,
+                expanded_children,
+                group_id,
+            } => {
+                let group_id = group_id.unwrap_or(f.group_id("element-attr-group-id"));
+
+                let expanded_children = expanded_children.memoized();
+                write!(
+                    f,
+                    [
+                        // If the attribute group breaks, prettier always breaks the children as well.
+                        &if_group_breaks(&expanded_children).with_group_id(Some(group_id)),
+                        // If the attribute group does NOT break, print whatever fits best for the children.
+                        &if_group_fits_on_line(&best_fitting![
+                            format_args![flat_children],
+                            format_args![expanded_children],
+                        ])
+                        .with_group_id(Some(group_id)),
+                    ]
+                )
+            }
+        }
+    }
 }
 
 impl FormatHtmlElementList {
@@ -478,6 +535,7 @@ impl FormatHtmlElementList {
             Ok(FormatChildrenResult::BestFitting {
                 flat_children: flat.finish()?,
                 expanded_children: multiline.finish()?,
+                group_id: self.group,
             })
         }
     }
@@ -505,6 +563,12 @@ impl FormatHtmlElementList {
                     meta.any_tag = true
                 }
                 AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
+                    meta.meaningful_text = meta.meaningful_text
+                        || text
+                            .value_token()
+                            .is_ok_and(|token| is_meaningful_html_text(token.text()));
+                }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text)) => {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()

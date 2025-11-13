@@ -1,11 +1,13 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
+description          = "Biome's GraphQL parser"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_graphql_parser"
+publish              = true
 repository.workspace = true
 version              = "0.1.0"
 
@@ -24,7 +26,7 @@ unicode-bom           = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
