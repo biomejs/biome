@@ -28,10 +28,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - name: Setup Node.js 22.x
+      - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.21.1
+          node-version: 24
 
       - name: Install pnpm
         run: |
@@ -83,10 +83,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - name: Setup Node.js 22.x
+      - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.21.1
+          node-version: 24
 
       - name: Check CLI version changes
         id: cli-version-changed
@@ -280,7 +280,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.5
+          node-version: 24
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -345,8 +345,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.5
-          registry-url: "https://registry.npmjs.org"
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
         run: |
@@ -368,9 +368,7 @@ jobs:
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package  --tag latest --access public --provenance; fi; done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package  --tag latest --access public; fi; done
 
       - name: Publish release for @biomejs/biome
         run: |
@@ -428,8 +426,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.5
-          registry-url: "https://registry.npmjs.org"
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
         run: |
@@ -442,8 +440,6 @@ jobs:
 
       - name: Publish npm package as latest
         run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish release for @biomejs/js-api
         run: |
