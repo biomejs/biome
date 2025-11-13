@@ -889,7 +889,20 @@ fn generate_group_struct(
                     }
                 }
             }
-            docs
+
+            let kebab_rule_name = Case::Kebab.convert(rule);
+            let url = if kind == RuleCategory::Action {
+                format!("https://biomejs.dev/assist/actions/{}", kebab_rule_name)
+            } else {
+                format!("https://biomejs.dev/linter/rules/{}", kebab_rule_name)
+            };
+
+            if !docs.is_empty() {
+                let docs = docs.trim_end_matches('.');
+                format!("{}.\nSee {}", docs, url)
+            } else {
+                format!("See {}", url)
+            }
         };
 
         let rule_position = Literal::u8_unsuffixed(index as u8);
