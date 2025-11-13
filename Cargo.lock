@@ -6306,13 +6306,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0637d3a5566a82fa5214bae89087bc8c9fb94cd8e8a3c07feb691bb8d9c632db"
 
 [[package]]
-name = "xtask"
-version = "0.0.0"
-dependencies = [
- "anyhow",
-]
-
-[[package]]
 name = "xtask_codegen"
 version = "0.0.0"
 dependencies = [
@@ -6351,7 +6344,7 @@ dependencies = [
  "serde",
  "serde_json",
  "ureq",
- "xtask",
+ "xtask_glue",
 ]
 
 [[package]]
@@ -6379,8 +6372,15 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "walkdir",
- "xtask",
+ "xtask_glue",
  "yastl",
+]
+
+[[package]]
+name = "xtask_glue"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]

@@ -4,9 +4,10 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use schemars::{Schema, schema_for};
 use serde_json::{Map, Value, to_string};
-use xtask::{Mode, Result, project_root};
+use xtask_glue::*;
 
-pub fn generate_schema() -> Result<String> {
+/// Returns the configuration schema as a string
+pub fn generate_schema_as_string() -> Result<String> {
     let schema = rename_references_in_schema(schema_for!(Configuration));
 
     let json_schema = to_string(&schema)?;
@@ -18,10 +19,11 @@ pub fn generate_schema() -> Result<String> {
     Ok(formatted.into_code())
 }
 
-pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {
+/// Generate the schema and saves it at `packages/@biomejs/biome/configuration_schema.json`
+pub fn generate_configuration_schema(mode: Mode) -> Result<()> {
     let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
 
-    let schema = generate_schema()?;
+    let schema = generate_schema_as_string()?;
 
     update(&schema_path_npm, schema.as_str(), &mode)?;
 

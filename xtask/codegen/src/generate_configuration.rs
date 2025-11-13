@@ -12,9 +12,9 @@ use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use xtask::*;
 use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
 use xtask_codegen::{to_capitalized, update};
+use xtask_glue::*;
 
 // ======= LINT ======
 #[derive(Default)]
@@ -278,7 +278,7 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let content = quote! {
         #( #lib_exports )*
     };
-    update(lib_root.as_path(), &xtask::reformat(content)?, &mode)?;
+    update(lib_root.as_path(), &xtask_glue::reformat(content)?, &mode)?;
 
     Ok(())
 }
@@ -830,8 +830,8 @@ fn generate_for_groups(
     } else {
         &root.join("rules.rs")
     };
-    update(path, &xtask::reformat(configuration)?, mode)?;
-    update(file_name, &xtask::reformat(push_rules)?, mode)?;
+    update(path, &xtask_glue::reformat(configuration)?, mode)?;
+    update(file_name, &xtask_glue::reformat(push_rules)?, mode)?;
 
     Ok(())
 }
@@ -1230,7 +1230,7 @@ fn generate_for_domains(
         }
     };
 
-    update(destination.as_path(), &xtask::reformat(stream)?, mode)?;
+    update(destination.as_path(), &xtask_glue::reformat(stream)?, mode)?;
 
     Ok(())
 }

@@ -23,7 +23,7 @@ mod tailwind_kinds_src;
 mod yaml_kinds_src;
 
 #[cfg(feature = "schema")]
-mod generate_schema;
+pub mod generate_schema;
 
 mod html_kinds_src;
 mod kind_src;
@@ -36,7 +36,7 @@ use bpaf::Bpaf;
 use std::path::Path;
 
 use crate::generate_new_analyzer_rule::Category;
-use xtask::{Mode, Result, glue::fs2};
+use xtask_glue::{Mode, Result, glue::fs2};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
@@ -47,9 +47,6 @@ pub use self::generate_analyzer_rule_options::{
 pub use self::generate_grit_mappings::generate_grit_mappings;
 pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
-
-#[cfg(feature = "schema")]
-pub use self::generate_schema::generate_schema;
 
 pub enum UpdateResult {
     NotUpdated,
