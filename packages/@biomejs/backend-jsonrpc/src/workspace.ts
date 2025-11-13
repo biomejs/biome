@@ -7145,7 +7145,7 @@ the latest Recommendation level standards.
 
 It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
-export type CssVariant = "standard";
+export type CssVariant = "standard" | "cssModules" | "tailwindCss";
 /**
  * The style of GraphQL contained in the file.
  */
