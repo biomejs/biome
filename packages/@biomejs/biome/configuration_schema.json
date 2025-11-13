@@ -5262,6 +5262,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSpread": {
+					"description": "Enforce the use of the spread operator over .apply().",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.",
 					"anyOf": [
@@ -5273,13 +5280,6 @@
 					"description": "Enforce specific order of Vue compiler macros.",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueDefineMacrosOrderConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSpread": {
-					"description": "Succinct description of the rule.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseSpreadConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9074,18 +9074,13 @@
 		},
 		"RuleWithUseSpreadOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseSpreadOptions" }]
-				}
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSpreadOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithUseStaticResponseMethodsOptions": {
 			"type": "object",
@@ -12017,9 +12012,9 @@
 			"additionalProperties": false
 		},
 		"UseSpreadConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseSpreadOptions" }
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSpreadOptions" }
 			]
 		},
 		"UseSpreadOptions": { "type": "object", "additionalProperties": false },
