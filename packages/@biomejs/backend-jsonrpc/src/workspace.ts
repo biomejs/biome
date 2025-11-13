@@ -6195,7 +6195,10 @@ export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
-export type CustomRestrictedElements = any;
+/**
+ * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+ */
+export type CustomRestrictedElements = Record<string, string>;
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
