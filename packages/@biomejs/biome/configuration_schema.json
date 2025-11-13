@@ -1362,7 +1362,9 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedElements": {
-			"$ref": "#/definitions/CustomRestrictedElementsBaseType",
+			"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
+			"type": "object",
+			"additionalProperties": { "type": "string" },
 			"minProperties": 1
 		},
 		"CustomRestrictedType": {

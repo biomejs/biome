@@ -48,9 +48,14 @@ impl schemars::JsonSchema for CustomRestrictedElements {
     }
 
     fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        // Generate schema for FxHashMap<Box<str>, Box<str>> inline
         schemars::json_schema!({
-            "$ref": "#/definitions/CustomRestrictedElementsBaseType",
-            "minProperties": 1
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            },
+            "minProperties": 1,
+            "description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used."
         })
     }
 }
