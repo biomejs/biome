@@ -1022,8 +1022,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         suppression_reason,
         enabled_selectors,
         plugins,
-        // TODO: wait here and see if it's needed
-        _diagnostic_offset: _,
+        diagnostic_offset,
     } = params;
     let tree = parse.tree();
     let analyzer_options =
@@ -1051,7 +1050,8 @@ pub(crate) fn pull_diagnostics_and_actions(
     };
 
     let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
-    let mut process_pull_diagnostics_and_actions = ProcessDiagnosticsAndActions::new();
+    let mut process_pull_diagnostics_and_actions =
+        ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(
         &tree,
         filter,

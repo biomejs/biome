@@ -561,7 +561,7 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) _diagnostic_offset: Option<TextSize>,
+    pub(crate) diagnostic_offset: Option<TextSize>,
 }
 
 pub(crate) struct LintResults {
@@ -792,7 +792,6 @@ impl<'a> ProcessFixAll<'a> {
                     });
 
                     // Check for runaway edit growth
-                    // let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
                     if !self.growth_guard.check(curr_len) {
                         // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
                         // We can do this by inspecting the last few fixes that were applied.
@@ -841,12 +840,14 @@ impl<'a> ProcessFixAll<'a> {
 
 pub(crate) struct ProcessDiagnosticsAndActions {
     diagnostics: Vec<(biome_diagnostics::serde::Diagnostic, Vec<CodeAction>)>,
+    diagnostic_offset: Option<TextSize>,
 }
 
 impl ProcessDiagnosticsAndActions {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(diagnostic_offset: Option<TextSize>) -> Self {
         Self {
             diagnostics: Vec::new(),
+            diagnostic_offset,
         }
     }
 
@@ -856,7 +857,7 @@ impl ProcessDiagnosticsAndActions {
     ) -> ControlFlow<Never> {
         let diagnostic = signal.diagnostic();
 
-        if let Some(diagnostic) = diagnostic {
+        if let Some(mut diagnostic) = diagnostic {
             let actions: Vec<_> = signal
                 .actions()
                 .into_code_action_iter()
@@ -870,6 +871,9 @@ impl ProcessDiagnosticsAndActions {
                 })
                 .collect();
             if !actions.is_empty() {
+                if let Some(offset) = &self.diagnostic_offset {
+                    diagnostic.add_diagnostic_offset(*offset);
+                }
                 self.diagnostics.push((
                     biome_diagnostics::serde::Diagnostic::new(Error::from(diagnostic)),
                     actions,

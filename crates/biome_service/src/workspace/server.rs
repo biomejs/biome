@@ -1609,7 +1609,7 @@ impl Workspace for WorkspaceServer {
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
                 plugins: plugins.clone(),
-                _diagnostic_offset: None,
+                diagnostic_offset: None,
             });
 
             for embedded_node in embedded_snippets {
@@ -1629,14 +1629,14 @@ impl Workspace for WorkspaceServer {
                     path: &path,
                     only: &only,
                     skip: &skip,
-                    language,
+                    language: file_source,
                     categories,
                     module_graph: self.module_graph.clone(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
                     plugins: plugins.clone(),
-                    _diagnostic_offset: None,
+                    diagnostic_offset: Some(embedded_node.content_offset()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
