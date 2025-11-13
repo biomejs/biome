@@ -188,11 +188,15 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useFragmentSyntax
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
+  - useIfAsNullishCoalescingAssignment
   - useImportType
   - useLiteralEnumMembers
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
+  - useNullishCoalescing
+  - useNullishCoalescingAssignment
+  - useNullishCoalescingInTernary
   - useNumberNamespace
   - useNumericSeparators
   - useObjectSpread

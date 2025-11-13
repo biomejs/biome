@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use crate::utils::is_node_equal;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -281,34 +282,13 @@ fn is_null_or_undefined(expr: &AnyJsExpression) -> bool {
 }
 
 /// Checks if an expression and an assignment pattern refer to the same entity
-///
-/// Note: Uses text-based comparison. Could be enhanced with semantic analysis
-/// to handle aliasing and shadowing correctly.
 fn expressions_match(expr: &AnyJsExpression, pattern: &AnyJsAssignmentPattern) -> bool {
-    // Convert pattern to expression for comparison
-    // This is a simplified text-based comparison
-    let expr_text = expr.syntax().text_trimmed().to_string();
-    let pattern_text = pattern.syntax().text_trimmed().to_string();
-
-    // Normalize whitespace
-    let expr_normalized = expr_text.split_whitespace().collect::<Vec<_>>().join("");
-    let pattern_normalized = pattern_text.split_whitespace().collect::<Vec<_>>().join("");
-
-    expr_normalized == pattern_normalized
+    expr.syntax().text_trimmed() == pattern.syntax().text_trimmed()
 }
 
-/// Checks if two expressions are textually equivalent
-///
-/// Note: Uses text-based comparison with whitespace normalization.
+/// Checks if two expressions are structurally equivalent
 fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
-    let a_text = a.syntax().text_trimmed().to_string();
-    let b_text = b.syntax().text_trimmed().to_string();
-
-    // Normalize whitespace
-    let a_normalized = a_text.split_whitespace().collect::<Vec<_>>().join("");
-    let b_normalized = b_text.split_whitespace().collect::<Vec<_>>().join("");
-
-    a_normalized == b_normalized
+    is_node_equal(a.syntax(), b.syntax())
 }
 
 impl Rule for UseIfAsNullishCoalescingAssignment {

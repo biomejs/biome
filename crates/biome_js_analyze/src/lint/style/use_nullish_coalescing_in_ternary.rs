@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use crate::utils::is_node_equal;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -344,15 +345,7 @@ fn is_null(expr: &AnyJsExpression) -> bool {
         .is_some_and(|v| matches!(v, StaticValue::Null(_)))
 }
 
-/// Checks if two expressions are textually equivalent
-///
-/// Note: This is a simple text comparison and could be enhanced with semantic analysis
-/// to handle cases where expressions are semantically equivalent but textually different.
+/// Checks if two expressions are equivalent
 fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
-    // Normalize whitespace for comparison
-    let a_text = a.syntax().text_trimmed().to_string();
-    let b_text = b.syntax().text_trimmed().to_string();
-
-    // Simple text comparison
-    a_text == b_text
+    is_node_equal(a.syntax(), b.syntax())
 }

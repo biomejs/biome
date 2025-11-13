@@ -105,11 +105,9 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {}
-
 impl Rule for UseNullishCoalescing {
     type Query = biome_analyze::Ast<JsLogicalExpression>;
-    type State = RuleState;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = UseNullishCoalescingOptions;
 
@@ -128,7 +126,7 @@ impl Rule for UseNullishCoalescing {
             return None;
         }
 
-        Some(RuleState {})
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -183,54 +181,41 @@ impl Rule for UseNullishCoalescing {
 /// const val = foo || bar         // Returns false (not a test position)
 /// ```
 fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
+    let logical_range = logical.syntax().text_trimmed_range();
+
     for ancestor in logical.syntax().ancestors() {
-        match ancestor.kind() {
+        // Check if this logical expression is in the test position of any control flow
+        let test_range = match ancestor.kind() {
             JsSyntaxKind::JS_IF_STATEMENT => {
-                if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor)
-                    && let Ok(test) = if_stmt.test()
-                {
-                    let test_range = test.syntax().text_trimmed_range();
-                    let logical_range = logical.syntax().text_trimmed_range();
-                    if test_range.contains_range(logical_range) {
-                        return true;
-                    }
-                }
+                JsIfStatement::cast_ref(&ancestor)
+                    .and_then(|stmt| stmt.test().ok())
+                    .map(|test| test.syntax().text_trimmed_range())
             }
             JsSyntaxKind::JS_WHILE_STATEMENT => {
-                if let Some(while_stmt) = JsWhileStatement::cast_ref(&ancestor)
-                    && let Ok(test) = while_stmt.test()
-                {
-                    let test_range = test.syntax().text_trimmed_range();
-                    let logical_range = logical.syntax().text_trimmed_range();
-                    if test_range.contains_range(logical_range) {
-                        return true;
-                    }
-                }
+                JsWhileStatement::cast_ref(&ancestor)
+                    .and_then(|stmt| stmt.test().ok())
+                    .map(|test| test.syntax().text_trimmed_range())
             }
             JsSyntaxKind::JS_FOR_STATEMENT => {
-                if let Some(for_stmt) = JsForStatement::cast_ref(&ancestor)
-                    && let Some(test) = for_stmt.test()
-                {
-                    let test_range = test.syntax().text_trimmed_range();
-                    let logical_range = logical.syntax().text_trimmed_range();
-                    if test_range.contains_range(logical_range) {
-                        return true;
-                    }
-                }
+                JsForStatement::cast_ref(&ancestor)
+                    .and_then(|stmt| stmt.test())
+                    .map(|test| test.syntax().text_trimmed_range())
             }
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
-                if let Some(ternary) = JsConditionalExpression::cast_ref(&ancestor)
-                    && let Ok(test) = ternary.test()
-                {
-                    let test_range = test.syntax().text_trimmed_range();
-                    let logical_range = logical.syntax().text_trimmed_range();
-                    if test_range.contains_range(logical_range) {
-                        return true;
-                    }
-                }
+                JsConditionalExpression::cast_ref(&ancestor)
+                    .and_then(|expr| expr.test().ok())
+                    .map(|test| test.syntax().text_trimmed_range())
             }
-            _ => {}
+            _ => None,
+        };
+
+        // If we found a test expression and it contains our logical expression, we're in test position
+        if let Some(range) = test_range {
+            if range.contains_range(logical_range) {
+                return true;
+            }
         }
     }
+
     false
 }
