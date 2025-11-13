@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "next",
         name: "useNullishCoalescingInTernary",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("prefer-nullish-coalescing").inspired()],
+        sources: &[RuleSource::EslintTypeScript("prefer-nullish-coalescing").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
