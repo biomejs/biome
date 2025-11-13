@@ -5262,6 +5262,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSpread": {
+					"description": "Enforce the use of the spread operator over .apply().",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.",
 					"anyOf": [
@@ -9065,6 +9072,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSpreadOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSpreadOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseStaticResponseMethodsOptions": {
 			"type": "object",
 			"properties": {
@@ -11999,6 +12016,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSpreadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSpreadOptions" }
+			]
+		},
+		"UseSpreadOptions": { "type": "object", "additionalProperties": false },
 		"UseStaticResponseMethodsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
