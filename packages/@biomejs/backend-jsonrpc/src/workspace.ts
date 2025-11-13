@@ -7357,6 +7357,17 @@ export type OtherActionCategory =
  * Indicates how a tool should manage this suggestion.
  */
 export type Applicability = "always" | "maybeIncorrect";
+export interface PullDiagnosticsAndActionsParams {
+	categories?: RuleCategories;
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
+	path: BiomePath;
+	projectKey: ProjectKey;
+	skip?: AnalyzerSelector[];
+}
+export interface PullDiagnosticsAndActionsResult {
+	diagnostics: [Diagnostic, CodeAction[]][];
+}
 export interface FormatFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -7513,6 +7524,9 @@ export interface Workspace {
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
+	pullDiagnosticsAndActions(
+		params: PullDiagnosticsAndActionsParams,
+	): Promise<PullDiagnosticsAndActionsResult>;
 	formatFile(params: FormatFileParams): Promise<Printed>;
 	formatRange(params: FormatRangeParams): Promise<Printed>;
 	formatOnType(params: FormatOnTypeParams): Promise<Printed>;
@@ -7587,6 +7601,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		pullActions(params) {
 			return transport.request("biome/pull_actions", params);
+		},
+		pullDiagnosticsAndActions(params) {
+			return transport.request("biome/pull_diagnostics_and_actions", params);
 		},
 		formatFile(params) {
 			return transport.request("biome/format_file", params);
