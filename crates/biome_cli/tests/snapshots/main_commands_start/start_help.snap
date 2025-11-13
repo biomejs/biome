@@ -5,11 +5,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Acts as a server for the Language Server Protocol over stdin/stdout.
+Starts the Biome daemon server process.
 
-Usage: lsp-proxy [--log-prefix-name=STRING] [--log-path=PATH] [--log-level=
-<none|debug|info|warn|error>] [--log-kind=<pretty|compact|json>] [--watcher-kind=
-<polling|recommended|none>] [--watcher-polling-interval=NUMBER]
+Usage: start [--log-prefix-name=STRING] [--log-path=PATH] [--log-level=<none|debug|info|warn|error>]
+[--log-kind=<pretty|compact|json>] [--watcher-kind=<polling|recommended|none>] [
+--watcher-polling-interval=NUMBER]
 
 Options to control logging (CLI and Daemon)
         --log-file=STRING  Optional path/file to redirect log messages to. This option is applicable
