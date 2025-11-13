@@ -1,35 +1,31 @@
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities, search,
+    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
+    ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{FixAllParams, is_diagnostic_error};
+use crate::file_handlers::FixAllParams;
 use crate::settings::{
     OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{DocumentFileSource, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
-    workspace::{
-        CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-        RenameResult,
-    },
+    workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
 };
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
-    RuleCategoriesBuilder, RuleError, RuleFilter,
+    RuleCategoriesBuilder, RuleFilter,
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
     JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
-use biome_diagnostics::Applicability;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
     IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
@@ -55,9 +51,9 @@ use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
+use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::collections::HashSet;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tracing::{debug, debug_span, error, trace_span};
@@ -506,6 +502,7 @@ impl ExtensionHandler for JsFileHandler {
                 fix_all: Some(fix_all),
                 rename: Some(rename),
                 update_snippets: None,
+                pull_diagnostics_and_actions: Some(pull_diagnostics_and_actions),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -889,11 +886,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         return Err(extension_error(params.biome_path));
     };
 
-    let mut actions = Vec::new();
-    let mut skipped_suggested_fixes = 0;
-    let mut errors: u16 = 0;
-    // For detecting runaway edit growth
-    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
+    let mut process_fix_all = ProcessFixAll::new(
+        &params,
+        rules,
+        tree.syntax().text_range_with_trivia().len().into(),
+    );
 
     loop {
         let services = JsAnalyzerServices::from((
@@ -908,121 +905,31 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &analyzer_options,
             &params.plugins,
             services,
-            |signal| {
-                let current_diagnostic = signal.diagnostic();
-
-                if let Some(diagnostic) = current_diagnostic.as_ref()
-                    && is_diagnostic_error(diagnostic, rules.as_deref())
-                {
-                    errors += 1;
-                }
-
-                for action in signal.actions() {
-                    match params.fix_file_mode {
-                        FixFileMode::ApplySuppressions => {
-                            if action.is_suppression() {
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                        FixFileMode::SafeFixes => {
-                            // suppression actions should not be part of safe fixes
-                            if action.is_suppression() {
-                                continue;
-                            }
-                            if action.applicability == Applicability::MaybeIncorrect {
-                                skipped_suggested_fixes += 1;
-                            }
-                            if action.applicability == Applicability::Always {
-                                errors = errors.saturating_sub(1);
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                        FixFileMode::SafeAndUnsafeFixes => {
-                            if action.is_suppression() {
-                                continue;
-                            }
-                            if matches!(
-                                action.applicability,
-                                Applicability::Always | Applicability::MaybeIncorrect
-                            ) {
-                                errors = errors.saturating_sub(1);
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                    }
-                }
-
-                ControlFlow::Continue(())
-            },
+            |signal| process_fix_all.process_signal(signal),
         );
 
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    tree = match AnyJsRoot::cast(root) {
-                        Some(tree) => tree,
-                        None => {
-                            return Err(WorkspaceError::RuleError(
-                                RuleError::ReplacedRootWithNonRootError {
-                                    rule_name: action.rule_name.map(|(group, rule)| {
-                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                    }),
-                                },
-                            ));
-                        }
-                    };
-                    actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match AnyJsRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
 
-                    // Check for runaway edit growth
-                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
-                    if !growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    }
-                }
-            }
-            None => {
-                let code = if params.should_format {
-                    format_node(
+        if result.is_none() {
+            return process_fix_all.finish(|| {
+                Ok(if params.should_format {
+                    Either::Left(format_node(
                         params.settings.format_options::<JsLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                    )?
-                    .print()?
-                    .into_code()
+                    ))
                 } else {
-                    tree.syntax().to_string()
-                };
-                return Ok(FixFileResult {
-                    code,
-                    skipped_suggested_fixes,
-                    actions,
-                    errors: errors.into(),
-                });
-            }
+                    Either::Right(tree.syntax().to_string())
+                })
+            });
         }
     }
 }
@@ -1097,6 +1004,64 @@ pub(crate) fn format_on_type(
 
     let printed = biome_js_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
+}
+
+pub(crate) fn pull_diagnostics_and_actions(
+    params: DiagnosticsAndActionsParams,
+) -> PullDiagnosticsAndActionsResult {
+    let DiagnosticsAndActionsParams {
+        parse,
+        settings,
+        language,
+        path,
+        only,
+        skip,
+        categories,
+        module_graph,
+        project_layout,
+        suppression_reason,
+        enabled_selectors,
+        plugins,
+        diagnostic_offset,
+    } = params;
+    let tree = parse.tree();
+    let analyzer_options =
+        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+            .with_only(only)
+            .with_skip(skip)
+            .with_path(path.as_path())
+            .with_enabled_selectors(enabled_selectors)
+            .with_project_layout(project_layout.clone())
+            .finish();
+    let filter = AnalysisFilter {
+        categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let Some(source_type) = language.to_js_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullDiagnosticsAndActionsResult {
+            diagnostics: Vec::new(),
+        };
+    };
+
+    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let mut process_pull_diagnostics_and_actions =
+        ProcessDiagnosticsAndActions::new(diagnostic_offset);
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        &plugins,
+        services,
+        |signal| process_pull_diagnostics_and_actions.process_signal(signal),
+    );
+
+    process_pull_diagnostics_and_actions.finish()
 }
 
 fn rename(

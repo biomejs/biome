@@ -2,24 +2,23 @@ use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, Capabilities, CodeActionsParams,
     DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler, FixAllParams,
     FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities, UpdateSnippetsNodes, is_diagnostic_error,
+    ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::{CodeAction, EmbeddedSnippet, FixAction, FixFileMode};
+use crate::workspace::{CodeAction, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleError};
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
 use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_diagnostics::Applicability;
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -47,6 +46,7 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode};
 use camino::Utf8Path;
+use either::Either;
 use std::borrow::Cow;
 use std::fmt::Debug;
 use tracing::{debug_span, error, instrument, trace_span};
@@ -338,6 +338,7 @@ impl ExtensionHandler for HtmlFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: Some(update_snippets),
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -850,7 +851,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
             .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout)
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -860,106 +861,40 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut actions = Vec::new();
-    let mut skipped_suggested_fixes = 0;
-    let mut errors: u16 = 0;
+    let mut process_fix_all = ProcessFixAll::new(
+        &params,
+        rules,
+        tree.syntax().text_range_with_trivia().len().into(),
+    );
 
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-            let current_diagnostic = signal.diagnostic();
-
-            if let Some(diagnostic) = current_diagnostic.as_ref()
-                && is_diagnostic_error(diagnostic, rules.as_deref())
-            {
-                errors += 1;
-            }
-
-            for action in signal.actions() {
-                match params.fix_file_mode {
-                    FixFileMode::SafeFixes => {
-                        // suppression actions should not be part of safe fixes
-                        if action.is_suppression() {
-                            continue;
-                        }
-                        if action.applicability == Applicability::MaybeIncorrect {
-                            skipped_suggested_fixes += 1;
-                        }
-                        if action.applicability == Applicability::Always {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::SafeAndUnsafeFixes => {
-                        // suppression actions should not be part of unsafe fixes either
-                        if action.is_suppression() {
-                            continue;
-                        }
-                        if matches!(
-                            action.applicability,
-                            Applicability::Always | Applicability::MaybeIncorrect
-                        ) {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::ApplySuppressions => {
-                        if action.is_suppression() {
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                }
-            }
-
-            ControlFlow::Continue(())
+            process_fix_all.process_signal(signal)
         });
 
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    tree = match HtmlRoot::cast(root) {
-                        Some(tree) => tree,
-                        None => {
-                            return Err(WorkspaceError::RuleError(
-                                RuleError::ReplacedRootWithNonRootError {
-                                    rule_name: action.rule_name.map(|(group, rule)| {
-                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                    }),
-                                },
-                            ));
-                        }
-                    };
-                    actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
-                }
-            }
-            None => {
-                let code = if params.should_format {
-                    format_node(
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match HtmlRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
+
+        if result.is_none() {
+            return process_fix_all.finish(|| {
+                Ok(if params.should_format {
+                    Either::Left(format_node(
                         params.settings.format_options::<HtmlLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                        false,
-                    )?
-                    .print()?
-                    .into_code()
+                        true,
+                    ))
                 } else {
-                    tree.syntax().to_string()
-                };
-                return Ok(FixFileResult {
-                    code,
-                    skipped_suggested_fixes,
-                    actions,
-                    errors: errors.into(),
-                });
-            }
+                    Either::Right(tree.syntax().to_string())
+                })
+            });
         }
     }
 }
