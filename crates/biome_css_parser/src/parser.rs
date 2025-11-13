@@ -1,7 +1,7 @@
 use crate::lexer::CssReLexContext;
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
-use biome_css_syntax::CssSyntaxKind;
+use biome_css_syntax::{CssFileSource, CssSyntaxKind};
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -169,4 +169,18 @@ pub struct CssParserCheckpoint {
     // `state` is not checkpointed because it (currently) only contains
     // scoped properties that aren't only dependent on checkpoints and
     // should be reset manually when the scope of their use is exited.
+}
+
+impl From<&CssFileSource> for CssParserOptions {
+    fn from(file_source: &CssFileSource) -> Self {
+        let mut options = Self::default();
+        if file_source.is_css_modules() {
+            options.css_modules = true;
+        }
+        if file_source.is_tailwind_css() {
+            options.tailwind_directives = true;
+        }
+
+        options
+    }
 }

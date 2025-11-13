@@ -22,6 +22,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+use biome_css_syntax::CssVariant;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -349,6 +350,28 @@ impl WorkspaceServer {
                 if jsx_everywhere {
                     js.set_variant(LanguageVariant::Jsx);
                 }
+            }
+        }
+
+        if let DocumentFileSource::Css(css) = &mut source {
+            if settings
+                .languages
+                .css
+                .parser
+                .css_modules_enabled
+                .unwrap_or_default()
+                .into()
+            {
+                css.set_variant(CssVariant::CssModules)
+            } else if settings
+                .languages
+                .css
+                .parser
+                .tailwind_directives
+                .unwrap_or_default()
+                .into()
+            {
+                css.set_variant(CssVariant::TailwindCss)
             }
         }
 
