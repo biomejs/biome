@@ -275,7 +275,7 @@ fn replace_biome_dir(input: Cow<str>) -> Cow<str> {
         let (before, after) = rest.split_at(index);
 
         result.push_str(before.trim());
-        result.push_str(" ");
+        result.push(' ');
         result.push_str("<BIOME_DIR>");
 
         let after = after.split_at(temp_dir.len()).1;
