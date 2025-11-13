@@ -1362,7 +1362,7 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedElements": {
-			"description": "A map of element names to restriction messages",
+			"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
 			"type": "object",
 			"additionalProperties": { "type": "string" },
 			"minProperties": 1
