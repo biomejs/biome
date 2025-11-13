@@ -33,6 +33,67 @@ declare_lint_rule! {
     /// ```js
     /// const value = count ?? 0;
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule provides the option described below.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreConditionalTests": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### ignoreConditionalTests
+    ///
+    /// When this option is set to `true`, the rule will not report `||` operators
+    /// used in conditional test positions (if, while, for, ternary test). This is
+    /// useful because in test positions, the distinction between falsy values and
+    /// nullish values often doesn't matter.
+    ///
+    /// When the option is set to `false`, all `||` operators will be reported
+    /// regardless of their position.
+    ///
+    /// Default: `true`
+    ///
+    /// #### Example with `ignoreConditionalTests: false`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreConditionalTests": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// if (foo || bar) {
+    ///     console.log("test position");
+    /// }
+    /// ```
+    ///
+    /// #### Example with `ignoreConditionalTests: true` (default)
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreConditionalTests": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// if (foo || bar) {
+    ///     console.log("test position - not reported");
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// const value = foo || bar; // Not in test position - still reported
+    /// ```
+    ///
     pub UseNullishCoalescing {
         version: "next",
         name: "useNullishCoalescing",
@@ -108,7 +169,19 @@ impl Rule for UseNullishCoalescing {
     }
 }
 
-/// Check if logical expression is in a test position (if/while/for/ternary)
+/// Checks if a logical expression is in a test position (if/while/for/ternary condition).
+///
+/// Returns `true` if the expression is used as the condition in a control flow statement,
+/// where the truthiness check is the primary purpose rather than value coalescing.
+///
+/// ## Examples
+/// ```js
+/// if (foo || bar) { }           // Returns true (test position)
+/// while (foo || bar) { }         // Returns true (test position)
+/// for (; foo || bar; ) { }       // Returns true (test position)
+/// x ? foo || bar : y             // Returns true (test position)
+/// const val = foo || bar         // Returns false (not a test position)
+/// ```
 fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
     for ancestor in logical.syntax().ancestors() {
         match ancestor.kind() {

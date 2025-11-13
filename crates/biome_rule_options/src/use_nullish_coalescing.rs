@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseNullishCoalescingOptions {
-    /// Ignore || in conditional test positions (if/while/for/ternary test)
-    /// Default: true
+    /// Ignore `||` in conditional test positions (if/while/for/ternary test)
+    ///
+    /// Default: `true`
     pub ignore_conditional_tests: bool,
 }
 

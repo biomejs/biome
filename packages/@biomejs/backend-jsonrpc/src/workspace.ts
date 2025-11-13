@@ -8836,7 +8836,9 @@ export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
 export interface UseNullishCoalescingOptions {
 	/**
-	 * Ignore || in conditional test positions (if/while/for/ternary test) Default: true
+	* Ignore `||` in conditional test positions (if/while/for/ternary test)
+
+Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
 }

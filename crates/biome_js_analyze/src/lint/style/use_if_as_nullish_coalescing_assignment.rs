@@ -61,8 +61,21 @@ pub struct RuleState {
     assignment: JsAssignmentExpression,
 }
 
-/// Checks if an if statement matches the pattern for ??= conversion
-/// Returns (checked_variable, assignment) if pattern matches
+/// Checks if an if statement matches the pattern for `??=` conversion
+///
+/// Returns `(checked_variable, assignment)` if the pattern matches:
+/// - No else clause
+/// - Single assignment statement in the consequent
+/// - Assignment uses `=` operator (not `+=`, `-=`, etc.)
+/// - Condition checks if the assigned variable is nullish
+///
+/// ## Examples
+/// ```js
+/// if (!foo) { foo = bar; }           // Matches
+/// if (foo == null) { foo = bar; }    // Matches
+/// if (!foo) { foo = bar; } else {}   // Doesn't match (has else)
+/// if (!foo) { foo += bar; }          // Doesn't match (wrong operator)
+/// ```
 fn check_if_pattern(if_stmt: &JsIfStatement) -> Option<(AnyJsExpression, JsAssignmentExpression)> {
     // Must not have else clause
     if if_stmt.else_clause().is_some() {
@@ -92,6 +105,12 @@ fn check_if_pattern(if_stmt: &JsIfStatement) -> Option<(AnyJsExpression, JsAssig
 }
 
 /// Extracts a single assignment expression from a statement
+///
+/// Handles two cases:
+/// 1. Block statement with single assignment: `{ foo = bar; }`
+/// 2. Naked expression statement: `foo = bar`
+///
+/// Returns `None` if the statement is not an assignment or contains multiple statements.
 fn extract_assignment(stmt: &AnyJsStatement) -> Option<JsAssignmentExpression> {
     match stmt {
         // Handle block statement with single assignment
@@ -122,8 +141,12 @@ fn extract_assignment(stmt: &AnyJsStatement) -> Option<JsAssignmentExpression> {
     }
 }
 
-/// Checks if condition is a nullish check for the given target
-/// Returns the checked expression if it matches
+/// Checks if a condition is a nullish check for the given assignment target
+///
+/// Returns the checked expression if one of these patterns matches:
+/// - `!variable`
+/// - `variable == null` (loose equality)
+/// - `variable === null || variable === undefined` (strict equality)
 fn is_nullish_check_for(
     condition: &AnyJsExpression,
     target: &AnyJsAssignmentPattern,
@@ -152,7 +175,7 @@ fn is_nullish_check_for(
     None
 }
 
-/// Checks for pattern: !variable
+/// Checks for pattern: `!variable`
 fn is_negation_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let unary = expr.as_js_unary_expression()?;
     let op = unary.operator().ok()?;
@@ -164,7 +187,10 @@ fn is_negation_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     unary.argument().ok()
 }
 
-/// Checks for pattern: variable == null (loose equality - matches both null and undefined)
+/// Checks for pattern: `variable == null`
+///
+/// Loose equality check matches both null and undefined due to JavaScript's
+/// type coercion rules.
 fn is_loose_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -187,7 +213,10 @@ fn is_loose_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     None
 }
 
-/// Checks for pattern: variable === null || variable === undefined
+/// Checks for pattern: `variable === null || variable === undefined`
+///
+/// Returns the variable if both sides of the OR check the same variable
+/// for strict equality against null or undefined.
 fn is_strict_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let logical = expr.as_js_logical_expression()?;
     let op = logical.operator().ok()?;
@@ -212,7 +241,10 @@ fn is_strict_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     Some(left_checked)
 }
 
-/// Checks for pattern: variable === null or variable === undefined
+/// Checks for pattern: `variable === null` or `variable === undefined`
+///
+/// Returns the checked variable if the binary expression uses strict equality
+/// to compare against null or undefined.
 fn is_strict_equality_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -235,20 +267,23 @@ fn is_strict_equality_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     None
 }
 
-/// Checks if expression is null literal
+/// Checks if an expression is a `null` literal
 fn is_null(expr: &AnyJsExpression) -> bool {
     use biome_js_syntax::static_value::StaticValue;
     expr.as_static_value()
         .is_some_and(|v| matches!(v, StaticValue::Null(_)))
 }
 
-/// Checks if expression is null or undefined literal
+/// Checks if an expression is `null` or `undefined` literal
 fn is_null_or_undefined(expr: &AnyJsExpression) -> bool {
     expr.as_static_value()
         .is_some_and(|v| v.is_null_or_undefined())
 }
 
-/// Checks if an expression and an assignment pattern refer to the same variable
+/// Checks if an expression and an assignment pattern refer to the same entity
+///
+/// Note: Uses text-based comparison. Could be enhanced with semantic analysis
+/// to handle aliasing and shadowing correctly.
 fn expressions_match(expr: &AnyJsExpression, pattern: &AnyJsAssignmentPattern) -> bool {
     // Convert pattern to expression for comparison
     // This is a simplified text-based comparison
@@ -262,7 +297,9 @@ fn expressions_match(expr: &AnyJsExpression, pattern: &AnyJsAssignmentPattern) -
     expr_normalized == pattern_normalized
 }
 
-/// Check if two expressions are textually equivalent
+/// Checks if two expressions are textually equivalent
+///
+/// Note: Uses text-based comparison with whitespace normalization.
 fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
     let a_text = a.syntax().text_trimmed().to_string();
     let b_text = b.syntax().text_trimmed().to_string();

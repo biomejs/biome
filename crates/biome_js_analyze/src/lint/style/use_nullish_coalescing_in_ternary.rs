@@ -145,8 +145,12 @@ fn check_ternary_pattern(
     None
 }
 
-/// Checks for patterns like: x !== null ? x : y
-/// Returns the checked expression if pattern matches
+/// Checks for patterns like `x !== null ? x : y`
+///
+/// Returns the checked expression if the pattern matches:
+/// - Pattern 1: `x != null ? x : y` (loose equality check)
+/// - Pattern 2: `x !== null ? x : y` (single strict check)
+/// - Pattern 3: `x !== null && x !== undefined ? x : y` (double strict check)
 fn is_positive_nullish_check(
     test: &AnyJsExpression,
     value: &AnyJsExpression,
@@ -185,7 +189,12 @@ fn is_positive_nullish_check(
     None
 }
 
-/// Checks for patterns like: x === null ? y : x
+/// Checks for patterns like `x === null ? y : x`
+///
+/// Returns the checked expression if the pattern matches:
+/// - Pattern 1: `x == null ? y : x` (loose equality check)
+/// - Pattern 2: `x === null ? y : x` (single strict check)
+/// - Pattern 3: `x === null || x === undefined ? y : x` (double strict check)
 fn is_negative_nullish_check(
     test: &AnyJsExpression,
     value: &AnyJsExpression,
@@ -224,7 +233,10 @@ fn is_negative_nullish_check(
     None
 }
 
-/// Checks for: x !== null or x !== undefined
+/// Checks for `x !== null` or `x !== undefined`
+///
+/// Returns the checked expression if the binary expression uses strict inequality
+/// to compare against null or undefined.
 fn is_strict_not_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -246,7 +258,10 @@ fn is_strict_not_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression
     None
 }
 
-/// Checks for: x === null or x === undefined
+/// Checks for `x === null` or `x === undefined`
+///
+/// Returns the checked expression if the binary expression uses strict equality
+/// to compare against null or undefined.
 fn is_strict_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -268,7 +283,9 @@ fn is_strict_nullish_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     None
 }
 
-/// Checks for: x != null (loose inequality - checks both null and undefined)
+/// Checks for `x != null` (loose inequality - checks both null and undefined)
+///
+/// In JavaScript, `x != null` is equivalent to `x !== null && x !== undefined`.
 fn is_loose_not_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -291,7 +308,9 @@ fn is_loose_not_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     None
 }
 
-/// Checks for: x == null (loose equality - checks both null and undefined)
+/// Checks for `x == null` (loose equality - checks both null and undefined)
+///
+/// In JavaScript, `x == null` is equivalent to `x === null || x === undefined`.
 fn is_loose_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     let binary = expr.as_js_binary_expression()?;
     let op = binary.operator().ok()?;
@@ -313,20 +332,22 @@ fn is_loose_null_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
     None
 }
 
-/// Checks if expression is null or undefined literal
+/// Checks if an expression is a `null` or `undefined` literal
 fn is_null_or_undefined(expr: &AnyJsExpression) -> bool {
     expr.as_static_value()
         .is_some_and(|v| v.is_null_or_undefined())
 }
 
-/// Checks if expression is null literal
+/// Checks if an expression is a `null` literal
 fn is_null(expr: &AnyJsExpression) -> bool {
     expr.as_static_value()
         .is_some_and(|v| matches!(v, StaticValue::Null(_)))
 }
 
-/// Check if two expressions are textually equivalent
-/// Note: This is a simple text comparison. Could be enhanced with semantic analysis.
+/// Checks if two expressions are textually equivalent
+///
+/// Note: This is a simple text comparison and could be enhanced with semantic analysis
+/// to handle cases where expressions are semantically equivalent but textually different.
 fn expressions_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
     // Normalize whitespace for comparison
     let a_text = a.syntax().text_trimmed().to_string();
