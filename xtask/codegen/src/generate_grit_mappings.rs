@@ -1,5 +1,5 @@
 use crate::{js_kinds_src::AstSrc, language_kind::LanguageKind};
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_grit_mappings(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let lang = LanguageConfig::new(language_kind);
@@ -127,7 +127,7 @@ pub fn kind_by_name(node_name: &str) -> Option<{syntax_kind_type}> {{
         native_patterns = native_patterns,
     );
 
-    xtask::reformat(result)
+    xtask_glue::reformat(result)
 }
 
 struct LanguageConfig {

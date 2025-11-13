@@ -1,7 +1,7 @@
 use biome_string_case::Case;
 use bpaf::Bpaf;
 use std::str::FromStr;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 #[derive(Debug, Clone, Bpaf)]
 pub enum LanguageKind {

@@ -11,8 +11,8 @@ use biome_rowan::AstNode;
 use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use biome_string_case::Case;
 use schemars::{SchemaGenerator, generate::SchemaSettings};
-use xtask::{Mode, Result, project_root};
 use xtask_codegen::update;
+use xtask_glue::{Mode, Result, project_root};
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
