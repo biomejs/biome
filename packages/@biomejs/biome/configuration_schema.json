@@ -1362,7 +1362,9 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedElements": {
-			"$ref": "#/definitions/CustomRestrictedElementsBaseType",
+			"description": "A map of element names to restriction messages",
+			"type": "object",
+			"additionalProperties": { "type": "string" },
 			"minProperties": 1
 		},
 		"CustomRestrictedType": {

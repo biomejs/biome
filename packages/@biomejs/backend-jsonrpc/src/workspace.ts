@@ -92,7 +92,7 @@ export interface Configuration {
 	plugins?: Plugins;
 	/**
 	* Indicates whether this configuration file is at the root of a Biome
-project. By default, this is `true`. 
+project. By default, this is `true`.
 	 */
 	root?: Bool;
 	/**
@@ -112,7 +112,7 @@ export interface AssistConfiguration {
 	enabled?: Bool;
 	/**
 	* A list of glob patterns. Biome will include files/folders that will
-match these patterns. 
+match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 }
@@ -151,7 +151,7 @@ export interface FilesConfiguration {
 instead: <https://biomejs.dev/reference/configuration/#filesincludes>
 
 Set of file and folder names that should be unconditionally ignored by
-Biome's scanner. 
+Biome's scanner.
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -160,12 +160,12 @@ Biome's scanner.
 	ignoreUnknown?: Bool;
 	/**
 	* A list of glob patterns. Biome will handle only those files/folders that will
-match these patterns. 
+match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 	/**
 	* The maximum allowed size for source code files in bytes. Files above
-this limit will be ignored for performance reasons. Defaults to 1 MiB 
+this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
 	maxSize?: MaxSize;
 }
@@ -192,17 +192,17 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
 	* Whether formatting should be allowed to proceed if a given file
-has syntax errors 
+has syntax errors
 	 */
 	formatWithErrors?: Bool;
 	/**
 	* A list of glob patterns. The formatter will include files/folders that will
-match these patterns. 
+match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 	/**
@@ -225,7 +225,7 @@ match these patterns.
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
-Default: `true`. 
+Default: `true`.
 	 */
 	useEditorconfig?: Bool;
 }
@@ -297,7 +297,7 @@ export interface JsConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics. 
+If defined here, they should not emit diagnostics.
 	 */
 	globals?: string[];
 	/**
@@ -345,7 +345,7 @@ export interface LinterConfiguration {
 	enabled?: Bool;
 	/**
 	* A list of glob patterns. The analyzer will handle only those files/folders that will
-match these patterns. 
+match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 	/**
@@ -378,12 +378,12 @@ folder where `biome.json` was found.
 
 If Biome can't find the configuration, it will attempt to use the current working directory.
 If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
-will be emitted 
+will be emitted
 	 */
 	root?: string;
 	/**
 	* Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
-specified in the ignore file. 
+specified in the ignore file.
 	 */
 	useIgnoreFile?: Bool;
 }
@@ -476,7 +476,7 @@ export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320 
+The allowed range of values is 1..=320
 	 */
 export type LineWidth = number;
 /**
@@ -675,7 +675,7 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
@@ -738,19 +738,19 @@ export interface JsLinterConfiguration {
 export interface JsParserConfiguration {
 	/**
 	* Enables parsing of Grit metavariables.
-Defaults to `false`. 
+Defaults to `false`.
 	 */
 	gritMetavariables?: Bool;
 	/**
 	* When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
 
-Defaults to `true`. 
+Defaults to `true`.
 	 */
 	jsxEverywhere?: Bool;
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change. 
+These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
@@ -778,7 +778,7 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
@@ -870,7 +870,7 @@ export interface OverridePattern {
 	html?: HtmlConfiguration;
 	/**
 	* A list of glob patterns. Biome will include files/folders that will
-match these patterns. 
+match these patterns.
 	 */
 	includes?: OverrideGlobs;
 	/**
@@ -921,7 +921,7 @@ export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
 
-When true, the content of `<script>` and `<style>` tags will be indented one level. 
+When true, the content of `<script>` and `<style>` tags will be indented one level.
 	 */
 export type IndentScriptAndStyle = boolean;
 /**
@@ -951,7 +951,7 @@ as this, where the content hugs the tags:
 >
 ```
 
-Note that this is only necessary for inline elements. Block elements do not have this restriction. 
+Note that this is only necessary for inline elements. Block elements do not have this restriction.
 	 */
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -1010,12 +1010,12 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
 	* Stores whether formatting should be allowed to proceed if a given file
-has syntax errors 
+has syntax errors
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -5625,7 +5625,7 @@ export interface NoPrivateImportsOptions {
 	/**
 	* The default visibility to assume for symbols without visibility tag.
 
-Default: **public**. 
+Default: **public**.
 	 */
 	defaultVisibility?: Visibility;
 }
@@ -5636,7 +5636,7 @@ export type NoRenderReturnValueOptions = {};
 export interface NoRestrictedElementsOptions {
 	/**
 	* Elements to restrict.
-Each key is the element name, and the value is the message to show when the element is used. 
+Each key is the element name, and the value is the message to show when the element is used.
 	 */
 	elements?: CustomRestrictedElements;
 }
@@ -5714,7 +5714,7 @@ export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
-extension the source file has in your project. 
+extension the source file has in your project.
 	 */
 	forceJsExtensions?: boolean;
 }
@@ -5732,7 +5732,7 @@ export type UseSingleJsDocAsteriskOptions = {};
 export interface UseUniqueElementIdsOptions {
 	/**
 	* Component names that accept an `id` prop that does not translate
-to a DOM element id. 
+to a DOM element id.
 	 */
 	excludedComponents?: string[];
 }
@@ -5755,7 +5755,7 @@ export interface NoImportCyclesOptions {
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
 will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type
 imports (`import { type Foo }`) aren't considered as type-only because it's not removed by
-the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default. 
+the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
 	 */
 	ignoreTypes?: boolean;
 }
@@ -5792,7 +5792,7 @@ export type NoUnresolvedImportsOptions = {};
 export type NoUnusedExpressionsOptions = {};
 /**
 	* Options for the `noUselessCatchBinding` rule.
-Currently empty; reserved for future extensions (e.g. allowlist of names). 
+Currently empty; reserved for future extensions (e.g. allowlist of names).
 	 */
 export type NoUselessCatchBindingOptions = {};
 export type NoUselessUndefinedOptions = {};
@@ -5808,7 +5808,7 @@ export interface UseConsistentArrowReturnOptions {
 	/**
 	* Determines whether the rule enforces a consistent style when the return value is an object literal.
 
-This option is only applicable when used in conjunction with the `asNeeded` option. 
+This option is only applicable when used in conjunction with the `asNeeded` option.
 	 */
 	requireForObjectLiteral?: boolean;
 	/**
@@ -5884,7 +5884,7 @@ export type UseTopLevelRegexOptions = {};
 export interface NoBlankTargetOptions {
 	/**
 	* List of domains where `target="_blank"` is allowed without
-`rel="noopener"`. 
+`rel="noopener"`.
 	 */
 	allowDomains?: string[];
 	/**
@@ -6008,7 +6008,7 @@ export interface UseFilenamingConventionOptions {
 	requireAscii?: boolean;
 	/**
 	* If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
-This does not affect other [Case]. 
+This does not affect other [Case].
 	 */
 	strictCase?: boolean;
 }
@@ -6037,7 +6037,7 @@ export interface UseNamingConventionOptions {
 	requireAscii?: boolean;
 	/**
 	* If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
-This does not affect other [Case]. 
+This does not affect other [Case].
 	 */
 	strictCase?: boolean;
 }
@@ -6105,7 +6105,7 @@ export interface NoDoubleEqualsOptions {
 	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check
 both for `null` or `undefined`.
 
-If `false`, no such exception will be made. 
+If `false`, no such exception will be made.
 	 */
 	ignoreNull?: boolean;
 }
@@ -6195,19 +6195,22 @@ export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
-export type CustomRestrictedElements = any;
+/**
+ * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+ */
+export type CustomRestrictedElements = Record<string, string>;
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-For example, for React's `useEffect()` hook, the closure index is 0. 
+For example, for React's `useEffect()` hook, the closure index is 0.
 	 */
 	closureIndex?: number;
 	/**
 	* The "position" of the array of dependencies, starting from zero.
 
-For example, for React's `useEffect()` hook, the dependencies index is 1. 
+For example, for React's `useEffect()` hook, the dependencies index is 1.
 	 */
 	dependenciesIndex?: number;
 	/**
@@ -6222,7 +6225,7 @@ or use a number/an array of numbers to mark the "positions" in the
 return array as stable.
 
 For example, for React's `useRef()` hook the value would be `true`,
-while for `useState()` it would be `[1]`. 
+while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
@@ -6884,7 +6887,7 @@ export type DiagnosticTags = DiagnosticTag[];
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
 See the [Visitor] trait for additional documentation on all the supported
-advice types. 
+advice types.
 	 */
 export type Advice =
 	| { log: [LogCategory, MarkupBuf] }
@@ -6905,7 +6908,7 @@ export interface MarkupNodeBuf {
 }
 /**
 	* Internal enum used to automatically generate bit offsets for [DiagnosticTags]
-and help with the implementation of `serde` and `schemars` for tags. 
+and help with the implementation of `serde` and `schemars` for tags.
 	 */
 export type DiagnosticTag =
 	| "fixable"
@@ -6915,7 +6918,7 @@ export type DiagnosticTag =
 	| "verbose";
 /**
 	* The category for a log advice, defines how the message should be presented
-to the user. 
+to the user.
 	 */
 export type LogCategory = "none" | "info" | "warn" | "error";
 export interface TextEdit {
@@ -6966,7 +6969,7 @@ export interface BacktraceSymbol {
 export interface OpenProjectParams {
 	/**
 	* Whether the folder should be opened as a project, even if no
-`biome.json` can be found. 
+`biome.json` can be found.
 	 */
 	openUninitialized: boolean;
 	/**
@@ -6991,7 +6994,7 @@ export interface ScanProjectParams {
 	/**
 	* Whether the watcher should watch this path.
 
-Does nothing if the watcher is already watching this path. 
+Does nothing if the watcher is already watching this path.
 	 */
 	watch: boolean;
 }
@@ -7002,7 +7005,7 @@ export type ScanKind =
 			targetedKnownFiles: {
 				/**
 	* Determines whether the file scanner should descend into
-subdirectories of the target paths. 
+subdirectories of the target paths.
 	 */
 				descendFromTargets: boolean;
 				/**
@@ -7010,7 +7013,7 @@ subdirectories of the target paths.
 
 If a target path indicates a folder, all files within are scanned as well.
 
-Target paths must be absolute. 
+Target paths must be absolute.
 	 */
 				targetPaths: BiomePath[];
 			};
@@ -7043,7 +7046,7 @@ export interface OpenFileParams {
 speed up subsequent reparsing if the document has been edited.
 
 This should only be enabled if reparsing is to be expected, such as when
-the file is opened through the LSP Proxy. 
+the file is opened through the LSP Proxy.
 	 */
 	persistNodeCache?: boolean;
 	projectKey: ProjectKey;
@@ -7063,7 +7066,7 @@ export type DocumentFileSource =
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
-For example, if inside an Astro file, a top-level return statement is allowed. 
+For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -7105,7 +7108,7 @@ export type Language =
 	| { typeScript: { definition_file: boolean } };
 /**
 	* Is the source file an ECMAScript Module or Script.
-Changes the parsing semantic. 
+Changes the parsing semantic.
 	 */
 export type ModuleKind = "script" | "module";
 export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
@@ -7113,7 +7116,7 @@ export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 	* Enum of the different ECMAScript standard versions.
 The versions are ordered in increasing order; The newest version comes last.
 
-Defaults to the latest stable ECMAScript standard. 
+Defaults to the latest stable ECMAScript standard.
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
 /**
@@ -7126,7 +7129,7 @@ export type JsonFileVariant = "standard" | "jsonc";
 Currently, Biome aims to be compatible with
 the latest Recommendation level standards.
 
-It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
+It also supports Tailwind CSS syntax additions, when the parser option is enabled.
 	 */
 export type CssVariant = "standard";
 /**
@@ -7162,7 +7165,7 @@ export interface FileExitsParams {
 export interface PathIsIgnoredParams {
 	/**
 	* Whether the path is ignored for specific features e.g. `formatter.includes`.
-When this field is empty, Biome checks only `files.includes`. 
+When this field is empty, Biome checks only `files.includes`.
 	 */
 	features: FeatureName;
 	/**
@@ -7252,13 +7255,13 @@ specifier itself.
   "./foo": "/absolute/path/to/foo.js",
   "react": "react"
 }
-``` 
+```
 	 */
 	staticImportPaths: Record<string, string>;
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Maps from the local imported name to the absolute path it resolves to.
 	 */
 	staticImports: Record<string, string>;
 }
@@ -7308,7 +7311,7 @@ export interface CodeAction {
 	* The category of a code action, this type maps directly to the
 [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
 	 */
 export type ActionCategory =
 	| { quickFix: string }
@@ -7318,7 +7321,7 @@ export type ActionCategory =
 /**
 	* A Suggestion that is provided by Biome's linter, and
 can be reported to the user, and can be automatically
-applied if it has the right [`Applicability`]. 
+applied if it has the right [`Applicability`].
 	 */
 export interface CodeSuggestion {
 	applicability: Applicability;
@@ -7330,7 +7333,7 @@ export interface CodeSuggestion {
 /**
 	* The sub-category of a refactor code action.
 
-[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information:
 	 */
 export type RefactorKind =
 	| "none"
