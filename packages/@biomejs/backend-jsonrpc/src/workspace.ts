@@ -1831,6 +1831,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	 * Enforce the use of the spread operator over .apply().
+	 */
+	useSpread?: UseSpreadConfiguration;
+	/**
 	 * Enforce unique operation names across a GraphQL document.
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
@@ -3207,6 +3211,9 @@ export type UseQwikValidLexicalScopeConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSpreadOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
@@ -4607,6 +4614,11 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseSpreadOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSpreadOptions;
+}
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
@@ -5845,6 +5857,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
 	/**
@@ -6627,6 +6640,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
