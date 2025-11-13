@@ -22,6 +22,9 @@ mod markdown_kinds_src;
 mod tailwind_kinds_src;
 mod yaml_kinds_src;
 
+#[cfg(feature = "schema")]
+mod generate_schema;
+
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
@@ -44,6 +47,9 @@ pub use self::generate_analyzer_rule_options::{
 pub use self::generate_grit_mappings::generate_grit_mappings;
 pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
+
+#[cfg(feature = "schema")]
+pub use self::generate_schema::generate_schema;
 
 pub enum UpdateResult {
     NotUpdated,
