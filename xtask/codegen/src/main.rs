@@ -6,10 +6,8 @@ mod generate_configuration;
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
-#[cfg(feature = "schema")]
-mod generate_schema;
 mod move_rule;
-use xtask::{Result, project_root, pushd};
+use xtask_glue::{Result, project_root, pushd};
 
 #[cfg(feature = "schema")]
 use crate::generate_bindings::generate_workspace_bindings;
@@ -22,15 +20,13 @@ use crate::generate_configuration::generate_rules_configuration;
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
-#[cfg(feature = "schema")]
-use crate::generate_schema::generate_configuration_schema;
 use crate::move_rule::move_rule;
 
-use xtask::Mode::Overwrite;
 use xtask_codegen::{
     TaskCommand, generate_analyzer, generate_analyzer_rule_options, generate_ast,
     generate_formatters, generate_new_analyzer_rule, generate_tables, task_command,
 };
+use xtask_glue::Mode::Overwrite;
 
 fn main() -> Result<()> {
     let _d = pushd(project_root());
@@ -55,7 +51,7 @@ fn main() -> Result<()> {
         }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]
-            generate_configuration_schema(Overwrite)?;
+            xtask_codegen::generate_schema::generate_configuration_schema(Overwrite)?;
         }
         TaskCommand::Bindings => {
             #[cfg(feature = "schema")]
@@ -90,7 +86,7 @@ fn main() -> Result<()> {
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;
             #[cfg(feature = "schema")]
-            generate_configuration_schema(Overwrite)?;
+            xtask_codegen::generate_schema::generate_configuration_schema(Overwrite)?;
             #[cfg(feature = "schema")]
             generate_workspace_bindings(Overwrite)?;
         }

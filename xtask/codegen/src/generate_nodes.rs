@@ -4,7 +4,7 @@ use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashMap;
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let (node_defs, node_boilerplate_impls): (Vec<_>, Vec<_>) = ast
@@ -989,7 +989,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .replace("T ! [ ", "crate::T![")
         .replace(" ] )", "])");
 
-    let pretty = xtask::reformat(ast)?;
+    let pretty = xtask_glue::reformat(ast)?;
     Ok(pretty)
 }
 

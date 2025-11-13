@@ -1,7 +1,7 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
+members  = ["crates/*", "xtask/glue", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -196,6 +196,9 @@ biome_ruledoc_utils  = { path = "./crates/biome_ruledoc_utils" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
+xtask_codegen        = { path = "xtask/codegen" }
+xtask_coverage       = { path = "xtask/coverage" }
+xtask_glue           = { path = "xtask/glue" }
 
 # Crates needed in the workspace
 anyhow               = "1.0.100"
