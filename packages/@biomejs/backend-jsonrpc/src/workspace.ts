@@ -1963,6 +1963,11 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-props
 	 */
 	noVueReservedProps?: NoVueReservedPropsConfiguration;
 	/**
+	* Disallow using v-if and v-for directives on the same element.
+See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
+	 */
+	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2031,6 +2036,11 @@ See https://biomejs.dev/linter/rules/use-unique-graphql-operation-name
 See https://biomejs.dev/linter/rules/use-vue-define-macros-order 
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
+	/**
+	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
+	 */
+	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
 	/**
 	* Enforce multi-word component names in Vue components.
 See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
@@ -3562,6 +3572,9 @@ export type NoVueReservedKeysConfiguration =
 export type NoVueReservedPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueReservedPropsOptions;
+export type NoVueVIfWithVForConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVIfWithVForOptions;
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
@@ -3601,6 +3614,9 @@ export type UseUniqueGraphqlOperationNameConfiguration =
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
+export type UseVueHyphenatedAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueHyphenatedAttributesOptions;
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
@@ -4952,6 +4968,10 @@ export interface RuleWithNoVueReservedPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueReservedPropsOptions;
 }
+export interface RuleWithNoVueVIfWithVForOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVIfWithVForOptions;
+}
 export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySortCompareOptions;
@@ -5008,6 +5028,11 @@ export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseVueDefineMacrosOrderOptions;
+}
+export interface RuleWithUseVueHyphenatedAttributesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueHyphenatedAttributesOptions;
 }
 export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
@@ -6193,6 +6218,7 @@ export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
 export type NoVueReservedKeysOptions = {};
 export type NoVueReservedPropsOptions = {};
+export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -6245,6 +6271,16 @@ export interface UseVueDefineMacrosOrderOptions {
 	 * The order of the Vue define macros.
 	 */
 	order?: string[];
+}
+export interface UseVueHyphenatedAttributesOptions {
+	/**
+	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 */
+	ignore?: string[];
+	/**
+	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 */
+	ignoreTags?: string[];
 }
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
@@ -7005,6 +7041,7 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -7024,6 +7061,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
+	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVElse"
