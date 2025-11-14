@@ -136,10 +136,32 @@ pub fn glimmer_block_params(
         ],
     ))
 }
+pub fn glimmer_element_modifier(
+    l_curly2_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly2_token_token: SyntaxToken,
+) -> GlimmerElementModifier {
+    GlimmerElementModifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_ELEMENT_MODIFIER,
+        [
+            Some(SyntaxElement::Token(l_curly2_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_curly2_token_token)),
+        ],
+    ))
+}
 pub fn glimmer_literal(value_token_token: SyntaxToken) -> GlimmerLiteral {
     GlimmerLiteral::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::GLIMMER_LITERAL,
         [Some(SyntaxElement::Token(value_token_token))],
+    ))
+}
+pub fn glimmer_mustache_comment(comment_token_token: SyntaxToken) -> GlimmerMustacheComment {
+    GlimmerMustacheComment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_MUSTACHE_COMMENT,
+        [Some(SyntaxElement::Token(comment_token_token))],
     ))
 }
 pub fn glimmer_mustache_expression(
@@ -169,6 +191,56 @@ pub fn glimmer_named_argument(
             Some(SyntaxElement::Token(name_token_token)),
             Some(SyntaxElement::Token(eq_token_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn glimmer_named_block(
+    opening: GlimmerNamedBlockOpening,
+    children: HtmlElementList,
+    closing: GlimmerNamedBlockClosing,
+) -> GlimmerNamedBlock {
+    GlimmerNamedBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing.into_syntax())),
+        ],
+    ))
+}
+pub fn glimmer_named_block_closing(
+    l_angle_token_token: SyntaxToken,
+    slash_token_token: SyntaxToken,
+    colon_token_token: SyntaxToken,
+    name_token_token: SyntaxToken,
+    r_angle_token_token: SyntaxToken,
+) -> GlimmerNamedBlockClosing {
+    GlimmerNamedBlockClosing::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_CLOSING,
+        [
+            Some(SyntaxElement::Token(l_angle_token_token)),
+            Some(SyntaxElement::Token(slash_token_token)),
+            Some(SyntaxElement::Token(colon_token_token)),
+            Some(SyntaxElement::Token(name_token_token)),
+            Some(SyntaxElement::Token(r_angle_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_named_block_opening(
+    l_angle_token_token: SyntaxToken,
+    colon_token_token: SyntaxToken,
+    name_token_token: SyntaxToken,
+    attributes: HtmlAttributeList,
+    r_angle_token_token: SyntaxToken,
+) -> GlimmerNamedBlockOpening {
+    GlimmerNamedBlockOpening::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_OPENING,
+        [
+            Some(SyntaxElement::Token(l_angle_token_token)),
+            Some(SyntaxElement::Token(colon_token_token)),
+            Some(SyntaxElement::Token(name_token_token)),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token_token)),
         ],
     ))
 }
@@ -221,6 +293,22 @@ pub fn glimmer_subexpression(
             Some(SyntaxElement::Node(path.into_syntax())),
             Some(SyntaxElement::Node(arguments.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_triple_stash_expression(
+    l_curly3_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly3_token_token: SyntaxToken,
+) -> GlimmerTripleStashExpression {
+    GlimmerTripleStashExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_TRIPLE_STASH_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly3_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_curly3_token_token)),
         ],
     ))
 }

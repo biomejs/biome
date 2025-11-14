@@ -46,8 +46,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GlimmerBlockParams::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_ELEMENT_MODIFIER => {
+                    let $pattern = unsafe { $crate::GlimmerElementModifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::GLIMMER_LITERAL => {
                     let $pattern = unsafe { $crate::GlimmerLiteral::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_COMMENT => {
+                    let $pattern = unsafe { $crate::GlimmerMustacheComment::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION => {
@@ -57,6 +65,18 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_NAMED_ARGUMENT => {
                     let $pattern = unsafe { $crate::GlimmerNamedArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_CLOSING => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlockClosing::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_OPENING => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlockOpening::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_PATH => {
@@ -82,6 +102,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::GLIMMER_SUBEXPRESSION => {
                     let $pattern = unsafe { $crate::GlimmerSubexpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_TRIPLE_STASH_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerTripleStashExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {

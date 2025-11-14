@@ -28,6 +28,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("...", "DOTDOTDOT"),
         ("(", "L_PAREN"),
         (")", "R_PAREN"),
+        (":", "COLON"),
     ],
     keywords: &["null", "true", "false", "doctype", "html", "debug"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
@@ -38,6 +39,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "IDENT",
         "HTML_IDENT",
         "SVELTE_IDENT",
+        "MUSTACHE_COMMENT",
+        "L_TRIPLE_CURLY",
+        "R_TRIPLE_CURLY",
     ],
     nodes: &[
         "HTML_ROOT",
@@ -70,6 +74,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_NAME",
         // Glimmer nodes
         "GLIMMER_MUSTACHE_EXPRESSION",
+        "GLIMMER_MUSTACHE_COMMENT",
+        "GLIMMER_TRIPLE_STASH_EXPRESSION",
         "GLIMMER_BLOCK_HELPER",
         "GLIMMER_BLOCK_HELPER_OPENING",
         "GLIMMER_BLOCK_HELPER_CLOSING",
@@ -86,6 +92,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "GLIMMER_STRING_LITERAL",
         "GLIMMER_LITERAL",
         "GLIMMER_SPLATTRIBUTE",
+        "GLIMMER_ELEMENT_MODIFIER",
+        "GLIMMER_NAMED_BLOCK",
+        "GLIMMER_NAMED_BLOCK_OPENING",
+        "GLIMMER_NAMED_BLOCK_CLOSING",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
