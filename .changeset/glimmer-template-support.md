@@ -10,4 +10,11 @@ Glimmer templates are recognized using the `<template>...</template>` syntax and
 - Expression contexts
 - Single unassigned templates (treated as default exports)
 
+**Phase 1 Implementation Notes:**
+- Template content is treated as **opaque tokens** - the content is preserved exactly as written without internal parsing or linting
+- The template syntax itself is validated (e.g., checking for unclosed tags)
+- Templates work with whitespace in the opening tag (e.g., `<template >`, `<template\n>`)
+- LSP language IDs "gjs" and "gts" are now recognized
+- Future phases will add internal template parsing and linting support
+
 The template content is preserved as-is during formatting, and the parser provides diagnostics for unclosed template tags.

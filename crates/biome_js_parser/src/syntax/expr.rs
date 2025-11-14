@@ -1249,7 +1249,8 @@ pub(crate) fn is_nth_at_expression(p: &mut JsParser, n: usize) -> bool {
         | JS_NUMBER_LITERAL
         | JS_BIGINT_LITERAL
         | JS_STRING_LITERAL
-        | NULL_KW => true,
+        | NULL_KW
+        | GLIMMER_TEMPLATE => true,
         t => t.is_contextual_keyword() || t.is_future_reserved_keyword(),
     }
 }

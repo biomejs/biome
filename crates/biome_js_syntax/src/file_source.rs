@@ -396,6 +396,8 @@ impl JsFileSource {
             "vue" | "vuejs" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            "gjs" => Ok(Self::gjs()),
+            "gts" => Ok(Self::gts()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
@@ -448,5 +450,28 @@ impl From<Language> for JsFileSource {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_gjs_language_id() {
+        let result = JsFileSource::try_from_language_id("gjs");
+        assert!(result.is_ok(), "gjs language ID should be recognized");
+        let file_source = result.unwrap();
+        // gjs() returns Self::js_module().with_embedding_kind(EmbeddingKind::Glimmer)
+        assert_eq!(file_source, JsFileSource::gjs());
+    }
+
+    #[test]
+    fn test_gts_language_id() {
+        let result = JsFileSource::try_from_language_id("gts");
+        assert!(result.is_ok(), "gts language ID should be recognized");
+        let file_source = result.unwrap();
+        // gts() returns Self::ts().with_embedding_kind(EmbeddingKind::Glimmer)
+        assert_eq!(file_source, JsFileSource::gts());
     }
 }

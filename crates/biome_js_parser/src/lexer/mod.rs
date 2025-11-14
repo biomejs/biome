@@ -1750,8 +1750,8 @@ impl<'src> JsLexer<'src> {
             return None;
         }
 
-        // Check if we have enough bytes for "<template>"
-        let template_bytes = b"template>";
+        // Check if we have enough bytes for "<template"
+        let template_bytes = b"template";
         let end_pos = self.position + 1 + template_bytes.len();
         if end_pos > self.source.len() {
             return None;

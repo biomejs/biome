@@ -1,0 +1,356 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Template with yield expression
+function* generator() {
+    yield <template>Yielded template</template>;
+}
+
+// Template with await expression
+async function asyncFn() {
+    await <template>Awaited template</template>;
+}
+
+// Template after typeof
+const TypeOf = typeof <template>Type test</template>;
+
+// Template in conditional
+const conditional = true ? <template>True</template> : <template>False</template>;
+
+// Template with void
+const voidResult = void <template>Void template</template>;
+
+// Template with delete (unusual but valid expression)
+const obj = { prop: <template>Prop</template> };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..42 "function" [Comments("// Template with yiel ..."), Newline("\n")] [],
+            star_token: STAR@42..44 "*" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@44..53 "generator" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@53..54 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@54..56 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@56..57 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsExpressionStatement {
+                        expression: JsYieldExpression {
+                            yield_token: YIELD_KW@57..68 "yield" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            argument: JsYieldArgument {
+                                star_token: missing (optional),
+                                expression: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@68..105 "<template>Yielded template</template>" [] [],
+                                },
+                            },
+                        },
+                        semicolon_token: SEMICOLON@105..106 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@106..108 "}" [Newline("\n")] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: ASYNC_KW@108..150 "async" [Newline("\n"), Newline("\n"), Comments("// Template with awai ..."), Newline("\n")] [Whitespace(" ")],
+            function_token: FUNCTION_KW@150..159 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@159..166 "asyncFn" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@166..167 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@167..169 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@169..170 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsExpressionStatement {
+                        expression: JsAwaitExpression {
+                            await_token: AWAIT_KW@170..181 "await" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            argument: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@181..218 "<template>Awaited template</template>" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@218..219 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@219..221 "}" [Newline("\n")] [],
+            },
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@221..254 "const" [Newline("\n"), Newline("\n"), Comments("// Template after typeof"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@254..261 "TypeOf" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@261..263 "=" [] [Whitespace(" ")],
+                            expression: JsUnaryExpression {
+                                operator_token: TYPEOF_KW@263..270 "typeof" [] [Whitespace(" ")],
+                                argument: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@270..300 "<template>Type test</template>" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@300..301 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@301..336 "const" [Newline("\n"), Newline("\n"), Comments("// Template in condit ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@336..348 "conditional" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@348..350 "=" [] [Whitespace(" ")],
+                            expression: JsConditionalExpression {
+                                test: JsBooleanLiteralExpression {
+                                    value_token: TRUE_KW@350..355 "true" [] [Whitespace(" ")],
+                                },
+                                question_mark_token: QUESTION@355..357 "?" [] [Whitespace(" ")],
+                                consequent: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@357..383 "<template>True</template>" [] [Whitespace(" ")],
+                                },
+                                colon_token: COLON@383..385 ":" [] [Whitespace(" ")],
+                                alternate: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@385..411 "<template>False</template>" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@411..412 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@412..442 "const" [Newline("\n"), Newline("\n"), Comments("// Template with void"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@442..453 "voidResult" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@453..455 "=" [] [Whitespace(" ")],
+                            expression: JsUnaryExpression {
+                                operator_token: VOID_KW@455..460 "void" [] [Whitespace(" ")],
+                                argument: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@460..494 "<template>Void template</template>" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@494..495 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@495..558 "const" [Newline("\n"), Newline("\n"), Comments("// Template with dele ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@558..562 "obj" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@562..564 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@564..566 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@566..570 "prop" [] [],
+                                        },
+                                        colon_token: COLON@570..572 ":" [] [Whitespace(" ")],
+                                        value: JsGlimmerTemplate {
+                                            template_token_token: GLIMMER_TEMPLATE@572..598 "<template>Prop</template>" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@598..599 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@599..600 ";" [] [],
+        },
+    ],
+    eof_token: EOF@600..601 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..601
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..600
+    0: JS_FUNCTION_DECLARATION@0..108
+      0: (empty)
+      1: FUNCTION_KW@0..42 "function" [Comments("// Template with yiel ..."), Newline("\n")] []
+      2: STAR@42..44 "*" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@44..53
+        0: IDENT@44..53 "generator" [] []
+      4: (empty)
+      5: JS_PARAMETERS@53..56
+        0: L_PAREN@53..54 "(" [] []
+        1: JS_PARAMETER_LIST@54..54
+        2: R_PAREN@54..56 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@56..108
+        0: L_CURLY@56..57 "{" [] []
+        1: JS_DIRECTIVE_LIST@57..57
+        2: JS_STATEMENT_LIST@57..106
+          0: JS_EXPRESSION_STATEMENT@57..106
+            0: JS_YIELD_EXPRESSION@57..105
+              0: YIELD_KW@57..68 "yield" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              1: JS_YIELD_ARGUMENT@68..105
+                0: (empty)
+                1: JS_GLIMMER_TEMPLATE@68..105
+                  0: GLIMMER_TEMPLATE@68..105 "<template>Yielded template</template>" [] []
+            1: SEMICOLON@105..106 ";" [] []
+        3: R_CURLY@106..108 "}" [Newline("\n")] []
+    1: JS_FUNCTION_DECLARATION@108..221
+      0: ASYNC_KW@108..150 "async" [Newline("\n"), Newline("\n"), Comments("// Template with awai ..."), Newline("\n")] [Whitespace(" ")]
+      1: FUNCTION_KW@150..159 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@159..166
+        0: IDENT@159..166 "asyncFn" [] []
+      4: (empty)
+      5: JS_PARAMETERS@166..169
+        0: L_PAREN@166..167 "(" [] []
+        1: JS_PARAMETER_LIST@167..167
+        2: R_PAREN@167..169 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@169..221
+        0: L_CURLY@169..170 "{" [] []
+        1: JS_DIRECTIVE_LIST@170..170
+        2: JS_STATEMENT_LIST@170..219
+          0: JS_EXPRESSION_STATEMENT@170..219
+            0: JS_AWAIT_EXPRESSION@170..218
+              0: AWAIT_KW@170..181 "await" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@181..218
+                0: GLIMMER_TEMPLATE@181..218 "<template>Awaited template</template>" [] []
+            1: SEMICOLON@218..219 ";" [] []
+        3: R_CURLY@219..221 "}" [Newline("\n")] []
+    2: JS_VARIABLE_STATEMENT@221..301
+      0: JS_VARIABLE_DECLARATION@221..300
+        0: (empty)
+        1: CONST_KW@221..254 "const" [Newline("\n"), Newline("\n"), Comments("// Template after typeof"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@254..300
+          0: JS_VARIABLE_DECLARATOR@254..300
+            0: JS_IDENTIFIER_BINDING@254..261
+              0: IDENT@254..261 "TypeOf" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@261..300
+              0: EQ@261..263 "=" [] [Whitespace(" ")]
+              1: JS_UNARY_EXPRESSION@263..300
+                0: TYPEOF_KW@263..270 "typeof" [] [Whitespace(" ")]
+                1: JS_GLIMMER_TEMPLATE@270..300
+                  0: GLIMMER_TEMPLATE@270..300 "<template>Type test</template>" [] []
+      1: SEMICOLON@300..301 ";" [] []
+    3: JS_VARIABLE_STATEMENT@301..412
+      0: JS_VARIABLE_DECLARATION@301..411
+        0: (empty)
+        1: CONST_KW@301..336 "const" [Newline("\n"), Newline("\n"), Comments("// Template in condit ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@336..411
+          0: JS_VARIABLE_DECLARATOR@336..411
+            0: JS_IDENTIFIER_BINDING@336..348
+              0: IDENT@336..348 "conditional" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@348..411
+              0: EQ@348..350 "=" [] [Whitespace(" ")]
+              1: JS_CONDITIONAL_EXPRESSION@350..411
+                0: JS_BOOLEAN_LITERAL_EXPRESSION@350..355
+                  0: TRUE_KW@350..355 "true" [] [Whitespace(" ")]
+                1: QUESTION@355..357 "?" [] [Whitespace(" ")]
+                2: JS_GLIMMER_TEMPLATE@357..383
+                  0: GLIMMER_TEMPLATE@357..383 "<template>True</template>" [] [Whitespace(" ")]
+                3: COLON@383..385 ":" [] [Whitespace(" ")]
+                4: JS_GLIMMER_TEMPLATE@385..411
+                  0: GLIMMER_TEMPLATE@385..411 "<template>False</template>" [] []
+      1: SEMICOLON@411..412 ";" [] []
+    4: JS_VARIABLE_STATEMENT@412..495
+      0: JS_VARIABLE_DECLARATION@412..494
+        0: (empty)
+        1: CONST_KW@412..442 "const" [Newline("\n"), Newline("\n"), Comments("// Template with void"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@442..494
+          0: JS_VARIABLE_DECLARATOR@442..494
+            0: JS_IDENTIFIER_BINDING@442..453
+              0: IDENT@442..453 "voidResult" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@453..494
+              0: EQ@453..455 "=" [] [Whitespace(" ")]
+              1: JS_UNARY_EXPRESSION@455..494
+                0: VOID_KW@455..460 "void" [] [Whitespace(" ")]
+                1: JS_GLIMMER_TEMPLATE@460..494
+                  0: GLIMMER_TEMPLATE@460..494 "<template>Void template</template>" [] []
+      1: SEMICOLON@494..495 ";" [] []
+    5: JS_VARIABLE_STATEMENT@495..600
+      0: JS_VARIABLE_DECLARATION@495..599
+        0: (empty)
+        1: CONST_KW@495..558 "const" [Newline("\n"), Newline("\n"), Comments("// Template with dele ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@558..599
+          0: JS_VARIABLE_DECLARATOR@558..599
+            0: JS_IDENTIFIER_BINDING@558..562
+              0: IDENT@558..562 "obj" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@562..599
+              0: EQ@562..564 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@564..599
+                0: L_CURLY@564..566 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@566..598
+                  0: JS_PROPERTY_OBJECT_MEMBER@566..598
+                    0: JS_LITERAL_MEMBER_NAME@566..570
+                      0: IDENT@566..570 "prop" [] []
+                    1: COLON@570..572 ":" [] [Whitespace(" ")]
+                    2: JS_GLIMMER_TEMPLATE@572..598
+                      0: GLIMMER_TEMPLATE@572..598 "<template>Prop</template>" [] [Whitespace(" ")]
+                2: R_CURLY@598..599 "}" [] []
+      1: SEMICOLON@599..600 ";" [] []
+  4: EOF@600..601 "" [Newline("\n")] []
+
+```
