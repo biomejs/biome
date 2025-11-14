@@ -1,8 +1,5 @@
-use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
-};
-use biome_js_semantic::{SemanticModel, SemanticModelOptions, semantic_model};
+use biome_analyze::{AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext};
+use biome_js_semantic::{SemanticModel, SemanticModelBuilder, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClassMember, AnyJsComputedMember, AnyJsExpression,
     AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsType, JsArrayAssignmentPattern,
@@ -102,48 +99,43 @@ impl Phase for SemanticClassServices {
 }
 
 pub struct SyntaxClassMemberReferencesVisitor {
-    root: AnyJsRoot,
+    extractor: SemanticEventExtractor,
+    builder: SemanticModelBuilder,
 }
 
 impl SyntaxClassMemberReferencesVisitor {
     pub(crate) fn new(root: AnyJsRoot) -> Self {
-        Self { root }
+        Self {
+            extractor: SemanticEventExtractor::default(),
+            builder: SemanticModelBuilder::new(root),
+        }
     }
 }
 
 impl Visitor for SyntaxClassMemberReferencesVisitor {
     type Language = JsLanguage;
 
-    fn visit(
-        &mut self,
-        _event: &WalkEvent<JsSyntaxNode>,
-        mut _ctx: VisitorContext<'_, '_, JsLanguage>,
-    ) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+        match event {
+            WalkEvent::Enter(node) => {
+                self.builder.push_node(node);
+                self.extractor.enter(node);
+            }
+            WalkEvent::Leave(node) => {
+                self.extractor.leave(node);
+            }
+        }
+
+        while let Some(e) = self.extractor.pop() {
+            self.builder.push_event(e);
+        }
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        let semantic = semantic_model(&self.root, SemanticModelOptions::default());
+        let semantic = self.builder.build();
 
         ctx.services
             .insert_service(SemanticClassModel::new(semantic));
-    }
-}
-
-pub struct SemanticClassMemberReferencesVisitor {}
-
-impl Visitor for SemanticClassMemberReferencesVisitor {
-    type Language = JsLanguage;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<JsSyntaxNode>,
-        mut ctx: VisitorContext<'_, '_, JsLanguage>,
-    ) {
-        if let WalkEvent::Enter(node) = event
-            && JsClassDeclaration::can_cast(node.kind())
-        {
-            ctx.match_query(node.clone());
-        }
     }
 }
 
@@ -170,7 +162,7 @@ where
         analyzer.add_visitor(Phases::Syntax, || {
             SyntaxClassMemberReferencesVisitor::new(root.clone())
         });
-        analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
     fn key() -> QueryKey<Self::Language> {
