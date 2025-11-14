@@ -5234,6 +5234,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFind": {
+					"description": "Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.\nSee https://biomejs.dev/linter/rules/use-find",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseFindConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
 					"anyOf": [
@@ -8518,6 +8525,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseFindOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseFindOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseFlatMapOptions": {
 			"type": "object",
 			"properties": {
@@ -11345,6 +11361,13 @@
 			},
 			"additionalProperties": false
 		},
+		"UseFindConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseFindOptions" }
+			]
+		},
+		"UseFindOptions": { "type": "object", "additionalProperties": false },
 		"UseFlatMapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
