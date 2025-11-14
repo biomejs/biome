@@ -33,6 +33,8 @@ gen-bindings:
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
 
+gen-globals:
+  cargo run -p xtask_codegen --features schema -- globals
 
 # Generates code generated files for the linter
 gen-analyzer:

@@ -102,6 +102,8 @@ pub enum TaskCommand {
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,
+    #[bpaf(command)]
+    Globals,
     /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
     #[bpaf(command)]
     Bindings,

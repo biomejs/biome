@@ -30,13 +30,13 @@ biome_html_syntax     = { workspace = true, optional = true }
 biome_js_analyze      = { workspace = true, optional = true }
 biome_js_factory      = { workspace = true, optional = true }
 biome_js_formatter    = { workspace = true, optional = true }
-biome_js_parser       = { workspace = true, optional = true }
-biome_js_syntax       = { workspace = true, optional = true }
+biome_js_parser       = { workspace = true }
+biome_js_syntax       = { workspace = true }
 biome_json_analyze    = { workspace = true, optional = true }
 biome_json_formatter  = { workspace = true, optional = true }
 biome_json_parser     = { workspace = true, optional = true }
 biome_json_syntax     = { workspace = true, optional = true }
-biome_rowan           = { workspace = true, optional = true }
+biome_rowan           = { workspace = true }
 biome_service         = { workspace = true, features = ["schema"], optional = true }
 biome_string_case     = { workspace = true }
 biome_ungrammar       = { workspace = true }
@@ -47,7 +47,6 @@ serde_json            = { workspace = true, optional = true }
 configuration = [
   "biome_analyze",
   "biome_js_analyze",
-  "biome_js_syntax",
   "biome_json_analyze",
   "biome_json_syntax",
   "biome_css_analyze",
@@ -56,7 +55,6 @@ configuration = [
   "biome_graphql_syntax",
   "biome_html_analyze",
   "biome_html_syntax",
-  "biome_rowan",
   "pulldown-cmark",
   "biome_diagnostics",
 ]
@@ -65,9 +63,7 @@ schema = [
   "schemars",
   "serde_json",
   "biome_analyze",
-  "biome_rowan",
   "biome_service",
-  "biome_js_syntax",
   "biome_js_factory",
   "biome_js_formatter",
   "biome_json_formatter",
