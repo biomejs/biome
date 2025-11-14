@@ -8,7 +8,7 @@ use std::{
 use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
-use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeResolverLevel};
+use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeResolverLevel, globals::infer_generated_type_id};
 
 /// Type store with efficient lookup mechanism.
 ///
@@ -165,7 +165,11 @@ impl TypeStore {
     }
 
     pub fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
+        if id.index() >= self.types.len() {
+            &self.types[infer_generated_type_id(id).index()]
+        } else {
+            &self.types[id.index()]
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -227,11 +231,18 @@ impl TypeStore {
     /// For instance, this may be useful to update a type after it has been
     /// resolved and/or flattened.
     pub fn replace(&mut self, index: usize, data: TypeData) {
+        // Use infer_generated_type_id to handle out-of-bounds indices
+        let actual_index = if index >= self.types.len() {
+            infer_generated_type_id(TypeId::new(index)).index()
+        } else {
+            index
+        };
+
         let new_hash = hash_data(&data);
-        let old_hash = hash_data(&self.types[index]);
+        let old_hash = hash_data(&self.types[actual_index]);
 
         if new_hash != old_hash {
-            if let Ok(occupied) = self.table.find_entry(old_hash, |i| *i == index) {
+            if let Ok(occupied) = self.table.find_entry(old_hash, |i| *i == actual_index) {
                 occupied.remove();
             }
 
@@ -242,10 +253,10 @@ impl TypeStore {
             );
             match entry {
                 Entry::Occupied(mut entry) => {
-                    *entry.get_mut() = index;
+                    *entry.get_mut() = actual_index;
                 }
                 Entry::Vacant(entry) => {
-                    entry.insert(index);
+                    entry.insert(actual_index);
                 }
             }
         }

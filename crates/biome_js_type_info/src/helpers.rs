@@ -11,7 +11,8 @@ use crate::{
     BindingId, Class, Interface, Intersection, Module, Namespace, Object, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, Type, TypeData, TypeInstance,
     TypeMember, TypeReference, TypeResolver, Union,
-    globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
+    globals::GLOBAL_TYPE_MEMBERS,
+    generated_globals::{GLOBAL_PROMISE_ID, GLOBAL_ARRAY_ID}
 };
 
 impl<'a> ResolvedTypeData<'a> {

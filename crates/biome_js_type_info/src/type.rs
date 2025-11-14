@@ -16,9 +16,10 @@ use crate::conditionals::ConditionalType;
 use crate::{
     GLOBAL_RESOLVER, Literal, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, TypeData,
     TypeId, TypeReference, TypeResolver, UNKNOWN_DATA,
-    globals::{
-        GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
-    },
+    globals::GLOBAL_UNKNOWN_ID,
+    generated_globals::{
+        GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_NUMBER_ID
+    }
 };
 
 /// Wrapper used to refer to type information stored in the `ModuleGraph`.
