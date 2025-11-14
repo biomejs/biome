@@ -1740,45 +1740,56 @@ impl<'src> JsLexer<'src> {
 
     /// Attempts to lex a Glimmer template block `<template>...</template>`.
     /// Returns Some(GLIMMER_TEMPLATE) if a template was found, None otherwise.
+    ///
+    /// IMPORTANT: This function uses lookahead to check if we have a valid `<template>` tag.
+    /// The lexer position is ONLY advanced if we confirm it's a valid template. If we return `None`,
+    /// the position remains at the `<` character, allowing normal token lexing to continue.
     fn try_lex_glimmer_template(&mut self) -> Option<JsSyntaxKind> {
-        // We're currently at '<', check if followed by 'template'
-        // Peek ahead without consuming
+        // Save start position for error reporting (we're currently at '<')
         let start = self.position;
 
-        // Check for "<template"
+        // LOOKAHEAD PHASE: All checks below use non-advancing operations (peek_byte, byte_at, slicing)
+        // The lexer position is NOT advanced during these checks.
+
+        // Check if '<' is followed by 't' (first char of "template")
         if self.peek_byte() != Some(b't') {
-            return None;
+            return None; // Not a template, position unchanged
         }
 
-        // Check if we have enough bytes for "<template"
+        // Check if we have enough bytes for "<template" (1 + 8 = 9 bytes)
         let template_bytes = b"template";
         let end_pos = self.position + 1 + template_bytes.len();
         if end_pos > self.source.len() {
-            return None;
+            return None; // Not enough bytes, position unchanged
         }
+
+        // Verify bytes spell "template" (checking self.position+1 through self.position+9)
         if &self.source.as_bytes()[self.position + 1..end_pos] != template_bytes {
-            return None;
+            return None; // Doesn't match "template", position unchanged
         }
 
-        // Verify that 'template' is followed by '>' or whitespace (not part of identifier)
+        // Verify that "template" is followed by '>' or whitespace (not part of an identifier)
+        // byte_at(9) checks self.position + 9, which is the byte immediately after "<template"
         match self.byte_at(9) {
-            // Position after "<template"
             Some(b'>' | b' ' | b'\t' | b'\n' | b'\r') => {
-                // This is indeed "<template"
+                // Valid template tag start
             }
-            _ => return None, // Not a template tag
+            _ => return None, // Followed by identifier char (e.g., <templatex), position unchanged
         }
 
-        // Consume "<template"
+        // COMMIT PHASE: We've confirmed this is a valid `<template>` tag
+        // Now we advance the lexer position and consume the template
+
+        // Consume "<template" (9 bytes: 1 for '<' + 8 for 'template')
         self.advance(9);
 
-        // Skip any attributes/whitespace until '>'
+        // Skip any attributes/whitespace until we find '>'
+        // Simplified loop: always advance, then check if we found '>'
         while let Some(chr) = self.current_byte() {
+            self.next_byte(); // always consume the current byte
             if chr == b'>' {
-                self.next_byte(); // consume '>'
-                break;
+                break; // Found '>', already consumed
             }
-            self.next_byte();
         }
 
         // Save the position after the opening tag for error reporting
