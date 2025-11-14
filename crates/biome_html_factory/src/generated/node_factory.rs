@@ -244,11 +244,30 @@ pub fn glimmer_named_block_opening(
         ],
     ))
 }
-pub fn glimmer_path(segments: GlimmerPathSegmentList) -> GlimmerPath {
-    GlimmerPath::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::GLIMMER_PATH,
-        [Some(SyntaxElement::Node(segments.into_syntax()))],
-    ))
+pub fn glimmer_path(segments: GlimmerPathSegmentList) -> GlimmerPathBuilder {
+    GlimmerPathBuilder {
+        segments,
+        at_token_token: None,
+    }
+}
+pub struct GlimmerPathBuilder {
+    segments: GlimmerPathSegmentList,
+    at_token_token: Option<SyntaxToken>,
+}
+impl GlimmerPathBuilder {
+    pub fn with_at_token_token(mut self, at_token_token: SyntaxToken) -> Self {
+        self.at_token_token = Some(at_token_token);
+        self
+    }
+    pub fn build(self) -> GlimmerPath {
+        GlimmerPath::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::GLIMMER_PATH,
+            [
+                self.at_token_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.segments.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn glimmer_path_segment(value_token_token: SyntaxToken) -> GlimmerPathSegment {
     GlimmerPathSegment::unwrap_cast(SyntaxNode::new_detached(
@@ -665,16 +684,25 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn glimmer_path_segment_list<I>(items: I) -> GlimmerPathSegmentList
+pub fn glimmer_path_segment_list<I, S>(items: I, separators: S) -> GlimmerPathSegmentList
 where
     I: IntoIterator<Item = GlimmerPathSegment>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     GlimmerPathSegmentList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList

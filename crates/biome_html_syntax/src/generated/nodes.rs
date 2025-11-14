@@ -725,11 +725,15 @@ impl GlimmerPath {
     }
     pub fn as_fields(&self) -> GlimmerPathFields {
         GlimmerPathFields {
+            at_token_token: self.at_token_token(),
             segments: self.segments(),
         }
     }
+    pub fn at_token_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
     pub fn segments(&self) -> GlimmerPathSegmentList {
-        support::list(&self.syntax, 0usize)
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for GlimmerPath {
@@ -742,6 +746,7 @@ impl Serialize for GlimmerPath {
 }
 #[derive(Serialize)]
 pub struct GlimmerPathFields {
+    pub at_token_token: Option<SyntaxToken>,
     pub segments: GlimmerPathSegmentList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2044,6 +2049,8 @@ impl AnyHtmlContent {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
     AnyHtmlContent(AnyHtmlContent),
+    GlimmerMustacheComment(GlimmerMustacheComment),
+    GlimmerTripleStashExpression(GlimmerTripleStashExpression),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlElement(HtmlElement),
@@ -2053,6 +2060,18 @@ impl AnyHtmlElement {
     pub fn as_any_html_content(&self) -> Option<&AnyHtmlContent> {
         match &self {
             Self::AnyHtmlContent(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_mustache_comment(&self) -> Option<&GlimmerMustacheComment> {
+        match &self {
+            Self::GlimmerMustacheComment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_triple_stash_expression(&self) -> Option<&GlimmerTripleStashExpression> {
+        match &self {
+            Self::GlimmerTripleStashExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -2992,6 +3011,10 @@ impl std::fmt::Debug for GlimmerPath {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GlimmerPath")
+                .field(
+                    "at_token_token",
+                    &support::DebugOptionalElement(self.at_token_token()),
+                )
                 .field("segments", &self.segments())
                 .finish()
         } else {
@@ -4962,6 +4985,16 @@ impl From<AnyHtmlContent> for SyntaxElement {
         node.into()
     }
 }
+impl From<GlimmerMustacheComment> for AnyHtmlElement {
+    fn from(node: GlimmerMustacheComment) -> Self {
+        Self::GlimmerMustacheComment(node)
+    }
+}
+impl From<GlimmerTripleStashExpression> for AnyHtmlElement {
+    fn from(node: GlimmerTripleStashExpression) -> Self {
+        Self::GlimmerTripleStashExpression(node)
+    }
+}
 impl From<HtmlBogusElement> for AnyHtmlElement {
     fn from(node: HtmlBogusElement) -> Self {
         Self::HtmlBogusElement(node)
@@ -4985,21 +5018,32 @@ impl From<HtmlSelfClosingElement> for AnyHtmlElement {
 impl AstNode for AnyHtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyHtmlContent::KIND_SET
+        .union(GlimmerMustacheComment::KIND_SET)
+        .union(GlimmerTripleStashExpression::KIND_SET)
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlElement::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_ELEMENT | HTML_CDATA_SECTION | HTML_ELEMENT | HTML_SELF_CLOSING_ELEMENT => {
-                true
-            }
+            GLIMMER_MUSTACHE_COMMENT
+            | GLIMMER_TRIPLE_STASH_EXPRESSION
+            | HTML_BOGUS_ELEMENT
+            | HTML_CDATA_SECTION
+            | HTML_ELEMENT
+            | HTML_SELF_CLOSING_ELEMENT => true,
             k if AnyHtmlContent::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GLIMMER_MUSTACHE_COMMENT => {
+                Self::GlimmerMustacheComment(GlimmerMustacheComment { syntax })
+            }
+            GLIMMER_TRIPLE_STASH_EXPRESSION => {
+                Self::GlimmerTripleStashExpression(GlimmerTripleStashExpression { syntax })
+            }
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
@@ -5017,6 +5061,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GlimmerMustacheComment(it) => &it.syntax,
+            Self::GlimmerTripleStashExpression(it) => &it.syntax,
             Self::HtmlBogusElement(it) => &it.syntax,
             Self::HtmlCdataSection(it) => &it.syntax,
             Self::HtmlElement(it) => &it.syntax,
@@ -5026,6 +5072,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GlimmerMustacheComment(it) => it.syntax,
+            Self::GlimmerTripleStashExpression(it) => it.syntax,
             Self::HtmlBogusElement(it) => it.syntax,
             Self::HtmlCdataSection(it) => it.syntax,
             Self::HtmlElement(it) => it.syntax,
@@ -5038,6 +5086,8 @@ impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyHtmlContent(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerMustacheComment(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerTripleStashExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
@@ -5049,6 +5099,8 @@ impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> Self {
         match n {
             AnyHtmlElement::AnyHtmlContent(it) => it.into(),
+            AnyHtmlElement::GlimmerMustacheComment(it) => it.into(),
+            AnyHtmlElement::GlimmerTripleStashExpression(it) => it.into(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into(),
             AnyHtmlElement::HtmlElement(it) => it.into(),
@@ -6079,7 +6131,7 @@ impl Serialize for GlimmerPathSegmentList {
         seq.end()
     }
 }
-impl AstNodeList for GlimmerPathSegmentList {
+impl AstSeparatedList for GlimmerPathSegmentList {
     type Language = Language;
     type Node = GlimmerPathSegment;
     fn syntax_list(&self) -> &SyntaxList {
@@ -6092,19 +6144,19 @@ impl AstNodeList for GlimmerPathSegmentList {
 impl Debug for GlimmerPathSegmentList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("GlimmerPathSegmentList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for &GlimmerPathSegmentList {
-    type Item = GlimmerPathSegment;
-    type IntoIter = AstNodeListIterator<Language, GlimmerPathSegment>;
+impl IntoIterator for GlimmerPathSegmentList {
+    type Item = SyntaxResult<GlimmerPathSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GlimmerPathSegment>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for GlimmerPathSegmentList {
-    type Item = GlimmerPathSegment;
-    type IntoIter = AstNodeListIterator<Language, GlimmerPathSegment>;
+impl IntoIterator for &GlimmerPathSegmentList {
+    type Item = SyntaxResult<GlimmerPathSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GlimmerPathSegment>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

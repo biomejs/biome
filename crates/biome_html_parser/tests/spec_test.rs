@@ -143,10 +143,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{@debug something, something, something}
+    let code = r#"{{{this.htmlContent}}}
     "#;
 
-    let root = parse_html(code, (&HtmlFileSource::svelte()).into());
+    let root = parse_html(code, (&HtmlFileSource::glimmer()).into());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {

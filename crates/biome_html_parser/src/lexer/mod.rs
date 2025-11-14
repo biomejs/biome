@@ -3,7 +3,8 @@ mod tests;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
     COMMENT, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL,
-    MUSTACHE_COMMENT, NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    IDENT, L_TRIPLE_CURLY, MUSTACHE_COMMENT, NEWLINE, R_TRIPLE_CURLY, SVELTE_IDENT, TOMBSTONE,
+    UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -39,6 +40,7 @@ enum IdentifierContext {
     None,
     Doctype,
     Svelte,
+    Glimmer,
 }
 
 impl IdentifierContext {
@@ -75,6 +77,7 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
+            b'{' if self.at_opening_triple_text_expression() => self.consume_l_triple_text_expression(),
             b'{' if self.at_mustache_comment() => self.consume_mustache_comment(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
@@ -85,7 +88,9 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             b'}' => {
-                if self.at_closing_double_text_expression() {
+                if self.at_closing_triple_text_expression() {
+                    self.consume_r_triple_text_expression()
+                } else if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
@@ -115,6 +120,7 @@ impl<'src> HtmlLexer<'src> {
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
             b',' if self.current() == T![<] => self.consume_byte(T![,]),
             b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            b'{' if self.at_opening_triple_text_expression() => self.consume_l_triple_text_expression(),
             b'{' if self.at_mustache_comment() => self.consume_mustache_comment(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
@@ -125,7 +131,9 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             b'}' => {
-                if self.at_closing_double_text_expression() {
+                if self.at_closing_triple_text_expression() {
+                    self.consume_r_triple_text_expression()
+                } else if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
@@ -243,7 +251,6 @@ impl<'src> HtmlLexer<'src> {
             b'}' if self.at_closing_double_text_expression() => {
                 self.consume_r_double_text_expression()
             }
-            b'<' => self.consume_byte(T![<]),
             _ => {
                 while let Some(current) = self.current_byte() {
                     match current {
@@ -255,6 +262,30 @@ impl<'src> HtmlLexer<'src> {
                 }
                 HTML_LITERAL
             }
+        }
+    }
+
+    /// Consumes tokens within a Glimmer double mustache expression ('{{...}}').
+    /// Properly tokenizes Glimmer expression syntax (identifiers, dots, @, string literals).
+    fn consume_double_glimmer_expression(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'}' if self.at_closing_double_text_expression() => {
+                self.consume_r_double_text_expression()
+            }
+            b'.' => self.consume_byte(T![.]),
+            b'@' => self.consume_byte(T![@]),
+            b'#' => self.consume_byte(T![#]),
+            b'/' => self.consume_byte(T![/]),
+            b'|' => self.consume_byte(T![|]),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
+            b'=' => self.consume_byte(T![=]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ if current.is_ascii_alphabetic() || current == b'_' => {
+                self.consume_identifier(current, IdentifierContext::Glimmer)
+            }
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -289,6 +320,27 @@ impl<'src> HtmlLexer<'src> {
         }
 
         HTML_LITERAL
+    }
+
+    /// Consumes tokens within a triple text expression ('{{{...}}}') for Glimmer.
+    /// Unlike simple text expressions, this properly tokenizes identifiers, dots,
+    /// string literals, etc. for Glimmer expression syntax.
+    fn consume_triple_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'}' if self.at_closing_triple_text_expression() => {
+                self.consume_r_triple_text_expression()
+            }
+            b'.' => self.consume_byte(T![.]),
+            b'@' => self.consume_byte(T![@]),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ if current.is_ascii_alphabetic() || current == b'_' => {
+                self.consume_identifier(current, IdentifierContext::Glimmer)
+            }
+            _ => self.consume_unexpected_character(),
+        }
     }
 
     /// Consumes an HTML comment starting with '<!--' until the closing '-->' is found.
@@ -423,6 +475,18 @@ impl<'src> HtmlLexer<'src> {
                         break;
                     }
                 }
+                IdentifierContext::Glimmer => {
+                    // Glimmer identifiers: alphanumeric and underscore only
+                    if byte.is_ascii_alphanumeric() || byte == b'_' {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
@@ -433,6 +497,7 @@ impl<'src> HtmlLexer<'src> {
                 b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
                 _ => SVELTE_IDENT,
             },
+            _ if matches!(context, IdentifierContext::Glimmer) => IDENT,
             _ => HTML_LITERAL,
         }
     }
@@ -582,6 +647,13 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes an opening triple text expression '{{{' token used for unescaped interpolation.
+    fn consume_l_triple_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_opening_triple_text_expression());
+        self.advance(3);
+        L_TRIPLE_CURLY
+    }
+
     /// Consumes an opening double text expression '{{' token used for interpolation.
     fn consume_l_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_opening_double_text_expression());
@@ -612,6 +684,13 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.at_closing_double_text_expression());
         self.advance(2);
         T!["}}"]
+    }
+
+    /// Consumes a closing triple text expression '}}}' token used for unescaped interpolation.
+    fn consume_r_triple_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_closing_triple_text_expression());
+        self.advance(3);
+        R_TRIPLE_CURLY
     }
 
     /// Consumes a frontmatter fence '---' token that delimits Astro frontmatter blocks.
@@ -703,6 +782,13 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
+    fn at_opening_triple_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'{')
+            && self.byte_at(1) == Some(b'{')
+            && self.byte_at(2) == Some(b'{')
+    }
+
+    #[inline(always)]
     fn at_mustache_comment(&self) -> bool {
         self.current_byte() == Some(b'{')
             && self.byte_at(1) == Some(b'{')
@@ -726,6 +812,13 @@ impl<'src> HtmlLexer<'src> {
     #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
+    }
+
+    #[inline(always)]
+    fn at_closing_triple_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'}')
+            && self.byte_at(1) == Some(b'}')
+            && self.byte_at(2) == Some(b'}')
     }
 
     /// Consumes the opening CDATA section marker '<![CDATA[' token.
@@ -941,6 +1034,8 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::TextExpression(kind) => match kind {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
                         TextExpressionKind::Single => self.consume_single_text_expression(),
+                        TextExpressionKind::Triple => self.consume_triple_text_expression(current),
+                        TextExpressionKind::DoubleGlimmer => self.consume_double_glimmer_expression(current),
                     },
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {

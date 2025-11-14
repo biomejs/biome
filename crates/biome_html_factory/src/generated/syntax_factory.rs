@@ -539,8 +539,15 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             GLIMMER_PATH => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [@]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && GlimmerPathSegmentList::can_cast(element.kind())
                 {
@@ -1324,9 +1331,13 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             GLIMMER_BLOCK_PARAM_LIST => {
                 Self::make_node_list_syntax(kind, children, GlimmerBlockParam::can_cast)
             }
-            GLIMMER_PATH_SEGMENT_LIST => {
-                Self::make_node_list_syntax(kind, children, GlimmerPathSegment::can_cast)
-            }
+            GLIMMER_PATH_SEGMENT_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                GlimmerPathSegment::can_cast,
+                T ! [.],
+                false,
+            ),
             HTML_ATTRIBUTE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlAttribute::can_cast)
             }

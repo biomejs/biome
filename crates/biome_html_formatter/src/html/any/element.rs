@@ -13,6 +13,8 @@ impl FormatRule<AnyHtmlElement> for FormatAnyHtmlElement {
             AnyHtmlElement::HtmlCdataSection(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlSelfClosingElement(node) => node.format().fmt(f),
+            AnyHtmlElement::GlimmerMustacheComment(node) => node.format().fmt(f),
+            AnyHtmlElement::GlimmerTripleStashExpression(node) => node.format().fmt(f),
         }
     }
 }

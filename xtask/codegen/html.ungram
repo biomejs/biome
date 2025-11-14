@@ -73,6 +73,8 @@ AnyHtmlElement =
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
+	| GlimmerMustacheComment
+	| GlimmerTripleStashExpression
 	| HtmlBogusElement
 
 AnyHtmlContent =
@@ -241,7 +243,7 @@ GlimmerMustacheComment =
 	comment_token: 'mustache_comment'
 
 // Triple-stash (unescaped): {{{path args}}}
-// Note: L_TRIPLE_CURLY and R_TRIPLE_CURLY are matched by the lexer, not grammar
+// Like mustache expressions but outputs unescaped HTML
 GlimmerTripleStashExpression =
 	l_curly3_token: 'l_triple_curly'
 	path: GlimmerPath
@@ -282,9 +284,10 @@ GlimmerBlockParam =
 
 // Path: this.foo, @arg, helper
 GlimmerPath =
+	at_token: '@'?
 	segments: GlimmerPathSegmentList
 
-GlimmerPathSegmentList = GlimmerPathSegment*
+GlimmerPathSegmentList = (GlimmerPathSegment ('.' GlimmerPathSegment)*)
 
 GlimmerPathSegment =
 	value_token: 'ident'
