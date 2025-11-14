@@ -41,7 +41,3 @@ class Foo {
 }
 ```
 
-***Summary***
-•	Only accesses that read a value are considered meaningful for the purpose of this rule.
-•	Simple assignments to a setter without a corresponding getter no longer count as usage.
-•	Operations like +=, method calls returning a value, or reading the property for computation are considered meaningful reads.
