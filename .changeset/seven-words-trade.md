@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added support for parsing the [CSS if function](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/if).
+Added support for parsing and formatting the [CSS if function](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/if).
 
 ***Example***
 
