@@ -1900,7 +1900,6 @@ CssIfTestBooleanOrExpr =
 AnyCssIfTestBooleanExprGroup =
 	AnyCssIfTest
 	| CssIfTestBooleanExprInParens
-	// TODO: <general-enclosed>
 
 // ( <boolean-expr> )
 CssIfTestBooleanExprInParens =
