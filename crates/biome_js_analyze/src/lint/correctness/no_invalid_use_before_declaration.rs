@@ -3,7 +3,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsFileSource, JsSyntaxKind,
+    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsFileSource, JsVariableDeclarationClause,
+    TsDeclareStatement,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
@@ -222,14 +223,10 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
                 Ok(Self::Variable)
             }
-            AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-                if value
-                    .syntax()
-                    .ancestors()
-                    .nth(4)
-                    .is_some_and(|maybe_declare| {
-                        maybe_declare.kind() == JsSyntaxKind::TS_DECLARE_STATEMENT
-                    })
+            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                if let Some(var_decl) = declarator.declaration()
+                    && let Some(var_decl_clause) = var_decl.parent::<JsVariableDeclarationClause>()
+                    && var_decl_clause.parent::<TsDeclareStatement>().is_some()
                 {
                     // Ambient variables, such as `declare const c;`,
                     // can be used before their declarations.
