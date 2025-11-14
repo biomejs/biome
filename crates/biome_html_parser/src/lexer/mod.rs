@@ -3,7 +3,7 @@ mod tests;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
     COMMENT, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL,
-    NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    MUSTACHE_COMMENT, NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -75,6 +75,7 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
+            b'{' if self.at_mustache_comment() => self.consume_mustache_comment(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
                 if self.at_opening_double_text_expression() {
@@ -114,6 +115,7 @@ impl<'src> HtmlLexer<'src> {
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
             b',' if self.current() == T![<] => self.consume_byte(T![,]),
             b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            b'{' if self.at_mustache_comment() => self.consume_mustache_comment(),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => {
                 if self.at_opening_double_text_expression() {
@@ -619,6 +621,47 @@ impl<'src> HtmlLexer<'src> {
         T![---]
     }
 
+    /// Consumes a Glimmer mustache comment.
+    /// Handles both `{{! comment }}` and `{{!-- comment --}}` formats.
+    fn consume_mustache_comment(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_mustache_comment());
+
+        // Check if this is a multi-line comment {{!-- ... --}}
+        let is_multiline = self.byte_at(3) == Some(b'-') && self.byte_at(4) == Some(b'-');
+
+        // Advance past the opening: {{! or {{!--
+        if is_multiline {
+            self.advance(5); // {{!--
+        } else {
+            self.advance(3); // {{!
+        }
+
+        // Consume until we find the closing }} or --}}
+        while let Some(char) = self.current_byte() {
+            if is_multiline {
+                // Look for --}}
+                if self.current_byte() == Some(b'-')
+                    && self.byte_at(1) == Some(b'-')
+                    && self.byte_at(2) == Some(b'}')
+                    && self.byte_at(3) == Some(b'}')
+                {
+                    self.advance(4); // --}}
+                    return MUSTACHE_COMMENT;
+                }
+            } else {
+                // Look for }}
+                if self.at_closing_double_text_expression() {
+                    self.advance(2); // }}
+                    return MUSTACHE_COMMENT;
+                }
+            }
+            self.advance_byte_or_char(char);
+        }
+
+        // If we reach EOF without finding closing, still return the token
+        MUSTACHE_COMMENT
+    }
+
     #[inline(always)]
     fn at_start_comment(&self) -> bool {
         self.current_byte() == Some(b'<')
@@ -657,6 +700,13 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'-')
+    }
+
+    #[inline(always)]
+    fn at_mustache_comment(&self) -> bool {
+        self.current_byte() == Some(b'{')
+            && self.byte_at(1) == Some(b'{')
+            && self.byte_at(2) == Some(b'!')
     }
 
     #[inline(always)]

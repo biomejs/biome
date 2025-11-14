@@ -222,6 +222,7 @@ impl ParseNodeList for ElementList {
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
+            MUSTACHE_COMMENT => parse_mustache_comment(p),
             T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
                 p,
                 |p| parse_double_text_expression(p, HtmlLexContext::Regular),
@@ -590,4 +591,16 @@ impl TextExpression {
 
         Present(m.complete(p, HTML_TEXT_EXPRESSION))
     }
+}
+
+/// Parse a Glimmer mustache comment.
+/// Grammar: GlimmerMustacheComment = comment_token: 'mustache_comment'
+fn parse_mustache_comment(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(MUSTACHE_COMMENT) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(MUSTACHE_COMMENT);
+    Present(m.complete(p, GLIMMER_MUSTACHE_COMMENT))
 }
