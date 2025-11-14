@@ -3,7 +3,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
+    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsFileSource, JsSyntaxKind,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
@@ -81,6 +81,13 @@ impl Rule for NoInvalidUseBeforeDeclaration {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
         let mut result = vec![];
+        let is_declaration_file = ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file();
+        if is_declaration_file {
+            return Box::default();
+        }
         for binding in model.all_bindings() {
             let id = binding.tree();
             if matches!(
@@ -212,8 +219,25 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-            | AnyJsBindingDeclaration::JsVariableDeclarator(_) => Ok(Self::Variable),
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                Ok(Self::Variable)
+            }
+            AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
+                if value
+                    .syntax()
+                    .ancestors()
+                    .nth(4)
+                    .is_some_and(|maybe_declare| {
+                        maybe_declare.kind() == JsSyntaxKind::TS_DECLARE_STATEMENT
+                    })
+                {
+                    // Ambient variables, such as `declare const c;`,
+                    // can be used before their declarations.
+                    Err(())
+                } else {
+                    Ok(Self::Variable)
+                }
+            }
             // Parameters
             AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_)
