@@ -154,6 +154,9 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();
             }
+            HtmlVariant::Glimmer => {
+                options = options.with_double_text_expression();
+            }
         }
 
         options
