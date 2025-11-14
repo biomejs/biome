@@ -409,8 +409,10 @@ HtmlRoot {
                             name_token: VUE_IDENT@717..724 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@724..725 ":" [] [],
-                                arg: VueStaticArgument {
-                                    name_token: HTML_LITERAL@725..735 "[propName]" [] [],
+                                arg: VueDynamicArgument {
+                                    l_brack_token: L_BRACKET@725..726 "[" [] [],
+                                    name_token: HTML_LITERAL@726..734 "propName" [] [],
+                                    r_brack_token: R_BRACKET@734..735 "]" [] [],
                                 },
                             },
                             modifiers: VueModifierList [
@@ -440,8 +442,10 @@ HtmlRoot {
                             name_token: VUE_IDENT@768..775 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@775..776 ":" [] [],
-                                arg: VueStaticArgument {
-                                    name_token: HTML_LITERAL@776..787 "[getProp()]" [] [],
+                                arg: VueDynamicArgument {
+                                    l_brack_token: L_BRACKET@776..777 "[" [] [],
+                                    name_token: HTML_LITERAL@777..786 "getProp()" [] [],
+                                    r_brack_token: R_BRACKET@786..787 "]" [] [],
                                 },
                             },
                             modifiers: VueModifierList [
@@ -471,8 +475,10 @@ HtmlRoot {
                             name_token: VUE_IDENT@818..825 "v-model" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@825..826 ":" [] [],
-                                arg: VueStaticArgument {
-                                    name_token: HTML_LITERAL@826..839 "[computedKey]" [] [],
+                                arg: VueDynamicArgument {
+                                    l_brack_token: L_BRACKET@826..827 "[" [] [],
+                                    name_token: HTML_LITERAL@827..838 "computedKey" [] [],
+                                    r_brack_token: R_BRACKET@838..839 "]" [] [],
                                 },
                             },
                             modifiers: VueModifierList [
@@ -1046,8 +1052,10 @@ HtmlRoot {
               0: VUE_IDENT@717..724 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@724..735
                 0: COLON@724..725 ":" [] []
-                1: VUE_STATIC_ARGUMENT@725..735
-                  0: HTML_LITERAL@725..735 "[propName]" [] []
+                1: VUE_DYNAMIC_ARGUMENT@725..735
+                  0: L_BRACKET@725..726 "[" [] []
+                  1: HTML_LITERAL@726..734 "propName" [] []
+                  2: R_BRACKET@734..735 "]" [] []
               2: VUE_MODIFIER_LIST@735..740
                 0: VUE_MODIFIER@735..740
                   0: DOT@735..736 "." [] []
@@ -1067,8 +1075,10 @@ HtmlRoot {
               0: VUE_IDENT@768..775 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@775..787
                 0: COLON@775..776 ":" [] []
-                1: VUE_STATIC_ARGUMENT@776..787
-                  0: HTML_LITERAL@776..787 "[getProp()]" [] []
+                1: VUE_DYNAMIC_ARGUMENT@776..787
+                  0: L_BRACKET@776..777 "[" [] []
+                  1: HTML_LITERAL@777..786 "getProp()" [] []
+                  2: R_BRACKET@786..787 "]" [] []
               2: VUE_MODIFIER_LIST@787..794
                 0: VUE_MODIFIER@787..794
                   0: DOT@787..788 "." [] []
@@ -1088,8 +1098,10 @@ HtmlRoot {
               0: VUE_IDENT@818..825 "v-model" [] []
               1: VUE_DIRECTIVE_ARGUMENT@825..839
                 0: COLON@825..826 ":" [] []
-                1: VUE_STATIC_ARGUMENT@826..839
-                  0: HTML_LITERAL@826..839 "[computedKey]" [] []
+                1: VUE_DYNAMIC_ARGUMENT@826..839
+                  0: L_BRACKET@826..827 "[" [] []
+                  1: HTML_LITERAL@827..838 "computedKey" [] []
+                  2: R_BRACKET@838..839 "]" [] []
               2: VUE_MODIFIER_LIST@839..844
                 0: VUE_MODIFIER@839..844
                   0: DOT@839..840 "." [] []

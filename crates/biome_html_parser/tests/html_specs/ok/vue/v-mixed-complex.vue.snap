@@ -112,8 +112,10 @@ HtmlRoot {
                                 name_token: VUE_IDENT@186..196 "v-model" [Newline("\n"), Whitespace("\t\t")] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@196..197 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@197..209 "[activeProp]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@197..198 "[" [] [],
+                                        name_token: HTML_LITERAL@198..208 "activeProp" [] [],
+                                        r_brack_token: R_BRACKET@208..209 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [
@@ -168,8 +170,10 @@ HtmlRoot {
                                 name_token: VUE_IDENT@275..284 "v-bind" [Newline("\n"), Whitespace("\t\t")] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@284..285 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@285..298 "[dynamicAttr]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@285..286 "[" [] [],
+                                        name_token: HTML_LITERAL@286..297 "dynamicAttr" [] [],
+                                        r_brack_token: R_BRACKET@297..298 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [
@@ -265,8 +269,10 @@ HtmlRoot {
                                 name_token: VUE_IDENT@478..485 "v-on" [Newline("\n"), Whitespace("\t\t")] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@485..486 ":" [] [],
-                                    arg: VueStaticArgument {
-                                        name_token: HTML_LITERAL@486..497 "[eventName]" [] [],
+                                    arg: VueDynamicArgument {
+                                        l_brack_token: L_BRACKET@486..487 "[" [] [],
+                                        name_token: HTML_LITERAL@487..496 "eventName" [] [],
+                                        r_brack_token: R_BRACKET@496..497 "]" [] [],
                                     },
                                 },
                                 modifiers: VueModifierList [
@@ -288,8 +294,10 @@ HtmlRoot {
                             },
                             VueVOnShorthandDirective {
                                 at_token: AT@522..526 "@" [Newline("\n"), Whitespace("\t\t")] [],
-                                arg: VueStaticArgument {
-                                    name_token: HTML_LITERAL@526..534 "[rawEvt]" [] [],
+                                arg: VueDynamicArgument {
+                                    l_brack_token: L_BRACKET@526..527 "[" [] [],
+                                    name_token: HTML_LITERAL@527..533 "rawEvt" [] [],
+                                    r_brack_token: R_BRACKET@533..534 "]" [] [],
                                 },
                                 modifiers: VueModifierList [
                                     VueModifier {
@@ -541,8 +549,10 @@ HtmlRoot {
                 0: VUE_IDENT@186..196 "v-model" [Newline("\n"), Whitespace("\t\t")] []
                 1: VUE_DIRECTIVE_ARGUMENT@196..209
                   0: COLON@196..197 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@197..209
-                    0: HTML_LITERAL@197..209 "[activeProp]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@197..209
+                    0: L_BRACKET@197..198 "[" [] []
+                    1: HTML_LITERAL@198..208 "activeProp" [] []
+                    2: R_BRACKET@208..209 "]" [] []
                 2: VUE_MODIFIER_LIST@209..221
                   0: VUE_MODIFIER@209..214
                     0: DOT@209..210 "." [] []
@@ -579,8 +589,10 @@ HtmlRoot {
                 0: VUE_IDENT@275..284 "v-bind" [Newline("\n"), Whitespace("\t\t")] []
                 1: VUE_DIRECTIVE_ARGUMENT@284..298
                   0: COLON@284..285 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@285..298
-                    0: HTML_LITERAL@285..298 "[dynamicAttr]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@285..298
+                    0: L_BRACKET@285..286 "[" [] []
+                    1: HTML_LITERAL@286..297 "dynamicAttr" [] []
+                    2: R_BRACKET@297..298 "]" [] []
                 2: VUE_MODIFIER_LIST@298..304
                   0: VUE_MODIFIER@298..304
                     0: DOT@298..299 "." [] []
@@ -645,8 +657,10 @@ HtmlRoot {
                 0: VUE_IDENT@478..485 "v-on" [Newline("\n"), Whitespace("\t\t")] []
                 1: VUE_DIRECTIVE_ARGUMENT@485..497
                   0: COLON@485..486 ":" [] []
-                  1: VUE_STATIC_ARGUMENT@486..497
-                    0: HTML_LITERAL@486..497 "[eventName]" [] []
+                  1: VUE_DYNAMIC_ARGUMENT@486..497
+                    0: L_BRACKET@486..487 "[" [] []
+                    1: HTML_LITERAL@487..496 "eventName" [] []
+                    2: R_BRACKET@496..497 "]" [] []
                 2: VUE_MODIFIER_LIST@497..510
                   0: VUE_MODIFIER@497..502
                     0: DOT@497..498 "." [] []
@@ -660,8 +674,10 @@ HtmlRoot {
                     0: HTML_STRING_LITERAL@511..522 "\"onDynamic\"" [] []
               13: VUE_V_ON_SHORTHAND_DIRECTIVE@522..555
                 0: AT@522..526 "@" [Newline("\n"), Whitespace("\t\t")] []
-                1: VUE_STATIC_ARGUMENT@526..534
-                  0: HTML_LITERAL@526..534 "[rawEvt]" [] []
+                1: VUE_DYNAMIC_ARGUMENT@526..534
+                  0: L_BRACKET@526..527 "[" [] []
+                  1: HTML_LITERAL@527..533 "rawEvt" [] []
+                  2: R_BRACKET@533..534 "]" [] []
                 2: VUE_MODIFIER_LIST@534..547
                   0: VUE_MODIFIER@534..542
                     0: DOT@534..535 "." [] []
