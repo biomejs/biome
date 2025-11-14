@@ -205,7 +205,7 @@ impl Type {
         self.as_raw_data().is_some_and(|ty| match ty {
             TypeData::Literal(literal) => match literal.as_ref() {
                 Literal::BigInt(literal) => literal
-                    .replace('n', "")
+                    .trim_end_matches('n')
                     .parse::<i64>()
                     .ok()
                     .is_some_and(|literal_value| literal_value == value),
