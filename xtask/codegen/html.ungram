@@ -79,6 +79,7 @@ AnyHtmlContent =
 	HtmlContent
 	| HtmlEmbeddedContent
 	| AnyHtmlTextExpression
+	| AnyGlimmerExpression
 
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
@@ -162,6 +163,7 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| GlimmerSplattribute
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -208,3 +210,103 @@ HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
 HtmlEmbeddedContent = value: 'html_literal'
+
+// ==================================
+// Glimmer
+// ==================================
+
+// Union of all Glimmer expressions
+AnyGlimmerExpression =
+	GlimmerMustacheExpression
+	| GlimmerBlockHelper
+	| GlimmerBogusExpression
+
+// Bogus node for error recovery
+GlimmerBogusExpression = SyntaxElement*
+
+// Basic mustache: {{path args}}
+GlimmerMustacheExpression =
+	l_curly2_token: '{{'
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_curly2_token: '}}'
+
+// Block helper: {{#if}}...{{/if}}
+GlimmerBlockHelper =
+	opening: GlimmerBlockHelperOpening
+	children: HtmlElementList
+	closing: GlimmerBlockHelperClosing
+
+GlimmerBlockHelperOpening =
+	l_curly2_token: '{{'
+	hash_token: '#'
+	helper: GlimmerPath
+	arguments: GlimmerArgumentList
+	block_params: GlimmerBlockParams?
+	r_curly2_token: '}}'
+
+GlimmerBlockHelperClosing =
+	l_curly2_token: '{{'
+	slash_token: '/'
+	helper: GlimmerPath
+	r_curly2_token: '}}'
+
+// Block params: as |item index|
+GlimmerBlockParams =
+	as_token: 'ident'
+	l_pipe_token: '|'
+	params: GlimmerBlockParamList
+	r_pipe_token: '|'
+
+GlimmerBlockParamList = GlimmerBlockParam*
+
+GlimmerBlockParam =
+	name_token: 'ident'
+
+// Path: this.foo, @arg, helper
+GlimmerPath =
+	segments: GlimmerPathSegmentList
+
+GlimmerPathSegmentList = GlimmerPathSegment*
+
+GlimmerPathSegment =
+	value_token: 'ident'
+
+// Arguments
+GlimmerArgumentList = AnyGlimmerArgument*
+
+AnyGlimmerArgument =
+	GlimmerPositionalArgument
+	| GlimmerNamedArgument
+
+GlimmerPositionalArgument =
+	value: AnyGlimmerArgumentValue
+
+GlimmerNamedArgument =
+	name_token: 'ident'
+	eq_token: '='
+	value: AnyGlimmerArgumentValue
+
+AnyGlimmerArgumentValue =
+	GlimmerPath
+	| GlimmerStringLiteral
+	| GlimmerLiteral
+	| GlimmerSubexpression
+
+// Subexpression: (helper arg1 arg2)
+GlimmerSubexpression =
+	l_paren_token: '('
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_paren_token: ')'
+
+GlimmerStringLiteral =
+	value_token: 'html_string_literal'
+
+GlimmerLiteral =
+	value_token: 'html_literal'
+
+// Splattribute: ...attributes
+GlimmerSplattribute =
+	dotdotdot_token: '...'
+	attributes_token: 'ident'
