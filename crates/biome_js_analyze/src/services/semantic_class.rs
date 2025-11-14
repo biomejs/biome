@@ -1,5 +1,9 @@
-use biome_analyze::{AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext};
-use biome_js_semantic::{SemanticModel, SemanticModelBuilder, SemanticEventExtractor};
+use biome_analyze::{
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
+};
+use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClassMember, AnyJsComputedMember, AnyJsExpression,
     AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsType, JsArrayAssignmentPattern,
@@ -150,7 +154,7 @@ impl QueryMatch for SemanticClass<JsClassDeclaration> {
 
 impl<N> Queryable for SemanticClass<N>
 where
-    N: AstNode<Language=JsLanguage> + 'static,
+    N: AstNode<Language = JsLanguage> + 'static,
 {
     type Input = JsSyntaxNode;
     type Output = N;
@@ -377,9 +381,11 @@ impl ThisScopeVisitor {
                                 .is_some();
 
                             if !is_constructor {
-                                let current_scope = ThisScopeReferences::new(&body).local_this_aliases;
+                                let current_scope =
+                                    ThisScopeReferences::new(&body).local_this_aliases;
                                 let mut scoped_this_references = FxHashSet::default();
-                                scoped_this_references.extend(self.inherited_this_aliases.iter().cloned());
+                                scoped_this_references
+                                    .extend(self.inherited_this_aliases.iter().cloned());
                                 scoped_this_references.extend(current_scope);
 
                                 self.current_this_scopes.push(FunctionThisAliases {
@@ -394,13 +400,15 @@ impl ThisScopeVisitor {
                     JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
                         if let Some(func_expr) = JsArrowFunctionExpression::cast_ref(node)
                             && let Some(body) = func_expr
-                            .body()
-                            .ok()
-                            .and_then(|b| b.as_js_function_body().cloned())
+                                .body()
+                                .ok()
+                                .and_then(|b| b.as_js_function_body().cloned())
                         {
-                            let current_scope_aliases = ThisScopeReferences::new(&body).local_this_aliases;
+                            let current_scope_aliases =
+                                ThisScopeReferences::new(&body).local_this_aliases;
                             let mut scoped_this_references = FxHashSet::default();
-                            scoped_this_references.extend(self.inherited_this_aliases.iter().cloned());
+                            scoped_this_references
+                                .extend(self.inherited_this_aliases.iter().cloned());
                             scoped_this_references.extend(current_scope_aliases.clone());
 
                             self.current_this_scopes.push(FunctionThisAliases {
@@ -707,12 +715,17 @@ fn visit_references_in_body(
                     }
                     JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
                     | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
-                        handle_dynamic_member_expression(&node, scoped_this_references, semantic, reads);
+                        handle_dynamic_member_expression(
+                            &node,
+                            scoped_this_references,
+                            semantic,
+                            reads,
+                        );
                     }
                     JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
                         handle_assignment_expression(&node, scoped_this_references, reads, writes);
                     }
-                    JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION=> {
+                    JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
                         handle_static_member_expression(&node, scoped_this_references, reads);
                     }
                     JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
@@ -727,7 +740,7 @@ fn visit_references_in_body(
                             );
                         }
                     }
-                    _ => {},
+                    _ => {}
                 }
             }
             WalkEvent::Leave(_) => {}
@@ -828,7 +841,7 @@ fn handle_dynamic_member_expression(
         && let Some(id_expr) = JsIdentifierExpression::cast_ref(member_expr.syntax())
         && let Some(ty) = resolve_formal_param_type(semantic, &id_expr)
         && let Some(ts_union_type) = TsUnionType::cast(ty.syntax().clone())
-        .or_else(|| resolve_reference_to_union(semantic, &ty))
+            .or_else(|| resolve_reference_to_union(semantic, &ty))
     {
         let items: Vec<_> = extract_literal_types(&ts_union_type);
 
@@ -887,10 +900,10 @@ fn handle_assignment_expression(
                     | JsSyntaxKind::QUESTION2EQ
             )
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-            operand.as_js_static_member_assignment(),
-            scoped_this_references,
-            AccessKind::MeaningfulRead,
-        )
+                operand.as_js_static_member_assignment(),
+                scoped_this_references,
+                AccessKind::MeaningfulRead,
+            )
         {
             reads.insert(name);
         }
@@ -906,10 +919,9 @@ fn handle_assignment_expression(
 
         // Object assignment pattern
         if let Some(object) = left.as_js_object_assignment_pattern() {
-            for class_member_reference in ThisPatternResolver::collect_object_assignment_names(
-                object,
-                scoped_this_references,
-            ) {
+            for class_member_reference in
+                ThisPatternResolver::collect_object_assignment_names(object, scoped_this_references)
+            {
                 match class_member_reference.access_kind {
                     AccessKind::Write => writes.insert(class_member_reference),
                     _ => reads.insert(class_member_reference),
@@ -920,19 +932,21 @@ fn handle_assignment_expression(
         // Plain assignment
         if let Some(assignment) = left.as_any_js_assignment()
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-            assignment.as_js_static_member_assignment(),
-            scoped_this_references,
-            AccessKind::Write,
-        )
+                assignment.as_js_static_member_assignment(),
+                scoped_this_references,
+                AccessKind::Write,
+            )
         {
             writes.insert(name.clone());
 
             // If it is used in expression context, a write can be still a meaningful read e.g.
             // class Used { #val; getVal() { return this.#val = 3 } }
-            if let Some(reference) = AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
+            if let Some(reference) =
+                AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
                 && is_used_in_expression_context(&reference)
             {
-                reads.insert({ ClassMemberReference {
+                reads.insert({
+                    ClassMemberReference {
                         name: name.name,
                         range: name.range,
                         access_kind: AccessKind::MeaningfulRead,
