@@ -32,6 +32,65 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if]) && p.nth_at(1, T!['('])
 }
 
+/// Parses an if function from the current position of the CSS parser.
+///
+/// For more detailed information on the CSS if function syntax, refer to the
+/// [CSS Conditional Value Section](https://drafts.csswg.org/css-values-5/#if-notation).
+///
+/// # If Function Syntax Examples
+///
+/// - Style if condition:
+///   ``` css
+///   if(style(--scheme: dark): #eeeeee;)
+///   ```
+///   Demonstrates a style if condition that checks if the --scheme variable is set to dark.
+///
+/// - Media if condition:
+///   ``` css
+///   if(media(print): white; else: black;)
+///   ```
+///   Demonstrates a media if condition that checks if the media query is active for print.
+///
+/// - Supports if condition:
+///   ``` css
+///   if(supports(color: lch(7.1% 60.23 300.16)): lch(7.1% 60.23 300.16);)
+///   ```
+///   Demonstrates a supports if condition that checks if lch color is supported.
+///
+/// - Else if condition:
+///   ``` css
+///   if(style(--size: "2xl"): 1em; else: 0.25em;)
+///   ```
+///   Demonstrates an else if condition that checks if the --size variable is set to "2xl".
+///
+/// - Multiple if conditions:
+///   ``` css
+///   if(
+///     style(--scheme: ice): linear-gradient(#caf0f8, white, #caf0f8);
+///     style(--scheme: fire): linear-gradient(#ffc971, white, #ffc971);
+///     else: none;
+///   )
+///   ```
+///  - If test with shortand:
+///  ``` css
+///  3px yellow if(
+///    style(--color: green): dashed;
+///    style(--color: yellow): inset;
+///    else: solid;
+///  )
+///  ```
+///
+/// # Grammar
+///
+/// ``` txt
+/// <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )
+/// <if-branch> = <if-condition> : <declaration-value>?
+/// <if-condition> = <boolean-expr[ <if-test> ]> | else
+/// <if-test> =
+///   supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
+///   media( <media-feature> | <media-condition> ) |
+///   style( <style-query> )
+/// ```
 pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_if_function(p) {
         return Absent;
@@ -54,6 +113,17 @@ fn is_at_if_supports_test(p: &mut CssParser) -> bool {
     p.at(T![supports]) && p.nth_at(1, T!['('])
 }
 
+/// Parses a supports if condition test.
+///
+/// # Grammar
+///
+/// `supports( [ <ident> : <declaration-value> ] | <supports-condition> )`
+///
+/// # Example
+///
+/// ``` css
+/// supports(color: lch(7.1% 60.23 300.16)
+/// ```
 #[inline]
 fn parse_if_supports_test(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_if_supports_test(p) {
@@ -85,6 +155,17 @@ fn is_at_if_style_test(p: &mut CssParser) -> bool {
     p.at(T![style]) && p.nth_at(1, T!['('])
 }
 
+/// Parses a style if condition test.
+///
+/// # Grammar
+///
+/// `style( <style-query> )`
+///
+/// # Example
+///
+/// ``` css
+/// style(--scheme: dark)
+/// ```
 #[inline]
 fn parse_if_style_test(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_if_style_test(p) {
@@ -113,6 +194,17 @@ fn is_at_if_media_test(p: &mut CssParser) -> bool {
     p.at(T![media]) && p.nth_at(1, T!['('])
 }
 
+/// Parses a media if condition test.
+///
+/// # Grammar
+///
+/// `media( <media-feature> | <media-condition> )`
+///
+/// # Example
+///
+/// ``` css
+/// media(print)
+/// ```
 #[inline]
 fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_if_media_test(p) {
@@ -181,7 +273,13 @@ fn is_at_if_test_boolean_not_expr(p: &mut CssParser) -> bool {
     p.at(T![not])
 }
 
-/// not <boolean-expr-group>
+/// Parses `not <boolean-expr-group>`
+///
+/// # Example
+///
+/// ``` css
+/// not style(--color: green)
+/// ```
 #[inline]
 fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_if_test_boolean_not_expr(p) {
@@ -202,7 +300,13 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_TEST_BOOLEAN_NOT_EXPR))
 }
 
-/// Parse <boolean-expr-group> and <boolean-expr-group> ...
+/// Parses `<boolean-expr-group> and <boolean-expr-group>`
+///
+/// # Example
+///
+/// ``` css
+/// style(--color: green) and style(--color: yellow)
+/// ```
 #[inline]
 fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
     if !p.at(T![and]) {
@@ -215,7 +319,7 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
     let recovery_result = parse_any_if_test_boolean_expr_group(p)
         .or_recover(
             p,
-            &AnyIfTestBooleanExprChainParseRecovery::new(T![and]),
+            &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
         .map(|rhs| parse_if_test_boolean_and_expr(p, rhs));
@@ -233,7 +337,13 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
     m.complete(p, CSS_IF_TEST_BOOLEAN_AND_EXPR)
 }
 
-/// Parse <boolean-expr-group> or <boolean-expr-group> ...
+/// Parses `<boolean-expr-group> or <boolean-expr-group>`
+///
+/// # Example
+///
+/// ``` css
+/// style(--color: green) or style(--color: yellow)
+/// ```
 #[inline]
 fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
     if !p.at(T![or]) {
@@ -246,7 +356,7 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
     let recovery_result = parse_any_if_test_boolean_expr_group(p)
         .or_recover(
             p,
-            &AnyIfTestBooleanExprChainParseRecovery::new(T![or]),
+            &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
         .map(|rhs| parse_if_test_boolean_or_expr(p, rhs));
@@ -288,7 +398,6 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
     parse_any_if_test_boolean_expr(p)
 }
 
-// TODO: BOGUS
 #[inline]
 fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
@@ -304,7 +413,6 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_BRANCH))
 }
 
-/// Recovery strategy for invalid if branch conditions
 struct IfBranchListParseRecovery;
 
 impl ParseRecovery for IfBranchListParseRecovery {
@@ -314,16 +422,10 @@ impl ParseRecovery for IfBranchListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // Recover at:
-        // 1. ')' - closing the if function
-        // 2. ';' - branch separator
-        // 3. '}' - end of CSS block (means we're missing closing paren)
-        // 4. Line break - likely indicates end of malformed branch
-        p.at(T![')']) || p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
+        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
     }
 }
 
-/// Recovery strategy for boolean expressions inside parentheses
 struct AnyIfTestBooleanExprParseRecovery;
 
 impl ParseRecovery for AnyIfTestBooleanExprParseRecovery {
@@ -332,21 +434,11 @@ impl ParseRecovery for AnyIfTestBooleanExprParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // Recover at closing paren, semicolon, CSS block end, or line break
-        p.at(T![')']) || p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
+        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
     }
 }
 
-/// Recovery strategy for chained boolean expressions (and/or)
-struct AnyIfTestBooleanExprChainParseRecovery {
-    chain_kind: CssSyntaxKind,
-}
-
-impl AnyIfTestBooleanExprChainParseRecovery {
-    fn new(chain_kind: CssSyntaxKind) -> Self {
-        Self { chain_kind }
-    }
-}
+struct AnyIfTestBooleanExprChainParseRecovery;
 
 impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     type Kind = CssSyntaxKind;
@@ -354,11 +446,7 @@ impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.chain_kind)
-            || p.at(T![')'])
-            || p.at(T![;])
-            || p.at(T!['}'])
-            || p.has_preceding_line_break()
+        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
     }
 }
 
@@ -374,7 +462,7 @@ impl ParseSeparatedList for CssIfBranchList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(T!['}'])
+        p.at(T![')'])
     }
 
     fn recover(

@@ -106,12 +106,12 @@ fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub fn is_at_any_media_condition(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_any_media_condition(p: &mut CssParser) -> bool {
     is_at_media_not_condition(p) || is_at_any_media_in_parens(p)
 }
 
 #[inline]
-pub fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_media_condition(p) {
         return Absent;
     }

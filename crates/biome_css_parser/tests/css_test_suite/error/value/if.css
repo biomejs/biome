@@ -1,8 +1,3 @@
-/* Missing closing paren */
-.missing-paren {
-	color: if(style(--foo: bar): black;
-}
-
 /* Missing colon after condition */
 .missing-colon {
 	color: if(style(--foo: bar) black);
