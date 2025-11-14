@@ -1,7 +1,7 @@
 use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse, parse_with_options};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rowan::syntax::SyntaxKind;
@@ -103,7 +103,7 @@ impl Test262TestCase {
         let files =
             TestCaseFiles::single(self.name.clone(), self.code.clone(), source_type, options);
 
-        match parse(&code, source_type, options).ok() {
+        match parse_with_options(parse(&code, source_type, options).ok() {
             Ok(root) if !should_fail => {
                 if let Some(bogus) = root
                     .syntax()

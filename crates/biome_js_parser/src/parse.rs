@@ -142,9 +142,8 @@ impl From<JsOffsetParse> for AnyParse {
 fn parse_common(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
-    let mut parser = JsParser::new(text, source_type, options);
+    let mut parser = JsParser::new(text, source_type);
     syntax::program::parse(&mut parser);
 
     let (events, trivia, errors) = parser.finish();
@@ -183,11 +182,13 @@ fn parse_common(
 ///
 /// assert_eq!(&tokens, &vec!["foo", ".", "bar", "[", "2", "]"]);
 /// ```
-pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
+/// Parses the provided string as an ECMAScript script.
+///
+/// Parser options are automatically derived from the source type.
+pub fn parse_script(text: &str) -> Parse<JsScript> {
     parse(
         text,
         JsFileSource::js_module().with_module_kind(ModuleKind::Script),
-        options,
     )
     .cast::<JsScript>()
     .unwrap()
@@ -229,8 +230,11 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 /// assert_eq!(tree.syntax().kind(), JsSyntaxKind::JS_MODULE);
 /// ```
 ///
-pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
-    parse(text, JsFileSource::js_module(), options)
+/// Parses the provided string as an ECMAScript module.
+///
+/// Parser options are automatically derived from the source type.
+pub fn parse_module(text: &str) -> Parse<JsModule> {
+    parse(text, JsFileSource::js_module())
         .cast::<JsModule>()
         .unwrap()
 }
@@ -258,9 +262,44 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 /// parsed = parse("foo[bar]", module, JsParserOptions::default());
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
-pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) -> Parse<AnyJsRoot> {
+/// Parses the provided string as an ECMAScript program.
+///
+/// Parser options are automatically derived from the `source_type` based on
+/// file characteristics (language, variant, embedding kind, etc.).
+pub fn parse(text: &str, source_type: JsFileSource) -> Parse<AnyJsRoot> {
     let mut cache = NodeCache::default();
-    parse_js_with_cache(text, source_type, options, &mut cache)
+    parse_js_with_cache(text, source_type, &mut cache)
+}
+
+/// Parses with explicitly provided options (for testing).
+///
+/// This is primarily used by the test harness to apply custom parsing options
+/// from test configuration files. Regular code should use `parse` which derives
+/// options from the source type.
+pub fn parse_with_options(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+) -> Parse<AnyJsRoot> {
+    let mut cache = NodeCache::default();
+    let (events, errors, tokens) = parse_common_with_options(text, source_type, options);
+    let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, &mut cache);
+    biome_parser::event::process(&mut tree_sink, events, errors);
+    let (green, parse_errors) = tree_sink.finish();
+    Parse::new(green, parse_errors)
+}
+
+fn parse_common_with_options(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
+    let mut parser = parser::JsParser::with_options(text, source_type, options);
+    syntax::program::parse(&mut parser);
+
+    let (events, trivia, errors) = parser.finish();
+
+    (events, errors, trivia)
 }
 
 /// Parses the provided string as a EcmaScript program using the provided syntax features and node cache.
@@ -283,13 +322,15 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// let parsed  = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
+/// Parses the provided string using a node cache for improved performance.
+///
+/// Parser options are automatically derived from the `source_type`.
 pub fn parse_js_with_cache(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common(text, source_type);
     let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
     biome_parser::event::process(&mut tree_sink, events, errors);
     let (green, parse_errors) = tree_sink.finish();
@@ -400,7 +441,7 @@ pub fn parse_js_with_offset_and_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> JsOffsetParse {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common_with_options(text, source_type, options);
     let mut tree_sink =
         crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, events, errors);

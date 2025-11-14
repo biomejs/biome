@@ -3,7 +3,7 @@ use crate::{
     check_file_encoding,
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
 };
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse, parse_with_options};
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::SyntaxKind;
 use std::io;
@@ -47,7 +47,7 @@ impl TestCase for BabelJsxTestCase {
             source_type,
             options,
         );
-        let result = parse(&self.code, source_type, options);
+        let result = parse_with_options(parse(&self.code, source_type, options);
 
         if result.diagnostics().is_empty() {
             if let Some(bogus) = result

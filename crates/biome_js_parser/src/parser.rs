@@ -40,8 +40,32 @@ pub struct JsParser<'source> {
 
 impl<'source> JsParser<'source> {
     /// Creates a new parser that parses the `source`.
-    pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
-        let source = JsTokenSource::from_str(source, source_type, options);
+    ///
+    /// Parser options are automatically derived from the `source_type` based on
+    /// file characteristics (language, variant, embedding kind, etc.).
+    pub fn new(source: &'source str, source_type: JsFileSource) -> Self {
+        let options = JsParserOptions::from(&source_type);
+        let source = JsTokenSource::from_str(source, source_type);
+
+        JsParser {
+            state: JsParserState::new(&source_type),
+            source_type,
+            context: ParserContext::default(),
+            source,
+            options,
+        }
+    }
+
+    /// Creates a new parser with explicit options (for testing).
+    ///
+    /// This is primarily used by the test harness. Regular code should use `new`
+    /// which derives options from the source type.
+    pub(crate) fn with_options(
+        source: &'source str,
+        source_type: JsFileSource,
+        options: JsParserOptions,
+    ) -> Self {
+        let source = JsTokenSource::from_str(source, source_type);
 
         JsParser {
             state: JsParserState::new(&source_type),

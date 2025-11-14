@@ -54,7 +54,7 @@ impl TestCase for BabelTypescriptTestCase {
             options,
         );
 
-        let result = biome_js_parser::parse(&self.code, source_type, options);
+        let result = biome_js_parser::parse_with_options(parse(&self.code, source_type, options);
 
         if self.expected_to_fail && result.diagnostics().is_empty() {
             TestRunOutcome::IncorrectlyPassed(files)
