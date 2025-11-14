@@ -379,11 +379,11 @@ impl biome_deserialize::Deserializable for Glob {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
-    fn schema_name() -> String {
-        "Glob".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Glob")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

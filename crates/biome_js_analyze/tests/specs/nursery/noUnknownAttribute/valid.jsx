@@ -7,10 +7,7 @@
 	<App accept-charset="bar" />
 	<App http-equiv="bar" />
 
-	{/*
-		Ignored because of jsx namespace is not available
-		<App xlink:href="bar" />
-	*/}
+	<App xlink:href="bar" />
 	<App clip-path="bar" />
 	<div className="bar"></div>
 	<div onMouseDown={this._onMouseDown}></div>
@@ -48,6 +45,13 @@
 		y1="7"
 		y2="8"
 	></svg>
+	<svg>
+		<path
+			d="M11.293 8H5.57c-.528 0-.771.79-.37 1.205l2.406 2.481z"
+			fill="currentColor"
+			opacity="0.5"
+		/>
+	</svg>
 	<g fill="#7B82A0" fillRule="evenodd"></g>
 	<mask fill="#7B82A0"></mask>
 	<symbol fill="#7B82A0"></symbol>

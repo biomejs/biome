@@ -57,9 +57,9 @@ pub fn generate_tables() -> Result<()> {
         }
     };
 
-    let pretty = xtask::reformat(tokens)?;
+    let pretty = xtask_glue::reformat(tokens)?;
 
-    std::fs::write(xtask::project_root().join(paths::TABLES), pretty)?;
+    std::fs::write(xtask_glue::project_root().join(paths::TABLES), pretty)?;
 
     Ok(())
 }
@@ -81,7 +81,7 @@ impl Properties {
     }
 
     fn path() -> PathBuf {
-        xtask::project_root().join(paths::DERIVED_CORE_PROPERTIES)
+        xtask_glue::project_root().join(paths::DERIVED_CORE_PROPERTIES)
     }
 
     /// Retrieve properties from the unicode website.

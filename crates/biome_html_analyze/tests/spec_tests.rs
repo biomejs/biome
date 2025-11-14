@@ -13,8 +13,8 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,json,jsonc}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -93,7 +93,7 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
 ) {
-    let parsed = parse_html(input_code, HtmlParseOptions::default());
+    let parsed = parse_html(input_code, (&source_type).into());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();

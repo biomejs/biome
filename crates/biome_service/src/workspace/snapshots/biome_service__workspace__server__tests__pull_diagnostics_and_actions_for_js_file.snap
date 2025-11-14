@@ -1,0 +1,138 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result
+---
+PullDiagnosticsAndActionsResult {
+    diagnostics: [
+        (
+            Diagnostic {
+                category: Some(
+                    Category {
+                        name: "lint/suspicious/noDebugger",
+                        link: Some(
+                            "https://biomejs.dev/linter/rules/no-debugger",
+                        ),
+                    },
+                ),
+                severity: Error,
+                description: "This is an unexpected use of the debugger statement.",
+                message: "This is an unexpected use of the "<Emphasis>"debugger"</Emphasis>" statement.",
+                advices: Advices {
+                    advices: [],
+                },
+                verbose_advices: Advices {
+                    advices: [],
+                },
+                location: Location {
+                    path: None,
+                    span: Some(
+                        0..8,
+                    ),
+                    source_code: None,
+                },
+                tags: DiagnosticTags(
+                    BitFlags<DiagnosticTag> {
+                        bits: 0b0,
+                    },
+                ),
+                source: None,
+            },
+            [
+                CodeAction {
+                    category: QuickFix(
+                        "suspicious.noDebugger",
+                    ),
+                    rule_name: Some(
+                        (
+                            "suspicious",
+                            "noDebugger",
+                        ),
+                    ),
+                    suggestion: CodeSuggestion {
+                        span: 0..8,
+                        applicability: MaybeIncorrect,
+                        msg: "Remove debugger statement",
+                        suggestion: TextEdit {
+                            dictionary: "debugger",
+                            ops: [
+                                DiffOp(
+                                    Delete {
+                                        range: 0..8,
+                                    },
+                                ),
+                            ],
+                        },
+                        labels: [],
+                    },
+                    offset: None,
+                },
+                CodeAction {
+                    category: Other(
+                        InlineSuppression,
+                    ),
+                    rule_name: Some(
+                        (
+                            "suspicious",
+                            "noDebugger",
+                        ),
+                    ),
+                    suggestion: CodeSuggestion {
+                        span: 0..8,
+                        applicability: Always,
+                        msg: "Suppress rule lint/suspicious/noDebugger for this line.",
+                        suggestion: TextEdit {
+                            dictionary: "// biome-ignore lint/suspicious/noDebugger: <explanation>\ndebugger",
+                            ops: [
+                                DiffOp(
+                                    Insert {
+                                        range: 0..58,
+                                    },
+                                ),
+                                DiffOp(
+                                    Equal {
+                                        range: 58..66,
+                                    },
+                                ),
+                            ],
+                        },
+                        labels: [],
+                    },
+                    offset: None,
+                },
+                CodeAction {
+                    category: Other(
+                        ToplevelSuppression,
+                    ),
+                    rule_name: Some(
+                        (
+                            "suspicious",
+                            "noDebugger",
+                        ),
+                    ),
+                    suggestion: CodeSuggestion {
+                        span: 0..8,
+                        applicability: Always,
+                        msg: "Suppress rule lint/suspicious/noDebugger for the whole file.",
+                        suggestion: TextEdit {
+                            dictionary: "/** biome-ignore-all lint/suspicious/noDebugger: <explanation> */\ndebugger",
+                            ops: [
+                                DiffOp(
+                                    Insert {
+                                        range: 0..66,
+                                    },
+                                ),
+                                DiffOp(
+                                    Equal {
+                                        range: 66..74,
+                                    },
+                                ),
+                            ],
+                        },
+                        labels: [],
+                    },
+                    offset: None,
+                },
+            ],
+        ),
+    ],
+}

@@ -28,7 +28,9 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
+        RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
+        RuleFilter::Rule("nursery", "useFind"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {

@@ -9,7 +9,7 @@ use biome_rowan::SyntaxKind;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";
 

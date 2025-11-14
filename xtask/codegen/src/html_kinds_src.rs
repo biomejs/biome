@@ -20,9 +20,15 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("{/", "SV_CURLY_SLASH"),
         ("{:", "SV_CURLY_COLON"),
         (",", "COMMA"),
+        (":", "COLON"),
+        ("@", "AT"),
+        (".", "DOT"),
+        ("[", "L_BRACKET"),
+        ("]", "R_BRACKET"),
     ],
     keywords: &[
         "null", "true", "false", "doctype", "html", "debug", "key", "render", "const", "attach",
+        "else", "if",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
@@ -32,6 +38,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "IDENT",
         "HTML_IDENT",
         "SVELTE_IDENT",
+        "VUE_IDENT",
     ],
     nodes: &[
         "HTML_ROOT",
@@ -69,6 +76,21 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_ATTACH_ATTRIBUTE",
         "SVELTE_HTML_BLOCK",
         "SVELTE_CONST_BLOCK",
+        "SVELTE_IF_BLOCK",
+        "SVELTE_IF_OPENING_BLOCK",
+        "SVELTE_ELSE_IF_CLAUSE_LIST",
+        "SVELTE_ELSE_CLAUSE",
+        "SVELTE_IF_CLOSING_BLOCK",
+        "SVELTE_ELSE_IF_CLAUSE",
+        // Vue nodes
+        "VUE_DIRECTIVE",
+        "VUE_DIRECTIVE_ARGUMENT",
+        "VUE_V_BIND_SHORTHAND_DIRECTIVE",
+        "VUE_V_ON_SHORTHAND_DIRECTIVE",
+        "VUE_STATIC_ARGUMENT",
+        "VUE_DYNAMIC_ARGUMENT",
+        "VUE_MODIFIER_LIST",
+        "VUE_MODIFIER",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
@@ -76,5 +98,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_BOGUS_TEXT_EXPRESSION",
         "ASTRO_BOGUS_FRONTMATTER",
         "SVELTE_BOGUS_BLOCK",
+        "VUE_BOGUS_DIRECTIVE",
+        "VUE_BOGUS_DIRECTIVE_ARGUMENT",
     ],
 };

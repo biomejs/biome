@@ -830,6 +830,82 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteDebugBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteElseClause>
+    for crate::svelte::auxiliary::else_clause::FormatSvelteElseClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteElseClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteElseClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseClause,
+        crate::svelte::auxiliary::else_clause::FormatSvelteElseClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_clause::FormatSvelteElseClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseClause,
+        crate::svelte::auxiliary::else_clause::FormatSvelteElseClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_clause::FormatSvelteElseClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteElseIfClause>
+    for crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteElseIfClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteElseIfClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseIfClause,
+        crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseIfClause,
+        crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::else_if_clause::FormatSvelteElseIfClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteHtmlBlock>
     for crate::svelte::auxiliary::html_block::FormatSvelteHtmlBlock
 {
@@ -865,6 +941,120 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteHtmlBlock {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::auxiliary::html_block::FormatSvelteHtmlBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfBlock>
+    for crate::svelte::auxiliary::if_block::FormatSvelteIfBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfBlock,
+        crate::svelte::auxiliary::if_block::FormatSvelteIfBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_block::FormatSvelteIfBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfBlock,
+        crate::svelte::auxiliary::if_block::FormatSvelteIfBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_block::FormatSvelteIfBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfClosingBlock>
+    for crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfClosingBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfClosingBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfClosingBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfClosingBlock,
+        crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfClosingBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfClosingBlock,
+        crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_closing_block::FormatSvelteIfClosingBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteIfOpeningBlock>
+    for crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteIfOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteIfOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteIfOpeningBlock,
+        crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteIfOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteIfOpeningBlock,
+        crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::if_opening_block::FormatSvelteIfOpeningBlock::default(),
         )
     }
 }
@@ -1054,6 +1244,260 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenderBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::VueDirective>
+    for crate::vue::auxiliary::directive::FormatVueDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueDirective,
+        crate::vue::auxiliary::directive::FormatVueDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::directive::FormatVueDirective::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueDirective,
+        crate::vue::auxiliary::directive::FormatVueDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::directive::FormatVueDirective::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueDirectiveArgument>
+    for crate::vue::auxiliary::directive_argument::FormatVueDirectiveArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueDirectiveArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueDirectiveArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueDirectiveArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueDirectiveArgument,
+        crate::vue::auxiliary::directive_argument::FormatVueDirectiveArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::directive_argument::FormatVueDirectiveArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueDirectiveArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueDirectiveArgument,
+        crate::vue::auxiliary::directive_argument::FormatVueDirectiveArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::directive_argument::FormatVueDirectiveArgument::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueDynamicArgument>
+    for crate::vue::auxiliary::dynamic_argument::FormatVueDynamicArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueDynamicArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueDynamicArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueDynamicArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueDynamicArgument,
+        crate::vue::auxiliary::dynamic_argument::FormatVueDynamicArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::dynamic_argument::FormatVueDynamicArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueDynamicArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueDynamicArgument,
+        crate::vue::auxiliary::dynamic_argument::FormatVueDynamicArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::dynamic_argument::FormatVueDynamicArgument::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueModifier>
+    for crate::vue::auxiliary::modifier::FormatVueModifier
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueModifier,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueModifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueModifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueModifier,
+        crate::vue::auxiliary::modifier::FormatVueModifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::modifier::FormatVueModifier::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueModifier {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueModifier,
+        crate::vue::auxiliary::modifier::FormatVueModifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::modifier::FormatVueModifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueStaticArgument>
+    for crate::vue::auxiliary::static_argument::FormatVueStaticArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueStaticArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueStaticArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueStaticArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueStaticArgument,
+        crate::vue::auxiliary::static_argument::FormatVueStaticArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::static_argument::FormatVueStaticArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueStaticArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueStaticArgument,
+        crate::vue::auxiliary::static_argument::FormatVueStaticArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::static_argument::FormatVueStaticArgument::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueVBindShorthandDirective>
+    for crate::vue::auxiliary::v_bind_shorthand_directive::FormatVueVBindShorthandDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVBindShorthandDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVBindShorthandDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVBindShorthandDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVBindShorthandDirective,
+        crate::vue::auxiliary::v_bind_shorthand_directive::FormatVueVBindShorthandDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: auxiliary :: v_bind_shorthand_directive :: FormatVueVBindShorthandDirective :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVBindShorthandDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVBindShorthandDirective,
+        crate::vue::auxiliary::v_bind_shorthand_directive::FormatVueVBindShorthandDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_bind_shorthand_directive :: FormatVueVBindShorthandDirective :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::VueVOnShorthandDirective>
+    for crate::vue::auxiliary::v_on_shorthand_directive::FormatVueVOnShorthandDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVOnShorthandDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVOnShorthandDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVOnShorthandDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVOnShorthandDirective,
+        crate::vue::auxiliary::v_on_shorthand_directive::FormatVueVOnShorthandDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: auxiliary :: v_on_shorthand_directive :: FormatVueVOnShorthandDirective :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVOnShorthandDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVOnShorthandDirective,
+        crate::vue::auxiliary::v_on_shorthand_directive::FormatVueVOnShorthandDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_on_shorthand_directive :: FormatVueVOnShorthandDirective :: default ())
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -1126,6 +1570,56 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::lists::binding_list::FormatSvelteBindingList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClauseList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteElseIfClauseList,
+        crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClauseList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteElseIfClauseList,
+        crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::lists::else_if_clause_list::FormatSvelteElseIfClauseList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueModifierList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueModifierList,
+        crate::vue::lists::modifier_list::FormatVueModifierList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::lists::modifier_list::FormatVueModifierList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueModifierList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueModifierList,
+        crate::vue::lists::modifier_list::FormatVueModifierList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::lists::modifier_list::FormatVueModifierList::default(),
         )
     }
 }
@@ -1345,6 +1839,82 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteBogusBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::VueBogusDirective>
+    for crate::vue::bogus::bogus_directive::FormatVueBogusDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueBogusDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_html_syntax::VueBogusDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueBogusDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueBogusDirective,
+        crate::vue::bogus::bogus_directive::FormatVueBogusDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::bogus::bogus_directive::FormatVueBogusDirective::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueBogusDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueBogusDirective,
+        crate::vue::bogus::bogus_directive::FormatVueBogusDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::bogus::bogus_directive::FormatVueBogusDirective::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::VueBogusDirectiveArgument>
+    for crate::vue::bogus::bogus_directive_argument::FormatVueBogusDirectiveArgument
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueBogusDirectiveArgument,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_html_syntax::VueBogusDirectiveArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueBogusDirectiveArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueBogusDirectiveArgument,
+        crate::vue::bogus::bogus_directive_argument::FormatVueBogusDirectiveArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::bogus::bogus_directive_argument::FormatVueBogusDirectiveArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueBogusDirectiveArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueBogusDirectiveArgument,
+        crate::vue::bogus::bogus_directive_argument::FormatVueBogusDirectiveArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::bogus::bogus_directive_argument::FormatVueBogusDirectiveArgument::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAstroFrontmatterElement {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -1517,6 +2087,56 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteBlock {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::any::block::FormatAnySvelteBlock::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueDirective,
+        crate::vue::any::directive::FormatAnyVueDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::any::directive::FormatAnyVueDirective::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueDirective,
+        crate::vue::any::directive::FormatAnyVueDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::any::directive::FormatAnyVueDirective::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyVueDirectiveArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyVueDirectiveArgument,
+        crate::vue::any::directive_argument::FormatAnyVueDirectiveArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::any::directive_argument::FormatAnyVueDirectiveArgument::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyVueDirectiveArgument {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyVueDirectiveArgument,
+        crate::vue::any::directive_argument::FormatAnyVueDirectiveArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::any::directive_argument::FormatAnyVueDirectiveArgument::default(),
         )
     }
 }

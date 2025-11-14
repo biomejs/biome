@@ -1,0 +1,32 @@
+<!-- should not generate diagnostics -->
+
+<!-- Basic long-form and shorthand bindings with a simple argument -->
+<div v-bind:foo="bar"></div>
+<div :foo="bar"></div>
+
+<!-- Valid modifiers from the rule: prop, camel, sync, attr -->
+<div v-bind:foo.prop="bar"></div>
+<div v-bind:foo.camel="bar"></div>
+<div v-bind:foo.sync="bar"></div>
+<div v-bind:foo.attr="bar"></div>
+
+<!-- Combined modifiers (order shouldn't matter) -->
+<div :foo.prop.sync="bar"></div>
+
+<!-- Dynamic argument (bracketed) is an argument, not a missing one -->
+<div v-bind:[dynamicName]="value"></div>
+
+<!-- Template-level binding -->
+<template v-bind:id="componentId"></template>
+
+<!-- Multiple v-bind directives on same element -->
+<div v-bind:foo="bar" v-bind:bar.prop="baz"></div>
+
+<!-- Component binding with modifiers and aria attribute binding -->
+<MyComponent :value.sync="value" v-bind:aria-label="label"></MyComponent>
+
+<!-- Bindings inside attributes and expressions are valid -->
+<button :disabled="isDisabled" v-bind:title="tooltip"></button>
+
+<!-- Edge-case: argument with hyphen / kebab-case -->
+<div v-bind:data-value="payload"></div>

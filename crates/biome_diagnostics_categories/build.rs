@@ -66,16 +66,15 @@ pub fn main() -> io::Result<()> {
 
         #[cfg(feature = "schema")]
         impl schemars::JsonSchema for &'static Category {
-            fn schema_name() -> String {
-                String::from("Category")
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                std::borrow::Cow::Borrowed("Category")
             }
 
-            fn json_schema(_gen: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-                schemars::schema::Schema::Object(schemars::schema::SchemaObject {
-                    instance_type: Some(schemars::schema::InstanceType::String.into()),
-                    enum_values: Some(vec![#( #enum_variants.into() ),*]),
-                    ..Default::default()
-                })
+            fn json_schema(_gen: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                let mut map = serde_json::Map::new();
+                map.insert("type".into(), "string".into());
+                map.insert("enum".into(), vec![#( serde_json::Value::from(#enum_variants) ),*].into());
+                schemars::Schema::from(map)
             }
         }
 

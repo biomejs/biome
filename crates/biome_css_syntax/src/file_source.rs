@@ -22,9 +22,13 @@ pub struct CssFileSource {
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 #[serde(rename_all = "camelCase")]
-enum CssVariant {
+pub enum CssVariant {
     #[default]
     Standard,
+    /// The file is a CSS module
+    CssModules,
+    /// The file belongs to tailwind
+    TailwindCss,
 }
 
 impl CssFileSource {
@@ -32,6 +36,24 @@ impl CssFileSource {
         Self {
             variant: CssVariant::Standard,
         }
+    }
+
+    pub fn tailwind_css() -> Self {
+        Self {
+            variant: CssVariant::TailwindCss,
+        }
+    }
+
+    pub fn is_css_modules(&self) -> bool {
+        self.variant == CssVariant::CssModules
+    }
+
+    pub fn is_tailwind_css(&self) -> bool {
+        self.variant == CssVariant::TailwindCss
+    }
+
+    pub fn set_variant(&mut self, variant: CssVariant) {
+        self.variant = variant;
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
@@ -58,7 +80,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
-            "tailwindcss" => Ok(Self::css()),
+            "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

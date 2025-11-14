@@ -3,7 +3,7 @@ use crate::{
     language_kind::LanguageKind,
 };
 use biome_string_case::Case;
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_target_language_constants(
     ast: &AstSrc,
@@ -54,7 +54,7 @@ pub(crate) const DISREGARDED_SNIPPET_SLOTS: &[({syntax_kind}, u32, DisregardedSl
 "
     );
 
-    let pretty = xtask::reformat(result)?;
+    let pretty = xtask_glue::reformat(result)?;
 
     Ok(pretty)
 }

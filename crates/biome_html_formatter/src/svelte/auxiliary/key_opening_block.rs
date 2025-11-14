@@ -18,7 +18,6 @@ impl FormatNodeRule<SvelteKeyOpeningBlock> for FormatSvelteKeyOpeningBlock {
             [
                 sv_curly_hash_token.format(),
                 key_token.format(),
-                space(),
                 expression.format(),
                 r_curly_token.format(),
             ]

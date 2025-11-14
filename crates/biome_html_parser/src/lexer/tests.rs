@@ -394,14 +394,14 @@ fn svelte_keywords() {
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
         WHITESPACE: 1,
-        SVELTE_IDENT: 5,
+        DEBUG_KW: 5,
     );
 
     assert_lex!(
         HtmlLexContext::Svelte,
         "  debug  ",
         WHITESPACE: 2,
-        SVELTE_IDENT: 5,
+        DEBUG_KW: 5,
         WHITESPACE: 2,
     )
 }

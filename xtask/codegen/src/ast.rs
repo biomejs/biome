@@ -26,7 +26,7 @@ use biome_string_case::Case;
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
 use std::str::FromStr;
-use xtask::{Result, project_root};
+use xtask_glue::{Result, project_root};
 
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";

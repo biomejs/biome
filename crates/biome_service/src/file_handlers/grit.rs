@@ -264,6 +264,7 @@ impl ExtensionHandler for GritFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
