@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use crate::services::semantic_class::{
-    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass,
+    AnyNamedClassMember, ClassMemberReference, ClassMemberReferences, NamedClassMember,
+    SemanticClass,
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -10,11 +11,10 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
     AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
-    JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
-    TsReadonlyModifier,
+    JsSyntaxKind, JsSyntaxToken, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier,
 };
 use biome_rowan::{
-    AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TriviaPiece,
+    AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, TriviaPiece,
 };
 use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertiesOptions;
 use std::iter::once;
@@ -125,7 +125,7 @@ declare_lint_rule! {
 
 impl Rule for UseReadonlyClassProperties {
     type Query = SemanticClass<JsClassDeclaration>;
-    type State = AnyPropertyMember;
+    type State = AnyNamedClassMember;
     type Signals = Box<[Self::State]>;
     type Options = UseReadonlyClassPropertiesOptions;
 
@@ -138,7 +138,8 @@ impl Rule for UseReadonlyClassProperties {
         let root = ctx.query();
         let members = root.members();
 
-        let ClassMemberReferences { writes, .. } = ctx.model.class_member_references(&members);
+        let ClassMemberReferences { writes, .. } =
+            ctx.semantic_class().class_member_references(&members);
 
         let private_only = !ctx.options().check_all_properties();
         let constructor_params: Vec<_> =
@@ -157,19 +158,23 @@ impl Rule for UseReadonlyClassProperties {
                 }),
             )
             .filter_map(|prop_or_param| {
-                if writes
-                    .clone()
-                    .into_iter()
-                    .any(|ClassMemberReference { name, .. }| {
-                        if let Some(TextAndRange { text, .. }) =
-                            extract_property_or_param_range_and_text(&prop_or_param.clone())
+                if writes.clone().into_iter().any(
+                    |ClassMemberReference {
+                         name: class_member_ref_name,
+                         ..
+                     }| {
+                        if let Some(NamedClassMember {
+                            name: member_name, ..
+                        }) = ctx
+                            .semantic_class()
+                            .extract_named_member(&prop_or_param.clone())
                         {
-                            return name.eq(&text);
+                            return class_member_ref_name.eq(&member_name);
                         }
 
                         false
-                    })
-                {
+                    },
+                ) {
                     None
                 } else {
                     Some(prop_or_param.clone())
@@ -179,19 +184,24 @@ impl Rule for UseReadonlyClassProperties {
             .into_boxed_slice()
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let TextAndRange { text, range } = extract_property_or_param_range_and_text(&node.clone())?;
-
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            range,
-            markup! {
-                "Member '"{text.text()}"' is never reassigned."
+    fn diagnostic(ctx: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+        let semantic_class = ctx.semantic_class();
+        if let Some(NamedClassMember { name, range }) =
+            semantic_class.extract_named_member(&node.clone())
+        {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                "Member '"{name.text()}"' is never reassigned."
             },
-        ).note(markup! {
+            ).note(markup! {
                 "Using "<Emphasis>"readonly"</Emphasis>" improves code safety, clarity, and helps prevent unintended mutations."
             }),
-        )
+            );
+        }
+
+        None
     }
 
     fn action(ctx: &RuleContext<Self>, node: &Self::State) -> Option<JsRuleAction> {
@@ -204,8 +214,8 @@ impl Rule for UseReadonlyClassProperties {
             [TriviaPiece::whitespace(1)],
         ));
 
-        if let Some(AnyPropertyMember::JsPropertyClassMember(member)) =
-            AnyPropertyMember::cast(original_node.clone())
+        if let Some(AnyNamedClassMember::JsPropertyClassMember(member)) =
+            AnyNamedClassMember::cast(original_node.clone())
         {
             if let Ok(member_name) = member.name() {
                 let replace_modifiers = make::js_property_modifier_list(
@@ -239,8 +249,8 @@ impl Rule for UseReadonlyClassProperties {
                     mutation.replace_node(member.clone(), builder.build());
                 }
             }
-        } else if let Some(AnyPropertyMember::TsPropertyParameter(parameter)) =
-            AnyPropertyMember::cast(original_node.clone())
+        } else if let Some(AnyNamedClassMember::TsPropertyParameter(parameter)) =
+            AnyNamedClassMember::cast(original_node.clone())
         {
             let replace_modifiers = make::ts_property_parameter_modifier_list(
                 parameter
@@ -272,12 +282,6 @@ impl Rule for UseReadonlyClassProperties {
     }
 }
 
-#[derive(Debug)]
-struct TextAndRange {
-    text: Text,
-    range: TextRange,
-}
-
 /// Collects mutable (not being `readonly`) class properties (excluding `static` and `accessor`),
 /// If `private_only` is true, only private properties are included.
 /// This is used to identify class properties that are candidates for being marked as `readonly`.
@@ -285,7 +289,7 @@ struct TextAndRange {
 fn collect_non_readonly_class_member_properties(
     members: &JsClassMemberList,
     private_only: bool,
-) -> impl Iterator<Item = AnyPropertyMember> {
+) -> impl Iterator<Item = AnyNamedClassMember> {
     members.iter().filter_map(move |member| {
         let property_class_member = member.as_js_property_class_member()?;
 
@@ -303,7 +307,7 @@ fn collect_non_readonly_class_member_properties(
             return None;
         }
 
-        let some_property = Some(AnyPropertyMember::JsPropertyClassMember(
+        let some_property = Some(AnyNamedClassMember::JsPropertyClassMember(
             property_class_member.clone(),
         ));
 
@@ -332,7 +336,7 @@ fn collect_non_readonly_class_member_properties(
 fn collect_non_readonly_constructor_parameters(
     class_members: &JsClassMemberList,
     private_only: bool,
-) -> Vec<AnyPropertyMember> {
+) -> Vec<AnyNamedClassMember> {
     class_members
         .iter()
         .find_map(|member| match member {
@@ -346,7 +350,7 @@ fn collect_non_readonly_constructor_parameters(
             AnyJsConstructorParameter::TsPropertyParameter(ts_property)
                 if is_non_readonly_and_optionally_private(&ts_property, private_only) =>
             {
-                Some(AnyPropertyMember::TsPropertyParameter(ts_property))
+                Some(AnyNamedClassMember::TsPropertyParameter(ts_property))
             }
             _ => None,
         })
@@ -393,39 +397,4 @@ fn is_non_readonly_and_optionally_private(param: &TsPropertyParameter, private_o
     });
 
     is_mutable && (!private_only || is_private)
-}
-
-/// Extracts the range and text from a property class member or constructor parameter
-fn extract_property_or_param_range_and_text(
-    property_or_param: &AnyPropertyMember,
-) -> Option<TextAndRange> {
-    if let Some(AnyPropertyMember::JsPropertyClassMember(member)) =
-        AnyPropertyMember::cast(property_or_param.clone().into())
-    {
-        if let Ok(member_name) = member.name() {
-            return Some(TextAndRange {
-                text: member_name.to_trimmed_text(),
-                range: member_name.range(),
-            });
-        }
-        return None;
-    }
-
-    if let Some(AnyPropertyMember::TsPropertyParameter(parameter)) =
-        AnyPropertyMember::cast(property_or_param.clone().into())
-    {
-        let name = parameter
-            .formal_parameter()
-            .ok()?
-            .as_js_formal_parameter()?
-            .binding()
-            .ok()?;
-
-        return Some(TextAndRange {
-            text: name.to_trimmed_text(),
-            range: name.range(),
-        });
-    }
-
-    None
 }
