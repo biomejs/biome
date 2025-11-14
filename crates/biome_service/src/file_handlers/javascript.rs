@@ -546,7 +546,7 @@ fn parse(
     let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
 
     let file_source = file_source.to_js_file_source().unwrap_or_default();
-    let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
+    let parse = biome_js_parser::parse_js_with_cache(text, file_source, cache);
     ParseResult {
         any_parse: parse.into(),
         language: None,

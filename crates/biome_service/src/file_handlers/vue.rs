@@ -132,7 +132,7 @@ fn parse(
 
     debug!("Parsing file with language {:?}", file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(script, file_source, cache);
 
     ParseResult {
         any_parse: parse.into(),

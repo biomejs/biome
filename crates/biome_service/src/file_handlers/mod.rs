@@ -867,7 +867,6 @@ pub(crate) fn parse_lang_from_script_opening_tag(
     parse(
         script_opening_tag,
         JsFileSource::jsx(),
-        JsParserOptions::default(),
     )
     .try_tree()
     .and_then(|tree| {

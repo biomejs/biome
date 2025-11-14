@@ -119,7 +119,6 @@ fn parse(
         file_source
             .to_js_file_source()
             .unwrap_or(JsFileSource::ts()),
-        JsParserOptions::default(),
         cache,
     );
 
