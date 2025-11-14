@@ -1392,6 +1392,9 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
         // let a = <number>b;
         T![<] if Jsx.is_supported(p) => return parse_jsx_tag_expression(p),
 
+        // Glimmer templates in .gjs/.gts files
+        GLIMMER_TEMPLATE => return parse_glimmer_template(p),
+
         // test_err js primary_expr_invalid_recovery
         // let a = \; foo();
         t if t.is_contextual_keyword() || t.is_future_reserved_keyword() => {
@@ -2112,7 +2115,18 @@ pub(super) fn is_nth_at_any_name(p: &mut JsParser, n: usize) -> bool {
     is_nth_at_name(p, n) || p.nth_at(n, T![#])
 }
 
-/// Parse the arguments for an import call expression (import() or import.defer() or import.source())
+/// Parses the argument list of an `import(...)`-style call and completes the import call node.
+///
+/// This consumes the opening `(`, parses one or two call arguments (reports an error if there are zero or more than two), enforces that spread (`...`) elements are not allowed, and completes the node as `JS_IMPORT_CALL_EXPRESSION`.
+///
+/// # Examples
+///
+/// ```
+/// // let mut p = JsParser::new(...);
+/// // let context = ExpressionContext::default();
+/// // let marker = p.start();
+/// // parse_import_call_expression(&mut p, context, marker);
+/// ```
 fn parse_import_call_expression(
     p: &mut JsParser,
     context: ExpressionContext,
@@ -2167,4 +2181,27 @@ fn parse_import_call_expression(
     p.expect(T![')']);
     args.complete(p, JS_CALL_ARGUMENTS);
     marker.complete(p, JS_IMPORT_CALL_EXPRESSION)
+}
+
+/// Parses a Glimmer template block (`<template>...</template>`) in `.gjs`/`.gts` files.
+///
+/// If the current token is a `GLIMMER_TEMPLATE`, consumes it and produces a `JS_GLIMMER_TEMPLATE` node;
+/// otherwise returns `Absent`.
+///
+/// # Examples
+///
+/// ```no_run
+/// // Assume `JsParser::from_source` and token stream setup are available in scope.
+/// let mut parser = JsParser::from_source("<template>...</template>");
+/// let result = parse_glimmer_template(&mut parser);
+/// assert!(matches!(result, Present(_)));
+/// ```
+pub(crate) fn parse_glimmer_template(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(GLIMMER_TEMPLATE) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GLIMMER_TEMPLATE);
+    Present(m.complete(p, JS_GLIMMER_TEMPLATE))
 }

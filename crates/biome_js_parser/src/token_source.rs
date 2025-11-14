@@ -17,7 +17,14 @@ pub struct JsTokenSource<'l> {
 pub(crate) type JsTokenSourceCheckpoint = TokenSourceCheckpoint<JsSyntaxKind>;
 
 impl<'l> JsTokenSource<'l> {
-    /// Creates a new token source.
+    /// Constructs a `JsTokenSource` that wraps the given buffered lexer and starts with an empty trivia list.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given an existing `BufferedLexer<JsSyntaxKind, JsLexer>` named `lexer`:
+    /// let source = JsTokenSource::new(lexer);
+    /// ```
     pub(crate) fn new(lexer: BufferedLexer<JsSyntaxKind, JsLexer<'l>>) -> Self {
         JsTokenSource {
             lexer,
@@ -25,9 +32,39 @@ impl<'l> JsTokenSource<'l> {
         }
     }
 
-    /// Creates a new token source for the given string
-    pub fn from_str(source: &'l str, options: JsParserOptions) -> Self {
-        let lexer = JsLexer::from_str(source).with_options(options);
+    /// Constructs a `JsTokenSource` from source text, a file source kind, and parser options.
+    ///
+    /// The returned token source is advanced to the first non-trivia token so it is ready for parsing.
+    ///
+    /// # Parameters
+    ///
+    /// - `source`: UTF-8 JavaScript/TypeScript source text.
+    /// - `source_type`: The file source kind (e.g., module or script) to configure lexing rules.
+    /// - `options`: Parser/lexer options that affect tokenization.
+    ///
+    /// # Returns
+    ///
+    /// A `JsTokenSource` primed at the first non-trivia token.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = "let x = 1;";
+    /// let ts = JsTokenSource::from_str(
+    ///     src,
+    ///     biome_js_syntax::JsFileSource::Module,
+    ///     JsParserOptions::default(),
+    /// );
+    /// assert_eq!(ts.text(), src);
+    /// ```
+    pub fn from_str(
+        source: &'l str,
+        source_type: biome_js_syntax::JsFileSource,
+        options: JsParserOptions,
+    ) -> Self {
+        let lexer = JsLexer::from_str(source)
+            .with_options(options)
+            .with_source_type(source_type);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);
 

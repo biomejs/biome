@@ -177,7 +177,21 @@ pub fn legacy_treesitter_slots_for_kind(kind: JsSyntaxKind) -> &'static [(&'stat
         .map_or(&[], |p| p.slots)
 }
 
-/// Returns the syntax kind for a legacy or native node name.
+/// Resolve a legacy TreeSitter or native Biome node name to the corresponding syntax kind.
+///
+/// # Examples
+///
+/// ```
+/// let k = kind_by_name("identifier");
+/// assert_eq!(k, Some(JsSyntaxKind::JS_REFERENCE_IDENTIFIER));
+///
+/// let missing = kind_by_name("NonExistentNode");
+/// assert_eq!(missing, None);
+/// ```
+///
+/// # Returns
+///
+/// `Some(JsSyntaxKind)` if a mapping exists for `node_name`, `None` otherwise.
 pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
     match node_name {
         // Legacy TreeSitter patterns
@@ -298,6 +312,7 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "JsFunctionExpression" => lang::JsFunctionExpression::KIND_SET.iter().next(),
         "JsGetterClassMember" => lang::JsGetterClassMember::KIND_SET.iter().next(),
         "JsGetterObjectMember" => lang::JsGetterObjectMember::KIND_SET.iter().next(),
+        "JsGlimmerTemplate" => lang::JsGlimmerTemplate::KIND_SET.iter().next(),
         "JsIdentifierAssignment" => lang::JsIdentifierAssignment::KIND_SET.iter().next(),
         "JsIdentifierBinding" => lang::JsIdentifierBinding::KIND_SET.iter().next(),
         "JsIdentifierExpression" => lang::JsIdentifierExpression::KIND_SET.iter().next(),

@@ -138,6 +138,22 @@ impl Rule for NoStaticOnlyClass {
     type Signals = Option<Self::State>;
     type Options = NoStaticOnlyClassOptions;
 
+    /// Determines whether the queried class contains only static members and signals the lint when it does.
+    ///
+    /// The rule returns `Some(())` when the class has at least one relevant member, has no decorators, does not extend another class,
+    /// and every relevant member is static (constructors count as non-static; certain placeholder/template members are ignored).
+    /// Otherwise it returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Example (illustrative): given a `RuleContext` for `class C { static a() {} }`:
+    /// // let ctx = ...;
+    /// // assert_eq!(NoStaticOnlyClass::run(&ctx), Some(()));
+    ///
+    /// // For `class C { a() {} }`:
+    /// // assert_eq!(NoStaticOnlyClass::run(&ctx), None);
+    /// ```
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let class_declaration = ctx.query();
 
@@ -162,6 +178,7 @@ impl Rule for NoStaticOnlyClass {
             .filter_map(|member| match member {
                 AnyJsClassMember::JsBogusMember(_)
                 | AnyJsClassMember::JsMetavariable(_)
+                | AnyJsClassMember::JsGlimmerTemplate(_)
                 | AnyJsClassMember::JsEmptyClassMember(_) => None,
                 AnyJsClassMember::JsConstructorClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::TsConstructorSignatureClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static

@@ -249,6 +249,28 @@ fn looks_like_directive(node: &JsExpressionStatement) -> bool {
     )
 }
 
+/// Determines whether a JavaScript/TypeScript expression is disallowed when used as a standalone expression statement.
+///
+/// Returns `true` for expressions that should be flagged if they appear alone as a statement (for example: literals, arrays, objects, identifiers, class/function expressions, template literals, JSX, glimmer templates, binary/conditional expressions, etc.). Returns `false` for expressions that are valid statement expressions (for example: call, assignment, `new`, `await`, `yield`, and update expressions).
+///
+/// # Parameters
+///
+/// - `expr`: the AST node representing the JavaScript/TypeScript expression to evaluate.
+///
+/// # Returns
+///
+/// `true` if the given expression is disallowed as an expression statement, `false` otherwise.
+///
+/// # Examples
+///
+/// ```no_run
+/// use rome_js_syntax::AnyJsExpression;
+/// // Assume `expr` is obtained from parsing source, e.g. a literal or a call expression.
+/// # fn _example(expr: AnyJsExpression) -> rome_rowan::SyntaxResult<bool> {
+/// let disallowed = is_disallowed(&expr)?;
+/// Ok(disallowed)
+/// # }
+/// ```
 fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
     let is_disallowed = match expr {
         AnyJsExpression::AnyJsLiteralExpression(_)
@@ -259,6 +281,7 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         | AnyJsExpression::JsComputedMemberExpression(_)
         | AnyJsExpression::JsConditionalExpression(_)
         | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsGlimmerTemplate(_)
         | AnyJsExpression::JsIdentifierExpression(_)
         | AnyJsExpression::JsImportMetaExpression(_)
         | AnyJsExpression::JsInExpression(_)

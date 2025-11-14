@@ -90,13 +90,30 @@ impl AnyJsClass {
 }
 
 impl AnyJsClassMember {
-    /// Returns the `name` of the member if it has any.
+    /// Retrieve the class member's name when present.
+    ///
+    /// The result is `Ok(Some(name))` when the member has an explicit name, `Ok(None)` when the member has no name (for example, empty members or static initialization blocks), or `Err(_)` if a syntax error occurred while accessing the name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use crate::AnyJsClassMember;
+    /// # // `member` would typically come from parsing a JS/TS AST.
+    /// # let member: AnyJsClassMember = unimplemented!();
+    /// let result = member.name();
+    /// match result {
+    ///     Ok(Some(name)) => println!("member name: {:?}", name),
+    ///     Ok(None) => println!("member has no name"),
+    ///     Err(err) => eprintln!("syntax error: {:?}", err),
+    /// }
+    /// ```
     pub fn name(&self) -> SyntaxResult<Option<AnyJsClassMemberName>> {
         match self {
             Self::JsConstructorClassMember(constructor) => constructor
                 .name()
                 .map(|name| Some(AnyJsClassMemberName::from(name))),
             Self::JsEmptyClassMember(_) => Ok(None),
+            Self::JsGlimmerTemplate(_) => Ok(None),
             Self::JsGetterClassMember(getter) => getter.name().map(Some),
             Self::JsMethodClassMember(method) => method.name().map(Some),
             Self::JsPropertyClassMember(property) => property.name().map(Some),

@@ -123,6 +123,8 @@ pub enum EmbeddingKind {
     Astro,
     Vue,
     Svelte,
+    /// Glimmer template files (.gjs/.gts) with embedded `<template>` blocks
+    Glimmer,
     #[default]
     None,
 }
@@ -134,8 +136,40 @@ impl EmbeddingKind {
     pub const fn is_vue(&self) -> bool {
         matches!(self, Self::Vue)
     }
+    /// Checks whether the embedding kind is Svelte.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the embedding kind is Svelte, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let kind = EmbeddingKind::Svelte;
+    /// assert!(kind.is_svelte());
+    ///
+    /// let other = EmbeddingKind::Vue;
+    /// assert!(!other.is_svelte());
+    /// ```
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte)
+    }
+    /// Reports whether the embedding kind is Glimmer.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the embedding kind is `Glimmer`, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let k = crate::file_source::EmbeddingKind::Glimmer;
+    /// assert!(k.is_glimmer());
+    /// let k = crate::file_source::EmbeddingKind::None;
+    /// assert!(!k.is_glimmer());
+    /// ```
+    pub const fn is_glimmer(&self) -> bool {
+        matches!(self, Self::Glimmer)
     }
 }
 
@@ -209,11 +243,61 @@ impl JsFileSource {
         Self::js_module().with_embedding_kind(EmbeddingKind::Vue)
     }
 
-    /// Svelte file definition
+    /// Constructs a JsFileSource configured for a JavaScript module with Svelte embedding.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = JsFileSource::svelte();
+    /// assert!(src.is_module());
+    /// assert_eq!(src.as_embedding_kind(), &EmbeddingKind::Svelte);
+    /// ```
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(EmbeddingKind::Svelte)
     }
 
+    /// Creates a `JsFileSource` configured for Glimmer JavaScript files (`.gjs`).
+    ///
+    /// The configuration uses JavaScript language, the standard variant, module kind, and Glimmer embedding.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = JsFileSource::gjs();
+    /// assert!(src.language().is_javascript());
+    /// assert!(src.is_module());
+    /// assert!(src.as_embedding_kind() == &EmbeddingKind::Glimmer);
+    /// ```
+    pub fn gjs() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Glimmer)
+    }
+
+    /// Constructs a JsFileSource for a Glimmer TypeScript module (.gts).
+    ///
+    /// The created source is configured as TypeScript (not a definition file), using the standard
+    /// variant and Module kind, with Glimmer embedding enabled.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = JsFileSource::gts();
+    /// assert!(src.is_typescript());
+    /// assert!(src.is_module());
+    /// ```
+    pub fn gts() -> Self {
+        Self::ts().with_embedding_kind(EmbeddingKind::Glimmer)
+    }
+
+    /// Set the module kind on this value and return the modified value.
+    ///
+    /// The returned value has its `module_kind` replaced by `kind`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = JsFileSource::js_module().with_module_kind(ModuleKind::Script);
+    /// assert!(src.is_script());
+    /// ```
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
         self.module_kind = kind;
         self
@@ -324,7 +408,22 @@ impl JsFileSource {
         }
     }
 
-    /// Try to return the JS file source corresponding to this file extension
+    /// Map a file extension string to the corresponding `JsFileSource` configuration.
+    ///
+    /// The `extension` should be lowercase; it may include dots for composite extensions (for example `"d.ts"`).
+    ///
+    /// # Returns
+    ///
+    /// `Ok(JsFileSource)` for a recognized extension, `Err(FileSourceError::UnknownExtension)` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = JsFileSource::try_from_extension("tsx").unwrap();
+    /// assert!(src.is_jsx());
+    ///
+    /// assert!(JsFileSource::try_from_extension("unknown").is_err());
+    /// ```
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {
@@ -343,6 +442,9 @@ impl JsFileSource {
             "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            // Glimmer template files
+            "gjs" => Ok(Self::gjs()),
+            "gts" => Ok(Self::gts()),
 
             _ => Err(FileSourceError::UnknownExtension),
         }

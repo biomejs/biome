@@ -148,12 +148,22 @@ impl StatementContext {
     }
 }
 
-/// A generic statement such as a block, if, while, with, etc
+/// Parse a single JavaScript/TypeScript statement (block, if, while, for, import/export, etc.).
 ///
-/// Error handling and recovering happens inside this function, so the
-/// caller has to pass a recovery set.
+/// This dispatches to the appropriate statement parser based on the current token,
+/// performs context-sensitive validation (e.g., top-level import/export, async/await/for restrictions,
+/// TypeScript-only constructs, decorators, labels), and performs error recovery using the provided
+/// statement recovery set (defaults to `STMT_RECOVERY_SET` internally). Returns `Present` for a
+/// successfully parsed statement, `Absent` when the current input is not a statement, or a
+/// bogus/adjusted node when recoverable errors occurred.
 ///
-/// If not passed, [STMT_RECOVERY_SET] will be used as recovery set
+/// # Examples
+///
+/// ```
+/// // Typical usage (illustrative — `JsParser` and `StatementContext` are part of the parser
+/// // infrastructure in this crate):
+/// // let parsed = parse_statement(&mut parser, StatementContext::StatementList);
+/// ```
 pub(crate) fn parse_statement(p: &mut JsParser, context: StatementContext) -> ParsedSyntax {
     match p.cur() {
         // test_err js import_decl_not_top_level
@@ -372,6 +382,12 @@ pub(crate) fn parse_statement(p: &mut JsParser, context: StatementContext) -> Pa
                     ts_only_syntax_error(p, p.text(name.as_range()), declaration.range(p))
                 },
             )
+        }
+        // Glimmer templates at top level in .gjs/.gts files
+        GLIMMER_TEMPLATE => {
+            let m = p.start();
+            p.bump(GLIMMER_TEMPLATE);
+            Present(m.complete(p, JS_GLIMMER_TEMPLATE))
         }
         _ if is_at_expression(p) || is_at_metavariable(p) => parse_expression_statement(p),
         _ => Absent,

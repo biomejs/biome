@@ -39,9 +39,19 @@ pub struct JsParser<'source> {
 }
 
 impl<'source> JsParser<'source> {
-    /// Creates a new parser that parses the `source`.
+    /// Creates a new JsParser for the given source string and source type.
+    ///
+    /// The parser is initialized with an empty parsing context and the provided options; it will produce parse events, trivia, and diagnostics as it consumes the token stream.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = "const x = 1;";
+    /// let mut parser = JsParser::new(src, JsFileSource::Module, JsParserOptions::default());
+    /// let (_events, _trivia, _diagnostics) = parser.finish();
+    /// ```
     pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
-        let source = JsTokenSource::from_str(source, options);
+        let source = JsTokenSource::from_str(source, source_type, options);
 
         JsParser {
             state: JsParserState::new(&source_type),

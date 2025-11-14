@@ -1148,6 +1148,29 @@ fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
     }
 }
 
+/// Derives a naming-convention Selector for a class member, or returns `None` when the member should be ignored.
+///
+/// Returns `None` for members that are not subject to naming checks (constructors, bogus/metavariable/empty members,
+/// Glimmer templates, static initialization blocks) or when the member is explicitly marked `override`. For other
+/// class members (methods, getters, setters, properties, index signatures) this returns a `Selector` whose `Kind`
+/// reflects the member kind and whose modifiers are mapped to the restricted modifier set used by conventions.
+///
+/// # Parameters
+///
+/// - `member`: the class member to analyze.
+///
+/// # Returns
+///
+/// `Some(Selector)` when the member is subject to naming-convention checks, with the selector's kind and restricted
+/// modifiers set accordingly; `None` when the member should be ignored.
+///
+/// # Examples
+///
+/// ```
+/// // Example (illustrative):
+/// // let sel = selector_from_class_member(&some_method_member);
+/// // assert!(sel.is_some());
+/// ```
 fn selector_from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
     let (kind, modifiers): (_, BitFlags<_>) = match member {
         AnyJsClassMember::JsBogusMember(_)
@@ -1155,6 +1178,7 @@ fn selector_from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
         | AnyJsClassMember::JsConstructorClassMember(_)
         | AnyJsClassMember::TsConstructorSignatureClassMember(_)
         | AnyJsClassMember::JsEmptyClassMember(_)
+        | AnyJsClassMember::JsGlimmerTemplate(_)
         | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
         AnyJsClassMember::TsIndexSignatureClassMember(member) => {
             (Kind::ClassProperty, (&member.modifiers()).into())

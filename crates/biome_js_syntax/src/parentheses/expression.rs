@@ -28,6 +28,19 @@ use crate::{
 use super::NeedsParentheses;
 
 impl NeedsParentheses for AnyJsExpression {
+    /// Dispatches the parentheses-necessity decision to the specific contained expression variant.
+    ///
+    /// This method forwards the check to the inner node implementation for each enum variant.
+    /// For sentinel variants that never require parentheses (e.g., bogus expressions and Glimmer
+    /// templates) it returns `false`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given an `AnyJsExpression` value `expr`, determine whether it needs parentheses:
+    /// // let needs = expr.needs_parentheses();
+    /// // assert!(matches!(needs, bool));
+    /// ```
     #[inline]
     fn needs_parentheses(&self) -> bool {
         match self {
@@ -63,6 +76,7 @@ impl NeedsParentheses for AnyJsExpression {
             Self::JsBogusExpression(_) => false,
             Self::JsYieldExpression(expr) => expr.needs_parentheses(),
             Self::JsxTagExpression(expr) => expr.needs_parentheses(),
+            Self::JsGlimmerTemplate(_) => false,
             Self::JsNewTargetExpression(expr) => expr.needs_parentheses(),
             Self::TsAsExpression(expr) => expr.needs_parentheses(),
             Self::TsSatisfiesExpression(expr) => expr.needs_parentheses(),

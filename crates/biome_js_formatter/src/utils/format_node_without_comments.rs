@@ -48,6 +48,29 @@ pub(crate) struct FormatAnyJsExpressionWithoutComments;
 
 impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
     type Context = JsFormatContext;
+    /// Formats an `AnyJsExpression` by delegating to the specific formatter for its variant.
+    ///
+    /// The method writes formatted output to the provided `JsFormatter` and returns a `FormatResult`
+    /// indicating success or formatting errors.
+    ///
+    /// # Returns
+    ///
+    /// `FormatResult<()>` — `Ok(())` on success, or an error describing a formatting failure.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use crate::FormatAnyJsExpressionWithoutComments;
+    /// use crate::formatter::JsFormatter;
+    /// use crate::syntax::AnyJsExpression;
+    ///
+    /// let formatter = FormatAnyJsExpressionWithoutComments::default();
+    /// let mut js_formatter = JsFormatter::new(); // hypothetical constructor
+    /// let node: AnyJsExpression = /* obtain or construct a node */ unimplemented!();
+    ///
+    /// // Format the node (writes to `js_formatter`)
+    /// let _ = formatter.fmt(&node, &mut js_formatter);
+    /// ```
     fn fmt(&self, node: &AnyJsExpression, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsExpression::AnyJsLiteralExpression(literal_expr) => match literal_expr {
@@ -93,6 +116,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
             AnyJsExpression::JsFunctionExpression(node) => {
                 FormatJsFunctionExpression::default().fmt_node(node, f)
             }
+            AnyJsExpression::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsExpression::JsMetavariable(node) => FormatJsMetavariable.fmt_node(node, f),
             AnyJsExpression::JsIdentifierExpression(node) => {
                 FormatJsIdentifierExpression.fmt_node(node, f)

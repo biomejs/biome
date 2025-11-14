@@ -6,6 +6,21 @@ use biome_js_syntax::AnyJsStatement;
 pub(crate) struct FormatAnyJsStatement;
 impl FormatRule<AnyJsStatement> for FormatAnyJsStatement {
     type Context = JsFormatContext;
+    /// Formats an `AnyJsStatement` into the provided `JsFormatter`.
+    ///
+    /// This method formats the given `AnyJsStatement` node using the formatting implementation appropriate for the node's concrete variant.
+    ///
+    /// Returns `Ok(())` if formatting succeeded, or an error if formatting failed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use crate::{FormatAnyJsStatement, AnyJsStatement, JsFormatter};
+    /// let rule = FormatAnyJsStatement::default();
+    /// // Construct `stmt: AnyJsStatement` and `formatter: JsFormatter` according to crate APIs,
+    /// // then call the formatter:
+    /// // rule.fmt(&stmt, &mut formatter).unwrap();
+    /// ```
     fn fmt(&self, node: &AnyJsStatement, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsStatement::JsBlockStatement(node) => node.format().fmt(f),
@@ -21,6 +36,7 @@ impl FormatRule<AnyJsStatement> for FormatAnyJsStatement {
             AnyJsStatement::JsForOfStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsForStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsFunctionDeclaration(node) => node.format().fmt(f),
+            AnyJsStatement::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsStatement::JsIfStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsLabeledStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsMetavariable(node) => node.format().fmt(f),

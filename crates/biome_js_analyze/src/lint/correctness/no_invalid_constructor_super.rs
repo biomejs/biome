@@ -154,6 +154,21 @@ impl Rule for NoInvalidConstructorSuper {
     }
 }
 
+/// Determines whether a given JavaScript expression can serve as a valid constructor target for `super()`.
+///
+/// Returns `Some(true)` if the expression is a valid constructor (e.g., `this`, `new`, function/class expressions,
+/// certain call-like expressions, or identifiers that are not the special `undefined` identifier),
+/// `Some(false)` if the expression is definitely not a constructor (e.g., literals, arrays, object expressions,
+/// binary expressions, glimmer templates), and `None` if the analysis is indeterminate for the expression form.
+///
+/// # Examples
+///
+/// ```no_run
+/// // Pseudocode example — construct a JsIdentifierExpression for `Parent` from a parser,
+/// // then call is_valid_constructor(expression) to determine whether `super()` is allowed.
+/// // let expr = parse_identifier_expression("Parent");
+/// // assert_eq!(is_valid_constructor(expr), Some(true));
+/// ```
 fn is_valid_constructor(expression: AnyJsExpression) -> Option<bool> {
     match expression.omit_parentheses() {
         AnyJsExpression::JsAwaitExpression(await_expression) => {
@@ -226,6 +241,7 @@ fn is_valid_constructor(expression: AnyJsExpression) -> Option<bool> {
         | AnyJsExpression::JsBinaryExpression(_)
         | AnyJsExpression::JsBogusExpression(_)
         | AnyJsExpression::JsMetavariable(_)
+        | AnyJsExpression::JsGlimmerTemplate(_)
         | AnyJsExpression::JsInstanceofExpression(_)
         | AnyJsExpression::JsObjectExpression(_)
         | AnyJsExpression::JsPostUpdateExpression(_)

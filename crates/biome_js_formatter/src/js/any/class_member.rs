@@ -6,12 +6,20 @@ use biome_js_syntax::AnyJsClassMember;
 pub(crate) struct FormatAnyJsClassMember;
 impl FormatRule<AnyJsClassMember> for FormatAnyJsClassMember {
     type Context = JsFormatContext;
+    /// Formats an `AnyJsClassMember` by delegating to the concrete variant's formatter.
+    ///
+    /// Each variant of `AnyJsClassMember` is routed to its respective `format()` implementation.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` if formatting succeeds, or an error if formatting fails.
     fn fmt(&self, node: &AnyJsClassMember, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsClassMember::JsBogusMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsConstructorClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsEmptyClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsGetterClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsClassMember::JsMetavariable(node) => node.format().fmt(f),
             AnyJsClassMember::JsMethodClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsPropertyClassMember(node) => node.format().fmt(f),

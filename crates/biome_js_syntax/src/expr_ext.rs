@@ -869,6 +869,21 @@ impl AnyJsExpression {
         .unwrap_or(self)
     }
 
+    /// Compute the operator precedence category for this expression.
+    ///
+    /// The returned precedence reflects JavaScript operator precedence rules for the
+    /// particular expression variant (e.g., Primary, Member, Unary, Binary,
+    /// Conditional, Assignment, etc.). This method returns the appropriate
+    /// OperatorPrecedence for the expression node it is called on.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Obtain an `AnyJsExpression` (for example via parsing) and query its precedence:
+    /// let expr: AnyJsExpression = /* parse or construct an expression */ unimplemented!();
+    /// let prec = expr.precedence().unwrap();
+    /// // `prec` is an `OperatorPrecedence` describing how the expression binds.
+    /// ```
     pub fn precedence(&self) -> SyntaxResult<OperatorPrecedence> {
         let precedence = match self {
             Self::JsSequenceExpression(_) => OperatorPrecedence::Comma,
@@ -913,7 +928,8 @@ impl AnyJsExpression {
             | Self::JsFunctionExpression(_)
             | Self::JsIdentifierExpression(_)
             | Self::JsObjectExpression(_)
-            | Self::JsxTagExpression(_) => OperatorPrecedence::Primary,
+            | Self::JsxTagExpression(_)
+            | Self::JsGlimmerTemplate(_) => OperatorPrecedence::Primary,
 
             Self::JsTemplateExpression(template) => {
                 if template.tag().is_some() {

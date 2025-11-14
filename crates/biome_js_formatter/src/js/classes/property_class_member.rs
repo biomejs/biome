@@ -91,6 +91,23 @@ impl Format<JsFormatContext> for FormatClassPropertySemicolon<'_> {
     }
 }
 
+/// Determines whether a semicolon is required after the given class property-like member
+/// based on its name and the syntactic context of the following class member.
+///
+/// # Returns
+///
+/// `true` if a semicolon should be present after `property`, `false` otherwise.
+///
+/// # Examples
+///
+/// ```no_run
+/// # use crate::needs_semicolon;
+/// # use crate::AnyJsPropertyClassMember;
+/// # fn get_property() -> AnyJsPropertyClassMember { unimplemented!() }
+/// let prop = get_property();
+/// let needs = needs_semicolon(&prop).unwrap();
+/// println!("semicolon needed: {}", needs);
+/// ```
 fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
     if let AnyJsClassMemberName::JsLiteralMemberName(name) = property.name()? {
         // `get;`, `set;` or `static`
@@ -134,6 +151,7 @@ fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
         | AnyJsClassMember::TsGetterSignatureClassMember(_)
         | AnyJsClassMember::TsSetterSignatureClassMember(_)
         | AnyJsClassMember::JsSetterClassMember(_)
+        | AnyJsClassMember::JsGlimmerTemplate(_)
         | AnyJsClassMember::JsMetavariable(_) => false,
 
         // Computed members may be misinterpreted as array accessors/array types
@@ -163,13 +181,29 @@ AnyJsClassMember::TsInitializedPropertySignatureClassMember(_)) => match member.
     })
 }
 
-/// Tests if `member` has any modifiers
+/// Returns whether the given class member has any modifiers.
+///
+/// This checks the member variant for the presence of modifier tokens (e.g., `public`, `private`,
+/// `static`) and returns `true` when at least one modifier is present, `false` otherwise.
+///
+/// # Returns
+///
+/// `true` if the `member` has one or more modifiers, `false` otherwise.
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// // `member` would be obtained from parsed syntax tree in real usage.
+/// let member: AnyJsClassMember = /* ... */;
+/// assert_eq!(has_modifiers(&member), false);
+/// ```
 fn has_modifiers(member: &AnyJsClassMember) -> bool {
     let is_empty = match member {
         AnyJsClassMember::JsConstructorClassMember(constructor) => {
             constructor.modifiers().is_empty()
         }
         AnyJsClassMember::JsEmptyClassMember(_) => true,
+        AnyJsClassMember::JsGlimmerTemplate(_) => true,
         AnyJsClassMember::JsGetterClassMember(getter) => getter.modifiers().is_empty(),
         AnyJsClassMember::JsMethodClassMember(method) => method.modifiers().is_empty(),
         AnyJsClassMember::JsPropertyClassMember(property) => property.modifiers().is_empty(),

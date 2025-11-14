@@ -2256,10 +2256,87 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
         biome_js_syntax::JsGetterObjectMember,
         crate::js::objects::getter_object_member::FormatJsGetterObjectMember,
     >;
+    /// Converts this value into an owned formatter that formats a getter object member using the
+    /// default `FormatJsGetterObjectMember` rule.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let node = get_a_js_getter_object_member(); // returns a `JsGetterObjectMember`
+    /// let formatted = node.into_format();
+    /// // `formatted` can be passed to the formatting API.
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
             crate::js::objects::getter_object_member::FormatJsGetterObjectMember::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsGlimmerTemplate>
+    for crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate
+{
+    type Context = JsFormatContext;
+    /// Formats a `JsGlimmerTemplate` node using this formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given a `template` of type `biome_js_syntax::JsGlimmerTemplate`
+    /// // and a mutable `formatter` of type `JsFormatter`:
+    /// // let result = crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate::default()
+    /// //     .fmt(&template, &mut formatter);
+    /// // assert!(result.is_ok());
+    /// ```
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsGlimmerTemplate,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsGlimmerTemplate>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsGlimmerTemplate {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsGlimmerTemplate,
+        crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate,
+    >;
+    /// Format a borrowed `JsGlimmerTemplate` with the default Glimmer template formatter.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given a `JsGlimmerTemplate` value `template`:
+    /// let formatted = template.format();
+    /// ```
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGlimmerTemplate {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsGlimmerTemplate,
+        crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate,
+    >;
+    /// Converts the Glimmer template node into an owned formatter that applies the Glimmer template formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::JsGlimmerTemplate;
+    ///
+    /// let node = JsGlimmerTemplate::default();
+    /// let owned_formatter = node.into_format();
+    /// ```
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate::default(),
         )
     }
 }

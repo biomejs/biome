@@ -523,6 +523,29 @@ impl ParseNodeList for ClassMembersList {
 //  static async foo() {}
 //  static async *foo() {}
 // }
+/// Parses a single class member (property, method, static block, decorator/semicolon member, or Glimmer template) at the current parser position.
+///
+/// This consumes tokens for a class member starting at the parser's current position and returns a `ParsedSyntax` describing the parsed member or `Absent` if no member could be parsed. The function handles:
+/// - semicolon-only empty members (`;`)
+/// - Glimmer templates inside class bodies
+/// - decorator lists and other modifiers
+/// - static initialization blocks (`static { ... }`)
+/// - ordinary property/method members, including validation of `abstract` and other modifiers relative to `inside_abstract_class`
+///
+/// Parameters:
+/// - `p`: the parser to read tokens from and to report diagnostics on.
+/// - `inside_abstract_class`: when `true`, abstract members are permitted; when `false`, abstract modifiers on members produce an error and the member is converted to bogus.
+///
+/// Returns:
+/// A `ParsedSyntax` indicating `Present` with the completed class member node when parsing succeeds, or `Absent` when no valid member was found at the current position.
+///
+/// # Examples
+///
+/// ```no_run
+/// // Given a `JsParser` instance `p` positioned inside a class body:
+/// // let parsed = parse_class_member(&mut p, /* inside_abstract_class = */ false);
+/// // match parsed { Present(node) => { /* handled member */ }, Absent => { /* no member */ } }
+/// ```
 fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSyntax {
     if is_at_metavariable(p) {
         return parse_metavariable(p);
@@ -533,6 +556,12 @@ fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSy
     // class foo { ;;;;;;;;;; get foo() {};;;;}
     if p.eat(T![;]) {
         return Present(member_marker.complete(p, JS_EMPTY_CLASS_MEMBER));
+    }
+
+    // Glimmer templates in class bodies
+    if p.at(GLIMMER_TEMPLATE) {
+        p.bump(GLIMMER_TEMPLATE);
+        return Present(member_marker.complete(p, JS_GLIMMER_TEMPLATE));
     }
 
     let mut modifiers = parse_class_member_modifiers(p, false);

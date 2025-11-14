@@ -6,6 +6,23 @@ use biome_js_syntax::AnyJsExpression;
 pub(crate) struct FormatAnyJsExpression;
 impl FormatRule<AnyJsExpression> for FormatAnyJsExpression {
     type Context = JsFormatContext;
+    /// Delegates formatting of an AnyJsExpression to its specific expression formatter.
+    ///
+    /// This method matches on the concrete variant of `AnyJsExpression` and forwards
+    /// formatting to the corresponding inner node's formatter implementation.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use crate::prelude::*;
+    ///
+    /// let formatter = FormatAnyJsExpression::default();
+    /// let any_expr: AnyJsExpression = /* construct an AnyJsExpression variant */ unimplemented!();
+    /// let mut f = JsFormatter::new(/* ... */);
+    ///
+    /// // Delegates to the underlying node's `fmt` implementation.
+    /// let _ = formatter.fmt(&any_expr, &mut f);
+    /// ```
     fn fmt(&self, node: &AnyJsExpression, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsExpression::AnyJsLiteralExpression(node) => node.format().fmt(f),
@@ -20,6 +37,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpression {
             AnyJsExpression::JsComputedMemberExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsConditionalExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsFunctionExpression(node) => node.format().fmt(f),
+            AnyJsExpression::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsExpression::JsIdentifierExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsImportCallExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsImportMetaExpression(node) => node.format().fmt(f),

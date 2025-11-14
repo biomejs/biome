@@ -132,6 +132,9 @@ pub(crate) struct JsLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: JsParserOptions,
+
+    /// The file source type (for determining if we're in .gjs/.gts files)
+    source_type: JsFileSource,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -299,7 +302,17 @@ impl<'src> LexerWithCheckpoint<'src> for JsLexer<'src> {
 }
 
 impl<'src> JsLexer<'src> {
-    /// Make a new lexer from a str, this is safe because strs are valid utf8
+    /// Creates a new JsLexer for the provided source string.
+    ///
+    /// The lexer is initialized with default parser options and a default file source type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let src = "const x = 1;";
+    /// let lexer = JsLexer::from_str(src);
+    /// assert_eq!(lexer.source(), src);
+    /// ```
     pub fn from_str(source: &'src str) -> Self {
         Self {
             source,
@@ -311,13 +324,52 @@ impl<'src> JsLexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: JsParserOptions::default(),
+            source_type: JsFileSource::default(),
         }
     }
 
+    /// Create a new lexer configured with the given parser options.
+    ///
+    /// Replaces the lexer's current `options` with `options` and returns the updated lexer.
+    ///
+    /// # Parameters
+    /// - `options`: parser options to apply to the returned lexer.
+    ///
+    /// # Returns
+    /// A `JsLexer` instance identical to the original except using the provided `options`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let lexer = JsLexer::from_str("let x = 1;").with_options(JsParserOptions::default());
+    /// ```
     pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
         Self { options, ..self }
     }
 
+    /// Sets the lexer file source type and returns an updated lexer.
+    ///
+    /// This consumes the lexer and returns a new instance with `source_type` set to the provided value,
+    /// preserving all other fields.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let lexer = JsLexer::from_str("x");
+    /// let lexer = lexer.with_source_type(JsFileSource::Glimmer);
+    /// assert!(lexer.source_type.as_embedding_kind().is_glimmer());
+    /// ```
+    pub(crate) fn with_source_type(self, source_type: JsFileSource) -> Self {
+        Self {
+            source_type,
+            ..self
+        }
+    }
+
+    /// Re-lexes a sequence starting with `>` into the widest matching binary/operator token.
+    ///
+    /// Returns the `JsSyntaxKind` corresponding to one of: `>`, `>>`, `>>>`, `>=`, `>>=` or `>>>=`.
+    /// If the current byte is not `>` the current token kind is returned unchanged.
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
         if self.current_byte() == Some(b'>') {
             match self.next_byte() {
@@ -1712,6 +1764,24 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Resolve a leading `'+'` into the correct operator token.
+    ///
+    /// Checks the next byte to determine whether the `'+'` begins a `++` increment,
+    /// a `+=` assignment, or is a standalone `+` token.
+    ///
+    /// # Returns
+    ///
+    /// `PLUS2` if the next bytes form `++`, `PLUSEQ` if they form `+=`, `T![+]` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Illustrative example (caller must ensure the lexer is positioned at '+').
+    /// let mut lexer = JsLexer::from_str("++");
+    /// // advance/positioning to the '+' is required in real usage
+    /// let kind = lexer.resolve_plus();
+    /// assert_eq!(kind, PLUS2);
+    /// ```
     #[inline]
     fn resolve_plus(&mut self) -> JsSyntaxKind {
         match self.next_byte() {
@@ -1727,6 +1797,117 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Attempts to lex a Glimmer `<template>...</template>` block from the current cursor position.
+    ///
+    /// If the lexer is positioned at an opening `<template` tag, this will consume the entire
+    /// opening tag, scan forward for a matching closing `</template>` tag, consume it if found,
+    /// and return `Some(GLIMMER_TEMPLATE)`. If a closing tag is not found, a diagnostic for an
+    /// unclosed `<template>` is pushed and the method still returns `Some(GLIMMER_TEMPLATE)` to
+    /// allow recovery. If the input at the current position is not a `<template` opening tag,
+    /// the method returns `None` and does not modify lexer state.
+    ///
+    /// # Returns
+    ///
+    /// `Some(GLIMMER_TEMPLATE)` if an opening `<template` tag was recognized (closing tag may be
+    /// present or missing), `None` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = JsLexer::from_str("<template>content</template>");
+    /// assert_eq!(lexer.try_lex_glimmer_template(), Some(GLIMMER_TEMPLATE));
+    ///
+    /// let mut lexer_unclosed = JsLexer::from_str("<template>content");
+    /// assert_eq!(lexer_unclosed.try_lex_glimmer_template(), Some(GLIMMER_TEMPLATE));
+    /// // a diagnostic about the unclosed template will have been pushed
+    /// ```
+    fn try_lex_glimmer_template(&mut self) -> Option<JsSyntaxKind> {
+        // We're currently at '<', check if followed by 'template'
+        // Peek ahead without consuming
+        let start = self.position;
+
+        // Check for "<template"
+        if self.peek_byte() != Some(b't') {
+            return None;
+        }
+
+        // Check if we have enough bytes for "<template>"
+        let template_bytes = b"template>";
+        let end_pos = self.position + 1 + template_bytes.len();
+        if end_pos > self.source.len() {
+            return None;
+        }
+        if &self.source.as_bytes()[self.position + 1..end_pos] != template_bytes {
+            return None;
+        }
+
+        // Verify that 'template' is followed by '>' or whitespace (not part of identifier)
+        match self.byte_at(9) {
+            // Position after "<template"
+            Some(b'>' | b' ' | b'\t' | b'\n' | b'\r') => {
+                // This is indeed "<template"
+            }
+            _ => return None, // Not a template tag
+        }
+
+        // Consume "<template"
+        self.advance(9);
+
+        // Skip any attributes/whitespace until '>'
+        while let Some(chr) = self.current_byte() {
+            if chr == b'>' {
+                self.next_byte(); // consume '>'
+                break;
+            }
+            self.next_byte();
+        }
+
+        // Save the position after the opening tag for error reporting
+        let opening_tag_end = self.position;
+
+        // Now search for "</template>"
+        let closing_tag = b"</template>";
+        let mut found_closing = false;
+
+        while self.position < self.source.len() {
+            if let Some(b'<') = self.current_byte() {
+                // Check if this is "</template>"
+                let end_pos = self.position + closing_tag.len();
+                if end_pos <= self.source.len()
+                    && &self.source.as_bytes()[self.position..end_pos] == closing_tag
+                {
+                    // Found closing tag, consume it
+                    self.advance(closing_tag.len());
+                    found_closing = true;
+                    break;
+                }
+            }
+            self.next_byte();
+        }
+
+        if !found_closing {
+            // Unclosed template - create diagnostic
+            let err = ParseDiagnostic::new("Unclosed `<template>` tag", start..opening_tag_end)
+                .with_hint("Add a closing `</template>` tag");
+            self.push_diagnostic(err);
+        }
+
+        Some(GLIMMER_TEMPLATE)
+    }
+
+    /// Lexes a minus-related operator and returns the corresponding token kind.
+    ///
+    /// # Returns
+    ///
+    /// `MINUS2` for the `--` operator, `MINUSEQ` for the `-=` operator, or `T![-]` for a single `-`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = JsLexer::from_str("--");
+    /// let kind = lexer.resolve_minus();
+    /// assert_eq!(kind, MINUS2);
+    /// ```
     #[inline]
     fn resolve_minus(&mut self) -> JsSyntaxKind {
         match self.next_byte() {
@@ -1742,8 +1923,34 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Lexes a `<`-starting token, handling Glimmer templates and compound `<` operators.
+    ///
+    /// If the lexer is configured for Glimmer embedding and a `<template>...</template>` block
+    /// is present at the current position, returns the corresponding `GLIMMER_TEMPLATE` kind.
+    /// Otherwise recognizes compound operators (`<<=`, `<<`, `<=`) or a single `<`.
+    ///
+    /// # Returns
+    ///
+    /// The `JsSyntaxKind` representing the lexed token: `GLIMMER_TEMPLATE`, `SHLEQ`, `SHL`,
+    /// `LTEQ`, or the single `<` token.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let mut lexer = JsLexer::from_str("<=");
+    /// // advance the lexer's cursor as appropriate in real usage (this example is illustrative)
+    /// let kind = lexer.resolve_less_than();
+    /// assert_eq!(kind, LTEQ);
+    /// ```
     #[inline]
     fn resolve_less_than(&mut self) -> JsSyntaxKind {
+        // Check for Glimmer template in .gjs/.gts files
+        if self.source_type.as_embedding_kind().is_glimmer()
+            && let Some(template_kind) = self.try_lex_glimmer_template()
+        {
+            return template_kind;
+        }
+
         match self.next_byte() {
             Some(b'<') => {
                 if let Some(b'=') = self.next_byte() {

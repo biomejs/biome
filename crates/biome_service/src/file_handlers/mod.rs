@@ -809,7 +809,20 @@ impl Features {
         }
     }
 
-    /// Returns the [Capabilities] associated with a [BiomePath]
+    /// Get the language-specific capabilities for the provided document file source.
+    ///
+    /// The returned `Capabilities` correspond to the handler that should be used for the
+    /// given `DocumentFileSource` (for example, JS, JSON, CSS, HTML, GraphQL, Grit, Ignore,
+    /// or Unknown). Embedded JS variants (Astro, Vue, Svelte) map to their respective
+    /// handlers; other JS embeddings map to the JS handler.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let features = Features::new();
+    /// let caps = features.get_capabilities(DocumentFileSource::Unknown);
+    /// let _ = caps; // use capabilities as needed
+    /// ```
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
@@ -817,7 +830,7 @@ impl Features {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
-                EmbeddingKind::None => self.js.capabilities(),
+                EmbeddingKind::Glimmer | EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
