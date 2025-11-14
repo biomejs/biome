@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { computed } from '@ember/object';
+
+export default Component.extend({
+  // No dependencies - will never update!
+  fullName: computed(function() {
+    return `${this.firstName} ${this.lastName}`;
+  })
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:5:13 lint/nursery/noEmberRequireComputedPropertyDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Computed properties require dependency keys.
+  
+    3 │ export default Component.extend({
+    4 │   // No dependencies - will never update!
+  > 5 │   fullName: computed(function() {
+      │             ^^^^^^^^^^^^^^^^^^^^^
+  > 6 │     return `${this.firstName} ${this.lastName}`;
+  > 7 │   })
+      │   ^^
+    8 │ });
+    9 │ 
+  
+  i Add the property keys this computed depends on, or use a native getter with @tracked properties.
+  
+  i Example: computed('firstName', 'lastName', function() { ... })
+  
+
+```

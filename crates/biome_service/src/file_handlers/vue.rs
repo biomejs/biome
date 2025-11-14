@@ -134,9 +134,13 @@ fn parse(
 
     let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
 
+    // Store the original source text so semantic analysis can scan templates
+    let original_source_text = Some(std::sync::Arc::new(text.to_string()));
+
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source.into()),
+        original_source_text,
     }
 }
 

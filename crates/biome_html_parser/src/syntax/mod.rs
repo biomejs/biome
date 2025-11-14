@@ -1,9 +1,13 @@
 mod astro;
+mod glimmer;
 mod parse_error;
 mod svelte;
 
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
+use crate::syntax::glimmer::{
+    parse_glimmer_block_helper, parse_glimmer_mustache_expression, parse_glimmer_splattribute,
+};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::parse_svelte_at_block;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
@@ -23,6 +27,9 @@ pub(crate) enum HtmlSyntaxFeatures {
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
     SingleTextExpressions,
+    /// Exclusive to those documents that support Glimmer syntax
+    /// (block helpers, splattributes, etc.)
+    Glimmer,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -37,6 +44,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             Self::SingleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Single)
             }
+            Self::Glimmer => p.options().glimmer,
         }
     }
 }
@@ -222,11 +230,25 @@ impl ParseNodeList for ElementList {
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
-            T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
-                p,
-                |p| parse_double_text_expression(p, HtmlLexContext::Regular),
-                |p, m| disabled_interpolation(p, m.range(p)),
-            ),
+            T!["{{"] => {
+                // Check if Glimmer mode is enabled
+                if HtmlSyntaxFeatures::Glimmer.is_supported(p) {
+                    // Check if it's a block helper ({{#...}})
+                    if p.nth_at(1, T![#]) {
+                        parse_glimmer_block_helper(p)
+                    } else {
+                        // Parse as Glimmer mustache expression
+                        parse_glimmer_mustache_expression(p, HtmlLexContext::Regular)
+                    }
+                } else {
+                    // Parse as regular double text expression
+                    HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
+                        p,
+                        |p| parse_double_text_expression(p, HtmlLexContext::Regular),
+                        |p, m| disabled_interpolation(p, m.range(p)),
+                    )
+                }
+            }
             T!["{@"] => parse_svelte_at_block(p),
             T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
                 let m = p.start();
@@ -304,6 +326,11 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
+    // Check for Glimmer splattribute first
+    if p.at(T![...]) {
+        return parse_glimmer_splattribute(p);
+    }
+
     let m = p.start();
     if p.at(T!["{{"]) {
         HtmlSyntaxFeatures::DoubleTextExpressions
@@ -334,7 +361,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{']])
+    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{'], T![...]])
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {

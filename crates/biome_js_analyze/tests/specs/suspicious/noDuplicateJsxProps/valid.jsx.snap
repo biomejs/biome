@@ -13,5 +13,3 @@ expression: valid.jsx
 <Hello name="John" Name="John" />;
 
 ```
-
-

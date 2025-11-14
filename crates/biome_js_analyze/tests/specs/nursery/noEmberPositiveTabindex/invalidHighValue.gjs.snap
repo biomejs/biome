@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHighValue.gjs
+---
+# Input
+```js
+import Component from '@glimmer/component';
+
+export default class MyDiv extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

@@ -733,5 +733,3 @@ while (true);
 ```cjs
 function foo(Boolean) { while (true); }
 ```
-
-

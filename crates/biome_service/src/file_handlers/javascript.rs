@@ -550,6 +550,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: None,
+        original_source_text: None,
     }
 }
 
@@ -761,7 +762,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
     let services =
-        JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
+        JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source))
+            .with_original_source_text(params.original_source_text.clone());
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,

@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBoth.js
+---
+# Input
+```js
+// Using both global $ and jQuery in the same file
+$('.selector').hide();
+jQuery('#element').show();
+
+function mixed() {
+  $('.foo').addClass('bar');
+  jQuery('.baz').removeClass('qux');
+}
+
+```
+
+# Diagnostics
+```
+invalidBoth.js:2:1 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global $.
+  
+    1 │ // Using both global $ and jQuery in the same file
+  > 2 │ $('.selector').hide();
+      │ ^
+    3 │ jQuery('#element').show();
+    4 │ 
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```
+
+```
+invalidBoth.js:3:1 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global jQuery.
+  
+    1 │ // Using both global $ and jQuery in the same file
+    2 │ $('.selector').hide();
+  > 3 │ jQuery('#element').show();
+      │ ^^^^^^
+    4 │ 
+    5 │ function mixed() {
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```
+
+```
+invalidBoth.js:6:3 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global $.
+  
+    5 │ function mixed() {
+  > 6 │   $('.foo').addClass('bar');
+      │   ^
+    7 │   jQuery('.baz').removeClass('qux');
+    8 │ }
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```
+
+```
+invalidBoth.js:7:3 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global jQuery.
+  
+    5 │ function mixed() {
+    6 │   $('.foo').addClass('bar');
+  > 7 │   jQuery('.baz').removeClass('qux');
+      │   ^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```

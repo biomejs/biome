@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerSelfClosing.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - self-closing components */
+import Icon from './Icon';
+import Divider from './Divider';
+import Image from './Image';
+
+export default class MyComponent {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import Component from '@ember/component';
+
+export default Component.extend({
+  actions: {
+    handleClick() {
+      console.log('clicked');
+    }
+  }
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:4:3 lint/nursery/noEmberActionsHash ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use the actions hash pattern.
+  
+     3 │ export default Component.extend({
+   > 4 │   actions: {
+       │   ^^^^^^^^^^
+   > 5 │     handleClick() {
+   > 6 │       console.log('clicked');
+   > 7 │     }
+   > 8 │   }
+       │   ^
+     9 │ });
+    10 │ 
+  
+  i Use @action decorators on individual methods instead.
+  
+  i See: https://guides.emberjs.com/release/upgrading/current-edition/action-syntax/
+  
+
+```

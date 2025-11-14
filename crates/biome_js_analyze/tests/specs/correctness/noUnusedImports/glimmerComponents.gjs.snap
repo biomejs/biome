@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerComponents.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - components used in template */
+import Component from '@glimmer/component';
+import Button from './Button';
+import Card from './Card';
+import { Header, Footer } from './Layout';
+
+export default class MyComponent extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

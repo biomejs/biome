@@ -8,6 +8,7 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::glimmer::GlimmerFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::FeaturesSupported;
@@ -112,6 +113,12 @@ pub(crate) fn format_with_guard<'ctx>(
                     return Ok(FileStatus::Unchanged);
                 }
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
+            }
+            Some("gjs") | Some("gts") => {
+                if output.is_empty() {
+                    return Ok(FileStatus::Unchanged);
+                }
+                output = GlimmerFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}
         }

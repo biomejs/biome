@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComponent.gjs
+---
+# Input
+```js
+// Component with accesskey argument
+import Component from '@glimmer/component';
+import Button from './button';
+
+export default class MyForm extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

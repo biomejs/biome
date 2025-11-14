@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: regressionRegularJs.js
+---
+# Input
+```js
+/* Regression test: ensure regular JS files still work correctly */
+import A from "mod";
+import B from "mod";
+
+// Only A is used, B should warn
+export { A };
+
+```
+
+# Diagnostics
+```
+regressionRegularJs.js:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ /* Regression test: ensure regular JS files still work correctly */
+    2 │ import A from "mod";
+  > 3 │ import B from "mod";
+      │        ^
+    4 │ 
+    5 │ // Only A is used, B should warn
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   /* Regression test: ensure regular JS files still work correctly */
+    2 2 │   import A from "mod";
+    3   │ - import·B·from·"mod";
+    4 3 │   
+    5 4 │   // Only A is used, B should warn
+  
+
+```

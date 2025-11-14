@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+import { setupTest } from 'ember-qunit';
+import { module, test } from 'qunit';
+
+module('Example', function (hooks) {
+  setupTest(hooks);
+
+  test('it works', async function () {
+    // No pauseTest call
+  });
+});
+
+```

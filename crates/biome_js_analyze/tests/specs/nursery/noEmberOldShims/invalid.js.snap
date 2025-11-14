@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import Model from 'ember-data/model';
+
+export default Model.extend({
+  name: null
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noEmberOldShims ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from deprecated Ember shim modules.
+  
+  > 1 │ import Model from 'ember-data/model';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export default Model.extend({
+  
+  i Use modern Ember module imports instead.
+  
+  i See: https://github.com/ember-cli/ember-rfc176-data
+  
+
+```

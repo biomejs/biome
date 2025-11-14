@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMethod.js
+---
+# Input
+```js
+import Component from '@glimmer/component';
+
+class MyComponent extends Component {
+  someMethod() {
+    return this.getWithDefault('property', 'fallback');
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalidMethod.js:5:12 lint/nursery/noEmberGetWithDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use the deprecated getWithDefault() method.
+  
+    3 │ class MyComponent extends Component {
+    4 │   someMethod() {
+  > 5 │     return this.getWithDefault('property', 'fallback');
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   }
+    7 │ }
+  
+  i The getWithDefault() method was deprecated in Ember 3.x and removed in Ember 4.0.
+  
+  i Use optional chaining (?.) or nullish coalescing (??) instead.
+  
+
+```

@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validGlimmerMethods.gjs
+---
+# Input
+```js
+/* should not generate diagnostics */
+export default class MyComponent {
+  count = 0;
+
+  get formattedCount() {
+    return `Count: ${this.count}`;
+  }
+
+  increment() {
+    this.count++;
+  }
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```
