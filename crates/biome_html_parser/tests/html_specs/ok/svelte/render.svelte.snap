@@ -1,0 +1,50 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{@render sum(1, 2)}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteRenderBlock {
+            sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
+            render_token: RENDER_KW@2..8 "render" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@8..18 " sum(1, 2)" [] [],
+            },
+            r_curly_token: R_CURLY@18..19 "}" [] [],
+        },
+    ],
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..20
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..19
+    0: SVELTE_RENDER_BLOCK@0..19
+      0: SV_CURLY_AT@0..2 "{@" [] []
+      1: RENDER_KW@2..8 "render" [] []
+      2: HTML_TEXT_EXPRESSION@8..18
+        0: HTML_LITERAL@8..18 " sum(1, 2)" [] []
+      3: R_CURLY@18..19 "}" [] []
+  4: EOF@19..20 "" [Newline("\n")] []
+
+```

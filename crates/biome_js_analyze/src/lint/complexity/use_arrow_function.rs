@@ -1,21 +1,21 @@
-use crate::JsRuleAction;
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
-    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_semantic::BindingExtensions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
     JsFunctionBody, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsReferenceIdentifier, JsScript, JsSetterClassMember,
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
-    TriviaPieceKind, WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
+    WalkEvent, declare_node_union,
 };
 use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
@@ -60,6 +60,17 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Functions that reference the [arguments
+    /// object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments)
+    /// are ignored because the arguments object is not available to arrow
+    /// functions.
+    ///
+    /// ```js
+    /// const q = function () {
+    ///     return arguments[0];
+    /// }
+    /// ```
+    ///
     /// Function expressions that declare the type of `this` are  also ignored:
     ///
     /// ```ts
@@ -79,16 +90,17 @@ declare_lint_rule! {
 }
 
 impl Rule for UseArrowFunction {
-    type Query = ActualThisScope;
+    type Query = Semantic<AnyThisScope>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseArrowFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let AnyThisScopeMetadata { scope, has_this } = ctx.query();
-        if *has_this {
-            return None;
-        }
+        let scope = ctx.query();
+        let model = ctx.model();
+        let root = scope.syntax();
+        let mut preorder = root.preorder();
+
         let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
             return None;
         };
@@ -123,12 +135,44 @@ impl Rule for UseArrowFunction {
             // Ignore cases where a prototype is required
             return None;
         }
+
+        while let Some(event) = preorder.next() {
+            match event {
+                WalkEvent::Enter(node) => {
+                    if node != *root
+                        && let Some(_) = AnyThisScope::cast_ref(&node)
+                    {
+                        // Stop crawling when we hit another function scope.
+                        preorder.skip_subtree();
+                    } else if matches!(
+                        node.kind(),
+                        JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
+                    ) {
+                        // If this function contains a this expression, it is not convertible
+                        // into an arrow function
+                        return None;
+                    }
+
+                    if let Some(reference) = JsReferenceIdentifier::cast_ref(&node)
+                        && reference.name().is_ok_and(|name| name == "arguments")
+                        && reference.binding(model).is_none()
+                    {
+                        // This method refers to arguments, and arguments has not
+                        // been reassigned as a variable (which is only permitted in
+                        // script mode, not module mode)
+                        return None;
+                    }
+                }
+                WalkEvent::Leave(_) => {}
+            }
+        }
+
         Some(())
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         let node = ctx.query();
-        let AnyThisScopeMetadata { scope, .. } = node;
+        let scope = node;
         let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
             return None;
         };
@@ -139,7 +183,7 @@ impl Rule for UseArrowFunction {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().scope.range(),
+                ctx.query().range(),
                 markup! {
                     "This "<Emphasis>"function expression"</Emphasis>" can be turned into an "<Emphasis>"arrow function"</Emphasis>"."
                 },
@@ -151,7 +195,7 @@ impl Rule for UseArrowFunction {
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let AnyThisScopeMetadata { scope, .. } = ctx.query();
+        let scope = ctx.query();
         let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
             return None;
         };
@@ -261,83 +305,6 @@ declare_node_union! {
         | JsSetterClassMember
         | JsSetterObjectMember
         | JsStaticInitializationBlockClassMember
-}
-
-#[derive(Debug, Clone)]
-pub struct AnyThisScopeMetadata {
-    scope: AnyThisScope,
-    has_this: bool,
-}
-
-pub struct ActualThisScope(AnyThisScopeMetadata);
-
-impl QueryMatch for ActualThisScope {
-    fn text_range(&self) -> TextRange {
-        self.0.scope.range()
-    }
-}
-
-impl Queryable for ActualThisScope {
-    type Input = Self;
-    type Language = JsLanguage;
-    type Output = AnyThisScopeMetadata;
-    type Services = ();
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
-    ) {
-        analyzer.add_visitor(Phases::Syntax, AnyThisScopeVisitor::default);
-    }
-
-    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
-        query.0.clone()
-    }
-}
-
-#[derive(Default)]
-struct AnyThisScopeVisitor {
-    /// Vector to hold a function or block where `this` is scoped.
-    /// The function or block is associated to a boolean indicating whether it contains `this`.
-    stack: Vec<AnyThisScopeMetadata>,
-}
-
-impl Visitor for AnyThisScopeVisitor {
-    type Language = JsLanguage;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                // When the visitor enters a function node, push a new entry on the stack
-                if let Some(scope) = AnyThisScope::cast_ref(node) {
-                    self.stack.push(AnyThisScopeMetadata {
-                        scope,
-                        has_this: false,
-                    });
-                } else if matches!(
-                    node.kind(),
-                    JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
-                ) {
-                    // When the visitor enters a `this` expression or `new.target`,
-                    // set the `has_this` flag for the top entry on the stack to `true`.
-                    if let Some(AnyThisScopeMetadata { has_this, .. }) = self.stack.last_mut() {
-                        *has_this = true;
-                    }
-                }
-            }
-            WalkEvent::Leave(node) => {
-                if AnyThisScope::can_cast(node.kind())
-                    && let Some(scope_metadata) = self.stack.pop()
-                {
-                    ctx.match_query(ActualThisScope(scope_metadata));
-                }
-            }
-        }
-    }
 }
 
 /// Get a minimal arrow function body from a regular function body.

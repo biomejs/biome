@@ -21,7 +21,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("{:", "SV_CURLY_COLON"),
         (",", "COMMA"),
     ],
-    keywords: &["null", "true", "false", "doctype", "html", "debug"],
+    keywords: &[
+        "null", "true", "false", "doctype", "html", "debug", "key", "render", "const", "attach",
+    ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
         "ERROR_TOKEN",
@@ -58,8 +60,15 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "ASTRO_EMBEDDED_CONTENT",
         // Svelte nodes
         "SVELTE_DEBUG_BLOCK",
+        "SVELTE_KEY_BLOCK",
+        "SVELTE_KEY_OPENING_BLOCK",
+        "SVELTE_KEY_CLOSING_BLOCK",
         "SVELTE_BINDING_LIST",
         "SVELTE_NAME",
+        "SVELTE_RENDER_BLOCK",
+        "SVELTE_ATTACH_ATTRIBUTE",
+        "SVELTE_HTML_BLOCK",
+        "SVELTE_CONST_BLOCK",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

@@ -40,9 +40,3 @@ Self close void elements: never
 } }}
 </template>
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" x => {\n\treturn \"hello\"\n} " => 14..40

@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithLocalModules.js
+---
+# Input
+```js
+/* should generate diagnostic for "./utils/other" but not "./utils/allowed" */
+import * as allowed from "./utils/allowed";
+import * as other from "./utils/other";
+
+```
+
+# Diagnostics
+```
+invalidWithLocalModules.js:3:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    1 │ /* should generate diagnostic for "./utils/other" but not "./utils/allowed" */
+    2 │ import * as allowed from "./utils/allowed";
+  > 3 │ import * as other from "./utils/other";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use named imports instead.
+  
+
+```

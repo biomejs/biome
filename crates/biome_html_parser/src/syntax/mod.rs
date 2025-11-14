@@ -3,9 +3,12 @@ mod parse_error;
 mod svelte;
 
 use crate::parser::HtmlParser;
+use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpressions};
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
-use crate::syntax::svelte::parse_svelte_at_block;
+use crate::syntax::svelte::{
+    parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+};
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -210,6 +213,39 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
+pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
+    match p.cur() {
+        T!["<![CDATA["] => parse_cdata_section(p),
+        T![<] => parse_element(p),
+        T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
+            p,
+            |p| parse_double_text_expression(p, HtmlLexContext::Regular),
+            |p, m| disabled_interpolation(p, m.range(p)),
+        ),
+        T!["{@"] => parse_svelte_at_block(p),
+        T!["{#"] => parse_svelte_hash_block(p),
+        T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
+            let m = p.start();
+            p.bump_remap(HTML_LITERAL);
+            Present(m.complete(p, HTML_CONTENT))
+        }),
+        T!["}}"] | T!['}'] => {
+            // The closing text expression should be handled by other functions.
+            // If we're here, we assume that text expressions are enabled and
+            // we remap to HTML_LITERAL
+            let m = p.start();
+            p.bump_remap(HTML_LITERAL);
+            Present(m.complete(p, HTML_CONTENT))
+        }
+        HTML_LITERAL => {
+            let m = p.start();
+            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
+            Present(m.complete(p, HTML_CONTENT))
+        }
+        _ => Absent,
+    }
+}
+
 #[derive(Default)]
 struct ElementList;
 
@@ -219,35 +255,7 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        match p.cur() {
-            T!["<![CDATA["] => parse_cdata_section(p),
-            T![<] => parse_element(p),
-            T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
-                p,
-                |p| parse_double_text_expression(p, HtmlLexContext::Regular),
-                |p, m| disabled_interpolation(p, m.range(p)),
-            ),
-            T!["{@"] => parse_svelte_at_block(p),
-            T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
-                let m = p.start();
-                p.bump_remap(HTML_LITERAL);
-                Present(m.complete(p, HTML_CONTENT))
-            }),
-            T!["}}"] | T!['}'] => {
-                // The closing text expression should be handled by other functions.
-                // If we're here, we assume that text expressions are enabled and
-                // we remap to HTML_LITERAL
-                let m = p.start();
-                p.bump_remap(HTML_LITERAL);
-                Present(m.complete(p, HTML_CONTENT))
-            }
-            HTML_LITERAL => {
-                let m = p.start();
-                p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
-                Present(m.complete(p, HTML_CONTENT))
-            }
-            _ => Absent,
-        }
+        parse_html_element(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -283,7 +291,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(EOF)
+        p.at(T![>]) || p.at(T![/]) || p.at(EOF) || p.at(T!['}'])
     }
 
     fn recover(
@@ -304,37 +312,46 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-    if p.at(T!["{{"]) {
-        HtmlSyntaxFeatures::DoubleTextExpressions
-            .parse_exclusive_syntax(
-                p,
-                |p| parse_double_text_expression(p, HtmlLexContext::InsideTag),
-                |p, marker| disabled_interpolation(p, marker.range(p)),
-            )
-            .ok();
+    match p.cur() {
+        T!["{{"] => {
+            let m = p.start();
+            DoubleTextExpressions
+                .parse_exclusive_syntax(
+                    p,
+                    |p| parse_double_text_expression(p, HtmlLexContext::InsideTag),
+                    |p, marker| disabled_interpolation(p, marker.range(p)),
+                )
+                .ok();
 
-        Present(m.complete(p, HTML_ATTRIBUTE))
-    } else if p.at(T!['{']) {
-        m.abandon(p);
-        HtmlSyntaxFeatures::SingleTextExpressions.parse_exclusive_syntax(
+            Present(m.complete(p, HTML_ATTRIBUTE))
+        }
+        T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
-        )
-    } else {
-        parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
-        if p.at(T![=]) {
-            parse_attribute_initializer(p).ok();
-            Present(m.complete(p, HTML_ATTRIBUTE))
-        } else {
-            Present(m.complete(p, HTML_ATTRIBUTE))
+        ),
+        T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
+            p,
+            |p| parse_attach_attribute(p),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+        ),
+        _ => {
+            let m = p.start();
+
+            parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            if p.at(T![=]) {
+                parse_attribute_initializer(p).ok();
+                Present(m.complete(p, HTML_ATTRIBUTE))
+            } else {
+                Present(m.complete(p, HTML_ATTRIBUTE))
+            }
         }
     }
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
     p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{']])
+        || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
@@ -460,10 +477,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     let checkpoint = p.checkpoint();
     let m = p.start();
     let opening_range = p.cur_range();
-    p.bump_with_context(
-        T!["{{"],
-        HtmlLexContext::TextExpression(TextExpressionKind::Double),
-    );
+    p.bump_with_context(T!["{{"], HtmlLexContext::double_expression());
 
     TextExpression::new_double().parse_element(p).ok();
 
@@ -471,7 +485,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
         p.expect_with_context(T!["}}"], context);
         Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
     } else if p.at(T![<]) {
-        let diagnostic = expected_text_expression(p, p.cur_range(), opening_range);
+        let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
         Present(m.complete(p, HTML_BOGUS_TEXT_EXPRESSION))
     } else {
@@ -481,7 +495,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
         let recovery =
             ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_TEXT_EXPRESSION_LIST);
         if let Ok(m) = recovery.enable_recovery_on_line_break().recover(p) {
-            let diagnostic = expected_text_expression(p, m.range(p), opening_range);
+            let diagnostic = expected_closing_text_expression(p, m.range(p), opening_range);
             p.error(diagnostic);
             Present(m)
         } else {
@@ -510,10 +524,7 @@ pub(crate) fn parse_single_text_expression(
     let m = p.start();
     let opening_range = p.cur_range();
 
-    p.bump_with_context(
-        T!['{'],
-        HtmlLexContext::TextExpression(TextExpressionKind::Single),
-    );
+    p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
 
     TextExpression::new_single().parse_element(p).ok();
 
@@ -521,7 +532,7 @@ pub(crate) fn parse_single_text_expression(
         p.bump_remap_with_context(T!['}'], context);
         Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
     } else if p.at(T![<]) {
-        let diagnostic = expected_text_expression(p, p.cur_range(), opening_range);
+        let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
         Present(m.complete(p, HTML_BOGUS_TEXT_EXPRESSION))
     } else {
@@ -530,7 +541,7 @@ pub(crate) fn parse_single_text_expression(
         let recovery =
             ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_TEXT_EXPRESSION_LIST);
         if let Ok(m) = recovery.enable_recovery_on_line_break().recover(p) {
-            let diagnostic = expected_text_expression(p, m.range(p), opening_range);
+            let diagnostic = expected_closing_text_expression(p, m.range(p), opening_range);
             p.error(diagnostic);
             Present(m)
         } else {
@@ -564,7 +575,6 @@ impl TextExpression {
         }
 
         let m = p.start();
-
         match self.kind {
             TextExpressionKind::Single => {
                 if p.at(T!["}}"]) {
@@ -572,8 +582,11 @@ impl TextExpression {
                         HTML_LITERAL,
                         HtmlLexContext::TextExpression(self.kind),
                     );
-                } else {
+                } else if !p.at(T!['}']) {
                     p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
+                } else {
+                    m.abandon(p);
+                    return Absent;
                 }
             }
             TextExpressionKind::Double => {

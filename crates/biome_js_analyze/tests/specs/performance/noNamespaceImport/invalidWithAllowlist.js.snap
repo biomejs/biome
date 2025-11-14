@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithAllowlist.js
+---
+# Input
+```js
+/* should generate diagnostic because "other-lib" is not in the allowlist */
+import * as z from "zod";
+import * as other from "other-lib";
+
+```
+
+# Diagnostics
+```
+invalidWithAllowlist.js:3:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    1 │ /* should generate diagnostic because "other-lib" is not in the allowlist */
+    2 │ import * as z from "zod";
+  > 3 │ import * as other from "other-lib";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use named imports instead.
+  
+
+```

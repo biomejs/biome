@@ -402,6 +402,18 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
+    "description": "File content differs from formatting output",
+    "check_name": "format",
+    "fingerprint": "15136662709985741127",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
     "description": "This variable implicitly has the any type.",
     "check_name": "lint/suspicious/noImplicitAnyLet",
     "fingerprint": "1339939023879653211",
@@ -758,6 +770,18 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
       "path": "main.ts",
       "lines": {
         "begin": 11
+      }
+    }
+  },
+  {
+    "description": "File content differs from formatting output",
+    "check_name": "format",
+    "fingerprint": "8454297847249184653",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 1
       }
     }
   }

@@ -69,6 +69,9 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::HtmlBogusAttribute(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::SvelteAttachAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;

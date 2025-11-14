@@ -1,7 +1,7 @@
 # Rome changelog
 
 Biome is a fork of [Rome Tools](https://github.com/rome/tools).
-This CHANGELOG describes all released of Rome Tools.
+This CHANGELOG describes all releases of Rome Tools.
 
 All releases of Biome are described in its own [CHANGELOG](./CHANGELOG.md).
 
@@ -85,14 +85,14 @@ the correct rules to apply [#4502](https://github.com/rome/tools/issues/4502)
 
 #### Other changes
 
-- Refactored the underling argument parsing logic. Changed the look and feel of the help
+- Refactored the underlying argument parsing logic. Changed the look and feel of the help
 output. [#4405](https://github.com/rome/tools/pull/4405).
 - The command `rome check` can accept input from `stdin`.
 - Add the argument `--stdin-file-path` to use when running `rome check` via `stdin`.
 - Add the argument `--formatter-enabled` to the command `rome check` to control the formatter via CLI.
 - Add the argument `--linter-enabled` to the command `rome check` to control the linter via CLI.
 - Add the argument `--organize-imports-enabled` to the command `rome check` to control the import sorting via CLI.
-- Add new command `rome migrate` the transform the configuration file `rome.json`
+- Add a new command `rome migrate` the transform the configuration file `rome.json`
 	when there are breaking changes.
 
 ### Configuration
@@ -108,14 +108,14 @@ output. [#4405](https://github.com/rome/tools/pull/4405).
 #### Other changes
 
 - Fix an issue where the VSCode extension duplicates text when using VSCode git utilities [#4338](https://github.com/rome/tools/issues/4338)
-- Remove code assists from being added to the code actions when apply fixes;
+- Remove code assists from being added to the code actions when applying fixes;
 - When requesting code actions, ignored files should not throw errors. Fixes [#4434](https://github.com/rome/tools/issues/4434)
 
 ### Formatter
 
 #### Other changes
 
-- Fix an issue where formatting of JSX string literals property values were using incorrect quotes [#4054](https://github.com/rome/tools/issues/4054)
+- Fix an issue where formatting of JSX string literals property values was using incorrect quotes [#4054](https://github.com/rome/tools/issues/4054)
 - Changed import assertion grammar to the new import attribute assertion
 ```diff
 - import "module" assert {}
@@ -241,9 +241,9 @@ if there are still diagnostics to be addressed.
 
 - `rome check` now checks import statements. This is an experimental feature that needs to be
 	enabled via configuration. Import can be sorted using `rome check --apply-unsafe`
-- Rome is able to auto discover the configuration file. If Rome doesn't fine a configuration in the
+- Rome is able to auto discover the configuration file. If Rome doesn't find a configuration in the
 working directory, it will try to find one in the parent directories.
-- Add a new global options called `--config-path`. It tells Rome to try and discover a `rome.json` file
+- Add a new global option called `--config-path`. It tells Rome to try and discover a `rome.json` file
 in the given path.
 	```shell
 	rome format --config-path=../../other/path/
@@ -509,7 +509,7 @@ Please give them a try by manually enabling them in your configuration and pleas
 
 - The concept of `backend` has been removed, in favor of the concept of `distribution`.
 - Removed the possibility to connect to the daemon, for the time being.
-- The APIs are asynchronous anymore.
+- The APIs are asynchronous now.
 
 #### Other changes
 
@@ -548,7 +548,7 @@ Please give them a try by manually enabling them in your configuration and pleas
 - Added a new argument `--linter-enabled` to the command `rome ci`.
 - Added the new `format` option `--trailing-comma` to configure where to add trailing commas.
 - Correctly show the supported options for `rome ci`, closes [#3456](https://github.com/rome/tools/issues/3456).
-- Fixed the command `rome ci` command to run the linter even if the formatter is disabled, closes [#3495](https://github.com/rome/tools/issues/3495).
+- Fixed the `rome ci` command to run the linter even if the formatter is disabled, closes [#3495](https://github.com/rome/tools/issues/3495).
 - Fixed the messaging of some diagnostics, [#3460](https://github.com/rome/tools/pull/3460).
 
 ### Configuration
@@ -565,7 +565,7 @@ Please give them a try by manually enabling them in your configuration and pleas
 
 - Added the new trailing comma option that configures where to add trailing commas. Supports the values: `all`, `es5` and `none`; refer to the [documentation](https://rome.tools/docs/#javascriptformattertrailingcomma) to learn more.
 - Improved JSX formatting [#3499](https://github.com/rome/tools/issues/3499), [#3211](https://github.com/rome/tools/issues/3211), [#3377](https://github.com/rome/tools/issues/3377)
-- Better formatting of object destructing
+- Better formatting of object destructuring
 - Improved formatting of test calls
 - Fixed formatting of trailing comments in arrow functions
 
@@ -829,7 +829,7 @@ configuration file `rome.json` to change the Rome's defaults.
 
 ### Formatter
 
-- JSX and TSX are now formatted by default! Make sure to enable Rome as default formatter in the VSCode extension.
+- JSX and TSX are now formatted by default! Make sure to enable Rome as the default formatter in the VSCode extension.
 - Improved the consistency of formatting of various statements:
   - call arguments;
   - object property members;
@@ -858,7 +858,7 @@ Fixes a regression introduced in the `rome format` command ([#2670](https://gith
 - TypeScript's formatting is better in line with what Prettier does.
 - Better formatting of string literals.
 Removing unnecessary quotes in string literals and quotes from member names.
-Correctly choose the correct quote based on quantity of quotes inside a literal:
+Correctly choose the correct quote based on the quantity of quotes inside a literal:
   ```js
   // original code
   let a = {
@@ -875,12 +875,12 @@ Correctly choose the correct quote based on quantity of quotes inside a literal:
   let c = '"content" \' ';
   ```
 - Better formatting of various statements
-- Improved the performance of the formatter an average of 20%-30%! Check the relevant
+- Improved the performance of the formatter by an average of 20%-30%! Check the relevant
 PRs [1](https://github.com/rome/tools/pull/2456), [2](https://github.com/rome/tools/pull/2638), [3](https://github.com/rome/tools/pull/2612), [4](https://github.com/rome/tools/pull/2462), [5](https://github.com/rome/tools/pull/2634) if you're interested in what the team did.
 
 To reach better compatibility with Prettier, the team had to revise the foundation of our printer,
 which caused some regressions around how comments are printed. These are known issues that we
-plan to close by next release.
+plan to close by the next release.
 
 ### Linter
 
@@ -891,7 +891,7 @@ Refer to the [website](https://rome.tools/#linter) to learn how to start using i
 
 ## 0.5.0
 
-- BREAKING CHANGES: the `format` command doesn't write on disk by default. Now the command prints on terminal.
+- BREAKING CHANGES: the `format` command doesn't write on disk by default. Now the command prints on the terminal.
 
     **Migration**: add the `--write` argument when calling `rome format`
 
