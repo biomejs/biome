@@ -82,9 +82,8 @@ glimmer_template_unclosed.gjs:2:16 parse ━━━━━━━━━━━━━
     1 │ // Unclosed template should produce error
   > 2 │ const Broken = <template>
       │                ^^^^^^^^^^
-  > 3 │   <div>This template is never closed
-  > 4 │ 
-      │ 
+    3 │   <div>This template is never closed
+    4 │ 
   
   i Add a closing `</template>` tag
   

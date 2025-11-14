@@ -1752,16 +1752,18 @@ impl<'src> JsLexer<'src> {
 
         // Check if we have enough bytes for "<template>"
         let template_bytes = b"template>";
-        for (i, &expected) in template_bytes.iter().enumerate() {
-            if self.byte_at(i + 1) != Some(expected) {
-                return None;
-            }
+        let end_pos = self.position + 1 + template_bytes.len();
+        if end_pos > self.source.len() {
+            return None;
+        }
+        if &self.source.as_bytes()[self.position + 1..end_pos] != template_bytes {
+            return None;
         }
 
         // Verify that 'template' is followed by '>' or whitespace (not part of identifier)
         match self.byte_at(9) {
             // Position after "<template"
-            Some(b'>') | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => {
+            Some(b'>' | b' ' | b'\t' | b'\n' | b'\r') => {
                 // This is indeed "<template"
             }
             _ => return None, // Not a template tag
@@ -1779,6 +1781,9 @@ impl<'src> JsLexer<'src> {
             self.next_byte();
         }
 
+        // Save the position after the opening tag for error reporting
+        let opening_tag_end = self.position;
+
         // Now search for "</template>"
         let closing_tag = b"</template>";
         let mut found_closing = false;
@@ -1786,15 +1791,10 @@ impl<'src> JsLexer<'src> {
         while self.position < self.source.len() {
             if let Some(b'<') = self.current_byte() {
                 // Check if this is "</template>"
-                let mut matches = true;
-                for (i, &expected) in closing_tag.iter().enumerate() {
-                    if self.byte_at(i) != Some(expected) {
-                        matches = false;
-                        break;
-                    }
-                }
-
-                if matches {
+                let end_pos = self.position + closing_tag.len();
+                if end_pos <= self.source.len()
+                    && &self.source.as_bytes()[self.position..end_pos] == closing_tag
+                {
                     // Found closing tag, consume it
                     self.advance(closing_tag.len());
                     found_closing = true;
@@ -1806,7 +1806,7 @@ impl<'src> JsLexer<'src> {
 
         if !found_closing {
             // Unclosed template - create diagnostic
-            let err = ParseDiagnostic::new("Unclosed `<template>` tag", start..self.position)
+            let err = ParseDiagnostic::new("Unclosed `<template>` tag", start..opening_tag_end)
                 .with_hint("Add a closing `</template>` tag");
             self.push_diagnostic(err);
         }
@@ -1832,10 +1832,10 @@ impl<'src> JsLexer<'src> {
     #[inline]
     fn resolve_less_than(&mut self) -> JsSyntaxKind {
         // Check for Glimmer template in .gjs/.gts files
-        if self.source_type.as_embedding_kind().is_glimmer() {
-            if let Some(template_kind) = self.try_lex_glimmer_template() {
-                return template_kind;
-            }
+        if self.source_type.as_embedding_kind().is_glimmer()
+            && let Some(template_kind) = self.try_lex_glimmer_template()
+        {
+            return template_kind;
         }
 
         match self.next_byte() {
