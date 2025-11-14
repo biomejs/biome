@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test that JSX (<div>) is forbidden in .gjs files
+// Only <template> tags are allowed, regular JSX is not
+const x = <div>content</div>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..114 "const" [Comments("// Test that JSX (<di ..."), Newline("\n"), Comments("// Only <template> ta ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@114..116 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@116..118 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: JsBogusExpression {
+                                    items: [
+                                        L_ANGLE@118..119 "<" [] [],
+                                        TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@119..122 "div" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                        R_ANGLE@122..123 ">" [] [],
+                                        JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@123..130 "content" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                operator_token: L_ANGLE@130..131 "<" [] [],
+                                right: JsRegexLiteralExpression {
+                                    value_token: JS_REGEX_LITERAL@131..137 "/div>;" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@137..138 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..138
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..137
+    0: JS_VARIABLE_STATEMENT@0..137
+      0: JS_VARIABLE_DECLARATION@0..137
+        0: (empty)
+        1: CONST_KW@0..114 "const" [Comments("// Test that JSX (<di ..."), Newline("\n"), Comments("// Only <template> ta ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@114..137
+          0: JS_VARIABLE_DECLARATOR@114..137
+            0: JS_IDENTIFIER_BINDING@114..116
+              0: IDENT@114..116 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@116..137
+              0: EQ@116..118 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@118..137
+                0: JS_BOGUS_EXPRESSION@118..130
+                  0: L_ANGLE@118..119 "<" [] []
+                  1: TS_REFERENCE_TYPE@119..122
+                    0: JS_REFERENCE_IDENTIFIER@119..122
+                      0: IDENT@119..122 "div" [] []
+                    1: (empty)
+                  2: R_ANGLE@122..123 ">" [] []
+                  3: JS_IDENTIFIER_EXPRESSION@123..130
+                    0: JS_REFERENCE_IDENTIFIER@123..130
+                      0: IDENT@123..130 "content" [] []
+                1: L_ANGLE@130..131 "<" [] []
+                2: JS_REGEX_LITERAL_EXPRESSION@131..137
+                  0: JS_REGEX_LITERAL@131..137 "/div>;" [] []
+      1: (empty)
+  4: EOF@137..138 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_lookalike_div.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // Test that JSX (<div>) is forbidden in .gjs files
+    2 │ // Only <template> tags are allowed, regular JSX is not
+  > 3 │ const x = <div>content</div>;
+      │           ^^^^^^^^^^^^
+    4 │ 
+  
+  i TypeScript only syntax
+  
+glimmer_lookalike_div.gjs:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    1 │ // Test that JSX (<div>) is forbidden in .gjs files
+    2 │ // Only <template> tags are allowed, regular JSX is not
+  > 3 │ const x = <div>content</div>;
+      │                              
+    4 │ 
+  
+  i ...but the line ends here
+  
+    1 │ // Test that JSX (<div>) is forbidden in .gjs files
+    2 │ // Only <template> tags are allowed, regular JSX is not
+  > 3 │ const x = <div>content</div>;
+      │                              
+    4 │ 
+  
+  i a regex literal starts there...
+  
+    1 │ // Test that JSX (<div>) is forbidden in .gjs files
+    2 │ // Only <template> tags are allowed, regular JSX is not
+  > 3 │ const x = <div>content</div>;
+      │                        ^
+    4 │ 
+  
+```
