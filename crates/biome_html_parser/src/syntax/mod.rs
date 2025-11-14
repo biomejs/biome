@@ -199,7 +199,12 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
                     && !closing.text(p).contains(opening_tag_name.as_str())
                 {
-                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                    let is_closing_void_element = is_closing_tag_for_void_element(&closing, p);
+                    if !is_closing_void_element {
+                        p.error(
+                            expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
+                        );
+                    }
                     closing.change_to_bogus(p);
                     continue;
                 }
@@ -212,6 +217,23 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
+fn is_void_element_name(name: &str) -> bool {
+    VOID_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(name))
+}
+
+fn is_closing_tag_for_void_element(closing: &CompletedMarker, p: &HtmlParser) -> bool {
+    let closing_text = closing.text(p);
+    if closing_text.starts_with("</")
+        && let Some(bracket_pos) = closing_text.find('>')
+    {
+        let tag_name = closing_text[2..bracket_pos].trim();
+        return is_void_element_name(tag_name);
+    }
+    false
+}
+
 fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
         return Absent;
@@ -219,9 +241,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![<], HtmlLexContext::InsideTag);
     p.bump_with_context(T![/], HtmlLexContext::InsideTag);
-    let should_be_self_closing = VOID_ELEMENTS
-        .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
+    let should_be_self_closing = is_void_element_name(p.cur_text());
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
