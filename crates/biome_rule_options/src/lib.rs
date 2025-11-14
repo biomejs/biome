@@ -292,6 +292,7 @@ pub mod use_exponentiation_operator;
 pub mod use_export_type;
 pub mod use_exports_last;
 pub mod use_filenaming_convention;
+pub mod use_find;
 pub mod use_flat_map;
 pub mod use_focusable_interactive;
 pub mod use_for_of;
