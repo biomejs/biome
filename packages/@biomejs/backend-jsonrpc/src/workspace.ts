@@ -1997,6 +1997,11 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 	 */
 	useExplicitType?: UseExplicitTypeConfiguration;
 	/**
+	* Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.
+See https://biomejs.dev/linter/rules/use-find 
+	 */
+	useFind?: UseFindConfiguration;
+	/**
 	* Enforce a maximum number of parameters in function definitions.
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
@@ -3580,6 +3585,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
+export type UseFindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseFindOptions;
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
@@ -4978,6 +4986,10 @@ export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
 }
+export interface RuleWithUseFindOptions {
+	level: RulePlainConfiguration;
+	options?: UseFindOptions;
+}
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
@@ -6220,6 +6232,7 @@ export interface UseDeprecatedDateOptions {
 }
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
+export type UseFindOptions = {};
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
@@ -7015,6 +7028,7 @@ export type Category =
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"

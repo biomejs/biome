@@ -203,6 +203,7 @@ define_categories! {
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
+    "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
