@@ -115,10 +115,6 @@ fn is_at_if_supports_test(p: &mut CssParser) -> bool {
 
 /// Parses a supports if condition test.
 ///
-/// # Grammar
-///
-/// `supports( [ <ident> : <declaration-value> ] | <supports-condition> )`
-///
 /// # Example
 ///
 /// ``` css
@@ -157,10 +153,6 @@ fn is_at_if_style_test(p: &mut CssParser) -> bool {
 
 /// Parses a style if condition test.
 ///
-/// # Grammar
-///
-/// `style( <style-query> )`
-///
 /// # Example
 ///
 /// ``` css
@@ -195,10 +187,6 @@ fn is_at_if_media_test(p: &mut CssParser) -> bool {
 }
 
 /// Parses a media if condition test.
-///
-/// # Grammar
-///
-/// `media( <media-feature> | <media-condition> )`
 ///
 /// # Example
 ///
