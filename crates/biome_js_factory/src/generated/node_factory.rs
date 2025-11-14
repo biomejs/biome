@@ -1895,6 +1895,12 @@ impl JsGetterObjectMemberBuilder {
         ))
     }
 }
+pub fn js_glimmer_template(template_token_token: SyntaxToken) -> JsGlimmerTemplate {
+    JsGlimmerTemplate::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_GLIMMER_TEMPLATE,
+        [Some(SyntaxElement::Token(template_token_token))],
+    ))
+}
 pub fn js_identifier_assignment(name_token: SyntaxToken) -> JsIdentifierAssignment {
     JsIdentifierAssignment::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT,

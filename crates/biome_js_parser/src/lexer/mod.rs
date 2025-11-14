@@ -132,6 +132,9 @@ pub(crate) struct JsLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: JsParserOptions,
+
+    /// The file source type (for determining if we're in .gjs/.gts files)
+    source_type: JsFileSource,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -311,11 +314,19 @@ impl<'src> JsLexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: JsParserOptions::default(),
+            source_type: JsFileSource::default(),
         }
     }
 
     pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    pub(crate) fn with_source_type(self, source_type: JsFileSource) -> Self {
+        Self {
+            source_type,
+            ..self
+        }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -1727,6 +1738,82 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Attempts to lex a Glimmer template block `<template>...</template>`.
+    /// Returns Some(GLIMMER_TEMPLATE) if a template was found, None otherwise.
+    fn try_lex_glimmer_template(&mut self) -> Option<JsSyntaxKind> {
+        // We're currently at '<', check if followed by 'template'
+        // Peek ahead without consuming
+        let start = self.position;
+
+        // Check for "<template"
+        if self.peek_byte() != Some(b't') {
+            return None;
+        }
+
+        // Check if we have enough bytes for "<template>"
+        let template_bytes = b"template>";
+        for (i, &expected) in template_bytes.iter().enumerate() {
+            if self.byte_at(i + 1) != Some(expected) {
+                return None;
+            }
+        }
+
+        // Verify that 'template' is followed by '>' or whitespace (not part of identifier)
+        match self.byte_at(9) {
+            // Position after "<template"
+            Some(b'>') | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => {
+                // This is indeed "<template"
+            }
+            _ => return None, // Not a template tag
+        }
+
+        // Consume "<template"
+        self.advance(9);
+
+        // Skip any attributes/whitespace until '>'
+        while let Some(chr) = self.current_byte() {
+            if chr == b'>' {
+                self.next_byte(); // consume '>'
+                break;
+            }
+            self.next_byte();
+        }
+
+        // Now search for "</template>"
+        let closing_tag = b"</template>";
+        let mut found_closing = false;
+
+        while self.position < self.source.len() {
+            if let Some(b'<') = self.current_byte() {
+                // Check if this is "</template>"
+                let mut matches = true;
+                for (i, &expected) in closing_tag.iter().enumerate() {
+                    if self.byte_at(i) != Some(expected) {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if matches {
+                    // Found closing tag, consume it
+                    self.advance(closing_tag.len());
+                    found_closing = true;
+                    break;
+                }
+            }
+            self.next_byte();
+        }
+
+        if !found_closing {
+            // Unclosed template - create diagnostic
+            let err = ParseDiagnostic::new("Unclosed `<template>` tag", start..self.position)
+                .with_hint("Add a closing `</template>` tag");
+            self.push_diagnostic(err);
+        }
+
+        Some(GLIMMER_TEMPLATE)
+    }
+
     #[inline]
     fn resolve_minus(&mut self) -> JsSyntaxKind {
         match self.next_byte() {
@@ -1744,6 +1831,13 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn resolve_less_than(&mut self) -> JsSyntaxKind {
+        // Check for Glimmer template in .gjs/.gts files
+        if self.source_type.as_embedding_kind().is_glimmer() {
+            if let Some(template_kind) = self.try_lex_glimmer_template() {
+                return template_kind;
+            }
+        }
+
         match self.next_byte() {
             Some(b'<') => {
                 if let Some(b'=') = self.next_byte() {

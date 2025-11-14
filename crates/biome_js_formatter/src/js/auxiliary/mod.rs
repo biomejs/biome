@@ -11,6 +11,7 @@ pub(crate) mod else_clause;
 pub(crate) mod expression_snipped;
 pub(crate) mod finally_clause;
 pub(crate) mod function_body;
+pub(crate) mod glimmer_template;
 pub(crate) mod initializer_clause;
 pub(crate) mod label;
 pub(crate) mod metavariable;

@@ -26,8 +26,14 @@ impl<'l> JsTokenSource<'l> {
     }
 
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'l str, options: JsParserOptions) -> Self {
-        let lexer = JsLexer::from_str(source).with_options(options);
+    pub fn from_str(
+        source: &'l str,
+        source_type: biome_js_syntax::JsFileSource,
+        options: JsParserOptions,
+    ) -> Self {
+        let lexer = JsLexer::from_str(source)
+            .with_options(options)
+            .with_source_type(source_type);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);
 

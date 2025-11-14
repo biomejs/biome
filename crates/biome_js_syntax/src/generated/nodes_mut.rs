@@ -1676,6 +1676,14 @@ impl JsGetterObjectMember {
         )
     }
 }
+impl JsGlimmerTemplate {
+    pub fn with_template_token_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl JsIdentifierAssignment {
     pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
