@@ -4,7 +4,6 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::AnyJsClass;
-use biome_rowan::AstNode;
 use biome_rule_options::no_class_assign::NoClassAssignOptions;
 
 use crate::services::semantic::Semantic;
