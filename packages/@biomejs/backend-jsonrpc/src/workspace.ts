@@ -1913,6 +1913,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 	 */
 	noShadow?: NoShadowConfiguration;
 	/**
+	* Prevent the usage of synchronous scripts.
+See https://biomejs.dev/linter/rules/no-sync-scripts 
+	 */
+	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
 	 */
@@ -3537,6 +3542,9 @@ export type NoReactForwardRefConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSyncScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncScriptsOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -4917,6 +4925,10 @@ export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
 }
+export interface RuleWithNoSyncScriptsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSyncScriptsOptions;
+}
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnknownAttributeOptions;
@@ -6189,6 +6201,7 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
+export type NoSyncScriptsOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -7006,6 +7019,7 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"

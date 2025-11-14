@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+const Invalid = () => {
+	return <script src="" />
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected synchronous script.
+  
+    1 │ const Invalid = () => {
+  > 2 │ 	return <script src="" />
+      │ 	       ^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute, or replace with Next.js' Script component.
+  
+
+```
