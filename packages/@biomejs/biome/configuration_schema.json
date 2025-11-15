@@ -4334,6 +4334,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSyncScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSyncScriptsOptions" }
+			]
+		},
+		"NoSyncScriptsOptions": { "type": "object", "additionalProperties": false },
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5115,6 +5122,13 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSyncScripts": {
+					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7488,6 +7502,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSwitchDeclarationsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSyncScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSyncScriptsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
