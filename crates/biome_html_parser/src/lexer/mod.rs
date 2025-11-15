@@ -491,7 +491,7 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
+            b"doctype" | b"DOCTYPE" if context.is_doctype() => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
             buffer if context.is_svelte() => match buffer {
                 b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
