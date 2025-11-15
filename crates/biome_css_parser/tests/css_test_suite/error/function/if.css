@@ -78,3 +78,6 @@
 	color: if(or style(--foo: bar): black;);
 }
 
+.empty-if {
+	color: if();
+}

@@ -35,7 +35,7 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
 /// Parses an if function from the current position of the CSS parser.
 ///
 /// For more detailed information on the CSS if function syntax, refer to the
-/// [CSS Conditional Value Section](https://drafts.csswg.org/css-values-5/#if-notation).
+/// [CSS Values and Units Module](https://drafts.csswg.org/css-values-5/#if-notation).
 ///
 /// # If Function Syntax Examples
 ///
@@ -220,6 +220,11 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_any_if_test(p: &mut CssParser) -> bool {
+    is_at_if_supports_test(p) || is_at_if_style_test(p) || is_at_if_media_test(p)
+}
+
+#[inline]
 fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
     if is_at_if_supports_test(p) {
         return parse_if_supports_test(p);
@@ -276,6 +281,11 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_TEST_BOOLEAN_NOT_EXPR))
 }
 
+#[inline]
+fn is_at_if_test_boolean_and_expr(p: &mut CssParser) -> bool {
+    p.at(T![and])
+}
+
 /// Parses `<boolean-expr-group> and <boolean-expr-group>`
 ///
 /// # Example
@@ -285,7 +295,7 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
 /// ```
 #[inline]
 fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
-    if !p.at(T![and]) {
+    if !is_at_if_test_boolean_and_expr(p) {
         return lhs;
     }
 
@@ -313,6 +323,11 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
     m.complete(p, CSS_IF_TEST_BOOLEAN_AND_EXPR)
 }
 
+#[inline]
+fn is_at_if_test_boolean_or_expr(p: &mut CssParser) -> bool {
+    p.at(T![or])
+}
+
 /// Parses `<boolean-expr-group> or <boolean-expr-group>`
 ///
 /// # Example
@@ -322,7 +337,7 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
 /// ```
 #[inline]
 fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
-    if !p.at(T![or]) {
+    if !is_at_if_test_boolean_or_expr(p) {
         return lhs;
     }
 
@@ -389,18 +404,6 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_BRANCH))
 }
 
-struct AnyIfTestParseRecovery;
-
-impl ParseRecovery for AnyIfTestParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
-    }
-}
-
 struct AnyIfTestBooleanExprChainParseRecovery;
 
 impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
@@ -409,7 +412,22 @@ impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
+        is_at_if_test_boolean_not_expr(p)
+            || is_at_if_test_boolean_and_expr(p)
+            || is_at_if_test_boolean_or_expr(p)
+            || p.has_preceding_line_break()
+    }
+}
+
+struct AnyIfTestParseRecovery;
+
+impl ParseRecovery for AnyIfTestParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')']) || p.has_preceding_line_break()
     }
 }
 
@@ -422,7 +440,7 @@ impl ParseRecovery for IfBranchListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
+        p.at(T![;]) || p.at(T![')']) || p.has_preceding_line_break()
     }
 }
 
@@ -455,5 +473,9 @@ impl ParseSeparatedList for CssIfBranchList {
 
     fn allow_trailing_separating_element(&self) -> bool {
         true
+    }
+
+    fn allow_empty(&self) -> bool {
+        false
     }
 }
