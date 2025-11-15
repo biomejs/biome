@@ -20,7 +20,6 @@ use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
-use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
