@@ -866,7 +866,7 @@
 					]
 				},
 				"noInvalidUseBeforeDeclaration": {
-					"description": "Disallow the use of variables and function parameters before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
+					"description": "Disallow the use of variables, function parameters, classes, and enums before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidUseBeforeDeclarationConfiguration" },
 						{ "type": "null" }
