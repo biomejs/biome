@@ -243,7 +243,9 @@ pub(crate) fn parse_glimmer_block_helper(p: &mut HtmlParser) -> ParsedSyntax {
     list_m.complete(p, HTML_ELEMENT_LIST);
 
     // Parse closing tag
-    let _ = parse_glimmer_block_helper_closing(p);
+    if parse_glimmer_block_helper_closing(p).is_absent() {
+        p.error(p.err_builder("Expected closing tag for block helper", p.cur_range()));
+    }
 
     Present(m.complete(p, GLIMMER_BLOCK_HELPER))
 }
