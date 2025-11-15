@@ -24,7 +24,8 @@ pub(crate) fn parse_glimmer_path(p: &mut HtmlParser, context: HtmlLexContext) ->
     let m = p.start();
 
     // Parse optional @ prefix (for argument references like @arg)
-    if p.at(AT) {
+    let has_at = p.at(AT);
+    if has_at {
         p.bump_with_context(AT, context);
     }
 
@@ -36,6 +37,9 @@ pub(crate) fn parse_glimmer_path(p: &mut HtmlParser, context: HtmlLexContext) ->
         let segment_m = p.start();
         p.bump_any_with_context(context); // IDENT or HTML_LITERAL
         segment_m.complete(p, GLIMMER_PATH_SEGMENT);
+    } else if has_at {
+        // @ was present but no identifier follows
+        p.error(p.err_builder("Expected identifier after '@'", p.cur_range()));
     }
 
     // Parse remaining segments separated by dots
