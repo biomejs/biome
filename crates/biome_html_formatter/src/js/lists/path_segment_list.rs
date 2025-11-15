@@ -9,7 +9,7 @@ impl FormatRule<GlimmerPathSegmentList> for FormatGlimmerPathSegmentList {
         // For separated lists, format each element and its separator
         for element in node.elements() {
             crate::prelude::write!(f, [element.node.format()])?;
-            if let Ok(Some(sep)) = &element.trailing_separator {
+            if let Ok(Some(sep)) = element.trailing_separator() {
                 crate::prelude::write!(f, [sep.format()])?;
             }
         }
