@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 135
 expression: valid.ts
 ---
 # Input
@@ -30,6 +29,7 @@ interface NestedBar {child:  {grandChild: {[FOO]: typeof FOO; enumFoo: EnumFoo}}
 const FOO = 'foo';
 enum EnumFoo {BAR = 'bar'}
 
-
+c;
+declare const c: number;
 
 ```

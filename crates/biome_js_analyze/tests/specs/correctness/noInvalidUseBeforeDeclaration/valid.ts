@@ -23,4 +23,5 @@ interface NestedBar {child:  {grandChild: {[FOO]: typeof FOO; enumFoo: EnumFoo}}
 const FOO = 'foo';
 enum EnumFoo {BAR = 'bar'}
 
-
+c;
+declare const c: number;
