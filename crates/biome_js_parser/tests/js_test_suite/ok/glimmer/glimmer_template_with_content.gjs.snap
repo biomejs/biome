@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Template with various content
+const MyTemplate = <template>
+  <div>
+    <h1>Hello {{name}}</h1>
+    <p>{{@description}}</p>
+    {{#each items as |item|}}
+      <li>{{item}}</li>
+    {{/each}}
+  </div>
+</template>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..39 "const" [Comments("// Template with vari ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@39..50 "MyTemplate" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@50..52 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@52..215 "<template>\n  <div>\n    <h1>Hello {{name}}</h1>\n    <p>{{@description}}</p>\n    {{#each items as |item|}}\n      <li>{{item}}</li>\n    {{/each}}\n  </div>\n</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@215..216 ";" [] [],
+        },
+    ],
+    eof_token: EOF@216..217 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..217
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..216
+    0: JS_VARIABLE_STATEMENT@0..216
+      0: JS_VARIABLE_DECLARATION@0..215
+        0: (empty)
+        1: CONST_KW@0..39 "const" [Comments("// Template with vari ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@39..215
+          0: JS_VARIABLE_DECLARATOR@39..215
+            0: JS_IDENTIFIER_BINDING@39..50
+              0: IDENT@39..50 "MyTemplate" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@50..215
+              0: EQ@50..52 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@52..215
+                0: GLIMMER_TEMPLATE@52..215 "<template>\n  <div>\n    <h1>Hello {{name}}</h1>\n    <p>{{@description}}</p>\n    {{#each items as |item|}}\n      <li>{{item}}</li>\n    {{/each}}\n  </div>\n</template>" [] []
+      1: SEMICOLON@215..216 ";" [] []
+  4: EOF@216..217 "" [Newline("\n")] []
+
+```

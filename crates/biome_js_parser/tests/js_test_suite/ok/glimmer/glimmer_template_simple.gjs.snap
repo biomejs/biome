@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Template as expression
+const MyTemplate = <template>Hello World</template>;
+
+// Export template
+export const Exported = <template>Exported content</template>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..32 "const" [Comments("// Template as expres ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@32..43 "MyTemplate" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@43..45 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@45..77 "<template>Hello World</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@77..78 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@78..106 "export" [Newline("\n"), Newline("\n"), Comments("// Export template"), Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: CONST_KW@106..112 "const" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@112..121 "Exported" [] [Whitespace(" ")],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: JsInitializerClause {
+                                eq_token: EQ@121..123 "=" [] [Whitespace(" ")],
+                                expression: JsGlimmerTemplate {
+                                    template_token_token: GLIMMER_TEMPLATE@123..160 "<template>Exported content</template>" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@160..161 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@161..162 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..162
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..161
+    0: JS_VARIABLE_STATEMENT@0..78
+      0: JS_VARIABLE_DECLARATION@0..77
+        0: (empty)
+        1: CONST_KW@0..32 "const" [Comments("// Template as expres ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@32..77
+          0: JS_VARIABLE_DECLARATOR@32..77
+            0: JS_IDENTIFIER_BINDING@32..43
+              0: IDENT@32..43 "MyTemplate" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@43..77
+              0: EQ@43..45 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@45..77
+                0: GLIMMER_TEMPLATE@45..77 "<template>Hello World</template>" [] []
+      1: SEMICOLON@77..78 ";" [] []
+    1: JS_EXPORT@78..161
+      0: JS_DECORATOR_LIST@78..78
+      1: EXPORT_KW@78..106 "export" [Newline("\n"), Newline("\n"), Comments("// Export template"), Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@106..161
+        0: JS_VARIABLE_DECLARATION@106..160
+          0: (empty)
+          1: CONST_KW@106..112 "const" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@112..160
+            0: JS_VARIABLE_DECLARATOR@112..160
+              0: JS_IDENTIFIER_BINDING@112..121
+                0: IDENT@112..121 "Exported" [] [Whitespace(" ")]
+              1: (empty)
+              2: JS_INITIALIZER_CLAUSE@121..160
+                0: EQ@121..123 "=" [] [Whitespace(" ")]
+                1: JS_GLIMMER_TEMPLATE@123..160
+                  0: GLIMMER_TEMPLATE@123..160 "<template>Exported content</template>" [] []
+        1: SEMICOLON@160..161 ";" [] []
+  4: EOF@161..162 "" [Newline("\n")] []
+
+```

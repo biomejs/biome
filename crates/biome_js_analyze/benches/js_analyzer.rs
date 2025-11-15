@@ -47,7 +47,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                         let file_source =
                             JsFileSource::try_from(test_case.path()).unwrap_or_default();
                         let parse =
-                            biome_js_parser::parse(code, file_source, JsParserOptions::default());
+                            biome_js_parser::parse_with_options(code, file_source, JsParserOptions::default());
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()

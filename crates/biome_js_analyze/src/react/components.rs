@@ -666,11 +666,11 @@ impl ReactSuperClass {
 #[cfg(test)]
 mod test {
     use super::*;
-    use biome_js_parser::{JsParserOptions, Parse, parse};
+    use biome_js_parser::{JsParserOptions, Parse, parse_with_options};
     use biome_js_syntax::{AnyJsRoot, JsFileSource};
 
     fn parse_jsx(code: &str) -> Parse<AnyJsRoot> {
-        let source = parse(code, JsFileSource::jsx(), JsParserOptions::default());
+        let source = parse_with_options(code, JsFileSource::jsx(), JsParserOptions::default());
 
         if source.has_errors() {
             panic!("syntax error")

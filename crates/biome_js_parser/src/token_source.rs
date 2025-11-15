@@ -25,9 +25,21 @@ impl<'l> JsTokenSource<'l> {
         }
     }
 
-    /// Creates a new token source for the given string
-    pub fn from_str(source: &'l str, options: JsParserOptions) -> Self {
-        let lexer = JsLexer::from_str(source).with_options(options);
+    /// Creates a new token source for the given string.
+    ///
+    /// Parser options are automatically derived from the `source_type` using
+    /// `From<&JsFileSource> for JsParserOptions`, ensuring consistent configuration
+    /// based on file characteristics.
+    pub fn from_str(
+        source: &'l str,
+        source_type: biome_js_syntax::JsFileSource,
+    ) -> Self {
+        // Derive parser options from file source type
+        let options = JsParserOptions::from(&source_type);
+
+        let lexer = JsLexer::from_str(source)
+            .with_options(options)
+            .with_source_type(source_type);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);
 

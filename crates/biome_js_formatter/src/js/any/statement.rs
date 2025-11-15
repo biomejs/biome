@@ -21,6 +21,7 @@ impl FormatRule<AnyJsStatement> for FormatAnyJsStatement {
             AnyJsStatement::JsForOfStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsForStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsFunctionDeclaration(node) => node.format().fmt(f),
+            AnyJsStatement::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsStatement::JsIfStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsLabeledStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsMetavariable(node) => node.format().fmt(f),

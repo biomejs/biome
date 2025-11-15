@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test incomplete "templat" at EOF
+// This tests lexer backtracking at EOF boundary
+const x = <templat
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..91 "const" [Comments("// Test incomplete \"t ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@91..93 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@93..95 "=" [] [Whitespace(" ")],
+                            expression: JsBogusExpression {
+                                items: [
+                                    L_ANGLE@95..96 "<" [] [],
+                                    TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@96..103 "templat" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@103..104 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..104
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..103
+    0: JS_VARIABLE_STATEMENT@0..103
+      0: JS_VARIABLE_DECLARATION@0..103
+        0: (empty)
+        1: CONST_KW@0..91 "const" [Comments("// Test incomplete \"t ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@91..103
+          0: JS_VARIABLE_DECLARATOR@91..103
+            0: JS_IDENTIFIER_BINDING@91..93
+              0: IDENT@91..93 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@93..103
+              0: EQ@93..95 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS_EXPRESSION@95..103
+                0: L_ANGLE@95..96 "<" [] []
+                1: TS_REFERENCE_TYPE@96..103
+                  0: JS_REFERENCE_IDENTIFIER@96..103
+                    0: IDENT@96..103 "templat" [] []
+                  1: (empty)
+      1: (empty)
+  4: EOF@103..104 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_incomplete_templat.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // Test incomplete "templat" at EOF
+    2 │ // This tests lexer backtracking at EOF boundary
+  > 3 │ const x = <templat
+      │           ^^^^^^^^
+    4 │ 
+  
+  i TypeScript only syntax
+  
+```

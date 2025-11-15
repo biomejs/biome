@@ -373,6 +373,12 @@ pub(crate) fn parse_statement(p: &mut JsParser, context: StatementContext) -> Pa
                 },
             )
         }
+        // Glimmer templates at top level in .gjs/.gts files
+        GLIMMER_TEMPLATE => {
+            let m = p.start();
+            p.bump(GLIMMER_TEMPLATE);
+            Present(m.complete(p, JS_GLIMMER_TEMPLATE))
+        }
         _ if is_at_expression(p) || is_at_metavariable(p) => parse_expression_statement(p),
         _ => Absent,
     }

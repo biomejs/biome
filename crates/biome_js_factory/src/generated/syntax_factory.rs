@@ -2655,6 +2655,25 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_GETTER_OBJECT_MEMBER, children)
             }
+            JS_GLIMMER_TEMPLATE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == GLIMMER_TEMPLATE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_GLIMMER_TEMPLATE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_GLIMMER_TEMPLATE, children)
+            }
             JS_IDENTIFIER_ASSIGNMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
