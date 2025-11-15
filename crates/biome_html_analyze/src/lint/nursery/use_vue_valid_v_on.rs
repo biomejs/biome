@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVOn {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVOn",
         language: "html",
         recommended: true,

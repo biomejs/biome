@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVIf {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVIf",
         language: "html",
         recommended: true,
