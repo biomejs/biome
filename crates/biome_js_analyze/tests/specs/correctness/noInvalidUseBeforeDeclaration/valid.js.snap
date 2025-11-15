@@ -16,8 +16,8 @@ let a; console.log(a);
 
 function h() { Y; }; const Y = 0;
 
-function f() {
-	const instance = new ClassC();
+function useClassInFunction() {
+	const instance = new Class();
 }
 class Class {
 	static SINGLETON = new Class();

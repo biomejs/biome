@@ -10,7 +10,7 @@ let a; console.log(a);
 
 function h() { Y; }; const Y = 0;
 
-function f() {
+function useClassInFunction() {
 	const instance = new Class();
 }
 class Class {

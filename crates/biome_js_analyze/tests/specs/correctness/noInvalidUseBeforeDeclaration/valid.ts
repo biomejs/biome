@@ -10,7 +10,7 @@ function f() {
 	const enum1Member = E1.A;
 }
 let e: E1;
-enum E1 { A }
+enum E1 { A, B = E1.A }
 
 let n = N.X;
 namespace N {

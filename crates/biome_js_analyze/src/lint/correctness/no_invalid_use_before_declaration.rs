@@ -41,14 +41,16 @@ declare_lint_rule! {
     /// function f(a = b, b = 0) {}
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// new C();
+    /// class C {}
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// f();
     /// function f() {}
-    ///
-    /// new C();
-    /// class C {}
     /// ```
     ///
     /// ```js
@@ -60,6 +62,14 @@ declare_lint_rule! {
     /// ```js
     /// function f() { return CONSTANT; }
     /// const CONSTANT = 0;
+    /// ```
+    ///
+    /// ```ts
+    /// function f() {
+    ///     new C();
+    /// }
+    /// let c: C;
+    /// class C {}
     /// ```
     pub NoInvalidUseBeforeDeclaration {
         version: "1.5.0",
@@ -106,8 +116,12 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             let Ok(declaration_kind) = DeclarationKind::try_from(&declaration) else {
                 continue;
             };
-            let declaration_end = if declaration_kind == DeclarationKind::Class {
+            let declaration_end = if matches!(
+                declaration_kind,
+                DeclarationKind::Class | DeclarationKind::Enum
+            ) {
                 // A class can be instantiated by its properties.
+                // Enum members can be qualified by the enum name.
                 id.range().end()
             } else {
                 declaration.range().end()
