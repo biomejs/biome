@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ops::Not};
+use std::{borrow::Cow, cmp::Ordering, ops::Not};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
@@ -133,6 +133,11 @@ declare_source_rule! {
     ///
     /// ### `groupByNesting`
     /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
+    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
+    /// followed by nested values (multi-line arrays and multi-line objects).
+    ///
+    /// > Default: `false`
+    ///
     ///
     /// ```json,options
     /// {
@@ -147,7 +152,7 @@ declare_source_rule! {
     ///     details: {
     ///         description: "nested"
     ///     },
-    ///     id: "123"
+    ///     id: 123
     /// };
     /// ```
     ///
@@ -162,22 +167,29 @@ declare_source_rule! {
 }
 
 /// Determines the nesting depth of a JavaScript expression for grouping purposes.
-fn get_nesting_depth_js(value: &AnyJsExpression) -> u8 {
+fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
     match value {
-        AnyJsExpression::JsObjectExpression(_) => 1,
+        AnyJsExpression::JsObjectExpression(obj) => {
+            // Check if object spans multiple lines by looking for newlines
+            if obj.syntax().text_trimmed().contains_char('\n') {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
         AnyJsExpression::JsArrayExpression(array) => {
             // Check if array spans multiple lines by looking for newlines
             if array.syntax().text_trimmed().contains_char('\n') {
-                1
+                Ordering::Greater
             } else {
-                0
+                Ordering::Equal
             }
         }
         // Function and class expressions are treated as nested
         AnyJsExpression::JsArrowFunctionExpression(_)
         | AnyJsExpression::JsFunctionExpression(_)
-        | AnyJsExpression::JsClassExpression(_) => 1,
-        _ => 0,
+        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
+        _ => Ordering::Equal,
     }
 }
 
@@ -185,15 +197,15 @@ fn get_nesting_depth_js(value: &AnyJsExpression) -> u8 {
 /// - properties: based on value expression;
 /// - methods/getters/setters: treat as nested (1);
 /// - spreads/computed or unnamed: non-sortable (None).
-fn get_member_depth(node: &AnyJsObjectMember) -> Option<u8> {
+fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
     match node {
         AnyJsObjectMember::JsPropertyObjectMember(prop) => {
             let value = prop.value().ok()?;
-            Some(get_nesting_depth_js(&value))
+            Some(get_nesting_depth(&value))
         }
         AnyJsObjectMember::JsMethodObjectMember(_)
         | AnyJsObjectMember::JsGetterObjectMember(_)
-        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(1),
+        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
         _ => None,
     }
 }
@@ -212,7 +224,7 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        if options.group_by_nesting {
+        if options.group_by_nesting.unwrap_or(false) {
             is_separated_list_sorted_by(
                 ctx.query(),
                 |node| {
@@ -238,12 +250,20 @@ impl Rule for UseSortedKeys {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let options = ctx.options();
+        let message = if options.group_by_nesting.unwrap_or(false) {
+            markup! {
+                "The object properties are not sorted by nesting level and key."
+            }
+        } else {
+            markup! {
+                "The object properties are not sorted by key."
+            }
+        };
         Some(RuleDiagnostic::new(
             category!("assist/source/useSortedKeys"),
             ctx.query().range(),
-            markup! {
-                "The object properties are not sorted by key."
-            },
+            message,
         ))
     }
 
@@ -264,7 +284,7 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        let new_list = if options.group_by_nesting {
+        let new_list = if options.group_by_nesting.unwrap_or(false) {
             sorted_separated_list_by(
                 list,
                 |node| {
