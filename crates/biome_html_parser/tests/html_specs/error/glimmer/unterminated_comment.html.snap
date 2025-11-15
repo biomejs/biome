@@ -1,0 +1,109 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div>
+  {{! This comment is not closed
+  <span>Content</span>
+</div>
+
+<div>
+  {{!-- This block comment is not closed
+  <span>Content</span>
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                GlimmerMustacheComment {
+                    comment_token_token: MUSTACHE_COMMENT@5..147 "{{! This comment is not closed\n  <span>Content</span>\n</div>\n\n<div>\n  {{!-- This block comment is not closed\n  <span>Content</span>\n</div>\n" [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@147..147 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..147
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..147
+    0: HTML_ELEMENT@0..147
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..147
+        0: GLIMMER_MUSTACHE_COMMENT@5..147
+          0: MUSTACHE_COMMENT@5..147 "{{! This comment is not closed\n  <span>Content</span>\n</div>\n\n<div>\n  {{!-- This block comment is not closed\n  <span>Content</span>\n</div>\n" [Newline("\n"), Whitespace("  ")] []
+      2: (empty)
+  4: EOF@147..147 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_comment.html:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated mustache comment, expected closing '}}'
+  
+     1 │ <div>
+   > 2 │   {{! This comment is not closed
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │   <span>Content</span>
+   > 4 │ </div>
+   > 5 │ 
+   > 6 │ <div>
+   > 7 │   {{!-- This block comment is not closed
+   > 8 │   <span>Content</span>
+   > 9 │ </div>
+  > 10 │ 
+       │ 
+  
+unterminated_comment.html:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+     8 │   <span>Content</span>
+     9 │ </div>
+  > 10 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+     8 │   <span>Content</span>
+     9 │ </div>
+  > 10 │ 
+       │ 
+  
+```

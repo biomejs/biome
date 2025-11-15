@@ -705,6 +705,8 @@ impl<'src> HtmlLexer<'src> {
     fn consume_mustache_comment(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_mustache_comment());
 
+        let comment_start = self.text_position();
+
         // Check if this is a multi-line comment {{!-- ... --}}
         let is_multiline = self.byte_at(3) == Some(b'-') && self.byte_at(4) == Some(b'-');
 
@@ -737,7 +739,14 @@ impl<'src> HtmlLexer<'src> {
             self.advance_byte_or_char(char);
         }
 
-        // If we reach EOF without finding closing, still return the token
+        // If we reach EOF without finding closing, emit an error
+        let expected_closing = if is_multiline { "--}}" } else { "}}" };
+        let err = ParseDiagnostic::new(
+            format!("Unterminated mustache comment, expected closing '{}'", expected_closing),
+            comment_start..self.text_position(),
+        );
+        self.diagnostics.push(err);
+
         MUSTACHE_COMMENT
     }
 
