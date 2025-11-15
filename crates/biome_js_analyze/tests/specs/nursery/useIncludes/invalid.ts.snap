@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* expect_diagnostic */
+const listWithIncludes = {
+    items: [1, 2, 3],
+    includes(searchElement: number) {
+        return this.items.includes(searchElement);
+    },
+    indexOf(searchElement: number) {
+        return this.items.indexOf(searchElement);
+    }
+};
+listWithIncludes.indexOf(2) !== -1;
+
+/* expect_diagnostic */
+const anotherListWithIncludes = {
+    items: [1, 2, 3],
+    includes(searchElement: number) {
+        return this.items.includes(searchElement);
+    },
+    indexOf(searchElement: number) {
+        return this.items.indexOf(searchElement);
+    }
+};
+anotherListWithIncludes.indexOf(4) === -1;
+
+/* expect_diagnostic */
+/a/.test("abc");
+
+/* expect_diagnostic */
+/a/i.test("ABC");
+
+```
+
+# Diagnostics
+```
+invalid.ts:26:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    25 │ /* expect_diagnostic */
+  > 26 │ /a/.test("abc");
+       │ ^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ /* expect_diagnostic */
+  
+  i Safe fix: Replace with 'includes()'
+  
+    24 24 │   
+    25 25 │   /* expect_diagnostic */
+    26    │ - /a/.test("abc");
+       26 │ + "abc".includes("a");
+    27 27 │   
+    28 28 │   /* expect_diagnostic */
+  
+
+```

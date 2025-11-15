@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+"foo".indexOf("o") !== -1;
+["a", "b", "c"].indexOf("a") === -1;
+
+"foo".indexOf(bar) >= 0;
+
+["a", "b", "c"].indexOf(bar) < 0;
+
+/a/.test("abc");
+
+/[ab]/.test("abc");
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+  > 1 │ "foo".indexOf("o") !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ ["a", "b", "c"].indexOf("a") === -1;
+    3 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+     1    │ - "foo".indexOf("o")·!==·-1;
+        1 │ + "foo".includes("o");
+     2  2 │   ["a", "b", "c"].indexOf("a") === -1;
+     3  3 │   
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    1 │ "foo".indexOf("o") !== -1;
+  > 2 │ ["a", "b", "c"].indexOf("a") === -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ "foo".indexOf(bar) >= 0;
+  
+  i Safe fix: Replace with 'includes()'
+  
+     1  1 │   "foo".indexOf("o") !== -1;
+     2    │ - ["a",·"b",·"c"].indexOf("a")·===·-1;
+        2 │ + !["a",·"b",·"c"].includes("a");
+     3  3 │   
+     4  4 │   "foo".indexOf(bar) >= 0;
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    2 │ ["a", "b", "c"].indexOf("a") === -1;
+    3 │ 
+  > 4 │ "foo".indexOf(bar) >= 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ ["a", "b", "c"].indexOf(bar) < 0;
+  
+  i Safe fix: Replace with 'includes()'
+  
+     2  2 │   ["a", "b", "c"].indexOf("a") === -1;
+     3  3 │   
+     4    │ - "foo".indexOf(bar)·>=·0;
+        4 │ + "foo".includes(bar);
+     5  5 │   
+     6  6 │   ["a", "b", "c"].indexOf(bar) < 0;
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    4 │ "foo".indexOf(bar) >= 0;
+    5 │ 
+  > 6 │ ["a", "b", "c"].indexOf(bar) < 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ /a/.test("abc");
+  
+  i Safe fix: Replace with 'includes()'
+  
+     4  4 │   "foo".indexOf(bar) >= 0;
+     5  5 │   
+     6    │ - ["a",·"b",·"c"].indexOf(bar)·<·0;
+        6 │ + !["a",·"b",·"c"].includes(bar);
+     7  7 │   
+     8  8 │   /a/.test("abc");
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+     6 │ ["a", "b", "c"].indexOf(bar) < 0;
+     7 │ 
+   > 8 │ /a/.test("abc");
+       │ ^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ /[ab]/.test("abc");
+  
+  i Safe fix: Replace with 'includes()'
+  
+     6  6 │   ["a", "b", "c"].indexOf(bar) < 0;
+     7  7 │   
+     8    │ - /a/.test("abc");
+        8 │ + "abc".includes("a");
+     9  9 │   
+    10 10 │   /[ab]/.test("abc");
+  
+
+```
