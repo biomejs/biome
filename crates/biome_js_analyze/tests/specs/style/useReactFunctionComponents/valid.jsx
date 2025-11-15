@@ -23,3 +23,11 @@ export default class Bar extends React.Component {
     return <div>This is a class component with error handling.</div>;
   }
 }
+
+const ErrorBoundary = class extends React.Component {
+  componentDidCatch(error, errorInfo) {}
+
+  render() {
+    return this.props.children;
+  }
+}
