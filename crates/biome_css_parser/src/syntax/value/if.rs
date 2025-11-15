@@ -22,7 +22,6 @@ use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_declaration;
-use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr;
@@ -217,11 +216,6 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_IF_MEDIA_TEST))
-}
-
-#[inline]
-fn is_at_any_if_test(p: &mut CssParser) -> bool {
-    is_at_if_supports_test(p) || is_at_if_style_test(p) || is_at_if_media_test(p)
 }
 
 #[inline]
