@@ -337,7 +337,6 @@ macro_rules! best_fitting {
 mod tests {
     use crate::prelude::*;
     use crate::{FormatState, SimpleFormatOptions, VecBuffer, write};
-    use biome_rowan::TextSize;
 
     struct TestFormat;
 
@@ -397,7 +396,7 @@ mod tests {
                 best_fitting![
                     format_args![text(
                         "Something that will not fit on a line with 30 character print width.",
-                        TextSize::default()
+                        None
                     )],
                     format_args![
                         group(&format_args![
