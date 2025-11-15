@@ -57,6 +57,14 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
 
         write!(f, [r_angle_token.format()])?;
 
+        // Handle whitespace sensitivity for trailing whitespace after the closing tag's `>`
+        if let Ok(r_angle_token) = &r_angle_token
+            && is_whitespace_sensitive
+            && r_angle_token.has_trailing_whitespace()
+        {
+            write!(f, [space()])?;
+        }
+
         Ok(())
     }
 }
