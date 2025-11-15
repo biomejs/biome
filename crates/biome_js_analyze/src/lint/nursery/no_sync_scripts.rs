@@ -70,9 +70,10 @@ fn validate_name(node: &AnyJsxElementName) -> Option<()> {
 }
 
 fn validate_attributes(list: &JsxAttributeList) -> Option<()> {
-    list.find_by_name("src")?;
-
-    if list.find_by_name("async").is_some() || list.find_by_name("defer").is_some() {
+    if list.find_by_name("src").is_none()
+        || list.find_by_name("async").is_some()
+        || list.find_by_name("defer").is_some()
+    {
         return None;
     }
 
