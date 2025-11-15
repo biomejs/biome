@@ -3041,6 +3041,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateSpreadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateSpreadOptions" }
+			]
+		},
+		"NoDuplicateSpreadOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateTestHooksConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5048,6 +5058,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSpread": {
+					"description": "Disallow JSX prop spreading the same identifier multiple times.\nSee https://biomejs.dev/linter/rules/no-duplicate-spread",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptySource": {
 					"description": "Disallow empty sources.\nSee https://biomejs.dev/linter/rules/no-empty-source",
 					"anyOf": [
@@ -6373,6 +6390,15 @@
 				"options": {
 					"$ref": "#/$defs/NoDuplicateSelectorsKeyframeBlockOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateSpreadOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateSpreadOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

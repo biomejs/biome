@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+const Valid1 = () => {
+	return <div {...props} something="else" />
+}
+
+const Valid2 = () => {
+	return <div something="else" {...props} />
+}
+
+const Valid3 = () => {
+	return <div {...props} something="else" {...otherProps} />
+}

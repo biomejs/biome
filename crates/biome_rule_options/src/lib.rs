@@ -63,6 +63,7 @@ pub mod no_duplicate_object_keys;
 pub mod no_duplicate_parameters;
 pub mod no_duplicate_properties;
 pub mod no_duplicate_selectors_keyframe_block;
+pub mod no_duplicate_spread;
 pub mod no_duplicate_test_hooks;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_empty_block;
