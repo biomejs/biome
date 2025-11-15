@@ -656,8 +656,21 @@ fn parse_triple_stash_expression(p: &mut HtmlParser) -> ParsedSyntax {
     if p.at(R_TRIPLE_CURLY) {
         p.bump_with_context(R_TRIPLE_CURLY, HtmlLexContext::Regular);
     } else {
-        // TODO: Add proper error handling for missing closing }}}
+        // Missing closing }}}, emit error and try to recover
         p.error(p.err_builder("Expected closing }}}", p.cur_range()));
+
+        // Try to resynchronize: consume tokens until we find }}} or reach a safe boundary
+        while !p.at(R_TRIPLE_CURLY) && !p.at(EOF) && !p.at(T![<]) {
+            p.bump_any();
+        }
+
+        // If we found }}}, consume it
+        if p.at(R_TRIPLE_CURLY) {
+            p.bump_with_context(R_TRIPLE_CURLY, HtmlLexContext::Regular);
+        } else {
+            // Reached EOF or safe boundary, switch context back to Regular
+            // (Note: We don't bump here since we're at a boundary token)
+        }
     }
 
     Present(m.complete(p, GLIMMER_TRIPLE_STASH_EXPRESSION))
