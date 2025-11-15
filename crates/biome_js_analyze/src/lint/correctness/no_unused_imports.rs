@@ -164,8 +164,9 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
     });
 }
 
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
 
 static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
