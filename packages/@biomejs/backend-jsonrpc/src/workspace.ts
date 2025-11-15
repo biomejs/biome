@@ -1569,7 +1569,7 @@ See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule
 	 */
 	noInvalidPositionAtImportRule?: NoInvalidPositionAtImportRuleConfiguration;
 	/**
-	* Disallow the use of variables and function parameters before their declaration.
+	* Disallow the use of variables, function parameters, classes, and enums before their declaration.
 See https://biomejs.dev/linter/rules/no-invalid-use-before-declaration 
 	 */
 	noInvalidUseBeforeDeclaration?: NoInvalidUseBeforeDeclarationConfiguration;

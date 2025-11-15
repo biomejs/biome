@@ -11,7 +11,7 @@ let a; console.log(a);
 function h() { Y; }; const Y = 0;
 
 function f() {
-	const instance = new ClassC();
+	const instance = new Class();
 }
 class Class {
 	static SINGLETON = new Class();
