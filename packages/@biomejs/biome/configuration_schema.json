@@ -5283,6 +5283,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.\nSee https://biomejs.dev/linter/rules/use-sorted-interface-members",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSpread": {
 					"description": "Enforce the use of the spread operator over .apply().\nSee https://biomejs.dev/linter/rules/use-spread",
 					"anyOf": [
@@ -9111,6 +9118,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSpreadOptions": {
 			"type": "object",
 			"properties": {
@@ -12030,6 +12047,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedInterfaceMembersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSortedInterfaceMembersOptions" }
+			]
+		},
+		"UseSortedInterfaceMembersOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {
