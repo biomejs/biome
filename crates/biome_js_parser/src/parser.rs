@@ -250,7 +250,7 @@ mod tests {
         expected = "Marker must either be `completed` or `abandoned` to avoid that children are implicitly attached to a marker's parent."
     )]
     fn uncompleted_markers_panic() {
-        let mut parser = JsParser::new(
+        let mut parser = JsParser::with_options(
             "'use strict'",
             JsFileSource::default(),
             JsParserOptions::default(),
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn completed_marker_doesnt_panic() {
-        let mut p = JsParser::new(
+        let mut p = JsParser::with_options(
             "'use strict'",
             JsFileSource::default(),
             JsParserOptions::default(),
@@ -275,7 +275,7 @@ mod tests {
 
     #[test]
     fn abandoned_marker_doesnt_panic() {
-        let mut p = JsParser::new(
+        let mut p = JsParser::with_options(
             "'use strict'",
             JsFileSource::default(),
             JsParserOptions::default(),

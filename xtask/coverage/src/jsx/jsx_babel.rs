@@ -47,7 +47,7 @@ impl TestCase for BabelJsxTestCase {
             source_type,
             options,
         );
-        let result = parse_with_options(parse(&self.code, source_type, options);
+        let result = parse_with_options(&self.code, source_type, options);
 
         if result.diagnostics().is_empty() {
             if let Some(bogus) = result

@@ -45,7 +45,7 @@ impl<T> Parse<T> {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// use biome_js_parser::{JsParserOptions, parse_script};
+    /// use biome_js_parser::parse_script;
     /// use biome_js_syntax::{JsIfStatement, JsSyntaxKind};
     /// use biome_rowan::{AstNode, AstNodeList};
     ///
@@ -54,8 +54,7 @@ impl<T> Parse<T> {
     ///     if (a > 5) {
     ///         /* something */
     ///     }
-    /// ",
-    ///  JsParserOptions::default()
+    /// "
     /// );
     ///
     /// // The first stmt in the root syntax node (Script) is the if statement.
@@ -155,11 +154,11 @@ fn parse_common(
 /// Or turned into a typed [`JsScript`](JsScript) with [`tree`](Parse::tree).
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_script};
+/// use biome_js_parser::parse_script;
 /// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
 /// use biome_rowan::{AstNode, Direction};
 ///
-/// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
+/// let parse = parse_script("foo.bar[2]");
 /// // Parse returns a JS Root which contains two lists, the directives and the statements, let's get the statements
 /// let stmt = parse.syntax().children().nth(1).unwrap();
 /// // The untyped syntax node of `foo.bar[2]`, the root node is `Script`.
@@ -200,14 +199,14 @@ pub fn parse_script(text: &str) -> Parse<JsScript> {
 ///
 /// Check the diagnostics emitted by the code
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::parse_module;
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
 ///
 /// someModule();
 /// "#;
 ///
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source);
 ///
 /// // Retrieve the diagnostics emitted
 /// assert_eq!(parse.diagnostics().len(), 0);
@@ -215,7 +214,7 @@ pub fn parse_script(text: &str) -> Parse<JsScript> {
 ///
 /// Retrieve the emitted AST and check its kind:
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::parse_module;
 /// use biome_js_syntax::JsSyntaxKind;
 /// use biome_rowan::AstNode;
 /// let source = r#"
@@ -223,7 +222,7 @@ pub fn parse_script(text: &str) -> Parse<JsScript> {
 ///
 /// someModule();
 /// "#;
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source);
 ///
 /// let tree = parse.tree();
 ///
@@ -244,22 +243,22 @@ pub fn parse_module(text: &str) -> Parse<JsModule> {
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse};
+/// use biome_js_parser::parse;
 /// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
-/// let mut parsed = parse("type F = {}", module, JsParserOptions::default());
+/// let mut parsed = parse("type F = {}", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text as JSX
 /// module = JsFileSource::jsx();
-/// parsed = parse("<Component></Component>", module, JsParserOptions::default());
+/// parsed = parse("<Component></Component>", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text with granular control
 /// module = JsFileSource::default()
 ///   .with_version(LanguageVersion::ESNext)
 ///   .with_module_kind(ModuleKind::Module)
 ///   .with_variant(LanguageVariant::Jsx);
-/// parsed = parse("foo[bar]", module, JsParserOptions::default());
+/// parsed = parse("foo[bar]", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
 /// Parses the provided string as an ECMAScript program.
@@ -307,7 +306,7 @@ fn parse_common_with_options(
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+/// use biome_js_parser::parse_js_with_cache;
 /// use biome_js_syntax::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///
@@ -315,11 +314,11 @@ fn parse_common_with_options(
 /// let mut cache = NodeCache::default();
 /// let mut source = "function f() { return 2 }";
 ///
-/// let parsed = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed = parse_js_with_cache(source, source_type, &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 ///
 /// source = "function bar() { return 3 }";
-/// let parsed  = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed  = parse_js_with_cache(source, source_type, &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
 /// Parses the provided string using a node cache for improved performance.
@@ -530,7 +529,6 @@ mod tests {
         let normal_parse = parse_js_with_cache(
             js_code,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
             &mut biome_rowan::NodeCache::default(),
         );
 

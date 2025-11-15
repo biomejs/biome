@@ -103,8 +103,11 @@ impl Test262TestCase {
         let files =
             TestCaseFiles::single(self.name.clone(), self.code.clone(), source_type, options);
 
-        match parse_with_options(parse(&code, source_type, options).ok() {
-            Ok(root) if !should_fail => {
+        let parsed = parse_with_options(&code, source_type, options);
+        let has_errors = parsed.has_errors();
+
+        match (parsed.try_tree(), has_errors, should_fail) {
+            (Some(root), false, false) => {
                 if let Some(bogus) = root
                     .syntax()
                     .descendants()
@@ -118,9 +121,12 @@ impl Test262TestCase {
                     TestRunOutcome::Passed(files)
                 }
             }
-            Err(_) if should_fail => TestRunOutcome::Passed(files),
-            Ok(_) if should_fail => TestRunOutcome::IncorrectlyPassed(files),
-            Err(errors) if !should_fail => TestRunOutcome::IncorrectlyErrored { errors, files },
+            (_, true, true) => TestRunOutcome::Passed(files),
+            (_, false, true) => TestRunOutcome::IncorrectlyPassed(files),
+            (_, true, false) => TestRunOutcome::IncorrectlyErrored {
+                errors: parsed.diagnostics().to_vec(),
+                files,
+            },
             _ => unreachable!(),
         }
     }

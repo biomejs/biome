@@ -85,7 +85,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
         );
 
         let mut prev_starts: HashSet<TextSize> = HashSet::default();
-        let r = biome_js_parser::parse_with_options(parse(&code, JsFileSource::tsx(), options);
+        let r = biome_js_parser::parse_with_options(&code, JsFileSource::tsx(), options);
         let mut actual: Vec<_> = biome_js_semantic::semantic_events(r.syntax())
             .into_iter()
             .filter(|x| {

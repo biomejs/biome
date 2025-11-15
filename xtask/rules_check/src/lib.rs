@@ -300,7 +300,7 @@ fn assert_lint(
                 _ => (code, file_source),
             };
 
-            let parse = biome_js_parser::parse(code, file_source, JsParserOptions::default());
+            let parse = biome_js_parser::parse(code, file_source);
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {

@@ -537,14 +537,12 @@ pub fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
 }
 
 fn parse(
-    biome_path: &BiomePath,
+    _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
-
     let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, cache);
     ParseResult {

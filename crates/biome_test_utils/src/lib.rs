@@ -12,7 +12,7 @@ use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsFileSource};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;

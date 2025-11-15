@@ -60,18 +60,16 @@ impl From<&JsFileSource> for JsParserOptions {
     /// centralized place to configure file-type-specific parsing behavior in the future.
     /// For example, Glimmer template parsing (.gjs/.gts files) is handled at the
     /// lexer level by checking the embedding kind.
-    fn from(file_source: &JsFileSource) -> Self {
-        let mut options = Self::default();
-
+    fn from(_file_source: &JsFileSource) -> Self {
         // File-type-specific options could be configured here based on:
-        // - file_source.language() - JavaScript vs TypeScript
-        // - file_source.variant() - Standard vs JSX
-        // - file_source.module_kind() - Script vs Module
-        // - file_source.as_embedding_kind() - Astro, Vue, Svelte, Glimmer, etc.
+        // - _file_source.language() - JavaScript vs TypeScript
+        // - _file_source.variant() - Standard vs JSX
+        // - _file_source.module_kind() - Script vs Module
+        // - _file_source.as_embedding_kind() - Astro, Vue, Svelte, Glimmer, etc.
         //
         // For now, Glimmer-specific behavior (template lexing) is handled in the lexer
-        // by checking file_source.as_embedding_kind().is_glimmer()
+        // by checking _file_source.as_embedding_kind().is_glimmer()
 
-        options
+        Self::default()
     }
 }

@@ -34,7 +34,7 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::parse;
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
