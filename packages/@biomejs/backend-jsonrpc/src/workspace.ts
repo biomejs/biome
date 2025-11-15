@@ -2007,7 +2007,7 @@ See https://biomejs.dev/linter/rules/use-find
 	 */
 	useFind?: UseFindConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce the use of includes() over indexOf().
 See https://biomejs.dev/linter/rules/use-includes 
 	 */
 	useIncludes?: UseIncludesConfiguration;
@@ -5011,6 +5011,7 @@ export interface RuleWithUseFindOptions {
 	options?: UseFindOptions;
 }
 export interface RuleWithUseIncludesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseIncludesOptions;
 }

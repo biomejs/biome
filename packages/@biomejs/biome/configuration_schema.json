@@ -5256,7 +5256,7 @@
 					]
 				},
 				"useIncludes": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-includes",
+					"description": "Enforce the use of includes() over indexOf().\nSee https://biomejs.dev/linter/rules/use-includes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseIncludesConfiguration" },
 						{ "type": "null" }
@@ -8744,6 +8744,7 @@
 		"RuleWithUseIncludesOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseIncludesOptions" }
 			},
