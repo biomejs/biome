@@ -11,9 +11,10 @@ use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of variables and function parameters before their declaration
+    /// Disallow the use of variables, function parameters, classes, and enums before their declaration
     ///
-    /// JavaScript doesn't allow the use of block-scoped variables (`let`, `const`) and function parameters before their declaration.
+    /// JavaScript doesn't allow the use of block-scoped variables (`let`, `const`), function parameters, and classes before their declaration.
+    /// Similarly TypeScript doesn't allow the use of enums before their declaration.
     /// A `ReferenceError` will be thrown with any attempt to access the variable or the parameter before its declaration.
     ///
     /// The rule also reports the use of variables declared with `var` before their declarations.
@@ -105,20 +106,17 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             let Ok(declaration_kind) = DeclarationKind::try_from(&declaration) else {
                 continue;
             };
-            let declaration_end = declaration.range().end();
-            let declaration_control_flow_root =
-                if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration
-                    .parent_binding_pattern_declaration()
-                    .unwrap_or(declaration)
-                {
-                    declarator
-                        .syntax()
-                        .ancestors()
-                        .skip(1)
-                        .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
-                } else {
-                    None
-                };
+            let declaration_end = if declaration_kind == DeclarationKind::Class {
+                // A class can be instantiated by its properties.
+                id.range().end()
+            } else {
+                declaration.range().end()
+            };
+            let declaration_control_flow_root = declaration
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()));
             for reference in binding.all_references() {
                 if reference.range_start() < declaration_end {
                     let reference_syntax = reference.syntax();
@@ -177,6 +175,8 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             binding_range: declaration_range,
         } = state;
         let declaration_kind_text = match declaration_kind {
+            DeclarationKind::Class => "class",
+            DeclarationKind::Enum => "enum",
             DeclarationKind::EnumMember => "enum member",
             DeclarationKind::Parameter => "parameter",
             DeclarationKind::Variable => "variable",
@@ -202,8 +202,10 @@ pub struct InvalidUseBeforeDeclaration {
     binding_range: TextRange,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DeclarationKind {
+    Class,
+    Enum,
     EnumMember,
     Parameter,
     Variable,
@@ -220,9 +222,8 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-                Ok(Self::Variable)
-            }
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => Ok(Self::Variable),
             AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
                 if let Some(var_decl) = declarator.declaration()
                     && let Some(var_decl_clause) = var_decl.parent::<JsVariableDeclarationClause>()
@@ -239,6 +240,21 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_)
             | AnyJsBindingDeclaration::TsPropertyParameter(_) => Ok(Self::Parameter),
+            AnyJsBindingDeclaration::JsClassDeclaration(_)
+            | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_) => {
+                if value.parent::<TsDeclareStatement>().is_some() {
+                    Err(())
+                } else {
+                    Ok(Self::Class)
+                }
+            }
+            AnyJsBindingDeclaration::TsEnumDeclaration(_) => {
+                if value.parent::<TsDeclareStatement>().is_some() {
+                    Err(())
+                } else {
+                    Ok(Self::Enum)
+                }
+            }
             // Other declarations allow use before definition
             AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
             | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -249,11 +265,9 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-            | AnyJsBindingDeclaration::JsClassDeclaration(_)
             | AnyJsBindingDeclaration::JsClassExpression(_)
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-            | AnyJsBindingDeclaration::TsEnumDeclaration(_)
             | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
@@ -261,8 +275,6 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
-            | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
             | AnyJsBindingDeclaration::JsCatchDeclaration(_) => Err(()),
