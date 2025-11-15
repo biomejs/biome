@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsObjectMember, AnyJsLiteralExpression, AnyJsMemberExpression,
-    JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
+    AnyJsObjectMember, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_includes::UseIncludesOptions;
@@ -21,7 +21,8 @@ declare_lint_rule! {
     /// Additionally, this rule reports the tests of simple regular expressions in favor of `String#includes`.
     ///
     /// This rule will report on any receiver object of an `indexOf` method call that has an `includes` method
-    /// where the two methods have the same parameters. Matching types include: `String`, `Array`, `ReadonlyArray`, and typed arrays.
+    /// where the two methods have the same parameters. This includes well-known built-in types like `String`, `Array`, `ReadonlyArray`, and typed arrays,
+    /// as well as user-defined objects that have both an `indexOf` and an `includes` method.
     ///
     /// ## Examples
     ///
@@ -39,6 +40,13 @@ declare_lint_rule! {
     /// /a/.test("abc")
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// const obj = {
+    ///     indexOf: (val) => [1, 2, 3].indexOf(val),
+    ///     includes: (val) => [1, 2, 3].includes(val),
+    /// };
+    /// obj.indexOf(2) > -1;
+    /// ```
     /// ### Valid
     ///
     /// ```js
@@ -413,26 +421,27 @@ fn matches_number_literal(expr: Option<&AnyJsExpression>, text: &str) -> bool {
 // This is true for `string`, `array`, and `typed array` types, or if it's an
 // object literal with an 'includes' property.
 fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool {
-    let Some(receiver_expr) = receiver else { return false };
+    let Some(receiver_expr) = receiver else {
+        return false;
+    };
 
     // Fast path for literals (already handled in your original code)
     if matches!(
         receiver_expr,
-        AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(_)
-        ) | AnyJsExpression::JsArrayExpression(_)
+        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
+            _
+        )) | AnyJsExpression::JsArrayExpression(_)
     ) {
         return true;
     }
 
     if let Some(object_expression) = receiver_expr.as_js_object_expression() {
         for member in object_expression.members() {
-            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property_member)) = member {
-                if let Ok(Some(name)) = property_member.name().map(|n| n.name()) {
-                    if name.text() == "includes" {
-                        return true;
-                    }
-                }
+            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property_member)) = member
+                && let Ok(Some(name)) = property_member.name().map(|n| n.name())
+                && name.text() == "includes"
+            {
+                return true;
             }
         }
     }
