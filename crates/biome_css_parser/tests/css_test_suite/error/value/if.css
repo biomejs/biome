@@ -27,3 +27,11 @@
 .invalid-style-query {
 	color: if(style(not a valid query): black);
 }
+
+.double-not {
+	color: if(not not(--style: black): black;);
+}
+
+.double-not-and {
+	color: if(not (style(--style: black) and not(--style: black)): black;);
+}

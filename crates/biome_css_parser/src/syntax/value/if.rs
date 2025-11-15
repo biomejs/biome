@@ -27,7 +27,6 @@ use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 
-/// Determines if the current position of the parser is at the beginning of an if function.
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if]) && p.nth_at(1, T!['('])
 }
@@ -242,13 +241,7 @@ fn parse_any_if_test_boolean_expr_group(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T!['(']) {
         let m = p.start();
         p.bump(T!['(']);
-        parse_any_if_test_boolean_expr(p)
-            .or_recover(
-                p,
-                &AnyIfTestBooleanExprParseRecovery,
-                expected_if_test_boolean_expr,
-            )
-            .ok();
+        parse_any_if_test_boolean_expr(p).ok();
         p.expect(T![')']);
         return Present(m.complete(p, CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS));
     }
@@ -277,13 +270,7 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![not]);
-    parse_any_if_test_boolean_expr_group(p)
-        .or_recover(
-            p,
-            &AnyIfTestBooleanExprParseRecovery,
-            expected_if_test_boolean_expr_group,
-        )
-        .ok();
+    parse_any_if_test_boolean_expr_group(p).ok();
 
     Present(m.complete(p, CSS_IF_TEST_BOOLEAN_NOT_EXPR))
 }
@@ -391,7 +378,7 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     parse_any_if_condition(p)
-        .or_recover(p, &IfBranchListParseRecovery, expected_if_branch)
+        .or_recover(p, &AnyIfTestParseRecovery, expected_if_branch)
         .ok();
 
     p.expect(T![:]);
@@ -401,25 +388,12 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_BRANCH))
 }
 
-struct IfBranchListParseRecovery;
+struct AnyIfTestParseRecovery;
 
-impl ParseRecovery for IfBranchListParseRecovery {
+impl ParseRecovery for AnyIfTestParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
-    }
-}
-
-struct AnyIfTestBooleanExprParseRecovery;
-
-impl ParseRecovery for AnyIfTestBooleanExprParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
@@ -432,6 +406,19 @@ impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+    }
+}
+
+struct IfBranchListParseRecovery;
+
+impl ParseRecovery for IfBranchListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
