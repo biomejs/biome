@@ -2007,6 +2007,11 @@ See https://biomejs.dev/linter/rules/use-find
 	 */
 	useFind?: UseFindConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/use-includes 
+	 */
+	useIncludes?: UseIncludesConfiguration;
+	/**
 	* Enforce a maximum number of parameters in function definitions.
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
@@ -3596,6 +3601,9 @@ export type UseExplicitTypeConfiguration =
 export type UseFindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFindOptions;
+export type UseIncludesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIncludesOptions;
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
@@ -5002,6 +5010,10 @@ export interface RuleWithUseFindOptions {
 	level: RulePlainConfiguration;
 	options?: UseFindOptions;
 }
+export interface RuleWithUseIncludesOptions {
+	level: RulePlainConfiguration;
+	options?: UseIncludesOptions;
+}
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
@@ -6246,6 +6258,7 @@ export interface UseDeprecatedDateOptions {
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
+export type UseIncludesOptions = {};
 export interface UseMaxParamsOptions {
 	/**
 	 * Maximum number of parameters allowed (default: 4)
@@ -7044,6 +7057,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"

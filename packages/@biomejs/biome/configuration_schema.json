@@ -5255,6 +5255,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIncludes": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-includes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseIncludesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
 					"anyOf": [
@@ -8734,6 +8741,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseIncludesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseIncludesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIndexOfOptions": {
 			"type": "object",
 			"properties": {
@@ -11586,6 +11602,13 @@
 			"type": "string",
 			"enum": ["auto", "inlineType", "separatedType"]
 		},
+		"UseIncludesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseIncludesOptions" }
+			]
+		},
+		"UseIncludesOptions": { "type": "object", "additionalProperties": false },
 		"UseIndexOfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
