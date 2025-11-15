@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVHtml {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVHtml",
         language: "html",
         recommended: true,

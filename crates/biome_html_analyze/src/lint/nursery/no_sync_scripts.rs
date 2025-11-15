@@ -27,7 +27,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSyncScripts {
-        version: "next",
+        version: "2.3.6",
         name: "noSyncScripts",
         language: "html",
         recommended: false,
