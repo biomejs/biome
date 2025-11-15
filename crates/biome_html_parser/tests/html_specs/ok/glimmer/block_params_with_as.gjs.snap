@@ -1,0 +1,294 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```glimmer
+<template>
+  {{#each items as |item|}}
+    {{item}}
+  {{/each}}
+
+  {{#let value as |v|}}
+    {{v}}
+  {{/let}}
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                GlimmerBlockHelper {
+                    opening: GlimmerBlockHelperOpening {
+                        l_curly2_token_token: L_DOUBLE_CURLY@10..15 "{{" [Newline("\n"), Whitespace("  ")] [],
+                        hash_token_token: HASH@15..16 "#" [] [],
+                        helper: GlimmerPath {
+                            at_token_token: missing (optional),
+                            segments: GlimmerPathSegmentList [
+                                GlimmerPathSegment {
+                                    value_token_token: IDENT@16..21 "each" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        arguments: GlimmerArgumentList [
+                            GlimmerPositionalArgument {
+                                value: GlimmerPath {
+                                    at_token_token: missing (optional),
+                                    segments: GlimmerPathSegmentList [
+                                        GlimmerPathSegment {
+                                            value_token_token: IDENT@21..27 "items" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block_params: GlimmerBlockParams {
+                            as_token_token: IDENT@27..30 "as" [] [Whitespace(" ")],
+                            l_pipe_token_token: PIPE@30..31 "|" [] [],
+                            params: GlimmerBlockParamList [
+                                GlimmerBlockParam {
+                                    name_token_token: IDENT@31..35 "item" [] [],
+                                },
+                            ],
+                            r_pipe_token_token: PIPE@35..36 "|" [] [],
+                        },
+                        r_curly2_token_token: R_DOUBLE_CURLY@36..38 "}}" [] [],
+                    },
+                    children: HtmlElementList [
+                        GlimmerMustacheExpression {
+                            l_curly2_token_token: L_DOUBLE_CURLY@38..45 "{{" [Newline("\n"), Whitespace("    ")] [],
+                            path: GlimmerPath {
+                                at_token_token: missing (optional),
+                                segments: GlimmerPathSegmentList [
+                                    GlimmerPathSegment {
+                                        value_token_token: IDENT@45..49 "item" [] [],
+                                    },
+                                ],
+                            },
+                            arguments: GlimmerArgumentList [],
+                            r_curly2_token_token: R_DOUBLE_CURLY@49..51 "}}" [] [],
+                        },
+                    ],
+                    closing: GlimmerBlockHelperClosing {
+                        l_curly2_token_token: L_DOUBLE_CURLY@51..56 "{{" [Newline("\n"), Whitespace("  ")] [],
+                        slash_token_token: SLASH@56..57 "/" [] [],
+                        helper: GlimmerPath {
+                            at_token_token: missing (optional),
+                            segments: GlimmerPathSegmentList [
+                                GlimmerPathSegment {
+                                    value_token_token: IDENT@57..61 "each" [] [],
+                                },
+                            ],
+                        },
+                        r_curly2_token_token: R_DOUBLE_CURLY@61..63 "}}" [] [],
+                    },
+                },
+                GlimmerBlockHelper {
+                    opening: GlimmerBlockHelperOpening {
+                        l_curly2_token_token: L_DOUBLE_CURLY@63..69 "{{" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        hash_token_token: HASH@69..70 "#" [] [],
+                        helper: GlimmerPath {
+                            at_token_token: missing (optional),
+                            segments: GlimmerPathSegmentList [
+                                GlimmerPathSegment {
+                                    value_token_token: IDENT@70..74 "let" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        arguments: GlimmerArgumentList [
+                            GlimmerPositionalArgument {
+                                value: GlimmerPath {
+                                    at_token_token: missing (optional),
+                                    segments: GlimmerPathSegmentList [
+                                        GlimmerPathSegment {
+                                            value_token_token: IDENT@74..80 "value" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block_params: GlimmerBlockParams {
+                            as_token_token: IDENT@80..83 "as" [] [Whitespace(" ")],
+                            l_pipe_token_token: PIPE@83..84 "|" [] [],
+                            params: GlimmerBlockParamList [
+                                GlimmerBlockParam {
+                                    name_token_token: IDENT@84..85 "v" [] [],
+                                },
+                            ],
+                            r_pipe_token_token: PIPE@85..86 "|" [] [],
+                        },
+                        r_curly2_token_token: R_DOUBLE_CURLY@86..88 "}}" [] [],
+                    },
+                    children: HtmlElementList [
+                        GlimmerMustacheExpression {
+                            l_curly2_token_token: L_DOUBLE_CURLY@88..95 "{{" [Newline("\n"), Whitespace("    ")] [],
+                            path: GlimmerPath {
+                                at_token_token: missing (optional),
+                                segments: GlimmerPathSegmentList [
+                                    GlimmerPathSegment {
+                                        value_token_token: IDENT@95..96 "v" [] [],
+                                    },
+                                ],
+                            },
+                            arguments: GlimmerArgumentList [],
+                            r_curly2_token_token: R_DOUBLE_CURLY@96..98 "}}" [] [],
+                        },
+                    ],
+                    closing: GlimmerBlockHelperClosing {
+                        l_curly2_token_token: L_DOUBLE_CURLY@98..103 "{{" [Newline("\n"), Whitespace("  ")] [],
+                        slash_token_token: SLASH@103..104 "/" [] [],
+                        helper: GlimmerPath {
+                            at_token_token: missing (optional),
+                            segments: GlimmerPathSegmentList [
+                                GlimmerPathSegment {
+                                    value_token_token: IDENT@104..107 "let" [] [],
+                                },
+                            ],
+                        },
+                        r_curly2_token_token: R_DOUBLE_CURLY@107..109 "}}" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
+                slash_token: SLASH@111..112 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@112..120 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@120..121 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@121..122 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..122
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..121
+    0: HTML_ELEMENT@0..121
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..109
+        0: GLIMMER_BLOCK_HELPER@10..63
+          0: GLIMMER_BLOCK_HELPER_OPENING@10..38
+            0: L_DOUBLE_CURLY@10..15 "{{" [Newline("\n"), Whitespace("  ")] []
+            1: HASH@15..16 "#" [] []
+            2: GLIMMER_PATH@16..21
+              0: (empty)
+              1: GLIMMER_PATH_SEGMENT_LIST@16..21
+                0: GLIMMER_PATH_SEGMENT@16..21
+                  0: IDENT@16..21 "each" [] [Whitespace(" ")]
+            3: GLIMMER_ARGUMENT_LIST@21..27
+              0: GLIMMER_POSITIONAL_ARGUMENT@21..27
+                0: GLIMMER_PATH@21..27
+                  0: (empty)
+                  1: GLIMMER_PATH_SEGMENT_LIST@21..27
+                    0: GLIMMER_PATH_SEGMENT@21..27
+                      0: IDENT@21..27 "items" [] [Whitespace(" ")]
+            4: GLIMMER_BLOCK_PARAMS@27..36
+              0: IDENT@27..30 "as" [] [Whitespace(" ")]
+              1: PIPE@30..31 "|" [] []
+              2: GLIMMER_BLOCK_PARAM_LIST@31..35
+                0: GLIMMER_BLOCK_PARAM@31..35
+                  0: IDENT@31..35 "item" [] []
+              3: PIPE@35..36 "|" [] []
+            5: R_DOUBLE_CURLY@36..38 "}}" [] []
+          1: HTML_ELEMENT_LIST@38..51
+            0: GLIMMER_MUSTACHE_EXPRESSION@38..51
+              0: L_DOUBLE_CURLY@38..45 "{{" [Newline("\n"), Whitespace("    ")] []
+              1: GLIMMER_PATH@45..49
+                0: (empty)
+                1: GLIMMER_PATH_SEGMENT_LIST@45..49
+                  0: GLIMMER_PATH_SEGMENT@45..49
+                    0: IDENT@45..49 "item" [] []
+              2: GLIMMER_ARGUMENT_LIST@49..49
+              3: R_DOUBLE_CURLY@49..51 "}}" [] []
+          2: GLIMMER_BLOCK_HELPER_CLOSING@51..63
+            0: L_DOUBLE_CURLY@51..56 "{{" [Newline("\n"), Whitespace("  ")] []
+            1: SLASH@56..57 "/" [] []
+            2: GLIMMER_PATH@57..61
+              0: (empty)
+              1: GLIMMER_PATH_SEGMENT_LIST@57..61
+                0: GLIMMER_PATH_SEGMENT@57..61
+                  0: IDENT@57..61 "each" [] []
+            3: R_DOUBLE_CURLY@61..63 "}}" [] []
+        1: GLIMMER_BLOCK_HELPER@63..109
+          0: GLIMMER_BLOCK_HELPER_OPENING@63..88
+            0: L_DOUBLE_CURLY@63..69 "{{" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: HASH@69..70 "#" [] []
+            2: GLIMMER_PATH@70..74
+              0: (empty)
+              1: GLIMMER_PATH_SEGMENT_LIST@70..74
+                0: GLIMMER_PATH_SEGMENT@70..74
+                  0: IDENT@70..74 "let" [] [Whitespace(" ")]
+            3: GLIMMER_ARGUMENT_LIST@74..80
+              0: GLIMMER_POSITIONAL_ARGUMENT@74..80
+                0: GLIMMER_PATH@74..80
+                  0: (empty)
+                  1: GLIMMER_PATH_SEGMENT_LIST@74..80
+                    0: GLIMMER_PATH_SEGMENT@74..80
+                      0: IDENT@74..80 "value" [] [Whitespace(" ")]
+            4: GLIMMER_BLOCK_PARAMS@80..86
+              0: IDENT@80..83 "as" [] [Whitespace(" ")]
+              1: PIPE@83..84 "|" [] []
+              2: GLIMMER_BLOCK_PARAM_LIST@84..85
+                0: GLIMMER_BLOCK_PARAM@84..85
+                  0: IDENT@84..85 "v" [] []
+              3: PIPE@85..86 "|" [] []
+            5: R_DOUBLE_CURLY@86..88 "}}" [] []
+          1: HTML_ELEMENT_LIST@88..98
+            0: GLIMMER_MUSTACHE_EXPRESSION@88..98
+              0: L_DOUBLE_CURLY@88..95 "{{" [Newline("\n"), Whitespace("    ")] []
+              1: GLIMMER_PATH@95..96
+                0: (empty)
+                1: GLIMMER_PATH_SEGMENT_LIST@95..96
+                  0: GLIMMER_PATH_SEGMENT@95..96
+                    0: IDENT@95..96 "v" [] []
+              2: GLIMMER_ARGUMENT_LIST@96..96
+              3: R_DOUBLE_CURLY@96..98 "}}" [] []
+          2: GLIMMER_BLOCK_HELPER_CLOSING@98..109
+            0: L_DOUBLE_CURLY@98..103 "{{" [Newline("\n"), Whitespace("  ")] []
+            1: SLASH@103..104 "/" [] []
+            2: GLIMMER_PATH@104..107
+              0: (empty)
+              1: GLIMMER_PATH_SEGMENT_LIST@104..107
+                0: GLIMMER_PATH_SEGMENT@104..107
+                  0: IDENT@104..107 "let" [] []
+            3: R_DOUBLE_CURLY@107..109 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@109..121
+        0: L_ANGLE@109..111 "<" [Newline("\n")] []
+        1: SLASH@111..112 "/" [] []
+        2: HTML_TAG_NAME@112..120
+          0: HTML_LITERAL@112..120 "template" [] []
+        3: R_ANGLE@120..121 ">" [] []
+  4: EOF@121..122 "" [Newline("\n")] []
+
+```

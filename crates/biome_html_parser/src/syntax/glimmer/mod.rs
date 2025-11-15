@@ -81,12 +81,13 @@ pub(crate) fn parse_glimmer_argument_list(
             value_m.complete(p, GLIMMER_STRING_LITERAL);
             arg_m.complete(p, GLIMMER_POSITIONAL_ARGUMENT);
         } else if p.at(IDENT) || p.at(HTML_LITERAL) {
-            // Check if this looks like block params (identifier followed by |)
-            // This would be the 'as' keyword in patterns like "as |param|"
+            // Check if this is the 'as' keyword followed by block params
+            // in patterns like "as |param|"
             let checkpoint = p.checkpoint();
+            let is_as_keyword = p.cur_text() == "as";
             p.bump_with_context(p.cur(), context);
 
-            if p.at(T![|]) {
+            if is_as_keyword && p.at(T![|]) {
                 // This is block params, not an argument - rewind and stop
                 p.rewind(checkpoint);
                 break;
@@ -353,20 +354,20 @@ fn parse_glimmer_block_helper_closing(p: &mut HtmlParser) -> ParsedSyntax {
 ///   params: GlimmerBlockParamList
 ///   r_pipe_token: '|'
 fn parse_glimmer_block_params(p: &mut HtmlParser, context: HtmlLexContext) -> ParsedSyntax {
-    if !p.at(IDENT) {
+    if !p.at(IDENT) || p.cur_text() != "as" {
         return Absent;
     }
 
     let m = p.start();
 
-    // Bump 'as' keyword (just check it's an identifier)
+    // Bump 'as' keyword
     p.bump_with_context(IDENT, context);
 
     // Bump opening |
     if p.at(T![|]) {
         p.bump_with_context(T![|], context);
     } else {
-        p.error(p.err_builder("Expected '|' after 'as'", p.cur_range()));
+        p.error(p.err_builder("Expected '|' after 'as' keyword", p.cur_range()));
     }
 
     // Parse parameter list
