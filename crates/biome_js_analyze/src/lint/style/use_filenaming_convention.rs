@@ -24,15 +24,16 @@ declare_lint_rule! {
     ///
     /// The rule supports the following exceptions:
     ///
-    /// - The name of the file can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
-    ///   For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    /// - The name of the file can start with a dot, a plus sign, or a dollar sign, be prefixed and suffixed by underscores `_`.
+    ///   For example, `.filename.js`, `+filename.js`, `$filename.js`, `__filename__.js`, or even `.__filename__.js`.
     ///
-    ///   The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///   - The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///   - The convention of prefixing a filename with a dollar sign is used by [TanStack Start](https://tanstack.com/start/latest/docs/framework/react/guide/routing#file-based-routing) for file-based routing.
     ///
     /// - Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
     ///   For example `[...slug].js` and `[[...slug]].js` are valid filenames.
     ///
-    /// Note that if you specify the `match' option, the previous exceptions will no longer be handled.
+    /// Note that if you specify the `match` option, the previous exceptions will no longer be handled.
     ///
     /// ## Ignoring some files
     ///
@@ -217,7 +218,9 @@ impl Rule for UseFilenamingConvention {
             //
             // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
             // [Vike](https://vike.dev/route) routing conventions where page name starts with `+`.
-            let file_name = if matches!(first_char, b'.' | b'+') {
+            //
+            // Support filenames starting with `$`.
+            let file_name = if matches!(first_char, b'.' | b'+' | b'$') {
                 &file_name[1..]
             } else {
                 file_name
@@ -305,6 +308,8 @@ impl Rule for UseFilenamingConvention {
                     // The filename starts with a dot
                     split.next()?
                 } else if let Some(stripped_name) = name.strip_prefix('+') {
+                    stripped_name
+                } else if let Some(stripped_name) = name.strip_prefix('$') {
                     stripped_name
                 } else {
                     name
