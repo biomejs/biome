@@ -22,6 +22,7 @@ use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_declaration;
+use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr;
@@ -396,7 +397,7 @@ impl ParseRecovery for AnyIfTestParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
     }
 }
 
@@ -408,7 +409,7 @@ impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
     }
 }
 
@@ -421,7 +422,7 @@ impl ParseRecovery for IfBranchListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+        p.at(T![;]) || p.at(T!['}']) || p.has_preceding_line_break()
     }
 }
 
