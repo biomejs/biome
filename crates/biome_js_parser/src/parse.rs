@@ -45,7 +45,7 @@ impl<T> Parse<T> {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// use biome_js_parser::{JsParserOptions, parse_script};
+    /// use biome_js_parser::parse_script;
     /// use biome_js_syntax::{JsIfStatement, JsSyntaxKind};
     /// use biome_rowan::{AstNode, AstNodeList};
     ///
@@ -54,8 +54,7 @@ impl<T> Parse<T> {
     ///     if (a > 5) {
     ///         /* something */
     ///     }
-    /// ",
-    ///  JsParserOptions::default()
+    /// "
     /// );
     ///
     /// // The first stmt in the root syntax node (Script) is the if statement.
@@ -142,9 +141,8 @@ impl From<JsOffsetParse> for AnyParse {
 fn parse_common(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
-    let mut parser = JsParser::new(text, source_type, options);
+    let mut parser = JsParser::new(text, source_type);
     syntax::program::parse(&mut parser);
 
     let (events, trivia, errors) = parser.finish();
@@ -156,11 +154,11 @@ fn parse_common(
 /// Or turned into a typed [`JsScript`](JsScript) with [`tree`](Parse::tree).
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_script};
+/// use biome_js_parser::parse_script;
 /// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
 /// use biome_rowan::{AstNode, Direction};
 ///
-/// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
+/// let parse = parse_script("foo.bar[2]");
 /// // Parse returns a JS Root which contains two lists, the directives and the statements, let's get the statements
 /// let stmt = parse.syntax().children().nth(1).unwrap();
 /// // The untyped syntax node of `foo.bar[2]`, the root node is `Script`.
@@ -183,11 +181,13 @@ fn parse_common(
 ///
 /// assert_eq!(&tokens, &vec!["foo", ".", "bar", "[", "2", "]"]);
 /// ```
-pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
+/// Parses the provided string as an ECMAScript script.
+///
+/// Parser options are automatically derived from the source type.
+pub fn parse_script(text: &str) -> Parse<JsScript> {
     parse(
         text,
         JsFileSource::js_module().with_module_kind(ModuleKind::Script),
-        options,
     )
     .cast::<JsScript>()
     .unwrap()
@@ -199,14 +199,14 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Check the diagnostics emitted by the code
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::parse_module;
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
 ///
 /// someModule();
 /// "#;
 ///
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source);
 ///
 /// // Retrieve the diagnostics emitted
 /// assert_eq!(parse.diagnostics().len(), 0);
@@ -214,7 +214,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Retrieve the emitted AST and check its kind:
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::parse_module;
 /// use biome_js_syntax::JsSyntaxKind;
 /// use biome_rowan::AstNode;
 /// let source = r#"
@@ -222,15 +222,18 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// someModule();
 /// "#;
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source);
 ///
 /// let tree = parse.tree();
 ///
 /// assert_eq!(tree.syntax().kind(), JsSyntaxKind::JS_MODULE);
 /// ```
 ///
-pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
-    parse(text, JsFileSource::js_module(), options)
+/// Parses the provided string as an ECMAScript module.
+///
+/// Parser options are automatically derived from the source type.
+pub fn parse_module(text: &str) -> Parse<JsModule> {
+    parse(text, JsFileSource::js_module())
         .cast::<JsModule>()
         .unwrap()
 }
@@ -240,27 +243,62 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse};
+/// use biome_js_parser::parse;
 /// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
-/// let mut parsed = parse("type F = {}", module, JsParserOptions::default());
+/// let mut parsed = parse("type F = {}", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text as JSX
 /// module = JsFileSource::jsx();
-/// parsed = parse("<Component></Component>", module, JsParserOptions::default());
+/// parsed = parse("<Component></Component>", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text with granular control
 /// module = JsFileSource::default()
 ///   .with_version(LanguageVersion::ESNext)
 ///   .with_module_kind(ModuleKind::Module)
 ///   .with_variant(LanguageVariant::Jsx);
-/// parsed = parse("foo[bar]", module, JsParserOptions::default());
+/// parsed = parse("foo[bar]", module);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
-pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) -> Parse<AnyJsRoot> {
+/// Parses the provided string as an ECMAScript program.
+///
+/// Parser options are automatically derived from the `source_type` based on
+/// file characteristics (language, variant, embedding kind, etc.).
+pub fn parse(text: &str, source_type: JsFileSource) -> Parse<AnyJsRoot> {
     let mut cache = NodeCache::default();
-    parse_js_with_cache(text, source_type, options, &mut cache)
+    parse_js_with_cache(text, source_type, &mut cache)
+}
+
+/// Parses with explicitly provided options (for testing).
+///
+/// This is primarily used by the test harness to apply custom parsing options
+/// from test configuration files. Regular code should use `parse` which derives
+/// options from the source type.
+pub fn parse_with_options(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+) -> Parse<AnyJsRoot> {
+    let mut cache = NodeCache::default();
+    let (events, errors, tokens) = parse_common_with_options(text, source_type, options);
+    let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, &mut cache);
+    biome_parser::event::process(&mut tree_sink, events, errors);
+    let (green, parse_errors) = tree_sink.finish();
+    Parse::new(green, parse_errors)
+}
+
+fn parse_common_with_options(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
+    let mut parser = parser::JsParser::with_options(text, source_type, options);
+    syntax::program::parse(&mut parser);
+
+    let (events, trivia, errors) = parser.finish();
+
+    (events, errors, trivia)
 }
 
 /// Parses the provided string as a EcmaScript program using the provided syntax features and node cache.
@@ -268,7 +306,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+/// use biome_js_parser::parse_js_with_cache;
 /// use biome_js_syntax::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///
@@ -276,20 +314,22 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// let mut cache = NodeCache::default();
 /// let mut source = "function f() { return 2 }";
 ///
-/// let parsed = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed = parse_js_with_cache(source, source_type, &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 ///
 /// source = "function bar() { return 3 }";
-/// let parsed  = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed  = parse_js_with_cache(source, source_type, &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
+/// Parses the provided string using a node cache for improved performance.
+///
+/// Parser options are automatically derived from the `source_type`.
 pub fn parse_js_with_cache(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common(text, source_type);
     let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
     biome_parser::event::process(&mut tree_sink, events, errors);
     let (green, parse_errors) = tree_sink.finish();
@@ -400,7 +440,7 @@ pub fn parse_js_with_offset_and_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> JsOffsetParse {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common_with_options(text, source_type, options);
     let mut tree_sink =
         crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, events, errors);
@@ -489,7 +529,6 @@ mod tests {
         let normal_parse = parse_js_with_cache(
             js_code,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
             &mut biome_rowan::NodeCache::default(),
         );
 

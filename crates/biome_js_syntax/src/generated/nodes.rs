@@ -3283,6 +3283,41 @@ pub struct JsGetterObjectMemberFields {
     pub body: SyntaxResult<JsFunctionBody>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsGlimmerTemplate {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsGlimmerTemplate {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsGlimmerTemplateFields {
+        JsGlimmerTemplateFields {
+            template_token_token: self.template_token_token(),
+        }
+    }
+    pub fn template_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for JsGlimmerTemplate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsGlimmerTemplateFields {
+    pub template_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsIdentifierAssignment {
     pub(crate) syntax: SyntaxNode,
 }
@@ -13723,6 +13758,7 @@ pub enum AnyJsClassMember {
     JsConstructorClassMember(JsConstructorClassMember),
     JsEmptyClassMember(JsEmptyClassMember),
     JsGetterClassMember(JsGetterClassMember),
+    JsGlimmerTemplate(JsGlimmerTemplate),
     JsMetavariable(JsMetavariable),
     JsMethodClassMember(JsMethodClassMember),
     JsPropertyClassMember(JsPropertyClassMember),
@@ -13758,6 +13794,12 @@ impl AnyJsClassMember {
     pub fn as_js_getter_class_member(&self) -> Option<&JsGetterClassMember> {
         match &self {
             Self::JsGetterClassMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_glimmer_template(&self) -> Option<&JsGlimmerTemplate> {
+        match &self {
+            Self::JsGlimmerTemplate(item) => Some(item),
             _ => None,
         }
     }
@@ -14268,6 +14310,7 @@ pub enum AnyJsExpression {
     JsComputedMemberExpression(JsComputedMemberExpression),
     JsConditionalExpression(JsConditionalExpression),
     JsFunctionExpression(JsFunctionExpression),
+    JsGlimmerTemplate(JsGlimmerTemplate),
     JsIdentifierExpression(JsIdentifierExpression),
     JsImportCallExpression(JsImportCallExpression),
     JsImportMetaExpression(JsImportMetaExpression),
@@ -14365,6 +14408,12 @@ impl AnyJsExpression {
     pub fn as_js_function_expression(&self) -> Option<&JsFunctionExpression> {
         match &self {
             Self::JsFunctionExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_glimmer_template(&self) -> Option<&JsGlimmerTemplate> {
+        match &self {
+            Self::JsGlimmerTemplate(item) => Some(item),
             _ => None,
         }
     }
@@ -15189,6 +15238,7 @@ pub enum AnyJsStatement {
     JsForOfStatement(JsForOfStatement),
     JsForStatement(JsForStatement),
     JsFunctionDeclaration(JsFunctionDeclaration),
+    JsGlimmerTemplate(JsGlimmerTemplate),
     JsIfStatement(JsIfStatement),
     JsLabeledStatement(JsLabeledStatement),
     JsMetavariable(JsMetavariable),
@@ -15286,6 +15336,12 @@ impl AnyJsStatement {
     pub fn as_js_function_declaration(&self) -> Option<&JsFunctionDeclaration> {
         match &self {
             Self::JsFunctionDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_glimmer_template(&self) -> Option<&JsGlimmerTemplate> {
+        match &self {
+            Self::JsGlimmerTemplate(item) => Some(item),
             _ => None,
         }
     }
@@ -20178,6 +20234,56 @@ impl From<JsGetterObjectMember> for SyntaxNode {
 }
 impl From<JsGetterObjectMember> for SyntaxElement {
     fn from(n: JsGetterObjectMember) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsGlimmerTemplate {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_GLIMMER_TEMPLATE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_GLIMMER_TEMPLATE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsGlimmerTemplate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsGlimmerTemplate")
+                .field(
+                    "template_token_token",
+                    &support::DebugSyntaxResult(self.template_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsGlimmerTemplate").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsGlimmerTemplate> for SyntaxNode {
+    fn from(n: JsGlimmerTemplate) -> Self {
+        n.syntax
+    }
+}
+impl From<JsGlimmerTemplate> for SyntaxElement {
+    fn from(n: JsGlimmerTemplate) -> Self {
         n.syntax.into()
     }
 }
@@ -33222,6 +33328,11 @@ impl From<JsGetterClassMember> for AnyJsClassMember {
         Self::JsGetterClassMember(node)
     }
 }
+impl From<JsGlimmerTemplate> for AnyJsClassMember {
+    fn from(node: JsGlimmerTemplate) -> Self {
+        Self::JsGlimmerTemplate(node)
+    }
+}
 impl From<JsMetavariable> for AnyJsClassMember {
     fn from(node: JsMetavariable) -> Self {
         Self::JsMetavariable(node)
@@ -33288,6 +33399,7 @@ impl AstNode for AnyJsClassMember {
         .union(JsConstructorClassMember::KIND_SET)
         .union(JsEmptyClassMember::KIND_SET)
         .union(JsGetterClassMember::KIND_SET)
+        .union(JsGlimmerTemplate::KIND_SET)
         .union(JsMetavariable::KIND_SET)
         .union(JsMethodClassMember::KIND_SET)
         .union(JsPropertyClassMember::KIND_SET)
@@ -33307,6 +33419,7 @@ impl AstNode for AnyJsClassMember {
                 | JS_CONSTRUCTOR_CLASS_MEMBER
                 | JS_EMPTY_CLASS_MEMBER
                 | JS_GETTER_CLASS_MEMBER
+                | JS_GLIMMER_TEMPLATE
                 | JS_METAVARIABLE
                 | JS_METHOD_CLASS_MEMBER
                 | JS_PROPERTY_CLASS_MEMBER
@@ -33329,6 +33442,7 @@ impl AstNode for AnyJsClassMember {
             }
             JS_EMPTY_CLASS_MEMBER => Self::JsEmptyClassMember(JsEmptyClassMember { syntax }),
             JS_GETTER_CLASS_MEMBER => Self::JsGetterClassMember(JsGetterClassMember { syntax }),
+            JS_GLIMMER_TEMPLATE => Self::JsGlimmerTemplate(JsGlimmerTemplate { syntax }),
             JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             JS_METHOD_CLASS_MEMBER => Self::JsMethodClassMember(JsMethodClassMember { syntax }),
             JS_PROPERTY_CLASS_MEMBER => {
@@ -33375,6 +33489,7 @@ impl AstNode for AnyJsClassMember {
             Self::JsConstructorClassMember(it) => &it.syntax,
             Self::JsEmptyClassMember(it) => &it.syntax,
             Self::JsGetterClassMember(it) => &it.syntax,
+            Self::JsGlimmerTemplate(it) => &it.syntax,
             Self::JsMetavariable(it) => &it.syntax,
             Self::JsMethodClassMember(it) => &it.syntax,
             Self::JsPropertyClassMember(it) => &it.syntax,
@@ -33395,6 +33510,7 @@ impl AstNode for AnyJsClassMember {
             Self::JsConstructorClassMember(it) => it.syntax,
             Self::JsEmptyClassMember(it) => it.syntax,
             Self::JsGetterClassMember(it) => it.syntax,
+            Self::JsGlimmerTemplate(it) => it.syntax,
             Self::JsMetavariable(it) => it.syntax,
             Self::JsMethodClassMember(it) => it.syntax,
             Self::JsPropertyClassMember(it) => it.syntax,
@@ -33417,6 +33533,7 @@ impl std::fmt::Debug for AnyJsClassMember {
             Self::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsGlimmerTemplate(it) => std::fmt::Debug::fmt(it, f),
             Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
@@ -33439,6 +33556,7 @@ impl From<AnyJsClassMember> for SyntaxNode {
             AnyJsClassMember::JsConstructorClassMember(it) => it.into(),
             AnyJsClassMember::JsEmptyClassMember(it) => it.into(),
             AnyJsClassMember::JsGetterClassMember(it) => it.into(),
+            AnyJsClassMember::JsGlimmerTemplate(it) => it.into(),
             AnyJsClassMember::JsMetavariable(it) => it.into(),
             AnyJsClassMember::JsMethodClassMember(it) => it.into(),
             AnyJsClassMember::JsPropertyClassMember(it) => it.into(),
@@ -34552,6 +34670,11 @@ impl From<JsFunctionExpression> for AnyJsExpression {
         Self::JsFunctionExpression(node)
     }
 }
+impl From<JsGlimmerTemplate> for AnyJsExpression {
+    fn from(node: JsGlimmerTemplate) -> Self {
+        Self::JsGlimmerTemplate(node)
+    }
+}
 impl From<JsIdentifierExpression> for AnyJsExpression {
     fn from(node: JsIdentifierExpression) -> Self {
         Self::JsIdentifierExpression(node)
@@ -34696,6 +34819,7 @@ impl AstNode for AnyJsExpression {
         .union(JsComputedMemberExpression::KIND_SET)
         .union(JsConditionalExpression::KIND_SET)
         .union(JsFunctionExpression::KIND_SET)
+        .union(JsGlimmerTemplate::KIND_SET)
         .union(JsIdentifierExpression::KIND_SET)
         .union(JsImportCallExpression::KIND_SET)
         .union(JsImportMetaExpression::KIND_SET)
@@ -34735,6 +34859,7 @@ impl AstNode for AnyJsExpression {
             | JS_COMPUTED_MEMBER_EXPRESSION
             | JS_CONDITIONAL_EXPRESSION
             | JS_FUNCTION_EXPRESSION
+            | JS_GLIMMER_TEMPLATE
             | JS_IDENTIFIER_EXPRESSION
             | JS_IMPORT_CALL_EXPRESSION
             | JS_IMPORT_META_EXPRESSION
@@ -34786,6 +34911,7 @@ impl AstNode for AnyJsExpression {
                 Self::JsConditionalExpression(JsConditionalExpression { syntax })
             }
             JS_FUNCTION_EXPRESSION => Self::JsFunctionExpression(JsFunctionExpression { syntax }),
+            JS_GLIMMER_TEMPLATE => Self::JsGlimmerTemplate(JsGlimmerTemplate { syntax }),
             JS_IDENTIFIER_EXPRESSION => {
                 Self::JsIdentifierExpression(JsIdentifierExpression { syntax })
             }
@@ -34860,6 +34986,7 @@ impl AstNode for AnyJsExpression {
             Self::JsComputedMemberExpression(it) => &it.syntax,
             Self::JsConditionalExpression(it) => &it.syntax,
             Self::JsFunctionExpression(it) => &it.syntax,
+            Self::JsGlimmerTemplate(it) => &it.syntax,
             Self::JsIdentifierExpression(it) => &it.syntax,
             Self::JsImportCallExpression(it) => &it.syntax,
             Self::JsImportMetaExpression(it) => &it.syntax,
@@ -34902,6 +35029,7 @@ impl AstNode for AnyJsExpression {
             Self::JsComputedMemberExpression(it) => it.syntax,
             Self::JsConditionalExpression(it) => it.syntax,
             Self::JsFunctionExpression(it) => it.syntax,
+            Self::JsGlimmerTemplate(it) => it.syntax,
             Self::JsIdentifierExpression(it) => it.syntax,
             Self::JsImportCallExpression(it) => it.syntax,
             Self::JsImportMetaExpression(it) => it.syntax,
@@ -34947,6 +35075,7 @@ impl std::fmt::Debug for AnyJsExpression {
             Self::JsComputedMemberExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsConditionalExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsGlimmerTemplate(it) => std::fmt::Debug::fmt(it, f),
             Self::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsImportCallExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsImportMetaExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -34991,6 +35120,7 @@ impl From<AnyJsExpression> for SyntaxNode {
             AnyJsExpression::JsComputedMemberExpression(it) => it.into(),
             AnyJsExpression::JsConditionalExpression(it) => it.into(),
             AnyJsExpression::JsFunctionExpression(it) => it.into(),
+            AnyJsExpression::JsGlimmerTemplate(it) => it.into(),
             AnyJsExpression::JsIdentifierExpression(it) => it.into(),
             AnyJsExpression::JsImportCallExpression(it) => it.into(),
             AnyJsExpression::JsImportMetaExpression(it) => it.into(),
@@ -36885,6 +37015,11 @@ impl From<JsFunctionDeclaration> for AnyJsStatement {
         Self::JsFunctionDeclaration(node)
     }
 }
+impl From<JsGlimmerTemplate> for AnyJsStatement {
+    fn from(node: JsGlimmerTemplate) -> Self {
+        Self::JsGlimmerTemplate(node)
+    }
+}
 impl From<JsIfStatement> for AnyJsStatement {
     fn from(node: JsIfStatement) -> Self {
         Self::JsIfStatement(node)
@@ -37000,6 +37135,7 @@ impl AstNode for AnyJsStatement {
         .union(JsForOfStatement::KIND_SET)
         .union(JsForStatement::KIND_SET)
         .union(JsFunctionDeclaration::KIND_SET)
+        .union(JsGlimmerTemplate::KIND_SET)
         .union(JsIfStatement::KIND_SET)
         .union(JsLabeledStatement::KIND_SET)
         .union(JsMetavariable::KIND_SET)
@@ -37036,6 +37172,7 @@ impl AstNode for AnyJsStatement {
                 | JS_FOR_OF_STATEMENT
                 | JS_FOR_STATEMENT
                 | JS_FUNCTION_DECLARATION
+                | JS_GLIMMER_TEMPLATE
                 | JS_IF_STATEMENT
                 | JS_LABELED_STATEMENT
                 | JS_METAVARIABLE
@@ -37077,6 +37214,7 @@ impl AstNode for AnyJsStatement {
             JS_FUNCTION_DECLARATION => {
                 Self::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
             }
+            JS_GLIMMER_TEMPLATE => Self::JsGlimmerTemplate(JsGlimmerTemplate { syntax }),
             JS_IF_STATEMENT => Self::JsIfStatement(JsIfStatement { syntax }),
             JS_LABELED_STATEMENT => Self::JsLabeledStatement(JsLabeledStatement { syntax }),
             JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
@@ -37128,6 +37266,7 @@ impl AstNode for AnyJsStatement {
             Self::JsForOfStatement(it) => &it.syntax,
             Self::JsForStatement(it) => &it.syntax,
             Self::JsFunctionDeclaration(it) => &it.syntax,
+            Self::JsGlimmerTemplate(it) => &it.syntax,
             Self::JsIfStatement(it) => &it.syntax,
             Self::JsLabeledStatement(it) => &it.syntax,
             Self::JsMetavariable(it) => &it.syntax,
@@ -37165,6 +37304,7 @@ impl AstNode for AnyJsStatement {
             Self::JsForOfStatement(it) => it.syntax,
             Self::JsForStatement(it) => it.syntax,
             Self::JsFunctionDeclaration(it) => it.syntax,
+            Self::JsGlimmerTemplate(it) => it.syntax,
             Self::JsIfStatement(it) => it.syntax,
             Self::JsLabeledStatement(it) => it.syntax,
             Self::JsMetavariable(it) => it.syntax,
@@ -37204,6 +37344,7 @@ impl std::fmt::Debug for AnyJsStatement {
             Self::JsForOfStatement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsForStatement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsGlimmerTemplate(it) => std::fmt::Debug::fmt(it, f),
             Self::JsIfStatement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsLabeledStatement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
@@ -37243,6 +37384,7 @@ impl From<AnyJsStatement> for SyntaxNode {
             AnyJsStatement::JsForOfStatement(it) => it.into(),
             AnyJsStatement::JsForStatement(it) => it.into(),
             AnyJsStatement::JsFunctionDeclaration(it) => it.into(),
+            AnyJsStatement::JsGlimmerTemplate(it) => it.into(),
             AnyJsStatement::JsIfStatement(it) => it.into(),
             AnyJsStatement::JsLabeledStatement(it) => it.into(),
             AnyJsStatement::JsMetavariable(it) => it.into(),
@@ -40676,6 +40818,11 @@ impl std::fmt::Display for JsGetterClassMember {
     }
 }
 impl std::fmt::Display for JsGetterObjectMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsGlimmerTemplate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

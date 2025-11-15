@@ -1,9 +1,14 @@
 mod astro;
+mod glimmer;
 mod parse_error;
 mod svelte;
 
 use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
+use crate::syntax::glimmer::{
+    parse_glimmer_argument_list, parse_glimmer_block_helper, parse_glimmer_mustache_expression,
+    parse_glimmer_path,
+};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::parse_svelte_at_block;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
@@ -31,9 +36,10 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
             Self::Astro => p.options().frontmatter,
-            Self::DoubleTextExpressions => {
-                p.options().text_expression == Some(TextExpressionKind::Double)
-            }
+            Self::DoubleTextExpressions => matches!(
+                p.options().text_expression,
+                Some(TextExpressionKind::Double | TextExpressionKind::DoubleGlimmer)
+            ),
             Self::SingleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Single)
             }
@@ -211,7 +217,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 #[derive(Default)]
-struct ElementList;
+pub(crate) struct ElementList;
 
 impl ParseNodeList for ElementList {
     type Kind = HtmlSyntaxKind;
@@ -222,11 +228,24 @@ impl ParseNodeList for ElementList {
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
-            T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
-                p,
-                |p| parse_double_text_expression(p, HtmlLexContext::Regular),
-                |p, m| disabled_interpolation(p, m.range(p)),
-            ),
+            MUSTACHE_COMMENT => parse_mustache_comment(p),
+            L_TRIPLE_CURLY => parse_triple_stash_expression(p),
+            T!["{{"] => {
+                // Try parsing as Glimmer block helper first (checks for '#')
+                parse_glimmer_block_helper(p).or_else(|| {
+                    // Try parsing as Glimmer mustache expression
+                    // If we're in a Glimmer file (.gjs/.gts), tokens inside will be lexed
+                    // with Glimmer context, so this will succeed
+                    parse_glimmer_mustache_expression(p).or_else(|| {
+                        // Fall back to generic double text expression for non-Glimmer files
+                        HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
+                            p,
+                            |p| parse_double_text_expression(p, HtmlLexContext::Regular),
+                            |p, m| disabled_interpolation(p, m.range(p)),
+                        )
+                    })
+                })
+            }
             T!["{@"] => parse_svelte_at_block(p),
             T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
                 let m = p.start();
@@ -586,8 +605,73 @@ impl TextExpression {
                     p.bump_remap_any_with_context(HtmlLexContext::TextExpression(self.kind))
                 }
             }
+            TextExpressionKind::Triple | TextExpressionKind::DoubleGlimmer => {
+                // Triple-stash and DoubleGlimmer expressions are properly tokenized by the lexer,
+                // so we don't need to remap. Just bump any token.
+                p.bump_any_with_context(HtmlLexContext::TextExpression(self.kind));
+            }
         }
 
         Present(m.complete(p, HTML_TEXT_EXPRESSION))
     }
+}
+
+/// Parse a Glimmer mustache comment.
+/// Grammar: GlimmerMustacheComment = comment_token: 'mustache_comment'
+fn parse_mustache_comment(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(MUSTACHE_COMMENT) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(MUSTACHE_COMMENT);
+    Present(m.complete(p, GLIMMER_MUSTACHE_COMMENT))
+}
+
+/// Parse a Glimmer triple-stash expression (unescaped HTML).
+/// Grammar: GlimmerTripleStashExpression =
+///   l_curly3_token: 'l_triple_curly'
+///   path: GlimmerPath
+///   arguments: GlimmerArgumentList
+///   r_curly3_token: 'r_triple_curly'
+fn parse_triple_stash_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(L_TRIPLE_CURLY) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let context = HtmlLexContext::TextExpression(TextExpressionKind::Triple);
+
+    // Bump with context to switch lexer to expression mode
+    p.bump_with_context(L_TRIPLE_CURLY, context);
+
+    // Parse the path (e.g., this.foo, helper, @arg)
+    let _ = parse_glimmer_path(p, context);
+
+    // Parse the argument list (can be empty)
+    let _ = parse_glimmer_argument_list(p, context);
+
+    // Bump closing }}} and switch back to regular context
+    if p.at(R_TRIPLE_CURLY) {
+        p.bump_with_context(R_TRIPLE_CURLY, HtmlLexContext::Regular);
+    } else {
+        // Missing closing }}}, emit error and try to recover
+        p.error(p.err_builder("Expected closing }}}", p.cur_range()));
+
+        // Try to resynchronize: consume tokens until we find }}} or reach a safe boundary
+        while !p.at(R_TRIPLE_CURLY) && !p.at(EOF) && !p.at(T![<]) {
+            p.bump_any();
+        }
+
+        // If we found }}}, consume it
+        if p.at(R_TRIPLE_CURLY) {
+            p.bump_with_context(R_TRIPLE_CURLY, HtmlLexContext::Regular);
+        } else {
+            // Reached EOF or safe boundary, switch context back to Regular
+            // (Note: We don't bump here since we're at a boundary token)
+        }
+    }
+
+    Present(m.complete(p, GLIMMER_TRIPLE_STASH_EXPRESSION))
 }

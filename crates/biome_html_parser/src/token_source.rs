@@ -57,11 +57,15 @@ pub(crate) enum HtmlLexContext {
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TextExpressionKind {
-    // {{ expr }}
+    // {{ expr }} - Generic (Vue, etc.)
     #[default]
     Double,
     // { expr }
     Single,
+    // {{{ expr }}} - Glimmer triple-stash (unescaped HTML)
+    Triple,
+    // {{ expr }} - Glimmer mustache expression (like Triple but with double curlies)
+    DoubleGlimmer,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]

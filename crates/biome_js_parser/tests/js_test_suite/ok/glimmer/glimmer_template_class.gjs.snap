@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Template in class body
+class MyComponent {
+  <template>
+    Hello from class
+  </template>
+}
+
+// Another class with template
+class AnotherComponent {
+  constructor() {
+    this.value = 42;
+  }
+
+  <template>
+    Component template
+  </template>
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..32 "class" [Comments("// Template in class  ..."), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@32..44 "MyComponent" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@44..45 "{" [] [],
+            members: JsClassMemberList [
+                JsGlimmerTemplate {
+                    template_token_token: GLIMMER_TEMPLATE@45..93 "<template>\n    Hello from class\n  </template>" [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            r_curly_token: R_CURLY@93..95 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@95..134 "class" [Newline("\n"), Newline("\n"), Comments("// Another class with ..."), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@134..151 "AnotherComponent" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@151..152 "{" [] [],
+            members: JsClassMemberList [
+                JsConstructorClassMember {
+                    modifiers: JsConstructorModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@152..166 "constructor" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    parameters: JsConstructorParameters {
+                        l_paren_token: L_PAREN@166..167 "(" [] [],
+                        parameters: JsConstructorParameterList [],
+                        r_paren_token: R_PAREN@167..169 ")" [] [Whitespace(" ")],
+                    },
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@169..170 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [
+                            JsExpressionStatement {
+                                expression: JsAssignmentExpression {
+                                    left: JsStaticMemberAssignment {
+                                        object: JsThisExpression {
+                                            this_token: THIS_KW@170..179 "this" [Newline("\n"), Whitespace("    ")] [],
+                                        },
+                                        dot_token: DOT@179..180 "." [] [],
+                                        member: JsName {
+                                            value_token: IDENT@180..186 "value" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    operator_token: EQ@186..188 "=" [] [Whitespace(" ")],
+                                    right: JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@188..190 "42" [] [],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@190..191 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@191..195 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                },
+                JsGlimmerTemplate {
+                    template_token_token: GLIMMER_TEMPLATE@195..246 "<template>\n    Component template\n  </template>" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            r_curly_token: R_CURLY@246..248 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@248..249 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..249
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..248
+    0: JS_CLASS_DECLARATION@0..95
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..32 "class" [Comments("// Template in class  ..."), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@32..44
+        0: IDENT@32..44 "MyComponent" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@44..45 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@45..93
+        0: JS_GLIMMER_TEMPLATE@45..93
+          0: GLIMMER_TEMPLATE@45..93 "<template>\n    Hello from class\n  </template>" [Newline("\n"), Whitespace("  ")] []
+      9: R_CURLY@93..95 "}" [Newline("\n")] []
+    1: JS_CLASS_DECLARATION@95..248
+      0: JS_DECORATOR_LIST@95..95
+      1: (empty)
+      2: CLASS_KW@95..134 "class" [Newline("\n"), Newline("\n"), Comments("// Another class with ..."), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@134..151
+        0: IDENT@134..151 "AnotherComponent" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@151..152 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@152..246
+        0: JS_CONSTRUCTOR_CLASS_MEMBER@152..195
+          0: JS_CONSTRUCTOR_MODIFIER_LIST@152..152
+          1: JS_LITERAL_MEMBER_NAME@152..166
+            0: IDENT@152..166 "constructor" [Newline("\n"), Whitespace("  ")] []
+          2: JS_CONSTRUCTOR_PARAMETERS@166..169
+            0: L_PAREN@166..167 "(" [] []
+            1: JS_CONSTRUCTOR_PARAMETER_LIST@167..167
+            2: R_PAREN@167..169 ")" [] [Whitespace(" ")]
+          3: JS_FUNCTION_BODY@169..195
+            0: L_CURLY@169..170 "{" [] []
+            1: JS_DIRECTIVE_LIST@170..170
+            2: JS_STATEMENT_LIST@170..191
+              0: JS_EXPRESSION_STATEMENT@170..191
+                0: JS_ASSIGNMENT_EXPRESSION@170..190
+                  0: JS_STATIC_MEMBER_ASSIGNMENT@170..186
+                    0: JS_THIS_EXPRESSION@170..179
+                      0: THIS_KW@170..179 "this" [Newline("\n"), Whitespace("    ")] []
+                    1: DOT@179..180 "." [] []
+                    2: JS_NAME@180..186
+                      0: IDENT@180..186 "value" [] [Whitespace(" ")]
+                  1: EQ@186..188 "=" [] [Whitespace(" ")]
+                  2: JS_NUMBER_LITERAL_EXPRESSION@188..190
+                    0: JS_NUMBER_LITERAL@188..190 "42" [] []
+                1: SEMICOLON@190..191 ";" [] []
+            3: R_CURLY@191..195 "}" [Newline("\n"), Whitespace("  ")] []
+        1: JS_GLIMMER_TEMPLATE@195..246
+          0: GLIMMER_TEMPLATE@195..246 "<template>\n    Component template\n  </template>" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+      9: R_CURLY@246..248 "}" [Newline("\n")] []
+  4: EOF@248..249 "" [Newline("\n")] []
+
+```

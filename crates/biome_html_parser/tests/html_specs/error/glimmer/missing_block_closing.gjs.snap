@@ -1,0 +1,218 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```glimmer
+<template>
+  {{#if condition}}
+    <div>Content</div>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                GlimmerBlockHelper {
+                    opening: GlimmerBlockHelperOpening {
+                        l_curly2_token_token: L_DOUBLE_CURLY@10..15 "{{" [Newline("\n"), Whitespace("  ")] [],
+                        hash_token_token: HASH@15..16 "#" [] [],
+                        helper: GlimmerPath {
+                            at_token_token: missing (optional),
+                            segments: GlimmerPathSegmentList [
+                                GlimmerPathSegment {
+                                    value_token_token: IDENT@16..19 "if" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        arguments: GlimmerArgumentList [
+                            GlimmerPositionalArgument {
+                                value: GlimmerPath {
+                                    at_token_token: missing (optional),
+                                    segments: GlimmerPathSegmentList [
+                                        GlimmerPathSegment {
+                                            value_token_token: IDENT@19..28 "condition" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block_params: missing (optional),
+                        r_curly2_token_token: R_DOUBLE_CURLY@28..30 "}}" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@30..36 "<" [Newline("\n"), Whitespace("    ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@36..39 "div" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@39..40 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@40..47 "Content" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@47..48 "<" [] [],
+                                slash_token: SLASH@48..49 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@49..52 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@52..53 ">" [] [],
+                            },
+                        },
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@53..55 "<" [Newline("\n")] [],
+                            name: missing (required),
+                            attributes: HtmlAttributeList [],
+                            slash_token: SLASH@55..56 "/" [] [],
+                            r_angle_token: missing (required),
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@56..64 "template" [] [],
+                        },
+                        HtmlContent {
+                            value_token: HTML_LITERAL@64..65 ">" [] [],
+                        },
+                    ],
+                    closing: missing (required),
+                },
+            ],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..66
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..65
+    0: HTML_ELEMENT@0..65
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..65
+        0: GLIMMER_BLOCK_HELPER@10..65
+          0: GLIMMER_BLOCK_HELPER_OPENING@10..30
+            0: L_DOUBLE_CURLY@10..15 "{{" [Newline("\n"), Whitespace("  ")] []
+            1: HASH@15..16 "#" [] []
+            2: GLIMMER_PATH@16..19
+              0: (empty)
+              1: GLIMMER_PATH_SEGMENT_LIST@16..19
+                0: GLIMMER_PATH_SEGMENT@16..19
+                  0: IDENT@16..19 "if" [] [Whitespace(" ")]
+            3: GLIMMER_ARGUMENT_LIST@19..28
+              0: GLIMMER_POSITIONAL_ARGUMENT@19..28
+                0: GLIMMER_PATH@19..28
+                  0: (empty)
+                  1: GLIMMER_PATH_SEGMENT_LIST@19..28
+                    0: GLIMMER_PATH_SEGMENT@19..28
+                      0: IDENT@19..28 "condition" [] []
+            4: (empty)
+            5: R_DOUBLE_CURLY@28..30 "}}" [] []
+          1: HTML_ELEMENT_LIST@30..65
+            0: HTML_ELEMENT@30..53
+              0: HTML_OPENING_ELEMENT@30..40
+                0: L_ANGLE@30..36 "<" [Newline("\n"), Whitespace("    ")] []
+                1: HTML_TAG_NAME@36..39
+                  0: HTML_LITERAL@36..39 "div" [] []
+                2: HTML_ATTRIBUTE_LIST@39..39
+                3: R_ANGLE@39..40 ">" [] []
+              1: HTML_ELEMENT_LIST@40..47
+                0: HTML_CONTENT@40..47
+                  0: HTML_LITERAL@40..47 "Content" [] []
+              2: HTML_CLOSING_ELEMENT@47..53
+                0: L_ANGLE@47..48 "<" [] []
+                1: SLASH@48..49 "/" [] []
+                2: HTML_TAG_NAME@49..52
+                  0: HTML_LITERAL@49..52 "div" [] []
+                3: R_ANGLE@52..53 ">" [] []
+            1: HTML_SELF_CLOSING_ELEMENT@53..56
+              0: L_ANGLE@53..55 "<" [Newline("\n")] []
+              1: (empty)
+              2: HTML_ATTRIBUTE_LIST@55..55
+              3: SLASH@55..56 "/" [] []
+              4: (empty)
+            2: HTML_CONTENT@56..64
+              0: HTML_LITERAL@56..64 "template" [] []
+            3: HTML_CONTENT@64..65
+              0: HTML_LITERAL@64..65 ">" [] []
+          2: (empty)
+      2: (empty)
+  4: EOF@65..66 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_block_closing.gjs:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '/'.
+  
+    2 │   {{#if condition}}
+    3 │     <div>Content</div>
+  > 4 │ </template>
+      │  ^
+    5 │ 
+  
+  i Expected an element name here.
+  
+    2 │   {{#if condition}}
+    3 │     <div>Content</div>
+  > 4 │ </template>
+      │  ^
+    5 │ 
+  
+missing_block_closing.gjs:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `template`
+  
+    2 │   {{#if condition}}
+    3 │     <div>Content</div>
+  > 4 │ </template>
+      │   ^^^^^^^^
+    5 │ 
+  
+  i Remove template
+  
+missing_block_closing.gjs:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected closing tag for block helper
+  
+    3 │     <div>Content</div>
+    4 │ </template>
+  > 5 │ 
+      │ 
+  
+```

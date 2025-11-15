@@ -19,6 +19,7 @@ pub mod context;
 mod cst;
 mod generated;
 mod html;
+mod js;
 pub(crate) mod prelude;
 pub(crate) mod separated;
 mod svelte;

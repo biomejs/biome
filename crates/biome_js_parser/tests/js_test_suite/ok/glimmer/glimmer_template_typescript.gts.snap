@@ -1,0 +1,166 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+// Template in TypeScript file
+const MyTemplate: TemplateFactory = <template>
+  <div>Hello TypeScript</div>
+</template>;
+
+// Class with template in TypeScript
+class TypedComponent {
+  private value: number = 42;
+
+  <template>
+    <span>{{this.value}}</span>
+  </template>
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..37 "const" [Comments("// Template in TypeSc ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@37..47 "MyTemplate" [] [],
+                        },
+                        variable_annotation: TsTypeAnnotation {
+                            colon_token: COLON@47..49 ":" [] [Whitespace(" ")],
+                            ty: TsReferenceType {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@49..65 "TemplateFactory" [] [Whitespace(" ")],
+                                },
+                                type_arguments: missing (optional),
+                            },
+                        },
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@65..67 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@67..119 "<template>\n  <div>Hello TypeScript</div>\n</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@119..120 ";" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@120..165 "class" [Newline("\n"), Newline("\n"), Comments("// Class with templat ..."), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@165..180 "TypedComponent" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@180..181 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@181..192 "private" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@192..197 "value" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@197..199 ":" [] [Whitespace(" ")],
+                        ty: TsNumberType {
+                            number_token: NUMBER_KW@199..206 "number" [] [Whitespace(" ")],
+                        },
+                    },
+                    value: JsInitializerClause {
+                        eq_token: EQ@206..208 "=" [] [Whitespace(" ")],
+                        expression: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@208..210 "42" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@210..211 ";" [] [],
+                },
+                JsGlimmerTemplate {
+                    template_token_token: GLIMMER_TEMPLATE@211..271 "<template>\n    <span>{{this.value}}</span>\n  </template>" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            r_curly_token: R_CURLY@271..273 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@273..274 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..274
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..273
+    0: JS_VARIABLE_STATEMENT@0..120
+      0: JS_VARIABLE_DECLARATION@0..119
+        0: (empty)
+        1: CONST_KW@0..37 "const" [Comments("// Template in TypeSc ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@37..119
+          0: JS_VARIABLE_DECLARATOR@37..119
+            0: JS_IDENTIFIER_BINDING@37..47
+              0: IDENT@37..47 "MyTemplate" [] []
+            1: TS_TYPE_ANNOTATION@47..65
+              0: COLON@47..49 ":" [] [Whitespace(" ")]
+              1: TS_REFERENCE_TYPE@49..65
+                0: JS_REFERENCE_IDENTIFIER@49..65
+                  0: IDENT@49..65 "TemplateFactory" [] [Whitespace(" ")]
+                1: (empty)
+            2: JS_INITIALIZER_CLAUSE@65..119
+              0: EQ@65..67 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@67..119
+                0: GLIMMER_TEMPLATE@67..119 "<template>\n  <div>Hello TypeScript</div>\n</template>" [] []
+      1: SEMICOLON@119..120 ";" [] []
+    1: JS_CLASS_DECLARATION@120..273
+      0: JS_DECORATOR_LIST@120..120
+      1: (empty)
+      2: CLASS_KW@120..165 "class" [Newline("\n"), Newline("\n"), Comments("// Class with templat ..."), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@165..180
+        0: IDENT@165..180 "TypedComponent" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@180..181 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@181..271
+        0: JS_PROPERTY_CLASS_MEMBER@181..211
+          0: JS_PROPERTY_MODIFIER_LIST@181..192
+            0: TS_ACCESSIBILITY_MODIFIER@181..192
+              0: PRIVATE_KW@181..192 "private" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@192..197
+            0: IDENT@192..197 "value" [] []
+          2: TS_TYPE_ANNOTATION@197..206
+            0: COLON@197..199 ":" [] [Whitespace(" ")]
+            1: TS_NUMBER_TYPE@199..206
+              0: NUMBER_KW@199..206 "number" [] [Whitespace(" ")]
+          3: JS_INITIALIZER_CLAUSE@206..210
+            0: EQ@206..208 "=" [] [Whitespace(" ")]
+            1: JS_NUMBER_LITERAL_EXPRESSION@208..210
+              0: JS_NUMBER_LITERAL@208..210 "42" [] []
+          4: SEMICOLON@210..211 ";" [] []
+        1: JS_GLIMMER_TEMPLATE@211..271
+          0: GLIMMER_TEMPLATE@211..271 "<template>\n    <span>{{this.value}}</span>\n  </template>" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+      9: R_CURLY@271..273 "}" [Newline("\n")] []
+  4: EOF@273..274 "" [Newline("\n")] []
+
+```

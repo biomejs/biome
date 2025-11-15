@@ -6,7 +6,7 @@ use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse, parse_with_options};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
@@ -82,7 +82,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let file_source = JsFileSource::try_from(test_case_path).unwrap_or_default();
 
     let extension = file_source.file_extension();
-    let parsed = parse(&content, file_source, options);
+
+    // Use parse_with_options if test-specific options were configured, otherwise use parse
+    let parsed = if options_path.exists() {
+        parse_with_options(&content, file_source, options)
+    } else {
+        parse(&content, file_source)
+    };
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
@@ -185,7 +191,7 @@ pub fn quick_test() {
 import.defer("foo", { with: { type: 'json' } })
     "#;
 
-    let root = parse(code, JsFileSource::ts(), JsParserOptions::default());
+    let root = parse_with_options(code, JsFileSource::ts(), JsParserOptions::default());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {
