@@ -32,7 +32,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
 use biome_css_semantic::semantic_model;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_diagnostics::Applicability;
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
@@ -402,7 +402,7 @@ fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
 
 fn parse(
     biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: &Settings,
     cache: &mut NodeCache,
@@ -436,7 +436,9 @@ fn parse(
         .override_settings
         .apply_override_css_parser_options(biome_path, &mut options);
 
-    let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
+
     ParseResult {
         any_parse: parse.into(),
         language: None,
@@ -468,7 +470,7 @@ fn debug_formatter_ir(
 }
 
 fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
-    let tree: CssRoot = parse.tree();
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
@@ -656,7 +658,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: CssRoot = params.parse.tree();
+    let mut tree: AnyCssRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
     let rules = params.settings.as_linter_rules(params.biome_path.as_path());
@@ -746,7 +748,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 if let (root, Some((range, _))) =
                     action.mutation.commit_with_text_range_and_edit(true)
                 {
-                    tree = match CssRoot::cast(root) {
+                    tree = match AnyCssRoot::cast(root) {
                         Some(tree) => tree,
                         None => {
                             return Err(WorkspaceError::RuleError(

@@ -2056,6 +2056,10 @@
 						{ "type": "null" }
 					]
 				},
+				"experimentalEmbeddedSnippetsEnabled": {
+					"description": "Enables support for embedding snippets.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [

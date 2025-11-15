@@ -62,9 +62,17 @@ CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 
+AnyCssRoot =
+	CssRoot
+	| CssInlineRoot
+
 CssRoot =
 	bom: 'UNICODE_BOM'?
 	rules: CssRuleList
+	eof: 'EOF'
+
+CssInlineRoot =
+	items: CssDeclarationOrRuleList
 	eof: 'EOF'
 
 CssRuleList = AnyCssRule*

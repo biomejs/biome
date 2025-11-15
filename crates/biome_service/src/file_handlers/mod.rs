@@ -400,9 +400,8 @@ impl DocumentFileSource {
     pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
         let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
-            Self::Html(_) => true,
-            Self::Js(_)
-            | Self::Css(_)
+            Self::Html(_) | Self::Js(_) => true,
+            Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Grit(_)

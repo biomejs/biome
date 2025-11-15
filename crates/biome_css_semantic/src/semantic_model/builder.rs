@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
 
@@ -12,7 +12,7 @@ use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
-    root: CssRoot,
+    root: AnyCssRoot,
     /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
@@ -27,7 +27,7 @@ pub struct SemanticModelBuilder {
 }
 
 impl SemanticModelBuilder {
-    pub fn new(root: CssRoot) -> Self {
+    pub fn new(root: AnyCssRoot) -> Self {
         Self {
             root,
             rules: Vec::new(),

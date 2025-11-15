@@ -245,6 +245,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssImportSupports::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_INLINE_ROOT => {
+                    let $pattern = unsafe { $crate::CssInlineRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_AT_RULE => {
                     let $pattern = unsafe { $crate::CssKeyframesAtRule::new_unchecked(node) };
                     $body

@@ -67,6 +67,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
         "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),
         "CssImportSupports" => lang::CssImportSupports::KIND_SET.iter().next(),
+        "CssInlineRoot" => lang::CssInlineRoot::KIND_SET.iter().next(),
         "CssKeyframesAtRule" => lang::CssKeyframesAtRule::KIND_SET.iter().next(),
         "CssKeyframesBlock" => lang::CssKeyframesBlock::KIND_SET.iter().next(),
         "CssKeyframesIdentSelector" => lang::CssKeyframesIdentSelector::KIND_SET.iter().next(),

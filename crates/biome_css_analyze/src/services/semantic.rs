@@ -5,7 +5,7 @@ use biome_analyze::{
 };
 use biome_css_semantic::builder::SemanticModelBuilder;
 use biome_css_semantic::{SemanticEventExtractor, model::SemanticModel};
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_rowan::{AstNode, TextRange, WalkEvent};
 
 /// The [SemanticServices] types can be used as a queryable to get an instance
@@ -86,7 +86,7 @@ pub struct SemanticModelBuilderVisitor {
 }
 
 impl SemanticModelBuilderVisitor {
-    pub(crate) fn new(root: &CssRoot) -> Self {
+    pub(crate) fn new(root: &AnyCssRoot) -> Self {
         Self {
             extractor: SemanticEventExtractor::default(),
             builder: SemanticModelBuilder::new(root.clone()),
@@ -179,7 +179,7 @@ where
     type Language = CssLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, root: &CssRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, root: &AnyCssRoot) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
