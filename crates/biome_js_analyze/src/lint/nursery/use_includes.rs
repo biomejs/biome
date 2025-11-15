@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsObjectMember, AnyJsLiteralExpression, AnyJsMemberExpression,
     JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
@@ -69,12 +69,14 @@ declare_node_union! {
 }
 
 pub enum State {
-    IndexOf(IndexOfState),
-    RegexTest(JsCallExpression),
+    IndexOf(IndexOfData),
+    RegexTest(RegexTestData),
 }
 
-pub struct IndexOfState {
+pub struct IndexOfData {
     binary_expression: JsBinaryExpression,
+    call_expression: JsCallExpression,
+    member_expression: AnyJsMemberExpression,
     is_negated: bool,
 }
 
@@ -90,8 +92,8 @@ impl Rule for UseIncludes {
             UseIncludesQuery::JsBinaryExpression(binary_expr) => {
                 let (call_expr, check_type) = analyze_index_of_check(binary_expr)?;
 
-                let member_expr = AnyJsMemberExpression::cast(
-                    call_expr.callee().ok()?.omit_parentheses().into_syntax(),
+                let member_expr = AnyJsMemberExpression::cast_ref(
+                    call_expr.callee().ok()?.omit_parentheses().syntax(),
                 )?;
 
                 if member_expr.member_name()?.text() != "indexOf" {
@@ -99,18 +101,20 @@ impl Rule for UseIncludes {
                 }
 
                 // Verify that the object has an `includes` method.
-                if !is_receiver_known_to_have_includes(ctx, member_expr.object().ok()) {
+                if !is_receiver_known_to_have_includes(member_expr.object().ok()) {
                     return None;
                 }
 
-                Some(State::IndexOf(IndexOfState {
+                Some(State::IndexOf(IndexOfData {
                     binary_expression: binary_expr.clone(),
                     is_negated: check_type.is_negated(),
+                    call_expression: call_expr,
+                    member_expression: member_expr,
                 }))
             }
             UseIncludesQuery::JsCallExpression(call_expr) => {
-                let member_expr = AnyJsMemberExpression::cast(
-                    call_expr.callee().ok()?.omit_parentheses().into_syntax(),
+                let member_expr = AnyJsMemberExpression::cast_ref(
+                    call_expr.callee().ok()?.omit_parentheses().syntax(),
                 )?;
 
                 if member_expr.member_name()?.text() != "test" {
@@ -125,7 +129,10 @@ impl Rule for UseIncludes {
                 let (pattern, flags) = regex_literal.decompose().ok()?;
 
                 if is_simple_regex(&pattern, &flags) {
-                    Some(State::RegexTest(call_expr.clone()))
+                    Some(State::RegexTest(RegexTestData {
+                        call_expression: call_expr.clone(),
+                        member_expression: member_expr,
+                    }))
                 } else {
                     None
                 }
@@ -135,16 +142,16 @@ impl Rule for UseIncludes {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
-            State::IndexOf(index_of_state) => Some(RuleDiagnostic::new(
+            State::IndexOf(data) => Some(RuleDiagnostic::new(
                 rule_category!(),
-                index_of_state.binary_expression.range(),
+                data.binary_expression.range(),
                 markup! {
                     "Use "<Emphasis>"includes()"</Emphasis>" instead of "<Emphasis>"indexOf()"</Emphasis>" to check for inclusion, as it is more readable and concise."
                 },
             )),
-            State::RegexTest(call_expr) => Some(RuleDiagnostic::new(
+            State::RegexTest(data) => Some(RuleDiagnostic::new(
                 rule_category!(),
-                call_expr.range(),
+                data.call_expression.range(),
                 markup! {
                     "Use "<Emphasis>"String.prototype.includes()"</Emphasis>" instead of "<Emphasis>"RegExp.prototype.test()"</Emphasis>" for simple searches as it is more readable and concise."
                 },
@@ -154,15 +161,10 @@ impl Rule for UseIncludes {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         match state {
-            State::IndexOf(index_of_state) => {
+            State::IndexOf(data) => {
                 let mut mutation = ctx.root().begin();
-                let (call_expr, _) = analyze_index_of_check(&index_of_state.binary_expression)?;
 
-                let member_expr = AnyJsMemberExpression::cast(
-                    call_expr.callee().ok()?.omit_parentheses().into_syntax(),
-                )?;
-
-                let new_member_expr = match member_expr {
+                let new_member_expr = match data.member_expression.clone() {
                     AnyJsMemberExpression::JsStaticMemberExpression(static_member) => {
                         AnyJsMemberExpression::from(
                             static_member
@@ -184,13 +186,13 @@ impl Rule for UseIncludes {
 
                 let mut new_call_expr = make::js_call_expression(
                     AnyJsExpression::from(new_member_expr),
-                    call_expr.arguments().ok()?,
+                    data.call_expression.arguments().ok()?,
                 )
                 .build();
 
                 new_call_expr = new_call_expr.with_leading_trivia_pieces([])?;
 
-                let mut final_expr = if index_of_state.is_negated {
+                let mut final_expr = if data.is_negated {
                     let unary_expr = make::js_unary_expression(
                         make::token(T![!]).with_trailing_trivia_pieces([]),
                         new_call_expr.with_leading_trivia_pieces([])?.into(),
@@ -200,22 +202,14 @@ impl Rule for UseIncludes {
                     new_call_expr.into()
                 };
 
-                if let Some(trivia) = index_of_state
-                    .binary_expression
-                    .syntax()
-                    .first_leading_trivia()
-                {
+                if let Some(trivia) = data.binary_expression.syntax().first_leading_trivia() {
                     final_expr = final_expr.with_leading_trivia_pieces(trivia.pieces())?;
                 }
-                if let Some(trivia) = index_of_state
-                    .binary_expression
-                    .syntax()
-                    .last_trailing_trivia()
-                {
+                if let Some(trivia) = data.binary_expression.syntax().last_trailing_trivia() {
                     final_expr = final_expr.with_trailing_trivia_pieces(trivia.pieces())?;
                 }
                 mutation.replace_node(
-                    AnyJsExpression::from(index_of_state.binary_expression.clone()),
+                    AnyJsExpression::from(data.binary_expression.clone()),
                     final_expr,
                 );
 
@@ -226,12 +220,10 @@ impl Rule for UseIncludes {
                     mutation,
                 ))
             }
-            State::RegexTest(call_expr) => {
+            State::RegexTest(data) => {
                 let mut mutation = ctx.root().begin();
 
-                let member_expr =
-                    AnyJsMemberExpression::cast(call_expr.callee().ok()?.into_syntax())?;
-                let object = member_expr.object().ok()?;
+                let object = data.member_expression.object().ok()?;
                 let regex_literal = object
                     .as_any_js_literal_expression()?
                     .as_js_regex_literal_expression()?;
@@ -240,7 +232,7 @@ impl Rule for UseIncludes {
                 let string_literal = make::js_string_literal(pattern.text());
                 let string_literal_expr = make::js_string_literal_expression(string_literal);
 
-                let arguments = call_expr.arguments().ok()?;
+                let arguments = data.call_expression.arguments().ok()?;
                 let first_arg = arguments
                     .args()
                     .into_iter()
@@ -275,7 +267,7 @@ impl Rule for UseIncludes {
                         .build();
 
                 mutation.replace_node(
-                    AnyJsExpression::from(call_expr.clone()),
+                    AnyJsExpression::from(data.call_expression.clone()),
                     AnyJsExpression::from(new_call_expr),
                 );
 
@@ -288,6 +280,11 @@ impl Rule for UseIncludes {
             }
         }
     }
+}
+
+pub struct RegexTestData {
+    call_expression: JsCallExpression,
+    member_expression: AnyJsMemberExpression,
 }
 
 enum IndexOfCheckType {
@@ -412,29 +409,35 @@ fn matches_number_literal(expr: Option<&AnyJsExpression>, text: &str) -> bool {
         .is_some_and(|token| token.text_trimmed() == text)
 }
 
-/// Checks if the receiver of a method call is known to have an `includes` method.
-/// This is true for `string`, `array`, and `typed array` types.
-fn is_receiver_known_to_have_includes(
-    ctx: &RuleContext<UseIncludes>,
-    receiver: Option<AnyJsExpression>,
-) -> bool {
-    let Some(receiver) = receiver else {
-        return false;
-    };
+// Checks if the receiver of a method call is known to have an `includes` method.
+// This is true for `string`, `array`, and `typed array` types, or if it's an
+// object literal with an 'includes' property.
+fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool {
+    let Some(receiver_expr) = receiver else { return false };
 
-    // Fast path for literals
+    // Fast path for literals (already handled in your original code)
     if matches!(
-        receiver,
-        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
-            _
-        )) | AnyJsExpression::JsArrayExpression(_)
+        receiver_expr,
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(_)
+        ) | AnyJsExpression::JsArrayExpression(_)
     ) {
         return true;
     }
 
-    // Fallback to semantic model for other expressions
-    let ty = ctx.type_of_expression(&receiver);
-    ty.is_string() || ty.is_array_of(|_| true)
+    if let Some(object_expression) = receiver_expr.as_js_object_expression() {
+        for member in object_expression.members() {
+            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property_member)) = member {
+                if let Ok(Some(name)) = property_member.name().map(|n| n.name()) {
+                    if name.text() == "includes" {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    false
 }
 
 /// Checks if a regex is simple enough to be replaced by `includes()`.
