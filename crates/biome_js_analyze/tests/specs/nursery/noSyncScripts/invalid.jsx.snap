@@ -22,7 +22,7 @@ invalid.jsx:2:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━�
     3 │ }
     4 │ 
   
-  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute, or replace with Next.js' Script component.
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute. If using Next.js, consider the Script component instead.
   
 
 ```

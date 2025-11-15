@@ -118,7 +118,7 @@ impl Rule for NoSyncScripts {
                 },
             )
             .note(markup! {
-                "Synchronous scripts can impact your webpage performance. Add the \"async\" or \"defer\" attribute, or replace with Next.js' Script component."
+                "Synchronous scripts can impact your webpage performance. Add the \"async\" or \"defer\" attribute. If using Next.js, consider the Script component instead."
             }),
         )
     }
