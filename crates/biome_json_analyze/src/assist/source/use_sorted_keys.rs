@@ -10,7 +10,7 @@ use biome_json_syntax::{AnyJsonValue, JsonMemberList, JsonObjectValue, T, TextRa
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
-use std::ops::Not;
+use std::{cmp::Ordering, ops::Not};
 
 declare_source_rule! {
     /// Sort the keys of a JSON object in natural order.
@@ -77,8 +77,10 @@ declare_source_rule! {
     ///
     /// ### `groupByNesting`
     /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
-    /// Simple values (primitives and single-line arrays) are sorted first, followed by nested values
-    /// (objects and multi-line arrays).
+    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
+    /// followed by nested values (multi-line arrays and multi-line objects).
+    ///
+    /// > Default: `false`
     ///
     /// ```json,options
     /// {
@@ -93,7 +95,7 @@ declare_source_rule! {
     ///     "details": {
     ///         "description": "nested"
     ///     },
-    ///     "id": "123"
+    ///     "id": 123
     /// }
     /// ```
     ///
@@ -106,20 +108,27 @@ declare_source_rule! {
 }
 
 /// Determines the nesting depth of a JSON value for grouping purposes.
-/// Objects and multi-line arrays are considered nested (depth 1).
-/// Primitives and single-line arrays are considered simple (depth 0).
-fn get_nesting_depth(value: &AnyJsonValue) -> u8 {
+/// Multi-line objects and multi-line arrays are considered nested (depth 1).
+/// Primitives, single-line arrays, and single-line objects are considered simple (depth 0).
+fn get_nesting_depth(value: &AnyJsonValue) -> Ordering {
     match value {
-        AnyJsonValue::JsonObjectValue(_) => 1,
-        AnyJsonValue::JsonArrayValue(array) => {
-            // Check if array spans multiple lines by looking for newlines
-            if array.to_string().contains('\n') {
-                1
+        AnyJsonValue::JsonObjectValue(obj) => {
+            // Check if object spans multiple lines by looking for newlines
+            if obj.syntax().text_trimmed().contains_char('\n') {
+                Ordering::Greater
             } else {
-                0
+                Ordering::Equal
             }
         }
-        _ => 0, // primitives: string, number, boolean, null
+        AnyJsonValue::JsonArrayValue(array) => {
+            // Check if array spans multiple lines by looking for newlines
+            if array.syntax().text_trimmed().contains_char('\n') {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        _ => Ordering::Equal, // primitives: string, number, boolean, null
     }
 }
 
@@ -137,7 +146,7 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        if options.group_by_nesting {
+        if options.group_by_nesting.unwrap_or(false) {
             is_separated_list_sorted_by(
                 ctx.query(),
                 |node| {
@@ -175,12 +184,20 @@ impl Rule for UseSortedKeys {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let options = ctx.options();
+        let message = if options.group_by_nesting.unwrap_or(false) {
+            markup! {
+                "The members are not sorted by nesting level and key."
+            }
+        } else {
+            markup! {
+                "The members are not sorted by key."
+            }
+        };
         Some(RuleDiagnostic::new(
             category!("assist/source/useSortedKeys"),
             Self::text_range(ctx, state),
-            markup! {
-                "The members are not sorted by key."
-            },
+            message,
         ))
     }
 
@@ -201,7 +218,7 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        let new_list = if options.group_by_nesting {
+        let new_list = if options.group_by_nesting.unwrap_or(false) {
             sorted_separated_list_by(
                 list,
                 |node| {

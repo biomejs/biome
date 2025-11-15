@@ -9,7 +9,8 @@ pub struct UseSortedKeysOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub sort_order: Option<SortOrder>,
     /// When enabled, groups object keys by their value's nesting depth before sorting.
-    /// Simple values (primitives, single-line arrays) are sorted first,
-    /// followed by nested values (objects, multi-line arrays).
-    pub group_by_nesting: bool,
+    /// Simple values (primitives, single-line arrays, single-line objects) are sorted first,
+    /// followed by nested values (multi-line objects, multi-line arrays).
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub group_by_nesting: Option<bool>,
 }

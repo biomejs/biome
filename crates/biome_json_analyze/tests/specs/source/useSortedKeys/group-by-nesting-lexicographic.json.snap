@@ -30,7 +30,7 @@ expression: group-by-nesting-lexicographic.json
 ```
 group-by-nesting-lexicographic.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i The members are not sorted by key.
+  i The members are not sorted by nesting level and key.
   
    > 1 │ {
        │ ^
