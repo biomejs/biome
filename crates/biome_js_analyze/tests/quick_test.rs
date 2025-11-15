@@ -6,7 +6,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse_with_options};
 use biome_js_syntax::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -38,7 +38,7 @@ export function f(options: PostcssOptions) {
 }
 "#;
 
-    let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
+    let parsed = parse_with_options(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file("sleep.ts", "export const sleep = async (ms = 1000): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));");
@@ -110,7 +110,7 @@ function App() {
 }
 "#;
 
-    let parsed = parse(SOURCE, JsFileSource::jsx(), JsParserOptions::default());
+    let parsed = parse_with_options(SOURCE, JsFileSource::jsx(), JsParserOptions::default());
 
     let file_path = Utf8PathBuf::from(FILENAME);
 

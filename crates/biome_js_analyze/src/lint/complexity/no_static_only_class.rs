@@ -162,8 +162,8 @@ impl Rule for NoStaticOnlyClass {
             .filter_map(|member| match member {
                 AnyJsClassMember::JsBogusMember(_)
                 | AnyJsClassMember::JsMetavariable(_)
-                | AnyJsClassMember::JsGlimmerTemplate(_)
                 | AnyJsClassMember::JsEmptyClassMember(_) => None,
+                AnyJsClassMember::JsGlimmerTemplate(_) => Some(false), // Glimmer templates are non-static members (component content)
                 AnyJsClassMember::JsConstructorClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::TsConstructorSignatureClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::JsGetterClassMember(m) => Some(m.has_static_modifier()),

@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse, parse_with_options};
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
@@ -23,9 +23,9 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
-tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,gjs,gts,json,jsonc,svelte,vue}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,gjs,gts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,gjs,gts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -176,7 +176,7 @@ pub(crate) fn analyze_and_snap(
         source_type.set_module_kind(ModuleKind::Script)
     }
 
-    let parsed = parse(input_code, source_type, parser_options);
+    let parsed = parse_with_options(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
@@ -342,7 +342,7 @@ fn check_code_action(
     // We check the re-parsed modified code only if the original source doesn't have bogus nodes
     if !has_bogus_nodes_or_empty_slots(root.syntax()) {
         // Re-parse the modified code and panic if the resulting tree has syntax errors
-        let re_parse = parse(&output, source_type, options);
+        let re_parse = parse_with_options(&output, source_type, options);
         assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
     }
 }

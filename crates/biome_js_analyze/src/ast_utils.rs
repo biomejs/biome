@@ -358,7 +358,7 @@ mod tests {
     use super::get_boolean_value;
 
     fn assert_boolean_value(code: &str, value: bool) {
-        let source = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+        let source = biome_js_parser::parse_with_options(code, JsFileSource::tsx(), JsParserOptions::default());
 
         if source.has_errors() {
             panic!("syntax error")

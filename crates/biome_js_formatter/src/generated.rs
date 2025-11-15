@@ -2271,7 +2271,7 @@ impl FormatRule<biome_js_syntax::JsGlimmerTemplate>
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,ignore
     /// // Given a `template` of type `biome_js_syntax::JsGlimmerTemplate`
     /// // and a mutable `formatter` of type `JsFormatter`:
     /// // let result = crate::js::auxiliary::glimmer_template::FormatJsGlimmerTemplate::default()
@@ -2297,7 +2297,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsGlimmerTemplate {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,ignore
     /// // Given a `JsGlimmerTemplate` value `template`:
     /// let formatted = template.format();
     /// ```
@@ -2317,7 +2317,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGlimmerTemplate {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,ignore
     /// use biome_js_syntax::JsGlimmerTemplate;
     ///
     /// let node = JsGlimmerTemplate::default();
