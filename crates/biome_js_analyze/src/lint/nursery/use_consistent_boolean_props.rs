@@ -52,17 +52,24 @@ declare_lint_rule! {
     ///
     /// ### Invalid (Explicit mode)
     ///
-    /// ```jsx,expect_diagnostic
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "mode": "explicit"
+    ///     }
+    /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
     /// <input disabled />
     /// ```
     ///
     /// ### Valid (Explicit mode)
     ///
-    /// ```jsx
+    /// ```jsx,use_options
     /// <input disabled={true} />
     /// ```
     ///
-    /// ```jsx
+    /// ```jsx,use_options
     /// <input disabled={false} />
     /// ```
     pub UseConsistentBooleanProps {
