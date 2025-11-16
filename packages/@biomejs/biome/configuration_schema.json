@@ -391,6 +391,7 @@
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"Bool": { "type": "boolean" },
+		"BooleanPropMode": { "type": "string", "enum": ["implicit", "explicit"] },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
 			"type": "boolean"
@@ -5237,6 +5238,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentBooleanProps": {
+					"description": "Enforces consistent usage of boolean props in JSX attributes.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBooleanPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentGraphqlDescriptions": {
 					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
@@ -8426,6 +8434,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentBooleanPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"properties": {
@@ -11209,6 +11227,19 @@
 					"const": "never"
 				}
 			]
+		},
+		"UseConsistentBooleanPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentBooleanPropsOptions" }
+			]
+		},
+		"UseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"mode": { "$ref": "#/$defs/BooleanPropMode", "default": "implicit" }
+			},
+			"additionalProperties": false
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"oneOf": [

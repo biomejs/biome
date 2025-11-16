@@ -199,6 +199,7 @@ define_categories! {
     "lint/nursery/useArraySortCompare": "https://biomejs.dev/linter/rules/use-array-sort-compare",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentArrowReturn": "https://biomejs.dev/linter/rules/use-consistent-arrow-return",
+    "lint/nursery/useConsistentBooleanProps": "https://biomejs.dev/linter/rules/use-consistent-boolean-props",
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",

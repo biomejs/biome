@@ -2000,6 +2000,11 @@ See https://biomejs.dev/linter/rules/use-consistent-arrow-return
 	 */
 	useConsistentArrowReturn?: UseConsistentArrowReturnConfiguration;
 	/**
+	* Enforces consistent usage of boolean props in JSX attributes.
+See https://biomejs.dev/linter/rules/use-consistent-boolean-props 
+	 */
+	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
+	/**
 	* Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
 See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions 
 	 */
@@ -3612,6 +3617,9 @@ export type UseArraySortCompareConfiguration =
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
+export type UseConsistentBooleanPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBooleanPropsOptions;
 export type UseConsistentGraphqlDescriptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentGraphqlDescriptionsOptions;
@@ -5022,6 +5030,11 @@ export interface RuleWithUseConsistentArrowReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentArrowReturnOptions;
 }
+export interface RuleWithUseConsistentBooleanPropsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBooleanPropsOptions;
+}
 export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentGraphqlDescriptionsOptions;
@@ -6285,6 +6298,9 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 */
 	style?: UseConsistentArrowReturnStyle;
 }
+export interface UseConsistentBooleanPropsOptions {
+	mode?: BooleanPropMode;
+}
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
 	 * The description style to enforce. Defaults to "block"
@@ -6712,6 +6728,7 @@ while for `useState()` it would be `[1]`.
 	stableResult?: StableHookResult;
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
+export type BooleanPropMode = "implicit" | "explicit";
 /**
  * The GraphQL description style to enforce.
  */
@@ -7099,6 +7116,7 @@ export type Category =
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useConsistentBooleanProps"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"

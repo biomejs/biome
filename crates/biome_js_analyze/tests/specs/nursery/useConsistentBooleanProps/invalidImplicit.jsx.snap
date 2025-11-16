@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: invalidImplicit.jsx
+---
+# Input
+```jsx
+<input disabled={true} />;
+<input accept={true} /** some comment */ />;
+<input /** some comment */ accept={true} />;
+
+```
+
+# Diagnostics
+```
+invalidImplicit.jsx:1:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be implicit (omit ={true}).
+  
+  > 1 │ <input disabled={true} />;
+      │        ^^^^^^^^^^^^^^^
+    2 │ <input accept={true} /** some comment */ />;
+    3 │ <input /** some comment */ accept={true} />;
+  
+  i Safe fix: Remove explicit `true` literal for this attribute
+  
+    1 │ <input·disabled={true}·/>;
+      │                -------    
+
+```
+
+```
+invalidImplicit.jsx:2:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be implicit (omit ={true}).
+  
+    1 │ <input disabled={true} />;
+  > 2 │ <input accept={true} /** some comment */ />;
+      │        ^^^^^^^^^^^^^
+    3 │ <input /** some comment */ accept={true} />;
+    4 │ 
+  
+  i Safe fix: Remove explicit `true` literal for this attribute
+  
+    2 │ <input·accept={true}·/**·some·comment·*/·/>;
+      │              -------                        
+
+```
+
+```
+invalidImplicit.jsx:3:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be implicit (omit ={true}).
+  
+    1 │ <input disabled={true} />;
+    2 │ <input accept={true} /** some comment */ />;
+  > 3 │ <input /** some comment */ accept={true} />;
+      │                            ^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Remove explicit `true` literal for this attribute
+  
+    3 │ <input·/**·some·comment·*/·accept={true}·/>;
+      │                                  -------    
+
+```

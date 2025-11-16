@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: validExplicit.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+// Explicit true/false
+<input disabled={true} />;
+<input disabled={false} />;
+
+// Explicit falsy values
+<input disabled={0} />;
+<input disabled={""} />;
+<input disabled={undefined} />;
+<input disabled={null} />;
+
+// Explicit string values (non-empty)
+<input disabled={"true"} />;
+<input disabled={"false"} />;
+<input disabled={"yes"} />;
+<input disabled={"no"} />;
+
+// Explicit numeric values
+<input disabled={1} />;
+<input disabled={42} />;
+<input disabled={-1} />;
+
+// Expressions resolving explicitly
+<input disabled={someCondition ? true : false} />;
+<input disabled={Boolean(flag)} />;
+<input disabled={!!flag} />;
+
+// Multiple props on the same element
+<input disabled={false} readOnly={true} required={false} />;
+
+// JSX fragments with explicit boolean props
+<>
+	<input disabled={true} />
+	<button disabled={false} />
+</>;
+
+// Nested components with explicit boolean props
+<MyComponent disabled={true} someProp={false} />;
+<Wrapper>
+	<ChildComponent disabled={false} />
+</Wrapper>;
+
+```

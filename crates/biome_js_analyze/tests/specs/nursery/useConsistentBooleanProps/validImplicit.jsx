@@ -1,0 +1,25 @@
+/* should not generate diagnostics */
+// Explicit true/false
+<input disabled />;
+
+// Explicit falsy values
+<input disabled={0} />;
+<input disabled={""} />;
+<input disabled={undefined} />;
+<input disabled={null} />;
+
+// Explicit string values (non-empty)
+<input disabled={"true"} />;
+<input disabled={"false"} />;
+<input disabled={"yes"} />;
+<input disabled={"no"} />;
+
+// Explicit numeric values
+<input disabled={1} />;
+<input disabled={42} />;
+<input disabled={-1} />;
+
+// Expressions resolving explicitly
+<input disabled={someCondition ? true : false} />;
+<input disabled={Boolean(flag)} />;
+<input disabled={!!flag} />;
