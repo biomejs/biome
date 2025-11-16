@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 Added support for parsing and formatting the [CSS if function](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/if).
