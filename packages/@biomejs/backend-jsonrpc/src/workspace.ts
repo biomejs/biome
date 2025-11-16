@@ -2045,6 +2045,11 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	* Sort interface members by key.
+See https://biomejs.dev/linter/rules/use-sorted-interface-members 
+	 */
+	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
+	/**
 	* Enforce the use of the spread operator over .apply().
 See https://biomejs.dev/linter/rules/use-spread 
 	 */
@@ -3634,6 +3639,9 @@ export type UseQwikValidLexicalScopeConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseSortedInterfaceMembersConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSortedInterfaceMembersOptions;
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
@@ -5052,6 +5060,11 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseSortedInterfaceMembersOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSortedInterfaceMembersOptions;
+}
 export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6303,6 +6316,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseSortedInterfaceMembersOptions = {};
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
@@ -7099,6 +7113,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSortedInterfaceMembers"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
@@ -7299,6 +7314,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
