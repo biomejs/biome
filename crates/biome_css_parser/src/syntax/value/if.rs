@@ -116,7 +116,7 @@ fn is_at_if_supports_test(p: &mut CssParser) -> bool {
 ///
 /// # Example
 ///
-/// ``` css
+/// ```css
 /// supports(color: lch(7.1% 60.23 300.16)
 /// ```
 #[inline]
