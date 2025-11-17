@@ -36,9 +36,9 @@
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "22.17.1",
-    "typescript": "5.9.2",
-    "vite": "7.1.11",
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3",
+    "vite": "7.2.2",
     "vitest": "3.2.4"
   },
   "publishConfig": {
