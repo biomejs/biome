@@ -1,6 +1,6 @@
 mod any_class_string_like;
 mod class_info;
-mod class_lexer;
+pub mod class_lexer;
 mod presets;
 mod sort;
 mod sort_config;

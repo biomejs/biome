@@ -17,7 +17,7 @@ impl FormatRule<GraphqlArgumentList> for FormatGraphqlArgumentList {
                     write!(f, [node.format()])?;
 
                     if index != last_index {
-                        write!(f, [if_group_fits_on_line(&text(","))])?;
+                        write!(f, [if_group_fits_on_line(&token(","))])?;
                     }
 
                     Ok(())

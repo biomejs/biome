@@ -1,0 +1,8 @@
+enum EnumValue {
+	"basic"
+	BASIC
+	"fluent"
+	FLUENT
+	"native"
+	NATIVE
+}

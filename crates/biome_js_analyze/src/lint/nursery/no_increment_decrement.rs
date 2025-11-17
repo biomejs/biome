@@ -131,7 +131,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIncrementDecrement {
-        version: "next",
+        version: "2.3.2",
         name: "noIncrementDecrement",
         language: "js",
         recommended: false,
@@ -152,7 +152,7 @@ impl Rule for NoIncrementDecrement {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if ctx.options().allow_for_loop_afterthoughts && is_for_loop_afterthought(node.syntax()) {
+        if ctx.options().allow_for_loop_afterthoughts() && is_for_loop_afterthought(node.syntax()) {
             return None;
         }
 

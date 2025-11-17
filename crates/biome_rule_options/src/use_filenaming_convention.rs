@@ -1,50 +1,48 @@
 use crate::restricted_regex::RestrictedRegex;
 use biome_console::markup;
 use biome_deserialize::{DeserializationContext, TextRange};
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_string_case::{Case, Cases};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseFilenamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub strict_case: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub strict_case: Option<bool>,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub require_ascii: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub require_ascii: Option<bool>,
 
     /// Regular expression to enforce
-    #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "match", skip_serializing_if = "Option::<_>::is_none")]
     pub matching: Option<RestrictedRegex>,
 
     /// Allowed cases for file names.
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub filename_cases: FilenameCases,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub filename_cases: Option<FilenameCases>,
 }
 
-const fn enabled() -> bool {
-    true
-}
+impl UseFilenamingConventionOptions {
+    pub const DEFAULT_STRICT_CASE: bool = true;
+    pub const DEFAULT_REQUIRE_ASCII: bool = true;
 
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
-}
+    /// Returns [`Self::strict_case`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_STRICT_CASE`].
+    pub fn strict_case(&self) -> bool {
+        self.strict_case.unwrap_or(Self::DEFAULT_STRICT_CASE)
+    }
 
-impl Default for UseFilenamingConventionOptions {
-    fn default() -> Self {
-        Self {
-            strict_case: true,
-            require_ascii: true,
-            matching: None,
-            filename_cases: FilenameCases::default(),
-        }
+    /// Returns [`Self::require_ascii`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_REQUIRE_ASCII`].
+    pub fn require_ascii(&self) -> bool {
+        self.require_ascii.unwrap_or(Self::DEFAULT_REQUIRE_ASCII)
     }
 }
 
@@ -99,10 +97,10 @@ impl From<FilenameCases> for SmallVec<[FilenameCase; 5]> {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FilenameCases {
-    fn schema_name() -> String {
-        "FilenameCases".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FilenameCases")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<FilenameCase>>::json_schema(generator)
     }
 }
@@ -133,6 +131,12 @@ impl biome_deserialize::DeserializableValidator for FilenameCases {
         } else {
             true
         }
+    }
+}
+
+impl biome_deserialize::Merge for FilenameCases {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
     }
 }
 

@@ -1,14 +1,15 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::at_rule::parse_at_rule_declarator;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
-use crate::syntax::parse_error::{expected_identifier, expected_selector, expected_string};
-use crate::syntax::selector::parse_selector;
+use crate::syntax::parse_error::{expected_identifier, expected_string, expected_tw_source};
+use crate::syntax::selector::SelectorList;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
-use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -131,7 +132,14 @@ fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    parse_selector(p).or_add_diagnostic(p, expected_selector);
+    if p.at(T![@]) {
+        parse_at_rule_declarator(p).ok();
+    } else {
+        let mut selector_list = SelectorList::default()
+            .with_end_kind_ts(token_set![T![')']])
+            .with_recovery_ts(token_set![T![')'], T![,], T![;]]);
+        selector_list.parse_list(p);
+    }
     p.expect(T![')']);
     p.expect(T![;]);
 
@@ -228,10 +236,28 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![not]) {
         p.bump(T![not]);
     }
-    parse_string(p).or_add_diagnostic(p, expected_string);
+    if p.at(T![inline]) {
+        parse_source_inline(p).or_add_diagnostic(p, expected_tw_source);
+    } else {
+        parse_string(p).or_add_diagnostic(p, expected_tw_source);
+    }
     p.expect(T![;]);
 
     Present(m.complete(p, TW_SOURCE_AT_RULE))
+}
+
+pub(crate) fn parse_source_inline(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![inline]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.expect(T![inline]);
+    p.expect(T!['(']);
+    parse_string(p).or_add_diagnostic(p, expected_string);
+    p.expect(T![')']);
+
+    Present(m.complete(p, TW_SOURCE_INLINE))
 }
 
 // @reference "../../app.css";
@@ -246,4 +272,17 @@ pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![;]);
 
     Present(m.complete(p, TW_REFERENCE_AT_RULE))
+}
+
+// @slot;
+pub(crate) fn parse_slot_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![slot]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![slot]);
+    p.expect(T![;]);
+
+    Present(m.complete(p, TW_SLOT_AT_RULE))
 }

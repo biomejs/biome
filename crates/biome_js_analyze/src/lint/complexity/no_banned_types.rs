@@ -18,50 +18,69 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow primitive type aliases and misleading types.
     ///
-    /// - Enforce consistent names for primitive types
+    /// This rule aims to prevent usage of potentially "misleading" types and type aliases
+    /// which may behave unexpectedly.
     ///
-    ///   Primitive types have aliases.
-    ///   For example, `Number` is an alias of `number`.
-    ///   The rule recommends the lowercase primitive type names.
+    /// ### Disallow "boxed object" types like `Boolean` and `Number`
     ///
-    /// - Disallow the `Function` type
+    /// JavaScript's 8 data types are described in TypeScript by the lowercase types
+    /// `undefined`, `null`, `boolean`, `number`, `string`, `bigint`, `symbol`, and `object`.
     ///
-    ///   The `Function` type is loosely typed and is thus considered dangerous or harmful.
-    ///   `Function` is equivalent to the type `(...rest: any[]) => any` that uses the unsafe `any` type.
+    /// The latter 6 also have uppercase variants, which instead represent _interfaces_ with the shared properties of their primitive counterparts.
+    /// Due to the nature of structural typing, these uppercase types accept both primitive values and non-primitive "boxed object"s
+    /// like `new Boolean(true)`, despite the two behaving differently in many circumstances like equality and truthiness.
     ///
-    /// - Disallow the misleading non-nullable type `{}`
+    /// It is thus considered best practice to avoid these "boxed types" in favor of their lowercase
+    /// primitive counterparts.
     ///
-    ///   In TypeScript, the type `{}` doesn't represent an empty object.
-    ///   It represents any value except `null` and `undefined`.
-    ///   The following TypeScript example is perfectly valid:
+    /// ### Disallow the unsafe `Function` type
     ///
-    ///   ```ts,expect_diagnostic
-    ///   const n: {} = 0
-    ///   ```
+    /// TypeScript's built-in `Function` type is capable of accepting callbacks of any shape or form,
+    /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly.
+    /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class,
+    /// which is likewise a potential source of confusion.
     ///
-    ///   To represent an empty object, you should use `{ [k: string]: never }` or `Record<string, never>`.
+    /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible. \
+    /// When a generic "catch-all" callback type is required, one of the following can be used instead:
+    /// - `() => void`: A function that accepts no parameters and whose return value is ignored
+    /// - `(...args: never) => unknown`: A "top type" for functions that can be assigned any function type,
+    ///    but can't be called directly
     ///
-    ///   To avoid any confusion, the rule forbids the use of the type `{}`, except in two situations:
+    /// ### Disallow the misleading empty object type `{}`
+    /// In TypeScript, the type `{}` _doesn't_ represent an empty object (as many new to the language may assume).
+    /// It actually accepts any non-nullish value, _including non-object primitives_.
+    /// The following TypeScript example is thus perfectly valid:
     ///
-    ///   1. In type constraints to restrict a generic type to non-nullable types:
+    /// ```ts,expect_diagnostic
+    /// const n: {} = 0;
+    /// ```
     ///
-    ///   ```ts
-    ///   function f<T extends {}>(x: T) {
-    ///       assert(x != null);
-    ///   }
-    ///   ```
+    /// Often, developers writing `{}` actually mean one of the following:
+    /// - `object`: Represents any object value
+    /// - `unknown`: Represents any value at all, including `null` and `undefined`
+    /// - `{ [k: string]: never }` or `Record<string, never>`: Represent object types that disallow property access
     ///
-    ///   2. In a type intersection to narrow a type to its non-nullable equivalent type:
+    /// To avoid confusion, this rule forbids the use of the type `{}`, except in two situations:
     ///
-    ///   ```ts
-    ///   type NonNullableMyType = MyType & {};
-    ///   ```
+    /// 1. In type constraints to restrict a generic type to non-nullable types:
     ///
-    ///   In this last case, you can also use the `NonNullable` utility type:
+    /// ```ts
+    /// function f<T extends {}>(x: T) {
+    ///     assert(x != null);
+    /// }
+    /// ```
     ///
-    ///   ```ts
-    ///   type NonNullableMyType = NonNullable<MyType>;
-    ///   ```
+    /// 2. In a type intersection to narrow a type to its non-nullable equivalent type:
+    ///
+    /// ```ts
+    /// type NonNullableMyType = MyType & {};
+    /// ```
+    ///
+    /// In this last case, you can also use the `NonNullable` utility type to the same effect:
+    ///
+    /// ```ts
+    /// type NonNullableMyType = NonNullable<MyType>;
+    /// ```
     ///
     /// ## Examples
     ///
@@ -72,21 +91,62 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// let bool = true as Boolean;
+    /// const bool = true as Boolean;
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// let invalidTuple: [string, Boolean] = ["foo", false];
+    /// let invalidTuple: [string, Number] = ["foo", 12];
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// function badFunction(cb: Function) {
+    ///   cb(12);
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// const notEmpty: {} = {prop: 12};
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// const alsoNotAnObj: Object = "foo";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```ts
-    /// let foo: string = "bar";
+    /// const foo: string = "bar";
     /// ```
     ///
     /// ```ts
     /// let tuple: [boolean, string] = [false, "foo"];
+    /// ```
+    ///
+    /// ```ts
+    /// function betterFunction(cb: (n: number) => string) {
+    ///   return cb(12);
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// type wrapFn<T extends (...args: never) => unknown> = { func: T }
+    /// ```
+    ///
+    /// ```ts
+    /// const goodObj: object = {foo: 12};
+    /// ```
+    ///
+    /// ```ts
+    /// type emptyObj = Record<string, never>;
+    /// ```
+    ///
+    /// Exceptions for `{}`:
+    /// ```ts
+    /// declare function foo<T extends {}>(x: T): void;
+    /// ```
+    ///
+    /// ```ts
+    /// type notNull<T> = T & {};
     /// ```
     ///
     pub NoBannedTypes {
@@ -161,9 +221,13 @@ impl Rule for NoBannedTypes {
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             banned_type_range,
-            markup! {"Don't use '"{banned_type.to_string()}"' as a type."}.to_owned(),
+            markup! {"Don't use '"<Emphasis>{banned_type.to_string()}</Emphasis>"' as a type."}
+                .to_owned(),
         )
-        .note(markup! { {banned_type.message()} }.to_owned());
+        .note(banned_type.message())
+        // TODO: Update this if/when the rule gets split up or has individual disabling options added
+        .note("If that's really what you want, use an inline disable comment.");
+
         Some(diagnostic)
     }
 
@@ -181,7 +245,7 @@ impl Rule for NoBannedTypes {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
+            markup! { "Use '"{suggested_type}"' instead." }.to_owned(),
             mutation,
         ))
     }
@@ -216,7 +280,7 @@ pub enum BannedType {
 }
 
 impl BannedType {
-    /// construct a [BannedType] from the textual name of a JavaScript type
+    /// Construct a [BannedType] from the textual name of a JavaScript type.
     fn from_str(s: &str) -> Option<Self> {
         Some(match s {
             "BigInt" => Self::BigInt,
@@ -231,20 +295,35 @@ impl BannedType {
         })
     }
 
-    /// Retrieves a diagnostic message from a [BannedType]
-    fn message(&self) -> &str {
+    /// Retrieve a diagnostic message from a [BannedType].
+    fn message(&self) -> impl biome_console::fmt::Display {
         match *self {
             Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
-                "Use lowercase primitives for consistency."
+                let primitive_str = self.as_js_syntax_kind().and_then(|syntax| syntax.to_string())
+                    .expect("BannedType should be coercible to its lowercase primitive as a string");
+
+                markup! {
+                    "Prefer using lowercase primitive types instead of uppercase \"boxed object\" types."
+                    "\n'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"anything"</Emphasis>" that implements the corresponding interface "
+                    "- both primitives and \"primitive-like\" objects."
+                    "\nIt is considered best practice to use '"<Emphasis>{ primitive_str }</Emphasis>"' instead in nearly all circumstances."
+                }.to_owned()
             }
             Self::Function => {
-                "Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs."
+                markup! {
+                    "The '"<Emphasis>"Function"</Emphasis>"' type is unsafe and accepts any arbitrary function or \"function-like\" value."
+                    "\nExplicitly defining the function's shape helps prevent mismatching argument types and return values."
+                    "\nIf a generic \"catch-all\" callback type is required, consider using a \"top type\" like '"<Emphasis>"(...args: never) => unknown"</Emphasis>"' instead."
+                }.to_owned()
             }
-            Self::Object => {
-                "Prefer explicitly define the object shape. This type means \"any non-nullable value\", which is slightly better than 'unknown', but it's still a broad type."
-            }
-            Self::EmptyObject => {
-                "Prefer explicitly define the object shape. '{}' means \"any non-nullable value\"."
+            Self::Object | Self::EmptyObject => {
+                markup! {
+                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullable value, including non-object primitives like '123' and 'true'."
+                    "\n- If you want a type meaning \"any arbitrary object\", use '"<Emphasis>"object"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"any value\", use '"<Emphasis>"unknown"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object without any properties\", use "
+                    "'"<Emphasis>"{ [k: string]: never }"</Emphasis>"' or '"<Emphasis>"Record<string, never>"</Emphasis>"' instead."
+                }.to_owned()
             }
         }
     }

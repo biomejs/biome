@@ -3,7 +3,7 @@ use biome_string_case::Case;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{collections::BTreeMap, path::Path};
-use xtask::{glue::fs2, project_root, reformat};
+use xtask_glue::{glue::fs2, project_root, reformat};
 
 pub fn generate_analyzer() -> Result<()> {
     generate_js_analyzer()?;
@@ -118,7 +118,7 @@ fn generate_category(
     );
 
     let (modules, paths): (Vec<_>, Vec<_>) = groups.into_values().unzip();
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         #( #modules )*
         ::biome_analyze::declare_category! {
             pub #category_name {
@@ -193,7 +193,7 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
 
         _ => panic!("Category not supported: {category}"),
     };
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         #import_macro;
 
         #( #rule_imports )*
@@ -220,7 +220,7 @@ fn update_js_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) ->
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_js_syntax::JsLanguage;
 
@@ -239,7 +239,7 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_json_syntax::JsonLanguage;
 
@@ -259,7 +259,7 @@ fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_css_syntax::CssLanguage;
 
@@ -279,7 +279,7 @@ fn update_graphql_registry_builder(analyzers: BTreeMap<&'static str, TokenStream
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_graphql_syntax::GraphqlLanguage;
 
@@ -298,7 +298,7 @@ fn update_html_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 
     let categories = analyzers.into_values();
 
-    let tokens = xtask::reformat(quote! {
+    let tokens = xtask_glue::reformat(quote! {
         use biome_analyze::RegistryVisitor;
         use biome_html_syntax::HtmlLanguage;
 

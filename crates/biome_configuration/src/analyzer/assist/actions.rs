@@ -181,23 +181,23 @@ pub struct Source {
     #[doc = r" Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order."]
+    #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order.\nSee https://biomejs.dev/assist/actions/organize-imports"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organize_imports: Option<
         RuleAssistConfiguration<biome_rule_options::organize_imports::OrganizeImportsOptions>,
     >,
-    #[doc = "Enforce attribute sorting in JSX elements."]
+    #[doc = "Enforce attribute sorting in JSX elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_attributes: Option<
         RuleAssistConfiguration<
             biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions,
         >,
     >,
-    #[doc = "Sort the keys of a JSON object in natural order."]
+    #[doc = "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
         Option<RuleAssistConfiguration<biome_rule_options::use_sorted_keys::UseSortedKeysOptions>>,
-    #[doc = "Enforce ordering of CSS properties and nested rules."]
+    #[doc = "Enforce ordering of CSS properties and nested rules.\nSee https://biomejs.dev/assist/actions/use-sorted-properties"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_properties: Option<
         RuleAssistConfiguration<

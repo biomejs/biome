@@ -1,9 +1,10 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessLint,
-    SearchCapabilities, is_diagnostic_error,
+    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
+    ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -12,16 +13,12 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::{
-    CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-};
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleError};
+use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
+use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
 };
-use biome_diagnostics::Applicability;
 use biome_formatter::{
     BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle,
@@ -35,8 +32,8 @@ use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, Text
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use camino::Utf8Path;
+use either::Either;
 use std::borrow::Cow;
-use std::collections::HashSet;
 use tracing::{debug_span, error, info, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -167,15 +164,18 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_analyzer_options(
-        _global: &Settings,
+        global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
+        let configuration =
+            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
+            .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
 
@@ -291,6 +291,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -555,7 +556,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
             .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout)
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -565,123 +566,38 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut actions = Vec::new();
-    let mut skipped_suggested_fixes = 0;
-    let mut errors: u16 = 0;
-    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
-
+    let mut process_fix_all = ProcessFixAll::new(
+        &params,
+        rules,
+        tree.syntax().text_range_with_trivia().len().into(),
+    );
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-            let current_diagnostic = signal.diagnostic();
-
-            if let Some(diagnostic) = current_diagnostic.as_ref()
-                && is_diagnostic_error(diagnostic, rules.as_deref())
-            {
-                errors += 1;
-            }
-
-            for action in signal.actions() {
-                match params.fix_file_mode {
-                    FixFileMode::SafeFixes => {
-                        // suppression actions should not be part of safe fixes
-                        if action.is_suppression() {
-                            continue;
-                        }
-                        if action.applicability == Applicability::MaybeIncorrect {
-                            skipped_suggested_fixes += 1;
-                        }
-                        if action.applicability == Applicability::Always {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::SafeAndUnsafeFixes => {
-                        if matches!(
-                            action.applicability,
-                            Applicability::Always | Applicability::MaybeIncorrect
-                        ) {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::ApplySuppressions => {
-                        if action.is_suppression() {
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                }
-            }
-
-            ControlFlow::Continue(())
+            process_fix_all.process_signal(signal)
         });
 
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    tree = match GraphqlRoot::cast(root) {
-                        Some(tree) => tree,
-                        None => {
-                            return Err(WorkspaceError::RuleError(
-                                RuleError::ReplacedRootWithNonRootError {
-                                    rule_name: action.rule_name.map(|(group, rule)| {
-                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                    }),
-                                },
-                            ));
-                        }
-                    };
-                    actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match GraphqlRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
 
-                    // Check for runaway edit growth
-                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
-                    if !growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    }
-                }
-            }
-            None => {
-                let code = if params.should_format {
-                    format_node(
+        if result.is_none() {
+            return process_fix_all.finish(|| {
+                Ok(if params.should_format {
+                    Either::Left(format_node(
                         params.settings.format_options::<GraphqlLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                    )?
-                    .print()?
-                    .into_code()
+                    ))
                 } else {
-                    tree.syntax().to_string()
-                };
-                return Ok(FixFileResult {
-                    code,
-                    skipped_suggested_fixes,
-                    actions,
-                    errors: errors.into(),
-                });
-            }
+                    Either::Right(tree.syntax().to_string())
+                })
+            });
         }
     }
 }

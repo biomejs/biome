@@ -60,6 +60,46 @@ pub struct CssAtRuleFields {
     pub rule: SyntaxResult<AnyCssAtRule>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssAtRuleDeclaratorFields {
+        CssAtRuleDeclaratorFields {
+            at_token: self.at_token(),
+            declarator: self.declarator(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn declarator(&self) -> SyntaxResult<AnyCssAtRuleDeclarator> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssAtRuleDeclaratorFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub declarator: SyntaxResult<AnyCssAtRuleDeclarator>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeMatcher {
     pub(crate) syntax: SyntaxNode,
 }
@@ -458,19 +498,15 @@ impl CssColorProfileAtRule {
     }
     pub fn as_fields(&self) -> CssColorProfileAtRuleFields {
         CssColorProfileAtRuleFields {
-            color_profile_token: self.color_profile_token(),
-            name: self.name(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn color_profile_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssColorProfileAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssColorProfileAtRule {
@@ -483,9 +519,48 @@ impl Serialize for CssColorProfileAtRule {
 }
 #[derive(Serialize)]
 pub struct CssColorProfileAtRuleFields {
+    pub declarator: SyntaxResult<CssColorProfileAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssColorProfileAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssColorProfileAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssColorProfileAtRuleDeclaratorFields {
+        CssColorProfileAtRuleDeclaratorFields {
+            color_profile_token: self.color_profile_token(),
+            name: self.name(),
+        }
+    }
+    pub fn color_profile_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssColorProfileAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssColorProfileAtRuleDeclaratorFields {
     pub color_profile_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssComplexSelector {
@@ -763,23 +838,15 @@ impl CssContainerAtRule {
     }
     pub fn as_fields(&self) -> CssContainerAtRuleFields {
         CssContainerAtRuleFields {
-            container_token: self.container_token(),
-            name: self.name(),
-            query: self.query(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn container_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> Option<CssCustomIdentifier> {
-        support::node(&self.syntax, 1usize)
-    }
-    pub fn query(&self) -> SyntaxResult<AnyCssContainerQuery> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn declarator(&self) -> SyntaxResult<CssContainerAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
-        support::required_node(&self.syntax, 3usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssContainerAtRule {
@@ -792,10 +859,53 @@ impl Serialize for CssContainerAtRule {
 }
 #[derive(Serialize)]
 pub struct CssContainerAtRuleFields {
+    pub declarator: SyntaxResult<CssContainerAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerAtRuleDeclaratorFields {
+        CssContainerAtRuleDeclaratorFields {
+            container_token: self.container_token(),
+            name: self.name(),
+            query: self.query(),
+        }
+    }
+    pub fn container_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> Option<CssCustomIdentifier> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn query(&self) -> SyntaxResult<AnyCssContainerQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssContainerAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerAtRuleDeclaratorFields {
     pub container_token: SyntaxResult<SyntaxToken>,
     pub name: Option<CssCustomIdentifier>,
     pub query: SyntaxResult<AnyCssContainerQuery>,
-    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerNotQuery {
@@ -1213,19 +1323,15 @@ impl CssCounterStyleAtRule {
     }
     pub fn as_fields(&self) -> CssCounterStyleAtRuleFields {
         CssCounterStyleAtRuleFields {
-            counter_style_token: self.counter_style_token(),
-            name: self.name(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn counter_style_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssCounterStyleAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssCounterStyleAtRule {
@@ -1238,9 +1344,48 @@ impl Serialize for CssCounterStyleAtRule {
 }
 #[derive(Serialize)]
 pub struct CssCounterStyleAtRuleFields {
+    pub declarator: SyntaxResult<CssCounterStyleAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCounterStyleAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCounterStyleAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCounterStyleAtRuleDeclaratorFields {
+        CssCounterStyleAtRuleDeclaratorFields {
+            counter_style_token: self.counter_style_token(),
+            name: self.name(),
+        }
+    }
+    pub fn counter_style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssCounterStyleAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCounterStyleAtRuleDeclaratorFields {
     pub counter_style_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCustomIdentifier {
@@ -1713,12 +1858,12 @@ impl CssFontFaceAtRule {
     }
     pub fn as_fields(&self) -> CssFontFaceAtRuleFields {
         CssFontFaceAtRuleFields {
-            font_face_token: self.font_face_token(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn font_face_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn declarator(&self) -> SyntaxResult<CssFontFaceAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
         support::required_node(&self.syntax, 1usize)
@@ -1734,8 +1879,43 @@ impl Serialize for CssFontFaceAtRule {
 }
 #[derive(Serialize)]
 pub struct CssFontFaceAtRuleFields {
-    pub font_face_token: SyntaxResult<SyntaxToken>,
+    pub declarator: SyntaxResult<CssFontFaceAtRuleDeclarator>,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFontFaceAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFontFaceAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFontFaceAtRuleDeclaratorFields {
+        CssFontFaceAtRuleDeclaratorFields {
+            font_face_token: self.font_face_token(),
+        }
+    }
+    pub fn font_face_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssFontFaceAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFontFaceAtRuleDeclaratorFields {
+    pub font_face_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFontFamilyName {
@@ -1923,19 +2103,15 @@ impl CssFontPaletteValuesAtRule {
     }
     pub fn as_fields(&self) -> CssFontPaletteValuesAtRuleFields {
         CssFontPaletteValuesAtRuleFields {
-            font_palette_values_token: self.font_palette_values_token(),
-            name: self.name(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn font_palette_values_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssFontPaletteValuesAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssFontPaletteValuesAtRule {
@@ -1948,9 +2124,48 @@ impl Serialize for CssFontPaletteValuesAtRule {
 }
 #[derive(Serialize)]
 pub struct CssFontPaletteValuesAtRuleFields {
+    pub declarator: SyntaxResult<CssFontPaletteValuesAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFontPaletteValuesAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFontPaletteValuesAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFontPaletteValuesAtRuleDeclaratorFields {
+        CssFontPaletteValuesAtRuleDeclaratorFields {
+            font_palette_values_token: self.font_palette_values_token(),
+            name: self.name(),
+        }
+    }
+    pub fn font_palette_values_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssFontPaletteValuesAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFontPaletteValuesAtRuleDeclaratorFields {
     pub font_palette_values_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssDashedIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFunction {
@@ -2988,19 +3203,15 @@ impl CssMediaAtRule {
     }
     pub fn as_fields(&self) -> CssMediaAtRuleFields {
         CssMediaAtRuleFields {
-            media_token: self.media_token(),
-            queries: self.queries(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn media_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn queries(&self) -> CssMediaQueryList {
-        support::list(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssMediaAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssMediaAtRule {
@@ -3013,9 +3224,48 @@ impl Serialize for CssMediaAtRule {
 }
 #[derive(Serialize)]
 pub struct CssMediaAtRuleFields {
+    pub declarator: SyntaxResult<CssMediaAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaAtRuleDeclaratorFields {
+        CssMediaAtRuleDeclaratorFields {
+            media_token: self.media_token(),
+            queries: self.queries(),
+        }
+    }
+    pub fn media_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn queries(&self) -> CssMediaQueryList {
+        support::list(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssMediaAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssMediaAtRuleDeclaratorFields {
     pub media_token: SyntaxResult<SyntaxToken>,
     pub queries: CssMediaQueryList,
-    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaConditionInParens {
@@ -3916,19 +4166,15 @@ impl CssPositionTryAtRule {
     }
     pub fn as_fields(&self) -> CssPositionTryAtRuleFields {
         CssPositionTryAtRuleFields {
-            position_try_token: self.position_try_token(),
-            name: self.name(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn position_try_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssPositionTryAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssPositionTryAtRule {
@@ -3941,9 +4187,48 @@ impl Serialize for CssPositionTryAtRule {
 }
 #[derive(Serialize)]
 pub struct CssPositionTryAtRuleFields {
+    pub declarator: SyntaxResult<CssPositionTryAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPositionTryAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPositionTryAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPositionTryAtRuleDeclaratorFields {
+        CssPositionTryAtRuleDeclaratorFields {
+            position_try_token: self.position_try_token(),
+            name: self.name(),
+        }
+    }
+    pub fn position_try_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssPositionTryAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPositionTryAtRuleDeclaratorFields {
     pub position_try_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssDashedIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPropertyAtRule {
@@ -3961,19 +4246,15 @@ impl CssPropertyAtRule {
     }
     pub fn as_fields(&self) -> CssPropertyAtRuleFields {
         CssPropertyAtRuleFields {
-            property_token: self.property_token(),
-            name: self.name(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn property_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssPropertyAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssPropertyAtRule {
@@ -3986,9 +4267,48 @@ impl Serialize for CssPropertyAtRule {
 }
 #[derive(Serialize)]
 pub struct CssPropertyAtRuleFields {
+    pub declarator: SyntaxResult<CssPropertyAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPropertyAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPropertyAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPropertyAtRuleDeclaratorFields {
+        CssPropertyAtRuleDeclaratorFields {
+            property_token: self.property_token(),
+            name: self.name(),
+        }
+    }
+    pub fn property_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssPropertyAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPropertyAtRuleDeclaratorFields {
     pub property_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssDashedIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionCompoundSelector {
@@ -5520,19 +5840,15 @@ impl CssScopeAtRule {
     }
     pub fn as_fields(&self) -> CssScopeAtRuleFields {
         CssScopeAtRuleFields {
-            scope_token: self.scope_token(),
-            range: self.range(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn scope_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn range(&self) -> Option<AnyCssScopeRange> {
-        support::node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssScopeAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssScopeAtRule {
@@ -5545,9 +5861,48 @@ impl Serialize for CssScopeAtRule {
 }
 #[derive(Serialize)]
 pub struct CssScopeAtRuleFields {
+    pub declarator: SyntaxResult<CssScopeAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeAtRuleDeclaratorFields {
+        CssScopeAtRuleDeclaratorFields {
+            scope_token: self.scope_token(),
+            range: self.range(),
+        }
+    }
+    pub fn scope_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn range(&self) -> Option<AnyCssScopeRange> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssScopeAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssScopeAtRuleDeclaratorFields {
     pub scope_token: SyntaxResult<SyntaxToken>,
     pub range: Option<AnyCssScopeRange>,
-    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssScopeEdge {
@@ -5730,12 +6085,12 @@ impl CssStartingStyleAtRule {
     }
     pub fn as_fields(&self) -> CssStartingStyleAtRuleFields {
         CssStartingStyleAtRuleFields {
-            starting_style_token: self.starting_style_token(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn starting_style_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn declarator(&self) -> SyntaxResult<CssStartingStyleAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 1usize)
@@ -5751,8 +6106,43 @@ impl Serialize for CssStartingStyleAtRule {
 }
 #[derive(Serialize)]
 pub struct CssStartingStyleAtRuleFields {
-    pub starting_style_token: SyntaxResult<SyntaxToken>,
+    pub declarator: SyntaxResult<CssStartingStyleAtRuleDeclarator>,
     pub block: SyntaxResult<AnyCssConditionalBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssStartingStyleAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssStartingStyleAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssStartingStyleAtRuleDeclaratorFields {
+        CssStartingStyleAtRuleDeclaratorFields {
+            starting_style_token: self.starting_style_token(),
+        }
+    }
+    pub fn starting_style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssStartingStyleAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssStartingStyleAtRuleDeclaratorFields {
+    pub starting_style_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssString {
@@ -5850,19 +6240,15 @@ impl CssSupportsAtRule {
     }
     pub fn as_fields(&self) -> CssSupportsAtRuleFields {
         CssSupportsAtRuleFields {
-            supports_token: self.supports_token(),
-            condition: self.condition(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn supports_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn condition(&self) -> SyntaxResult<AnyCssSupportsCondition> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn declarator(&self) -> SyntaxResult<CssSupportsAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssSupportsAtRule {
@@ -5875,9 +6261,48 @@ impl Serialize for CssSupportsAtRule {
 }
 #[derive(Serialize)]
 pub struct CssSupportsAtRuleFields {
+    pub declarator: SyntaxResult<CssSupportsAtRuleDeclarator>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsAtRuleDeclaratorFields {
+        CssSupportsAtRuleDeclaratorFields {
+            supports_token: self.supports_token(),
+            condition: self.condition(),
+        }
+    }
+    pub fn supports_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AnyCssSupportsCondition> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssSupportsAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSupportsAtRuleDeclaratorFields {
     pub supports_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
-    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssSupportsConditionInParens {
@@ -6858,12 +7283,12 @@ impl CssViewTransitionAtRule {
     }
     pub fn as_fields(&self) -> CssViewTransitionAtRuleFields {
         CssViewTransitionAtRuleFields {
-            view_transition_token: self.view_transition_token(),
+            declarator: self.declarator(),
             block: self.block(),
         }
     }
-    pub fn view_transition_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn declarator(&self) -> SyntaxResult<CssViewTransitionAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
         support::required_node(&self.syntax, 1usize)
@@ -6879,8 +7304,43 @@ impl Serialize for CssViewTransitionAtRule {
 }
 #[derive(Serialize)]
 pub struct CssViewTransitionAtRuleFields {
-    pub view_transition_token: SyntaxResult<SyntaxToken>,
+    pub declarator: SyntaxResult<CssViewTransitionAtRuleDeclarator>,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssViewTransitionAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssViewTransitionAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssViewTransitionAtRuleDeclaratorFields {
+        CssViewTransitionAtRuleDeclaratorFields {
+            view_transition_token: self.view_transition_token(),
+        }
+    }
+    pub fn view_transition_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssViewTransitionAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssViewTransitionAtRuleDeclaratorFields {
+    pub view_transition_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwApplyAtRule {
@@ -7042,7 +7502,7 @@ impl TwCustomVariantShorthand {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn selector(&self) -> SyntaxResult<AnyCssSelector> {
+    pub fn selector(&self) -> SyntaxResult<AnyTwCustomVariantShorthand> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -7063,7 +7523,7 @@ impl Serialize for TwCustomVariantShorthand {
 #[derive(Serialize)]
 pub struct TwCustomVariantShorthandFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub selector: SyntaxResult<AnyCssSelector>,
+    pub selector: SyntaxResult<AnyTwCustomVariantShorthand>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -7208,6 +7668,46 @@ pub struct TwReferenceAtRuleFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwSlotAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwSlotAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwSlotAtRuleFields {
+        TwSlotAtRuleFields {
+            slot_token: self.slot_token(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn slot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for TwSlotAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwSlotAtRuleFields {
+    pub slot_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwSourceAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7225,7 +7725,7 @@ impl TwSourceAtRule {
         TwSourceAtRuleFields {
             source_token: self.source_token(),
             not_token: self.not_token(),
-            path: self.path(),
+            source: self.source(),
             semicolon_token: self.semicolon_token(),
         }
     }
@@ -7235,7 +7735,7 @@ impl TwSourceAtRule {
     pub fn not_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 1usize)
     }
-    pub fn path(&self) -> SyntaxResult<CssString> {
+    pub fn source(&self) -> SyntaxResult<AnyTwSource> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -7254,8 +7754,58 @@ impl Serialize for TwSourceAtRule {
 pub struct TwSourceAtRuleFields {
     pub source_token: SyntaxResult<SyntaxToken>,
     pub not_token: Option<SyntaxToken>,
-    pub path: SyntaxResult<CssString>,
+    pub source: SyntaxResult<AnyTwSource>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwSourceInline {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwSourceInline {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwSourceInlineFields {
+        TwSourceInlineFields {
+            inline_token: self.inline_token(),
+            l_paren_token: self.l_paren_token(),
+            content: self.content(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn inline_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn content(&self) -> SyntaxResult<CssString> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for TwSourceInline {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwSourceInlineFields {
+    pub inline_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub content: SyntaxResult<CssString>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwThemeAtRule {
@@ -7468,6 +8018,7 @@ pub enum AnyCssAtRule {
     TwCustomVariantAtRule(TwCustomVariantAtRule),
     TwPluginAtRule(TwPluginAtRule),
     TwReferenceAtRule(TwReferenceAtRule),
+    TwSlotAtRule(TwSlotAtRule),
     TwSourceAtRule(TwSourceAtRule),
     TwThemeAtRule(TwThemeAtRule),
     TwUtilityAtRule(TwUtilityAtRule),
@@ -7648,6 +8199,12 @@ impl AnyCssAtRule {
             _ => None,
         }
     }
+    pub fn as_tw_slot_at_rule(&self) -> Option<&TwSlotAtRule> {
+        match &self {
+            Self::TwSlotAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_tw_source_at_rule(&self) -> Option<&TwSourceAtRule> {
         match &self {
             Self::TwSourceAtRule(item) => Some(item),
@@ -7669,6 +8226,107 @@ impl AnyCssAtRule {
     pub fn as_tw_variant_at_rule(&self) -> Option<&TwVariantAtRule> {
         match &self {
             Self::TwVariantAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAtRuleDeclarator {
+    CssColorProfileAtRuleDeclarator(CssColorProfileAtRuleDeclarator),
+    CssContainerAtRuleDeclarator(CssContainerAtRuleDeclarator),
+    CssCounterStyleAtRuleDeclarator(CssCounterStyleAtRuleDeclarator),
+    CssFontFaceAtRuleDeclarator(CssFontFaceAtRuleDeclarator),
+    CssFontPaletteValuesAtRuleDeclarator(CssFontPaletteValuesAtRuleDeclarator),
+    CssMediaAtRuleDeclarator(CssMediaAtRuleDeclarator),
+    CssPositionTryAtRuleDeclarator(CssPositionTryAtRuleDeclarator),
+    CssPropertyAtRuleDeclarator(CssPropertyAtRuleDeclarator),
+    CssScopeAtRuleDeclarator(CssScopeAtRuleDeclarator),
+    CssStartingStyleAtRuleDeclarator(CssStartingStyleAtRuleDeclarator),
+    CssSupportsAtRuleDeclarator(CssSupportsAtRuleDeclarator),
+    CssViewTransitionAtRuleDeclarator(CssViewTransitionAtRuleDeclarator),
+}
+impl AnyCssAtRuleDeclarator {
+    pub fn as_css_color_profile_at_rule_declarator(
+        &self,
+    ) -> Option<&CssColorProfileAtRuleDeclarator> {
+        match &self {
+            Self::CssColorProfileAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_at_rule_declarator(&self) -> Option<&CssContainerAtRuleDeclarator> {
+        match &self {
+            Self::CssContainerAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_counter_style_at_rule_declarator(
+        &self,
+    ) -> Option<&CssCounterStyleAtRuleDeclarator> {
+        match &self {
+            Self::CssCounterStyleAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_face_at_rule_declarator(&self) -> Option<&CssFontFaceAtRuleDeclarator> {
+        match &self {
+            Self::CssFontFaceAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_palette_values_at_rule_declarator(
+        &self,
+    ) -> Option<&CssFontPaletteValuesAtRuleDeclarator> {
+        match &self {
+            Self::CssFontPaletteValuesAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_at_rule_declarator(&self) -> Option<&CssMediaAtRuleDeclarator> {
+        match &self {
+            Self::CssMediaAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_position_try_at_rule_declarator(
+        &self,
+    ) -> Option<&CssPositionTryAtRuleDeclarator> {
+        match &self {
+            Self::CssPositionTryAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_property_at_rule_declarator(&self) -> Option<&CssPropertyAtRuleDeclarator> {
+        match &self {
+            Self::CssPropertyAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_scope_at_rule_declarator(&self) -> Option<&CssScopeAtRuleDeclarator> {
+        match &self {
+            Self::CssScopeAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_starting_style_at_rule_declarator(
+        &self,
+    ) -> Option<&CssStartingStyleAtRuleDeclarator> {
+        match &self {
+            Self::CssStartingStyleAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_at_rule_declarator(&self) -> Option<&CssSupportsAtRuleDeclarator> {
+        match &self {
+            Self::CssSupportsAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_view_transition_at_rule_declarator(
+        &self,
+    ) -> Option<&CssViewTransitionAtRuleDeclarator> {
+        match &self {
+            Self::CssViewTransitionAtRuleDeclarator(item) => Some(item),
             _ => None,
         }
     }
@@ -9737,6 +10395,44 @@ impl AnyTwCustomVariantSelector {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTwCustomVariantShorthand {
+    CssAtRuleDeclarator(CssAtRuleDeclarator),
+    CssSelectorList(CssSelectorList),
+}
+impl AnyTwCustomVariantShorthand {
+    pub fn as_css_at_rule_declarator(&self) -> Option<&CssAtRuleDeclarator> {
+        match &self {
+            Self::CssAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_selector_list(&self) -> Option<&CssSelectorList> {
+        match &self {
+            Self::CssSelectorList(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTwSource {
+    CssString(CssString),
+    TwSourceInline(TwSourceInline),
+}
+impl AnyTwSource {
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_source_inline(&self) -> Option<&TwSourceInline> {
+        match &self {
+            Self::TwSourceInline(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTwUtilityName {
     CssIdentifier(CssIdentifier),
     TwFunctionalUtilityName(TwFunctionalUtilityName),
@@ -9800,6 +10496,54 @@ impl From<CssAtRule> for SyntaxNode {
 }
 impl From<CssAtRule> for SyntaxElement {
     fn from(n: CssAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAtRuleDeclarator")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .finish()
+        } else {
+            f.debug_struct("CssAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -10295,11 +11039,7 @@ impl std::fmt::Debug for CssColorProfileAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssColorProfileAtRule")
-                .field(
-                    "color_profile_token",
-                    &support::DebugSyntaxResult(self.color_profile_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -10316,6 +11056,57 @@ impl From<CssColorProfileAtRule> for SyntaxNode {
 }
 impl From<CssColorProfileAtRule> for SyntaxElement {
     fn from(n: CssColorProfileAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssColorProfileAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COLOR_PROFILE_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COLOR_PROFILE_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssColorProfileAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssColorProfileAtRuleDeclarator")
+                .field(
+                    "color_profile_token",
+                    &support::DebugSyntaxResult(self.color_profile_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssColorProfileAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssColorProfileAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssColorProfileAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssColorProfileAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssColorProfileAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -10648,12 +11439,7 @@ impl std::fmt::Debug for CssContainerAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerAtRule")
-                .field(
-                    "container_token",
-                    &support::DebugSyntaxResult(self.container_token()),
-                )
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -10670,6 +11456,58 @@ impl From<CssContainerAtRule> for SyntaxNode {
 }
 impl From<CssContainerAtRule> for SyntaxElement {
     fn from(n: CssContainerAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CONTAINER_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerAtRuleDeclarator")
+                .field(
+                    "container_token",
+                    &support::DebugSyntaxResult(self.container_token()),
+                )
+                .field("name", &support::DebugOptionalElement(self.name()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssContainerAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssContainerAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -11168,11 +12006,7 @@ impl std::fmt::Debug for CssCounterStyleAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssCounterStyleAtRule")
-                .field(
-                    "counter_style_token",
-                    &support::DebugSyntaxResult(self.counter_style_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -11189,6 +12023,57 @@ impl From<CssCounterStyleAtRule> for SyntaxNode {
 }
 impl From<CssCounterStyleAtRule> for SyntaxElement {
     fn from(n: CssCounterStyleAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCounterStyleAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COUNTER_STYLE_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COUNTER_STYLE_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCounterStyleAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCounterStyleAtRuleDeclarator")
+                .field(
+                    "counter_style_token",
+                    &support::DebugSyntaxResult(self.counter_style_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssCounterStyleAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCounterStyleAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssCounterStyleAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCounterStyleAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssCounterStyleAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -11799,10 +12684,7 @@ impl std::fmt::Debug for CssFontFaceAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFaceAtRule")
-                .field(
-                    "font_face_token",
-                    &support::DebugSyntaxResult(self.font_face_token()),
-                )
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -11819,6 +12701,56 @@ impl From<CssFontFaceAtRule> for SyntaxNode {
 }
 impl From<CssFontFaceAtRule> for SyntaxElement {
     fn from(n: CssFontFaceAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFontFaceAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FONT_FACE_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_FACE_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFontFaceAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFaceAtRuleDeclarator")
+                .field(
+                    "font_face_token",
+                    &support::DebugSyntaxResult(self.font_face_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssFontFaceAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFontFaceAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssFontFaceAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFontFaceAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssFontFaceAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -12053,11 +12985,7 @@ impl std::fmt::Debug for CssFontPaletteValuesAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontPaletteValuesAtRule")
-                .field(
-                    "font_palette_values_token",
-                    &support::DebugSyntaxResult(self.font_palette_values_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -12074,6 +13002,59 @@ impl From<CssFontPaletteValuesAtRule> for SyntaxNode {
 }
 impl From<CssFontPaletteValuesAtRule> for SyntaxElement {
     fn from(n: CssFontPaletteValuesAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFontPaletteValuesAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFontPaletteValuesAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontPaletteValuesAtRuleDeclarator")
+                .field(
+                    "font_palette_values_token",
+                    &support::DebugSyntaxResult(self.font_palette_values_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssFontPaletteValuesAtRuleDeclarator")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFontPaletteValuesAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssFontPaletteValuesAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFontPaletteValuesAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssFontPaletteValuesAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -13334,11 +14315,7 @@ impl std::fmt::Debug for CssMediaAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaAtRule")
-                .field(
-                    "media_token",
-                    &support::DebugSyntaxResult(self.media_token()),
-                )
-                .field("queries", &self.queries())
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -13355,6 +14332,57 @@ impl From<CssMediaAtRule> for SyntaxNode {
 }
 impl From<CssMediaAtRule> for SyntaxElement {
     fn from(n: CssMediaAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssMediaAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_MEDIA_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMediaAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaAtRuleDeclarator")
+                .field(
+                    "media_token",
+                    &support::DebugSyntaxResult(self.media_token()),
+                )
+                .field("queries", &self.queries())
+                .finish()
+        } else {
+            f.debug_struct("CssMediaAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssMediaAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssMediaAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssMediaAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssMediaAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -14497,11 +15525,7 @@ impl std::fmt::Debug for CssPositionTryAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssPositionTryAtRule")
-                .field(
-                    "position_try_token",
-                    &support::DebugSyntaxResult(self.position_try_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -14518,6 +15542,57 @@ impl From<CssPositionTryAtRule> for SyntaxNode {
 }
 impl From<CssPositionTryAtRule> for SyntaxElement {
     fn from(n: CssPositionTryAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPositionTryAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_POSITION_TRY_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_POSITION_TRY_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPositionTryAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPositionTryAtRuleDeclarator")
+                .field(
+                    "position_try_token",
+                    &support::DebugSyntaxResult(self.position_try_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssPositionTryAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssPositionTryAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssPositionTryAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssPositionTryAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssPositionTryAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -14549,11 +15624,7 @@ impl std::fmt::Debug for CssPropertyAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssPropertyAtRule")
-                .field(
-                    "property_token",
-                    &support::DebugSyntaxResult(self.property_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -14570,6 +15641,57 @@ impl From<CssPropertyAtRule> for SyntaxNode {
 }
 impl From<CssPropertyAtRule> for SyntaxElement {
     fn from(n: CssPropertyAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPropertyAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PROPERTY_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PROPERTY_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPropertyAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPropertyAtRuleDeclarator")
+                .field(
+                    "property_token",
+                    &support::DebugSyntaxResult(self.property_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssPropertyAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssPropertyAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssPropertyAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssPropertyAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssPropertyAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -16399,11 +17521,7 @@ impl std::fmt::Debug for CssScopeAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeAtRule")
-                .field(
-                    "scope_token",
-                    &support::DebugSyntaxResult(self.scope_token()),
-                )
-                .field("range", &support::DebugOptionalElement(self.range()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -16420,6 +17538,57 @@ impl From<CssScopeAtRule> for SyntaxNode {
 }
 impl From<CssScopeAtRule> for SyntaxElement {
     fn from(n: CssScopeAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssScopeAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeAtRuleDeclarator")
+                .field(
+                    "scope_token",
+                    &support::DebugSyntaxResult(self.scope_token()),
+                )
+                .field("range", &support::DebugOptionalElement(self.range()))
+                .finish()
+        } else {
+            f.debug_struct("CssScopeAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssScopeAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssScopeAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssScopeAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssScopeAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -16650,10 +17819,7 @@ impl std::fmt::Debug for CssStartingStyleAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssStartingStyleAtRule")
-                .field(
-                    "starting_style_token",
-                    &support::DebugSyntaxResult(self.starting_style_token()),
-                )
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -16670,6 +17836,56 @@ impl From<CssStartingStyleAtRule> for SyntaxNode {
 }
 impl From<CssStartingStyleAtRule> for SyntaxElement {
     fn from(n: CssStartingStyleAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssStartingStyleAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_STARTING_STYLE_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_STARTING_STYLE_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssStartingStyleAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssStartingStyleAtRuleDeclarator")
+                .field(
+                    "starting_style_token",
+                    &support::DebugSyntaxResult(self.starting_style_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssStartingStyleAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssStartingStyleAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssStartingStyleAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssStartingStyleAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssStartingStyleAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -16800,11 +18016,7 @@ impl std::fmt::Debug for CssSupportsAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsAtRule")
-                .field(
-                    "supports_token",
-                    &support::DebugSyntaxResult(self.supports_token()),
-                )
-                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -16821,6 +18033,57 @@ impl From<CssSupportsAtRule> for SyntaxNode {
 }
 impl From<CssSupportsAtRule> for SyntaxElement {
     fn from(n: CssSupportsAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsAtRuleDeclarator")
+                .field(
+                    "supports_token",
+                    &support::DebugSyntaxResult(self.supports_token()),
+                )
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSupportsAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssSupportsAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSupportsAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssSupportsAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -18033,10 +19296,7 @@ impl std::fmt::Debug for CssViewTransitionAtRule {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssViewTransitionAtRule")
-                .field(
-                    "view_transition_token",
-                    &support::DebugSyntaxResult(self.view_transition_token()),
-                )
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -18053,6 +19313,56 @@ impl From<CssViewTransitionAtRule> for SyntaxNode {
 }
 impl From<CssViewTransitionAtRule> for SyntaxElement {
     fn from(n: CssViewTransitionAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssViewTransitionAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssViewTransitionAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssViewTransitionAtRuleDeclarator")
+                .field(
+                    "view_transition_token",
+                    &support::DebugSyntaxResult(self.view_transition_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssViewTransitionAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssViewTransitionAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssViewTransitionAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssViewTransitionAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssViewTransitionAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -18440,6 +19750,57 @@ impl From<TwReferenceAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwSlotAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SLOT_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_SLOT_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwSlotAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwSlotAtRule")
+                .field("slot_token", &support::DebugSyntaxResult(self.slot_token()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwSlotAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwSlotAtRule> for SyntaxNode {
+    fn from(n: TwSlotAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<TwSlotAtRule> for SyntaxElement {
+    fn from(n: TwSlotAtRule) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwSourceAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18476,7 +19837,7 @@ impl std::fmt::Debug for TwSourceAtRule {
                     "not_token",
                     &support::DebugOptionalElement(self.not_token()),
                 )
-                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
                 .field(
                     "semicolon_token",
                     &support::DebugSyntaxResult(self.semicolon_token()),
@@ -18496,6 +19857,65 @@ impl From<TwSourceAtRule> for SyntaxNode {
 }
 impl From<TwSourceAtRule> for SyntaxElement {
     fn from(n: TwSourceAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwSourceInline {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SOURCE_INLINE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_SOURCE_INLINE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwSourceInline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwSourceInline")
+                .field(
+                    "inline_token",
+                    &support::DebugSyntaxResult(self.inline_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("content", &support::DebugSyntaxResult(self.content()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwSourceInline").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwSourceInline> for SyntaxNode {
+    fn from(n: TwSourceInline) -> Self {
+        n.syntax
+    }
+}
+impl From<TwSourceInline> for SyntaxElement {
+    fn from(n: TwSourceInline) -> Self {
         n.syntax.into()
     }
 }
@@ -18852,6 +20272,11 @@ impl From<TwReferenceAtRule> for AnyCssAtRule {
         Self::TwReferenceAtRule(node)
     }
 }
+impl From<TwSlotAtRule> for AnyCssAtRule {
+    fn from(node: TwSlotAtRule) -> Self {
+        Self::TwSlotAtRule(node)
+    }
+}
 impl From<TwSourceAtRule> for AnyCssAtRule {
     fn from(node: TwSourceAtRule) -> Self {
         Self::TwSourceAtRule(node)
@@ -18903,6 +20328,7 @@ impl AstNode for AnyCssAtRule {
         .union(TwCustomVariantAtRule::KIND_SET)
         .union(TwPluginAtRule::KIND_SET)
         .union(TwReferenceAtRule::KIND_SET)
+        .union(TwSlotAtRule::KIND_SET)
         .union(TwSourceAtRule::KIND_SET)
         .union(TwThemeAtRule::KIND_SET)
         .union(TwUtilityAtRule::KIND_SET)
@@ -18939,6 +20365,7 @@ impl AstNode for AnyCssAtRule {
                 | TW_CUSTOM_VARIANT_AT_RULE
                 | TW_PLUGIN_AT_RULE
                 | TW_REFERENCE_AT_RULE
+                | TW_SLOT_AT_RULE
                 | TW_SOURCE_AT_RULE
                 | TW_THEME_AT_RULE
                 | TW_UTILITY_AT_RULE
@@ -18994,6 +20421,7 @@ impl AstNode for AnyCssAtRule {
             }
             TW_PLUGIN_AT_RULE => Self::TwPluginAtRule(TwPluginAtRule { syntax }),
             TW_REFERENCE_AT_RULE => Self::TwReferenceAtRule(TwReferenceAtRule { syntax }),
+            TW_SLOT_AT_RULE => Self::TwSlotAtRule(TwSlotAtRule { syntax }),
             TW_SOURCE_AT_RULE => Self::TwSourceAtRule(TwSourceAtRule { syntax }),
             TW_THEME_AT_RULE => Self::TwThemeAtRule(TwThemeAtRule { syntax }),
             TW_UTILITY_AT_RULE => Self::TwUtilityAtRule(TwUtilityAtRule { syntax }),
@@ -19004,76 +20432,78 @@ impl AstNode for AnyCssAtRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusAtRule(it) => &it.syntax,
-            Self::CssCharsetAtRule(it) => &it.syntax,
-            Self::CssColorProfileAtRule(it) => &it.syntax,
-            Self::CssContainerAtRule(it) => &it.syntax,
-            Self::CssCounterStyleAtRule(it) => &it.syntax,
-            Self::CssDocumentAtRule(it) => &it.syntax,
-            Self::CssFontFaceAtRule(it) => &it.syntax,
-            Self::CssFontFeatureValuesAtRule(it) => &it.syntax,
-            Self::CssFontPaletteValuesAtRule(it) => &it.syntax,
-            Self::CssImportAtRule(it) => &it.syntax,
-            Self::CssKeyframesAtRule(it) => &it.syntax,
-            Self::CssLayerAtRule(it) => &it.syntax,
-            Self::CssMediaAtRule(it) => &it.syntax,
-            Self::CssNamespaceAtRule(it) => &it.syntax,
-            Self::CssPageAtRule(it) => &it.syntax,
-            Self::CssPositionTryAtRule(it) => &it.syntax,
-            Self::CssPropertyAtRule(it) => &it.syntax,
-            Self::CssScopeAtRule(it) => &it.syntax,
-            Self::CssStartingStyleAtRule(it) => &it.syntax,
-            Self::CssSupportsAtRule(it) => &it.syntax,
-            Self::CssUnknownBlockAtRule(it) => &it.syntax,
-            Self::CssUnknownValueAtRule(it) => &it.syntax,
-            Self::CssValueAtRule(it) => &it.syntax,
-            Self::CssViewTransitionAtRule(it) => &it.syntax,
-            Self::TwApplyAtRule(it) => &it.syntax,
-            Self::TwConfigAtRule(it) => &it.syntax,
-            Self::TwCustomVariantAtRule(it) => &it.syntax,
-            Self::TwPluginAtRule(it) => &it.syntax,
-            Self::TwReferenceAtRule(it) => &it.syntax,
-            Self::TwSourceAtRule(it) => &it.syntax,
-            Self::TwThemeAtRule(it) => &it.syntax,
-            Self::TwUtilityAtRule(it) => &it.syntax,
-            Self::TwVariantAtRule(it) => &it.syntax,
+            Self::CssBogusAtRule(it) => it.syntax(),
+            Self::CssCharsetAtRule(it) => it.syntax(),
+            Self::CssColorProfileAtRule(it) => it.syntax(),
+            Self::CssContainerAtRule(it) => it.syntax(),
+            Self::CssCounterStyleAtRule(it) => it.syntax(),
+            Self::CssDocumentAtRule(it) => it.syntax(),
+            Self::CssFontFaceAtRule(it) => it.syntax(),
+            Self::CssFontFeatureValuesAtRule(it) => it.syntax(),
+            Self::CssFontPaletteValuesAtRule(it) => it.syntax(),
+            Self::CssImportAtRule(it) => it.syntax(),
+            Self::CssKeyframesAtRule(it) => it.syntax(),
+            Self::CssLayerAtRule(it) => it.syntax(),
+            Self::CssMediaAtRule(it) => it.syntax(),
+            Self::CssNamespaceAtRule(it) => it.syntax(),
+            Self::CssPageAtRule(it) => it.syntax(),
+            Self::CssPositionTryAtRule(it) => it.syntax(),
+            Self::CssPropertyAtRule(it) => it.syntax(),
+            Self::CssScopeAtRule(it) => it.syntax(),
+            Self::CssStartingStyleAtRule(it) => it.syntax(),
+            Self::CssSupportsAtRule(it) => it.syntax(),
+            Self::CssUnknownBlockAtRule(it) => it.syntax(),
+            Self::CssUnknownValueAtRule(it) => it.syntax(),
+            Self::CssValueAtRule(it) => it.syntax(),
+            Self::CssViewTransitionAtRule(it) => it.syntax(),
+            Self::TwApplyAtRule(it) => it.syntax(),
+            Self::TwConfigAtRule(it) => it.syntax(),
+            Self::TwCustomVariantAtRule(it) => it.syntax(),
+            Self::TwPluginAtRule(it) => it.syntax(),
+            Self::TwReferenceAtRule(it) => it.syntax(),
+            Self::TwSlotAtRule(it) => it.syntax(),
+            Self::TwSourceAtRule(it) => it.syntax(),
+            Self::TwThemeAtRule(it) => it.syntax(),
+            Self::TwUtilityAtRule(it) => it.syntax(),
+            Self::TwVariantAtRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusAtRule(it) => it.syntax,
-            Self::CssCharsetAtRule(it) => it.syntax,
-            Self::CssColorProfileAtRule(it) => it.syntax,
-            Self::CssContainerAtRule(it) => it.syntax,
-            Self::CssCounterStyleAtRule(it) => it.syntax,
-            Self::CssDocumentAtRule(it) => it.syntax,
-            Self::CssFontFaceAtRule(it) => it.syntax,
-            Self::CssFontFeatureValuesAtRule(it) => it.syntax,
-            Self::CssFontPaletteValuesAtRule(it) => it.syntax,
-            Self::CssImportAtRule(it) => it.syntax,
-            Self::CssKeyframesAtRule(it) => it.syntax,
-            Self::CssLayerAtRule(it) => it.syntax,
-            Self::CssMediaAtRule(it) => it.syntax,
-            Self::CssNamespaceAtRule(it) => it.syntax,
-            Self::CssPageAtRule(it) => it.syntax,
-            Self::CssPositionTryAtRule(it) => it.syntax,
-            Self::CssPropertyAtRule(it) => it.syntax,
-            Self::CssScopeAtRule(it) => it.syntax,
-            Self::CssStartingStyleAtRule(it) => it.syntax,
-            Self::CssSupportsAtRule(it) => it.syntax,
-            Self::CssUnknownBlockAtRule(it) => it.syntax,
-            Self::CssUnknownValueAtRule(it) => it.syntax,
-            Self::CssValueAtRule(it) => it.syntax,
-            Self::CssViewTransitionAtRule(it) => it.syntax,
-            Self::TwApplyAtRule(it) => it.syntax,
-            Self::TwConfigAtRule(it) => it.syntax,
-            Self::TwCustomVariantAtRule(it) => it.syntax,
-            Self::TwPluginAtRule(it) => it.syntax,
-            Self::TwReferenceAtRule(it) => it.syntax,
-            Self::TwSourceAtRule(it) => it.syntax,
-            Self::TwThemeAtRule(it) => it.syntax,
-            Self::TwUtilityAtRule(it) => it.syntax,
-            Self::TwVariantAtRule(it) => it.syntax,
+            Self::CssBogusAtRule(it) => it.into_syntax(),
+            Self::CssCharsetAtRule(it) => it.into_syntax(),
+            Self::CssColorProfileAtRule(it) => it.into_syntax(),
+            Self::CssContainerAtRule(it) => it.into_syntax(),
+            Self::CssCounterStyleAtRule(it) => it.into_syntax(),
+            Self::CssDocumentAtRule(it) => it.into_syntax(),
+            Self::CssFontFaceAtRule(it) => it.into_syntax(),
+            Self::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
+            Self::CssFontPaletteValuesAtRule(it) => it.into_syntax(),
+            Self::CssImportAtRule(it) => it.into_syntax(),
+            Self::CssKeyframesAtRule(it) => it.into_syntax(),
+            Self::CssLayerAtRule(it) => it.into_syntax(),
+            Self::CssMediaAtRule(it) => it.into_syntax(),
+            Self::CssNamespaceAtRule(it) => it.into_syntax(),
+            Self::CssPageAtRule(it) => it.into_syntax(),
+            Self::CssPositionTryAtRule(it) => it.into_syntax(),
+            Self::CssPropertyAtRule(it) => it.into_syntax(),
+            Self::CssScopeAtRule(it) => it.into_syntax(),
+            Self::CssStartingStyleAtRule(it) => it.into_syntax(),
+            Self::CssSupportsAtRule(it) => it.into_syntax(),
+            Self::CssUnknownBlockAtRule(it) => it.into_syntax(),
+            Self::CssUnknownValueAtRule(it) => it.into_syntax(),
+            Self::CssValueAtRule(it) => it.into_syntax(),
+            Self::CssViewTransitionAtRule(it) => it.into_syntax(),
+            Self::TwApplyAtRule(it) => it.into_syntax(),
+            Self::TwConfigAtRule(it) => it.into_syntax(),
+            Self::TwCustomVariantAtRule(it) => it.into_syntax(),
+            Self::TwPluginAtRule(it) => it.into_syntax(),
+            Self::TwReferenceAtRule(it) => it.into_syntax(),
+            Self::TwSlotAtRule(it) => it.into_syntax(),
+            Self::TwSourceAtRule(it) => it.into_syntax(),
+            Self::TwThemeAtRule(it) => it.into_syntax(),
+            Self::TwUtilityAtRule(it) => it.into_syntax(),
+            Self::TwVariantAtRule(it) => it.into_syntax(),
         }
     }
 }
@@ -19109,6 +20539,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::TwCustomVariantAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwPluginAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwReferenceAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwSlotAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwSourceAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwThemeAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwUtilityAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -19119,44 +20550,257 @@ impl std::fmt::Debug for AnyCssAtRule {
 impl From<AnyCssAtRule> for SyntaxNode {
     fn from(n: AnyCssAtRule) -> Self {
         match n {
-            AnyCssAtRule::CssBogusAtRule(it) => it.into(),
-            AnyCssAtRule::CssCharsetAtRule(it) => it.into(),
-            AnyCssAtRule::CssColorProfileAtRule(it) => it.into(),
-            AnyCssAtRule::CssContainerAtRule(it) => it.into(),
-            AnyCssAtRule::CssCounterStyleAtRule(it) => it.into(),
-            AnyCssAtRule::CssDocumentAtRule(it) => it.into(),
-            AnyCssAtRule::CssFontFaceAtRule(it) => it.into(),
-            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into(),
-            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into(),
-            AnyCssAtRule::CssImportAtRule(it) => it.into(),
-            AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
-            AnyCssAtRule::CssLayerAtRule(it) => it.into(),
-            AnyCssAtRule::CssMediaAtRule(it) => it.into(),
-            AnyCssAtRule::CssNamespaceAtRule(it) => it.into(),
-            AnyCssAtRule::CssPageAtRule(it) => it.into(),
-            AnyCssAtRule::CssPositionTryAtRule(it) => it.into(),
-            AnyCssAtRule::CssPropertyAtRule(it) => it.into(),
-            AnyCssAtRule::CssScopeAtRule(it) => it.into(),
-            AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
-            AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
-            AnyCssAtRule::CssUnknownBlockAtRule(it) => it.into(),
-            AnyCssAtRule::CssUnknownValueAtRule(it) => it.into(),
-            AnyCssAtRule::CssValueAtRule(it) => it.into(),
-            AnyCssAtRule::CssViewTransitionAtRule(it) => it.into(),
-            AnyCssAtRule::TwApplyAtRule(it) => it.into(),
-            AnyCssAtRule::TwConfigAtRule(it) => it.into(),
-            AnyCssAtRule::TwCustomVariantAtRule(it) => it.into(),
-            AnyCssAtRule::TwPluginAtRule(it) => it.into(),
-            AnyCssAtRule::TwReferenceAtRule(it) => it.into(),
-            AnyCssAtRule::TwSourceAtRule(it) => it.into(),
-            AnyCssAtRule::TwThemeAtRule(it) => it.into(),
-            AnyCssAtRule::TwUtilityAtRule(it) => it.into(),
-            AnyCssAtRule::TwVariantAtRule(it) => it.into(),
+            AnyCssAtRule::CssBogusAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssCharsetAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssColorProfileAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssContainerAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssCounterStyleAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssDocumentAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssFontFaceAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssImportAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssKeyframesAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssLayerAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssMediaAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssNamespaceAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssPageAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssPositionTryAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssPropertyAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssScopeAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssStartingStyleAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssSupportsAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssUnknownBlockAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssUnknownValueAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssValueAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssViewTransitionAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwApplyAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwConfigAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwCustomVariantAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwPluginAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwReferenceAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwSlotAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwSourceAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwThemeAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwUtilityAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::TwVariantAtRule(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnyCssAtRule> for SyntaxElement {
     fn from(n: AnyCssAtRule) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssColorProfileAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssColorProfileAtRuleDeclarator) -> Self {
+        Self::CssColorProfileAtRuleDeclarator(node)
+    }
+}
+impl From<CssContainerAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssContainerAtRuleDeclarator) -> Self {
+        Self::CssContainerAtRuleDeclarator(node)
+    }
+}
+impl From<CssCounterStyleAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssCounterStyleAtRuleDeclarator) -> Self {
+        Self::CssCounterStyleAtRuleDeclarator(node)
+    }
+}
+impl From<CssFontFaceAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssFontFaceAtRuleDeclarator) -> Self {
+        Self::CssFontFaceAtRuleDeclarator(node)
+    }
+}
+impl From<CssFontPaletteValuesAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssFontPaletteValuesAtRuleDeclarator) -> Self {
+        Self::CssFontPaletteValuesAtRuleDeclarator(node)
+    }
+}
+impl From<CssMediaAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssMediaAtRuleDeclarator) -> Self {
+        Self::CssMediaAtRuleDeclarator(node)
+    }
+}
+impl From<CssPositionTryAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssPositionTryAtRuleDeclarator) -> Self {
+        Self::CssPositionTryAtRuleDeclarator(node)
+    }
+}
+impl From<CssPropertyAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssPropertyAtRuleDeclarator) -> Self {
+        Self::CssPropertyAtRuleDeclarator(node)
+    }
+}
+impl From<CssScopeAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssScopeAtRuleDeclarator) -> Self {
+        Self::CssScopeAtRuleDeclarator(node)
+    }
+}
+impl From<CssStartingStyleAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssStartingStyleAtRuleDeclarator) -> Self {
+        Self::CssStartingStyleAtRuleDeclarator(node)
+    }
+}
+impl From<CssSupportsAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssSupportsAtRuleDeclarator) -> Self {
+        Self::CssSupportsAtRuleDeclarator(node)
+    }
+}
+impl From<CssViewTransitionAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssViewTransitionAtRuleDeclarator) -> Self {
+        Self::CssViewTransitionAtRuleDeclarator(node)
+    }
+}
+impl AstNode for AnyCssAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssColorProfileAtRuleDeclarator::KIND_SET
+        .union(CssContainerAtRuleDeclarator::KIND_SET)
+        .union(CssCounterStyleAtRuleDeclarator::KIND_SET)
+        .union(CssFontFaceAtRuleDeclarator::KIND_SET)
+        .union(CssFontPaletteValuesAtRuleDeclarator::KIND_SET)
+        .union(CssMediaAtRuleDeclarator::KIND_SET)
+        .union(CssPositionTryAtRuleDeclarator::KIND_SET)
+        .union(CssPropertyAtRuleDeclarator::KIND_SET)
+        .union(CssScopeAtRuleDeclarator::KIND_SET)
+        .union(CssStartingStyleAtRuleDeclarator::KIND_SET)
+        .union(CssSupportsAtRuleDeclarator::KIND_SET)
+        .union(CssViewTransitionAtRuleDeclarator::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_COLOR_PROFILE_AT_RULE_DECLARATOR
+                | CSS_CONTAINER_AT_RULE_DECLARATOR
+                | CSS_COUNTER_STYLE_AT_RULE_DECLARATOR
+                | CSS_FONT_FACE_AT_RULE_DECLARATOR
+                | CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR
+                | CSS_MEDIA_AT_RULE_DECLARATOR
+                | CSS_POSITION_TRY_AT_RULE_DECLARATOR
+                | CSS_PROPERTY_AT_RULE_DECLARATOR
+                | CSS_SCOPE_AT_RULE_DECLARATOR
+                | CSS_STARTING_STYLE_AT_RULE_DECLARATOR
+                | CSS_SUPPORTS_AT_RULE_DECLARATOR
+                | CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_COLOR_PROFILE_AT_RULE_DECLARATOR => {
+                Self::CssColorProfileAtRuleDeclarator(CssColorProfileAtRuleDeclarator { syntax })
+            }
+            CSS_CONTAINER_AT_RULE_DECLARATOR => {
+                Self::CssContainerAtRuleDeclarator(CssContainerAtRuleDeclarator { syntax })
+            }
+            CSS_COUNTER_STYLE_AT_RULE_DECLARATOR => {
+                Self::CssCounterStyleAtRuleDeclarator(CssCounterStyleAtRuleDeclarator { syntax })
+            }
+            CSS_FONT_FACE_AT_RULE_DECLARATOR => {
+                Self::CssFontFaceAtRuleDeclarator(CssFontFaceAtRuleDeclarator { syntax })
+            }
+            CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR => {
+                Self::CssFontPaletteValuesAtRuleDeclarator(CssFontPaletteValuesAtRuleDeclarator {
+                    syntax,
+                })
+            }
+            CSS_MEDIA_AT_RULE_DECLARATOR => {
+                Self::CssMediaAtRuleDeclarator(CssMediaAtRuleDeclarator { syntax })
+            }
+            CSS_POSITION_TRY_AT_RULE_DECLARATOR => {
+                Self::CssPositionTryAtRuleDeclarator(CssPositionTryAtRuleDeclarator { syntax })
+            }
+            CSS_PROPERTY_AT_RULE_DECLARATOR => {
+                Self::CssPropertyAtRuleDeclarator(CssPropertyAtRuleDeclarator { syntax })
+            }
+            CSS_SCOPE_AT_RULE_DECLARATOR => {
+                Self::CssScopeAtRuleDeclarator(CssScopeAtRuleDeclarator { syntax })
+            }
+            CSS_STARTING_STYLE_AT_RULE_DECLARATOR => {
+                Self::CssStartingStyleAtRuleDeclarator(CssStartingStyleAtRuleDeclarator { syntax })
+            }
+            CSS_SUPPORTS_AT_RULE_DECLARATOR => {
+                Self::CssSupportsAtRuleDeclarator(CssSupportsAtRuleDeclarator { syntax })
+            }
+            CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR => {
+                Self::CssViewTransitionAtRuleDeclarator(CssViewTransitionAtRuleDeclarator {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssColorProfileAtRuleDeclarator(it) => it.syntax(),
+            Self::CssContainerAtRuleDeclarator(it) => it.syntax(),
+            Self::CssCounterStyleAtRuleDeclarator(it) => it.syntax(),
+            Self::CssFontFaceAtRuleDeclarator(it) => it.syntax(),
+            Self::CssFontPaletteValuesAtRuleDeclarator(it) => it.syntax(),
+            Self::CssMediaAtRuleDeclarator(it) => it.syntax(),
+            Self::CssPositionTryAtRuleDeclarator(it) => it.syntax(),
+            Self::CssPropertyAtRuleDeclarator(it) => it.syntax(),
+            Self::CssScopeAtRuleDeclarator(it) => it.syntax(),
+            Self::CssStartingStyleAtRuleDeclarator(it) => it.syntax(),
+            Self::CssSupportsAtRuleDeclarator(it) => it.syntax(),
+            Self::CssViewTransitionAtRuleDeclarator(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssColorProfileAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssContainerAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssCounterStyleAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssFontFaceAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssFontPaletteValuesAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssMediaAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssPositionTryAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssPropertyAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssScopeAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssStartingStyleAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssSupportsAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssViewTransitionAtRuleDeclarator(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssColorProfileAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCounterStyleAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssFontFaceAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssFontPaletteValuesAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMediaAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssPositionTryAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssPropertyAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssScopeAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssStartingStyleAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSupportsAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssViewTransitionAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAtRuleDeclarator> for SyntaxNode {
+    fn from(n: AnyCssAtRuleDeclarator) -> Self {
+        match n {
+            AnyCssAtRuleDeclarator::CssColorProfileAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssContainerAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssCounterStyleAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssFontFaceAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssMediaAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssScopeAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssStartingStyleAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssSupportsAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssViewTransitionAtRuleDeclarator(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAtRuleDeclarator> for SyntaxElement {
+    fn from(n: AnyCssAtRuleDeclarator) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -19187,14 +20831,14 @@ impl AstNode for AnyCssAttributeMatcherValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -19209,8 +20853,8 @@ impl std::fmt::Debug for AnyCssAttributeMatcherValue {
 impl From<AnyCssAttributeMatcherValue> for SyntaxNode {
     fn from(n: AnyCssAttributeMatcherValue) -> Self {
         match n {
-            AnyCssAttributeMatcherValue::CssIdentifier(it) => it.into(),
-            AnyCssAttributeMatcherValue::CssString(it) => it.into(),
+            AnyCssAttributeMatcherValue::CssIdentifier(it) => it.into_syntax(),
+            AnyCssAttributeMatcherValue::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -19246,14 +20890,14 @@ impl AstNode for AnyCssComposesImportSource {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -19268,8 +20912,8 @@ impl std::fmt::Debug for AnyCssComposesImportSource {
 impl From<AnyCssComposesImportSource> for SyntaxNode {
     fn from(n: AnyCssComposesImportSource) -> Self {
         match n {
-            AnyCssComposesImportSource::CssIdentifier(it) => it.into(),
-            AnyCssComposesImportSource::CssString(it) => it.into(),
+            AnyCssComposesImportSource::CssIdentifier(it) => it.into_syntax(),
+            AnyCssComposesImportSource::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -19306,14 +20950,14 @@ impl AstNode for AnyCssCompoundSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssCompoundSelector(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssCompoundSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssCompoundSelector(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssCompoundSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -19328,8 +20972,8 @@ impl std::fmt::Debug for AnyCssCompoundSelector {
 impl From<AnyCssCompoundSelector> for SyntaxNode {
     fn from(n: AnyCssCompoundSelector) -> Self {
         match n {
-            AnyCssCompoundSelector::CssBogusSelector(it) => it.into(),
-            AnyCssCompoundSelector::CssCompoundSelector(it) => it.into(),
+            AnyCssCompoundSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssCompoundSelector::CssCompoundSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -19378,16 +21022,16 @@ impl AstNode for AnyCssConditionalBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssDeclarationOrRuleBlock(it) => &it.syntax,
-            Self::CssRuleBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
+            Self::CssRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssDeclarationOrRuleBlock(it) => it.syntax,
-            Self::CssRuleBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            Self::CssRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -19403,9 +21047,9 @@ impl std::fmt::Debug for AnyCssConditionalBlock {
 impl From<AnyCssConditionalBlock> for SyntaxNode {
     fn from(n: AnyCssConditionalBlock) -> Self {
         match n {
-            AnyCssConditionalBlock::CssBogusBlock(it) => it.into(),
-            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.into(),
-            AnyCssConditionalBlock::CssRuleBlock(it) => it.into(),
+            AnyCssConditionalBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::CssRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -19449,13 +21093,13 @@ impl AstNode for AnyCssContainerAndCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerAndQuery(it) => &it.syntax,
+            Self::CssContainerAndQuery(it) => it.syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerAndQuery(it) => it.syntax,
+            Self::CssContainerAndQuery(it) => it.into_syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.into_syntax(),
         }
     }
@@ -19471,8 +21115,8 @@ impl std::fmt::Debug for AnyCssContainerAndCombinableQuery {
 impl From<AnyCssContainerAndCombinableQuery> for SyntaxNode {
     fn from(n: AnyCssContainerAndCombinableQuery) -> Self {
         match n {
-            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => it.into(),
-            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => it.into(),
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -19516,13 +21160,13 @@ impl AstNode for AnyCssContainerOrCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerOrQuery(it) => &it.syntax,
+            Self::CssContainerOrQuery(it) => it.syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerOrQuery(it) => it.syntax,
+            Self::CssContainerOrQuery(it) => it.into_syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.into_syntax(),
         }
     }
@@ -19538,8 +21182,8 @@ impl std::fmt::Debug for AnyCssContainerOrCombinableQuery {
 impl From<AnyCssContainerOrCombinableQuery> for SyntaxNode {
     fn from(n: AnyCssContainerOrCombinableQuery) -> Self {
         match n {
-            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => it.into(),
-            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => it.into(),
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -19597,17 +21241,17 @@ impl AstNode for AnyCssContainerQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerAndQuery(it) => &it.syntax,
-            Self::CssContainerNotQuery(it) => &it.syntax,
-            Self::CssContainerOrQuery(it) => &it.syntax,
+            Self::CssContainerAndQuery(it) => it.syntax(),
+            Self::CssContainerNotQuery(it) => it.syntax(),
+            Self::CssContainerOrQuery(it) => it.syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerAndQuery(it) => it.syntax,
-            Self::CssContainerNotQuery(it) => it.syntax,
-            Self::CssContainerOrQuery(it) => it.syntax,
+            Self::CssContainerAndQuery(it) => it.into_syntax(),
+            Self::CssContainerNotQuery(it) => it.into_syntax(),
+            Self::CssContainerOrQuery(it) => it.into_syntax(),
             Self::AnyCssContainerQueryInParens(it) => it.into_syntax(),
         }
     }
@@ -19625,10 +21269,10 @@ impl std::fmt::Debug for AnyCssContainerQuery {
 impl From<AnyCssContainerQuery> for SyntaxNode {
     fn from(n: AnyCssContainerQuery) -> Self {
         match n {
-            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => it.into(),
-            AnyCssContainerQuery::CssContainerAndQuery(it) => it.into(),
-            AnyCssContainerQuery::CssContainerNotQuery(it) => it.into(),
-            AnyCssContainerQuery::CssContainerOrQuery(it) => it.into(),
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerQuery::CssContainerAndQuery(it) => it.into_syntax(),
+            AnyCssContainerQuery::CssContainerNotQuery(it) => it.into_syntax(),
+            AnyCssContainerQuery::CssContainerOrQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -19683,16 +21327,16 @@ impl AstNode for AnyCssContainerQueryInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerQueryInParens(it) => &it.syntax,
-            Self::CssContainerSizeFeatureInParens(it) => &it.syntax,
-            Self::CssContainerStyleQueryInParens(it) => &it.syntax,
+            Self::CssContainerQueryInParens(it) => it.syntax(),
+            Self::CssContainerSizeFeatureInParens(it) => it.syntax(),
+            Self::CssContainerStyleQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerQueryInParens(it) => it.syntax,
-            Self::CssContainerSizeFeatureInParens(it) => it.syntax,
-            Self::CssContainerStyleQueryInParens(it) => it.syntax,
+            Self::CssContainerQueryInParens(it) => it.into_syntax(),
+            Self::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
+            Self::CssContainerStyleQueryInParens(it) => it.into_syntax(),
         }
     }
 }
@@ -19708,9 +21352,9 @@ impl std::fmt::Debug for AnyCssContainerQueryInParens {
 impl From<AnyCssContainerQueryInParens> for SyntaxNode {
     fn from(n: AnyCssContainerQueryInParens) -> Self {
         match n {
-            AnyCssContainerQueryInParens::CssContainerQueryInParens(it) => it.into(),
-            AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(it) => it.into(),
-            AnyCssContainerQueryInParens::CssContainerStyleQueryInParens(it) => it.into(),
+            AnyCssContainerQueryInParens::CssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
+            AnyCssContainerQueryInParens::CssContainerStyleQueryInParens(it) => it.into_syntax(),
         }
     }
 }
@@ -19754,14 +21398,14 @@ impl AstNode for AnyCssContainerStyleAndCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerStyleAndQuery(it) => &it.syntax,
-            Self::CssContainerStyleInParens(it) => &it.syntax,
+            Self::CssContainerStyleAndQuery(it) => it.syntax(),
+            Self::CssContainerStyleInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerStyleAndQuery(it) => it.syntax,
-            Self::CssContainerStyleInParens(it) => it.syntax,
+            Self::CssContainerStyleAndQuery(it) => it.into_syntax(),
+            Self::CssContainerStyleInParens(it) => it.into_syntax(),
         }
     }
 }
@@ -19776,8 +21420,12 @@ impl std::fmt::Debug for AnyCssContainerStyleAndCombinableQuery {
 impl From<AnyCssContainerStyleAndCombinableQuery> for SyntaxNode {
     fn from(n: AnyCssContainerStyleAndCombinableQuery) -> Self {
         match n {
-            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => it.into(),
-            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => it.into(),
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => {
+                it.into_syntax()
+            }
         }
     }
 }
@@ -19820,13 +21468,13 @@ impl AstNode for AnyCssContainerStyleInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssDeclaration(it) => &it.syntax,
+            Self::CssDeclaration(it) => it.syntax(),
             Self::AnyCssContainerStyleQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssDeclaration(it) => it.syntax,
+            Self::CssDeclaration(it) => it.into_syntax(),
             Self::AnyCssContainerStyleQuery(it) => it.into_syntax(),
         }
     }
@@ -19842,8 +21490,8 @@ impl std::fmt::Debug for AnyCssContainerStyleInParens {
 impl From<AnyCssContainerStyleInParens> for SyntaxNode {
     fn from(n: AnyCssContainerStyleInParens) -> Self {
         match n {
-            AnyCssContainerStyleInParens::AnyCssContainerStyleQuery(it) => it.into(),
-            AnyCssContainerStyleInParens::CssDeclaration(it) => it.into(),
+            AnyCssContainerStyleInParens::AnyCssContainerStyleQuery(it) => it.into_syntax(),
+            AnyCssContainerStyleInParens::CssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -19887,14 +21535,14 @@ impl AstNode for AnyCssContainerStyleOrCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerStyleInParens(it) => &it.syntax,
-            Self::CssContainerStyleOrQuery(it) => &it.syntax,
+            Self::CssContainerStyleInParens(it) => it.syntax(),
+            Self::CssContainerStyleOrQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerStyleInParens(it) => it.syntax,
-            Self::CssContainerStyleOrQuery(it) => it.syntax,
+            Self::CssContainerStyleInParens(it) => it.into_syntax(),
+            Self::CssContainerStyleOrQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -19909,8 +21557,10 @@ impl std::fmt::Debug for AnyCssContainerStyleOrCombinableQuery {
 impl From<AnyCssContainerStyleOrCombinableQuery> for SyntaxNode {
     fn from(n: AnyCssContainerStyleOrCombinableQuery) -> Self {
         match n {
-            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => it.into(),
-            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => it.into(),
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -19983,20 +21633,20 @@ impl AstNode for AnyCssContainerStyleQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssContainerStyleAndQuery(it) => &it.syntax,
-            Self::CssContainerStyleInParens(it) => &it.syntax,
-            Self::CssContainerStyleNotQuery(it) => &it.syntax,
-            Self::CssContainerStyleOrQuery(it) => &it.syntax,
-            Self::CssDeclaration(it) => &it.syntax,
+            Self::CssContainerStyleAndQuery(it) => it.syntax(),
+            Self::CssContainerStyleInParens(it) => it.syntax(),
+            Self::CssContainerStyleNotQuery(it) => it.syntax(),
+            Self::CssContainerStyleOrQuery(it) => it.syntax(),
+            Self::CssDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssContainerStyleAndQuery(it) => it.syntax,
-            Self::CssContainerStyleInParens(it) => it.syntax,
-            Self::CssContainerStyleNotQuery(it) => it.syntax,
-            Self::CssContainerStyleOrQuery(it) => it.syntax,
-            Self::CssDeclaration(it) => it.syntax,
+            Self::CssContainerStyleAndQuery(it) => it.into_syntax(),
+            Self::CssContainerStyleInParens(it) => it.into_syntax(),
+            Self::CssContainerStyleNotQuery(it) => it.into_syntax(),
+            Self::CssContainerStyleOrQuery(it) => it.into_syntax(),
+            Self::CssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20014,11 +21664,11 @@ impl std::fmt::Debug for AnyCssContainerStyleQuery {
 impl From<AnyCssContainerStyleQuery> for SyntaxNode {
     fn from(n: AnyCssContainerStyleQuery) -> Self {
         match n {
-            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => it.into(),
-            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => it.into(),
-            AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => it.into(),
-            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => it.into(),
-            AnyCssContainerStyleQuery::CssDeclaration(it) => it.into(),
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => it.into_syntax(),
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => it.into_syntax(),
+            AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => it.into_syntax(),
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => it.into_syntax(),
+            AnyCssContainerStyleQuery::CssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20057,14 +21707,14 @@ impl AstNode for AnyCssCustomIdentifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusCustomIdentifier(it) => &it.syntax,
-            Self::CssCustomIdentifier(it) => &it.syntax,
+            Self::CssBogusCustomIdentifier(it) => it.syntax(),
+            Self::CssCustomIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusCustomIdentifier(it) => it.syntax,
-            Self::CssCustomIdentifier(it) => it.syntax,
+            Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            Self::CssCustomIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -20079,8 +21729,8 @@ impl std::fmt::Debug for AnyCssCustomIdentifier {
 impl From<AnyCssCustomIdentifier> for SyntaxNode {
     fn from(n: AnyCssCustomIdentifier) -> Self {
         match n {
-            AnyCssCustomIdentifier::CssBogusCustomIdentifier(it) => it.into(),
-            AnyCssCustomIdentifier::CssCustomIdentifier(it) => it.into(),
+            AnyCssCustomIdentifier::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            AnyCssCustomIdentifier::CssCustomIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -20119,14 +21769,14 @@ impl AstNode for AnyCssDeclaration {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
-            Self::CssEmptyDeclaration(it) => &it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssDeclarationWithSemicolon(it) => it.syntax,
-            Self::CssEmptyDeclaration(it) => it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20141,8 +21791,8 @@ impl std::fmt::Debug for AnyCssDeclaration {
 impl From<AnyCssDeclaration> for SyntaxNode {
     fn from(n: AnyCssDeclaration) -> Self {
         match n {
-            AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclaration::CssEmptyDeclaration(it) => it.into(),
+            AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            AnyCssDeclaration::CssEmptyDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20179,14 +21829,14 @@ impl AstNode for AnyCssDeclarationBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssDeclarationBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssDeclarationBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssDeclarationBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssDeclarationBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20201,8 +21851,8 @@ impl std::fmt::Debug for AnyCssDeclarationBlock {
 impl From<AnyCssDeclarationBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationBlock) -> Self {
         match n {
-            AnyCssDeclarationBlock::CssBogusBlock(it) => it.into(),
-            AnyCssDeclarationBlock::CssDeclarationBlock(it) => it.into(),
+            AnyCssDeclarationBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationBlock::CssDeclarationBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20251,16 +21901,16 @@ impl AstNode for AnyCssDeclarationName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssDashedIdentifier(it) => &it.syntax,
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::TwValueThemeReference(it) => &it.syntax,
+            Self::CssDashedIdentifier(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::TwValueThemeReference(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssDashedIdentifier(it) => it.syntax,
-            Self::CssIdentifier(it) => it.syntax,
-            Self::TwValueThemeReference(it) => it.syntax,
+            Self::CssDashedIdentifier(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::TwValueThemeReference(it) => it.into_syntax(),
         }
     }
 }
@@ -20276,9 +21926,9 @@ impl std::fmt::Debug for AnyCssDeclarationName {
 impl From<AnyCssDeclarationName> for SyntaxNode {
     fn from(n: AnyCssDeclarationName) -> Self {
         match n {
-            AnyCssDeclarationName::CssDashedIdentifier(it) => it.into(),
-            AnyCssDeclarationName::CssIdentifier(it) => it.into(),
-            AnyCssDeclarationName::TwValueThemeReference(it) => it.into(),
+            AnyCssDeclarationName::CssDashedIdentifier(it) => it.into_syntax(),
+            AnyCssDeclarationName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssDeclarationName::TwValueThemeReference(it) => it.into_syntax(),
         }
     }
 }
@@ -20327,16 +21977,16 @@ impl AstNode for AnyCssDeclarationOrAtRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssAtRule(it) => &it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
-            Self::CssEmptyDeclaration(it) => &it.syntax,
+            Self::CssAtRule(it) => it.syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssAtRule(it) => it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => it.syntax,
-            Self::CssEmptyDeclaration(it) => it.syntax,
+            Self::CssAtRule(it) => it.into_syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20352,9 +22002,9 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRule {
 impl From<AnyCssDeclarationOrAtRule> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrAtRule) -> Self {
         match n {
-            AnyCssDeclarationOrAtRule::CssAtRule(it) => it.into(),
-            AnyCssDeclarationOrAtRule::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclarationOrAtRule::CssEmptyDeclaration(it) => it.into(),
+            AnyCssDeclarationOrAtRule::CssAtRule(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRule::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRule::CssEmptyDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -20393,14 +22043,14 @@ impl AstNode for AnyCssDeclarationOrAtRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssDeclarationOrAtRuleBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssDeclarationOrAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssDeclarationOrAtRuleBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20415,8 +22065,8 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRuleBlock {
 impl From<AnyCssDeclarationOrAtRuleBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrAtRuleBlock) -> Self {
         match n {
-            AnyCssDeclarationOrAtRuleBlock::CssBogusBlock(it) => it.into(),
-            AnyCssDeclarationOrAtRuleBlock::CssDeclarationOrAtRuleBlock(it) => it.into(),
+            AnyCssDeclarationOrAtRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRuleBlock::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20482,19 +22132,19 @@ impl AstNode for AnyCssDeclarationOrRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogus(it) => &it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
-            Self::CssEmptyDeclaration(it) => &it.syntax,
-            Self::CssMetavariable(it) => &it.syntax,
+            Self::CssBogus(it) => it.syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::AnyCssRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogus(it) => it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => it.syntax,
-            Self::CssEmptyDeclaration(it) => it.syntax,
-            Self::CssMetavariable(it) => it.syntax,
+            Self::CssBogus(it) => it.into_syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -20513,11 +22163,11 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
 impl From<AnyCssDeclarationOrRule> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrRule) -> Self {
         match n {
-            AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
-            AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
-            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into(),
-            AnyCssDeclarationOrRule::CssMetavariable(it) => it.into(),
+            AnyCssDeclarationOrRule::AnyCssRule(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssBogus(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssMetavariable(it) => it.into_syntax(),
         }
     }
 }
@@ -20556,14 +22206,14 @@ impl AstNode for AnyCssDeclarationOrRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssDeclarationOrRuleBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssDeclarationOrRuleBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20578,8 +22228,8 @@ impl std::fmt::Debug for AnyCssDeclarationOrRuleBlock {
 impl From<AnyCssDeclarationOrRuleBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrRuleBlock) -> Self {
         match n {
-            AnyCssDeclarationOrRuleBlock::CssBogusBlock(it) => it.into(),
-            AnyCssDeclarationOrRuleBlock::CssDeclarationOrRuleBlock(it) => it.into(),
+            AnyCssDeclarationOrRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrRuleBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20626,16 +22276,16 @@ impl AstNode for AnyCssDimension {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssPercentage(it) => &it.syntax,
-            Self::CssRegularDimension(it) => &it.syntax,
-            Self::CssUnknownDimension(it) => &it.syntax,
+            Self::CssPercentage(it) => it.syntax(),
+            Self::CssRegularDimension(it) => it.syntax(),
+            Self::CssUnknownDimension(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssPercentage(it) => it.syntax,
-            Self::CssRegularDimension(it) => it.syntax,
-            Self::CssUnknownDimension(it) => it.syntax,
+            Self::CssPercentage(it) => it.into_syntax(),
+            Self::CssRegularDimension(it) => it.into_syntax(),
+            Self::CssUnknownDimension(it) => it.into_syntax(),
         }
     }
 }
@@ -20651,9 +22301,9 @@ impl std::fmt::Debug for AnyCssDimension {
 impl From<AnyCssDimension> for SyntaxNode {
     fn from(n: AnyCssDimension) -> Self {
         match n {
-            AnyCssDimension::CssPercentage(it) => it.into(),
-            AnyCssDimension::CssRegularDimension(it) => it.into(),
-            AnyCssDimension::CssUnknownDimension(it) => it.into(),
+            AnyCssDimension::CssPercentage(it) => it.into_syntax(),
+            AnyCssDimension::CssRegularDimension(it) => it.into_syntax(),
+            AnyCssDimension::CssUnknownDimension(it) => it.into_syntax(),
         }
     }
 }
@@ -20704,16 +22354,16 @@ impl AstNode for AnyCssDocumentMatcher {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusDocumentMatcher(it) => &it.syntax,
-            Self::CssDocumentCustomMatcher(it) => &it.syntax,
-            Self::CssUrlFunction(it) => &it.syntax,
+            Self::CssBogusDocumentMatcher(it) => it.syntax(),
+            Self::CssDocumentCustomMatcher(it) => it.syntax(),
+            Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusDocumentMatcher(it) => it.syntax,
-            Self::CssDocumentCustomMatcher(it) => it.syntax,
-            Self::CssUrlFunction(it) => it.syntax,
+            Self::CssBogusDocumentMatcher(it) => it.into_syntax(),
+            Self::CssDocumentCustomMatcher(it) => it.into_syntax(),
+            Self::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -20729,9 +22379,9 @@ impl std::fmt::Debug for AnyCssDocumentMatcher {
 impl From<AnyCssDocumentMatcher> for SyntaxNode {
     fn from(n: AnyCssDocumentMatcher) -> Self {
         match n {
-            AnyCssDocumentMatcher::CssBogusDocumentMatcher(it) => it.into(),
-            AnyCssDocumentMatcher::CssDocumentCustomMatcher(it) => it.into(),
-            AnyCssDocumentMatcher::CssUrlFunction(it) => it.into(),
+            AnyCssDocumentMatcher::CssBogusDocumentMatcher(it) => it.into_syntax(),
+            AnyCssDocumentMatcher::CssDocumentCustomMatcher(it) => it.into_syntax(),
+            AnyCssDocumentMatcher::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -20786,16 +22436,16 @@ impl AstNode for AnyCssExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBinaryExpression(it) => &it.syntax,
-            Self::CssListOfComponentValuesExpression(it) => &it.syntax,
-            Self::CssParenthesizedExpression(it) => &it.syntax,
+            Self::CssBinaryExpression(it) => it.syntax(),
+            Self::CssListOfComponentValuesExpression(it) => it.syntax(),
+            Self::CssParenthesizedExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBinaryExpression(it) => it.syntax,
-            Self::CssListOfComponentValuesExpression(it) => it.syntax,
-            Self::CssParenthesizedExpression(it) => it.syntax,
+            Self::CssBinaryExpression(it) => it.into_syntax(),
+            Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
+            Self::CssParenthesizedExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -20811,9 +22461,9 @@ impl std::fmt::Debug for AnyCssExpression {
 impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
-            AnyCssExpression::CssBinaryExpression(it) => it.into(),
-            AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into(),
-            AnyCssExpression::CssParenthesizedExpression(it) => it.into(),
+            AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
+            AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
+            AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -20862,16 +22512,16 @@ impl AstNode for AnyCssFontFamilyName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusFontFamilyName(it) => &it.syntax,
-            Self::CssFontFamilyName(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssBogusFontFamilyName(it) => it.syntax(),
+            Self::CssFontFamilyName(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusFontFamilyName(it) => it.syntax,
-            Self::CssFontFamilyName(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssBogusFontFamilyName(it) => it.into_syntax(),
+            Self::CssFontFamilyName(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -20887,9 +22537,9 @@ impl std::fmt::Debug for AnyCssFontFamilyName {
 impl From<AnyCssFontFamilyName> for SyntaxNode {
     fn from(n: AnyCssFontFamilyName) -> Self {
         match n {
-            AnyCssFontFamilyName::CssBogusFontFamilyName(it) => it.into(),
-            AnyCssFontFamilyName::CssFontFamilyName(it) => it.into(),
-            AnyCssFontFamilyName::CssString(it) => it.into(),
+            AnyCssFontFamilyName::CssBogusFontFamilyName(it) => it.into_syntax(),
+            AnyCssFontFamilyName::CssFontFamilyName(it) => it.into_syntax(),
+            AnyCssFontFamilyName::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -20928,14 +22578,14 @@ impl AstNode for AnyCssFontFeatureValuesBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssFontFeatureValuesBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssFontFeatureValuesBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssFontFeatureValuesBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssFontFeatureValuesBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20950,8 +22600,8 @@ impl std::fmt::Debug for AnyCssFontFeatureValuesBlock {
 impl From<AnyCssFontFeatureValuesBlock> for SyntaxNode {
     fn from(n: AnyCssFontFeatureValuesBlock) -> Self {
         match n {
-            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => it.into(),
-            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => it.into(),
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -20995,14 +22645,14 @@ impl AstNode for AnyCssFontFeatureValuesItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusFontFeatureValuesItem(it) => &it.syntax,
-            Self::CssFontFeatureValuesItem(it) => &it.syntax,
+            Self::CssBogusFontFeatureValuesItem(it) => it.syntax(),
+            Self::CssFontFeatureValuesItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusFontFeatureValuesItem(it) => it.syntax,
-            Self::CssFontFeatureValuesItem(it) => it.syntax,
+            Self::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            Self::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
 }
@@ -21017,8 +22667,8 @@ impl std::fmt::Debug for AnyCssFontFeatureValuesItem {
 impl From<AnyCssFontFeatureValuesItem> for SyntaxNode {
     fn from(n: AnyCssFontFeatureValuesItem) -> Self {
         match n {
-            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.into(),
-            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.into(),
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
 }
@@ -21054,14 +22704,14 @@ impl AstNode for AnyCssFunction {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssFunction(it) => &it.syntax,
-            Self::CssUrlFunction(it) => &it.syntax,
+            Self::CssFunction(it) => it.syntax(),
+            Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssFunction(it) => it.syntax,
-            Self::CssUrlFunction(it) => it.syntax,
+            Self::CssFunction(it) => it.into_syntax(),
+            Self::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -21076,8 +22726,8 @@ impl std::fmt::Debug for AnyCssFunction {
 impl From<AnyCssFunction> for SyntaxNode {
     fn from(n: AnyCssFunction) -> Self {
         match n {
-            AnyCssFunction::CssFunction(it) => it.into(),
-            AnyCssFunction::CssUrlFunction(it) => it.into(),
+            AnyCssFunction::CssFunction(it) => it.into_syntax(),
+            AnyCssFunction::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -21117,13 +22767,13 @@ impl AstNode for AnyCssGenericComponentValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssGenericDelimiter(it) => &it.syntax,
+            Self::CssGenericDelimiter(it) => it.syntax(),
             Self::AnyCssValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssGenericDelimiter(it) => it.syntax,
+            Self::CssGenericDelimiter(it) => it.into_syntax(),
             Self::AnyCssValue(it) => it.into_syntax(),
         }
     }
@@ -21139,8 +22789,8 @@ impl std::fmt::Debug for AnyCssGenericComponentValue {
 impl From<AnyCssGenericComponentValue> for SyntaxNode {
     fn from(n: AnyCssGenericComponentValue) -> Self {
         match n {
-            AnyCssGenericComponentValue::AnyCssValue(it) => it.into(),
-            AnyCssGenericComponentValue::CssGenericDelimiter(it) => it.into(),
+            AnyCssGenericComponentValue::AnyCssValue(it) => it.into_syntax(),
+            AnyCssGenericComponentValue::CssGenericDelimiter(it) => it.into_syntax(),
         }
     }
 }
@@ -21179,14 +22829,14 @@ impl AstNode for AnyCssImportLayer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssImportAnonymousLayer(it) => &it.syntax,
-            Self::CssImportNamedLayer(it) => &it.syntax,
+            Self::CssImportAnonymousLayer(it) => it.syntax(),
+            Self::CssImportNamedLayer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssImportAnonymousLayer(it) => it.syntax,
-            Self::CssImportNamedLayer(it) => it.syntax,
+            Self::CssImportAnonymousLayer(it) => it.into_syntax(),
+            Self::CssImportNamedLayer(it) => it.into_syntax(),
         }
     }
 }
@@ -21201,8 +22851,8 @@ impl std::fmt::Debug for AnyCssImportLayer {
 impl From<AnyCssImportLayer> for SyntaxNode {
     fn from(n: AnyCssImportLayer) -> Self {
         match n {
-            AnyCssImportLayer::CssImportAnonymousLayer(it) => it.into(),
-            AnyCssImportLayer::CssImportNamedLayer(it) => it.into(),
+            AnyCssImportLayer::CssImportAnonymousLayer(it) => it.into_syntax(),
+            AnyCssImportLayer::CssImportNamedLayer(it) => it.into_syntax(),
         }
     }
 }
@@ -21242,13 +22892,13 @@ impl AstNode for AnyCssImportSupportsCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssDeclaration(it) => &it.syntax,
+            Self::CssDeclaration(it) => it.syntax(),
             Self::AnyCssSupportsCondition(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssDeclaration(it) => it.syntax,
+            Self::CssDeclaration(it) => it.into_syntax(),
             Self::AnyCssSupportsCondition(it) => it.into_syntax(),
         }
     }
@@ -21264,8 +22914,8 @@ impl std::fmt::Debug for AnyCssImportSupportsCondition {
 impl From<AnyCssImportSupportsCondition> for SyntaxNode {
     fn from(n: AnyCssImportSupportsCondition) -> Self {
         match n {
-            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.into(),
-            AnyCssImportSupportsCondition::CssDeclaration(it) => it.into(),
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.into_syntax(),
+            AnyCssImportSupportsCondition::CssDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -21301,14 +22951,14 @@ impl AstNode for AnyCssImportUrl {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssString(it) => &it.syntax,
-            Self::CssUrlFunction(it) => &it.syntax,
+            Self::CssString(it) => it.syntax(),
+            Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssString(it) => it.syntax,
-            Self::CssUrlFunction(it) => it.syntax,
+            Self::CssString(it) => it.into_syntax(),
+            Self::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -21323,8 +22973,8 @@ impl std::fmt::Debug for AnyCssImportUrl {
 impl From<AnyCssImportUrl> for SyntaxNode {
     fn from(n: AnyCssImportUrl) -> Self {
         match n {
-            AnyCssImportUrl::CssString(it) => it.into(),
-            AnyCssImportUrl::CssUrlFunction(it) => it.into(),
+            AnyCssImportUrl::CssString(it) => it.into_syntax(),
+            AnyCssImportUrl::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -21361,14 +23011,14 @@ impl AstNode for AnyCssKeyframesBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssKeyframesBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssKeyframesBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssKeyframesBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssKeyframesBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -21383,8 +23033,8 @@ impl std::fmt::Debug for AnyCssKeyframesBlock {
 impl From<AnyCssKeyframesBlock> for SyntaxNode {
     fn from(n: AnyCssKeyframesBlock) -> Self {
         match n {
-            AnyCssKeyframesBlock::CssBogusBlock(it) => it.into(),
-            AnyCssKeyframesBlock::CssKeyframesBlock(it) => it.into(),
+            AnyCssKeyframesBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssKeyframesBlock::CssKeyframesBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -21421,14 +23071,14 @@ impl AstNode for AnyCssKeyframesIdentifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssCustomIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssCustomIdentifier(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssCustomIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssCustomIdentifier(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -21443,8 +23093,8 @@ impl std::fmt::Debug for AnyCssKeyframesIdentifier {
 impl From<AnyCssKeyframesIdentifier> for SyntaxNode {
     fn from(n: AnyCssKeyframesIdentifier) -> Self {
         match n {
-            AnyCssKeyframesIdentifier::CssCustomIdentifier(it) => it.into(),
-            AnyCssKeyframesIdentifier::CssString(it) => it.into(),
+            AnyCssKeyframesIdentifier::CssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssKeyframesIdentifier::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -21483,14 +23133,14 @@ impl AstNode for AnyCssKeyframesItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusKeyframesItem(it) => &it.syntax,
-            Self::CssKeyframesItem(it) => &it.syntax,
+            Self::CssBogusKeyframesItem(it) => it.syntax(),
+            Self::CssKeyframesItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusKeyframesItem(it) => it.syntax,
-            Self::CssKeyframesItem(it) => it.syntax,
+            Self::CssBogusKeyframesItem(it) => it.into_syntax(),
+            Self::CssKeyframesItem(it) => it.into_syntax(),
         }
     }
 }
@@ -21505,8 +23155,8 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
 impl From<AnyCssKeyframesItem> for SyntaxNode {
     fn from(n: AnyCssKeyframesItem) -> Self {
         match n {
-            AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into(),
-            AnyCssKeyframesItem::CssKeyframesItem(it) => it.into(),
+            AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
+            AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
         }
     }
 }
@@ -21560,15 +23210,15 @@ impl AstNode for AnyCssKeyframesName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusKeyframesName(it) => &it.syntax,
-            Self::CssKeyframesScopedName(it) => &it.syntax,
+            Self::CssBogusKeyframesName(it) => it.syntax(),
+            Self::CssKeyframesScopedName(it) => it.syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusKeyframesName(it) => it.syntax,
-            Self::CssKeyframesScopedName(it) => it.syntax,
+            Self::CssBogusKeyframesName(it) => it.into_syntax(),
+            Self::CssKeyframesScopedName(it) => it.into_syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
         }
     }
@@ -21585,9 +23235,9 @@ impl std::fmt::Debug for AnyCssKeyframesName {
 impl From<AnyCssKeyframesName> for SyntaxNode {
     fn from(n: AnyCssKeyframesName) -> Self {
         match n {
-            AnyCssKeyframesName::AnyCssKeyframesIdentifier(it) => it.into(),
-            AnyCssKeyframesName::CssBogusKeyframesName(it) => it.into(),
-            AnyCssKeyframesName::CssKeyframesScopedName(it) => it.into(),
+            AnyCssKeyframesName::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
+            AnyCssKeyframesName::CssBogusKeyframesName(it) => it.into_syntax(),
+            AnyCssKeyframesName::CssKeyframesScopedName(it) => it.into_syntax(),
         }
     }
 }
@@ -21631,14 +23281,14 @@ impl AstNode for AnyCssKeyframesScope {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssKeyframesScopeFunction(it) => &it.syntax,
-            Self::CssKeyframesScopePrefix(it) => &it.syntax,
+            Self::CssKeyframesScopeFunction(it) => it.syntax(),
+            Self::CssKeyframesScopePrefix(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssKeyframesScopeFunction(it) => it.syntax,
-            Self::CssKeyframesScopePrefix(it) => it.syntax,
+            Self::CssKeyframesScopeFunction(it) => it.into_syntax(),
+            Self::CssKeyframesScopePrefix(it) => it.into_syntax(),
         }
     }
 }
@@ -21653,8 +23303,8 @@ impl std::fmt::Debug for AnyCssKeyframesScope {
 impl From<AnyCssKeyframesScope> for SyntaxNode {
     fn from(n: AnyCssKeyframesScope) -> Self {
         match n {
-            AnyCssKeyframesScope::CssKeyframesScopeFunction(it) => it.into(),
-            AnyCssKeyframesScope::CssKeyframesScopePrefix(it) => it.into(),
+            AnyCssKeyframesScope::CssKeyframesScopeFunction(it) => it.into_syntax(),
+            AnyCssKeyframesScope::CssKeyframesScopePrefix(it) => it.into_syntax(),
         }
     }
 }
@@ -21705,16 +23355,16 @@ impl AstNode for AnyCssKeyframesSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssKeyframesIdentSelector(it) => &it.syntax,
-            Self::CssKeyframesPercentageSelector(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssKeyframesIdentSelector(it) => it.syntax(),
+            Self::CssKeyframesPercentageSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssKeyframesIdentSelector(it) => it.syntax,
-            Self::CssKeyframesPercentageSelector(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssKeyframesIdentSelector(it) => it.into_syntax(),
+            Self::CssKeyframesPercentageSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -21730,9 +23380,9 @@ impl std::fmt::Debug for AnyCssKeyframesSelector {
 impl From<AnyCssKeyframesSelector> for SyntaxNode {
     fn from(n: AnyCssKeyframesSelector) -> Self {
         match n {
-            AnyCssKeyframesSelector::CssBogusSelector(it) => it.into(),
-            AnyCssKeyframesSelector::CssKeyframesIdentSelector(it) => it.into(),
-            AnyCssKeyframesSelector::CssKeyframesPercentageSelector(it) => it.into(),
+            AnyCssKeyframesSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssKeyframesSelector::CssKeyframesIdentSelector(it) => it.into_syntax(),
+            AnyCssKeyframesSelector::CssKeyframesPercentageSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -21779,16 +23429,16 @@ impl AstNode for AnyCssLayer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusLayer(it) => &it.syntax,
-            Self::CssLayerDeclaration(it) => &it.syntax,
-            Self::CssLayerReference(it) => &it.syntax,
+            Self::CssBogusLayer(it) => it.syntax(),
+            Self::CssLayerDeclaration(it) => it.syntax(),
+            Self::CssLayerReference(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusLayer(it) => it.syntax,
-            Self::CssLayerDeclaration(it) => it.syntax,
-            Self::CssLayerReference(it) => it.syntax,
+            Self::CssBogusLayer(it) => it.into_syntax(),
+            Self::CssLayerDeclaration(it) => it.into_syntax(),
+            Self::CssLayerReference(it) => it.into_syntax(),
         }
     }
 }
@@ -21804,9 +23454,9 @@ impl std::fmt::Debug for AnyCssLayer {
 impl From<AnyCssLayer> for SyntaxNode {
     fn from(n: AnyCssLayer) -> Self {
         match n {
-            AnyCssLayer::CssBogusLayer(it) => it.into(),
-            AnyCssLayer::CssLayerDeclaration(it) => it.into(),
-            AnyCssLayer::CssLayerReference(it) => it.into(),
+            AnyCssLayer::CssBogusLayer(it) => it.into_syntax(),
+            AnyCssLayer::CssLayerDeclaration(it) => it.into_syntax(),
+            AnyCssLayer::CssLayerReference(it) => it.into_syntax(),
         }
     }
 }
@@ -21846,13 +23496,13 @@ impl AstNode for AnyCssMediaAndCombinableCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => &it.syntax,
+            Self::CssMediaAndCondition(it) => it.syntax(),
             Self::AnyCssMediaInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => it.syntax,
+            Self::CssMediaAndCondition(it) => it.into_syntax(),
             Self::AnyCssMediaInParens(it) => it.into_syntax(),
         }
     }
@@ -21868,8 +23518,8 @@ impl std::fmt::Debug for AnyCssMediaAndCombinableCondition {
 impl From<AnyCssMediaAndCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaAndCombinableCondition) -> Self {
         match n {
-            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into(),
-            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.into(),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -21923,17 +23573,17 @@ impl AstNode for AnyCssMediaCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => &it.syntax,
-            Self::CssMediaNotCondition(it) => &it.syntax,
-            Self::CssMediaOrCondition(it) => &it.syntax,
+            Self::CssMediaAndCondition(it) => it.syntax(),
+            Self::CssMediaNotCondition(it) => it.syntax(),
+            Self::CssMediaOrCondition(it) => it.syntax(),
             Self::AnyCssMediaInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => it.syntax,
-            Self::CssMediaNotCondition(it) => it.syntax,
-            Self::CssMediaOrCondition(it) => it.syntax,
+            Self::CssMediaAndCondition(it) => it.into_syntax(),
+            Self::CssMediaNotCondition(it) => it.into_syntax(),
+            Self::CssMediaOrCondition(it) => it.into_syntax(),
             Self::AnyCssMediaInParens(it) => it.into_syntax(),
         }
     }
@@ -21951,10 +23601,10 @@ impl std::fmt::Debug for AnyCssMediaCondition {
 impl From<AnyCssMediaCondition> for SyntaxNode {
     fn from(n: AnyCssMediaCondition) -> Self {
         match n {
-            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into(),
-            AnyCssMediaCondition::CssMediaAndCondition(it) => it.into(),
-            AnyCssMediaCondition::CssMediaNotCondition(it) => it.into(),
-            AnyCssMediaCondition::CssMediaOrCondition(it) => it.into(),
+            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaCondition::CssMediaAndCondition(it) => it.into_syntax(),
+            AnyCssMediaCondition::CssMediaNotCondition(it) => it.into_syntax(),
+            AnyCssMediaCondition::CssMediaOrCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -21998,14 +23648,14 @@ impl AstNode for AnyCssMediaInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaConditionInParens(it) => &it.syntax,
-            Self::CssMediaFeatureInParens(it) => &it.syntax,
+            Self::CssMediaConditionInParens(it) => it.syntax(),
+            Self::CssMediaFeatureInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaConditionInParens(it) => it.syntax,
-            Self::CssMediaFeatureInParens(it) => it.syntax,
+            Self::CssMediaConditionInParens(it) => it.into_syntax(),
+            Self::CssMediaFeatureInParens(it) => it.into_syntax(),
         }
     }
 }
@@ -22020,8 +23670,8 @@ impl std::fmt::Debug for AnyCssMediaInParens {
 impl From<AnyCssMediaInParens> for SyntaxNode {
     fn from(n: AnyCssMediaInParens) -> Self {
         match n {
-            AnyCssMediaInParens::CssMediaConditionInParens(it) => it.into(),
-            AnyCssMediaInParens::CssMediaFeatureInParens(it) => it.into(),
+            AnyCssMediaInParens::CssMediaConditionInParens(it) => it.into_syntax(),
+            AnyCssMediaInParens::CssMediaFeatureInParens(it) => it.into_syntax(),
         }
     }
 }
@@ -22061,13 +23711,13 @@ impl AstNode for AnyCssMediaOrCombinableCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaOrCondition(it) => &it.syntax,
+            Self::CssMediaOrCondition(it) => it.syntax(),
             Self::AnyCssMediaInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaOrCondition(it) => it.syntax,
+            Self::CssMediaOrCondition(it) => it.into_syntax(),
             Self::AnyCssMediaInParens(it) => it.into_syntax(),
         }
     }
@@ -22083,8 +23733,8 @@ impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
 impl From<AnyCssMediaOrCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaOrCombinableCondition) -> Self {
         match n {
-            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into(),
-            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.into(),
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -22140,17 +23790,17 @@ impl AstNode for AnyCssMediaQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusMediaQuery(it) => &it.syntax,
-            Self::CssMediaConditionQuery(it) => &it.syntax,
-            Self::CssMetavariable(it) => &it.syntax,
+            Self::CssBogusMediaQuery(it) => it.syntax(),
+            Self::CssMediaConditionQuery(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusMediaQuery(it) => it.syntax,
-            Self::CssMediaConditionQuery(it) => it.syntax,
-            Self::CssMetavariable(it) => it.syntax,
+            Self::CssBogusMediaQuery(it) => it.into_syntax(),
+            Self::CssMediaConditionQuery(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
@@ -22168,10 +23818,10 @@ impl std::fmt::Debug for AnyCssMediaQuery {
 impl From<AnyCssMediaQuery> for SyntaxNode {
     fn from(n: AnyCssMediaQuery) -> Self {
         match n {
-            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
-            AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
-            AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
-            AnyCssMediaQuery::CssMetavariable(it) => it.into(),
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
+            AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into_syntax(),
+            AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into_syntax(),
+            AnyCssMediaQuery::CssMetavariable(it) => it.into_syntax(),
         }
     }
 }
@@ -22218,15 +23868,15 @@ impl AstNode for AnyCssMediaTypeCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => &it.syntax,
-            Self::CssMediaNotCondition(it) => &it.syntax,
+            Self::CssMediaAndCondition(it) => it.syntax(),
+            Self::CssMediaNotCondition(it) => it.syntax(),
             Self::AnyCssMediaInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaAndCondition(it) => it.syntax,
-            Self::CssMediaNotCondition(it) => it.syntax,
+            Self::CssMediaAndCondition(it) => it.into_syntax(),
+            Self::CssMediaNotCondition(it) => it.into_syntax(),
             Self::AnyCssMediaInParens(it) => it.into_syntax(),
         }
     }
@@ -22243,9 +23893,9 @@ impl std::fmt::Debug for AnyCssMediaTypeCondition {
 impl From<AnyCssMediaTypeCondition> for SyntaxNode {
     fn from(n: AnyCssMediaTypeCondition) -> Self {
         match n {
-            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into(),
-            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.into(),
-            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.into(),
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.into_syntax(),
+            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -22282,14 +23932,14 @@ impl AstNode for AnyCssMediaTypeQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssMediaAndTypeQuery(it) => &it.syntax,
-            Self::CssMediaTypeQuery(it) => &it.syntax,
+            Self::CssMediaAndTypeQuery(it) => it.syntax(),
+            Self::CssMediaTypeQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssMediaAndTypeQuery(it) => it.syntax,
-            Self::CssMediaTypeQuery(it) => it.syntax,
+            Self::CssMediaAndTypeQuery(it) => it.into_syntax(),
+            Self::CssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -22304,8 +23954,8 @@ impl std::fmt::Debug for AnyCssMediaTypeQuery {
 impl From<AnyCssMediaTypeQuery> for SyntaxNode {
     fn from(n: AnyCssMediaTypeQuery) -> Self {
         match n {
-            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => it.into(),
-            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => it.into(),
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => it.into_syntax(),
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -22349,14 +23999,14 @@ impl AstNode for AnyCssNamespacePrefix {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssNamedNamespacePrefix(it) => &it.syntax,
-            Self::CssUniversalNamespacePrefix(it) => &it.syntax,
+            Self::CssNamedNamespacePrefix(it) => it.syntax(),
+            Self::CssUniversalNamespacePrefix(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssNamedNamespacePrefix(it) => it.syntax,
-            Self::CssUniversalNamespacePrefix(it) => it.syntax,
+            Self::CssNamedNamespacePrefix(it) => it.into_syntax(),
+            Self::CssUniversalNamespacePrefix(it) => it.into_syntax(),
         }
     }
 }
@@ -22371,8 +24021,8 @@ impl std::fmt::Debug for AnyCssNamespacePrefix {
 impl From<AnyCssNamespacePrefix> for SyntaxNode {
     fn from(n: AnyCssNamespacePrefix) -> Self {
         match n {
-            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => it.into(),
-            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => it.into(),
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => it.into_syntax(),
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => it.into_syntax(),
         }
     }
 }
@@ -22408,14 +24058,14 @@ impl AstNode for AnyCssNamespaceUrl {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssString(it) => &it.syntax,
-            Self::CssUrlFunction(it) => &it.syntax,
+            Self::CssString(it) => it.syntax(),
+            Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssString(it) => it.syntax,
-            Self::CssUrlFunction(it) => it.syntax,
+            Self::CssString(it) => it.into_syntax(),
+            Self::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -22430,8 +24080,8 @@ impl std::fmt::Debug for AnyCssNamespaceUrl {
 impl From<AnyCssNamespaceUrl> for SyntaxNode {
     fn from(n: AnyCssNamespaceUrl) -> Self {
         match n {
-            AnyCssNamespaceUrl::CssString(it) => it.into(),
-            AnyCssNamespaceUrl::CssUrlFunction(it) => it.into(),
+            AnyCssNamespaceUrl::CssString(it) => it.into_syntax(),
+            AnyCssNamespaceUrl::CssUrlFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -22468,14 +24118,14 @@ impl AstNode for AnyCssPageAtRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssPageAtRuleBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssPageAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssPageAtRuleBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssPageAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -22490,8 +24140,8 @@ impl std::fmt::Debug for AnyCssPageAtRuleBlock {
 impl From<AnyCssPageAtRuleBlock> for SyntaxNode {
     fn from(n: AnyCssPageAtRuleBlock) -> Self {
         match n {
-            AnyCssPageAtRuleBlock::CssBogusBlock(it) => it.into(),
-            AnyCssPageAtRuleBlock::CssPageAtRuleBlock(it) => it.into(),
+            AnyCssPageAtRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssPageAtRuleBlock::CssPageAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -22550,18 +24200,18 @@ impl AstNode for AnyCssPageAtRuleItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssAtRule(it) => &it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
-            Self::CssEmptyDeclaration(it) => &it.syntax,
-            Self::CssMarginAtRule(it) => &it.syntax,
+            Self::CssAtRule(it) => it.syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
+            Self::CssMarginAtRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssAtRule(it) => it.syntax,
-            Self::CssDeclarationWithSemicolon(it) => it.syntax,
-            Self::CssEmptyDeclaration(it) => it.syntax,
-            Self::CssMarginAtRule(it) => it.syntax,
+            Self::CssAtRule(it) => it.into_syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
+            Self::CssMarginAtRule(it) => it.into_syntax(),
         }
     }
 }
@@ -22578,10 +24228,10 @@ impl std::fmt::Debug for AnyCssPageAtRuleItem {
 impl From<AnyCssPageAtRuleItem> for SyntaxNode {
     fn from(n: AnyCssPageAtRuleItem) -> Self {
         match n {
-            AnyCssPageAtRuleItem::CssAtRule(it) => it.into(),
-            AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into(),
-            AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into(),
+            AnyCssPageAtRuleItem::CssAtRule(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into_syntax(),
+            AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into_syntax(),
         }
     }
 }
@@ -22618,14 +24268,14 @@ impl AstNode for AnyCssPageSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssPageSelector(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssPageSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssPageSelector(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssPageSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -22640,8 +24290,8 @@ impl std::fmt::Debug for AnyCssPageSelector {
 impl From<AnyCssPageSelector> for SyntaxNode {
     fn from(n: AnyCssPageSelector) -> Self {
         match n {
-            AnyCssPageSelector::CssBogusSelector(it) => it.into(),
-            AnyCssPageSelector::CssPageSelector(it) => it.into(),
+            AnyCssPageSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssPageSelector::CssPageSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -22685,14 +24335,14 @@ impl AstNode for AnyCssPageSelectorPseudo {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPageSelectorPseudo(it) => &it.syntax,
-            Self::CssPageSelectorPseudo(it) => &it.syntax,
+            Self::CssBogusPageSelectorPseudo(it) => it.syntax(),
+            Self::CssPageSelectorPseudo(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPageSelectorPseudo(it) => it.syntax,
-            Self::CssPageSelectorPseudo(it) => it.syntax,
+            Self::CssBogusPageSelectorPseudo(it) => it.into_syntax(),
+            Self::CssPageSelectorPseudo(it) => it.into_syntax(),
         }
     }
 }
@@ -22707,8 +24357,8 @@ impl std::fmt::Debug for AnyCssPageSelectorPseudo {
 impl From<AnyCssPageSelectorPseudo> for SyntaxNode {
     fn from(n: AnyCssPageSelectorPseudo) -> Self {
         match n {
-            AnyCssPageSelectorPseudo::CssBogusPageSelectorPseudo(it) => it.into(),
-            AnyCssPageSelectorPseudo::CssPageSelectorPseudo(it) => it.into(),
+            AnyCssPageSelectorPseudo::CssBogusPageSelectorPseudo(it) => it.into_syntax(),
+            AnyCssPageSelectorPseudo::CssPageSelectorPseudo(it) => it.into_syntax(),
         }
     }
 }
@@ -22755,16 +24405,16 @@ impl AstNode for AnyCssProperty {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => &it.syntax,
-            Self::CssComposesProperty(it) => &it.syntax,
-            Self::CssGenericProperty(it) => &it.syntax,
+            Self::CssBogusProperty(it) => it.syntax(),
+            Self::CssComposesProperty(it) => it.syntax(),
+            Self::CssGenericProperty(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.syntax,
-            Self::CssComposesProperty(it) => it.syntax,
-            Self::CssGenericProperty(it) => it.syntax,
+            Self::CssBogusProperty(it) => it.into_syntax(),
+            Self::CssComposesProperty(it) => it.into_syntax(),
+            Self::CssGenericProperty(it) => it.into_syntax(),
         }
     }
 }
@@ -22780,9 +24430,9 @@ impl std::fmt::Debug for AnyCssProperty {
 impl From<AnyCssProperty> for SyntaxNode {
     fn from(n: AnyCssProperty) -> Self {
         match n {
-            AnyCssProperty::CssBogusProperty(it) => it.into(),
-            AnyCssProperty::CssComposesProperty(it) => it.into(),
-            AnyCssProperty::CssGenericProperty(it) => it.into(),
+            AnyCssProperty::CssBogusProperty(it) => it.into_syntax(),
+            AnyCssProperty::CssComposesProperty(it) => it.into_syntax(),
+            AnyCssProperty::CssGenericProperty(it) => it.into_syntax(),
         }
     }
 }
@@ -22937,34 +24587,34 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPseudoClass(it) => &it.syntax,
-            Self::CssPseudoClassFunctionCompoundSelector(it) => &it.syntax,
-            Self::CssPseudoClassFunctionCompoundSelectorList(it) => &it.syntax,
-            Self::CssPseudoClassFunctionCustomIdentifier(it) => &it.syntax,
-            Self::CssPseudoClassFunctionCustomIdentifierList(it) => &it.syntax,
-            Self::CssPseudoClassFunctionIdentifier(it) => &it.syntax,
-            Self::CssPseudoClassFunctionNth(it) => &it.syntax,
-            Self::CssPseudoClassFunctionRelativeSelectorList(it) => &it.syntax,
-            Self::CssPseudoClassFunctionSelector(it) => &it.syntax,
-            Self::CssPseudoClassFunctionSelectorList(it) => &it.syntax,
-            Self::CssPseudoClassFunctionValueList(it) => &it.syntax,
-            Self::CssPseudoClassIdentifier(it) => &it.syntax,
+            Self::CssBogusPseudoClass(it) => it.syntax(),
+            Self::CssPseudoClassFunctionCompoundSelector(it) => it.syntax(),
+            Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifier(it) => it.syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionIdentifier(it) => it.syntax(),
+            Self::CssPseudoClassFunctionNth(it) => it.syntax(),
+            Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionSelector(it) => it.syntax(),
+            Self::CssPseudoClassFunctionSelectorList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionValueList(it) => it.syntax(),
+            Self::CssPseudoClassIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPseudoClass(it) => it.syntax,
-            Self::CssPseudoClassFunctionCompoundSelector(it) => it.syntax,
-            Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax,
-            Self::CssPseudoClassFunctionCustomIdentifier(it) => it.syntax,
-            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.syntax,
-            Self::CssPseudoClassFunctionIdentifier(it) => it.syntax,
-            Self::CssPseudoClassFunctionNth(it) => it.syntax,
-            Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax,
-            Self::CssPseudoClassFunctionSelector(it) => it.syntax,
-            Self::CssPseudoClassFunctionSelectorList(it) => it.syntax,
-            Self::CssPseudoClassFunctionValueList(it) => it.syntax,
-            Self::CssPseudoClassIdentifier(it) => it.syntax,
+            Self::CssBogusPseudoClass(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionNth(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionSelector(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionSelectorList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionValueList(it) => it.into_syntax(),
+            Self::CssPseudoClassIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -22989,18 +24639,18 @@ impl std::fmt::Debug for AnyCssPseudoClass {
 impl From<AnyCssPseudoClass> for SyntaxNode {
     fn from(n: AnyCssPseudoClass) -> Self {
         match n {
-            AnyCssPseudoClass::CssBogusPseudoClass(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => it.into(),
-            AnyCssPseudoClass::CssPseudoClassIdentifier(it) => it.into(),
+            AnyCssPseudoClass::CssBogusPseudoClass(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -23051,16 +24701,16 @@ impl AstNode for AnyCssPseudoClassNth {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssPseudoClassNth(it) => &it.syntax,
-            Self::CssPseudoClassNthIdentifier(it) => &it.syntax,
-            Self::CssPseudoClassNthNumber(it) => &it.syntax,
+            Self::CssPseudoClassNth(it) => it.syntax(),
+            Self::CssPseudoClassNthIdentifier(it) => it.syntax(),
+            Self::CssPseudoClassNthNumber(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssPseudoClassNth(it) => it.syntax,
-            Self::CssPseudoClassNthIdentifier(it) => it.syntax,
-            Self::CssPseudoClassNthNumber(it) => it.syntax,
+            Self::CssPseudoClassNth(it) => it.into_syntax(),
+            Self::CssPseudoClassNthIdentifier(it) => it.into_syntax(),
+            Self::CssPseudoClassNthNumber(it) => it.into_syntax(),
         }
     }
 }
@@ -23076,9 +24726,9 @@ impl std::fmt::Debug for AnyCssPseudoClassNth {
 impl From<AnyCssPseudoClassNth> for SyntaxNode {
     fn from(n: AnyCssPseudoClassNth) -> Self {
         match n {
-            AnyCssPseudoClassNth::CssPseudoClassNth(it) => it.into(),
-            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => it.into(),
-            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => it.into(),
+            AnyCssPseudoClassNth::CssPseudoClassNth(it) => it.into_syntax(),
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => it.into_syntax(),
         }
     }
 }
@@ -23117,14 +24767,14 @@ impl AstNode for AnyCssPseudoClassNthSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssPseudoClassNthSelector(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssPseudoClassNthSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssPseudoClassNthSelector(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssPseudoClassNthSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -23139,8 +24789,8 @@ impl std::fmt::Debug for AnyCssPseudoClassNthSelector {
 impl From<AnyCssPseudoClassNthSelector> for SyntaxNode {
     fn from(n: AnyCssPseudoClassNthSelector) -> Self {
         match n {
-            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => it.into(),
-            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => it.into(),
+            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -23217,20 +24867,20 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPseudoElement(it) => &it.syntax,
-            Self::CssPseudoElementFunction(it) => &it.syntax,
-            Self::CssPseudoElementFunctionCustomIdentifier(it) => &it.syntax,
-            Self::CssPseudoElementFunctionSelector(it) => &it.syntax,
-            Self::CssPseudoElementIdentifier(it) => &it.syntax,
+            Self::CssBogusPseudoElement(it) => it.syntax(),
+            Self::CssPseudoElementFunction(it) => it.syntax(),
+            Self::CssPseudoElementFunctionCustomIdentifier(it) => it.syntax(),
+            Self::CssPseudoElementFunctionSelector(it) => it.syntax(),
+            Self::CssPseudoElementIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPseudoElement(it) => it.syntax,
-            Self::CssPseudoElementFunction(it) => it.syntax,
-            Self::CssPseudoElementFunctionCustomIdentifier(it) => it.syntax,
-            Self::CssPseudoElementFunctionSelector(it) => it.syntax,
-            Self::CssPseudoElementIdentifier(it) => it.syntax,
+            Self::CssBogusPseudoElement(it) => it.into_syntax(),
+            Self::CssPseudoElementFunction(it) => it.into_syntax(),
+            Self::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
+            Self::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
+            Self::CssPseudoElementIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -23248,11 +24898,11 @@ impl std::fmt::Debug for AnyCssPseudoElement {
 impl From<AnyCssPseudoElement> for SyntaxNode {
     fn from(n: AnyCssPseudoElement) -> Self {
         match n {
-            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.into(),
-            AnyCssPseudoElement::CssPseudoElementFunction(it) => it.into(),
-            AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(it) => it.into(),
-            AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into(),
-            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.into_syntax(),
+            AnyCssPseudoElement::CssPseudoElementFunction(it) => it.into_syntax(),
+            AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -23288,14 +24938,14 @@ impl AstNode for AnyCssPseudoValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -23310,8 +24960,8 @@ impl std::fmt::Debug for AnyCssPseudoValue {
 impl From<AnyCssPseudoValue> for SyntaxNode {
     fn from(n: AnyCssPseudoValue) -> Self {
         match n {
-            AnyCssPseudoValue::CssIdentifier(it) => it.into(),
-            AnyCssPseudoValue::CssString(it) => it.into(),
+            AnyCssPseudoValue::CssIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoValue::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -23382,20 +25032,20 @@ impl AstNode for AnyCssQueryFeature {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssQueryFeatureBoolean(it) => &it.syntax,
-            Self::CssQueryFeaturePlain(it) => &it.syntax,
-            Self::CssQueryFeatureRange(it) => &it.syntax,
-            Self::CssQueryFeatureRangeInterval(it) => &it.syntax,
-            Self::CssQueryFeatureReverseRange(it) => &it.syntax,
+            Self::CssQueryFeatureBoolean(it) => it.syntax(),
+            Self::CssQueryFeaturePlain(it) => it.syntax(),
+            Self::CssQueryFeatureRange(it) => it.syntax(),
+            Self::CssQueryFeatureRangeInterval(it) => it.syntax(),
+            Self::CssQueryFeatureReverseRange(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssQueryFeatureBoolean(it) => it.syntax,
-            Self::CssQueryFeaturePlain(it) => it.syntax,
-            Self::CssQueryFeatureRange(it) => it.syntax,
-            Self::CssQueryFeatureRangeInterval(it) => it.syntax,
-            Self::CssQueryFeatureReverseRange(it) => it.syntax,
+            Self::CssQueryFeatureBoolean(it) => it.into_syntax(),
+            Self::CssQueryFeaturePlain(it) => it.into_syntax(),
+            Self::CssQueryFeatureRange(it) => it.into_syntax(),
+            Self::CssQueryFeatureRangeInterval(it) => it.into_syntax(),
+            Self::CssQueryFeatureReverseRange(it) => it.into_syntax(),
         }
     }
 }
@@ -23413,11 +25063,11 @@ impl std::fmt::Debug for AnyCssQueryFeature {
 impl From<AnyCssQueryFeature> for SyntaxNode {
     fn from(n: AnyCssQueryFeature) -> Self {
         match n {
-            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => it.into(),
-            AnyCssQueryFeature::CssQueryFeaturePlain(it) => it.into(),
-            AnyCssQueryFeature::CssQueryFeatureRange(it) => it.into(),
-            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => it.into(),
-            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => it.into(),
+            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => it.into_syntax(),
+            AnyCssQueryFeature::CssQueryFeaturePlain(it) => it.into_syntax(),
+            AnyCssQueryFeature::CssQueryFeatureRange(it) => it.into_syntax(),
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => it.into_syntax(),
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => it.into_syntax(),
         }
     }
 }
@@ -23479,18 +25129,18 @@ impl AstNode for AnyCssQueryFeatureValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssNumber(it) => &it.syntax,
-            Self::CssRatio(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
+            Self::CssRatio(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssNumber(it) => it.syntax,
-            Self::CssRatio(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::CssRatio(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -23510,11 +25160,11 @@ impl std::fmt::Debug for AnyCssQueryFeatureValue {
 impl From<AnyCssQueryFeatureValue> for SyntaxNode {
     fn from(n: AnyCssQueryFeatureValue) -> Self {
         match n {
-            AnyCssQueryFeatureValue::AnyCssDimension(it) => it.into(),
-            AnyCssQueryFeatureValue::AnyCssFunction(it) => it.into(),
-            AnyCssQueryFeatureValue::CssIdentifier(it) => it.into(),
-            AnyCssQueryFeatureValue::CssNumber(it) => it.into(),
-            AnyCssQueryFeatureValue::CssRatio(it) => it.into(),
+            AnyCssQueryFeatureValue::AnyCssDimension(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::AnyCssFunction(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::CssIdentifier(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::CssNumber(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::CssRatio(it) => it.into_syntax(),
         }
     }
 }
@@ -23551,14 +25201,14 @@ impl AstNode for AnyCssRelativeSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssRelativeSelector(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssRelativeSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssRelativeSelector(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssRelativeSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -23573,8 +25223,8 @@ impl std::fmt::Debug for AnyCssRelativeSelector {
 impl From<AnyCssRelativeSelector> for SyntaxNode {
     fn from(n: AnyCssRelativeSelector) -> Self {
         match n {
-            AnyCssRelativeSelector::CssBogusSelector(it) => it.into(),
-            AnyCssRelativeSelector::CssRelativeSelector(it) => it.into(),
+            AnyCssRelativeSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssRelativeSelector::CssRelativeSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -23630,18 +25280,18 @@ impl AstNode for AnyCssRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssAtRule(it) => &it.syntax,
-            Self::CssBogusRule(it) => &it.syntax,
-            Self::CssNestedQualifiedRule(it) => &it.syntax,
-            Self::CssQualifiedRule(it) => &it.syntax,
+            Self::CssAtRule(it) => it.syntax(),
+            Self::CssBogusRule(it) => it.syntax(),
+            Self::CssNestedQualifiedRule(it) => it.syntax(),
+            Self::CssQualifiedRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssAtRule(it) => it.syntax,
-            Self::CssBogusRule(it) => it.syntax,
-            Self::CssNestedQualifiedRule(it) => it.syntax,
-            Self::CssQualifiedRule(it) => it.syntax,
+            Self::CssAtRule(it) => it.into_syntax(),
+            Self::CssBogusRule(it) => it.into_syntax(),
+            Self::CssNestedQualifiedRule(it) => it.into_syntax(),
+            Self::CssQualifiedRule(it) => it.into_syntax(),
         }
     }
 }
@@ -23658,10 +25308,10 @@ impl std::fmt::Debug for AnyCssRule {
 impl From<AnyCssRule> for SyntaxNode {
     fn from(n: AnyCssRule) -> Self {
         match n {
-            AnyCssRule::CssAtRule(it) => it.into(),
-            AnyCssRule::CssBogusRule(it) => it.into(),
-            AnyCssRule::CssNestedQualifiedRule(it) => it.into(),
-            AnyCssRule::CssQualifiedRule(it) => it.into(),
+            AnyCssRule::CssAtRule(it) => it.into_syntax(),
+            AnyCssRule::CssBogusRule(it) => it.into_syntax(),
+            AnyCssRule::CssNestedQualifiedRule(it) => it.into_syntax(),
+            AnyCssRule::CssQualifiedRule(it) => it.into_syntax(),
         }
     }
 }
@@ -23697,14 +25347,14 @@ impl AstNode for AnyCssRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssRuleBlock(it) => &it.syntax,
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssRuleBlock(it) => it.syntax,
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -23719,8 +25369,8 @@ impl std::fmt::Debug for AnyCssRuleBlock {
 impl From<AnyCssRuleBlock> for SyntaxNode {
     fn from(n: AnyCssRuleBlock) -> Self {
         match n {
-            AnyCssRuleBlock::CssBogusBlock(it) => it.into(),
-            AnyCssRuleBlock::CssRuleBlock(it) => it.into(),
+            AnyCssRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssRuleBlock::CssRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -23779,18 +25429,18 @@ impl AstNode for AnyCssScopeRange {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusScopeRange(it) => &it.syntax,
-            Self::CssScopeRangeEnd(it) => &it.syntax,
-            Self::CssScopeRangeInterval(it) => &it.syntax,
-            Self::CssScopeRangeStart(it) => &it.syntax,
+            Self::CssBogusScopeRange(it) => it.syntax(),
+            Self::CssScopeRangeEnd(it) => it.syntax(),
+            Self::CssScopeRangeInterval(it) => it.syntax(),
+            Self::CssScopeRangeStart(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusScopeRange(it) => it.syntax,
-            Self::CssScopeRangeEnd(it) => it.syntax,
-            Self::CssScopeRangeInterval(it) => it.syntax,
-            Self::CssScopeRangeStart(it) => it.syntax,
+            Self::CssBogusScopeRange(it) => it.into_syntax(),
+            Self::CssScopeRangeEnd(it) => it.into_syntax(),
+            Self::CssScopeRangeInterval(it) => it.into_syntax(),
+            Self::CssScopeRangeStart(it) => it.into_syntax(),
         }
     }
 }
@@ -23807,10 +25457,10 @@ impl std::fmt::Debug for AnyCssScopeRange {
 impl From<AnyCssScopeRange> for SyntaxNode {
     fn from(n: AnyCssScopeRange) -> Self {
         match n {
-            AnyCssScopeRange::CssBogusScopeRange(it) => it.into(),
-            AnyCssScopeRange::CssScopeRangeEnd(it) => it.into(),
-            AnyCssScopeRange::CssScopeRangeInterval(it) => it.into(),
-            AnyCssScopeRange::CssScopeRangeStart(it) => it.into(),
+            AnyCssScopeRange::CssBogusScopeRange(it) => it.into_syntax(),
+            AnyCssScopeRange::CssScopeRangeEnd(it) => it.into_syntax(),
+            AnyCssScopeRange::CssScopeRangeInterval(it) => it.into_syntax(),
+            AnyCssScopeRange::CssScopeRangeStart(it) => it.into_syntax(),
         }
     }
 }
@@ -23864,18 +25514,18 @@ impl AstNode for AnyCssSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => &it.syntax,
-            Self::CssComplexSelector(it) => &it.syntax,
-            Self::CssCompoundSelector(it) => &it.syntax,
-            Self::CssMetavariable(it) => &it.syntax,
+            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssComplexSelector(it) => it.syntax(),
+            Self::CssCompoundSelector(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax,
-            Self::CssComplexSelector(it) => it.syntax,
-            Self::CssCompoundSelector(it) => it.syntax,
-            Self::CssMetavariable(it) => it.syntax,
+            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssComplexSelector(it) => it.into_syntax(),
+            Self::CssCompoundSelector(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
         }
     }
 }
@@ -23892,10 +25542,10 @@ impl std::fmt::Debug for AnyCssSelector {
 impl From<AnyCssSelector> for SyntaxNode {
     fn from(n: AnyCssSelector) -> Self {
         match n {
-            AnyCssSelector::CssBogusSelector(it) => it.into(),
-            AnyCssSelector::CssComplexSelector(it) => it.into(),
-            AnyCssSelector::CssCompoundSelector(it) => it.into(),
-            AnyCssSelector::CssMetavariable(it) => it.into(),
+            AnyCssSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssSelector::CssComplexSelector(it) => it.into_syntax(),
+            AnyCssSelector::CssCompoundSelector(it) => it.into_syntax(),
+            AnyCssSelector::CssMetavariable(it) => it.into_syntax(),
         }
     }
 }
@@ -23932,14 +25582,14 @@ impl AstNode for AnyCssSimpleSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssTypeSelector(it) => &it.syntax,
-            Self::CssUniversalSelector(it) => &it.syntax,
+            Self::CssTypeSelector(it) => it.syntax(),
+            Self::CssUniversalSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssTypeSelector(it) => it.syntax,
-            Self::CssUniversalSelector(it) => it.syntax,
+            Self::CssTypeSelector(it) => it.into_syntax(),
+            Self::CssUniversalSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -23954,8 +25604,8 @@ impl std::fmt::Debug for AnyCssSimpleSelector {
 impl From<AnyCssSimpleSelector> for SyntaxNode {
     fn from(n: AnyCssSimpleSelector) -> Self {
         match n {
-            AnyCssSimpleSelector::CssTypeSelector(it) => it.into(),
-            AnyCssSimpleSelector::CssUniversalSelector(it) => it.into(),
+            AnyCssSimpleSelector::CssTypeSelector(it) => it.into_syntax(),
+            AnyCssSimpleSelector::CssUniversalSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -24032,22 +25682,22 @@ impl AstNode for AnyCssSubSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssAttributeSelector(it) => &it.syntax,
-            Self::CssBogusSubSelector(it) => &it.syntax,
-            Self::CssClassSelector(it) => &it.syntax,
-            Self::CssIdSelector(it) => &it.syntax,
-            Self::CssPseudoClassSelector(it) => &it.syntax,
-            Self::CssPseudoElementSelector(it) => &it.syntax,
+            Self::CssAttributeSelector(it) => it.syntax(),
+            Self::CssBogusSubSelector(it) => it.syntax(),
+            Self::CssClassSelector(it) => it.syntax(),
+            Self::CssIdSelector(it) => it.syntax(),
+            Self::CssPseudoClassSelector(it) => it.syntax(),
+            Self::CssPseudoElementSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssAttributeSelector(it) => it.syntax,
-            Self::CssBogusSubSelector(it) => it.syntax,
-            Self::CssClassSelector(it) => it.syntax,
-            Self::CssIdSelector(it) => it.syntax,
-            Self::CssPseudoClassSelector(it) => it.syntax,
-            Self::CssPseudoElementSelector(it) => it.syntax,
+            Self::CssAttributeSelector(it) => it.into_syntax(),
+            Self::CssBogusSubSelector(it) => it.into_syntax(),
+            Self::CssClassSelector(it) => it.into_syntax(),
+            Self::CssIdSelector(it) => it.into_syntax(),
+            Self::CssPseudoClassSelector(it) => it.into_syntax(),
+            Self::CssPseudoElementSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -24066,12 +25716,12 @@ impl std::fmt::Debug for AnyCssSubSelector {
 impl From<AnyCssSubSelector> for SyntaxNode {
     fn from(n: AnyCssSubSelector) -> Self {
         match n {
-            AnyCssSubSelector::CssAttributeSelector(it) => it.into(),
-            AnyCssSubSelector::CssBogusSubSelector(it) => it.into(),
-            AnyCssSubSelector::CssClassSelector(it) => it.into(),
-            AnyCssSubSelector::CssIdSelector(it) => it.into(),
-            AnyCssSubSelector::CssPseudoClassSelector(it) => it.into(),
-            AnyCssSubSelector::CssPseudoElementSelector(it) => it.into(),
+            AnyCssSubSelector::CssAttributeSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssBogusSubSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssClassSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssIdSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssPseudoClassSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssPseudoElementSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -24113,13 +25763,13 @@ impl AstNode for AnyCssSupportsAndCombinableCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssSupportsAndCondition(it) => &it.syntax,
+            Self::CssSupportsAndCondition(it) => it.syntax(),
             Self::AnyCssSupportsInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssSupportsAndCondition(it) => it.syntax,
+            Self::CssSupportsAndCondition(it) => it.into_syntax(),
             Self::AnyCssSupportsInParens(it) => it.into_syntax(),
         }
     }
@@ -24135,8 +25785,8 @@ impl std::fmt::Debug for AnyCssSupportsAndCombinableCondition {
 impl From<AnyCssSupportsAndCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssSupportsAndCombinableCondition) -> Self {
         match n {
-            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => it.into(),
-            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => it.into(),
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -24208,19 +25858,19 @@ impl AstNode for AnyCssSupportsCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSupportsCondition(it) => &it.syntax,
-            Self::CssSupportsAndCondition(it) => &it.syntax,
-            Self::CssSupportsNotCondition(it) => &it.syntax,
-            Self::CssSupportsOrCondition(it) => &it.syntax,
+            Self::CssBogusSupportsCondition(it) => it.syntax(),
+            Self::CssSupportsAndCondition(it) => it.syntax(),
+            Self::CssSupportsNotCondition(it) => it.syntax(),
+            Self::CssSupportsOrCondition(it) => it.syntax(),
             Self::AnyCssSupportsInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSupportsCondition(it) => it.syntax,
-            Self::CssSupportsAndCondition(it) => it.syntax,
-            Self::CssSupportsNotCondition(it) => it.syntax,
-            Self::CssSupportsOrCondition(it) => it.syntax,
+            Self::CssBogusSupportsCondition(it) => it.into_syntax(),
+            Self::CssSupportsAndCondition(it) => it.into_syntax(),
+            Self::CssSupportsNotCondition(it) => it.into_syntax(),
+            Self::CssSupportsOrCondition(it) => it.into_syntax(),
             Self::AnyCssSupportsInParens(it) => it.into_syntax(),
         }
     }
@@ -24239,11 +25889,11 @@ impl std::fmt::Debug for AnyCssSupportsCondition {
 impl From<AnyCssSupportsCondition> for SyntaxNode {
     fn from(n: AnyCssSupportsCondition) -> Self {
         match n {
-            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.into(),
-            AnyCssSupportsCondition::CssBogusSupportsCondition(it) => it.into(),
-            AnyCssSupportsCondition::CssSupportsAndCondition(it) => it.into(),
-            AnyCssSupportsCondition::CssSupportsNotCondition(it) => it.into(),
-            AnyCssSupportsCondition::CssSupportsOrCondition(it) => it.into(),
+            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+            AnyCssSupportsCondition::CssBogusSupportsCondition(it) => it.into_syntax(),
+            AnyCssSupportsCondition::CssSupportsAndCondition(it) => it.into_syntax(),
+            AnyCssSupportsCondition::CssSupportsNotCondition(it) => it.into_syntax(),
+            AnyCssSupportsCondition::CssSupportsOrCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -24305,17 +25955,17 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssSupportsConditionInParens(it) => &it.syntax,
-            Self::CssSupportsFeatureDeclaration(it) => &it.syntax,
-            Self::CssSupportsFeatureSelector(it) => &it.syntax,
+            Self::CssSupportsConditionInParens(it) => it.syntax(),
+            Self::CssSupportsFeatureDeclaration(it) => it.syntax(),
+            Self::CssSupportsFeatureSelector(it) => it.syntax(),
             Self::AnyCssValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssSupportsConditionInParens(it) => it.syntax,
-            Self::CssSupportsFeatureDeclaration(it) => it.syntax,
-            Self::CssSupportsFeatureSelector(it) => it.syntax,
+            Self::CssSupportsConditionInParens(it) => it.into_syntax(),
+            Self::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
+            Self::CssSupportsFeatureSelector(it) => it.into_syntax(),
             Self::AnyCssValue(it) => it.into_syntax(),
         }
     }
@@ -24333,10 +25983,10 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
 impl From<AnyCssSupportsInParens> for SyntaxNode {
     fn from(n: AnyCssSupportsInParens) -> Self {
         match n {
-            AnyCssSupportsInParens::AnyCssValue(it) => it.into(),
-            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into(),
-            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into(),
-            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into(),
+            AnyCssSupportsInParens::AnyCssValue(it) => it.into_syntax(),
+            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into_syntax(),
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -24378,13 +26028,13 @@ impl AstNode for AnyCssSupportsOrCombinableCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssSupportsOrCondition(it) => &it.syntax,
+            Self::CssSupportsOrCondition(it) => it.syntax(),
             Self::AnyCssSupportsInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssSupportsOrCondition(it) => it.syntax,
+            Self::CssSupportsOrCondition(it) => it.into_syntax(),
             Self::AnyCssSupportsInParens(it) => it.into_syntax(),
         }
     }
@@ -24400,8 +26050,8 @@ impl std::fmt::Debug for AnyCssSupportsOrCombinableCondition {
 impl From<AnyCssSupportsOrCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssSupportsOrCombinableCondition) -> Self {
         match n {
-            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => it.into(),
-            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => it.into(),
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -24464,18 +26114,18 @@ impl AstNode for AnyCssUnicodeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusUnicodeRangeValue(it) => &it.syntax,
-            Self::CssUnicodeCodepoint(it) => &it.syntax,
-            Self::CssUnicodeRangeInterval(it) => &it.syntax,
-            Self::CssUnicodeRangeWildcard(it) => &it.syntax,
+            Self::CssBogusUnicodeRangeValue(it) => it.syntax(),
+            Self::CssUnicodeCodepoint(it) => it.syntax(),
+            Self::CssUnicodeRangeInterval(it) => it.syntax(),
+            Self::CssUnicodeRangeWildcard(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusUnicodeRangeValue(it) => it.syntax,
-            Self::CssUnicodeCodepoint(it) => it.syntax,
-            Self::CssUnicodeRangeInterval(it) => it.syntax,
-            Self::CssUnicodeRangeWildcard(it) => it.syntax,
+            Self::CssBogusUnicodeRangeValue(it) => it.into_syntax(),
+            Self::CssUnicodeCodepoint(it) => it.into_syntax(),
+            Self::CssUnicodeRangeInterval(it) => it.into_syntax(),
+            Self::CssUnicodeRangeWildcard(it) => it.into_syntax(),
         }
     }
 }
@@ -24492,10 +26142,10 @@ impl std::fmt::Debug for AnyCssUnicodeValue {
 impl From<AnyCssUnicodeValue> for SyntaxNode {
     fn from(n: AnyCssUnicodeValue) -> Self {
         match n {
-            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => it.into(),
-            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => it.into(),
-            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => it.into(),
-            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => it.into(),
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => it.into_syntax(),
+            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => it.into_syntax(),
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => it.into_syntax(),
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => it.into_syntax(),
         }
     }
 }
@@ -24539,16 +26189,16 @@ impl AstNode for AnyCssUrlModifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusUrlModifier(it) => &it.syntax,
-            Self::CssFunction(it) => &it.syntax,
-            Self::CssIdentifier(it) => &it.syntax,
+            Self::CssBogusUrlModifier(it) => it.syntax(),
+            Self::CssFunction(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusUrlModifier(it) => it.syntax,
-            Self::CssFunction(it) => it.syntax,
-            Self::CssIdentifier(it) => it.syntax,
+            Self::CssBogusUrlModifier(it) => it.into_syntax(),
+            Self::CssFunction(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -24564,9 +26214,9 @@ impl std::fmt::Debug for AnyCssUrlModifier {
 impl From<AnyCssUrlModifier> for SyntaxNode {
     fn from(n: AnyCssUrlModifier) -> Self {
         match n {
-            AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into(),
-            AnyCssUrlModifier::CssFunction(it) => it.into(),
-            AnyCssUrlModifier::CssIdentifier(it) => it.into(),
+            AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into_syntax(),
+            AnyCssUrlModifier::CssFunction(it) => it.into_syntax(),
+            AnyCssUrlModifier::CssIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -24602,14 +26252,14 @@ impl AstNode for AnyCssUrlValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssString(it) => &it.syntax,
-            Self::CssUrlValueRaw(it) => &it.syntax,
+            Self::CssString(it) => it.syntax(),
+            Self::CssUrlValueRaw(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssString(it) => it.syntax,
-            Self::CssUrlValueRaw(it) => it.syntax,
+            Self::CssString(it) => it.into_syntax(),
+            Self::CssUrlValueRaw(it) => it.into_syntax(),
         }
     }
 }
@@ -24624,8 +26274,8 @@ impl std::fmt::Debug for AnyCssUrlValue {
 impl From<AnyCssUrlValue> for SyntaxNode {
     fn from(n: AnyCssUrlValue) -> Self {
         match n {
-            AnyCssUrlValue::CssString(it) => it.into(),
-            AnyCssUrlValue::CssUrlValueRaw(it) => it.into(),
+            AnyCssUrlValue::CssString(it) => it.into_syntax(),
+            AnyCssUrlValue::CssUrlValueRaw(it) => it.into_syntax(),
         }
     }
 }
@@ -24755,34 +26405,34 @@ impl AstNode for AnyCssValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBracketedValue(it) => &it.syntax,
-            Self::CssColor(it) => &it.syntax,
-            Self::CssCustomIdentifier(it) => &it.syntax,
-            Self::CssDashedIdentifier(it) => &it.syntax,
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssMetavariable(it) => &it.syntax,
-            Self::CssNumber(it) => &it.syntax,
-            Self::CssRatio(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
-            Self::CssUnicodeRange(it) => &it.syntax,
-            Self::TwValueThemeReference(it) => &it.syntax,
+            Self::CssBracketedValue(it) => it.syntax(),
+            Self::CssColor(it) => it.syntax(),
+            Self::CssCustomIdentifier(it) => it.syntax(),
+            Self::CssDashedIdentifier(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
+            Self::CssRatio(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
+            Self::CssUnicodeRange(it) => it.syntax(),
+            Self::TwValueThemeReference(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBracketedValue(it) => it.syntax,
-            Self::CssColor(it) => it.syntax,
-            Self::CssCustomIdentifier(it) => it.syntax,
-            Self::CssDashedIdentifier(it) => it.syntax,
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssMetavariable(it) => it.syntax,
-            Self::CssNumber(it) => it.syntax,
-            Self::CssRatio(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
-            Self::CssUnicodeRange(it) => it.syntax,
-            Self::TwValueThemeReference(it) => it.syntax,
+            Self::CssBracketedValue(it) => it.into_syntax(),
+            Self::CssColor(it) => it.into_syntax(),
+            Self::CssCustomIdentifier(it) => it.into_syntax(),
+            Self::CssDashedIdentifier(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::CssRatio(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
+            Self::CssUnicodeRange(it) => it.into_syntax(),
+            Self::TwValueThemeReference(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -24810,19 +26460,19 @@ impl std::fmt::Debug for AnyCssValue {
 impl From<AnyCssValue> for SyntaxNode {
     fn from(n: AnyCssValue) -> Self {
         match n {
-            AnyCssValue::AnyCssDimension(it) => it.into(),
-            AnyCssValue::AnyCssFunction(it) => it.into(),
-            AnyCssValue::CssBracketedValue(it) => it.into(),
-            AnyCssValue::CssColor(it) => it.into(),
-            AnyCssValue::CssCustomIdentifier(it) => it.into(),
-            AnyCssValue::CssDashedIdentifier(it) => it.into(),
-            AnyCssValue::CssIdentifier(it) => it.into(),
-            AnyCssValue::CssMetavariable(it) => it.into(),
-            AnyCssValue::CssNumber(it) => it.into(),
-            AnyCssValue::CssRatio(it) => it.into(),
-            AnyCssValue::CssString(it) => it.into(),
-            AnyCssValue::CssUnicodeRange(it) => it.into(),
-            AnyCssValue::TwValueThemeReference(it) => it.into(),
+            AnyCssValue::AnyCssDimension(it) => it.into_syntax(),
+            AnyCssValue::AnyCssFunction(it) => it.into_syntax(),
+            AnyCssValue::CssBracketedValue(it) => it.into_syntax(),
+            AnyCssValue::CssColor(it) => it.into_syntax(),
+            AnyCssValue::CssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssValue::CssDashedIdentifier(it) => it.into_syntax(),
+            AnyCssValue::CssIdentifier(it) => it.into_syntax(),
+            AnyCssValue::CssMetavariable(it) => it.into_syntax(),
+            AnyCssValue::CssNumber(it) => it.into_syntax(),
+            AnyCssValue::CssRatio(it) => it.into_syntax(),
+            AnyCssValue::CssString(it) => it.into_syntax(),
+            AnyCssValue::CssUnicodeRange(it) => it.into_syntax(),
+            AnyCssValue::TwValueThemeReference(it) => it.into_syntax(),
         }
     }
 }
@@ -24866,14 +26516,14 @@ impl AstNode for AnyCssValueAtRuleClause {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssValueAtRuleDeclarationClause(it) => &it.syntax,
-            Self::CssValueAtRuleImportClause(it) => &it.syntax,
+            Self::CssValueAtRuleDeclarationClause(it) => it.syntax(),
+            Self::CssValueAtRuleImportClause(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssValueAtRuleDeclarationClause(it) => it.syntax,
-            Self::CssValueAtRuleImportClause(it) => it.syntax,
+            Self::CssValueAtRuleDeclarationClause(it) => it.into_syntax(),
+            Self::CssValueAtRuleImportClause(it) => it.into_syntax(),
         }
     }
 }
@@ -24888,8 +26538,8 @@ impl std::fmt::Debug for AnyCssValueAtRuleClause {
 impl From<AnyCssValueAtRuleClause> for SyntaxNode {
     fn from(n: AnyCssValueAtRuleClause) -> Self {
         match n {
-            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => it.into(),
-            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => it.into(),
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => it.into_syntax(),
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => it.into_syntax(),
         }
     }
 }
@@ -24925,14 +26575,14 @@ impl AstNode for AnyCssValueAtRuleImportSource {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -24947,8 +26597,8 @@ impl std::fmt::Debug for AnyCssValueAtRuleImportSource {
 impl From<AnyCssValueAtRuleImportSource> for SyntaxNode {
     fn from(n: AnyCssValueAtRuleImportSource) -> Self {
         match n {
-            AnyCssValueAtRuleImportSource::CssIdentifier(it) => it.into(),
-            AnyCssValueAtRuleImportSource::CssString(it) => it.into(),
+            AnyCssValueAtRuleImportSource::CssIdentifier(it) => it.into_syntax(),
+            AnyCssValueAtRuleImportSource::CssString(it) => it.into_syntax(),
         }
     }
 }
@@ -24994,14 +26644,14 @@ impl AstNode for AnyCssValueAtRuleImportSpecifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssValueAtRuleImportSpecifier(it) => &it.syntax,
-            Self::CssValueAtRuleNamedImportSpecifier(it) => &it.syntax,
+            Self::CssValueAtRuleImportSpecifier(it) => it.syntax(),
+            Self::CssValueAtRuleNamedImportSpecifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssValueAtRuleImportSpecifier(it) => it.syntax,
-            Self::CssValueAtRuleNamedImportSpecifier(it) => it.syntax,
+            Self::CssValueAtRuleImportSpecifier(it) => it.into_syntax(),
+            Self::CssValueAtRuleNamedImportSpecifier(it) => it.into_syntax(),
         }
     }
 }
@@ -25016,8 +26666,10 @@ impl std::fmt::Debug for AnyCssValueAtRuleImportSpecifier {
 impl From<AnyCssValueAtRuleImportSpecifier> for SyntaxNode {
     fn from(n: AnyCssValueAtRuleImportSpecifier) -> Self {
         match n {
-            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => it.into(),
-            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => it.into(),
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => it.into_syntax(),
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => {
+                it.into_syntax()
+            }
         }
     }
 }
@@ -25059,14 +26711,14 @@ impl AstNode for AnyCssValueAtRuleProperty {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => &it.syntax,
-            Self::CssValueAtRuleGenericProperty(it) => &it.syntax,
+            Self::CssBogusProperty(it) => it.syntax(),
+            Self::CssValueAtRuleGenericProperty(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.syntax,
-            Self::CssValueAtRuleGenericProperty(it) => it.syntax,
+            Self::CssBogusProperty(it) => it.into_syntax(),
+            Self::CssValueAtRuleGenericProperty(it) => it.into_syntax(),
         }
     }
 }
@@ -25081,8 +26733,8 @@ impl std::fmt::Debug for AnyCssValueAtRuleProperty {
 impl From<AnyCssValueAtRuleProperty> for SyntaxNode {
     fn from(n: AnyCssValueAtRuleProperty) -> Self {
         match n {
-            AnyCssValueAtRuleProperty::CssBogusProperty(it) => it.into(),
-            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => it.into(),
+            AnyCssValueAtRuleProperty::CssBogusProperty(it) => it.into_syntax(),
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => it.into_syntax(),
         }
     }
 }
@@ -25124,13 +26776,13 @@ impl AstNode for AnyTwCustomVariantSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwCustomVariantShorthand(it) => &it.syntax,
+            Self::TwCustomVariantShorthand(it) => it.syntax(),
             Self::AnyCssRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwCustomVariantShorthand(it) => it.syntax,
+            Self::TwCustomVariantShorthand(it) => it.into_syntax(),
             Self::AnyCssRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -25146,13 +26798,132 @@ impl std::fmt::Debug for AnyTwCustomVariantSelector {
 impl From<AnyTwCustomVariantSelector> for SyntaxNode {
     fn from(n: AnyTwCustomVariantSelector) -> Self {
         match n {
-            AnyTwCustomVariantSelector::AnyCssRuleBlock(it) => it.into(),
-            AnyTwCustomVariantSelector::TwCustomVariantShorthand(it) => it.into(),
+            AnyTwCustomVariantSelector::AnyCssRuleBlock(it) => it.into_syntax(),
+            AnyTwCustomVariantSelector::TwCustomVariantShorthand(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnyTwCustomVariantSelector> for SyntaxElement {
     fn from(n: AnyTwCustomVariantSelector) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssAtRuleDeclarator> for AnyTwCustomVariantShorthand {
+    fn from(node: CssAtRuleDeclarator) -> Self {
+        Self::CssAtRuleDeclarator(node)
+    }
+}
+impl From<CssSelectorList> for AnyTwCustomVariantShorthand {
+    fn from(node: CssSelectorList) -> Self {
+        Self::CssSelectorList(node)
+    }
+}
+impl AstNode for AnyTwCustomVariantShorthand {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssAtRuleDeclarator::KIND_SET.union(CssSelectorList::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_AT_RULE_DECLARATOR | CSS_SELECTOR_LIST)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_AT_RULE_DECLARATOR => Self::CssAtRuleDeclarator(CssAtRuleDeclarator { syntax }),
+            CSS_SELECTOR_LIST => Self::CssSelectorList(CssSelectorList::cast(syntax)?),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssAtRuleDeclarator(it) => it.syntax(),
+            Self::CssSelectorList(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssSelectorList(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyTwCustomVariantShorthand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSelectorList(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTwCustomVariantShorthand> for SyntaxNode {
+    fn from(n: AnyTwCustomVariantShorthand) -> Self {
+        match n {
+            AnyTwCustomVariantShorthand::CssAtRuleDeclarator(it) => it.into_syntax(),
+            AnyTwCustomVariantShorthand::CssSelectorList(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyTwCustomVariantShorthand> for SyntaxElement {
+    fn from(n: AnyTwCustomVariantShorthand) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssString> for AnyTwSource {
+    fn from(node: CssString) -> Self {
+        Self::CssString(node)
+    }
+}
+impl From<TwSourceInline> for AnyTwSource {
+    fn from(node: TwSourceInline) -> Self {
+        Self::TwSourceInline(node)
+    }
+}
+impl AstNode for AnyTwSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET.union(TwSourceInline::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_STRING | TW_SOURCE_INLINE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_STRING => Self::CssString(CssString { syntax }),
+            TW_SOURCE_INLINE => Self::TwSourceInline(TwSourceInline { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssString(it) => it.syntax(),
+            Self::TwSourceInline(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssString(it) => it.into_syntax(),
+            Self::TwSourceInline(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyTwSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwSourceInline(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTwSource> for SyntaxNode {
+    fn from(n: AnyTwSource) -> Self {
+        match n {
+            AnyTwSource::CssString(it) => it.into_syntax(),
+            AnyTwSource::TwSourceInline(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyTwSource> for SyntaxElement {
+    fn from(n: AnyTwSource) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -25186,14 +26957,14 @@ impl AstNode for AnyTwUtilityName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => &it.syntax,
-            Self::TwFunctionalUtilityName(it) => &it.syntax,
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::TwFunctionalUtilityName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssIdentifier(it) => it.syntax,
-            Self::TwFunctionalUtilityName(it) => it.syntax,
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::TwFunctionalUtilityName(it) => it.into_syntax(),
         }
     }
 }
@@ -25208,8 +26979,8 @@ impl std::fmt::Debug for AnyTwUtilityName {
 impl From<AnyTwUtilityName> for SyntaxNode {
     fn from(n: AnyTwUtilityName) -> Self {
         match n {
-            AnyTwUtilityName::CssIdentifier(it) => it.into(),
-            AnyTwUtilityName::TwFunctionalUtilityName(it) => it.into(),
+            AnyTwUtilityName::CssIdentifier(it) => it.into_syntax(),
+            AnyTwUtilityName::TwFunctionalUtilityName(it) => it.into_syntax(),
         }
     }
 }
@@ -25220,6 +26991,11 @@ impl From<AnyTwUtilityName> for SyntaxElement {
     }
 }
 impl std::fmt::Display for AnyCssAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25619,12 +27395,27 @@ impl std::fmt::Display for AnyTwCustomVariantSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyTwCustomVariantShorthand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTwSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyTwUtilityName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for CssAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25679,6 +27470,11 @@ impl std::fmt::Display for CssColorProfileAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssColorProfileAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssComplexSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -25710,6 +27506,11 @@ impl std::fmt::Display for CssContainerAndQuery {
     }
 }
 impl std::fmt::Display for CssContainerAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25760,6 +27561,11 @@ impl std::fmt::Display for CssContainerStyleQueryInParens {
     }
 }
 impl std::fmt::Display for CssCounterStyleAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCounterStyleAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25824,6 +27630,11 @@ impl std::fmt::Display for CssFontFaceAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssFontFaceAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssFontFamilyName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -25845,6 +27656,11 @@ impl std::fmt::Display for CssFontFeatureValuesItem {
     }
 }
 impl std::fmt::Display for CssFontPaletteValuesAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFontPaletteValuesAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25974,6 +27790,11 @@ impl std::fmt::Display for CssMediaAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssMediaAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssMediaConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -26089,7 +27910,17 @@ impl std::fmt::Display for CssPositionTryAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssPositionTryAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssPropertyAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPropertyAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -26269,6 +28100,11 @@ impl std::fmt::Display for CssScopeAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssScopeAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssScopeEdge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -26294,6 +28130,11 @@ impl std::fmt::Display for CssStartingStyleAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssStartingStyleAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -26305,6 +28146,11 @@ impl std::fmt::Display for CssSupportsAndCondition {
     }
 }
 impl std::fmt::Display for CssSupportsAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -26429,6 +28275,11 @@ impl std::fmt::Display for CssViewTransitionAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssViewTransitionAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for TwApplyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -26464,7 +28315,17 @@ impl std::fmt::Display for TwReferenceAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for TwSlotAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for TwSourceAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwSourceInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

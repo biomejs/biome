@@ -3,6 +3,7 @@ class Example1 {
 	private prop1: number = 42;
 	protected prop2: string;
 	public prop3: string;
+	prop4: string;
 }
 
 class Example2 {

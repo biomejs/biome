@@ -9,7 +9,16 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedTypesOptions {
-    pub types: FxHashMap<Box<str>, CustomRestrictedType>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub types: Option<FxHashMap<Box<str>, CustomRestrictedType>>,
+}
+
+impl biome_deserialize::Merge for NoRestrictedTypesOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(types) = other.types {
+            self.types = Some(types);
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

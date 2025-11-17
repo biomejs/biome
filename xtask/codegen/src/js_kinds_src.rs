@@ -700,6 +700,10 @@ impl Field {
                     ("]]>", LanguageKind::Html) => "cdata_end",
                     ("{{", LanguageKind::Html) => "l_double_curly",
                     ("}}", LanguageKind::Html) => "r_double_curly",
+                    ("{@", LanguageKind::Html) => "sv_curly_at",
+                    ("{#", LanguageKind::Html) => "sv_curly_hash",
+                    ("{/", LanguageKind::Html) => "sv_curly_slash",
+                    ("{:", LanguageKind::Html) => "sv_curly_colon",
                     _ => name,
                 };
 

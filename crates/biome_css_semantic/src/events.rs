@@ -190,7 +190,7 @@ impl SemanticEventExtractor {
     /// @property --my-other-property {}
     /// ```
     fn process_at_property(&mut self, node: CssPropertyAtRule) {
-        let Ok(property_name) = node.name() else {
+        let Ok(property_name) = node.declarator().and_then(|d| d.name()) else {
             return;
         };
         let Some(decls) = node
@@ -218,7 +218,7 @@ impl SemanticEventExtractor {
                         initial_value = Some(CssPropertyInitialValue::from(prop.value()));
                     }
                     "syntax" => {
-                        syntax = Some(prop.value().to_trimmed_string().to_string());
+                        syntax = Some(prop.value().to_trimmed_string().clone());
                     }
                     "inherits" => {
                         inherits = Some(

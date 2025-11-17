@@ -1,0 +1,118 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	<Foo :[key]="foo" />
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        VueVBindShorthandDirective {
+                            arg: VueDirectiveArgument {
+                                colon_token: COLON@17..18 ":" [] [],
+                                arg: VueDynamicArgument {
+                                    l_brack_token: L_BRACKET@18..19 "[" [] [],
+                                    name_token: HTML_LITERAL@19..22 "key" [] [],
+                                    r_brack_token: R_BRACKET@22..23 "]" [] [],
+                                },
+                            },
+                            modifiers: VueModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@23..24 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@24..30 "\"foo\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@30..31 "/" [] [],
+                    r_angle_token: R_ANGLE@31..32 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@32..34 "<" [Newline("\n")] [],
+                slash_token: SLASH@34..35 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@35..43 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@43..44 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..45
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..44
+    0: HTML_ELEMENT@0..44
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..32
+        0: HTML_SELF_CLOSING_ELEMENT@10..32
+          0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@13..17
+            0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@17..30
+            0: VUE_V_BIND_SHORTHAND_DIRECTIVE@17..30
+              0: VUE_DIRECTIVE_ARGUMENT@17..23
+                0: COLON@17..18 ":" [] []
+                1: VUE_DYNAMIC_ARGUMENT@18..23
+                  0: L_BRACKET@18..19 "[" [] []
+                  1: HTML_LITERAL@19..22 "key" [] []
+                  2: R_BRACKET@22..23 "]" [] []
+              1: VUE_MODIFIER_LIST@23..23
+              2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..30
+                0: EQ@23..24 "=" [] []
+                1: HTML_STRING@24..30
+                  0: HTML_STRING_LITERAL@24..30 "\"foo\"" [] [Whitespace(" ")]
+          3: SLASH@30..31 "/" [] []
+          4: R_ANGLE@31..32 ">" [] []
+      2: HTML_CLOSING_ELEMENT@32..44
+        0: L_ANGLE@32..34 "<" [Newline("\n")] []
+        1: SLASH@34..35 "/" [] []
+        2: HTML_TAG_NAME@35..43
+          0: HTML_LITERAL@35..43 "template" [] []
+        3: R_ANGLE@43..44 ">" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```

@@ -57,7 +57,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.5
+          node-version: 24.11.1
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -123,7 +123,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.5
+          node-version: 24.11.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
@@ -131,21 +131,18 @@ jobs:
         run: node packages/@biomejs/js-api/scripts/update-nightly-version.mjs
 
       - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        run: npm publish packages/@biomejs/js-api --tag latest --access public
         if: needs.build.outputs.prerelease != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish npm package as nightly
-        run: npm publish packages/@biomejs/js-api --tag nightly --access public --provenance
+        run: npm publish packages/@biomejs/js-api --tag nightly --access public
         if: needs.build.outputs.prerelease == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Extract changelog
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

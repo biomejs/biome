@@ -427,11 +427,11 @@ impl From<&str> for Schema {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Schema {
-    fn schema_name() -> String {
-        "Schema".into()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Schema")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -560,7 +560,7 @@ pub struct FilesConfiguration {
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
     /// **Deprecated:** Please use _force-ignore syntax_ in `files.includes`
-    /// instead: https://biomejs.dev/reference/configuration/#filesincludes
+    /// instead: <https://biomejs.dev/reference/configuration/#filesincludes>
     ///
     /// Set of file and folder names that should be unconditionally ignored by
     /// Biome's scanner.

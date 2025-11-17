@@ -10,14 +10,15 @@ use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::Settings;
+use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
-    AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-    RenameResult,
+    AnyEmbeddedSnippet, CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+    PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
 };
 use biome_analyze::{
-    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
-    GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory,
-    RuleFilter, RuleGroup,
+    AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal,
+    ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories,
+    RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -25,8 +26,8 @@ use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
 use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
-use biome_formatter::Printed;
+use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -44,14 +45,16 @@ use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache, SendNode};
+use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
+use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use std::sync::Arc;
 use tracing::instrument;
 
@@ -545,6 +548,22 @@ pub(crate) struct LintParams<'a> {
     pub(crate) diagnostic_offset: Option<TextSize>,
 }
 
+pub(crate) struct DiagnosticsAndActionsParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) settings: &'a Settings,
+    pub(crate) language: DocumentFileSource,
+    pub(crate) path: &'a BiomePath,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
+    pub(crate) categories: RuleCategories,
+    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) project_layout: Arc<ProjectLayout>,
+    pub(crate) suppression_reason: Option<String>,
+    pub(crate) enabled_selectors: &'a [AnalyzerSelector],
+    pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) diagnostic_offset: Option<TextSize>,
+}
+
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
@@ -659,6 +678,219 @@ impl<'a> ProcessLint<'a> {
     }
 }
 
+/// Use this type to process fix all actions
+pub(crate) struct ProcessFixAll<'a> {
+    fix_file_mode: &'a FixFileMode,
+    errors: usize,
+    rules: Option<Cow<'a, Rules>>,
+    skipped_suggested_fixes: u32,
+    actions: Vec<FixAction>,
+    growth_guard: GrowthGuard,
+}
+
+impl<'a> ProcessFixAll<'a> {
+    pub(crate) fn new(
+        params: &'a FixAllParams,
+        rules: Option<Cow<'a, Rules>>,
+        syntax_len: u32,
+    ) -> Self {
+        Self {
+            fix_file_mode: &params.fix_file_mode,
+            errors: 0,
+            rules,
+            skipped_suggested_fixes: 0,
+            actions: Vec::new(),
+            growth_guard: GrowthGuard::new(syntax_len),
+        }
+    }
+
+    /// Process the incoming signal from the analyzer. Tracks errors and actions based on the type of
+    /// fix have been provided.
+    pub(crate) fn process_signal<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow<AnalyzerAction<L>> {
+        let current_diagnostic = signal.diagnostic();
+
+        if let Some(diagnostic) = current_diagnostic.as_ref()
+            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+        {
+            self.errors += 1;
+        }
+
+        for action in signal.actions() {
+            match self.fix_file_mode {
+                FixFileMode::ApplySuppressions => {
+                    if action.is_suppression() {
+                        return ControlFlow::Break(action);
+                    }
+                }
+                FixFileMode::SafeFixes => {
+                    // suppression actions should not be part of safe fixes
+                    if action.is_suppression() {
+                        continue;
+                    }
+                    if action.applicability == Applicability::MaybeIncorrect {
+                        self.skipped_suggested_fixes += 1;
+                    }
+                    if action.applicability == Applicability::Always {
+                        self.errors = self.errors.saturating_sub(1);
+                        return ControlFlow::Break(action);
+                    }
+                }
+                FixFileMode::SafeAndUnsafeFixes => {
+                    if action.is_suppression() {
+                        continue;
+                    }
+                    if matches!(
+                        action.applicability,
+                        Applicability::Always | Applicability::MaybeIncorrect
+                    ) {
+                        self.errors = self.errors.saturating_sub(1);
+                        return ControlFlow::Break(action);
+                    }
+                }
+            }
+        }
+
+        ControlFlow::Continue(())
+    }
+
+    /// Applies the mutation of the `action`. The closure returns the new root and must return
+    /// the length of the text that was replaced by the mutation.
+    ///
+    /// If `None` is returned, it means that there aren't any more mutations to apply.
+    pub(crate) fn process_action<T, L>(
+        &mut self,
+        action: Option<AnalyzerAction<L>>,
+        mut update_tree_return_text_len: T,
+    ) -> Result<Option<()>, WorkspaceError>
+    where
+        T: FnMut(SyntaxNode<L>) -> Option<u32>,
+        L: biome_rowan::Language,
+    {
+        match action {
+            Some(action) => {
+                if let (root, Some((range, _))) =
+                    action.mutation.commit_with_text_range_and_edit(true)
+                {
+                    let Some(curr_len) = update_tree_return_text_len(root) else {
+                        return Err(WorkspaceError::RuleError(
+                            RuleError::ReplacedRootWithNonRootError {
+                                rule_name: action.rule_name.map(|(group, rule)| {
+                                    (Cow::Borrowed(group), Cow::Borrowed(rule))
+                                }),
+                            },
+                        ));
+                    };
+
+                    self.actions.push(FixAction {
+                        rule_name: action
+                            .rule_name
+                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
+                        range,
+                    });
+
+                    // Check for runaway edit growth
+                    if !self.growth_guard.check(curr_len) {
+                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
+                        // We can do this by inspecting the last few fixes that were applied.
+                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
+
+                        let mut seen_rules = HashSet::new();
+                        for action in self.actions.iter().rev().take(10) {
+                            if let Some((group, rule)) = action.rule_name.as_ref() {
+                                seen_rules.insert((group.clone(), rule.clone()));
+                            }
+                        }
+
+                        return Err(WorkspaceError::RuleError(
+                            RuleError::ConflictingRuleFixesError {
+                                rules: seen_rules.into_iter().collect(),
+                            },
+                        ));
+                    };
+                };
+
+                Ok(Some(()))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
+    /// is a closure that must return the new code (formatted, if needed).
+    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    where
+        F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
+        C: FormatContext,
+    {
+        let code = match format_tree()? {
+            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Right(string) => string,
+        };
+        Ok(FixFileResult {
+            code,
+            skipped_suggested_fixes: self.skipped_suggested_fixes,
+            actions: self.actions,
+            errors: self.errors,
+        })
+    }
+}
+
+pub(crate) struct ProcessDiagnosticsAndActions {
+    diagnostics: Vec<(biome_diagnostics::serde::Diagnostic, Vec<CodeAction>)>,
+    diagnostic_offset: Option<TextSize>,
+}
+
+impl ProcessDiagnosticsAndActions {
+    pub(crate) fn new(diagnostic_offset: Option<TextSize>) -> Self {
+        Self {
+            diagnostics: Vec::new(),
+            diagnostic_offset,
+        }
+    }
+
+    pub(crate) fn process_signal<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow<Never> {
+        let diagnostic = signal.diagnostic();
+
+        if let Some(mut diagnostic) = diagnostic {
+            let actions: Vec<_> = signal
+                .actions()
+                .into_code_action_iter()
+                .map(|item| CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: None,
+                })
+                .collect();
+            if !actions.is_empty() {
+                if let Some(offset) = &self.diagnostic_offset {
+                    diagnostic.add_diagnostic_offset(*offset);
+                }
+                self.diagnostics.push((
+                    biome_diagnostics::serde::Diagnostic::new(Error::from(diagnostic)),
+                    actions,
+                ));
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    }
+
+    pub(crate) fn finish(self) -> PullDiagnosticsAndActionsResult {
+        PullDiagnosticsAndActionsResult {
+            diagnostics: self.diagnostics,
+        }
+    }
+}
+
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
@@ -686,6 +918,7 @@ type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -699,6 +932,8 @@ pub struct AnalyzerCapabilities {
     pub(crate) rename: Option<Rename>,
     /// It updates the snippets contained in the original root
     pub(crate) update_snippets: Option<UpdateSnippets>,
+    /// Pulls diagnostics with relative code actions
+    pub(crate) pull_diagnostics_and_actions: Option<PullDiagnosticsAndActions>,
 }
 
 type Format =
@@ -814,7 +1049,7 @@ impl Features {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro => self.astro.capabilities(),
+                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),

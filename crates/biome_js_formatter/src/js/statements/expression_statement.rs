@@ -41,17 +41,17 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
             && !is_after_bogus
             && (needs_parentheses || needs_semicolon(node))
         {
-            write!(f, [text(";")])?;
+            write!(f, [token(";")])?;
         }
 
         if needs_parentheses {
-            write!(f, [text("(")])?;
+            write!(f, [token("(")])?;
         }
 
         self.fmt_fields(node, f)?;
 
         if needs_parentheses {
-            write!(f, [text(")")])?;
+            write!(f, [token(")")])?;
         }
 
         Ok(())

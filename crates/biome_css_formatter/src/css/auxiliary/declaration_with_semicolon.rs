@@ -21,7 +21,7 @@ impl FormatNodeRule<CssDeclarationWithSemicolon> for FormatCssDeclarationWithSem
             // if semicolon is present, use the token's format to keep the comments
             write!(f, [semicolon_token.format()])
         } else {
-            write!(f, [text(";")])
+            write!(f, [token(";")])
         }
     }
 }

@@ -119,6 +119,7 @@ impl<W: io::Write> HtmlAdapter<W> {
                 b'_' => self.0.write_all(b"&#95;")?,
                 b'\\' => self.0.write_all(b"&#92;")?,
                 b'~' => self.0.write_all(b"\\~")?,
+                b'`' => self.0.write_all(b"&#96;")?,
                 _ => return Ok(false),
             }
         }

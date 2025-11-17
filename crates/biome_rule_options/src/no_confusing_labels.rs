@@ -5,6 +5,14 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoConfusingLabelsOptions {
     /// A list of (non-confusing) labels that should be allowed
-    #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    pub allowed_labels: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub allowed_labels: Option<Box<[Box<str>]>>,
+}
+
+impl biome_deserialize::Merge for NoConfusingLabelsOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(allowed_labels) = other.allowed_labels {
+            self.allowed_labels = Some(allowed_labels);
+        }
+    }
 }

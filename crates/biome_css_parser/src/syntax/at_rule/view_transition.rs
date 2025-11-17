@@ -20,14 +20,20 @@ pub(crate) fn parse_view_transition_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    parse_view_transition_at_rule_declarator(p).ok();
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_VIEW_TRANSITION_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_view_transition_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_view_transition_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
     p.bump(T![view_transition]);
 
-    let kind = if p.at(T!['{']) {
-        parse_declaration_block(p);
-        CSS_VIEW_TRANSITION_AT_RULE
-    } else {
-        CSS_BOGUS_AT_RULE
-    };
-
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR))
 }

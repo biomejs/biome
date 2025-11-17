@@ -59,6 +59,7 @@ AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
 TwFullCandidate =
 	variants: TwVariantList
+	negative: '-'?
 	candidate: AnyTwCandidate
 	'!'?
 

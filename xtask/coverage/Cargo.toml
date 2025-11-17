@@ -5,7 +5,7 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-ascii_table        = "4.0.7"
+ascii_table        = "4.0.8"
 backtrace          = "0.3.76"
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
@@ -17,7 +17,7 @@ biome_rowan        = { workspace = true }
 biome_string_case  = { workspace = true }
 camino             = { workspace = true }
 colored            = "3.0.0"
-indicatif          = { version = "0.18.0", features = ["improved_unicode"] }
+indicatif          = { version = "0.18.3", features = ["improved_unicode"] }
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = { workspace = true }
 serde              = { workspace = true, features = ["derive"] }
@@ -26,7 +26,7 @@ serde_yaml         = "0.9.34"
 tracing            = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "std"] }
 walkdir            = { workspace = true }
-xtask              = { path = '../', version = "0.0" }
+xtask_glue         = { workspace = true }
 yastl              = "0.1.2"
 
 [lints]

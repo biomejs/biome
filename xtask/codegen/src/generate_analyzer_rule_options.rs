@@ -3,7 +3,7 @@ use biome_string_case::Case;
 use proc_macro2::{Ident, Span};
 use quote::quote;
 use std::path::PathBuf;
-use xtask::*;
+use xtask_glue::*;
 
 /// The path to the analyzer rule options directory.
 pub fn get_analyzer_rule_options_path() -> PathBuf {
@@ -24,10 +24,10 @@ pub fn generate_analyzer_rule_options(
     );
 
     let content = quote! {
-        use biome_deserialize_macros::Deserializable;
+        use biome_deserialize_macros::{Deserializable, Merge};
         use serde::{Deserialize, Serialize};
 
-        #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+        #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
         #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
         pub struct #struct_name {}

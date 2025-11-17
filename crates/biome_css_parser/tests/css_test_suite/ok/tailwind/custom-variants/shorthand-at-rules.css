@@ -1,0 +1,63 @@
+@custom-variant hasgrid (@supports (display: grid));
+@custom-variant no-flex (@supports not (display: flex));
+@custom-variant selector-support (@supports selector(:focus-visible));
+@custom-variant supports-and (@supports (display: grid) and (animation-name: slidein));
+@custom-variant supports-or (@supports (display: flex) or (display: grid));
+@custom-variant supports-complex (@supports (display: grid) and (not (animation-name: slidein)));
+@custom-variant supports-nested (@supports ((display: grid) and (display: contents)));
+
+@custom-variant media-print (@media print);
+@custom-variant media-screen-min (@media screen and (min-width: 640px));
+@custom-variant media-max-md (@media (max-width: 768px));
+@custom-variant media-orientation-landscape (@media (orientation: landscape));
+@custom-variant media-hoverable (@media (hover: hover));
+@custom-variant media-reduced-motion (@media (prefers-reduced-motion: reduce));
+@custom-variant media-dark (@media (prefers-color-scheme: dark));
+@custom-variant media-pointer-coarse (@media (pointer: coarse));
+@custom-variant media-high-contrast (@media (forced-colors: active));
+@custom-variant media-print-or-hover (@media print, (hover: hover));
+@custom-variant media-multi-list (@media (min-width: 768px), screen and (min-width: 1024px), (orientation: portrait));
+@custom-variant media-and-chain (@media (min-width: 300px) and (min-height: 200px) and (orientation: landscape));
+@custom-variant media-or-chain (@media (min-width: 500px) or (min-height: 400px));
+@custom-variant media-nested-parens (@media ((min-width: 320px)));
+@custom-variant media-not-screen (@media not screen);
+@custom-variant media-not-and (@media not (min-width: 1024px));
+@custom-variant media-not-or (@media not (orientation: portrait));
+
+@custom-variant container-size (@container (min-width: 400px));
+@custom-variant container-named (@container sidebar (width > 300px));
+@custom-variant container-style-simple (@container style(color: red));
+@custom-variant container-style-chain (@container style((color: red) and (background: blue)));
+@custom-variant container-or (@container (min-width: 400px) or (height > 300px));
+@custom-variant container-and-or (@container (min-width: 400px) and ((height > 300px) or (orientation: landscape)));
+@custom-variant container-not (@container not (min-width: 900px));
+
+@custom-variant scope-start (@scope (.card));
+@custom-variant scope-interval (@scope (.from) to (.to));
+
+@custom-variant starting-style-only (@starting-style);
+
+@custom-variant color-profile-displayp3 (@color-profile display-p3);
+@custom-variant counter-style-bullets (@counter-style bullets);
+@custom-variant font-face-basic (@font-face);
+@custom-variant font-palette-values-main (@font-palette-values --main-palette);
+@custom-variant position-try-centered (@position-try --centered);
+@custom-variant property-my-color (@property --my-color);
+@custom-variant view-transition-basic (@view-transition);
+
+@custom-variant multiple-mixed-media-supports (@media (min-width: 600px) and (orientation: portrait));
+@custom-variant multiple-mixed-container-supports (@container (min-width: 500px));
+@custom-variant multiple-mixed-scope-media (@scope (.box));
+
+/* Edge cases with minimal declarators */
+@custom-variant font-face-alone (@font-face);
+@custom-variant starting-style-again (@starting-style);
+
+/* Complex combined conditions to stress parser (media + logical chains) */
+@custom-variant media-deep-chain (@media (min-width: 200px) and (min-height: 300px) and ((orientation: landscape) or (hover: hover)));
+
+/* Container style with or chain */
+@custom-variant container-style-or (@container style((color: red) or (background: blue)));
+
+/* Supports with selector feature */
+@custom-variant supports-selector-feature (@supports selector(:has(.item)));

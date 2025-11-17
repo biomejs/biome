@@ -21,7 +21,7 @@ CssRoot {
             rule: TwSourceAtRule {
                 source_token: SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
                 not_token: NOT_KW@8..12 "not" [] [Whitespace(" ")],
-                path: CssString {
+                source: CssString {
                     value_token: CSS_STRING_LITERAL@12..36 "\"../routes/utils/ds.tsx\"" [] [],
                 },
                 semicolon_token: SEMICOLON@36..37 ";" [] [],

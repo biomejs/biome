@@ -12,6 +12,7 @@ on:
       - 'crates/biome_graphql_formatter/**/*.rs'
       - 'crates/biome_graphql_parser/**/*.rs'
       - 'crates/biome_graphql_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
   push:
@@ -23,6 +24,7 @@ on:
       - 'crates/biome_graphql_formatter/**/*.rs'
       - 'crates/biome_graphql_parser/**/*.rs'
       - 'crates/biome_graphql_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
 

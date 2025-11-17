@@ -69,7 +69,11 @@ impl Rule for NoRestrictedTypes {
         let identifier_token = identifier.value_token().ok()?;
         let token_name = identifier_token.text_trimmed();
 
-        let restricted_type = options.types.get(token_name)?.clone();
+        let restricted_type = options
+            .types
+            .as_ref()
+            .and_then(|types| types.get(token_name))?
+            .clone();
 
         Some(restricted_type.into())
     }
