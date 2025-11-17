@@ -632,7 +632,7 @@ impl JsModuleInfoCollector {
                                     let assigned_type = self.reference_to_owned_data(data);
                                     ty = ResolvedTypeId::new(
                                         self.level(),
-                                        self.union_with(ty.clone(), assigned_type).into(),
+                                        self.union_with(ty.clone(), assigned_type),
                                     )
                                     .into();
                                 }

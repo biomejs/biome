@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
-assertion_line: 129
 expression: content
 ---
 # `index.ts` (Not imported by resolver)
