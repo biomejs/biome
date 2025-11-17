@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseFind {
-        version: "next",
+        version: "2.3.6",
         name: "useFind",
         language: "js",
         recommended: false,
