@@ -1,13 +1,15 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
 let a = <html lang="lorem" />;
 let a = <html lang="en-babab" />;
 let a = <html lang="en-GB-something" />;
+let a = <html lang="zh-Xxxx" />;
+let a = <html lang="zh-Hans-ZZ" />;
+let a = <html lang="en-US-GB-Extra" />;
 
 ```
 
@@ -52,7 +54,88 @@ invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   > 2 │ let a = <html lang="en-babab" />;
       │                    ^^^^^^^^^^
     3 │ let a = <html lang="en-GB-something" />;
-    4 │ 
+    4 │ let a = <html lang="zh-Xxxx" />;
+  
+
+```
+
+```
+invalid.jsx:3:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    1 │ let a = <html lang="lorem" />;
+    2 │ let a = <html lang="en-babab" />;
+  > 3 │ let a = <html lang="en-GB-something" />;
+      │                    ^^^^^^^^^^^^^^^^^
+    4 │ let a = <html lang="zh-Xxxx" />;
+    5 │ let a = <html lang="zh-Hans-ZZ" />;
+  
+  i Some of valid scripts:
+  
+  - Arab
+  - Armn
+  - Beng
+  - Cyrl
+  - Deva
+  - Ethi
+  - Grek
+  - Gujr
+  - Guru
+  - Hang
+  - Hani
+  - Hans
+  - Hant
+  - Hebr
+  - Hira
+  
+
+```
+
+```
+invalid.jsx:4:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    2 │ let a = <html lang="en-babab" />;
+    3 │ let a = <html lang="en-GB-something" />;
+  > 4 │ let a = <html lang="zh-Xxxx" />;
+      │                    ^^^^^^^^^
+    5 │ let a = <html lang="zh-Hans-ZZ" />;
+    6 │ let a = <html lang="en-US-GB-Extra" />;
+  
+  i Some of valid scripts:
+  
+  - Arab
+  - Armn
+  - Beng
+  - Cyrl
+  - Deva
+  - Ethi
+  - Grek
+  - Gujr
+  - Guru
+  - Hang
+  - Hani
+  - Hans
+  - Hant
+  - Hebr
+  - Hira
+  
+
+```
+
+```
+invalid.jsx:5:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    3 │ let a = <html lang="en-GB-something" />;
+    4 │ let a = <html lang="zh-Xxxx" />;
+  > 5 │ let a = <html lang="zh-Hans-ZZ" />;
+      │                    ^^^^^^^^^^^^
+    6 │ let a = <html lang="en-US-GB-Extra" />;
+    7 │ 
   
   i Some of valid countries:
   
@@ -76,15 +159,15 @@ invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:3:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a valid value for the lang attribute.
   
-    1 │ let a = <html lang="lorem" />;
-    2 │ let a = <html lang="en-babab" />;
-  > 3 │ let a = <html lang="en-GB-something" />;
-      │                    ^^^^^^^^^^^^^^^^^
-    4 │ 
+    4 │ let a = <html lang="zh-Xxxx" />;
+    5 │ let a = <html lang="zh-Hans-ZZ" />;
+  > 6 │ let a = <html lang="en-US-GB-Extra" />;
+      │                    ^^^^^^^^^^^^^^^^
+    7 │ 
   
 
 ```
