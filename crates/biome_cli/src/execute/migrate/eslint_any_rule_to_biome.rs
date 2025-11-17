@@ -53,7 +53,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/google-font-display" => {
+        "@next/next/google-font-display" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -61,7 +61,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/google-font-preconnect" => {
+        "@next/next/google-font-preconnect" => {
             let group = rules.performance.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -69,7 +69,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-async-client-component" => {
+        "@next/next/no-async-client-component" => {
             if !options.include_nursery {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
@@ -81,7 +81,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-document-import-in-page" => {
+        "@next/next/no-document-import-in-page" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -89,7 +89,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-head-element" => {
+        "@next/next/no-head-element" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -97,7 +97,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-head-import-in-document" => {
+        "@next/next/no-head-import-in-document" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -105,7 +105,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-img-element" => {
+        "@next/next/no-img-element" => {
             let group = rules.performance.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
@@ -113,7 +113,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-sync-scripts" => {
+        "@next/next/no-sync-scripts" => {
             if !options.include_nursery {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
@@ -125,7 +125,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "@next/no-unwanted-polyfillio" => {
+        "@next/next/no-unwanted-polyfillio" => {
             let group = rules.performance.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
