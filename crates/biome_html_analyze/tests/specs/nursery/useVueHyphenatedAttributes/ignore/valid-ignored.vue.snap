@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-ignored.vue
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<IgnoredComponent fooBar="foo" />
+<Foo ignoredAttribute="foo" />
+
+```
