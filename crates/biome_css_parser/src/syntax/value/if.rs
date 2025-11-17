@@ -24,7 +24,6 @@ use crate::syntax::is_at_declaration;
 use crate::syntax::parse_declaration;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_if_branch;
-use crate::syntax::value::parse_error::expected_if_test_boolean_expr;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
@@ -98,7 +97,7 @@ pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![if]);
-    p.bump(T!['(']);
+    p.expect(T!['(']);
 
     CssIfBranchList.parse_list(p);
 
