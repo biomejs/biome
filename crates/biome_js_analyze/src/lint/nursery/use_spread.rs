@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSpread {
-        version: "next",
+        version: "2.3.6",
         name: "useSpread",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-spread").same()],
