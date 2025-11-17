@@ -2670,7 +2670,8 @@ impl<'a, Context> BestFitting<'a, Context> {
 impl<Context> Format<Context> for BestFitting<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let variants = self.variants.items();
-        let mut buffer = VecBuffer::with_capacity(variants.len() * 8, f.state_mut());
+        // Each variant is wrapped in Start/End tags
+        let mut buffer = VecBuffer::with_capacity(variants.len() * 3, f.state_mut());
 
         for variant in variants {
             buffer.write_element(FormatElement::Tag(StartBestFittingEntry))?;
