@@ -28,7 +28,7 @@ use crate::syntax::value::parse_error::expected_if_test_boolean_expr;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
-    p.at(T![if]) && p.nth_at(1, T!['('])
+    p.at(T![if])
 }
 
 /// Parses an if function from the current position of the CSS parser.
