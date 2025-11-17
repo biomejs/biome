@@ -55,7 +55,7 @@ camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
 path-absolutize          = { workspace = true }
-quick-junit              = "0.5.1"
+quick-junit              = "0.5.2"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
