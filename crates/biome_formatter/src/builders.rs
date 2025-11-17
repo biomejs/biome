@@ -1,7 +1,7 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{Argument, Arguments, GroupId, TextRange, TextSize, format_element, write};
+use crate::{Argument, Arguments, GroupId, TextRange, TextSize, write};
 use crate::{Buffer, VecBuffer};
 use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
@@ -2669,25 +2669,19 @@ impl<'a, Context> BestFitting<'a, Context> {
 
 impl<Context> Format<Context> for BestFitting<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        let mut buffer = VecBuffer::new(f.state_mut());
         let variants = self.variants.items();
-
-        let mut formatted_variants = Vec::with_capacity(variants.len());
+        let mut buffer = VecBuffer::with_capacity(variants.len() * 8, f.state_mut());
 
         for variant in variants {
-            buffer.write_element(FormatElement::Tag(StartEntry))?;
+            buffer.write_element(FormatElement::Tag(StartBestFittingEntry))?;
             buffer.write_fmt(Arguments::from(variant))?;
-            buffer.write_element(FormatElement::Tag(EndEntry))?;
-
-            formatted_variants.push(buffer.take_vec().into_boxed_slice());
+            buffer.write_element(FormatElement::Tag(EndBestFittingEntry))?;
         }
 
         // SAFETY: The constructor guarantees that there are always at least two variants. It's, therefore,
         // safe to call into the unsafe `from_vec_unchecked` function
         let element = unsafe {
-            FormatElement::BestFitting(format_element::BestFittingElement::from_vec_unchecked(
-                formatted_variants,
-            ))
+            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(buffer.into_vec()))
         };
 
         f.write_element(element)

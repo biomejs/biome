@@ -9,6 +9,7 @@ use biome_rowan::TokenText;
 #[cfg(target_pointer_width = "64")]
 use biome_rowan::static_assert;
 use std::hash::{Hash, Hasher};
+use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -58,7 +59,7 @@ pub enum FormatElement {
 
     /// A list of different variants representing the same content. The printer picks the best fitting content.
     /// Line breaks inside of a best fitting don't propagate to parent groups.
-    BestFitting(BestFittingElement),
+    BestFitting(BestFittingVariants),
 
     /// A [Tag] that marks the start/end of some content to which some special formatting is applied.
     Tag(Tag),
@@ -229,6 +230,14 @@ impl FormatElement {
     pub const fn is_line(&self) -> bool {
         matches!(self, Self::Line(_))
     }
+
+    pub fn tag_kind(&self) -> Option<TagKind> {
+        if let Self::Tag(tag) = self {
+            Some(tag.kind())
+        } else {
+            None
+        }
+    }
 }
 
 impl FormatElements for FormatElement {
@@ -279,16 +288,16 @@ impl FormatElements for FormatElement {
 /// Provides the printer with different representations for the same element so that the printer
 /// can pick the best fitting variant.
 ///
-/// Best fitting is defined as the variant that takes the most horizontal space but fits on the line.
-#[derive(Clone, Eq, PartialEq)]
-pub struct BestFittingElement {
-    /// The different variants for this element.
-    /// The first element is the one that takes up the most space horizontally (the most flat),
-    /// The last element takes up the least space horizontally (but most horizontal space).
-    variants: Box<[Box<[FormatElement]>]>,
-}
+/// The best fitting is defined as the variant
+/// that takes the most horizontal space but fits on the line.
+/// The different variants for this element.
+///
+/// The first element is the one that takes up the most space horizontally (the most flat),
+/// The last element takes up the least space horizontally (but most horizontal space).
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct BestFittingVariants(Box<[FormatElement]>);
 
-impl BestFittingElement {
+impl BestFittingVariants {
     /// Creates a new best fitting IR with the given variants. The method itself isn't unsafe
     /// but it is to discourage people from using it because the printer will panic if
     /// the slice doesn't contain at least the least and most expanded variants.
@@ -296,47 +305,127 @@ impl BestFittingElement {
     /// You're looking for a way to create a `BestFitting` object, use the `best_fitting![least_expanded, most_expanded]` macro.
     ///
     /// ## Safety
-    /// The slice must contain at least two variants.
+    /// The slice must contain at least two variants (each delimited by StartEntry/EndEntry tags).
     #[doc(hidden)]
-    pub unsafe fn from_vec_unchecked(variants: Vec<Box<[FormatElement]>>) -> Self {
+    pub unsafe fn from_vec_unchecked(variants: Vec<FormatElement>) -> Self {
         debug_assert!(
-            variants.len() >= 2,
+            variants
+                .iter()
+                .filter(|element| matches!(element, FormatElement::Tag(Tag::StartBestFittingEntry)))
+                .count()
+                >= 2,
             "Requires at least the least expanded and most expanded variants"
         );
-
-        Self {
-            variants: variants.into_boxed_slice(),
-        }
+        Self(variants.into_boxed_slice())
     }
 
     /// Returns the most expanded variant
     pub fn most_expanded(&self) -> &[FormatElement] {
-        self.variants.last().expect(
+        debug_assert!(
+            self.as_slice()
+                .iter()
+                .filter(|element| matches!(element, FormatElement::Tag(Tag::StartBestFittingEntry)))
+                .count()
+                >= 2,
+            "Requires at least the least expanded and most expanded variants"
+        );
+
+        self.into_iter().last().expect(
             "Most contain at least two elements, as guaranteed by the best fitting builder.",
         )
     }
 
-    pub fn variants(&self) -> &[Box<[FormatElement]>] {
-        &self.variants
+    pub fn as_slice(&self) -> &[FormatElement] {
+        &self.0
     }
 
-    pub(crate) fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
-        &mut self.variants
+    pub(crate) fn as_slice_mut(&mut self) -> &mut [FormatElement] {
+        &mut self.0
     }
 
     /// Returns the least expanded variant
+    ///
+    /// # Panics
+    ///
+    /// When the number of variants is less than two.
     pub fn most_flat(&self) -> &[FormatElement] {
-        self.variants.first().expect(
-            "Most contain at least two elements, as guaranteed by the best fitting builder.",
-        )
+        debug_assert!(
+            self.as_slice()
+                .iter()
+                .filter(|element| matches!(element, FormatElement::Tag(Tag::StartBestFittingEntry)))
+                .count()
+                >= 2,
+            "Requires at least the least expanded and most expanded variants"
+        );
+        self.into_iter().next().unwrap()
     }
 }
 
-impl std::fmt::Debug for BestFittingElement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(&*self.variants).finish()
+impl Deref for BestFittingVariants {
+    type Target = [FormatElement];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_slice()
     }
 }
+
+pub struct BestFittingVariantsIter<'a> {
+    elements: &'a [FormatElement],
+}
+
+impl<'a> IntoIterator for &'a BestFittingVariants {
+    type Item = &'a [FormatElement];
+    type IntoIter = BestFittingVariantsIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        BestFittingVariantsIter { elements: &self.0 }
+    }
+}
+
+impl<'a> Iterator for BestFittingVariantsIter<'a> {
+    type Item = &'a [FormatElement];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.elements.first()? {
+            FormatElement::Tag(Tag::StartBestFittingEntry) => {
+                let end = self
+                    .elements
+                    .iter()
+                    .position(|element| {
+                        matches!(element, FormatElement::Tag(Tag::EndBestFittingEntry))
+                    })
+                    .map_or(self.elements.len(), |position| position + 1);
+
+                let (variant, rest) = self.elements.split_at(end);
+                self.elements = rest;
+
+                Some(variant)
+            }
+            _ => None,
+        }
+    }
+
+    fn last(mut self) -> Option<Self::Item>
+    where
+        Self: Sized,
+    {
+        self.next_back()
+    }
+}
+
+impl<'a> DoubleEndedIterator for BestFittingVariantsIter<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let start_position = self.elements.iter().rposition(|element| {
+            matches!(element, FormatElement::Tag(Tag::StartBestFittingEntry))
+        })?;
+
+        let (rest, variant) = self.elements.split_at(start_position);
+        self.elements = rest;
+        Some(variant)
+    }
+}
+
+impl FusedIterator for BestFittingVariantsIter<'_> {}
 
 pub trait FormatElements {
     /// Returns true if this [FormatElement] is guaranteed to break across multiple lines by the printer.

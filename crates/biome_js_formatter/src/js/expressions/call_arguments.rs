@@ -9,7 +9,7 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{VecBuffer, format_args, format_element, write};
+use biome_formatter::{VecBuffer, format_args, format_element::BestFittingVariants, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
@@ -396,7 +396,7 @@ fn write_grouped_arguments(
     // First write the most expanded variant because it needs `arguments`.
     let most_expanded = {
         let mut buffer = VecBuffer::new(f.state_mut());
-        buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
 
         write!(
             buffer,
@@ -408,7 +408,7 @@ fn write_grouped_arguments(
                 expand: true,
             }]
         )?;
-        buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
 
         buffer.into_vec()
     };
@@ -448,7 +448,7 @@ fn write_grouped_arguments(
     let most_flat = {
         let snapshot = f.state_snapshot();
         let mut buffer = VecBuffer::new(f.state_mut());
-        buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
 
         let result = write!(
             buffer,
@@ -474,23 +474,23 @@ fn write_grouped_arguments(
             f.restore_state_snapshot(snapshot);
 
             let mut most_expanded_iter = most_expanded.into_iter();
-            // Skip over the Start/EndEntry items.
+            // Skip over the StartBestFittingEntry/EndBestFittingEntry items.
             most_expanded_iter.next();
             most_expanded_iter.next_back();
 
             return f.write_elements(most_expanded_iter);
         }
 
-        buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
 
-        buffer.into_vec().into_boxed_slice()
+        buffer.into_vec()
     };
 
     // Write the second variant that forces the group of the first/last argument to expand.
     let middle_variant = {
         let mut buffer = VecBuffer::new(f.state_mut());
 
-        buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
 
         write!(
             buffer,
@@ -517,28 +517,27 @@ fn write_grouped_arguments(
             ]
         )?;
 
-        buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
 
-        buffer.into_vec().into_boxed_slice()
+        buffer.into_vec()
     };
 
     // If the grouped content breaks, then we can skip the most_flat variant,
     // since we already know that it won't be fitting on a single line.
     let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-        vec![middle_variant, most_expanded.into_boxed_slice()]
+        [middle_variant, most_expanded].concat()
     } else {
-        vec![most_flat, middle_variant, most_expanded.into_boxed_slice()]
+        [most_flat, middle_variant, most_expanded].concat()
     };
 
-    // SAFETY: Safe because variants is guaranteed to contain exactly 3 entries:
-    // * most flat
-    // * middle
+    // SAFETY: Safe because variants is guaranteed to contain at least 2 entries:
+    // * most flat (or middle if grouped_breaks)
     // * most expanded
-    // ... and best fitting only requires the most flat/and expanded.
+    // Each entry is delimited by StartBestFittingEntry/EndBestFittingEntry tags.
     unsafe {
         f.write_element(FormatElement::BestFitting(
-            format_element::BestFittingElement::from_vec_unchecked(variants),
+            BestFittingVariants::from_vec_unchecked(variants),
         ))
     }
 }

@@ -6,7 +6,7 @@ mod stack;
 
 pub use printer_options::*;
 
-use crate::format_element::{BestFittingElement, LineMode, PrintMode};
+use crate::format_element::{BestFittingVariants, LineMode, PrintMode};
 use crate::{
     ActualStart, FormatElement, GroupId, IndentStyle, InvalidDocumentError, PrintError,
     PrintResult, Printed, SourceMarker, TextRange,
@@ -150,8 +150,8 @@ impl<'a> Printer<'a> {
                 self.flush_line_suffixes(queue, stack, indent_stack, Some(HARD_BREAK));
             }
 
-            FormatElement::BestFitting(best_fitting) => {
-                self.print_best_fitting(best_fitting, queue, stack, indent_stack)?;
+            FormatElement::BestFitting(variants) => {
+                self.print_best_fitting(variants, queue, stack, indent_stack)?;
             }
 
             FormatElement::Interned(content) => {
@@ -264,12 +264,15 @@ impl<'a> Printer<'a> {
                 stack.push(TagKind::Verbatim, args);
             }
 
-            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_))) => {
+            FormatElement::Tag(
+                tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_) | StartBestFittingEntry),
+            ) => {
                 stack.push(tag.kind(), args);
             }
             FormatElement::Tag(
                 tag @ (EndLabelled
                 | EndEntry
+                | EndBestFittingEntry
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
@@ -437,7 +440,7 @@ impl<'a> Printer<'a> {
 
     fn print_best_fitting(
         &mut self,
-        best_fitting: &'a BestFittingElement,
+        variants: &'a BestFittingVariants,
         queue: &mut PrintQueue<'a>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
@@ -445,51 +448,63 @@ impl<'a> Printer<'a> {
         let args = stack.top();
 
         if args.mode().is_flat() && self.state.measured_group_fits {
-            queue.extend_back(best_fitting.most_flat());
-            self.print_entry(queue, stack, indent_stack, args)
+            queue.extend_back(variants.most_flat());
+            self.print_entry(queue, stack, indent_stack, args, TagKind::BestFittingEntry)
         } else {
             self.state.measured_group_fits = true;
+            let mut variants_iter = variants.into_iter();
+            let mut current = variants_iter.next().unwrap();
 
-            let normal_variants = &best_fitting.variants()[..best_fitting.variants().len() - 1];
-
-            for variant in normal_variants.iter() {
+            for next in variants_iter {
                 // Test if this variant fits and if so, use it. Otherwise try the next
                 // variant.
 
                 // Try to fit only the first variant on a single line
-                if !matches!(variant.first(), Some(&FormatElement::Tag(Tag::StartEntry))) {
-                    return invalid_start_tag(TagKind::Entry, variant.first());
+                if !matches!(
+                    current.first(),
+                    Some(&FormatElement::Tag(Tag::StartBestFittingEntry))
+                ) {
+                    return invalid_start_tag(TagKind::BestFittingEntry, current.first());
                 }
 
                 let entry_args = args.with_print_mode(PrintMode::Flat);
 
                 // Skip the first element because we want to override the args for the entry and the
                 // args must be popped from the stack as soon as it sees the matching end entry.
-                let content = &variant[1..];
+                let content = &current[1..];
 
                 queue.extend_back(content);
-                stack.push(TagKind::Entry, entry_args);
+                stack.push(TagKind::BestFittingEntry, entry_args);
                 let variant_fits = self.fits(queue, stack, indent_stack)?;
-                stack.pop(TagKind::Entry)?;
+                stack.pop(TagKind::BestFittingEntry)?;
 
                 // Remove the content slice because printing needs the variant WITH the start entry
                 let popped_slice = queue.pop_slice();
                 debug_assert_eq!(popped_slice, Some(content));
 
                 if variant_fits {
-                    queue.extend_back(variant);
-                    return self.print_entry(queue, stack, indent_stack, entry_args);
+                    queue.extend_back(current);
+                    return self.print_entry(
+                        queue,
+                        stack,
+                        indent_stack,
+                        args.with_print_mode(PrintMode::Flat),
+                        TagKind::BestFittingEntry,
+                    );
                 }
+
+                current = next;
             }
 
+            // At this stage current is the most expanded.
             // No variant fits, take the last (most expanded) as fallback
-            let most_expanded = best_fitting.most_expanded();
-            queue.extend_back(most_expanded);
+            queue.extend_back(current);
             self.print_entry(
                 queue,
                 stack,
                 indent_stack,
                 args.with_print_mode(PrintMode::Expanded),
+                TagKind::BestFittingEntry,
             )
         }
     }
@@ -658,7 +673,7 @@ impl<'a> Printer<'a> {
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
     ) -> PrintResult<()> {
-        self.print_entry(queue, stack, indent_stack, args)
+        self.print_entry(queue, stack, indent_stack, args, TagKind::Entry)
     }
 
     /// Semantic alias for [Self::print_entry] for fill separators.
@@ -669,7 +684,7 @@ impl<'a> Printer<'a> {
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
     ) -> PrintResult<()> {
-        self.print_entry(queue, stack, indent_stack, args)
+        self.print_entry(queue, stack, indent_stack, args, TagKind::Entry)
     }
 
     /// Fully print an element (print the element itself and all its descendants)
@@ -682,32 +697,38 @@ impl<'a> Printer<'a> {
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
+        kind: TagKind,
     ) -> PrintResult<()> {
         let start_entry = queue.top();
 
-        if !matches!(start_entry, Some(&FormatElement::Tag(Tag::StartEntry))) {
-            return invalid_start_tag(TagKind::Entry, start_entry);
+        if !matches!(
+            start_entry,
+            Some(&FormatElement::Tag(
+                Tag::StartEntry | Tag::StartBestFittingEntry
+            ))
+        ) {
+            return invalid_start_tag(kind, start_entry);
         }
 
         let mut depth = 0;
 
         while let Some(element) = queue.pop() {
             match element {
-                FormatElement::Tag(Tag::StartEntry) => {
+                FormatElement::Tag(Tag::StartEntry | Tag::StartBestFittingEntry) => {
                     // Handle the start of the first element by pushing the args on the stack.
                     if depth == 0 {
                         depth = 1;
-                        stack.push(TagKind::Entry, args);
+                        stack.push(kind, args);
                         continue;
                     }
 
                     depth += 1;
                 }
-                FormatElement::Tag(Tag::EndEntry) => {
+                FormatElement::Tag(end_tag @ (Tag::EndEntry | Tag::EndBestFittingEntry)) => {
                     depth -= 1;
                     // Reached the end entry, pop the entry from the stack and return.
                     if depth == 0 {
-                        stack.pop(TagKind::Entry)?;
+                        stack.pop(end_tag.kind())?;
                         return Ok(());
                     }
                 }
@@ -719,7 +740,7 @@ impl<'a> Printer<'a> {
             self.print_element(stack, indent_stack, queue, element)?;
         }
 
-        invalid_end_tag(TagKind::Entry, stack.top_kind())
+        invalid_end_tag(kind, stack.top_kind())
     }
 
     fn print_char(&mut self, char: char) {
@@ -1158,11 +1179,15 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                     PrintMode::Expanded => best_fitting.most_expanded(),
                 };
 
-                if !matches!(slice.first(), Some(FormatElement::Tag(Tag::StartEntry))) {
-                    return invalid_start_tag(TagKind::Entry, slice.first());
+                if !matches!(
+                    slice.first(),
+                    Some(FormatElement::Tag(StartBestFittingEntry))
+                ) {
+                    return invalid_start_tag(TagKind::BestFittingEntry, slice.first());
                 }
 
-                self.queue.extend_back(slice);
+                self.stack.push(TagKind::BestFittingEntry, args);
+                self.queue.extend_back(&slice[1..]);
             }
 
             FormatElement::Interned(content) => self.queue.extend_back(content),
@@ -1247,7 +1272,11 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(
-                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry
+                tag @ (StartFill
+                | StartVerbatim(_)
+                | StartLabelled(_)
+                | StartEntry
+                | StartBestFittingEntry
                 | StartEmbedded(_)),
             ) => {
                 self.stack.push(tag.kind(), args);
@@ -1255,6 +1284,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             FormatElement::Tag(
                 tag @ (EndLabelled
                 | EndEntry
+                | EndBestFittingEntry
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
@@ -1998,5 +2028,107 @@ Group 1 breaks"#
                 ))]
             )
         }
+    }
+
+    #[test]
+    fn test_print_entry_handles_interned_elements_containing_start_entry_tags() {
+        let result = format(&format_with(|f| {
+            let vec = {
+                let mut buffer = VecBuffer::new(f.state_mut());
+
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(buffer, [token("foo")])?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(buffer, [token("bar")])?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+                buffer.into_vec()
+            };
+
+            let interned = f.intern_vec(vec);
+
+            if let Some(interned_element) = interned {
+                f.write_element(FormatElement::Tag(Tag::StartFill))?;
+                f.write_element(interned_element)?;
+                f.write_element(FormatElement::Tag(Tag::EndFill))?;
+            }
+
+            Ok(())
+        }));
+
+        assert_eq!(result.as_code(), "foobar");
+    }
+
+    #[test]
+    fn test_print_entry_handles_interned_entries_with_long_content_triggering_line_breaks() {
+        let result = format(&format_with(|f| {
+            let vec = {
+                let mut buffer = VecBuffer::new(f.state_mut());
+
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(
+                    buffer,
+                    [token(
+                        "foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                    )]
+                )?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(buffer, [token("baaaaaaaaaaaaaaaaaar")])?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+                buffer.into_vec()
+            };
+
+            let interned = f.intern_vec(vec);
+
+            if let Some(interned_element) = interned {
+                f.write_element(FormatElement::Tag(Tag::StartFill))?;
+                f.write_element(interned_element)?;
+                f.write_element(FormatElement::Tag(Tag::EndFill))?;
+            }
+
+            Ok(())
+        }));
+
+        assert_eq!(
+            result.as_code(),
+            "foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooobaaaaaaaaaaaaaaaaaar"
+        );
+    }
+
+    #[test]
+    fn test_print_entry_handles_best_fitting_variants_containing_fill_with_interned_entries() {
+        let result = format(&format_with(|f| {
+            let vec = {
+                let mut buffer = VecBuffer::new(f.state_mut());
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(buffer, [token("text")])?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+
+                buffer.write_element(FormatElement::Tag(Tag::StartEntry))?;
+                write!(buffer, [token("another")])?;
+                buffer.write_element(FormatElement::Tag(Tag::EndEntry))?;
+                buffer.into_vec()
+            };
+
+            let fill_interned = f.intern_vec(vec);
+
+            if let Some(interned) = fill_interned {
+                let variant = format_with(|f| {
+                    f.write_element(FormatElement::Tag(Tag::StartFill))?;
+                    f.write_element(interned.clone())?;
+                    f.write_element(FormatElement::Tag(Tag::EndFill))?;
+                    Ok(())
+                });
+
+                write!(f, [best_fitting![variant, variant]])?;
+            }
+
+            Ok(())
+        }));
+
+        assert_eq!(result.as_code(), "textanother");
     }
 }
