@@ -875,6 +875,7 @@ dependencies = [
  "biome_html_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "biome_test_utils",
  "biome_unicode_table",
  "camino",

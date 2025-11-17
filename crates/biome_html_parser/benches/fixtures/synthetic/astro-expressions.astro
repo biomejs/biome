@@ -1,0 +1,379 @@
+<!-- Astro Expressions Benchmark - Stresses single-brace expressions, spread attributes, and class:list -->
+
+<!-- Simple expressions -->
+<div>{title}</div>
+<p>{description}</p>
+<span>{count}</span>
+<h1>{heading}</h1>
+<h2>{subheading}</h2>
+
+<!-- Expressions in attributes -->
+<div id={id} class={className} data-value={value} />
+<a href={url} title={linkTitle} target={target} />
+<img src={src} alt={alt} width={width} height={height} />
+<input type={inputType} value={inputValue} placeholder={placeholder} />
+<button disabled={isDisabled} aria-label={label} />
+
+<!-- Boolean expressions -->
+<div hidden={!isVisible} />
+<input checked={isChecked} />
+<input disabled={isDisabled} />
+<textarea readonly={isReadonly} />
+<option selected={isSelected} />
+
+<!-- Ternary expressions -->
+<div class={isActive ? 'active' : 'inactive'} />
+<span class={hasError ? 'error' : 'success'} />
+<p class={isLoading ? 'loading' : 'loaded'} />
+<button class={isPressed ? 'pressed' : ''} />
+<a class={isExternal ? 'external' : 'internal'} />
+
+<!-- Logical expressions -->
+<div>{isVisible && <span>Visible content</span>}</div>
+<p>{hasItems && items.length > 0 && 'Items available'}</p>
+<span>{isLoggedIn && user.name}</span>
+<div>{showDetails && <DetailsComponent />}</div>
+<p>{error && <ErrorMessage message={error} />}</p>
+
+<!-- Spread attributes - single spread -->
+<div {...props} />
+<Component {...componentProps} />
+<Button {...buttonProps} />
+<Card {...cardProps} />
+<Input {...inputProps} />
+
+<!-- Spread attributes - multiple spreads -->
+<div {...props} {...moreProps} />
+<Component {...baseProps} {...overrideProps} />
+<Button {...defaultProps} {...customProps} />
+<Card {...layoutProps} {...styleProps} />
+<Input {...inputAttrs} {...validationProps} />
+
+<!-- Spread with regular attributes -->
+<div id="main" {...props} class="extra" />
+<Component title="Title" {...props} description="Desc" />
+<Button type="button" {...buttonProps} onClick={handleClick} />
+<Card elevation={1} {...cardProps} bordered={true} />
+<Input name="email" {...inputProps} required={true} />
+
+<!-- class:list directive -->
+<div class:list={['base', 'modifier']} />
+<div class:list={['class1', 'class2', 'class3']} />
+<div class:list={[baseClass, activeClass]} />
+<div class:list={['btn', isPrimary && 'btn-primary']} />
+<div class:list={['card', isElevated && 'shadow', isBordered && 'border']} />
+
+<!-- class:list with object syntax -->
+<div class:list={{ active: isActive, disabled: isDisabled }} />
+<div class:list={{ visible: showContent, hidden: !showContent }} />
+<div class:list={{ 'text-large': isLarge, 'text-small': isSmall }} />
+<div class:list={{ 'theme-dark': isDarkMode, 'theme-light': !isDarkMode }} />
+<div class:list={{ loading: isLoading, error: hasError, success: isSuccess }} />
+
+<!-- class:list with mixed syntax -->
+<div class:list={['base', { active: isActive }, 'extra']} />
+<div class:list={['btn', { 'btn-primary': isPrimary, 'btn-secondary': !isPrimary }]} />
+<div class:list={[baseClass, { [dynamicClass]: condition }, 'static']} />
+<div class:list={['container', isFluid && 'container-fluid', { 'mx-auto': centered }]} />
+<div class:list={['grid', `grid-cols-${cols}`, { 'gap-4': hasGap, 'gap-0': !hasGap }]} />
+
+<!-- Dense expression blocks -->
+<div>
+  {a}{b}{c}{d}{e}
+</div>
+<p>
+  {firstName} {lastName} - {email}
+</p>
+<span>
+  {day}/{month}/{year}
+</span>
+<div>
+  {hours}:{minutes}:{seconds}
+</div>
+
+<!-- Expressions in text content -->
+<p>Welcome, {user.name}! You have {unreadCount} unread messages.</p>
+<div>Price: ${price} ({currency}) - Save {discount}%</div>
+<span>Progress: {current}/{total} ({percentage}%)</span>
+<p>Last updated: {lastUpdated} by {updatedBy}</p>
+<div>Location: {city}, {country} ({coordinates})</div>
+
+<!-- Nested expressions -->
+<div>{items.map(item => <span>{item.name}: {item.value}</span>)}</div>
+<ul>{list.map((item, index) => <li key={index}>{index + 1}. {item}</li>)}</ul>
+<div>{data.map(d => <p>{d.title} - {d.description}</p>)}</div>
+<span>{tags.map((tag, i) => <span key={i}>#{tag}</span>)}</span>
+<p>{users.map(u => <a href={u.profile}>{u.name} ({u.role})</a>)}</p>
+
+<!-- Complex spread patterns -->
+<Form.Input {...inputProps} {...{ type: 'email', required: true }} />
+<Button {...{ variant: 'primary', size: 'large' }} {...buttonProps} />
+<Card {...baseCardProps} {...{ elevation: 2, hoverable: true }} {...styleProps} />
+<Link {...linkProps} {...{ external: true, rel: 'noopener' }} {...securityProps} />
+<Image {...imageProps} {...{ loading: 'lazy', decoding: 'async' }} {...perfProps} />
+
+<!-- Expressions with function calls -->
+<div>{formatDate(date)}</div>
+<p>{calculateTotal(items)}</p>
+<span>{getInitials(name)}</span>
+<div>{truncateText(text, 100)}</div>
+<p>{pluralize(count, 'item', 'items')}</p>
+
+<!-- Expressions with operators -->
+<div>{count + 1}</div>
+<p>{price * quantity}</p>
+<span>{total / items.length}</span>
+<div>{basePrice - discount}</div>
+<p>{min + Math.random() * (max - min)}</p>
+
+<!-- Conditional rendering patterns -->
+<div>
+  {condition1 ? (
+    <span>Condition 1</span>
+  ) : condition2 ? (
+    <span>Condition 2</span>
+  ) : (
+    <span>Default</span>
+  )}
+</div>
+
+<p>
+  {status === 'loading' && <Loader />}
+  {status === 'error' && <Error />}
+  {status === 'success' && <Content />}
+</p>
+
+<!-- Array mapping with spreads -->
+<div>
+  {items.map(item => (
+    <Card 
+      key={item.id} 
+      {...item} 
+      class:list={['item', { featured: item.isFeatured }]} 
+    />
+  ))}
+</div>
+
+<!-- Complex attribute expressions -->
+<div 
+  style={{ 
+    color: textColor, 
+    backgroundColor: bgColor,
+    fontSize: `${size}px`
+  }} 
+/>
+
+<a 
+  href={getRoute(path, params)}
+  class:list={[
+    'link',
+    isExternal && 'external',
+    { 'active': isCurrentPage }
+  ]}
+/>
+
+<!-- Expression in event handlers (as strings in Astro) -->
+<button onclick={`handleClick(${id})`}>Click</button>
+<input oninput={`handleInput('${field}')`} />
+<form onsubmit={`handleSubmit(${JSON.stringify(data)})`} />
+
+<!-- Mixed patterns - expressions, spreads, class:list -->
+<Component
+  {...props}
+  id={componentId}
+  class:list={[
+    'component',
+    `variant-${variant}`,
+    { active: isActive, disabled: isDisabled }
+  ]}
+  data-state={state}
+  data-count={items.length}
+>
+  {children}
+</Component>
+
+<Button
+  {...buttonProps}
+  type={type}
+  disabled={isDisabled || isLoading}
+  class:list={[
+    'btn',
+    `btn-${variant}`,
+    `btn-${size}`,
+    { 'btn-loading': isLoading, 'btn-block': isBlock }
+  ]}
+>
+  {isLoading ? 'Loading...' : label}
+</Button>
+
+<Input
+  {...inputProps}
+  {...validationRules}
+  type={type}
+  value={value}
+  placeholder={placeholder}
+  class:list={[
+    'input',
+    `input-${size}`,
+    { 'input-error': hasError, 'input-valid': isValid }
+  ]}
+  oninput={`handleChange('${name}', this.value)`}
+/>
+
+<!-- Grid with dynamic classes -->
+<div class:list={['grid', `grid-cols-${cols}`, `gap-${gap}`]}>
+  {Array.from({ length: count }).map((_, i) => (
+    <div 
+      key={i}
+      class:list={[
+        'cell',
+        { 'cell-odd': i % 2 === 0, 'cell-even': i % 2 === 1 }
+      ]}
+      {...cellProps}
+    >
+      {i + 1}
+    </div>
+  ))}
+</div>
+
+<!-- Table with expressions -->
+<table class:list={['table', { 'table-striped': isStriped, 'table-hover': isHoverable }]}>
+  <thead>
+    <tr>
+      {columns.map(col => (
+        <th key={col.key} {...col.headerProps}>
+          {col.title}
+        </th>
+      ))}
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map((row, rowIndex) => (
+      <tr key={rowIndex} class:list={{ 'row-selected': row.isSelected }}>
+        {columns.map(col => (
+          <td key={col.key} {...col.cellProps}>
+            {row[col.key]}
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<!-- Form with dense expressions -->
+<form {...formProps} onsubmit={`handleSubmit(event, ${formId})`}>
+  {fields.map(field => (
+    <div key={field.name} class:list={['field', { 'field-error': field.error }]}>
+      <label>{field.label} {field.required && '*'}</label>
+      <input
+        {...field.inputProps}
+        name={field.name}
+        type={field.type}
+        value={values[field.name]}
+        placeholder={field.placeholder}
+        required={field.required}
+        class:list={[
+          'input',
+          `input-${field.size || 'md'}`,
+          { 'input-invalid': errors[field.name] }
+        ]}
+      />
+      {errors[field.name] && <span class="error">{errors[field.name]}</span>}
+    </div>
+  ))}
+  <button 
+    type="submit" 
+    disabled={isSubmitting || !isValid}
+    class:list={['btn', 'btn-primary', { 'btn-loading': isSubmitting }]}
+  >
+    {isSubmitting ? 'Submitting...' : submitText}
+  </button>
+</form>
+
+<!-- Navigation with active states -->
+<nav class:list={['nav', `nav-${orientation}`, { 'nav-sticky': isSticky }]}>
+  {links.map(link => (
+    <a
+      key={link.href}
+      href={link.href}
+      {...link.props}
+      class:list={[
+        'nav-link',
+        { 'nav-link-active': currentPath === link.href }
+      ]}
+      aria-current={currentPath === link.href ? 'page' : undefined}
+    >
+      {link.icon && <Icon name={link.icon} />}
+      {link.label}
+      {link.badge && <Badge count={link.badge} />}
+    </a>
+  ))}
+</nav>
+
+<!-- Card grid with complex patterns -->
+<div class:list={['card-grid', `cols-${gridCols}`]}>
+  {cards.map((card, index) => (
+    <article
+      key={card.id}
+      {...card.attributes}
+      class:list={[
+        'card',
+        `card-${card.variant}`,
+        { 'card-featured': card.isFeatured, 'card-new': card.isNew }
+      ]}
+      style={{ '--index': index }}
+    >
+      {card.image && <img src={card.image} alt={card.title} {...card.imageProps} />}
+      <div class="card-content">
+        <h3>{card.title}</h3>
+        <p>{card.description}</p>
+        {card.tags && (
+          <div class="tags">
+            {card.tags.map(tag => <span key={tag} class="tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+      <footer class="card-footer">
+        {card.price && <span class="price">${card.price}</span>}
+        <button {...card.ctaProps} class:list={['btn', 'btn-sm']}>
+          {card.ctaText || 'Learn More'}
+        </button>
+      </footer>
+    </article>
+  ))}
+</div>
+
+<!-- Modal with dynamic content -->
+<div 
+  {...modalProps}
+  class:list={['modal', { 'modal-open': isOpen, 'modal-closing': isClosing }]}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={titleId}
+  hidden={!isOpen}
+>
+  <div class="modal-backdrop" onclick={`closeModal(${modalId})`} />
+  <div class="modal-content" {...contentProps}>
+    <header class="modal-header">
+      <h2 id={titleId}>{title}</h2>
+      <button onclick={`closeModal(${modalId})`} aria-label="Close">×</button>
+    </header>
+    <div class="modal-body">
+      {children}
+    </div>
+    {actions && (
+      <footer class="modal-footer">
+        {actions.map(action => (
+          <button
+            key={action.id}
+            {...action.props}
+            onclick={`handleAction(${modalId}, '${action.id}')`}
+            class:list={['btn', `btn-${action.variant || 'secondary'}`]}
+          >
+            {action.label}
+          </button>
+        ))}
+      </footer>
+    )}
+  </div>
+</div>
