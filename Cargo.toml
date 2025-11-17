@@ -256,7 +256,7 @@ url                  = "2.5.7"
 uuid                 = "1.18.1"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"
-windows              = "0.61.3"
+windows              = "0.62.2"
 
 [profile.dev.package.biome_wasm]
 debug     = true
