@@ -5798,10 +5798,72 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleDomain": {
+			"description": "Rule domains",
+			"oneOf": [
+				{
+					"description": "React library rules",
+					"type": "string",
+					"const": "react"
+				},
+				{ "description": "Testing rules", "type": "string", "const": "test" },
+				{
+					"description": "Solid.js framework rules",
+					"type": "string",
+					"const": "solid"
+				},
+				{
+					"description": "Next.js framework rules",
+					"type": "string",
+					"const": "next"
+				},
+				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"const": "qwik"
+				},
+				{
+					"description": "Vue.js framework rules",
+					"type": "string",
+					"const": "vue"
+				},
+				{
+					"description": "For rules that require querying multiple files inside a project",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"const": "tailwind"
+				}
+			]
+		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Enables only the recommended rules for this domain",
+					"type": "string",
+					"const": "recommended"
+				}
+			]
+		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/definitions/RuleDomain" }
+			"additionalProperties": {
+				"$ref": "#/components/schemas/RuleDomainValue"
+			},
+			"propertyNames": { "$ref": "#/components/schemas/RuleDomain" }
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [

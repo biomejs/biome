@@ -68,14 +68,16 @@ impl schemars::JsonSchema for RuleDomains {
         std::borrow::Cow::Borrowed("RuleDomains")
     }
 
-    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let _names = generator.subschema_for::<RuleDomain>();
+        let _values = generator.subschema_for::<RuleDomainValue>();
         schemars::json_schema!({
             "type": "object",
             "propertyNames": {
-                "$ref": "#/definitions/RuleDomain"
+                "$ref": "#/components/schemas/RuleDomain"
             },
             "additionalProperties": {
-                "$ref": "#/definitions/RuleDomainValue"
+                "$ref": "#/components/schemas/RuleDomainValue"
             }
         })
     }
