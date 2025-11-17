@@ -327,7 +327,7 @@ impl RuleSource {
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
-            Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
+            Self::EslintNext(rule_name) => format!("@next/next/{rule_name}"),
             Self::EslintQwik(rule_name) => format!("qwik/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
