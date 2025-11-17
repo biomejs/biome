@@ -314,7 +314,7 @@ impl RuleSource {
             Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
-            Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
+            Self::EslintNext(rule_name) => format!("@next/next/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
             Self::EslintPackageJson(rule_name) => format!("package-json/{rule_name}"),
             Self::EslintPackageJsonDependencies(rule_name) => {
