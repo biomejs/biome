@@ -205,7 +205,7 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_any_media_condition(p) {
         parse_any_media_condition(p)
-            .or_recover(p, &AnyInParensParseRecovery, expected_if_test_boolean_expr)
+            .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
             .ok();
     } else {
         parse_any_query_feature(p)
