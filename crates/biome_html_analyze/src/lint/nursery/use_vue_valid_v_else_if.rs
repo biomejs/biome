@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVElseIf {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVElseIf",
         language: "html",
         recommended: true,

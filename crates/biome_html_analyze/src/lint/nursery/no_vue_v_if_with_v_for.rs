@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueVIfWithVFor {
-        version: "next",
+        version: "2.3.6",
         name: "noVueVIfWithVFor",
         language: "html",
         recommended: true,

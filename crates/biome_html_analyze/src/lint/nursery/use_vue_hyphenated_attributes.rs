@@ -88,7 +88,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueHyphenatedAttributes {
-        version: "next",
+        version: "2.3.6",
         name: "useVueHyphenatedAttributes",
         language: "html",
         recommended: true,
