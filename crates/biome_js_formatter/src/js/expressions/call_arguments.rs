@@ -526,9 +526,14 @@ fn write_grouped_arguments(
     // since we already know that it won't be fitting on a single line.
     let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-        [middle_variant, most_expanded].concat()
+        let mut variants = middle_variant;
+        variants.extend(most_expanded);
+        variants
     } else {
-        [most_flat, middle_variant, most_expanded].concat()
+        let mut variants = most_flat;
+        variants.extend(middle_variant);
+        variants.extend(most_expanded);
+        variants
     };
 
     // SAFETY: Safe because variants is guaranteed to contain at least 2 entries:
