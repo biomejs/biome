@@ -824,7 +824,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in any]?: any };
+export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -970,6 +970,19 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
+/**
+ * Rule domains
+ */
+export type RuleDomain =
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "qwik"
+	| "vue"
+	| "project"
+	| "tailwind";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
 export type SeverityOrCorrectness = GroupPlainConfiguration | Correctness;
@@ -7948,19 +7961,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "react"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "vue"
-	| "project"
-	| "tailwind";
-export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
