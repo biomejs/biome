@@ -76,7 +76,9 @@ fn validate_attributes(list: &JsxAttributeList) -> Option<()> {
             attribute.initializer().is_some_and(|initializer| {
                 initializer.value().ok().is_some_and(|value| {
                     value.as_jsx_string().is_some_and(|jsx_string| {
-                        jsx_string.inner_string_text().unwrap().text() == "module"
+                        jsx_string
+                            .inner_string_text()
+                            .is_ok_and(|inner_string| inner_string.text() == "module")
                     })
                 })
             })
