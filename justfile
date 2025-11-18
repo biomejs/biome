@@ -27,12 +27,16 @@ gen-all:
 
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
-  cargo codegen-schema
+  just gen-schema
   just gen-types
 
+# Generates TypeScript types
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
 
+# Generates the JSON Schema of the configuration
+gen-schema:
+  cargo codegen-schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -144,10 +148,12 @@ test-lintrule name:
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
+  just _touch crates/biome_html_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

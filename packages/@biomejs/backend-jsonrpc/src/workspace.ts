@@ -824,7 +824,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in any]?: any };
+export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -970,6 +970,19 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
+/**
+ * Rule domains
+ */
+export type RuleDomain =
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "qwik"
+	| "vue"
+	| "project"
+	| "tailwind";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
 export type SeverityOrCorrectness = GroupPlainConfiguration | Correctness;
@@ -1569,7 +1582,7 @@ See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule
 	 */
 	noInvalidPositionAtImportRule?: NoInvalidPositionAtImportRuleConfiguration;
 	/**
-	* Disallow the use of variables and function parameters before their declaration.
+	* Disallow the use of variables, function parameters, classes, and enums before their declaration.
 See https://biomejs.dev/linter/rules/no-invalid-use-before-declaration 
 	 */
 	noInvalidUseBeforeDeclaration?: NoInvalidUseBeforeDeclarationConfiguration;
@@ -1913,6 +1926,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 	 */
 	noShadow?: NoShadowConfiguration;
 	/**
+	* Prevent the usage of synchronous scripts.
+See https://biomejs.dev/linter/rules/no-sync-scripts 
+	 */
+	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
 	 */
@@ -1962,6 +1980,11 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-keys
 See https://biomejs.dev/linter/rules/no-vue-reserved-props 
 	 */
 	noVueReservedProps?: NoVueReservedPropsConfiguration;
+	/**
+	* Disallow using v-if and v-for directives on the same element.
+See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
+	 */
+	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2036,6 +2059,11 @@ See https://biomejs.dev/linter/rules/use-unique-graphql-operation-name
 See https://biomejs.dev/linter/rules/use-vue-define-macros-order 
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
+	/**
+	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
+	 */
+	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
 	/**
 	* Enforce multi-word component names in Vue components.
 See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
@@ -3537,6 +3565,9 @@ export type NoReactForwardRefConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSyncScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncScriptsOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -3567,6 +3598,9 @@ export type NoVueReservedKeysConfiguration =
 export type NoVueReservedPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueReservedPropsOptions;
+export type NoVueVIfWithVForConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVIfWithVForOptions;
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
@@ -3609,6 +3643,9 @@ export type UseUniqueGraphqlOperationNameConfiguration =
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
+export type UseVueHyphenatedAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueHyphenatedAttributesOptions;
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
@@ -4917,6 +4954,10 @@ export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
 }
+export interface RuleWithNoSyncScriptsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSyncScriptsOptions;
+}
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnknownAttributeOptions;
@@ -4959,6 +5000,10 @@ export interface RuleWithNoVueReservedKeysOptions {
 export interface RuleWithNoVueReservedPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueReservedPropsOptions;
+}
+export interface RuleWithNoVueVIfWithVForOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVIfWithVForOptions;
 }
 export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
@@ -5020,6 +5065,11 @@ export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseVueDefineMacrosOrderOptions;
+}
+export interface RuleWithUseVueHyphenatedAttributesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueHyphenatedAttributesOptions;
 }
 export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
@@ -6189,6 +6239,7 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
+export type NoSyncScriptsOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -6205,6 +6256,7 @@ export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
 export type NoVueReservedKeysOptions = {};
 export type NoVueReservedPropsOptions = {};
+export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -6258,6 +6310,16 @@ export interface UseVueDefineMacrosOrderOptions {
 	 * The order of the Vue define macros.
 	 */
 	order?: string[];
+}
+export interface UseVueHyphenatedAttributesOptions {
+	/**
+	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 */
+	ignore?: string[];
+	/**
+	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 */
+	ignoreTags?: string[];
 }
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
@@ -7006,6 +7068,7 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
@@ -7018,6 +7081,7 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -7038,6 +7102,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
+	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVElse"
@@ -7896,19 +7961,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "react"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "vue"
-	| "project"
-	| "tailwind";
-export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;

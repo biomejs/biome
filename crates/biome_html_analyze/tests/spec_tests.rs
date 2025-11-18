@@ -1,6 +1,6 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -151,7 +151,7 @@ pub(crate) fn analyze_and_snap(
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
-    _source_type: HtmlFileSource,
+    source_type: HtmlFileSource,
     action: &AnalyzerAction<HtmlLanguage>,
 ) {
     let (new_tree, text_edit) = match action
@@ -179,7 +179,7 @@ fn check_code_action(
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_html(&output, HtmlParseOptions::default());
+    let re_parse = parse_html(&output, (&source_type).into());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 

@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentGraphqlDescriptions {
-        version: "next",
+        version: "2.3.6",
         name: "useConsistentGraphqlDescriptions",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("description-style").same()],
