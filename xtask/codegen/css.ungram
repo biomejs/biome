@@ -2046,13 +2046,13 @@ CssMetavariable = value: 'grit_metavariable'
 CssAttrFunction =
 	name: 'attr'
 	'('
-	attr_name: CssAttrName
+	attr_name: CssAttrNameList
 	attr_type: CssAttrType?
 	','?
 	fallback_value: AnyCssGenericComponentValue?
 	')'
 
-CssAttrName = (CssIdentifier ('|' CssIdentifier)*)
+CssAttrNameList = (CssIdentifier ('|' CssIdentifier)*)
 
 CssAttrType =
 	'TODO'

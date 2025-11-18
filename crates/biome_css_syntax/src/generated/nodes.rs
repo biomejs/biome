@@ -130,7 +130,7 @@ impl CssAttrFunction {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn attr_name(&self) -> CssAttrName {
+    pub fn attr_name(&self) -> CssAttrNameList {
         support::list(&self.syntax, 2usize)
     }
     pub fn attr_type(&self) -> Option<CssAttrType> {
@@ -158,7 +158,7 @@ impl Serialize for CssAttrFunction {
 pub struct CssAttrFunctionFields {
     pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub attr_name: CssAttrName,
+    pub attr_name: CssAttrNameList,
     pub attr_type: Option<CssAttrType>,
     pub comma_token: Option<SyntaxToken>,
     pub fallback_value: Option<AnyCssGenericComponentValue>,
@@ -32247,10 +32247,10 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
 }
 biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct CssAttrName {
+pub struct CssAttrNameList {
     syntax_list: SyntaxList,
 }
-impl CssAttrName {
+impl CssAttrNameList {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -32263,12 +32263,12 @@ impl CssAttrName {
         }
     }
 }
-impl AstNode for CssAttrName {
+impl AstNode for CssAttrNameList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTR_NAME as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTR_NAME_LIST as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTR_NAME
+        kind == CSS_ATTR_NAME_LIST
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -32286,7 +32286,7 @@ impl AstNode for CssAttrName {
         self.syntax_list.into_node()
     }
 }
-impl Serialize for CssAttrName {
+impl Serialize for CssAttrNameList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -32298,7 +32298,7 @@ impl Serialize for CssAttrName {
         seq.end()
     }
 }
-impl AstSeparatedList for CssAttrName {
+impl AstSeparatedList for CssAttrNameList {
     type Language = Language;
     type Node = CssIdentifier;
     fn syntax_list(&self) -> &SyntaxList {
@@ -32308,20 +32308,20 @@ impl AstSeparatedList for CssAttrName {
         self.syntax_list
     }
 }
-impl Debug for CssAttrName {
+impl Debug for CssAttrNameList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssAttrName ")?;
+        f.write_str("CssAttrNameList ")?;
         f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for CssAttrName {
+impl IntoIterator for CssAttrNameList {
     type Item = SyntaxResult<CssIdentifier>;
     type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &CssAttrName {
+impl IntoIterator for &CssAttrNameList {
     type Item = SyntaxResult<CssIdentifier>;
     type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
     fn into_iter(self) -> Self::IntoIter {

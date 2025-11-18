@@ -1008,8 +1008,8 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssValueAtRuleGenericValue::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ATTR_NAME => {
-                    let $pattern = unsafe { $crate::CssAttrName::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_ATTR_NAME_LIST => {
+                    let $pattern = unsafe { $crate::CssAttrNameList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BRACKETED_VALUE_LIST => {

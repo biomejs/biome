@@ -116,7 +116,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssAttrName::can_cast(element.kind())
+                    && CssAttrNameList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6063,7 +6063,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(TW_VARIANT_AT_RULE, children)
             }
-            CSS_ATTR_NAME => Self::make_separated_list_syntax(
+            CSS_ATTR_NAME_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
                 CssIdentifier::can_cast,

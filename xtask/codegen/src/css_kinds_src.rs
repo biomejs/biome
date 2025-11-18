@@ -400,7 +400,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_IF_TEST_BOOLEAN_OR_EXPR",
         "CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS",
         "CSS_ATTR_FUNCTION",
-        "CSS_ATTR_NAME",
         "CSS_ATTR_NAME_LIST",
         "CSS_ATTR_TYPE",
         "CSS_URL_MODIFIER_LIST",

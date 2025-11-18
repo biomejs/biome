@@ -5,6 +5,7 @@ use biome_rowan::AstNode;
 pub(crate) struct FormatCssAttrType;
 impl FormatNodeRule<CssAttrType> for FormatCssAttrType {
     fn fmt_fields(&self, node: &CssAttrType, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        todo!()
+        // format_verbatim_node(node.syntax()).fmt(f)
     }
 }

@@ -40,15 +40,6 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_ATTR_FUNCTION))
 }
 
-#[inline]
-fn parse_attr_name(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
-
-    parse_regular_identifier(p).ok();
-
-    Present(m.complete(p, CSS_ATTR_NAME))
-}
-
 struct AttrNameListParseRecovery;
 
 impl ParseRecovery for AttrNameListParseRecovery {

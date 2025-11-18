@@ -30,7 +30,7 @@ pub fn css_at_rule_declarator(
 pub fn css_attr_function(
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    attr_name: CssAttrName,
+    attr_name: CssAttrNameList,
     r_paren_token: SyntaxToken,
 ) -> CssAttrFunctionBuilder {
     CssAttrFunctionBuilder {
@@ -46,7 +46,7 @@ pub fn css_attr_function(
 pub struct CssAttrFunctionBuilder {
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    attr_name: CssAttrName,
+    attr_name: CssAttrNameList,
     r_paren_token: SyntaxToken,
     attr_type: Option<CssAttrType>,
     comma_token: Option<SyntaxToken>,
@@ -2987,7 +2987,7 @@ pub fn tw_variant_at_rule(
         ],
     ))
 }
-pub fn css_attr_name<I, S>(items: I, separators: S) -> CssAttrName
+pub fn css_attr_name_list<I, S>(items: I, separators: S) -> CssAttrNameList
 where
     I: IntoIterator<Item = CssIdentifier>,
     I::IntoIter: ExactSizeIterator,
@@ -2997,8 +2997,8 @@ where
     let mut items = items.into_iter();
     let mut separators = separators.into_iter();
     let length = items.len() + separators.len();
-    CssAttrName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTR_NAME,
+    CssAttrNameList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_NAME_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
