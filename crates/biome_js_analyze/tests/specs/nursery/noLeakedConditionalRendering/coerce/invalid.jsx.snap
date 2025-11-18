@@ -1,0 +1,325 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid cases with validStrategies: ['coerce']
+
+const Component1 = ({ count, title }) => {
+	return <div>{count && title}</div>;
+};
+
+const Component2 = ({ count }) => {
+	return <div>{count && <span>There are {count} results</span>}</div>;
+};
+
+const Component3 = ({ elements }) => {
+	return <div>{elements.length && <List elements={elements} />}</div>;
+};
+
+const Component4 = ({ nestedCollection }) => {
+	return (
+		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
+	);
+};
+
+const Component5 = ({ elements }) => {
+	return <div>{elements[0] && <List elements={elements} />}</div>;
+};
+
+const Component6 = ({ numberA, numberB }) => {
+	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
+};
+
+const Component7 = ({ connection, hasError, hasErrorUpdate }) => {
+	return <div>{connection && (hasError || hasErrorUpdate)}</div>;
+};
+
+// Ternary isn't valid if strategy is only "coerce"
+const Component8 = ({ count, title }) => {
+	return <div>{count ? title : null}</div>;
+};
+
+const Component9 = ({ count, title }) => {
+	return <div>{!count ? title : null}</div>;
+};
+
+const Component10 = ({ count, somethingElse, title }) => {
+	return <div>{count && somethingElse ? title : null}</div>;
+};
+
+const Component11 = ({ items, somethingElse, title }) => {
+	return <div>{items.length > 0 && somethingElse && title}</div>;
+};
+
+const MyComponent1 = () => {
+	const items = [];
+	const breakpoint = { phones: true };
+
+	return <div>{items.length > 0 && breakpoint.phones && <span />}</div>;
+};
+
+const MyComponent2 = () => {
+	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
+};
+
+const MyComponent3 = () => {
+	return <Something checked={isIndeterminate ? false : isChecked} />;
+};
+
+const MyComponent4 = () => {
+	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+};
+
+const MyComponent5 = () => {
+	return (
+		<>
+			{someCondition && (
+				<div>
+					<p>hello</p>
+				</div>
+			)}
+		</>
+	);
+};
+
+const MyComponent6 = () => {
+	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
+};
+
+const isOpen = 0;
+const Component12 = () => {
+	return <Popover open={isOpen && items.length > 0} />;
+};
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    3 │ const Component1 = ({ count, title }) => {
+  > 4 │ 	return <div>{count && title}</div>;
+      │ 	             ^^^^^^^^^^^^^^
+    5 │ };
+    6 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:8:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+     7 │ const Component2 = ({ count }) => {
+   > 8 │ 	return <div>{count && <span>There are {count} results</span>}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ };
+    10 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:12:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    11 │ const Component3 = ({ elements }) => {
+  > 12 │ 	return <div>{elements.length && <List elements={elements} />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ };
+    14 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:17:9 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    15 │ const Component4 = ({ nestedCollection }) => {
+    16 │ 	return (
+  > 17 │ 		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
+       │ 		      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	);
+    19 │ };
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:22:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    21 │ const Component5 = ({ elements }) => {
+  > 22 │ 	return <div>{elements[0] && <List elements={elements} />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ };
+    24 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:26:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    25 │ const Component6 = ({ numberA, numberB }) => {
+  > 26 │ 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ };
+    28 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:30:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    29 │ const Component7 = ({ connection, hasError, hasErrorUpdate }) => {
+  > 30 │ 	return <div>{connection && (hasError || hasErrorUpdate)}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ };
+    32 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:35:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    33 │ // Ternary isn't valid if strategy is only "coerce"
+    34 │ const Component8 = ({ count, title }) => {
+  > 35 │ 	return <div>{count ? title : null}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^
+    36 │ };
+    37 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:39:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    38 │ const Component9 = ({ count, title }) => {
+  > 39 │ 	return <div>{!count ? title : null}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^
+    40 │ };
+    41 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:43:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    42 │ const Component10 = ({ count, somethingElse, title }) => {
+  > 43 │ 	return <div>{count && somethingElse ? title : null}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ };
+    45 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:43:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    42 │ const Component10 = ({ count, somethingElse, title }) => {
+  > 43 │ 	return <div>{count && somethingElse ? title : null}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^
+    44 │ };
+    45 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:47:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    46 │ const Component11 = ({ items, somethingElse, title }) => {
+  > 47 │ 	return <div>{items.length > 0 && somethingElse && title}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ };
+    49 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:54:15 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    52 │ 	const breakpoint = { phones: true };
+    53 │ 
+  > 54 │ 	return <div>{items.length > 0 && breakpoint.phones && <span />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ };
+    56 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:87:24 lint/nursery/noLeakedConditionalRendering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintentionally rendered values or rendering crashes
+  
+    85 │ const isOpen = 0;
+    86 │ const Component12 = () => {
+  > 87 │ 	return <Popover open={isOpen && items.length > 0} />;
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ };
+    89 │ 
+  
+  i This note will give you more information.
+  
+
+```

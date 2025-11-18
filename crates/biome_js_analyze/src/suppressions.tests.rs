@@ -10,7 +10,11 @@ use std::slice;
 #[test]
 fn quick_test() {
     const SOURCE: &str = r#"
-         const b = <>{!(NaN) && <Foo />}</>; "#;
+           const isOpen = true;
+           const Component = () => {
+             return <Popover open={isOpen && items.length > 0} />
+           }
+         "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 

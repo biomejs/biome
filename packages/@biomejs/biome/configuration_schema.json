@@ -3763,6 +3763,12 @@
 		},
 		"NoLeakedConditionalRenderingOptions": {
 			"type": "object",
+			"properties": {
+				"validStrategies": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoMagicNumbersConfiguration": {

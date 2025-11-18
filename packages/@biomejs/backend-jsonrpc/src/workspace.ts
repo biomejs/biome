@@ -8353,7 +8353,9 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
-export interface NoLeakedConditionalRenderingOptions {}
+export interface NoLeakedConditionalRenderingOptions {
+	validStrategies?: string[];
+}
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoParametersOnlyUsedInRecursionOptions {}
