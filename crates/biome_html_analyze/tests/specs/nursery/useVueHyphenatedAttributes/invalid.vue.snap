@@ -1,0 +1,304 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- Plain HTML attributes: these should be flagged -->
+<div someAttr="x"></div>
+<div SomeAttr="x"></div>
+<div SOME_ATTR="x"></div>
+<div some_attr="x"></div>
+
+<!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+<div v-bind:fooBar="true"></div>
+<div :fooBar="true"></div>
+
+<div v-model:fooBar="true"></div>
+
+<!-- Custom component props written in non-hyphenated forms -->
+<MyComp someProp="x" AnotherProp="y"></MyComp>
+<MyComp someProp="x" AnotherProp="y" />
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute someAttr should be hyphenated (kebab-case).
+  
+    3 │ <!-- Plain HTML attributes: these should be flagged -->
+  > 4 │ <div someAttr="x"></div>
+      │      ^^^^^^^^^^^^
+    5 │ <div SomeAttr="x"></div>
+    6 │ <div SOME_ATTR="x"></div>
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-attr.
+  
+     2  2 │   
+     3  3 │   <!-- Plain HTML attributes: these should be flagged -->
+     4    │ - <div·someAttr="x"></div>
+        4 │ + <div·some-attr="x"></div>
+     5  5 │   <div SomeAttr="x"></div>
+     6  6 │   <div SOME_ATTR="x"></div>
+  
+
+```
+
+```
+invalid.vue:5:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute SomeAttr should be hyphenated (kebab-case).
+  
+    3 │ <!-- Plain HTML attributes: these should be flagged -->
+    4 │ <div someAttr="x"></div>
+  > 5 │ <div SomeAttr="x"></div>
+      │      ^^^^^^^^^^^^
+    6 │ <div SOME_ATTR="x"></div>
+    7 │ <div some_attr="x"></div>
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-attr.
+  
+     3  3 │   <!-- Plain HTML attributes: these should be flagged -->
+     4  4 │   <div someAttr="x"></div>
+     5    │ - <div·SomeAttr="x"></div>
+        5 │ + <div·some-attr="x"></div>
+     6  6 │   <div SOME_ATTR="x"></div>
+     7  7 │   <div some_attr="x"></div>
+  
+
+```
+
+```
+invalid.vue:6:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute SOME_ATTR should be hyphenated (kebab-case).
+  
+    4 │ <div someAttr="x"></div>
+    5 │ <div SomeAttr="x"></div>
+  > 6 │ <div SOME_ATTR="x"></div>
+      │      ^^^^^^^^^^^^^
+    7 │ <div some_attr="x"></div>
+    8 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-attr.
+  
+     4  4 │   <div someAttr="x"></div>
+     5  5 │   <div SomeAttr="x"></div>
+     6    │ - <div·SOME_ATTR="x"></div>
+        6 │ + <div·some-attr="x"></div>
+     7  7 │   <div some_attr="x"></div>
+     8  8 │   
+  
+
+```
+
+```
+invalid.vue:7:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute some_attr should be hyphenated (kebab-case).
+  
+    5 │ <div SomeAttr="x"></div>
+    6 │ <div SOME_ATTR="x"></div>
+  > 7 │ <div some_attr="x"></div>
+      │      ^^^^^^^^^^^^^
+    8 │ 
+    9 │ <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-attr.
+  
+     5  5 │   <div SomeAttr="x"></div>
+     6  6 │   <div SOME_ATTR="x"></div>
+     7    │ - <div·some_attr="x"></div>
+        7 │ + <div·some-attr="x"></div>
+     8  8 │   
+     9  9 │   <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+  
+
+```
+
+```
+invalid.vue:10:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute fooBar should be hyphenated (kebab-case).
+  
+     9 │ <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+  > 10 │ <div v-bind:fooBar="true"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^
+    11 │ <div :fooBar="true"></div>
+    12 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to foo-bar.
+  
+     8  8 │   
+     9  9 │   <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+    10    │ - <div·v-bind:fooBar="true"></div>
+       10 │ + <div·v-bind:foo-bar="true"></div>
+    11 11 │   <div :fooBar="true"></div>
+    12 12 │   
+  
+
+```
+
+```
+invalid.vue:11:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute fooBar should be hyphenated (kebab-case).
+  
+     9 │ <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+    10 │ <div v-bind:fooBar="true"></div>
+  > 11 │ <div :fooBar="true"></div>
+       │      ^^^^^^^^^^^^^^
+    12 │ 
+    13 │ <div v-model:fooBar="true"></div>
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to foo-bar.
+  
+     9  9 │   <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
+    10 10 │   <div v-bind:fooBar="true"></div>
+    11    │ - <div·:fooBar="true"></div>
+       11 │ + <div·:foo-bar="true"></div>
+    12 12 │   
+    13 13 │   <div v-model:fooBar="true"></div>
+  
+
+```
+
+```
+invalid.vue:13:6 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute fooBar should be hyphenated (kebab-case).
+  
+    11 │ <div :fooBar="true"></div>
+    12 │ 
+  > 13 │ <div v-model:fooBar="true"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- Custom component props written in non-hyphenated forms -->
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to foo-bar.
+  
+    11 11 │   <div :fooBar="true"></div>
+    12 12 │   
+    13    │ - <div·v-model:fooBar="true"></div>
+       13 │ + <div·v-model:foo-bar="true"></div>
+    14 14 │   
+    15 15 │   <!-- Custom component props written in non-hyphenated forms -->
+  
+
+```
+
+```
+invalid.vue:16:9 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute someProp should be hyphenated (kebab-case).
+  
+    15 │ <!-- Custom component props written in non-hyphenated forms -->
+  > 16 │ <MyComp someProp="x" AnotherProp="y"></MyComp>
+       │         ^^^^^^^^^^^^
+    17 │ <MyComp someProp="x" AnotherProp="y" />
+    18 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-prop.
+  
+    14 14 │   
+    15 15 │   <!-- Custom component props written in non-hyphenated forms -->
+    16    │ - <MyComp·someProp="x"·AnotherProp="y"></MyComp>
+       16 │ + <MyComp·some-prop="x"·AnotherProp="y"></MyComp>
+    17 17 │   <MyComp someProp="x" AnotherProp="y" />
+    18 18 │   
+  
+
+```
+
+```
+invalid.vue:16:22 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute AnotherProp should be hyphenated (kebab-case).
+  
+    15 │ <!-- Custom component props written in non-hyphenated forms -->
+  > 16 │ <MyComp someProp="x" AnotherProp="y"></MyComp>
+       │                      ^^^^^^^^^^^^^^^
+    17 │ <MyComp someProp="x" AnotherProp="y" />
+    18 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to another-prop.
+  
+    14 14 │   
+    15 15 │   <!-- Custom component props written in non-hyphenated forms -->
+    16    │ - <MyComp·someProp="x"·AnotherProp="y"></MyComp>
+       16 │ + <MyComp·someProp="x"·another-prop="y"></MyComp>
+    17 17 │   <MyComp someProp="x" AnotherProp="y" />
+    18 18 │   
+  
+
+```
+
+```
+invalid.vue:17:9 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute someProp should be hyphenated (kebab-case).
+  
+    15 │ <!-- Custom component props written in non-hyphenated forms -->
+    16 │ <MyComp someProp="x" AnotherProp="y"></MyComp>
+  > 17 │ <MyComp someProp="x" AnotherProp="y" />
+       │         ^^^^^^^^^^^^
+    18 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to some-prop.
+  
+    15 15 │   <!-- Custom component props written in non-hyphenated forms -->
+    16 16 │   <MyComp someProp="x" AnotherProp="y"></MyComp>
+    17    │ - <MyComp·someProp="x"·AnotherProp="y"·/>
+       17 │ + <MyComp·some-prop="x"·AnotherProp="y"·/>
+    18 18 │   
+  
+
+```
+
+```
+invalid.vue:17:22 lint/nursery/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Attribute AnotherProp should be hyphenated (kebab-case).
+  
+    15 │ <!-- Custom component props written in non-hyphenated forms -->
+    16 │ <MyComp someProp="x" AnotherProp="y"></MyComp>
+  > 17 │ <MyComp someProp="x" AnotherProp="y" />
+       │                      ^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
+  
+  i Unsafe fix: Rename the attribute to another-prop.
+  
+    15 15 │   <!-- Custom component props written in non-hyphenated forms -->
+    16 16 │   <MyComp someProp="x" AnotherProp="y"></MyComp>
+    17    │ - <MyComp·someProp="x"·AnotherProp="y"·/>
+       17 │ + <MyComp·someProp="x"·another-prop="y"·/>
+    18 18 │   
+  
+
+```

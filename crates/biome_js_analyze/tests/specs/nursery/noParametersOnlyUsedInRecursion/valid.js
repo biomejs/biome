@@ -84,3 +84,14 @@ class CounterNonLiteral {
         return this[methodName](n - 1, acc);  // Won't be recognized as recursive
     }
 }
+
+// Method calling outer function with same name (not recursive)
+function notRecursive(arg) {
+  return arg;
+}
+
+const obj = {
+  notRecursive(arg) {
+    return notRecursive(arg);  // Calls outer function, not self
+  }
+};

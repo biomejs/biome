@@ -1,0 +1,82 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+enum EnumValue {
+	"""
+	basic
+	"""
+	BASIC
+	"""
+	fluent
+	"""
+	FLUENT
+	"""
+	native
+	"""
+	NATIVE
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected block description style.
+  
+    1 │ enum EnumValue {
+  > 2 │ 	"""
+      │ 	^^^
+  > 3 │ 	basic
+  > 4 │ 	"""
+      │ 	^^^
+    5 │ 	BASIC
+    6 │ 	"""
+  
+  i To stay consistent within the project, write the description inline style.
+  
+
+```
+
+```
+invalid.graphql:6:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected block description style.
+  
+     4 │ 	"""
+     5 │ 	BASIC
+   > 6 │ 	"""
+       │ 	^^^
+   > 7 │ 	fluent
+   > 8 │ 	"""
+       │ 	^^^
+     9 │ 	FLUENT
+    10 │ 	"""
+  
+  i To stay consistent within the project, write the description inline style.
+  
+
+```
+
+```
+invalid.graphql:10:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected block description style.
+  
+     8 │ 	"""
+     9 │ 	FLUENT
+  > 10 │ 	"""
+       │ 	^^^
+  > 11 │ 	native
+  > 12 │ 	"""
+       │ 	^^^
+    13 │ 	NATIVE
+    14 │ }
+  
+  i To stay consistent within the project, write the description inline style.
+  
+
+```

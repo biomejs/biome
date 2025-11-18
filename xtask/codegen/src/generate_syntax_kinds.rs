@@ -305,5 +305,5 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         }
     };
 
-    xtask::reformat(ast)
+    xtask_glue::reformat(ast)
 }

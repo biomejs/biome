@@ -98,7 +98,6 @@ impl Rule for NoClassAssign {
 
         Vec::new().into_boxed_slice()
     }
-
     fn diagnostic(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
         let binding = ctx
             .query()

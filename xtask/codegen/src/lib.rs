@@ -22,6 +22,9 @@ mod markdown_kinds_src;
 mod tailwind_kinds_src;
 mod yaml_kinds_src;
 
+#[cfg(feature = "schema")]
+pub mod generate_schema;
+
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
@@ -33,7 +36,7 @@ use bpaf::Bpaf;
 use std::path::Path;
 
 use crate::generate_new_analyzer_rule::Category;
-use xtask::{Mode, Result, glue::fs2};
+use xtask_glue::{Mode, Result, glue::fs2};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;

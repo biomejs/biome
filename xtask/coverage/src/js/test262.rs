@@ -10,7 +10,7 @@ use serde::Deserialize;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const BASE_PATH: &str = "xtask/coverage/test262/test";
 
