@@ -641,10 +641,7 @@ impl JsModuleInfoCollector {
 
                         ty
                     } else {
-                        typed_bindings
-                            .iter()
-                            .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
-                            .unwrap_or_default()
+                        ty
                     }
                 } else {
                     let data = TypeData::from_any_js_declaration(self, scope_id, &decl);
