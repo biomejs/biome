@@ -385,5 +385,6 @@ pub mod use_vue_valid_v_else_if;
 pub mod use_vue_valid_v_html;
 pub mod use_vue_valid_v_if;
 pub mod use_vue_valid_v_on;
+pub mod use_vue_valid_v_text;
 pub mod use_while;
 pub mod use_yield;
