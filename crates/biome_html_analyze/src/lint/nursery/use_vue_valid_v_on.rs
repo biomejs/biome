@@ -11,9 +11,9 @@ declare_lint_rule! {
     /// Enforce valid `v-on` directives with proper arguments, modifiers, and handlers.
     ///
     /// This rule reports v-on directives in the following cases:
-    /// - The directive does not have an event name. E.g. <div v-on="foo"></div>
-    /// - The directive has invalid modifiers. E.g. <div v-on:click.bogus="foo"></div>
-    /// - The directive is missing a handler expression. E.g. <div v-on:click></div>
+    /// - The directive does not have an event name. E.g. `<div v-on="foo"></div>`
+    /// - The directive has invalid modifiers. E.g. `<div v-on:click.bogus="foo"></div>`
+    /// - The directive is missing a handler expression. E.g. `<div v-on:click></div>`
     ///
     /// ## Examples
     ///
