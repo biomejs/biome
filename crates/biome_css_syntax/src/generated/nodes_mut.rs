@@ -3,6 +3,20 @@
 use crate::{CssSyntaxToken as SyntaxToken, generated::nodes::*};
 use biome_rowan::AstNode;
 use std::iter::once;
+impl AnyCssAttrType {
+    pub fn with_raw_string_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_number_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssAtRule {
     pub fn with_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -50,7 +64,7 @@ impl CssAttrFunction {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attr_type(self, element: Option<CssAttrType>) -> Self {
+    pub fn with_attr_type(self, element: Option<AnyCssAttrType>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -72,14 +86,6 @@ impl CssAttrFunction {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(6usize..=6usize, once(Some(element.into()))),
-        )
-    }
-}
-impl CssAttrType {
-    pub fn with_TODO_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

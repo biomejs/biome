@@ -916,6 +916,8 @@ impl<'src> CssLexer<'src> {
             b"else" => ELSE_KW,
             b"url" => URL_KW,
             b"attr" => ATTR_KW,
+            b"raw-string" => RAW_STRING_KW,
+            b"number" => NUMBER_KW,
             b"TODO" => UPPER_TODO_KW,
             b"src" => SRC_KW,
             b"scope" => SCOPE_KW,

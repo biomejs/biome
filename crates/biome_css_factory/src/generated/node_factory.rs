@@ -6,6 +6,18 @@ use biome_css_syntax::{
     *,
 };
 use biome_rowan::AstNode;
+pub fn any_css_attr_type(
+    raw_string_token: SyntaxToken,
+    number_token: SyntaxToken,
+) -> AnyCssAttrType {
+    AnyCssAttrType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::ANY_CSS_ATTR_TYPE,
+        [
+            Some(SyntaxElement::Token(raw_string_token)),
+            Some(SyntaxElement::Token(number_token)),
+        ],
+    ))
+}
 pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
     CssAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_AT_RULE,
@@ -48,12 +60,12 @@ pub struct CssAttrFunctionBuilder {
     l_paren_token: SyntaxToken,
     attr_name: CssAttrNameList,
     r_paren_token: SyntaxToken,
-    attr_type: Option<CssAttrType>,
+    attr_type: Option<AnyCssAttrType>,
     comma_token: Option<SyntaxToken>,
     fallback_value: Option<AnyCssGenericComponentValue>,
 }
 impl CssAttrFunctionBuilder {
-    pub fn with_attr_type(mut self, attr_type: CssAttrType) -> Self {
+    pub fn with_attr_type(mut self, attr_type: AnyCssAttrType) -> Self {
         self.attr_type = Some(attr_type);
         self
     }
@@ -81,12 +93,6 @@ impl CssAttrFunctionBuilder {
             ],
         ))
     }
-}
-pub fn css_attr_type(TODO_token: SyntaxToken) -> CssAttrType {
-    CssAttrType::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTR_TYPE,
-        [Some(SyntaxElement::Token(TODO_token))],
-    ))
 }
 pub fn css_attribute_matcher(
     operator_token: SyntaxToken,

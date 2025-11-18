@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::CssSyntaxNode::kind(&node) {
+                $crate::CssSyntaxKind::ANY_CSS_ATTR_TYPE => {
+                    let $pattern = unsafe { $crate::AnyCssAttrType::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_AT_RULE => {
                     let $pattern = unsafe { $crate::CssAtRule::new_unchecked(node) };
                     $body
@@ -26,10 +30,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_ATTR_FUNCTION => {
                     let $pattern = unsafe { $crate::CssAttrFunction::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_ATTR_TYPE => {
-                    let $pattern = unsafe { $crate::CssAttrType::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_ATTRIBUTE_MATCHER => {

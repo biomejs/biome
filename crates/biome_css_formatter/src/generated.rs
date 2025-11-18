@@ -6812,28 +6812,28 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::TwVariantAtRule {
         )
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssAttrName {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssAttrNameList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssAttrName,
-        crate::css::lists::attr_name::FormatCssAttrName,
+        biome_css_syntax::CssAttrNameList,
+        crate::css::lists::attr_name_list::FormatCssAttrNameList,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::css::lists::attr_name::FormatCssAttrName::default(),
+            crate::css::lists::attr_name_list::FormatCssAttrNameList::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssAttrName {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssAttrNameList {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssAttrName,
-        crate::css::lists::attr_name::FormatCssAttrName,
+        biome_css_syntax::CssAttrNameList,
+        crate::css::lists::attr_name_list::FormatCssAttrNameList,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::css::lists::attr_name::FormatCssAttrName::default(),
+            crate::css::lists::attr_name_list::FormatCssAttrNameList::default(),
         )
     }
 }

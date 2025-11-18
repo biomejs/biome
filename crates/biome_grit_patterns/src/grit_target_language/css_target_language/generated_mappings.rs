@@ -12,7 +12,6 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssAtRule" => lang::CssAtRule::KIND_SET.iter().next(),
         "CssAtRuleDeclarator" => lang::CssAtRuleDeclarator::KIND_SET.iter().next(),
         "CssAttrFunction" => lang::CssAttrFunction::KIND_SET.iter().next(),
-        "CssAttrType" => lang::CssAttrType::KIND_SET.iter().next(),
         "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
         "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),

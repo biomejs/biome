@@ -23,21 +23,38 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    dbg!("1");
-
     let m = p.start();
     p.bump(T![attr]);
     p.bump(T!['(']);
 
     AttrNameList.parse_list(p);
-
-    dbg!("2");
+    parse_attr_type(p).ok();
 
     p.expect(T![')']);
 
-    dbg!("3");
-
     Present(m.complete(p, CSS_ATTR_FUNCTION))
+}
+
+#[inline]
+fn is_at_attr_type(p: &mut CssParser) -> bool {
+    p.cur_text() == "raw-string" || p.cur_text() == "number"
+}
+
+#[inline]
+fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attr_type(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.cur_text() == "raw-string" {
+        p.bump(T![raw_string]);
+    } else if p.cur_text() == "number" {
+        p.bump(T![number]);
+    }
+
+    Present(m.complete(p, ANY_CSS_ATTR_TYPE))
 }
 
 struct AttrNameListParseRecovery;
@@ -50,7 +67,7 @@ impl ParseRecovery for AttrNameListParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // TODO:
-        p.at(T![')'])
+        p.at(T![')']) || p.at(T![|])
     }
 }
 
@@ -66,8 +83,7 @@ impl ParseSeparatedList for AttrNameList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        // TODO:
-        p.at(T![')'])
+        is_at_attr_type(p) || p.at(T![,]) || p.at(T![')'])
     }
 
     fn recover(

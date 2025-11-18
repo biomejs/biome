@@ -2047,15 +2047,16 @@ CssAttrFunction =
 	name: 'attr'
 	'('
 	attr_name: CssAttrNameList
-	attr_type: CssAttrType?
+	attr_type: AnyCssAttrType?
 	','?
 	fallback_value: AnyCssGenericComponentValue?
 	')'
 
 CssAttrNameList = (CssIdentifier ('|' CssIdentifier)*)
 
-CssAttrType =
-	'TODO'
+AnyCssAttrType =
+	'raw-string'
+	| 'number'
 
 
 // Tailwind

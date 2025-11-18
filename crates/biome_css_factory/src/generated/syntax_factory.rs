@@ -45,6 +45,32 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
+            ANY_CSS_ATTR_TYPE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![raw_string]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![number]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANY_CSS_ATTR_TYPE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANY_CSS_ATTR_TYPE, children)
+            }
             CSS_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -123,7 +149,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssAttrType::can_cast(element.kind())
+                    && AnyCssAttrType::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -158,6 +184,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_ATTR_FUNCTION, children)
             }
+<<<<<<< HEAD
             CSS_ATTR_TYPE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -177,6 +204,8 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_ATTR_TYPE, children)
             }
+=======
+>>>>>>> 5912e8df90 (update attr type grammar)
             CSS_ATTRIBUTE_MATCHER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();

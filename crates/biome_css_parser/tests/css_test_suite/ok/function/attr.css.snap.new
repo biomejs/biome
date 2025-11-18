@@ -7,7 +7,7 @@ expression: snapshot
 
 ```css
 div {
-	background: attr(text);
+	background: attr(text | data-foo);
 }
 
 ```
@@ -46,38 +46,42 @@ CssRoot {
                                     CssAttrFunction {
                                         name_token: ATTR_KW@19..23 "attr" [] [],
                                         l_paren_token: L_PAREN@23..24 "(" [] [],
-                                        attr_name: CssAttrName [
+                                        attr_name: CssAttrNameList [
                                             CssIdentifier {
-                                                value_token: IDENT@24..28 "text" [] [],
+                                                value_token: IDENT@24..29 "text" [] [Whitespace(" ")],
+                                            },
+                                            PIPE@29..31 "|" [] [Whitespace(" ")],
+                                            CssIdentifier {
+                                                value_token: IDENT@31..39 "data-foo" [] [],
                                             },
                                         ],
                                         attr_type: missing (optional),
                                         comma_token: missing (optional),
                                         fallback_value: missing (optional),
-                                        r_paren_token: R_PAREN@28..29 ")" [] [],
+                                        r_paren_token: R_PAREN@39..40 ")" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@29..30 ";" [] [],
+                        semicolon_token: SEMICOLON@40..41 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@30..32 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@41..43 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@32..33 "" [Newline("\n")] [],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..33
+0: CSS_ROOT@0..44
   0: (empty)
-  1: CSS_RULE_LIST@0..32
-    0: CSS_QUALIFIED_RULE@0..32
+  1: CSS_RULE_LIST@0..43
+    0: CSS_QUALIFIED_RULE@0..43
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPOUND_SELECTOR@0..4
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -86,29 +90,32 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_OR_RULE_BLOCK@4..32
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..43
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@5..30
-          0: CSS_DECLARATION_WITH_SEMICOLON@5..30
-            0: CSS_DECLARATION@5..29
-              0: CSS_GENERIC_PROPERTY@5..29
+        1: CSS_DECLARATION_OR_RULE_LIST@5..41
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..41
+            0: CSS_DECLARATION@5..40
+              0: CSS_GENERIC_PROPERTY@5..40
                 0: CSS_IDENTIFIER@5..17
                   0: IDENT@5..17 "background" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@17..19 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..29
-                  0: CSS_ATTR_FUNCTION@19..29
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..40
+                  0: CSS_ATTR_FUNCTION@19..40
                     0: ATTR_KW@19..23 "attr" [] []
                     1: L_PAREN@23..24 "(" [] []
-                    2: CSS_ATTR_NAME@24..28
-                      0: CSS_IDENTIFIER@24..28
-                        0: IDENT@24..28 "text" [] []
+                    2: CSS_ATTR_NAME_LIST@24..39
+                      0: CSS_IDENTIFIER@24..29
+                        0: IDENT@24..29 "text" [] [Whitespace(" ")]
+                      1: PIPE@29..31 "|" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@31..39
+                        0: IDENT@31..39 "data-foo" [] []
                     3: (empty)
                     4: (empty)
                     5: (empty)
-                    6: R_PAREN@28..29 ")" [] []
+                    6: R_PAREN@39..40 ")" [] []
               1: (empty)
-            1: SEMICOLON@29..30 ";" [] []
-        2: R_CURLY@30..32 "}" [Newline("\n")] []
-  2: EOF@32..33 "" [Newline("\n")] []
+            1: SEMICOLON@40..41 ";" [] []
+        2: R_CURLY@41..43 "}" [Newline("\n")] []
+  2: EOF@43..44 "" [Newline("\n")] []
 
 ```
