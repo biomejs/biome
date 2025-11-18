@@ -74,10 +74,10 @@ impl schemars::JsonSchema for RuleDomains {
         schemars::json_schema!({
             "type": "object",
             "propertyNames": {
-                "$ref": "#/components/schemas/RuleDomain"
+                "$ref": "#/$defs/RuleDomain"
             },
             "additionalProperties": {
-                "$ref": "#/components/schemas/RuleDomainValue"
+                "$ref": "#/$defs/RuleDomainValue"
             }
         })
     }
