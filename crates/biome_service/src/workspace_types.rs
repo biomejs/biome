@@ -727,8 +727,8 @@ impl WorkspaceMethod {
         P: JsonSchema,
         R: JsonSchema,
     {
-        let params = SchemaGenerator::from(SchemaSettings::openapi3()).root_schema_for::<P>();
-        let result = SchemaGenerator::from(SchemaSettings::openapi3()).root_schema_for::<R>();
+        let params = SchemaGenerator::from(SchemaSettings::draft2019_09()).root_schema_for::<P>();
+        let result = SchemaGenerator::from(SchemaSettings::draft2019_09()).root_schema_for::<R>();
         Self {
             name,
             params,

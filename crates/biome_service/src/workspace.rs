@@ -434,10 +434,10 @@ impl schemars::JsonSchema for FeaturesSupported {
         schemars::json_schema!({
             "type": "object",
             "propertyNames": {
-                "$ref": "#/components/schemas/FeatureKind"
+                "$ref": "#/$defs/FeatureKind"
             },
             "additionalProperties": {
-                "$ref": "#/components/schemas/SupportKind"
+                "$ref": "#/$defs/SupportKind"
             }
         })
     }
