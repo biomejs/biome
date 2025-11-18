@@ -24,6 +24,7 @@ declare_lint_rule! {
     /// ```html
     /// <script src="" async></script>
     /// <script src="" defer></script>
+    /// <script src="" type="module"></script>
     /// ```
     ///
     pub NoSyncScripts {
@@ -52,6 +53,15 @@ impl Rule for NoSyncScripts {
 
         let attributes = binding.attributes();
         if attributes.find_by_name("src").is_none()
+            || attributes.find_by_name("type").is_some_and(|attribute| {
+                attribute.initializer().is_some_and(|initializer| {
+                    initializer.value().ok().is_some_and(|value| {
+                        value.as_html_string().is_some_and(|html_string| {
+                            html_string.inner_string_text().unwrap().text() == "module"
+                        })
+                    })
+                })
+            })
             || attributes.find_by_name("async").is_some()
             || attributes.find_by_name("defer").is_some()
         {
