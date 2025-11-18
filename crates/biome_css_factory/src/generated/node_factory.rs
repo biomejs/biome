@@ -27,6 +27,67 @@ pub fn css_at_rule_declarator(
         ],
     ))
 }
+pub fn css_attr_function(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    attr_name: CssAttrName,
+    r_paren_token: SyntaxToken,
+) -> CssAttrFunctionBuilder {
+    CssAttrFunctionBuilder {
+        name_token,
+        l_paren_token,
+        attr_name,
+        r_paren_token,
+        attr_type: None,
+        comma_token: None,
+        fallback_value: None,
+    }
+}
+pub struct CssAttrFunctionBuilder {
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    attr_name: CssAttrName,
+    r_paren_token: SyntaxToken,
+    attr_type: Option<CssAttrType>,
+    comma_token: Option<SyntaxToken>,
+    fallback_value: Option<AnyCssGenericComponentValue>,
+}
+impl CssAttrFunctionBuilder {
+    pub fn with_attr_type(mut self, attr_type: CssAttrType) -> Self {
+        self.attr_type = Some(attr_type);
+        self
+    }
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn with_fallback_value(mut self, fallback_value: AnyCssGenericComponentValue) -> Self {
+        self.fallback_value = Some(fallback_value);
+        self
+    }
+    pub fn build(self) -> CssAttrFunction {
+        CssAttrFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ATTR_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.attr_name.into_syntax())),
+                self.attr_type
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                self.fallback_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_attr_type(TODO_token: SyntaxToken) -> CssAttrType {
+    CssAttrType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_TYPE,
+        [Some(SyntaxElement::Token(TODO_token))],
+    ))
+}
 pub fn css_attribute_matcher(
     operator_token: SyntaxToken,
     value: CssAttributeMatcherValue,
@@ -2924,6 +2985,27 @@ pub fn tw_variant_at_rule(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_attr_name<I, S>(items: I, separators: S) -> CssAttrName
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssAttrName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_NAME,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList

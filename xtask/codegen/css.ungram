@@ -1802,6 +1802,7 @@ AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
 	| CssIfFunction
+	| CssAttrFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -2041,6 +2042,20 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
+
+CssAttrFunction =
+	name: 'attr'
+	'('
+	attr_name: CssAttrName
+	attr_type: CssAttrType?
+	','?
+	fallback_value: AnyCssGenericComponentValue?
+	')'
+
+CssAttrName = (CssIdentifier ('|' CssIdentifier)*)
+
+CssAttrType =
+	'TODO'
 
 
 // Tailwind

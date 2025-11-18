@@ -24,6 +24,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_ATTR_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssAttrFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_ATTR_TYPE => {
+                    let $pattern = unsafe { $crate::CssAttrType::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ATTRIBUTE_MATCHER => {
                     let $pattern = unsafe { $crate::CssAttributeMatcher::new_unchecked(node) };
                     $body
@@ -998,6 +1006,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRuleGenericValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_ATTR_NAME => {
+                    let $pattern = unsafe { $crate::CssAttrName::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BRACKETED_VALUE_LIST => {
