@@ -57,12 +57,7 @@ impl Rule for NoAccessKey {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if !is_accesskey_attribute(node) {
-            return None;
-        }
-
-        let attribute_value = node.initializer()?.value().ok()?;
-        if attribute_value.as_html_string().is_some() {
+        if is_accesskey_attribute(node) {
             return Some(());
         }
 
