@@ -3,20 +3,6 @@
 use crate::{CssSyntaxToken as SyntaxToken, generated::nodes::*};
 use biome_rowan::AstNode;
 use std::iter::once;
-impl AnyCssAttrType {
-    pub fn with_raw_string_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_number_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-}
 impl CssAtRule {
     pub fn with_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -39,6 +25,20 @@ impl CssAtRuleDeclarator {
         )
     }
     pub fn with_declarator(self, element: AnyCssAtRuleDeclarator) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssAttrFallbackValue {
+    pub fn with_comma_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: CssGenericComponentValueList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -70,22 +70,16 @@ impl CssAttrFunction {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
-        )
-    }
-    pub fn with_fallback_value(self, element: Option<AnyCssGenericComponentValue>) -> Self {
+    pub fn with_fallback_value(self, element: Option<CssAttrFallbackValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            5usize..=5usize,
+            4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
 }
@@ -732,6 +726,302 @@ impl CssDeclarationWithSemicolon {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+}
+impl CssDistanceUnit {
+    pub fn with_cap_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ch_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_em_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ex_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ic_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_lh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rcap_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(6usize..=6usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rch_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(7usize..=7usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rem_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(8usize..=8usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rex_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(9usize..=9usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ric_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(10usize..=10usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rlh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(11usize..=11usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_dvh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(12usize..=12usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_dvw_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(13usize..=13usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_lvh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(14usize..=14usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_lvw_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(15usize..=15usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_svh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(16usize..=16usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_svw_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(17usize..=17usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vb_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(18usize..=18usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(19usize..=19usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vi_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(20usize..=20usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vmax_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(21usize..=21usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vmin_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(22usize..=22usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_vw_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(23usize..=23usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqb_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(24usize..=24usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqh_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(25usize..=25usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqi_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(26usize..=26usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqmax_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(27usize..=27usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqmin_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(28usize..=28usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cqw_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(29usize..=29usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_cm_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(30usize..=30usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_in_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(31usize..=31usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_mm_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(32usize..=32usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_pc_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(33usize..=33usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_pt_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(34usize..=34usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_px_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(35usize..=35usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_q_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(36usize..=36usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_deg_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(37usize..=37usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_grad_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(38usize..=38usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_rad_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(39usize..=39usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_turn_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(40usize..=40usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ms_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(41usize..=41usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_s_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(42usize..=42usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_hz_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(43usize..=43usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_khz_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(44usize..=44usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_fr_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(45usize..=45usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_dpcm_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(46usize..=46usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_dpi_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(47usize..=47usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_dppx_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(48usize..=48usize, once(Some(element.into()))),
         )
     }
 }
@@ -1773,6 +2063,14 @@ impl CssNumber {
         )
     }
 }
+impl CssNumberDeclarator {
+    pub fn with_number_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssPageAtRule {
     pub fn with_page_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2539,6 +2837,14 @@ impl CssRatio {
         )
     }
 }
+impl CssRawStringDeclarator {
+    pub fn with_raw_string_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssRegularDimension {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2875,6 +3181,74 @@ impl CssSupportsOrCondition {
         )
     }
 }
+impl CssSyntaxComponent {
+    pub fn with_component(self, element: AnyCssSyntaxSingleComponent) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_multiplier(self, element: Option<CssSyntaxMultiplier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
+impl CssSyntaxMultiplier {
+    pub fn with_multiplier_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssSyntaxType {
+    pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssTypeFunction {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ty(self, element: AnyCssSyntax) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssTypeSelector {
     pub fn with_namespace(self, element: Option<CssNamespace>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
@@ -3167,6 +3541,14 @@ impl CssViewTransitionAtRule {
 }
 impl CssViewTransitionAtRuleDeclarator {
     pub fn with_view_transition_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssWildcard {
+    pub fn with_star_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),

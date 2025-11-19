@@ -10,7 +10,10 @@ use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
 use crate::syntax::parse_regular_identifier;
+use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_expression;
+use crate::syntax::value::r#type::is_at_type_function;
+use crate::syntax::value::r#type::parse_type_function;
 
 #[inline]
 pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
@@ -28,7 +31,10 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T!['(']);
 
     AttrNameList.parse_list(p);
+    // todo: bogus for this
     parse_attr_type(p).ok();
+    // todo: bogus for this
+    parse_attr_fallback_value(p).ok();
 
     p.expect(T![')']);
 
@@ -37,7 +43,7 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_type(p: &mut CssParser) -> bool {
-    p.cur_text() == "raw-string" || p.cur_text() == "number"
+    p.at(T![raw_string]) || p.at(T![number]) || is_at_type_function(p) || is_at_attr_unit(p)
 }
 
 #[inline]
@@ -46,15 +52,62 @@ fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-
-    if p.cur_text() == "raw-string" {
-        p.bump(T![raw_string]);
-    } else if p.cur_text() == "number" {
-        p.bump(T![number]);
+    if is_at_type_function(p) {
+        return parse_type_function(p);
     }
 
-    Present(m.complete(p, ANY_CSS_ATTR_TYPE))
+    if p.at(T![raw_string]) {
+        let m = p.start();
+        p.bump(T![raw_string]);
+        return Present(m.complete(p, CSS_RAW_STRING_DECLARATOR));
+    }
+
+    if p.at(T![number]) {
+        let m = p.start();
+        p.bump(T![number]);
+        return Present(m.complete(p, CSS_NUMBER_DECLARATOR));
+    }
+
+    if is_at_attr_unit(p) {
+        return parse_attr_unit(p);
+    }
+
+    Absent
+}
+
+#[inline]
+fn is_at_attr_unit(p: &mut CssParser) -> bool {
+    p.at(T![%])
+}
+
+#[inline]
+fn parse_attr_unit(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attr_unit(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![%]);
+    Present(m.complete(p, CSS_PERCENTAGE))
+}
+
+#[inline]
+fn is_at_attr_fallback_value(p: &mut CssParser) -> bool {
+    p.at(T![,]) // && p.nth_at(1, T![ident])
+}
+
+#[inline]
+fn parse_attr_fallback_value(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attr_fallback_value(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![,]);
+    GenericComponentValueList.parse_list(p);
+
+    Present(m.complete(p, CSS_ATTR_FALLBACK_VALUE))
 }
 
 struct AttrNameListParseRecovery;
@@ -62,12 +115,15 @@ struct AttrNameListParseRecovery;
 impl ParseRecovery for AttrNameListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    // TODO: custom bogus?
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // TODO:
-        p.at(T![')']) || p.at(T![|])
+        // 1. At a new attr name
+        // 2. At end of attr name and at fallback value
+        // 3. At end of attr() or maybe type()
+        // 4. At the end of the declaration
+        // 5. At a new line, most likely indicating the end of the declaration
+        p.at(T![|]) || p.at(T![,]) || p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
     }
 }
 

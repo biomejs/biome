@@ -6,18 +6,6 @@ use biome_css_syntax::{
     *,
 };
 use biome_rowan::AstNode;
-pub fn any_css_attr_type(
-    raw_string_token: SyntaxToken,
-    number_token: SyntaxToken,
-) -> AnyCssAttrType {
-    AnyCssAttrType::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::ANY_CSS_ATTR_TYPE,
-        [
-            Some(SyntaxElement::Token(raw_string_token)),
-            Some(SyntaxElement::Token(number_token)),
-        ],
-    ))
-}
 pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
     CssAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_AT_RULE,
@@ -39,6 +27,18 @@ pub fn css_at_rule_declarator(
         ],
     ))
 }
+pub fn css_attr_fallback_value(
+    comma_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+) -> CssAttrFallbackValue {
+    CssAttrFallbackValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_attr_function(
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -51,7 +51,6 @@ pub fn css_attr_function(
         attr_name,
         r_paren_token,
         attr_type: None,
-        comma_token: None,
         fallback_value: None,
     }
 }
@@ -61,19 +60,14 @@ pub struct CssAttrFunctionBuilder {
     attr_name: CssAttrNameList,
     r_paren_token: SyntaxToken,
     attr_type: Option<AnyCssAttrType>,
-    comma_token: Option<SyntaxToken>,
-    fallback_value: Option<AnyCssGenericComponentValue>,
+    fallback_value: Option<CssAttrFallbackValue>,
 }
 impl CssAttrFunctionBuilder {
     pub fn with_attr_type(mut self, attr_type: AnyCssAttrType) -> Self {
         self.attr_type = Some(attr_type);
         self
     }
-    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
-        self.comma_token = Some(comma_token);
-        self
-    }
-    pub fn with_fallback_value(mut self, fallback_value: AnyCssGenericComponentValue) -> Self {
+    pub fn with_fallback_value(mut self, fallback_value: CssAttrFallbackValue) -> Self {
         self.fallback_value = Some(fallback_value);
         self
     }
@@ -86,7 +80,6 @@ impl CssAttrFunctionBuilder {
                 Some(SyntaxElement::Node(self.attr_name.into_syntax())),
                 self.attr_type
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.comma_token.map(|token| SyntaxElement::Token(token)),
                 self.fallback_value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.r_paren_token)),
@@ -702,6 +695,112 @@ impl CssDeclarationWithSemicolonBuilder {
             ],
         ))
     }
+}
+pub fn css_distance_unit(
+    cap_token: SyntaxToken,
+    ch_token: SyntaxToken,
+    em_token: SyntaxToken,
+    ex_token: SyntaxToken,
+    ic_token: SyntaxToken,
+    lh_token: SyntaxToken,
+    rcap_token: SyntaxToken,
+    rch_token: SyntaxToken,
+    rem_token: SyntaxToken,
+    rex_token: SyntaxToken,
+    ric_token: SyntaxToken,
+    rlh_token: SyntaxToken,
+    dvh_token: SyntaxToken,
+    dvw_token: SyntaxToken,
+    lvh_token: SyntaxToken,
+    lvw_token: SyntaxToken,
+    svh_token: SyntaxToken,
+    svw_token: SyntaxToken,
+    vb_token: SyntaxToken,
+    vh_token: SyntaxToken,
+    vi_token: SyntaxToken,
+    vmax_token: SyntaxToken,
+    vmin_token: SyntaxToken,
+    vw_token: SyntaxToken,
+    cqb_token: SyntaxToken,
+    cqh_token: SyntaxToken,
+    cqi_token: SyntaxToken,
+    cqmax_token: SyntaxToken,
+    cqmin_token: SyntaxToken,
+    cqw_token: SyntaxToken,
+    cm_token: SyntaxToken,
+    in_token: SyntaxToken,
+    mm_token: SyntaxToken,
+    pc_token: SyntaxToken,
+    pt_token: SyntaxToken,
+    px_token: SyntaxToken,
+    q_token: SyntaxToken,
+    deg_token: SyntaxToken,
+    grad_token: SyntaxToken,
+    rad_token: SyntaxToken,
+    turn_token: SyntaxToken,
+    ms_token: SyntaxToken,
+    s_token: SyntaxToken,
+    hz_token: SyntaxToken,
+    khz_token: SyntaxToken,
+    fr_token: SyntaxToken,
+    dpcm_token: SyntaxToken,
+    dpi_token: SyntaxToken,
+    dppx_token: SyntaxToken,
+) -> CssDistanceUnit {
+    CssDistanceUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DISTANCE_UNIT,
+        [
+            Some(SyntaxElement::Token(cap_token)),
+            Some(SyntaxElement::Token(ch_token)),
+            Some(SyntaxElement::Token(em_token)),
+            Some(SyntaxElement::Token(ex_token)),
+            Some(SyntaxElement::Token(ic_token)),
+            Some(SyntaxElement::Token(lh_token)),
+            Some(SyntaxElement::Token(rcap_token)),
+            Some(SyntaxElement::Token(rch_token)),
+            Some(SyntaxElement::Token(rem_token)),
+            Some(SyntaxElement::Token(rex_token)),
+            Some(SyntaxElement::Token(ric_token)),
+            Some(SyntaxElement::Token(rlh_token)),
+            Some(SyntaxElement::Token(dvh_token)),
+            Some(SyntaxElement::Token(dvw_token)),
+            Some(SyntaxElement::Token(lvh_token)),
+            Some(SyntaxElement::Token(lvw_token)),
+            Some(SyntaxElement::Token(svh_token)),
+            Some(SyntaxElement::Token(svw_token)),
+            Some(SyntaxElement::Token(vb_token)),
+            Some(SyntaxElement::Token(vh_token)),
+            Some(SyntaxElement::Token(vi_token)),
+            Some(SyntaxElement::Token(vmax_token)),
+            Some(SyntaxElement::Token(vmin_token)),
+            Some(SyntaxElement::Token(vw_token)),
+            Some(SyntaxElement::Token(cqb_token)),
+            Some(SyntaxElement::Token(cqh_token)),
+            Some(SyntaxElement::Token(cqi_token)),
+            Some(SyntaxElement::Token(cqmax_token)),
+            Some(SyntaxElement::Token(cqmin_token)),
+            Some(SyntaxElement::Token(cqw_token)),
+            Some(SyntaxElement::Token(cm_token)),
+            Some(SyntaxElement::Token(in_token)),
+            Some(SyntaxElement::Token(mm_token)),
+            Some(SyntaxElement::Token(pc_token)),
+            Some(SyntaxElement::Token(pt_token)),
+            Some(SyntaxElement::Token(px_token)),
+            Some(SyntaxElement::Token(q_token)),
+            Some(SyntaxElement::Token(deg_token)),
+            Some(SyntaxElement::Token(grad_token)),
+            Some(SyntaxElement::Token(rad_token)),
+            Some(SyntaxElement::Token(turn_token)),
+            Some(SyntaxElement::Token(ms_token)),
+            Some(SyntaxElement::Token(s_token)),
+            Some(SyntaxElement::Token(hz_token)),
+            Some(SyntaxElement::Token(khz_token)),
+            Some(SyntaxElement::Token(fr_token)),
+            Some(SyntaxElement::Token(dpcm_token)),
+            Some(SyntaxElement::Token(dpi_token)),
+            Some(SyntaxElement::Token(dppx_token)),
+        ],
+    ))
 }
 pub fn css_document_at_rule(
     document_token: SyntaxToken,
@@ -1541,6 +1640,12 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_number_declarator(number_token: SyntaxToken) -> CssNumberDeclarator {
+    CssNumberDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NUMBER_DECLARATOR,
+        [Some(SyntaxElement::Token(number_token))],
+    ))
+}
 pub fn css_page_at_rule(
     page_token: SyntaxToken,
     selectors: CssPageSelectorList,
@@ -2155,6 +2260,12 @@ pub fn css_ratio(
         ],
     ))
 }
+pub fn css_raw_string_declarator(raw_string_token: SyntaxToken) -> CssRawStringDeclarator {
+    CssRawStringDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RAW_STRING_DECLARATOR,
+        [Some(SyntaxElement::Token(raw_string_token))],
+    ))
+}
 pub fn css_regular_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2450,6 +2561,68 @@ pub fn css_supports_or_condition(
         ],
     ))
 }
+pub fn css_syntax_component(component: AnyCssSyntaxSingleComponent) -> CssSyntaxComponentBuilder {
+    CssSyntaxComponentBuilder {
+        component,
+        multiplier: None,
+    }
+}
+pub struct CssSyntaxComponentBuilder {
+    component: AnyCssSyntaxSingleComponent,
+    multiplier: Option<CssSyntaxMultiplier>,
+}
+impl CssSyntaxComponentBuilder {
+    pub fn with_multiplier(mut self, multiplier: CssSyntaxMultiplier) -> Self {
+        self.multiplier = Some(multiplier);
+        self
+    }
+    pub fn build(self) -> CssSyntaxComponent {
+        CssSyntaxComponent::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_SYNTAX_COMPONENT,
+            [
+                Some(SyntaxElement::Node(self.component.into_syntax())),
+                self.multiplier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_syntax_multiplier(multiplier_token: SyntaxToken) -> CssSyntaxMultiplier {
+    CssSyntaxMultiplier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_MULTIPLIER,
+        [Some(SyntaxElement::Token(multiplier_token))],
+    ))
+}
+pub fn css_syntax_type(
+    l_angle_token: SyntaxToken,
+    name_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> CssSyntaxType {
+    CssSyntaxType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_TYPE,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
+pub fn css_type_function(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    ty: AnyCssSyntax,
+    r_paren_token: SyntaxToken,
+) -> CssTypeFunction {
+    CssTypeFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TYPE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {
         ident,
@@ -2717,6 +2890,12 @@ pub fn css_view_transition_at_rule_declarator(
     CssViewTransitionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR,
         [Some(SyntaxElement::Token(view_transition_token))],
+    ))
+}
+pub fn css_wildcard(star_token: SyntaxToken) -> CssWildcard {
+    CssWildcard::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_WILDCARD,
+        [Some(SyntaxElement::Token(star_token))],
     ))
 }
 pub fn tw_apply_at_rule(
@@ -3481,6 +3660,27 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_syntax_component_list<I, S>(items: I, separators: S) -> CssSyntaxComponentList
+where
+    I: IntoIterator<Item = CssSyntaxComponent>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssSyntaxComponentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_COMPONENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
 where
     I: IntoIterator<Item = AnyCssUrlModifier>,
@@ -3564,6 +3764,16 @@ where
 {
     CssBogusAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_AT_RULE,
+        slots,
+    ))
+}
+pub fn css_bogus_attr_unit<I>(slots: I) -> CssBogusAttrUnit
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusAttrUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_ATTR_UNIT,
         slots,
     ))
 }
@@ -3794,6 +4004,26 @@ where
 {
     CssBogusSupportsCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION,
+        slots,
+    ))
+}
+pub fn css_bogus_syntax<I>(slots: I) -> CssBogusSyntax
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSyntax::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SYNTAX,
+        slots,
+    ))
+}
+pub fn css_bogus_syntax_single_component<I>(slots: I) -> CssBogusSyntaxSingleComponent
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSyntaxSingleComponent::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT,
         slots,
     ))
 }

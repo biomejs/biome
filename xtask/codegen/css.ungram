@@ -63,6 +63,9 @@ CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
+CssBogusAttrUnit = SyntaxElement*
+CssBogusSyntax = SyntaxElement*
+CssBogusSyntaxSingleComponent = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -2048,16 +2051,143 @@ CssAttrFunction =
 	'('
 	attr_name: CssAttrNameList
 	attr_type: AnyCssAttrType?
-	','?
-	fallback_value: AnyCssGenericComponentValue?
+	fallback_value: CssAttrFallbackValue?
 	')'
 
 CssAttrNameList = (CssIdentifier ('|' CssIdentifier)*)
 
-AnyCssAttrType =
+CssRawStringDeclarator =
 	'raw-string'
-	| 'number'
 
+CssNumberDeclarator =
+	'number'
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#distance_units
+CssDistanceUnit = (
+	// local font-relative units
+	'cap'
+	'ch'
+	'em'
+	'ex'
+	'ic'
+	'lh'
+	// root font-relative units
+	'rcap'
+	'rch'
+	'rem'
+	'rex'
+	'ric'
+	'rlh'
+	// viewport units
+	'dvh'
+	'dvw'
+	'lvh'
+	'lvw'
+	'svh'
+	'svw'
+	'vb'
+	'vh'
+	'vi'
+	'vmax'
+	'vmin'
+	'vw'
+	// container units
+	'cqb'
+	'cqh'
+	'cqi'
+	'cqmax'
+	'cqmin'
+	'cqw'
+	// absolute length units
+	'cm'
+	'in'
+	'mm'
+	'pc'
+	'pt'
+	'px'
+	'q'
+	// angle units
+	'deg'
+	'grad'
+	'rad'
+	'turn'
+	// time units
+	'ms'
+	's'
+	// frequency units
+	'hz'
+	'khz'
+	// flex units
+	'fr'
+	// resolution units
+	'dpcm'
+	'dpi'
+	'dppx'
+)
+
+AnyCssAttrUnit =
+	CssPercentage
+	| CssDistanceUnit
+	| CssBogusAttrUnit
+
+AnyCssAttrType =
+	CssRawStringDeclarator
+	|CssTypeFunction
+	| CssNumberDeclarator
+	| AnyCssAttrUnit
+
+CssAttrFallbackValue =
+	','
+	value: CssGenericComponentValueList
+
+CssTypeFunction =
+	name: 'type'
+	'('
+	type: AnyCssSyntax
+	')'
+
+CssWildcard =
+	'*'
+
+AnyCssSyntax =
+	CssWildcard
+	| CssSyntaxComponentList
+	| CssString
+	| CssBogusSyntax
+
+CssSyntaxComponentList = CssSyntaxComponent ('|' CssSyntaxComponent)*
+
+CssSyntaxComponent =
+	component: AnyCssSyntaxSingleComponent
+	multiplier: CssSyntaxMultiplier?
+
+AnyCssSyntaxSingleComponent =
+	CssSyntaxType
+	| CssIdentifier
+	| CssBogusSyntaxSingleComponent
+
+CssSyntaxType =
+	'<'
+	name: (
+		'angle'
+		| 'color'
+		| 'custom-ident'
+		| 'image'
+		| 'integer'
+		| 'length'
+		| 'length-percentage'
+		| 'number'
+		| 'percentage'
+		| 'resolution'
+		| 'string'
+		| 'time'
+		| 'url'
+		| 'transform-function'
+	)
+	'>'
+
+CssSyntaxMultiplier =
+	multiplier: ('#' | '+')
 
 // Tailwind
 
