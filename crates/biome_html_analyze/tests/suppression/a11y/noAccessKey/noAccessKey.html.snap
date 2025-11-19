@@ -13,7 +13,7 @@ expression: noAccessKey.html
 ```
 noAccessKey.html:2:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
     1 │ <!-- code that should trigger the rule and show suppression actions -->
   > 2 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>

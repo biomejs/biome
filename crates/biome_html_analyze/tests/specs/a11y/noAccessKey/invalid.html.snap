@@ -15,7 +15,7 @@ expression: invalid.html
 ```
 invalid.html:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <input type="submit" accesskey="s" value="Submit" />
@@ -35,7 +35,7 @@ invalid.html:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
 ```
 invalid.html:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <input type="submit" accesskey="s" value="Submit" />
@@ -56,7 +56,7 @@ invalid.html:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
 ```
 invalid.html:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
     2 │ <input type="submit" accesskey="s" value="Submit" />
     3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>

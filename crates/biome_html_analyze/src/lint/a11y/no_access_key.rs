@@ -72,7 +72,7 @@ impl Rule for NoAccessKey {
                 node.syntax().text_trimmed_range(),
                 markup! {
                     "Avoid the "<Emphasis>"accesskey"</Emphasis>" attribute to reduce inconsistencies between \
-                    keyboard shortcuts and screen reader keyboard comments."
+                    keyboard shortcuts and screen reader keyboard commands."
                 },
             ).note(
                 markup! {
