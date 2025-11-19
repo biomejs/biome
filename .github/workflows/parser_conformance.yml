@@ -1,6 +1,7 @@
 # Test coverage job. It is run on pull request because it prints the results via comment
 name: Parser conformance and comparison
 on:
+  merge_group:
   pull_request:
     branches:
       - main
