@@ -1,6 +1,7 @@
 # Jobs run on pull request in js folders
 name: Pull request JS
 on:
+  merge_group:
   pull_request:
     branches:
       - main

@@ -1,5 +1,6 @@
 name: Pull request Markdown
 on:
+  merge_group:
   pull_request:
     branches:
       - main

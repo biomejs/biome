@@ -1,5 +1,6 @@
 name: Lint rule docs
 on:
+  merge_group:
   pull_request:
     branches:
       - main
