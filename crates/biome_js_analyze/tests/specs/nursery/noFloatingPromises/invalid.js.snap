@@ -10,6 +10,11 @@ async function returnsPromise() {
 returnsPromise();
 returnsPromise().then(() => { }).finally(() => { });
 
+async function issue7999() {
+  // ✅
+  returnsPromise();
+}
+
 ```
 
 # Diagnostics
@@ -40,8 +45,30 @@ invalid.js:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
   > 5 │ returnsPromise().then(() => { }).finally(() => { });
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
+    7 │ async function issue7999() {
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
+
+```
+
+```
+invalid.js:9:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     7 │ async function issue7999() {
+     8 │   // ✅
+   > 9 │   returnsPromise();
+       │   ^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    9 │ ··await·returnsPromise();
+      │   ++++++                 
 
 ```
