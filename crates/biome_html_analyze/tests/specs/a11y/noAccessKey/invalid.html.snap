@@ -13,7 +13,7 @@ expression: invalid.html
 
 # Diagnostics
 ```
-invalid.html:2:22 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
   
@@ -33,7 +33,7 @@ invalid.html:2:22 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.html:3:31 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
   
@@ -54,7 +54,7 @@ invalid.html:3:31 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.html:4:9 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
   

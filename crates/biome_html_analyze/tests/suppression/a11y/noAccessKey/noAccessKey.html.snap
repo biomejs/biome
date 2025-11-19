@@ -11,7 +11,7 @@ expression: noAccessKey.html
 
 # Diagnostics
 ```
-noAccessKey.html:2:31 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+noAccessKey.html:2:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
   
@@ -22,19 +22,19 @@ noAccessKey.html:2:31 lint/nursery/noAccessKey  FIXABLE  ━━━━━━━�
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
-  i Safe fix: Suppress rule lint/nursery/noAccessKey for this line.
+  i Safe fix: Suppress rule lint/a11y/noAccessKey for this line.
   
     1 1 │   <!-- code that should trigger the rule and show suppression actions -->
     2   │ - <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
-      2 │ + <!--·biome-ignore·lint/nursery/noAccessKey:·<explanation>·-->
+      2 │ + <!--·biome-ignore·lint/a11y/noAccessKey:·<explanation>·-->
       3 │ + <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
     3 4 │   
   
-  i Safe fix: Suppress rule lint/nursery/noAccessKey for the whole file.
+  i Safe fix: Suppress rule lint/a11y/noAccessKey for the whole file.
   
     1 1 │   <!-- code that should trigger the rule and show suppression actions -->
     2   │ - <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
-      2 │ + <!--·biome-ignore-all·lint/nursery/noAccessKey:·<explanation>·-->
+      2 │ + <!--·biome-ignore-all·lint/a11y/noAccessKey:·<explanation>·-->
       3 │ + <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
     3 4 │   
   
