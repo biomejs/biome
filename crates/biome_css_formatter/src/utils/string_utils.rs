@@ -296,3 +296,63 @@ impl<'token> LiteralStringNormaliser<'token> {
         }
     }
 }
+
+pub(crate) struct FormatDimension {
+    token: SyntaxToken<CssLanguage>,
+}
+
+impl From<SyntaxToken<CssLanguage>> for FormatDimension {
+    fn from(value: SyntaxToken<CssLanguage>) -> Self {
+        Self { token: value }
+    }
+}
+
+impl Format<CssFormatContext> for FormatDimension {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let original = self.token.text_trimmed();
+        match original.to_ascii_lowercase_cow() {
+            Cow::Borrowed(_) => write!(f, [self.token.format()]),
+            Cow::Owned(lowercase) => {
+                write!(
+                    f,
+                    [format_replaced(
+                        &self.token,
+                        &text(
+                            &map_dimension_casing(lowercase),
+                            self.token.text_trimmed_range().start()
+                        ),
+                    )]
+                )
+            }
+        }
+    }
+}
+
+/// Most CSS dimensions can be formatted as lower case, but there are a few that are more commonly
+/// formatted with some uppercase characters. This function maps those few cases to the correct casing and returns the
+/// rest as-is. This matches the behavior of the Prettier formatter.
+///
+/// The function takes and returns ownership so that we can return the original and not reallocate if it is not modified.
+///
+/// # Reference
+///
+///  [Absolute length units](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#absolute_length_units)
+///
+/// # Examples
+///
+/// ```rust
+/// use biome_css_formatter::utils::string_utils::map_dimension_casing;
+///
+/// assert_eq!(map_dimension_casing("hz".to_string()), "Hz");
+/// assert_eq!(map_dimension_casing("khz".to_string()), "kHz");
+/// assert_eq!(map_dimension_casing("q".to_string()), "Q");
+/// assert_eq!(map_dimension_casing("unknown".to_string()), "unknown");
+/// ```
+fn map_dimension_casing(value: String) -> String {
+    match value.as_str() {
+        "hz" => String::from("Hz"),
+        "khz" => String::from("kHz"),
+        "q" => String::from("Q"),
+        _ => value,
+    }
+}

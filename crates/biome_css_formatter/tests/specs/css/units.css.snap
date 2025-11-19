@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/units.css
 ---
-
 # Input
 
 ```css
@@ -89,7 +88,7 @@ Quote style: Double Quotes
 	a: 5vmax;
 	a: 5cm;
 	a: 5mm;
-	a: 5q;
+	a: 5Q;
 	a: 5in;
 	a: 5pt;
 	a: 5pc;
@@ -99,8 +98,8 @@ Quote style: Double Quotes
 	a: 5rad;
 	a: 5s;
 	a: 5ms;
-	a: 5hz;
-	a: 5khz;
+	a: 5Hz;
+	a: 5kHz;
 	a: 5dpi;
 	a: 5dpcm;
 	a: 5dppx;
@@ -113,5 +112,3 @@ Quote style: Double Quotes
 	a: 0\0;
 }
 ```
-
-
