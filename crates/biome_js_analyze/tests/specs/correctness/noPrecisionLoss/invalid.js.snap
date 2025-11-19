@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -41,6 +40,13 @@ var x = 0o4_00000000000000_001
 var x = 0O4_0000000000000000_1
 var x = 0x2_0000000000001
 var x = 0X200000_0000000_1
+// From repro_issue.js
+var x = 0x20000000000001; // 2^53 + 1 (Invalid, precision loss)
+var x = 9007199254740993; // 2^53 + 1 (Invalid, precision loss)
+var x = 0x10000000000000000000000001; // 2^100 + 1 (Invalid, precision loss)
+// 2^1024 (Overflow, Invalid)
+var x = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+
 ```
 
 # Diagnostics
@@ -614,6 +620,7 @@ invalid.js:35:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   > 35 │ var x = 0x2_0000000000001
        │         ^^^^^^^^^^^^^^^^^
     36 │ var x = 0X200000_0000000_1
+    37 │ // From repro_issue.js
   
   i The value at runtime will be 9007199254740992
   
@@ -629,8 +636,77 @@ invalid.js:36:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     35 │ var x = 0x2_0000000000001
   > 36 │ var x = 0X200000_0000000_1
        │         ^^^^^^^^^^^^^^^^^^
+    37 │ // From repro_issue.js
+    38 │ var x = 0x20000000000001; // 2^53 + 1 (Invalid, precision loss)
   
   i The value at runtime will be 9007199254740992
+  
+
+```
+
+```
+invalid.js:38:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This number literal will lose precision at runtime.
+  
+    36 │ var x = 0X200000_0000000_1
+    37 │ // From repro_issue.js
+  > 38 │ var x = 0x20000000000001; // 2^53 + 1 (Invalid, precision loss)
+       │         ^^^^^^^^^^^^^^^^
+    39 │ var x = 9007199254740993; // 2^53 + 1 (Invalid, precision loss)
+    40 │ var x = 0x10000000000000000000000001; // 2^100 + 1 (Invalid, precision loss)
+  
+  i The value at runtime will be 9007199254740992
+  
+
+```
+
+```
+invalid.js:39:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This number literal will lose precision at runtime.
+  
+    37 │ // From repro_issue.js
+    38 │ var x = 0x20000000000001; // 2^53 + 1 (Invalid, precision loss)
+  > 39 │ var x = 9007199254740993; // 2^53 + 1 (Invalid, precision loss)
+       │         ^^^^^^^^^^^^^^^^
+    40 │ var x = 0x10000000000000000000000001; // 2^100 + 1 (Invalid, precision loss)
+    41 │ // 2^1024 (Overflow, Invalid)
+  
+  i The value at runtime will be 9007199254740992
+  
+
+```
+
+```
+invalid.js:40:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This number literal will lose precision at runtime.
+  
+    38 │ var x = 0x20000000000001; // 2^53 + 1 (Invalid, precision loss)
+    39 │ var x = 9007199254740993; // 2^53 + 1 (Invalid, precision loss)
+  > 40 │ var x = 0x10000000000000000000000001; // 2^100 + 1 (Invalid, precision loss)
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ // 2^1024 (Overflow, Invalid)
+    42 │ var x = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+  
+  i The value at runtime will be 1267650600228229400000000000000
+  
+
+```
+
+```
+invalid.js:42:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This number literal will lose precision at runtime.
+  
+    40 │ var x = 0x10000000000000000000000001; // 2^100 + 1 (Invalid, precision loss)
+    41 │ // 2^1024 (Overflow, Invalid)
+  > 42 │ var x = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+  
+  i The value at runtime will be inf
   
 
 ```
