@@ -4,45 +4,45 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, VueDirective, inner_string_text};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
-use biome_rule_options::use_vue_valid_v_html::UseVueValidVHtmlOptions;
+use biome_rule_options::use_vue_valid_v_text::UseVueValidVTextOptions;
 
 declare_lint_rule! {
-    /// Enforce valid `v-html` directives.
+    /// Enforce valid `v-text` Vue directives.
     ///
-    /// This rule reports v-html directives in the following cases:
-    /// - The directive has an argument. E.g. `<div v-html:aaa></div>`
-    /// - The directive has a modifier. E.g. `<div v-html.bbb></div>`
-    /// - The directive does not have an attribute value. E.g. `<div v-html></div>`
+    /// This rule reports `v-text` directives in the following cases:
+    /// - The directive has an argument. E.g. `<div v-text:aaa></div>`
+    /// - The directive has any modifiers. E.g. `<div v-text.bbb></div>`
+    /// - The directive does not have a value. E.g. `<div v-text></div>`
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```vue,expect_diagnostic
-    /// <div v-html:aaa="foo"></div>
+    /// <div v-text />
     /// ```
     ///
     /// ```vue,expect_diagnostic
-    /// <div v-html.bbb="foo"></div>
+    /// <div v-text:aaa="foo"></div>
     /// ```
     ///
     /// ```vue,expect_diagnostic
-    /// <div v-html></div>
+    /// <div v-text.bbb="foo"></div>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```vue
-    /// <div v-html="htmlContent"></div>
+    /// <div v-text="foo" />
     /// ```
     ///
-    pub UseVueValidVHtml {
-        version: "2.3.6",
-        name: "useVueValidVHtml",
+    pub UseVueValidVText {
+        version: "next",
+        name: "useVueValidVText",
         language: "html",
         recommended: true,
         domains: &[RuleDomain::Vue],
-        sources: &[RuleSource::EslintVueJs("valid-v-html").same()],
+        sources: &[RuleSource::EslintVueJs("valid-v-text").same()],
     }
 }
 
@@ -52,17 +52,18 @@ pub enum ViolationKind {
     MissingValue,
 }
 
-impl Rule for UseVueValidVHtml {
+impl Rule for UseVueValidVText {
     type Query = Ast<VueDirective>;
     type State = ViolationKind;
     type Signals = Option<Self::State>;
-    type Options = UseVueValidVHtmlOptions;
+    type Options = UseVueValidVTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let vue_directive = ctx.query();
-        if vue_directive.name_token().ok()?.text_trimmed() != "v-html" {
+        if vue_directive.name_token().ok()?.text_trimmed() != "v-text" {
             return None;
         }
+
         if let Some(arg) = vue_directive.arg() {
             return Some(ViolationKind::UnexpectedArgument(arg.range()));
         }
@@ -93,33 +94,33 @@ impl Rule for UseVueValidVHtml {
                     rule_category!(),
                     range,
                     markup! {
-                        "The v-html directive does not accept an argument."
+                        "The v-text directive does not accept an argument."
                     },
                 )
                 .note(markup! {
-                    "v-html directives should be used without arguments, like " <Emphasis>"v-html=\"content\""</Emphasis>"."
+                    "v-text directives should be used without arguments, like " <Emphasis>"v-text=\"content\""</Emphasis>"."
                 }),
                 ViolationKind::UnexpectedModifier(range) => RuleDiagnostic::new(
                     rule_category!(),
                     range,
                     markup! {
-                        "The v-html directive does not support modifiers."
+                        "The v-text directive does not support modifiers."
                     },
                 )
                 .note(markup! {
-                    "v-html directives do not support any modifiers. Remove the modifier."
+                    "v-text directives do not support any modifiers. Remove the modifier."
                 }),
                 ViolationKind::MissingValue => RuleDiagnostic::new(
                     rule_category!(),
                     ctx.query().range(),
                     markup! {
-                        "The v-html directive is missing a value."
+                        "The v-text directive is missing a value."
                     },
                 )
                 .note(markup! {
-                    "v-html directives require a value containing the HTML content to render."
+                    "v-text directives require a value containing the text content to render."
                 }).note(markup! {
-                    "For example, use " <Emphasis>"v-html=\"htmlContent\""</Emphasis> " to render the content of the " <Emphasis>"htmlContent"</Emphasis> " variable."
+                    "For example, use " <Emphasis>"v-text=\"foo\""</Emphasis> " to render the content of the " <Emphasis>"foo"</Emphasis> " variable."
                 }),
             }
         )

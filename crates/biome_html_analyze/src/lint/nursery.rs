@@ -12,4 +12,5 @@ pub mod use_vue_valid_v_else_if;
 pub mod use_vue_valid_v_html;
 pub mod use_vue_valid_v_if;
 pub mod use_vue_valid_v_on;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_sync_scripts :: NoSyncScripts , self :: no_vue_v_if_with_v_for :: NoVueVIfWithVFor , self :: use_vue_hyphenated_attributes :: UseVueHyphenatedAttributes , self :: use_vue_valid_v_bind :: UseVueValidVBind , self :: use_vue_valid_v_else :: UseVueValidVElse , self :: use_vue_valid_v_else_if :: UseVueValidVElseIf , self :: use_vue_valid_v_html :: UseVueValidVHtml , self :: use_vue_valid_v_if :: UseVueValidVIf , self :: use_vue_valid_v_on :: UseVueValidVOn ,] } }
+pub mod use_vue_valid_v_text;
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_sync_scripts :: NoSyncScripts , self :: no_vue_v_if_with_v_for :: NoVueVIfWithVFor , self :: use_vue_hyphenated_attributes :: UseVueHyphenatedAttributes , self :: use_vue_valid_v_bind :: UseVueValidVBind , self :: use_vue_valid_v_else :: UseVueValidVElse , self :: use_vue_valid_v_else_if :: UseVueValidVElseIf , self :: use_vue_valid_v_html :: UseVueValidVHtml , self :: use_vue_valid_v_if :: UseVueValidVIf , self :: use_vue_valid_v_on :: UseVueValidVOn , self :: use_vue_valid_v_text :: UseVueValidVText ,] } }

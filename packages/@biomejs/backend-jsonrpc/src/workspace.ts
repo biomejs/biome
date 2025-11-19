@@ -2099,6 +2099,11 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-if
 See https://biomejs.dev/linter/rules/use-vue-valid-v-on 
 	 */
 	useVueValidVOn?: UseVueValidVOnConfiguration;
+	/**
+	* Enforce valid v-text Vue directives.
+See https://biomejs.dev/linter/rules/use-vue-valid-v-text 
+	 */
+	useVueValidVText?: UseVueValidVTextConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -3667,6 +3672,9 @@ export type UseVueValidVIfConfiguration =
 export type UseVueValidVOnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVOnOptions;
+export type UseVueValidVTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVTextOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -5099,6 +5107,10 @@ export interface RuleWithUseVueValidVOnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVOnOptions;
 }
+export interface RuleWithUseVueValidVTextOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVTextOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -6338,6 +6350,7 @@ export interface UseVueValidVOnOptions {
 	 */
 	modifiers?: string[];
 }
+export type UseVueValidVTextOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -7112,6 +7125,7 @@ export type Category =
 	| "lint/nursery/useVueValidVIf"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueValidVOn"
+	| "lint/nursery/useVueValidVText"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

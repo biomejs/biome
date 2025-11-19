@@ -112,6 +112,11 @@ new-html-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new html lint rule with the given name, but targets vue. Name has to be camel case.
+new-html-vue-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Promotes a rule from the nursery group to a new group
 move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
