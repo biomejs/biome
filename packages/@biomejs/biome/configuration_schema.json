@@ -106,7 +106,7 @@
 			"type": "object",
 			"properties": {
 				"noAccessKey": {
-					"description": "Enforce that the accessKey attribute is not used on any HTML element.",
+					"description": "Enforce that the accesskey attribute is not used on any HTML element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoAccessKeyConfiguration" },
 						{ "type": "null" }

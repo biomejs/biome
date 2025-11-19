@@ -1042,7 +1042,7 @@ export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
  */
 export interface A11y {
 	/**
-	 * Enforce that the accessKey attribute is not used on any HTML element.
+	 * Enforce that the accesskey attribute is not used on any HTML element.
 	 */
 	noAccessKey?: RuleFixConfiguration_for_NoAccessKeyOptions;
 	/**
