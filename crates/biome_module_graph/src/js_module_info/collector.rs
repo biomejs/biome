@@ -610,36 +610,13 @@ impl JsModuleInfoCollector {
                     .as_js_variable_declaration()
                     .and_then(|decl| self.variable_declarations.get(decl.syntax()))
                 {
-                    let mut ty = typed_bindings
+                    let ty = typed_bindings
                         .iter()
                         .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
                         .unwrap_or_default();
 
                     if self.has_writable_reference(&binding) {
-                        let references = self.get_writable_references(&binding);
-                        for reference in references {
-                            let Some(node) = self.binding_node_by_start.get(&reference.range_start)
-                            else {
-                                continue;
-                            };
-                            for ancestor in node.ancestors().skip(1) {
-                                if let Some(assignment) =
-                                    JsAssignmentExpression::cast_ref(&ancestor)
-                                    && let Ok(right) = assignment.right()
-                                {
-                                    let data =
-                                        TypeData::from_any_js_expression(self, scope_id, &right);
-                                    let assigned_type = self.reference_to_owned_data(data);
-                                    ty = ResolvedTypeId::new(
-                                        self.level(),
-                                        self.union_with(ty.clone(), assigned_type),
-                                    )
-                                    .into();
-                                }
-                            }
-                        }
-
-                        ty
+                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
                     } else {
                         ty
                     }
@@ -686,6 +663,37 @@ impl JsModuleInfoCollector {
         }
 
         TypeReference::unknown()
+    }
+
+    /// Widen the type of binding from its writable references.
+    fn widen_binding_from_writable_references(
+        &mut self,
+        scope_id: ScopeId,
+        binding: &JsBindingData,
+        ty: &TypeReference,
+    ) -> TypeReference {
+        let references = self.get_writable_references(binding);
+        let mut ty = ty.clone();
+        for reference in references {
+            let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
+                continue;
+            };
+            for ancestor in node.ancestors().skip(1) {
+                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
+                    && let Ok(right) = assignment.right()
+                {
+                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                    let assigned_type = self.reference_to_owned_data(data);
+                    ty = ResolvedTypeId::new(
+                        self.level(),
+                        self.union_with(ty.clone(), assigned_type),
+                    )
+                    .into();
+                }
+            }
+        }
+
+        ty
     }
 
     /// After the first pass of the collector, import references have been
