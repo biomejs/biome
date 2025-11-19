@@ -1,4 +1,6 @@
-use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
@@ -89,12 +91,43 @@ declare_lint_rule! {
     ///   const isReady = true;
     ///   return <div>{isReady && <Content />}</div>;
     /// }
+    ///
+    /// ### `validStrategies`
+    ///
+    /// An array containing "coerce", "ternary", or both (default: ["ternary", "coerce"])
+    /// Decide which strategies are considered valid to prevent leaked renders (at least 1 is required).
+    /// The "coerce" option will transform the conditional of the JSX expression to a boolean.
+    /// The "ternary" option transforms the binary expression into a ternay expression return `null`
+    /// for falsy values.
+    ///
+    /// ```json
+    /// {
+    ///   "noLeakedRender": {
+    ///     "options": {
+    ///       "validStrategies": ["coerce", "ternary"]
+    ///     }
+    ///   }
+    /// }
+    ///
+    /// {
+    ///   "noLeakedRender": {
+    ///     "options": {
+    ///       "validStrategies": ["coerce"]
+    ///     }
+    ///   }
+    /// }
+    /// ```
+
     /// ```
 
     pub NoLeakedRender{
         version: "next",
         name: "noLeakedRender",
-        language: "js",
+        language: "jsx",
+        domains: &[RuleDomain::React],
+        sources: &[
+            RuleSource::EslintReact("no-leaked-render").same(),
+        ],
         recommended: false,
     }
 }
@@ -103,11 +136,7 @@ const COERCE_STRATEGY: &str = "coerce";
 const TERNARY_STRATEGY: &str = "ternary";
 const TERNARY_INVALID_ALTERNATE_VALUES: &[&str] = &["null", "undefined", "false"];
 
-const DEFAULT_VALID_STRATEGIES: &[&str] = &[TERNARY_STRATEGY, COERCE_STRATEGY];
-
-pub enum NoLeakedRenderState {
-    NoPotentialLeakedRender,
-}
+const DEFAULT_VALID_STRATEGIES: &[&str] = &[COERCE_STRATEGY, TERNARY_STRATEGY];
 
 fn get_variable_from_context(
     model: &SemanticModel,
@@ -132,7 +161,7 @@ declare_node_union! {
 
 impl Rule for NoLeakedRender {
     type Query = Semantic<Query>;
-    type State = NoLeakedRenderState;
+    type State = bool;
     type Signals = Option<Self::State>;
     type Options = NoLeakedRenderOptions;
 
@@ -179,25 +208,27 @@ impl Rule for NoLeakedRender {
                     if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                         let name = ident.name().ok()?;
 
-                        let binding = get_variable_from_context(
+                        if let Some(binding) = get_variable_from_context(
                             model,
                             left_node,
                             name.to_trimmed_text().trim(),
-                        )?;
+                        ) {
+                            let declaration = binding.tree().declaration()?;
 
-                        let declaration = binding.tree().declaration()?;
+                            if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+                                declaration
+                            {
+                                let initializer = declarator.initializer()?;
+                                let initializer = initializer.expression().ok()?;
 
-                        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
-                            declaration
-                        {
-                            let initializer = declarator.initializer()?;
-                            let initializer = initializer.expression().ok()?;
+                                if let AnyJsExpression::AnyJsLiteralExpression(literal) =
+                                    initializer
+                                {
+                                    let literal = literal.value_token().ok()?;
 
-                            if let AnyJsExpression::AnyJsLiteralExpression(literal) = initializer {
-                                let literal = literal.value_token().ok()?;
-
-                                if matches!(literal.text_trimmed(), "true" | "false") {
-                                    return None;
+                                    if matches!(literal.text_trimmed(), "true" | "false") {
+                                        return None;
+                                    }
                                 }
                             }
                         }
@@ -209,7 +240,7 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
-                return Some(NoLeakedRenderState::NoPotentialLeakedRender);
+                return Some(true);
             }
             Query::JsConditionalExpression(expr) => {
                 if valid_strategies
@@ -223,13 +254,13 @@ impl Rule for NoLeakedRender {
                     .iter()
                     .any(|&s| alternate.to_trimmed_text() == s);
 
-                let is_jsx_element_alt = matches!(alternate, AnyJsExpression::sxTagExpression(_));
+                let is_jsx_element_alt = matches!(alternate, AnyJsExpression::JsxTagExpression(_));
 
                 if !is_problematic_alternate || is_jsx_element_alt {
                     return None;
                 }
 
-                return Some(NoLeakedRenderState::NoPotentialLeakedRender);
+                return Some(true);
             }
         }
     }
