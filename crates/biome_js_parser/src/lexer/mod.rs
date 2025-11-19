@@ -132,6 +132,9 @@ pub(crate) struct JsLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: JsParserOptions,
+
+    /// The file source type (for determining if we're in .gjs/.gts files)
+    source_type: JsFileSource,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -311,11 +314,19 @@ impl<'src> JsLexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: JsParserOptions::default(),
+            source_type: JsFileSource::default(),
         }
     }
 
     pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    pub(crate) fn with_source_type(self, source_type: JsFileSource) -> Self {
+        Self {
+            source_type,
+            ..self
+        }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -1727,6 +1738,93 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Attempts to lex a Glimmer template block `<template>...</template>`.
+    /// Returns Some(GLIMMER_TEMPLATE) if a template was found, None otherwise.
+    ///
+    /// IMPORTANT: This function uses lookahead to check if we have a valid `<template>` tag.
+    /// The lexer position is ONLY advanced if we confirm it's a valid template. If we return `None`,
+    /// the position remains at the `<` character, allowing normal token lexing to continue.
+    fn try_lex_glimmer_template(&mut self) -> Option<JsSyntaxKind> {
+        // Save start position for error reporting (we're currently at '<')
+        let start = self.position;
+
+        // LOOKAHEAD PHASE: All checks below use non-advancing operations (peek_byte, byte_at, slicing)
+        // The lexer position is NOT advanced during these checks.
+
+        // Check if '<' is followed by 't' (first char of "template")
+        if self.peek_byte() != Some(b't') {
+            return None; // Not a template, position unchanged
+        }
+
+        // Check if we have enough bytes for "<template" (1 + 8 = 9 bytes)
+        let template_bytes = b"template";
+        let end_pos = self.position + 1 + template_bytes.len();
+        if end_pos > self.source.len() {
+            return None; // Not enough bytes, position unchanged
+        }
+
+        // Verify bytes spell "template" (checking self.position+1 through self.position+9)
+        if &self.source.as_bytes()[self.position + 1..end_pos] != template_bytes {
+            return None; // Doesn't match "template", position unchanged
+        }
+
+        // Verify that "template" is followed by '>' or whitespace (not part of an identifier)
+        // byte_at(9) checks self.position + 9, which is the byte immediately after "<template"
+        match self.byte_at(9) {
+            Some(b'>' | b' ' | b'\t' | b'\n' | b'\r') => {
+                // Valid template tag start
+            }
+            _ => return None, // Followed by identifier char (e.g., <templatex), position unchanged
+        }
+
+        // COMMIT PHASE: We've confirmed this is a valid `<template>` tag
+        // Now we advance the lexer position and consume the template
+
+        // Consume "<template" (9 bytes: 1 for '<' + 8 for 'template')
+        self.advance(9);
+
+        // Skip any attributes/whitespace until we find '>'
+        // Simplified loop: always advance, then check if we found '>'
+        while let Some(chr) = self.current_byte() {
+            self.next_byte(); // always consume the current byte
+            if chr == b'>' {
+                break; // Found '>', already consumed
+            }
+        }
+
+        // Save the position after the opening tag for error reporting
+        let opening_tag_end = self.position;
+
+        // Now search for "</template>"
+        let closing_tag = b"</template>";
+        let mut found_closing = false;
+
+        while self.position < self.source.len() {
+            if let Some(b'<') = self.current_byte() {
+                // Check if this is "</template>"
+                let end_pos = self.position + closing_tag.len();
+                if end_pos <= self.source.len()
+                    && &self.source.as_bytes()[self.position..end_pos] == closing_tag
+                {
+                    // Found closing tag, consume it
+                    self.advance(closing_tag.len());
+                    found_closing = true;
+                    break;
+                }
+            }
+            self.next_byte();
+        }
+
+        if !found_closing {
+            // Unclosed template - create diagnostic
+            let err = ParseDiagnostic::new("Unclosed `<template>` tag", start..opening_tag_end)
+                .with_hint("Add a closing `</template>` tag");
+            self.push_diagnostic(err);
+        }
+
+        Some(GLIMMER_TEMPLATE)
+    }
+
     #[inline]
     fn resolve_minus(&mut self) -> JsSyntaxKind {
         match self.next_byte() {
@@ -1744,6 +1842,13 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn resolve_less_than(&mut self) -> JsSyntaxKind {
+        // Check for Glimmer template in .gjs/.gts files
+        if self.source_type.as_embedding_kind().is_glimmer()
+            && let Some(template_kind) = self.try_lex_glimmer_template()
+        {
+            return template_kind;
+        }
+
         match self.next_byte() {
             Some(b'<') => {
                 if let Some(b'=') = self.next_byte() {

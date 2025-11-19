@@ -11,7 +11,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+use biome_js_parser::parse_js_with_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -132,7 +132,7 @@ fn parse(
 
     debug!("Parsing file with language {:?}", file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(script, file_source, cache);
 
     ParseResult {
         any_parse: parse.into(),

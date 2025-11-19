@@ -8,7 +8,7 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+use biome_js_parser::parse_js_with_cache;
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -119,7 +119,6 @@ fn parse(
         file_source
             .to_js_file_source()
             .unwrap_or(JsFileSource::ts()),
-        JsParserOptions::default(),
         cache,
     );
 

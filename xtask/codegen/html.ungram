@@ -73,12 +73,15 @@ AnyHtmlElement =
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
+	| GlimmerMustacheComment
+	| GlimmerTripleStashExpression
 	| HtmlBogusElement
 
 AnyHtmlContent =
 	HtmlContent
 	| HtmlEmbeddedContent
 	| AnyHtmlTextExpression
+	| AnyGlimmerExpression
 
 AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
@@ -162,6 +165,8 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
+	| GlimmerSplattribute
+	| GlimmerElementModifier
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -208,3 +213,147 @@ HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
 HtmlEmbeddedContent = value: 'html_literal'
+
+// ==================================
+// Glimmer
+// ==================================
+
+// Union of all Glimmer expressions
+AnyGlimmerExpression =
+	GlimmerMustacheExpression
+	| GlimmerMustacheComment
+	| GlimmerTripleStashExpression
+	| GlimmerBlockHelper
+	| GlimmerNamedBlock
+	| GlimmerBogusExpression
+
+// Bogus node for error recovery
+GlimmerBogusExpression = SyntaxElement*
+
+// Basic mustache: {{path args}}
+GlimmerMustacheExpression =
+	l_curly2_token: '{{'
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_curly2_token: '}}'
+
+// Mustache comment: {{! comment }} or {{!-- comment --}}
+// Note: MUSTACHE_COMMENT is consumed entirely by the lexer
+GlimmerMustacheComment =
+	comment_token: 'mustache_comment'
+
+// Triple-stash (unescaped): {{{path args}}}
+// Like mustache expressions but outputs unescaped HTML
+GlimmerTripleStashExpression =
+	l_curly3_token: 'l_triple_curly'
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_curly3_token: 'r_triple_curly'
+
+// Block helper: {{#if}}...{{/if}}
+GlimmerBlockHelper =
+	opening: GlimmerBlockHelperOpening
+	children: HtmlElementList
+	closing: GlimmerBlockHelperClosing
+
+GlimmerBlockHelperOpening =
+	l_curly2_token: '{{'
+	hash_token: '#'
+	helper: GlimmerPath
+	arguments: GlimmerArgumentList
+	block_params: GlimmerBlockParams?
+	r_curly2_token: '}}'
+
+GlimmerBlockHelperClosing =
+	l_curly2_token: '{{'
+	slash_token: '/'
+	helper: GlimmerPath
+	r_curly2_token: '}}'
+
+// Block params: as |item index|
+GlimmerBlockParams =
+	as_token: 'ident'
+	l_pipe_token: '|'
+	params: GlimmerBlockParamList
+	r_pipe_token: '|'
+
+GlimmerBlockParamList = GlimmerBlockParam*
+
+GlimmerBlockParam =
+	name_token: 'ident'
+
+// Path: this.foo, @arg, helper
+GlimmerPath =
+	at_token: '@'?
+	segments: GlimmerPathSegmentList
+
+GlimmerPathSegmentList = (GlimmerPathSegment ('.' GlimmerPathSegment)*)
+
+GlimmerPathSegment =
+	value_token: 'ident'
+
+// Arguments
+GlimmerArgumentList = AnyGlimmerArgument*
+
+AnyGlimmerArgument =
+	GlimmerPositionalArgument
+	| GlimmerNamedArgument
+
+GlimmerPositionalArgument =
+	value: AnyGlimmerArgumentValue
+
+GlimmerNamedArgument =
+	name_token: 'ident'
+	eq_token: '='
+	value: AnyGlimmerArgumentValue
+
+AnyGlimmerArgumentValue =
+	GlimmerPath
+	| GlimmerStringLiteral
+	| GlimmerLiteral
+	| GlimmerSubexpression
+
+// Subexpression: (helper arg1 arg2)
+GlimmerSubexpression =
+	l_paren_token: '('
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_paren_token: ')'
+
+GlimmerStringLiteral =
+	value_token: 'html_string_literal'
+
+GlimmerLiteral =
+	value_token: 'html_literal'
+
+// Splattribute: ...attributes
+GlimmerSplattribute =
+	dotdotdot_token: '...'
+	attributes_token: 'ident'
+
+// Element modifier: {{modifier args}} in attribute position
+GlimmerElementModifier =
+	l_curly2_token: '{{'
+	path: GlimmerPath
+	arguments: GlimmerArgumentList
+	r_curly2_token: '}}'
+
+// Named block: <:blockName>content</:blockName>
+GlimmerNamedBlock =
+	opening: GlimmerNamedBlockOpening
+	children: HtmlElementList
+	closing: GlimmerNamedBlockClosing
+
+GlimmerNamedBlockOpening =
+	l_angle_token: '<'
+	colon_token: ':'
+	name_token: 'ident'
+	attributes: HtmlAttributeList
+	r_angle_token: '>'
+
+GlimmerNamedBlockClosing =
+	l_angle_token: '<'
+	slash_token: '/'
+	colon_token: ':'
+	name_token: 'ident'
+	r_angle_token: '>'

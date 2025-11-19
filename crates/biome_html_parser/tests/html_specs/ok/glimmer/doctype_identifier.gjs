@@ -1,0 +1,4 @@
+<template>
+  {{doctype}}
+  {{DOCTYPE}}
+</template>

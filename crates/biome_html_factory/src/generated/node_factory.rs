@@ -40,6 +40,297 @@ pub fn astro_frontmatter_element(
         ],
     ))
 }
+pub fn glimmer_block_helper(
+    opening: GlimmerBlockHelperOpening,
+    children: HtmlElementList,
+    closing: GlimmerBlockHelperClosing,
+) -> GlimmerBlockHelper {
+    GlimmerBlockHelper::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BLOCK_HELPER,
+        [
+            Some(SyntaxElement::Node(opening.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing.into_syntax())),
+        ],
+    ))
+}
+pub fn glimmer_block_helper_closing(
+    l_curly2_token_token: SyntaxToken,
+    slash_token_token: SyntaxToken,
+    helper: GlimmerPath,
+    r_curly2_token_token: SyntaxToken,
+) -> GlimmerBlockHelperClosing {
+    GlimmerBlockHelperClosing::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_CLOSING,
+        [
+            Some(SyntaxElement::Token(l_curly2_token_token)),
+            Some(SyntaxElement::Token(slash_token_token)),
+            Some(SyntaxElement::Node(helper.into_syntax())),
+            Some(SyntaxElement::Token(r_curly2_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_block_helper_opening(
+    l_curly2_token_token: SyntaxToken,
+    hash_token_token: SyntaxToken,
+    helper: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly2_token_token: SyntaxToken,
+) -> GlimmerBlockHelperOpeningBuilder {
+    GlimmerBlockHelperOpeningBuilder {
+        l_curly2_token_token,
+        hash_token_token,
+        helper,
+        arguments,
+        r_curly2_token_token,
+        block_params: None,
+    }
+}
+pub struct GlimmerBlockHelperOpeningBuilder {
+    l_curly2_token_token: SyntaxToken,
+    hash_token_token: SyntaxToken,
+    helper: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly2_token_token: SyntaxToken,
+    block_params: Option<GlimmerBlockParams>,
+}
+impl GlimmerBlockHelperOpeningBuilder {
+    pub fn with_block_params(mut self, block_params: GlimmerBlockParams) -> Self {
+        self.block_params = Some(block_params);
+        self
+    }
+    pub fn build(self) -> GlimmerBlockHelperOpening {
+        GlimmerBlockHelperOpening::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_OPENING,
+            [
+                Some(SyntaxElement::Token(self.l_curly2_token_token)),
+                Some(SyntaxElement::Token(self.hash_token_token)),
+                Some(SyntaxElement::Node(self.helper.into_syntax())),
+                Some(SyntaxElement::Node(self.arguments.into_syntax())),
+                self.block_params
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly2_token_token)),
+            ],
+        ))
+    }
+}
+pub fn glimmer_block_param(name_token_token: SyntaxToken) -> GlimmerBlockParam {
+    GlimmerBlockParam::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BLOCK_PARAM,
+        [Some(SyntaxElement::Token(name_token_token))],
+    ))
+}
+pub fn glimmer_block_params(
+    as_token_token: SyntaxToken,
+    l_pipe_token_token: SyntaxToken,
+    params: GlimmerBlockParamList,
+    r_pipe_token_token: SyntaxToken,
+) -> GlimmerBlockParams {
+    GlimmerBlockParams::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BLOCK_PARAMS,
+        [
+            Some(SyntaxElement::Token(as_token_token)),
+            Some(SyntaxElement::Token(l_pipe_token_token)),
+            Some(SyntaxElement::Node(params.into_syntax())),
+            Some(SyntaxElement::Token(r_pipe_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_element_modifier(
+    l_curly2_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly2_token_token: SyntaxToken,
+) -> GlimmerElementModifier {
+    GlimmerElementModifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_ELEMENT_MODIFIER,
+        [
+            Some(SyntaxElement::Token(l_curly2_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_curly2_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_literal(value_token_token: SyntaxToken) -> GlimmerLiteral {
+    GlimmerLiteral::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_LITERAL,
+        [Some(SyntaxElement::Token(value_token_token))],
+    ))
+}
+pub fn glimmer_mustache_comment(comment_token_token: SyntaxToken) -> GlimmerMustacheComment {
+    GlimmerMustacheComment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_MUSTACHE_COMMENT,
+        [Some(SyntaxElement::Token(comment_token_token))],
+    ))
+}
+pub fn glimmer_mustache_expression(
+    l_curly2_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly2_token_token: SyntaxToken,
+) -> GlimmerMustacheExpression {
+    GlimmerMustacheExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly2_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_curly2_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_named_argument(
+    name_token_token: SyntaxToken,
+    eq_token_token: SyntaxToken,
+    value: AnyGlimmerArgumentValue,
+) -> GlimmerNamedArgument {
+    GlimmerNamedArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_ARGUMENT,
+        [
+            Some(SyntaxElement::Token(name_token_token)),
+            Some(SyntaxElement::Token(eq_token_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn glimmer_named_block(
+    opening: GlimmerNamedBlockOpening,
+    children: HtmlElementList,
+    closing: GlimmerNamedBlockClosing,
+) -> GlimmerNamedBlock {
+    GlimmerNamedBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing.into_syntax())),
+        ],
+    ))
+}
+pub fn glimmer_named_block_closing(
+    l_angle_token_token: SyntaxToken,
+    slash_token_token: SyntaxToken,
+    colon_token_token: SyntaxToken,
+    name_token_token: SyntaxToken,
+    r_angle_token_token: SyntaxToken,
+) -> GlimmerNamedBlockClosing {
+    GlimmerNamedBlockClosing::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_CLOSING,
+        [
+            Some(SyntaxElement::Token(l_angle_token_token)),
+            Some(SyntaxElement::Token(slash_token_token)),
+            Some(SyntaxElement::Token(colon_token_token)),
+            Some(SyntaxElement::Token(name_token_token)),
+            Some(SyntaxElement::Token(r_angle_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_named_block_opening(
+    l_angle_token_token: SyntaxToken,
+    colon_token_token: SyntaxToken,
+    name_token_token: SyntaxToken,
+    attributes: HtmlAttributeList,
+    r_angle_token_token: SyntaxToken,
+) -> GlimmerNamedBlockOpening {
+    GlimmerNamedBlockOpening::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_OPENING,
+        [
+            Some(SyntaxElement::Token(l_angle_token_token)),
+            Some(SyntaxElement::Token(colon_token_token)),
+            Some(SyntaxElement::Token(name_token_token)),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_path(segments: GlimmerPathSegmentList) -> GlimmerPathBuilder {
+    GlimmerPathBuilder {
+        segments,
+        at_token_token: None,
+    }
+}
+pub struct GlimmerPathBuilder {
+    segments: GlimmerPathSegmentList,
+    at_token_token: Option<SyntaxToken>,
+}
+impl GlimmerPathBuilder {
+    pub fn with_at_token_token(mut self, at_token_token: SyntaxToken) -> Self {
+        self.at_token_token = Some(at_token_token);
+        self
+    }
+    pub fn build(self) -> GlimmerPath {
+        GlimmerPath::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::GLIMMER_PATH,
+            [
+                self.at_token_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.segments.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn glimmer_path_segment(value_token_token: SyntaxToken) -> GlimmerPathSegment {
+    GlimmerPathSegment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_PATH_SEGMENT,
+        [Some(SyntaxElement::Token(value_token_token))],
+    ))
+}
+pub fn glimmer_positional_argument(value: AnyGlimmerArgumentValue) -> GlimmerPositionalArgument {
+    GlimmerPositionalArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_POSITIONAL_ARGUMENT,
+        [Some(SyntaxElement::Node(value.into_syntax()))],
+    ))
+}
+pub fn glimmer_splattribute(
+    dotdotdot_token_token: SyntaxToken,
+    attributes_token_token: SyntaxToken,
+) -> GlimmerSplattribute {
+    GlimmerSplattribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_SPLATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(dotdotdot_token_token)),
+            Some(SyntaxElement::Token(attributes_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_string_literal(value_token_token: SyntaxToken) -> GlimmerStringLiteral {
+    GlimmerStringLiteral::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_STRING_LITERAL,
+        [Some(SyntaxElement::Token(value_token_token))],
+    ))
+}
+pub fn glimmer_subexpression(
+    l_paren_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_paren_token_token: SyntaxToken,
+) -> GlimmerSubexpression {
+    GlimmerSubexpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_SUBEXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token_token)),
+        ],
+    ))
+}
+pub fn glimmer_triple_stash_expression(
+    l_curly3_token_token: SyntaxToken,
+    path: GlimmerPath,
+    arguments: GlimmerArgumentList,
+    r_curly3_token_token: SyntaxToken,
+) -> GlimmerTripleStashExpression {
+    GlimmerTripleStashExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_TRIPLE_STASH_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly3_token_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Node(arguments.into_syntax())),
+            Some(SyntaxElement::Token(r_curly3_token_token)),
+        ],
+    ))
+}
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
         name,
@@ -369,6 +660,51 @@ pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
         [Some(SyntaxElement::Token(svelte_ident_token))],
     ))
 }
+pub fn glimmer_argument_list<I>(items: I) -> GlimmerArgumentList
+where
+    I: IntoIterator<Item = AnyGlimmerArgument>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GlimmerArgumentList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_ARGUMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn glimmer_block_param_list<I>(items: I) -> GlimmerBlockParamList
+where
+    I: IntoIterator<Item = GlimmerBlockParam>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GlimmerBlockParamList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BLOCK_PARAM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn glimmer_path_segment_list<I, S>(items: I, separators: S) -> GlimmerPathSegmentList
+where
+    I: IntoIterator<Item = GlimmerPathSegment>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    GlimmerPathSegmentList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,
@@ -421,6 +757,16 @@ where
 {
     AstroBogusFrontmatter::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER,
+        slots,
+    ))
+}
+pub fn glimmer_bogus_expression<I>(slots: I) -> GlimmerBogusExpression
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GlimmerBogusExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::GLIMMER_BOGUS_EXPRESSION,
         slots,
     ))
 }

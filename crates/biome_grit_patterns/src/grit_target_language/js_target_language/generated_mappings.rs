@@ -298,6 +298,7 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "JsFunctionExpression" => lang::JsFunctionExpression::KIND_SET.iter().next(),
         "JsGetterClassMember" => lang::JsGetterClassMember::KIND_SET.iter().next(),
         "JsGetterObjectMember" => lang::JsGetterObjectMember::KIND_SET.iter().next(),
+        "JsGlimmerTemplate" => lang::JsGlimmerTemplate::KIND_SET.iter().next(),
         "JsIdentifierAssignment" => lang::JsIdentifierAssignment::KIND_SET.iter().next(),
         "JsIdentifierBinding" => lang::JsIdentifierBinding::KIND_SET.iter().next(),
         "JsIdentifierExpression" => lang::JsIdentifierExpression::KIND_SET.iter().next(),
