@@ -27,9 +27,9 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => value: false
+Module TypeId(0) => bool: false
 
-Module TypeId(1) => value: true
+Module TypeId(1) => bool: true
 
 Module TypeId(2) => unknown
 
@@ -51,9 +51,9 @@ Module TypeId(5) => sync Function "f" {
 ## Registered types
 
 ```
-Full TypeId(0) => value: false
+Full TypeId(0) => bool: false
 
-Full TypeId(1) => value: true
+Full TypeId(1) => bool: true
 
 Full TypeId(2) => unknown
 

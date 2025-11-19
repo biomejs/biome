@@ -32,11 +32,11 @@ Imports {
 ```
 Module TypeId(0) => undefined
 
-Module TypeId(1) => value: some string
+Module TypeId(1) => string: some string
 
 Module TypeId(2) => unknown
 
-Module TypeId(3) => value: 123
+Module TypeId(3) => number: 123
 
 Module TypeId(4) => Module(0) TypeId(0) | Module(0) TypeId(1)
 
@@ -68,11 +68,11 @@ Module TypeId(8) => sync Function "g" {
 ```
 Full TypeId(0) => undefined
 
-Full TypeId(1) => value: some string
+Full TypeId(1) => string: some string
 
 Full TypeId(2) => unknown
 
-Full TypeId(3) => value: 123
+Full TypeId(3) => number: 123
 
 Full TypeId(4) => Module(0) TypeId(0) | Module(0) TypeId(1)
 
