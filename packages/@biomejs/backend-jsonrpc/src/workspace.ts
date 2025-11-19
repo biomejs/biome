@@ -911,6 +911,11 @@ See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
+	* Sort interface members by key.
+See https://biomejs.dev/assist/actions/use-sorted-interface-members 
+	 */
+	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
+	/**
 	* Sort the keys of a JSON object in natural order.
 See https://biomejs.dev/assist/actions/use-sorted-keys 
 	 */
@@ -1077,6 +1082,9 @@ export type OrganizeImportsConfiguration =
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedInterfaceMembersConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedInterfaceMembersOptions;
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
@@ -2044,11 +2052,6 @@ See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
-	/**
-	* Sort interface members by key.
-See https://biomejs.dev/linter/rules/use-sorted-interface-members 
-	 */
-	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
 	/**
 	* Enforce the use of the spread operator over .apply().
 See https://biomejs.dev/linter/rules/use-spread 
@@ -3076,6 +3079,10 @@ export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
 }
+export interface RuleAssistWithUseSortedInterfaceMembersOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedInterfaceMembersOptions;
+}
 export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
@@ -3639,9 +3646,6 @@ export type UseQwikValidLexicalScopeConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
-export type UseSortedInterfaceMembersConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseSortedInterfaceMembersOptions;
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
@@ -4235,6 +4239,7 @@ export interface OrganizeImportsOptions {
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
 	sortOrder?: SortOrder;
 }
@@ -5059,11 +5064,6 @@ export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
-}
-export interface RuleWithUseSortedInterfaceMembersOptions {
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseSortedInterfaceMembersOptions;
 }
 export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
@@ -6316,7 +6316,6 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
-export type UseSortedInterfaceMembersOptions = {};
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
@@ -7113,7 +7112,6 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useSortedClasses"
-	| "lint/nursery/useSortedInterfaceMembers"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"

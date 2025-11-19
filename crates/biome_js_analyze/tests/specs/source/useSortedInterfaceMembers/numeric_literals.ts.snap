@@ -14,7 +14,7 @@ interface _NumericKeys {
 
 # Diagnostics
 ```
-numeric_literals.ts:1:1 lint/nursery/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+numeric_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The interface members are not sorted by key.
   

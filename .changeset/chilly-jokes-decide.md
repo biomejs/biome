@@ -2,9 +2,9 @@
 "@biomejs/biome": patch
 ---
 
-Added a new nursery rule `useSortedInterfaceMembers` that enforces an ordering for TypeScript interface members.
+Added a new assist action `useSortedInterfaceMembers` that sorts TypeScript interface members, for readability.
 
-The rule sorts interface members for readability. It includes an autofix.
+It includes an autofix.
 
 Invalid example.
 
@@ -17,7 +17,7 @@ interface MixedMembers {
 }
 ```
 
-Valid example (after the fix).
+Valid example (after using the assist).
 
 ```ts
 interface MixedMembers {

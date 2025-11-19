@@ -1,9 +1,12 @@
+use std::borrow::Cow;
+
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    declare_source_rule,
 };
 
 use biome_console::markup;
+use biome_diagnostics::category;
 use biome_js_syntax::{
     AnyJsObjectMemberName, AnyTsTypeMember, TsInterfaceDeclaration, TsTypeMemberList,
 };
@@ -12,7 +15,7 @@ use biome_rule_options::use_sorted_interface_members::UseSortedInterfaceMembersO
 use crate::JsRuleAction;
 use biome_rowan::{AstNode, AstNodeExt, AstNodeList, BatchMutationExt, TextRange};
 use biome_string_case::comparable_token::ComparableToken;
-declare_lint_rule! {
+declare_source_rule! {
     /// Sort interface members by key.
     ///
     /// Interface members are sorted according to their names. The rule distinguishes between
@@ -91,12 +94,15 @@ impl Rule for UseSortedInterfaceMembers {
         let interface = ctx.query();
 
         Some(RuleDiagnostic::new(
-            rule_category!(),
+            category!("assist/source/useSortedInterfaceMembers"),
             interface.range(),
             markup! {
                 "The interface members are not sorted by key."
             },
         ))
+    }
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().range())
     }
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let interface = ctx.query();
@@ -109,14 +115,11 @@ impl Rule for UseSortedInterfaceMembers {
         sort_interface_members_in_place(&list, comparator, &mut mutation)?;
 
         Some(RuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            rule_action_category!(),
             ctx.metadata().applicability(),
             markup! { "Sort the interface members by key." },
             mutation,
         ))
-    }
-    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        Some(ctx.query().range())
     }
 }
 fn comparator(a: &ComparableToken, b: &ComparableToken) -> std::cmp::Ordering {
