@@ -35,3 +35,19 @@ const Component5 = ({ elements }) => {
 const Component6 = ({ numberA, numberB }) => {
 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
 };
+
+const MyComponent1 = () => {
+	return (
+		<>
+			{someCondition && (
+				<div>
+					<p>hello</p>
+				</div>
+			)}
+		</>
+	);
+};
+
+const MyComponent2 = () => {
+	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
+};

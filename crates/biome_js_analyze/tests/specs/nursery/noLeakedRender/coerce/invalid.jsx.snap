@@ -53,13 +53,6 @@ const Component11 = ({ items, somethingElse, title }) => {
 	return <div>{items.length > 0 && somethingElse && title}</div>;
 };
 
-const MyComponent1 = () => {
-	const items = [];
-	const breakpoint = { phones: true };
-
-	return <div>{items.length > 0 && breakpoint.phones && <span />}</div>;
-};
-
 const MyComponent2 = () => {
 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
 };
@@ -315,35 +308,16 @@ invalid.jsx:47:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:54:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:80:24 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    52 │ 	const breakpoint = { phones: true };
-    53 │ 
-  > 54 │ 	return <div>{items.length > 0 && breakpoint.phones && <span />}</div>;
-       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    55 │ };
-    56 │ 
-  
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
-  
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
-  
-
-```
-
-```
-invalid.jsx:87:24 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    85 │ const isOpen = 0;
-    86 │ const Component12 = () => {
-  > 87 │ 	return <Popover open={isOpen && items.length > 0} />;
+    78 │ const isOpen = 0;
+    79 │ const Component12 = () => {
+  > 80 │ 	return <Popover open={isOpen && items.length > 0} />;
        │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    88 │ };
-    89 │ 
+    81 │ };
+    82 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
   

@@ -3666,13 +3666,13 @@
 			},
 			"additionalProperties": false
 		},
-		"NoLeakedConditionalRenderingConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoLeakedConditionalRenderingOptions" }
+		"NoLeakedRenderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
 			]
 		},
-		"NoLeakedConditionalRenderingOptions": {
+		"NoLeakedRenderOptions": {
 			"type": "object",
 			"properties": {
 				"validStrategies": {
@@ -5116,12 +5116,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noLeakedConditionalRendering": {
-					"description": "Succinct description of the rule.",
+				"noLeakedRender": {
+					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
 					"anyOf": [
-						{
-							"$ref": "#/definitions/NoLeakedConditionalRenderingConfiguration"
-						},
+						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7019,22 +7017,14 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoLeakedConditionalRenderingOptions": {
+		"RuleWithNoLeakedRenderOptions": {
 			"type": "object",
-			"required": ["level"],
 			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoLeakedConditionalRenderingOptions" }
-					]
-				}
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
 			},
-			"additionalProperties": false
+			"additionalProperties": false,
+			"required": ["level"]
 		},
 		"RuleWithNoMagicNumbersOptions": {
 			"type": "object",

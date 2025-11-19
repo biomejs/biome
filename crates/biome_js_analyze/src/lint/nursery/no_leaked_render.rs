@@ -153,23 +153,22 @@ impl Rule for NoLeakedRender {
         match query {
             Query::JsLogicalExpression(exp) => {
                 let op = exp.operator().ok()?;
-                let left = exp.left().ok()?;
 
                 if op != JsLogicalOperator::LogicalAnd {
                     return None;
                 }
-
-                let is_coerce_valid_left_side = matches!(
-                    left,
-                    AnyJsExpression::JsUnaryExpression(_)
-                        | AnyJsExpression::JsCallExpression(_)
-                        | AnyJsExpression::JsBinaryExpression(_)
-                );
+                let left = exp.left().ok()?;
 
                 if valid_strategies
                     .iter()
                     .any(|s| s.as_ref() == COERCE_STRATEGY)
                 {
+                    let is_coerce_valid_left_side = matches!(
+                        left,
+                        AnyJsExpression::JsUnaryExpression(_)
+                            | AnyJsExpression::JsCallExpression(_)
+                            | AnyJsExpression::JsBinaryExpression(_)
+                    );
                     if is_coerce_valid_left_side
                         || get_is_coerce_valid_nested_logical_expression(exp.left())
                     {
@@ -224,7 +223,7 @@ impl Rule for NoLeakedRender {
                     .iter()
                     .any(|&s| alternate.to_trimmed_text() == s);
 
-                let is_jsx_element_alt = matches!(alternate, AnyJsExpression::JsxTagExpression(_));
+                let is_jsx_element_alt = matches!(alternate, AnyJsExpression::sxTagExpression(_));
 
                 if !is_problematic_alternate || is_jsx_element_alt {
                     return None;

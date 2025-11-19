@@ -1,5 +1,5 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
-import type { Transport } from './transport';
+import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
 	path: BiomePath;
@@ -8,17 +8,23 @@ export interface SupportsFeatureParams {
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
 export type ProjectKey = number;
-export type FeatureKind = 'format' | 'lint' | 'search' | 'assist' | 'debug' | 'htmlFullSupport';
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export interface FileFeaturesResult {
 	featuresSupported: FeaturesSupported;
 }
 export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
 export type SupportKind =
-	| 'supported'
-	| 'ignored'
-	| 'protected'
-	| 'featureNotEnabled'
-	| 'fileNotSupported';
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	projectKey: ProjectKey;
@@ -86,7 +92,7 @@ export interface Configuration {
 	plugins?: Plugins;
 	/**
 	* Indicates whether this configuration file is at the root of a Biome
-project. By default, this is `true`.
+project. By default, this is `true`. 
 	 */
 	root?: Bool;
 	/**
@@ -106,7 +112,7 @@ export interface AssistConfiguration {
 	enabled?: Bool;
 	/**
 	* A list of glob patterns. Biome will include files/folders that will
-match these patterns.
+match these patterns. 
 	 */
 	includes?: NormalizedGlob[];
 }
@@ -145,7 +151,7 @@ export interface FilesConfiguration {
 instead: <https://biomejs.dev/reference/configuration/#filesincludes>
 
 Set of file and folder names that should be unconditionally ignored by
-Biome's scanner.
+Biome's scanner. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -154,12 +160,12 @@ Biome's scanner.
 	ignoreUnknown?: Bool;
 	/**
 	* A list of glob patterns. Biome will handle only those files/folders that will
-match these patterns.
+match these patterns. 
 	 */
 	includes?: NormalizedGlob[];
 	/**
 	* The maximum allowed size for source code files in bytes. Files above
-this limit will be ignored for performance reasons. Defaults to 1 MiB
+this limit will be ignored for performance reasons. Defaults to 1 MiB 
 	 */
 	maxSize?: MaxSize;
 }
@@ -186,17 +192,17 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
 	 */
 	expand?: Expand;
 	/**
 	* Whether formatting should be allowed to proceed if a given file
-has syntax errors
+has syntax errors 
 	 */
 	formatWithErrors?: Bool;
 	/**
 	* A list of glob patterns. The formatter will include files/folders that will
-match these patterns.
+match these patterns. 
 	 */
 	includes?: NormalizedGlob[];
 	/**
@@ -219,7 +225,7 @@ match these patterns.
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
-Default: `true`.
+Default: `true`. 
 	 */
 	useEditorconfig?: Bool;
 }
@@ -291,7 +297,7 @@ export interface JsConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics.
+If defined here, they should not emit diagnostics. 
 	 */
 	globals?: string[];
 	/**
@@ -339,7 +345,7 @@ export interface LinterConfiguration {
 	enabled?: Bool;
 	/**
 	* A list of glob patterns. The analyzer will handle only those files/folders that will
-match these patterns.
+match these patterns. 
 	 */
 	includes?: NormalizedGlob[];
 	/**
@@ -372,12 +378,12 @@ folder where `biome.json` was found.
 
 If Biome can't find the configuration, it will attempt to use the current working directory.
 If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
-will be emitted
+will be emitted 
 	 */
 	root?: string;
 	/**
 	* Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
-specified in the ignore file.
+specified in the ignore file. 
 	 */
 	useIgnoreFile?: Bool;
 }
@@ -457,20 +463,20 @@ export interface CssParserConfiguration {
 	tailwindDirectives?: Bool;
 }
 export type MaxSize = number;
-export type AttributePosition = 'auto' | 'multiline';
+export type AttributePosition = "auto" | "multiline";
 /**
  * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
-export type Expand = 'auto' | 'always' | 'never';
-export type IndentStyle = 'tab' | 'space';
+export type Expand = "auto" | "always" | "never";
+export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
-export type LineEnding = 'lf' | 'crlf' | 'cr' | 'auto';
+export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320
+The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
 /**
@@ -669,7 +675,7 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
 	 */
 	expand?: Expand;
 	/**
@@ -716,7 +722,7 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
-export type JsxRuntime = 'transparent' | 'reactClassic';
+export type JsxRuntime = "transparent" | "reactClassic";
 /**
  * Linter options specific to the JavaScript linter
  */
@@ -732,19 +738,19 @@ export interface JsLinterConfiguration {
 export interface JsParserConfiguration {
 	/**
 	* Enables parsing of Grit metavariables.
-Defaults to `false`.
+Defaults to `false`. 
 	 */
 	gritMetavariables?: Bool;
 	/**
 	* When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
 
-Defaults to `true`.
+Defaults to `true`. 
 	 */
 	jsxEverywhere?: Bool;
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change.
+These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
@@ -772,7 +778,7 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
 	 */
 	expand?: Expand;
 	/**
@@ -864,7 +870,7 @@ export interface OverridePattern {
 	html?: HtmlConfiguration;
 	/**
 	* A list of glob patterns. Biome will include files/folders that will
-match these patterns.
+match these patterns. 
 	 */
 	includes?: OverrideGlobs;
 	/**
@@ -885,14 +891,14 @@ match these patterns.
 	plugins?: Plugins;
 }
 export type PluginConfiguration = string;
-export type VcsClientKind = 'git';
+export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
  */
 export interface Source {
 	/**
 	* Provides a code action to sort the imports and exports in the file using a built-in or custom order.
-See https://biomejs.dev/assist/actions/organize-imports
+See https://biomejs.dev/assist/actions/organize-imports 
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
 	/**
@@ -901,31 +907,31 @@ See https://biomejs.dev/assist/actions/organize-imports
 	recommended?: boolean;
 	/**
 	* Enforce attribute sorting in JSX elements.
-See https://biomejs.dev/assist/actions/use-sorted-attributes
+See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
 	* Sort the keys of a JSON object in natural order.
-See https://biomejs.dev/assist/actions/use-sorted-keys
+See https://biomejs.dev/assist/actions/use-sorted-keys 
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
 	* Enforce ordering of CSS properties and nested rules.
-See https://biomejs.dev/assist/actions/use-sorted-properties
+See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
 }
-export type QuoteStyle = 'double' | 'single';
+export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
 
-When true, the content of `<script>` and `<style>` tags will be indented one level.
+When true, the content of `<script>` and `<style>` tags will be indented one level. 
 	 */
 export type IndentScriptAndStyle = boolean;
 /**
  * Controls whether void-elements should be self closed
  */
-export type SelfCloseVoidElements = 'never' | 'always';
+export type SelfCloseVoidElements = "never" | "always";
 /**
 	* Whitespace sensitivity for HTML formatting.
 
@@ -949,34 +955,34 @@ as this, where the content hugs the tags:
 >
 ```
 
-Note that this is only necessary for inline elements. Block elements do not have this restriction.
+Note that this is only necessary for inline elements. Block elements do not have this restriction. 
 	 */
-export type WhitespaceSensitivity = 'css' | 'strict' | 'ignore';
-export type ArrowParentheses = 'always' | 'asNeeded';
-export type OperatorLinebreak = 'after' | 'before';
-export type QuoteProperties = 'asNeeded' | 'preserve';
-export type Semicolons = 'always' | 'asNeeded';
+export type WhitespaceSensitivity = "css" | "strict" | "ignore";
+export type ArrowParentheses = "always" | "asNeeded";
+export type OperatorLinebreak = "after" | "before";
+export type QuoteProperties = "asNeeded" | "preserve";
+export type Semicolons = "always" | "asNeeded";
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files.
  */
-export type JsTrailingCommas = 'all' | 'es5' | 'none';
+export type JsTrailingCommas = "all" | "es5" | "none";
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
-export type JsonTrailingCommas = 'none' | 'all';
+export type JsonTrailingCommas = "none" | "all";
 /**
  * Rule domains
  */
 export type RuleDomain =
-	| 'react'
-	| 'test'
-	| 'solid'
-	| 'next'
-	| 'qwik'
-	| 'vue'
-	| 'project'
-	| 'tailwind';
-export type RuleDomainValue = 'all' | 'none' | 'recommended';
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "qwik"
+	| "vue"
+	| "project"
+	| "tailwind";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
 export type SeverityOrCorrectness = GroupPlainConfiguration | Correctness;
@@ -1021,12 +1027,12 @@ When set to `auto`, object literals are formatted on multiple lines if the first
 and array literals are formatted on a single line if it fits in the line.
 When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
 When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
 	 */
 	expand?: Expand;
 	/**
 	* Stores whether formatting should be allowed to proceed if a given file
-has syntax errors
+has syntax errors 
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -1077,89 +1083,89 @@ export type UseSortedKeysConfiguration =
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
-export type GroupPlainConfiguration = 'off' | 'on' | 'info' | 'warn' | 'error';
+export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
  */
 export interface A11y {
 	/**
 	* Enforce that the accessKey attribute is not used on any HTML element.
-See https://biomejs.dev/linter/rules/no-access-key
+See https://biomejs.dev/linter/rules/no-access-key 
 	 */
 	noAccessKey?: NoAccessKeyConfiguration;
 	/**
 	* Enforce that aria-hidden="true" is not set on focusable elements.
-See https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable
+See https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable 
 	 */
 	noAriaHiddenOnFocusable?: NoAriaHiddenOnFocusableConfiguration;
 	/**
 	* Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
-See https://biomejs.dev/linter/rules/no-aria-unsupported-elements
+See https://biomejs.dev/linter/rules/no-aria-unsupported-elements 
 	 */
 	noAriaUnsupportedElements?: NoAriaUnsupportedElementsConfiguration;
 	/**
 	* Enforce that autoFocus prop is not used on elements.
-See https://biomejs.dev/linter/rules/no-autofocus
+See https://biomejs.dev/linter/rules/no-autofocus 
 	 */
 	noAutofocus?: NoAutofocusConfiguration;
 	/**
 	* Enforces that no distracting elements are used.
-See https://biomejs.dev/linter/rules/no-distracting-elements
+See https://biomejs.dev/linter/rules/no-distracting-elements 
 	 */
 	noDistractingElements?: NoDistractingElementsConfiguration;
 	/**
 	* The scope prop should be used only on \<th> elements.
-See https://biomejs.dev/linter/rules/no-header-scope
+See https://biomejs.dev/linter/rules/no-header-scope 
 	 */
 	noHeaderScope?: NoHeaderScopeConfiguration;
 	/**
 	* Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
-See https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role
+See https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role 
 	 */
 	noInteractiveElementToNoninteractiveRole?: NoInteractiveElementToNoninteractiveRoleConfiguration;
 	/**
 	* Enforce that a label element or component has a text label and an associated input.
-See https://biomejs.dev/linter/rules/no-label-without-control
+See https://biomejs.dev/linter/rules/no-label-without-control 
 	 */
 	noLabelWithoutControl?: NoLabelWithoutControlConfiguration;
 	/**
 	* Disallow use event handlers on non-interactive elements.
-See https://biomejs.dev/linter/rules/no-noninteractive-element-interactions
+See https://biomejs.dev/linter/rules/no-noninteractive-element-interactions 
 	 */
 	noNoninteractiveElementInteractions?: NoNoninteractiveElementInteractionsConfiguration;
 	/**
 	* Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
-See https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role
+See https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role 
 	 */
 	noNoninteractiveElementToInteractiveRole?: NoNoninteractiveElementToInteractiveRoleConfiguration;
 	/**
 	* Enforce that tabIndex is not assigned to non-interactive HTML elements.
-See https://biomejs.dev/linter/rules/no-noninteractive-tabindex
+See https://biomejs.dev/linter/rules/no-noninteractive-tabindex 
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
 	/**
 	* Prevent the usage of positive integers on tabIndex property.
-See https://biomejs.dev/linter/rules/no-positive-tabindex
+See https://biomejs.dev/linter/rules/no-positive-tabindex 
 	 */
 	noPositiveTabindex?: NoPositiveTabindexConfiguration;
 	/**
 	* Enforce img alt prop does not contain the word "image", "picture", or "photo".
-See https://biomejs.dev/linter/rules/no-redundant-alt
+See https://biomejs.dev/linter/rules/no-redundant-alt 
 	 */
 	noRedundantAlt?: NoRedundantAltConfiguration;
 	/**
 	* Enforce explicit role property is not the same as implicit/default role property on an element.
-See https://biomejs.dev/linter/rules/no-redundant-roles
+See https://biomejs.dev/linter/rules/no-redundant-roles 
 	 */
 	noRedundantRoles?: NoRedundantRolesConfiguration;
 	/**
 	* Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
-See https://biomejs.dev/linter/rules/no-static-element-interactions
+See https://biomejs.dev/linter/rules/no-static-element-interactions 
 	 */
 	noStaticElementInteractions?: NoStaticElementInteractionsConfiguration;
 	/**
 	* Enforces the usage of the title element for the svg element.
-See https://biomejs.dev/linter/rules/no-svg-without-title
+See https://biomejs.dev/linter/rules/no-svg-without-title 
 	 */
 	noSvgWithoutTitle?: NoSvgWithoutTitleConfiguration;
 	/**
@@ -1168,107 +1174,107 @@ See https://biomejs.dev/linter/rules/no-svg-without-title
 	recommended?: boolean;
 	/**
 	* Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
-See https://biomejs.dev/linter/rules/use-alt-text
+See https://biomejs.dev/linter/rules/use-alt-text 
 	 */
 	useAltText?: UseAltTextConfiguration;
 	/**
 	* Enforce that anchors have content and that the content is accessible to screen readers.
-See https://biomejs.dev/linter/rules/use-anchor-content
+See https://biomejs.dev/linter/rules/use-anchor-content 
 	 */
 	useAnchorContent?: UseAnchorContentConfiguration;
 	/**
 	* Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
-See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex
+See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex 
 	 */
 	useAriaActivedescendantWithTabindex?: UseAriaActivedescendantWithTabindexConfiguration;
 	/**
 	* Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
-See https://biomejs.dev/linter/rules/use-aria-props-for-role
+See https://biomejs.dev/linter/rules/use-aria-props-for-role 
 	 */
 	useAriaPropsForRole?: UseAriaPropsForRoleConfiguration;
 	/**
 	* Enforce that ARIA properties are valid for the roles that are supported by the element.
-See https://biomejs.dev/linter/rules/use-aria-props-supported-by-role
+See https://biomejs.dev/linter/rules/use-aria-props-supported-by-role 
 	 */
 	useAriaPropsSupportedByRole?: UseAriaPropsSupportedByRoleConfiguration;
 	/**
 	* Enforces the usage of the attribute type for the element button.
-See https://biomejs.dev/linter/rules/use-button-type
+See https://biomejs.dev/linter/rules/use-button-type 
 	 */
 	useButtonType?: UseButtonTypeConfiguration;
 	/**
 	* Elements with an interactive role and interaction handlers must be focusable.
-See https://biomejs.dev/linter/rules/use-focusable-interactive
+See https://biomejs.dev/linter/rules/use-focusable-interactive 
 	 */
 	useFocusableInteractive?: UseFocusableInteractiveConfiguration;
 	/**
 	* Disallow a missing generic family keyword within font families.
-See https://biomejs.dev/linter/rules/use-generic-font-names
+See https://biomejs.dev/linter/rules/use-generic-font-names 
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
 	/**
 	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
-See https://biomejs.dev/linter/rules/use-heading-content
+See https://biomejs.dev/linter/rules/use-heading-content 
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
 	/**
 	* Enforce that html element has lang attribute.
-See https://biomejs.dev/linter/rules/use-html-lang
+See https://biomejs.dev/linter/rules/use-html-lang 
 	 */
 	useHtmlLang?: UseHtmlLangConfiguration;
 	/**
 	* Enforces the usage of the attribute title for the element iframe.
-See https://biomejs.dev/linter/rules/use-iframe-title
+See https://biomejs.dev/linter/rules/use-iframe-title 
 	 */
 	useIframeTitle?: UseIframeTitleConfiguration;
 	/**
 	* Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.
-See https://biomejs.dev/linter/rules/use-key-with-click-events
+See https://biomejs.dev/linter/rules/use-key-with-click-events 
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
 	* Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
-See https://biomejs.dev/linter/rules/use-key-with-mouse-events
+See https://biomejs.dev/linter/rules/use-key-with-mouse-events 
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
 	/**
 	* Enforces that audio and video elements must have a track for captions.
-See https://biomejs.dev/linter/rules/use-media-caption
+See https://biomejs.dev/linter/rules/use-media-caption 
 	 */
 	useMediaCaption?: UseMediaCaptionConfiguration;
 	/**
 	* It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
-See https://biomejs.dev/linter/rules/use-semantic-elements
+See https://biomejs.dev/linter/rules/use-semantic-elements 
 	 */
 	useSemanticElements?: UseSemanticElementsConfiguration;
 	/**
 	* Enforce that all anchors are valid, and they are navigable elements.
-See https://biomejs.dev/linter/rules/use-valid-anchor
+See https://biomejs.dev/linter/rules/use-valid-anchor 
 	 */
 	useValidAnchor?: UseValidAnchorConfiguration;
 	/**
 	* Ensures that ARIA properties aria-* are all valid.
-See https://biomejs.dev/linter/rules/use-valid-aria-props
+See https://biomejs.dev/linter/rules/use-valid-aria-props 
 	 */
 	useValidAriaProps?: UseValidAriaPropsConfiguration;
 	/**
 	* Elements with ARIA roles must use a valid, non-abstract ARIA role.
-See https://biomejs.dev/linter/rules/use-valid-aria-role
+See https://biomejs.dev/linter/rules/use-valid-aria-role 
 	 */
 	useValidAriaRole?: UseValidAriaRoleConfiguration;
 	/**
 	* Enforce that ARIA state and property values are valid.
-See https://biomejs.dev/linter/rules/use-valid-aria-values
+See https://biomejs.dev/linter/rules/use-valid-aria-values 
 	 */
 	useValidAriaValues?: UseValidAriaValuesConfiguration;
 	/**
 	* Use valid values for the autocomplete attribute on input elements.
-See https://biomejs.dev/linter/rules/use-valid-autocomplete
+See https://biomejs.dev/linter/rules/use-valid-autocomplete 
 	 */
 	useValidAutocomplete?: UseValidAutocompleteConfiguration;
 	/**
 	* Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.
-See https://biomejs.dev/linter/rules/use-valid-lang
+See https://biomejs.dev/linter/rules/use-valid-lang 
 	 */
 	useValidLang?: UseValidLangConfiguration;
 }
@@ -1278,162 +1284,162 @@ See https://biomejs.dev/linter/rules/use-valid-lang
 export interface Complexity {
 	/**
 	* Disallow unclear usage of consecutive space characters in regular expression literals.
-See https://biomejs.dev/linter/rules/no-adjacent-spaces-in-regex
+See https://biomejs.dev/linter/rules/no-adjacent-spaces-in-regex 
 	 */
 	noAdjacentSpacesInRegex?: NoAdjacentSpacesInRegexConfiguration;
 	/**
 	* Disallow the use of arguments.
-See https://biomejs.dev/linter/rules/no-arguments
+See https://biomejs.dev/linter/rules/no-arguments 
 	 */
 	noArguments?: NoArgumentsConfiguration;
 	/**
 	* Disallow primitive type aliases and misleading types.
-See https://biomejs.dev/linter/rules/no-banned-types
+See https://biomejs.dev/linter/rules/no-banned-types 
 	 */
 	noBannedTypes?: NoBannedTypesConfiguration;
 	/**
 	* Disallow comma operator.
-See https://biomejs.dev/linter/rules/no-comma-operator
+See https://biomejs.dev/linter/rules/no-comma-operator 
 	 */
 	noCommaOperator?: NoCommaOperatorConfiguration;
 	/**
 	* Disallow empty type parameters in type aliases and interfaces.
-See https://biomejs.dev/linter/rules/no-empty-type-parameters
+See https://biomejs.dev/linter/rules/no-empty-type-parameters 
 	 */
 	noEmptyTypeParameters?: NoEmptyTypeParametersConfiguration;
 	/**
 	* Disallow functions that exceed a given Cognitive Complexity score.
-See https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity
+See https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity 
 	 */
 	noExcessiveCognitiveComplexity?: NoExcessiveCognitiveComplexityConfiguration;
 	/**
 	* Restrict the number of lines of code in a function.
-See https://biomejs.dev/linter/rules/no-excessive-lines-per-function
+See https://biomejs.dev/linter/rules/no-excessive-lines-per-function 
 	 */
 	noExcessiveLinesPerFunction?: NoExcessiveLinesPerFunctionConfiguration;
 	/**
 	* This rule enforces a maximum depth to nested describe() in test files.
-See https://biomejs.dev/linter/rules/no-excessive-nested-test-suites
+See https://biomejs.dev/linter/rules/no-excessive-nested-test-suites 
 	 */
 	noExcessiveNestedTestSuites?: NoExcessiveNestedTestSuitesConfiguration;
 	/**
 	* Disallow unnecessary boolean casts.
-See https://biomejs.dev/linter/rules/no-extra-boolean-cast
+See https://biomejs.dev/linter/rules/no-extra-boolean-cast 
 	 */
 	noExtraBooleanCast?: NoExtraBooleanCastConfiguration;
 	/**
 	* Disallow to use unnecessary callback on flatMap.
-See https://biomejs.dev/linter/rules/no-flat-map-identity
+See https://biomejs.dev/linter/rules/no-flat-map-identity 
 	 */
 	noFlatMapIdentity?: NoFlatMapIdentityConfiguration;
 	/**
 	* Prefer for...of statement instead of Array.forEach.
-See https://biomejs.dev/linter/rules/no-for-each
+See https://biomejs.dev/linter/rules/no-for-each 
 	 */
 	noForEach?: NoForEachConfiguration;
 	/**
 	* Disallow shorthand type conversions.
-See https://biomejs.dev/linter/rules/no-implicit-coercions
+See https://biomejs.dev/linter/rules/no-implicit-coercions 
 	 */
 	noImplicitCoercions?: NoImplicitCoercionsConfiguration;
 	/**
 	* Disallow the use of the !important style.
-See https://biomejs.dev/linter/rules/no-important-styles
+See https://biomejs.dev/linter/rules/no-important-styles 
 	 */
 	noImportantStyles?: NoImportantStylesConfiguration;
 	/**
 	* This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
-See https://biomejs.dev/linter/rules/no-static-only-class
+See https://biomejs.dev/linter/rules/no-static-only-class 
 	 */
 	noStaticOnlyClass?: NoStaticOnlyClassConfiguration;
 	/**
 	* Disallow this and super in static contexts.
-See https://biomejs.dev/linter/rules/no-this-in-static
+See https://biomejs.dev/linter/rules/no-this-in-static 
 	 */
 	noThisInStatic?: NoThisInStaticConfiguration;
 	/**
 	* Disallow unnecessary catch clauses.
-See https://biomejs.dev/linter/rules/no-useless-catch
+See https://biomejs.dev/linter/rules/no-useless-catch 
 	 */
 	noUselessCatch?: NoUselessCatchConfiguration;
 	/**
 	* Disallow unnecessary constructors.
-See https://biomejs.dev/linter/rules/no-useless-constructor
+See https://biomejs.dev/linter/rules/no-useless-constructor 
 	 */
 	noUselessConstructor?: NoUselessConstructorConfiguration;
 	/**
 	* Avoid using unnecessary continue.
-See https://biomejs.dev/linter/rules/no-useless-continue
+See https://biomejs.dev/linter/rules/no-useless-continue 
 	 */
 	noUselessContinue?: NoUselessContinueConfiguration;
 	/**
 	* Disallow empty exports that don't change anything in a module file.
-See https://biomejs.dev/linter/rules/no-useless-empty-export
+See https://biomejs.dev/linter/rules/no-useless-empty-export 
 	 */
 	noUselessEmptyExport?: NoUselessEmptyExportConfiguration;
 	/**
 	* Disallow unnecessary escape sequence in regular expression literals.
-See https://biomejs.dev/linter/rules/no-useless-escape-in-regex
+See https://biomejs.dev/linter/rules/no-useless-escape-in-regex 
 	 */
 	noUselessEscapeInRegex?: NoUselessEscapeInRegexConfiguration;
 	/**
 	* Disallow unnecessary fragments.
-See https://biomejs.dev/linter/rules/no-useless-fragments
+See https://biomejs.dev/linter/rules/no-useless-fragments 
 	 */
 	noUselessFragments?: NoUselessFragmentsConfiguration;
 	/**
 	* Disallow unnecessary labels.
-See https://biomejs.dev/linter/rules/no-useless-label
+See https://biomejs.dev/linter/rules/no-useless-label 
 	 */
 	noUselessLabel?: NoUselessLabelConfiguration;
 	/**
 	* Disallow unnecessary nested block statements.
-See https://biomejs.dev/linter/rules/no-useless-lone-block-statements
+See https://biomejs.dev/linter/rules/no-useless-lone-block-statements 
 	 */
 	noUselessLoneBlockStatements?: NoUselessLoneBlockStatementsConfiguration;
 	/**
 	* Disallow renaming import, export, and destructured assignments to the same name.
-See https://biomejs.dev/linter/rules/no-useless-rename
+See https://biomejs.dev/linter/rules/no-useless-rename 
 	 */
 	noUselessRename?: NoUselessRenameConfiguration;
 	/**
 	* Disallow unnecessary concatenation of string or template literals.
-See https://biomejs.dev/linter/rules/no-useless-string-concat
+See https://biomejs.dev/linter/rules/no-useless-string-concat 
 	 */
 	noUselessStringConcat?: NoUselessStringConcatConfiguration;
 	/**
 	* Disallow unnecessary String.raw function in template string literals without any escape sequence.
-See https://biomejs.dev/linter/rules/no-useless-string-raw
+See https://biomejs.dev/linter/rules/no-useless-string-raw 
 	 */
 	noUselessStringRaw?: NoUselessStringRawConfiguration;
 	/**
 	* Disallow useless case in switch statements.
-See https://biomejs.dev/linter/rules/no-useless-switch-case
+See https://biomejs.dev/linter/rules/no-useless-switch-case 
 	 */
 	noUselessSwitchCase?: NoUselessSwitchCaseConfiguration;
 	/**
 	* Disallow ternary operators when simpler alternatives exist.
-See https://biomejs.dev/linter/rules/no-useless-ternary
+See https://biomejs.dev/linter/rules/no-useless-ternary 
 	 */
 	noUselessTernary?: NoUselessTernaryConfiguration;
 	/**
 	* Disallow useless this aliasing.
-See https://biomejs.dev/linter/rules/no-useless-this-alias
+See https://biomejs.dev/linter/rules/no-useless-this-alias 
 	 */
 	noUselessThisAlias?: NoUselessThisAliasConfiguration;
 	/**
 	* Disallow using any or unknown as type constraint.
-See https://biomejs.dev/linter/rules/no-useless-type-constraint
+See https://biomejs.dev/linter/rules/no-useless-type-constraint 
 	 */
 	noUselessTypeConstraint?: NoUselessTypeConstraintConfiguration;
 	/**
 	* Disallow initializing variables to undefined.
-See https://biomejs.dev/linter/rules/no-useless-undefined-initialization
+See https://biomejs.dev/linter/rules/no-useless-undefined-initialization 
 	 */
 	noUselessUndefinedInitialization?: NoUselessUndefinedInitializationConfiguration;
 	/**
 	* Disallow the use of void operators, which is not a familiar operator.
-See https://biomejs.dev/linter/rules/no-void
+See https://biomejs.dev/linter/rules/no-void 
 	 */
 	noVoid?: NoVoidConfiguration;
 	/**
@@ -1442,57 +1448,57 @@ See https://biomejs.dev/linter/rules/no-void
 	recommended?: boolean;
 	/**
 	* Use arrow functions over function expressions.
-See https://biomejs.dev/linter/rules/use-arrow-function
+See https://biomejs.dev/linter/rules/use-arrow-function 
 	 */
 	useArrowFunction?: UseArrowFunctionConfiguration;
 	/**
 	* Use Date.now() to get the number of milliseconds since the Unix Epoch.
-See https://biomejs.dev/linter/rules/use-date-now
+See https://biomejs.dev/linter/rules/use-date-now 
 	 */
 	useDateNow?: UseDateNowConfiguration;
 	/**
 	* Promotes the use of .flatMap() when map().flat() are used together.
-See https://biomejs.dev/linter/rules/use-flat-map
+See https://biomejs.dev/linter/rules/use-flat-map 
 	 */
 	useFlatMap?: UseFlatMapConfiguration;
 	/**
 	* Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
-See https://biomejs.dev/linter/rules/use-index-of
+See https://biomejs.dev/linter/rules/use-index-of 
 	 */
 	useIndexOf?: UseIndexOfConfiguration;
 	/**
 	* Enforce the usage of a literal access to properties over computed property access.
-See https://biomejs.dev/linter/rules/use-literal-keys
+See https://biomejs.dev/linter/rules/use-literal-keys 
 	 */
 	useLiteralKeys?: UseLiteralKeysConfiguration;
 	/**
 	* Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals.
-See https://biomejs.dev/linter/rules/use-numeric-literals
+See https://biomejs.dev/linter/rules/use-numeric-literals 
 	 */
 	useNumericLiterals?: UseNumericLiteralsConfiguration;
 	/**
 	* Enforce using concise optional chain instead of chained logical expressions.
-See https://biomejs.dev/linter/rules/use-optional-chain
+See https://biomejs.dev/linter/rules/use-optional-chain 
 	 */
 	useOptionalChain?: UseOptionalChainConfiguration;
 	/**
 	* Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
-See https://biomejs.dev/linter/rules/use-regex-literals
+See https://biomejs.dev/linter/rules/use-regex-literals 
 	 */
 	useRegexLiterals?: UseRegexLiteralsConfiguration;
 	/**
 	* Disallow number literal object member names which are not base 10 or use underscore as separator.
-See https://biomejs.dev/linter/rules/use-simple-number-keys
+See https://biomejs.dev/linter/rules/use-simple-number-keys 
 	 */
 	useSimpleNumberKeys?: UseSimpleNumberKeysConfiguration;
 	/**
 	* Discard redundant terms from logical expressions.
-See https://biomejs.dev/linter/rules/use-simplified-logic-expression
+See https://biomejs.dev/linter/rules/use-simplified-logic-expression 
 	 */
 	useSimplifiedLogicExpression?: UseSimplifiedLogicExpressionConfiguration;
 	/**
 	* Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
-See https://biomejs.dev/linter/rules/use-while
+See https://biomejs.dev/linter/rules/use-while 
 	 */
 	useWhile?: UseWhileConfiguration;
 }
@@ -1502,267 +1508,267 @@ See https://biomejs.dev/linter/rules/use-while
 export interface Correctness {
 	/**
 	* Prevent passing of children as props.
-See https://biomejs.dev/linter/rules/no-children-prop
+See https://biomejs.dev/linter/rules/no-children-prop 
 	 */
 	noChildrenProp?: NoChildrenPropConfiguration;
 	/**
 	* Prevents from having const variables being re-assigned.
-See https://biomejs.dev/linter/rules/no-const-assign
+See https://biomejs.dev/linter/rules/no-const-assign 
 	 */
 	noConstAssign?: NoConstAssignConfiguration;
 	/**
 	* Disallow constant expressions in conditions.
-See https://biomejs.dev/linter/rules/no-constant-condition
+See https://biomejs.dev/linter/rules/no-constant-condition 
 	 */
 	noConstantCondition?: NoConstantConditionConfiguration;
 	/**
 	* Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
-See https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp
+See https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp 
 	 */
 	noConstantMathMinMaxClamp?: NoConstantMathMinMaxClampConfiguration;
 	/**
 	* Disallow returning a value from a constructor.
-See https://biomejs.dev/linter/rules/no-constructor-return
+See https://biomejs.dev/linter/rules/no-constructor-return 
 	 */
 	noConstructorReturn?: NoConstructorReturnConfiguration;
 	/**
 	* Disallow empty character classes in regular expression literals.
-See https://biomejs.dev/linter/rules/no-empty-character-class-in-regex
+See https://biomejs.dev/linter/rules/no-empty-character-class-in-regex 
 	 */
 	noEmptyCharacterClassInRegex?: NoEmptyCharacterClassInRegexConfiguration;
 	/**
 	* Disallows empty destructuring patterns.
-See https://biomejs.dev/linter/rules/no-empty-pattern
+See https://biomejs.dev/linter/rules/no-empty-pattern 
 	 */
 	noEmptyPattern?: NoEmptyPatternConfiguration;
 	/**
 	* Disallow the use of __dirname and __filename in the global scope.
-See https://biomejs.dev/linter/rules/no-global-dirname-filename
+See https://biomejs.dev/linter/rules/no-global-dirname-filename 
 	 */
 	noGlobalDirnameFilename?: NoGlobalDirnameFilenameConfiguration;
 	/**
 	* Disallow calling global object properties as functions.
-See https://biomejs.dev/linter/rules/no-global-object-calls
+See https://biomejs.dev/linter/rules/no-global-object-calls 
 	 */
 	noGlobalObjectCalls?: NoGlobalObjectCallsConfiguration;
 	/**
 	* Disallow function and var declarations that are accessible outside their block.
-See https://biomejs.dev/linter/rules/no-inner-declarations
+See https://biomejs.dev/linter/rules/no-inner-declarations 
 	 */
 	noInnerDeclarations?: NoInnerDeclarationsConfiguration;
 	/**
 	* Ensure that builtins are correctly instantiated.
-See https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation
+See https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation 
 	 */
 	noInvalidBuiltinInstantiation?: NoInvalidBuiltinInstantiationConfiguration;
 	/**
 	* Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.
-See https://biomejs.dev/linter/rules/no-invalid-constructor-super
+See https://biomejs.dev/linter/rules/no-invalid-constructor-super 
 	 */
 	noInvalidConstructorSuper?: NoInvalidConstructorSuperConfiguration;
 	/**
 	* Disallow non-standard direction values for linear gradient functions.
-See https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient
+See https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient 
 	 */
 	noInvalidDirectionInLinearGradient?: NoInvalidDirectionInLinearGradientConfiguration;
 	/**
 	* Disallows invalid named grid areas in CSS Grid Layouts.
-See https://biomejs.dev/linter/rules/no-invalid-grid-areas
+See https://biomejs.dev/linter/rules/no-invalid-grid-areas 
 	 */
 	noInvalidGridAreas?: NoInvalidGridAreasConfiguration;
 	/**
 	* Disallow the use of @import at-rules in invalid positions.
-See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule
+See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule 
 	 */
 	noInvalidPositionAtImportRule?: NoInvalidPositionAtImportRuleConfiguration;
 	/**
 	* Disallow the use of variables, function parameters, classes, and enums before their declaration.
-See https://biomejs.dev/linter/rules/no-invalid-use-before-declaration
+See https://biomejs.dev/linter/rules/no-invalid-use-before-declaration 
 	 */
 	noInvalidUseBeforeDeclaration?: NoInvalidUseBeforeDeclarationConfiguration;
 	/**
 	* Disallow missing var function for css variables.
-See https://biomejs.dev/linter/rules/no-missing-var-function
+See https://biomejs.dev/linter/rules/no-missing-var-function 
 	 */
 	noMissingVarFunction?: NoMissingVarFunctionConfiguration;
 	/**
 	* Disallows defining React components inside other components.
-See https://biomejs.dev/linter/rules/no-nested-component-definitions
+See https://biomejs.dev/linter/rules/no-nested-component-definitions 
 	 */
 	noNestedComponentDefinitions?: NoNestedComponentDefinitionsConfiguration;
 	/**
 	* Forbid the use of Node.js builtin modules.
-See https://biomejs.dev/linter/rules/no-nodejs-modules
+See https://biomejs.dev/linter/rules/no-nodejs-modules 
 	 */
 	noNodejsModules?: NoNodejsModulesConfiguration;
 	/**
 	* Disallow \8 and \9 escape sequences in string literals.
-See https://biomejs.dev/linter/rules/no-nonoctal-decimal-escape
+See https://biomejs.dev/linter/rules/no-nonoctal-decimal-escape 
 	 */
 	noNonoctalDecimalEscape?: NoNonoctalDecimalEscapeConfiguration;
 	/**
 	* Disallow literal numbers that lose precision.
-See https://biomejs.dev/linter/rules/no-precision-loss
+See https://biomejs.dev/linter/rules/no-precision-loss 
 	 */
 	noPrecisionLoss?: NoPrecisionLossConfiguration;
 	/**
 	* Restrict imports of private exports.
-See https://biomejs.dev/linter/rules/no-private-imports
+See https://biomejs.dev/linter/rules/no-private-imports 
 	 */
 	noPrivateImports?: NoPrivateImportsConfiguration;
 	/**
 	* Disallow the use of process global.
-See https://biomejs.dev/linter/rules/no-process-global
+See https://biomejs.dev/linter/rules/no-process-global 
 	 */
 	noProcessGlobal?: NoProcessGlobalConfiguration;
 	/**
 	* Disallow useVisibleTask$() functions in Qwik components.
-See https://biomejs.dev/linter/rules/no-qwik-use-visible-task
+See https://biomejs.dev/linter/rules/no-qwik-use-visible-task 
 	 */
 	noQwikUseVisibleTask?: NoQwikUseVisibleTaskConfiguration;
 	/**
 	* Disallow assigning to React component props.
-See https://biomejs.dev/linter/rules/no-react-prop-assignments
+See https://biomejs.dev/linter/rules/no-react-prop-assignments 
 	 */
 	noReactPropAssignments?: NoReactPropAssignmentsConfiguration;
 	/**
 	* Prevent the usage of the return value of React.render.
-See https://biomejs.dev/linter/rules/no-render-return-value
+See https://biomejs.dev/linter/rules/no-render-return-value 
 	 */
 	noRenderReturnValue?: NoRenderReturnValueConfiguration;
 	/**
 	* Disallow the use of configured elements.
-See https://biomejs.dev/linter/rules/no-restricted-elements
+See https://biomejs.dev/linter/rules/no-restricted-elements 
 	 */
 	noRestrictedElements?: NoRestrictedElementsConfiguration;
 	/**
 	* Disallow assignments where both sides are exactly the same.
-See https://biomejs.dev/linter/rules/no-self-assign
+See https://biomejs.dev/linter/rules/no-self-assign 
 	 */
 	noSelfAssign?: NoSelfAssignConfiguration;
 	/**
 	* Disallow returning a value from a setter.
-See https://biomejs.dev/linter/rules/no-setter-return
+See https://biomejs.dev/linter/rules/no-setter-return 
 	 */
 	noSetterReturn?: NoSetterReturnConfiguration;
 	/**
 	* Disallow destructuring props inside JSX components in Solid projects.
-See https://biomejs.dev/linter/rules/no-solid-destructured-props
+See https://biomejs.dev/linter/rules/no-solid-destructured-props 
 	 */
 	noSolidDestructuredProps?: NoSolidDestructuredPropsConfiguration;
 	/**
 	* Disallow comparison of expressions modifying the string case with non-compliant value.
-See https://biomejs.dev/linter/rules/no-string-case-mismatch
+See https://biomejs.dev/linter/rules/no-string-case-mismatch 
 	 */
 	noStringCaseMismatch?: NoStringCaseMismatchConfiguration;
 	/**
 	* Disallow lexical declarations in switch clauses.
-See https://biomejs.dev/linter/rules/no-switch-declarations
+See https://biomejs.dev/linter/rules/no-switch-declarations 
 	 */
 	noSwitchDeclarations?: NoSwitchDeclarationsConfiguration;
 	/**
 	* Disallow the use of dependencies that aren't specified in the package.json.
-See https://biomejs.dev/linter/rules/no-undeclared-dependencies
+See https://biomejs.dev/linter/rules/no-undeclared-dependencies 
 	 */
 	noUndeclaredDependencies?: NoUndeclaredDependenciesConfiguration;
 	/**
 	* Prevents the usage of variables that haven't been declared inside the document.
-See https://biomejs.dev/linter/rules/no-undeclared-variables
+See https://biomejs.dev/linter/rules/no-undeclared-variables 
 	 */
 	noUndeclaredVariables?: NoUndeclaredVariablesConfiguration;
 	/**
 	* Disallow unknown CSS value functions.
-See https://biomejs.dev/linter/rules/no-unknown-function
+See https://biomejs.dev/linter/rules/no-unknown-function 
 	 */
 	noUnknownFunction?: NoUnknownFunctionConfiguration;
 	/**
 	* Disallow unknown media feature names.
-See https://biomejs.dev/linter/rules/no-unknown-media-feature-name
+See https://biomejs.dev/linter/rules/no-unknown-media-feature-name 
 	 */
 	noUnknownMediaFeatureName?: NoUnknownMediaFeatureNameConfiguration;
 	/**
 	* Disallow unknown properties.
-See https://biomejs.dev/linter/rules/no-unknown-property
+See https://biomejs.dev/linter/rules/no-unknown-property 
 	 */
 	noUnknownProperty?: NoUnknownPropertyConfiguration;
 	/**
 	* Disallow unknown pseudo-class selectors.
-See https://biomejs.dev/linter/rules/no-unknown-pseudo-class
+See https://biomejs.dev/linter/rules/no-unknown-pseudo-class 
 	 */
 	noUnknownPseudoClass?: NoUnknownPseudoClassConfiguration;
 	/**
 	* Disallow unknown pseudo-element selectors.
-See https://biomejs.dev/linter/rules/no-unknown-pseudo-element
+See https://biomejs.dev/linter/rules/no-unknown-pseudo-element 
 	 */
 	noUnknownPseudoElement?: NoUnknownPseudoElementConfiguration;
 	/**
 	* Disallow unknown type selectors.
-See https://biomejs.dev/linter/rules/no-unknown-type-selector
+See https://biomejs.dev/linter/rules/no-unknown-type-selector 
 	 */
 	noUnknownTypeSelector?: NoUnknownTypeSelectorConfiguration;
 	/**
 	* Disallow unknown CSS units.
-See https://biomejs.dev/linter/rules/no-unknown-unit
+See https://biomejs.dev/linter/rules/no-unknown-unit 
 	 */
 	noUnknownUnit?: NoUnknownUnitConfiguration;
 	/**
 	* Disallow unmatchable An+B selectors.
-See https://biomejs.dev/linter/rules/no-unmatchable-anb-selector
+See https://biomejs.dev/linter/rules/no-unmatchable-anb-selector 
 	 */
 	noUnmatchableAnbSelector?: NoUnmatchableAnbSelectorConfiguration;
 	/**
 	* Disallow unreachable code.
-See https://biomejs.dev/linter/rules/no-unreachable
+See https://biomejs.dev/linter/rules/no-unreachable 
 	 */
 	noUnreachable?: NoUnreachableConfiguration;
 	/**
 	* Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass.
-See https://biomejs.dev/linter/rules/no-unreachable-super
+See https://biomejs.dev/linter/rules/no-unreachable-super 
 	 */
 	noUnreachableSuper?: NoUnreachableSuperConfiguration;
 	/**
 	* Disallow control flow statements in finally blocks.
-See https://biomejs.dev/linter/rules/no-unsafe-finally
+See https://biomejs.dev/linter/rules/no-unsafe-finally 
 	 */
 	noUnsafeFinally?: NoUnsafeFinallyConfiguration;
 	/**
 	* Disallow the use of optional chaining in contexts where the undefined value is not allowed.
-See https://biomejs.dev/linter/rules/no-unsafe-optional-chaining
+See https://biomejs.dev/linter/rules/no-unsafe-optional-chaining 
 	 */
 	noUnsafeOptionalChaining?: NoUnsafeOptionalChainingConfiguration;
 	/**
 	* Disallow unused function parameters.
-See https://biomejs.dev/linter/rules/no-unused-function-parameters
+See https://biomejs.dev/linter/rules/no-unused-function-parameters 
 	 */
 	noUnusedFunctionParameters?: NoUnusedFunctionParametersConfiguration;
 	/**
 	* Disallow unused imports.
-See https://biomejs.dev/linter/rules/no-unused-imports
+See https://biomejs.dev/linter/rules/no-unused-imports 
 	 */
 	noUnusedImports?: NoUnusedImportsConfiguration;
 	/**
 	* Disallow unused labels.
-See https://biomejs.dev/linter/rules/no-unused-labels
+See https://biomejs.dev/linter/rules/no-unused-labels 
 	 */
 	noUnusedLabels?: NoUnusedLabelsConfiguration;
 	/**
 	* Disallow unused private class members.
-See https://biomejs.dev/linter/rules/no-unused-private-class-members
+See https://biomejs.dev/linter/rules/no-unused-private-class-members 
 	 */
 	noUnusedPrivateClassMembers?: NoUnusedPrivateClassMembersConfiguration;
 	/**
 	* Disallow unused variables.
-See https://biomejs.dev/linter/rules/no-unused-variables
+See https://biomejs.dev/linter/rules/no-unused-variables 
 	 */
 	noUnusedVariables?: NoUnusedVariablesConfiguration;
 	/**
 	* This rules prevents void elements (AKA self-closing elements) from having children.
-See https://biomejs.dev/linter/rules/no-void-elements-with-children
+See https://biomejs.dev/linter/rules/no-void-elements-with-children 
 	 */
 	noVoidElementsWithChildren?: NoVoidElementsWithChildrenConfiguration;
 	/**
 	* Disallow returning a value from a function with the return type 'void'.
-See https://biomejs.dev/linter/rules/no-void-type-return
+See https://biomejs.dev/linter/rules/no-void-type-return 
 	 */
 	noVoidTypeReturn?: NoVoidTypeReturnConfiguration;
 	/**
@@ -1771,77 +1777,77 @@ See https://biomejs.dev/linter/rules/no-void-type-return
 	recommended?: boolean;
 	/**
 	* Enforce all dependencies are correctly specified in a React hook.
-See https://biomejs.dev/linter/rules/use-exhaustive-dependencies
+See https://biomejs.dev/linter/rules/use-exhaustive-dependencies 
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
 	/**
 	* Enforce specifying the name of GraphQL operations.
-See https://biomejs.dev/linter/rules/use-graphql-named-operations
+See https://biomejs.dev/linter/rules/use-graphql-named-operations 
 	 */
 	useGraphqlNamedOperations?: UseGraphqlNamedOperationsConfiguration;
 	/**
 	* Enforce that all React hooks are being called from the Top Level component functions.
-See https://biomejs.dev/linter/rules/use-hook-at-top-level
+See https://biomejs.dev/linter/rules/use-hook-at-top-level 
 	 */
 	useHookAtTopLevel?: UseHookAtTopLevelConfiguration;
 	/**
 	* Enforces that \<img> elements have both width and height attributes.
-See https://biomejs.dev/linter/rules/use-image-size
+See https://biomejs.dev/linter/rules/use-image-size 
 	 */
 	useImageSize?: UseImageSizeConfiguration;
 	/**
 	* Enforce file extensions for relative imports.
-See https://biomejs.dev/linter/rules/use-import-extensions
+See https://biomejs.dev/linter/rules/use-import-extensions 
 	 */
 	useImportExtensions?: UseImportExtensionsConfiguration;
 	/**
 	* Require calls to isNaN() when checking for NaN.
-See https://biomejs.dev/linter/rules/use-is-nan
+See https://biomejs.dev/linter/rules/use-is-nan 
 	 */
 	useIsNan?: UseIsNanConfiguration;
 	/**
 	* Enforces the use of with { type: "json" } for JSON module imports.
-See https://biomejs.dev/linter/rules/use-json-import-attributes
+See https://biomejs.dev/linter/rules/use-json-import-attributes 
 	 */
 	useJsonImportAttributes?: UseJsonImportAttributesConfiguration;
 	/**
 	* Disallow missing key props in iterators/collection literals.
-See https://biomejs.dev/linter/rules/use-jsx-key-in-iterable
+See https://biomejs.dev/linter/rules/use-jsx-key-in-iterable 
 	 */
 	useJsxKeyInIterable?: UseJsxKeyInIterableConfiguration;
 	/**
 	* Enforce the consistent use of the radix argument when using parseInt().
-See https://biomejs.dev/linter/rules/use-parse-int-radix
+See https://biomejs.dev/linter/rules/use-parse-int-radix 
 	 */
 	useParseIntRadix?: UseParseIntRadixConfiguration;
 	/**
 	* Prefer using the class prop as a classlist over the classnames helper.
-See https://biomejs.dev/linter/rules/use-qwik-classlist
+See https://biomejs.dev/linter/rules/use-qwik-classlist 
 	 */
 	useQwikClasslist?: UseQwikClasslistConfiguration;
 	/**
 	* Enforce JSDoc comment lines to start with a single asterisk, except for the first one.
-See https://biomejs.dev/linter/rules/use-single-js-doc-asterisk
+See https://biomejs.dev/linter/rules/use-single-js-doc-asterisk 
 	 */
 	useSingleJsDocAsterisk?: UseSingleJsDocAsteriskConfiguration;
 	/**
 	* Prevent the usage of static string literal id attribute on elements.
-See https://biomejs.dev/linter/rules/use-unique-element-ids
+See https://biomejs.dev/linter/rules/use-unique-element-ids 
 	 */
 	useUniqueElementIds?: UseUniqueElementIdsConfiguration;
 	/**
 	* Enforce "for" loop update clause moving the counter in the right direction.
-See https://biomejs.dev/linter/rules/use-valid-for-direction
+See https://biomejs.dev/linter/rules/use-valid-for-direction 
 	 */
 	useValidForDirection?: UseValidForDirectionConfiguration;
 	/**
 	* This rule checks that the result of a typeof expression is compared to a valid value.
-See https://biomejs.dev/linter/rules/use-valid-typeof
+See https://biomejs.dev/linter/rules/use-valid-typeof 
 	 */
 	useValidTypeof?: UseValidTypeofConfiguration;
 	/**
 	* Require generator functions to contain yield.
-See https://biomejs.dev/linter/rules/use-yield
+See https://biomejs.dev/linter/rules/use-yield 
 	 */
 	useYield?: UseYieldConfiguration;
 }
@@ -1851,132 +1857,137 @@ See https://biomejs.dev/linter/rules/use-yield
 export interface Nursery {
 	/**
 	* Disallow continue statements.
-See https://biomejs.dev/linter/rules/no-continue
+See https://biomejs.dev/linter/rules/no-continue 
 	 */
 	noContinue?: NoContinueConfiguration;
 	/**
 	* Restrict imports of deprecated exports.
-See https://biomejs.dev/linter/rules/no-deprecated-imports
+See https://biomejs.dev/linter/rules/no-deprecated-imports 
 	 */
 	noDeprecatedImports?: NoDeprecatedImportsConfiguration;
 	/**
 	* Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
-See https://biomejs.dev/linter/rules/no-duplicate-dependencies
+See https://biomejs.dev/linter/rules/no-duplicate-dependencies 
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
 	/**
 	* Disallow empty sources.
-See https://biomejs.dev/linter/rules/no-empty-source
+See https://biomejs.dev/linter/rules/no-empty-source 
 	 */
 	noEmptySource?: NoEmptySourceConfiguration;
 	/**
 	* Require Promise-like statements to be handled appropriately.
-See https://biomejs.dev/linter/rules/no-floating-promises
+See https://biomejs.dev/linter/rules/no-floating-promises 
 	 */
 	noFloatingPromises?: NoFloatingPromisesConfiguration;
 	/**
 	* Disallow iterating using a for-in loop.
-See https://biomejs.dev/linter/rules/no-for-in
+See https://biomejs.dev/linter/rules/no-for-in 
 	 */
 	noForIn?: NoForInConfiguration;
 	/**
 	* Prevent import cycles.
-See https://biomejs.dev/linter/rules/no-import-cycles
+See https://biomejs.dev/linter/rules/no-import-cycles 
 	 */
 	noImportCycles?: NoImportCyclesConfiguration;
 	/**
 	* Disallows the usage of the unary operators ++ and --.
-See https://biomejs.dev/linter/rules/no-increment-decrement
+See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
 	/**
 	* Disallow string literals inside JSX elements.
-See https://biomejs.dev/linter/rules/no-jsx-literals
+See https://biomejs.dev/linter/rules/no-jsx-literals 
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Prevent problematic leaked values from being rendered.
+See https://biomejs.dev/linter/rules/no-leaked-render 
+	 */
+	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
-See https://biomejs.dev/linter/rules/no-misused-promises
+See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
 	* Prevent client components from being async functions.
-See https://biomejs.dev/linter/rules/no-next-async-client-component
+See https://biomejs.dev/linter/rules/no-next-async-client-component 
 	 */
 	noNextAsyncClientComponent?: NoNextAsyncClientComponentConfiguration;
 	/**
 	* Disallow function parameters that are only used in recursive calls.
-See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion
+See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion 
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
 	* Replaces usages of forwardRef with passing ref as a prop.
-See https://biomejs.dev/linter/rules/no-react-forward-ref
+See https://biomejs.dev/linter/rules/no-react-forward-ref 
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
 	* Disallow variable declarations from shadowing variables declared in the outer scope.
-See https://biomejs.dev/linter/rules/no-shadow
+See https://biomejs.dev/linter/rules/no-shadow 
 	 */
 	noShadow?: NoShadowConfiguration;
 	/**
 	* Prevent the usage of synchronous scripts.
-See https://biomejs.dev/linter/rules/no-sync-scripts
+See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
 	/**
 	* Disallow unknown DOM properties.
-See https://biomejs.dev/linter/rules/no-unknown-attribute
+See https://biomejs.dev/linter/rules/no-unknown-attribute 
 	 */
 	noUnknownAttribute?: NoUnknownAttributeConfiguration;
 	/**
 	* Disallow unnecessary type-based conditions that can be statically determined as redundant.
-See https://biomejs.dev/linter/rules/no-unnecessary-conditions
+See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
 	* Warn when importing non-existing exports.
-See https://biomejs.dev/linter/rules/no-unresolved-imports
+See https://biomejs.dev/linter/rules/no-unresolved-imports 
 	 */
 	noUnresolvedImports?: NoUnresolvedImportsConfiguration;
 	/**
 	* Disallow expression statements that are neither a function call nor an assignment.
-See https://biomejs.dev/linter/rules/no-unused-expressions
+See https://biomejs.dev/linter/rules/no-unused-expressions 
 	 */
 	noUnusedExpressions?: NoUnusedExpressionsConfiguration;
 	/**
 	* Disallow unused catch bindings.
-See https://biomejs.dev/linter/rules/no-useless-catch-binding
+See https://biomejs.dev/linter/rules/no-useless-catch-binding 
 	 */
 	noUselessCatchBinding?: NoUselessCatchBindingConfiguration;
 	/**
 	* Disallow the use of useless undefined.
-See https://biomejs.dev/linter/rules/no-useless-undefined
+See https://biomejs.dev/linter/rules/no-useless-undefined 
 	 */
 	noUselessUndefined?: NoUselessUndefinedConfiguration;
 	/**
 	* Enforce that Vue component data options are declared as functions.
-See https://biomejs.dev/linter/rules/no-vue-data-object-declaration
+See https://biomejs.dev/linter/rules/no-vue-data-object-declaration 
 	 */
 	noVueDataObjectDeclaration?: NoVueDataObjectDeclarationConfiguration;
 	/**
 	* Disallow duplicate keys in Vue component data, methods, computed properties, and other options.
-See https://biomejs.dev/linter/rules/no-vue-duplicate-keys
+See https://biomejs.dev/linter/rules/no-vue-duplicate-keys 
 	 */
 	noVueDuplicateKeys?: NoVueDuplicateKeysConfiguration;
 	/**
 	* Disallow reserved keys in Vue component data and computed properties.
-See https://biomejs.dev/linter/rules/no-vue-reserved-keys
+See https://biomejs.dev/linter/rules/no-vue-reserved-keys 
 	 */
 	noVueReservedKeys?: NoVueReservedKeysConfiguration;
 	/**
 	* Disallow reserved names to be used as props.
-See https://biomejs.dev/linter/rules/no-vue-reserved-props
+See https://biomejs.dev/linter/rules/no-vue-reserved-props 
 	 */
 	noVueReservedProps?: NoVueReservedPropsConfiguration;
 	/**
 	* Disallow using v-if and v-for directives on the same element.
-See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
+See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
@@ -1985,112 +1996,112 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	recommended?: boolean;
 	/**
 	* Require Array#sort and Array#toSorted calls to always provide a compareFunction.
-See https://biomejs.dev/linter/rules/use-array-sort-compare
+See https://biomejs.dev/linter/rules/use-array-sort-compare 
 	 */
 	useArraySortCompare?: UseArraySortCompareConfiguration;
 	/**
 	* Enforce consistent arrow function bodies.
-See https://biomejs.dev/linter/rules/use-consistent-arrow-return
+See https://biomejs.dev/linter/rules/use-consistent-arrow-return 
 	 */
 	useConsistentArrowReturn?: UseConsistentArrowReturnConfiguration;
 	/**
 	* Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
-See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
+See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions 
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
 	/**
 	* Require the @deprecated directive to specify a deletion date.
-See https://biomejs.dev/linter/rules/use-deprecated-date
+See https://biomejs.dev/linter/rules/use-deprecated-date 
 	 */
 	useDeprecatedDate?: UseDeprecatedDateConfiguration;
 	/**
 	* Require switch-case statements to be exhaustive.
-See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
+See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases 
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
 	* Enforce types in functions, methods, variables, and parameters.
-See https://biomejs.dev/linter/rules/use-explicit-type
+See https://biomejs.dev/linter/rules/use-explicit-type 
 	 */
 	useExplicitType?: UseExplicitTypeConfiguration;
 	/**
 	* Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.
-See https://biomejs.dev/linter/rules/use-find
+See https://biomejs.dev/linter/rules/use-find 
 	 */
 	useFind?: UseFindConfiguration;
 	/**
 	* Enforce a maximum number of parameters in function definitions.
-See https://biomejs.dev/linter/rules/use-max-params
+See https://biomejs.dev/linter/rules/use-max-params 
 	 */
 	useMaxParams?: UseMaxParamsConfiguration;
 	/**
 	* Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
-See https://biomejs.dev/linter/rules/use-qwik-method-usage
+See https://biomejs.dev/linter/rules/use-qwik-method-usage 
 	 */
 	useQwikMethodUsage?: UseQwikMethodUsageConfiguration;
 	/**
 	* Disallow unserializable expressions in Qwik dollar ($) scopes.
-See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope
+See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope 
 	 */
 	useQwikValidLexicalScope?: UseQwikValidLexicalScopeConfiguration;
 	/**
 	* Enforce the sorting of CSS utility classes.
-See https://biomejs.dev/linter/rules/use-sorted-classes
+See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
 	* Enforce the use of the spread operator over .apply().
-See https://biomejs.dev/linter/rules/use-spread
+See https://biomejs.dev/linter/rules/use-spread 
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
 	* Enforce unique operation names across a GraphQL document.
-See https://biomejs.dev/linter/rules/use-unique-graphql-operation-name
+See https://biomejs.dev/linter/rules/use-unique-graphql-operation-name 
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
 	* Enforce specific order of Vue compiler macros.
-See https://biomejs.dev/linter/rules/use-vue-define-macros-order
+See https://biomejs.dev/linter/rules/use-vue-define-macros-order 
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
 	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
-See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes
+See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
 	 */
 	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
 	/**
 	* Enforce multi-word component names in Vue components.
-See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names
+See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
 	/**
 	* Forbids v-bind directives with missing arguments or invalid modifiers.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-bind
+See https://biomejs.dev/linter/rules/use-vue-valid-v-bind 
 	 */
 	useVueValidVBind?: UseVueValidVBindConfiguration;
 	/**
 	* Enforce valid usage of v-else.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-else
+See https://biomejs.dev/linter/rules/use-vue-valid-v-else 
 	 */
 	useVueValidVElse?: UseVueValidVElseConfiguration;
 	/**
 	* Enforce valid v-else-if directives.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-else-if
+See https://biomejs.dev/linter/rules/use-vue-valid-v-else-if 
 	 */
 	useVueValidVElseIf?: UseVueValidVElseIfConfiguration;
 	/**
 	* Enforce valid v-html directives.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-html
+See https://biomejs.dev/linter/rules/use-vue-valid-v-html 
 	 */
 	useVueValidVHtml?: UseVueValidVHtmlConfiguration;
 	/**
 	* Enforces valid v-if usage for Vue templates.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-if
+See https://biomejs.dev/linter/rules/use-vue-valid-v-if 
 	 */
 	useVueValidVIf?: UseVueValidVIfConfiguration;
 	/**
 	* Enforce valid v-on directives with proper arguments, modifiers, and handlers.
-See https://biomejs.dev/linter/rules/use-vue-valid-v-on
+See https://biomejs.dev/linter/rules/use-vue-valid-v-on 
 	 */
 	useVueValidVOn?: UseVueValidVOnConfiguration;
 }
@@ -2100,47 +2111,47 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-on
 export interface Performance {
 	/**
 	* Disallow the use of spread (...) syntax on accumulators.
-See https://biomejs.dev/linter/rules/no-accumulating-spread
+See https://biomejs.dev/linter/rules/no-accumulating-spread 
 	 */
 	noAccumulatingSpread?: NoAccumulatingSpreadConfiguration;
 	/**
 	* Disallow await inside loops.
-See https://biomejs.dev/linter/rules/no-await-in-loops
+See https://biomejs.dev/linter/rules/no-await-in-loops 
 	 */
 	noAwaitInLoops?: NoAwaitInLoopsConfiguration;
 	/**
 	* Disallow the use of barrel file.
-See https://biomejs.dev/linter/rules/no-barrel-file
+See https://biomejs.dev/linter/rules/no-barrel-file 
 	 */
 	noBarrelFile?: NoBarrelFileConfiguration;
 	/**
 	* Disallow the use of the delete operator.
-See https://biomejs.dev/linter/rules/no-delete
+See https://biomejs.dev/linter/rules/no-delete 
 	 */
 	noDelete?: NoDeleteConfiguration;
 	/**
 	* Disallow accessing namespace imports dynamically.
-See https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access
+See https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access 
 	 */
 	noDynamicNamespaceImportAccess?: NoDynamicNamespaceImportAccessConfiguration;
 	/**
 	* Prevent usage of \<img> element in a Next.js project.
-See https://biomejs.dev/linter/rules/no-img-element
+See https://biomejs.dev/linter/rules/no-img-element 
 	 */
 	noImgElement?: NoImgElementConfiguration;
 	/**
 	* Disallow the use of namespace imports.
-See https://biomejs.dev/linter/rules/no-namespace-import
+See https://biomejs.dev/linter/rules/no-namespace-import 
 	 */
 	noNamespaceImport?: NoNamespaceImportConfiguration;
 	/**
 	* Avoid re-export all.
-See https://biomejs.dev/linter/rules/no-re-export-all
+See https://biomejs.dev/linter/rules/no-re-export-all 
 	 */
 	noReExportAll?: NoReExportAllConfiguration;
 	/**
 	* Prevent duplicate polyfills from Polyfill.io.
-See https://biomejs.dev/linter/rules/no-unwanted-polyfillio
+See https://biomejs.dev/linter/rules/no-unwanted-polyfillio 
 	 */
 	noUnwantedPolyfillio?: NoUnwantedPolyfillioConfiguration;
 	/**
@@ -2149,17 +2160,17 @@ See https://biomejs.dev/linter/rules/no-unwanted-polyfillio
 	recommended?: boolean;
 	/**
 	* Ensure the preconnect attribute is used when using Google Fonts.
-See https://biomejs.dev/linter/rules/use-google-font-preconnect
+See https://biomejs.dev/linter/rules/use-google-font-preconnect 
 	 */
 	useGoogleFontPreconnect?: UseGoogleFontPreconnectConfiguration;
 	/**
 	* Enforce using Solid's \<For /> component for mapping an array to JSX elements.
-See https://biomejs.dev/linter/rules/use-solid-for-component
+See https://biomejs.dev/linter/rules/use-solid-for-component 
 	 */
 	useSolidForComponent?: UseSolidForComponentConfiguration;
 	/**
 	* Require regex literals to be declared at the top level.
-See https://biomejs.dev/linter/rules/use-top-level-regex
+See https://biomejs.dev/linter/rules/use-top-level-regex 
 	 */
 	useTopLevelRegex?: UseTopLevelRegexConfiguration;
 }
@@ -2169,27 +2180,27 @@ See https://biomejs.dev/linter/rules/use-top-level-regex
 export interface Security {
 	/**
 	* Disallow target="_blank" attribute without rel="noopener".
-See https://biomejs.dev/linter/rules/no-blank-target
+See https://biomejs.dev/linter/rules/no-blank-target 
 	 */
 	noBlankTarget?: NoBlankTargetConfiguration;
 	/**
 	* Prevent the usage of dangerous JSX props.
-See https://biomejs.dev/linter/rules/no-dangerously-set-inner-html
+See https://biomejs.dev/linter/rules/no-dangerously-set-inner-html 
 	 */
 	noDangerouslySetInnerHtml?: NoDangerouslySetInnerHtmlConfiguration;
 	/**
 	* Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop.
-See https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children
+See https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children 
 	 */
 	noDangerouslySetInnerHtmlWithChildren?: NoDangerouslySetInnerHtmlWithChildrenConfiguration;
 	/**
 	* Disallow the use of global eval().
-See https://biomejs.dev/linter/rules/no-global-eval
+See https://biomejs.dev/linter/rules/no-global-eval 
 	 */
 	noGlobalEval?: NoGlobalEvalConfiguration;
 	/**
 	* Disallow usage of sensitive data such as API keys and tokens.
-See https://biomejs.dev/linter/rules/no-secrets
+See https://biomejs.dev/linter/rules/no-secrets 
 	 */
 	noSecrets?: NoSecretsConfiguration;
 	/**
@@ -2203,132 +2214,132 @@ See https://biomejs.dev/linter/rules/no-secrets
 export interface Style {
 	/**
 	* Disallow use of CommonJs module system in favor of ESM style imports.
-See https://biomejs.dev/linter/rules/no-common-js
+See https://biomejs.dev/linter/rules/no-common-js 
 	 */
 	noCommonJs?: NoCommonJsConfiguration;
 	/**
 	* Disallow default exports.
-See https://biomejs.dev/linter/rules/no-default-export
+See https://biomejs.dev/linter/rules/no-default-export 
 	 */
 	noDefaultExport?: NoDefaultExportConfiguration;
 	/**
 	* Disallow a lower specificity selector from coming after a higher specificity selector.
-See https://biomejs.dev/linter/rules/no-descending-specificity
+See https://biomejs.dev/linter/rules/no-descending-specificity 
 	 */
 	noDescendingSpecificity?: NoDescendingSpecificityConfiguration;
 	/**
 	* Disallow using a callback in asynchronous tests and hooks.
-See https://biomejs.dev/linter/rules/no-done-callback
+See https://biomejs.dev/linter/rules/no-done-callback 
 	 */
 	noDoneCallback?: NoDoneCallbackConfiguration;
 	/**
 	* Disallow TypeScript enum.
-See https://biomejs.dev/linter/rules/no-enum
+See https://biomejs.dev/linter/rules/no-enum 
 	 */
 	noEnum?: NoEnumConfiguration;
 	/**
 	* Disallow exporting an imported variable.
-See https://biomejs.dev/linter/rules/no-exported-imports
+See https://biomejs.dev/linter/rules/no-exported-imports 
 	 */
 	noExportedImports?: NoExportedImportsConfiguration;
 	/**
 	* Prevent usage of \<head> element in a Next.js project.
-See https://biomejs.dev/linter/rules/no-head-element
+See https://biomejs.dev/linter/rules/no-head-element 
 	 */
 	noHeadElement?: NoHeadElementConfiguration;
 	/**
 	* Disallow implicit true values on JSX boolean attributes.
-See https://biomejs.dev/linter/rules/no-implicit-boolean
+See https://biomejs.dev/linter/rules/no-implicit-boolean 
 	 */
 	noImplicitBoolean?: NoImplicitBooleanConfiguration;
 	/**
 	* Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
-See https://biomejs.dev/linter/rules/no-inferrable-types
+See https://biomejs.dev/linter/rules/no-inferrable-types 
 	 */
 	noInferrableTypes?: NoInferrableTypesConfiguration;
 	/**
 	* Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
-See https://biomejs.dev/linter/rules/no-magic-numbers
+See https://biomejs.dev/linter/rules/no-magic-numbers 
 	 */
 	noMagicNumbers?: NoMagicNumbersConfiguration;
 	/**
 	* Disallow the use of TypeScript's namespaces.
-See https://biomejs.dev/linter/rules/no-namespace
+See https://biomejs.dev/linter/rules/no-namespace 
 	 */
 	noNamespace?: NoNamespaceConfiguration;
 	/**
 	* Disallow negation in the condition of an if statement if it has an else clause.
-See https://biomejs.dev/linter/rules/no-negation-else
+See https://biomejs.dev/linter/rules/no-negation-else 
 	 */
 	noNegationElse?: NoNegationElseConfiguration;
 	/**
 	* Disallow nested ternary expressions.
-See https://biomejs.dev/linter/rules/no-nested-ternary
+See https://biomejs.dev/linter/rules/no-nested-ternary 
 	 */
 	noNestedTernary?: NoNestedTernaryConfiguration;
 	/**
 	* Disallow non-null assertions using the ! postfix operator.
-See https://biomejs.dev/linter/rules/no-non-null-assertion
+See https://biomejs.dev/linter/rules/no-non-null-assertion 
 	 */
 	noNonNullAssertion?: NoNonNullAssertionConfiguration;
 	/**
 	* Disallow reassigning function parameters.
-See https://biomejs.dev/linter/rules/no-parameter-assign
+See https://biomejs.dev/linter/rules/no-parameter-assign 
 	 */
 	noParameterAssign?: NoParameterAssignConfiguration;
 	/**
 	* Disallow the use of parameter properties in class constructors.
-See https://biomejs.dev/linter/rules/no-parameter-properties
+See https://biomejs.dev/linter/rules/no-parameter-properties 
 	 */
 	noParameterProperties?: NoParameterPropertiesConfiguration;
 	/**
 	* Disallow the use of process.env.
-See https://biomejs.dev/linter/rules/no-process-env
+See https://biomejs.dev/linter/rules/no-process-env 
 	 */
 	noProcessEnv?: NoProcessEnvConfiguration;
 	/**
 	* This rule allows you to specify global variable names that you don’t want to use in your application.
-See https://biomejs.dev/linter/rules/no-restricted-globals
+See https://biomejs.dev/linter/rules/no-restricted-globals 
 	 */
 	noRestrictedGlobals?: NoRestrictedGlobalsConfiguration;
 	/**
 	* Disallow specified modules when loaded by import or require.
-See https://biomejs.dev/linter/rules/no-restricted-imports
+See https://biomejs.dev/linter/rules/no-restricted-imports 
 	 */
 	noRestrictedImports?: NoRestrictedImportsConfiguration;
 	/**
 	* Disallow user defined types.
-See https://biomejs.dev/linter/rules/no-restricted-types
+See https://biomejs.dev/linter/rules/no-restricted-types 
 	 */
 	noRestrictedTypes?: NoRestrictedTypesConfiguration;
 	/**
 	* Disallow the use of constants which its value is the upper-case version of its name.
-See https://biomejs.dev/linter/rules/no-shouty-constants
+See https://biomejs.dev/linter/rules/no-shouty-constants 
 	 */
 	noShoutyConstants?: NoShoutyConstantsConfiguration;
 	/**
 	* Enforce the use of String.slice() over String.substr() and String.substring().
-See https://biomejs.dev/linter/rules/no-substr
+See https://biomejs.dev/linter/rules/no-substr 
 	 */
 	noSubstr?: NoSubstrConfiguration;
 	/**
 	* Disallow template literals if interpolation and special-character handling are not needed.
-See https://biomejs.dev/linter/rules/no-unused-template-literal
+See https://biomejs.dev/linter/rules/no-unused-template-literal 
 	 */
 	noUnusedTemplateLiteral?: NoUnusedTemplateLiteralConfiguration;
 	/**
 	* Disallow else block when the if block breaks early.
-See https://biomejs.dev/linter/rules/no-useless-else
+See https://biomejs.dev/linter/rules/no-useless-else 
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
 	* Disallow use of @value rule in css modules.
-See https://biomejs.dev/linter/rules/no-value-at-rule
+See https://biomejs.dev/linter/rules/no-value-at-rule 
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
 	/**
 	* Disallow the use of yoda expressions.
-See https://biomejs.dev/linter/rules/no-yoda-expression
+See https://biomejs.dev/linter/rules/no-yoda-expression 
 	 */
 	noYodaExpression?: NoYodaExpressionConfiguration;
 	/**
@@ -2337,237 +2348,237 @@ See https://biomejs.dev/linter/rules/no-yoda-expression
 	recommended?: boolean;
 	/**
 	* Disallow Array constructors.
-See https://biomejs.dev/linter/rules/use-array-literals
+See https://biomejs.dev/linter/rules/use-array-literals 
 	 */
 	useArrayLiterals?: UseArrayLiteralsConfiguration;
 	/**
 	* Enforce the use of as const over literal type and type annotation.
-See https://biomejs.dev/linter/rules/use-as-const-assertion
+See https://biomejs.dev/linter/rules/use-as-const-assertion 
 	 */
 	useAsConstAssertion?: UseAsConstAssertionConfiguration;
 	/**
 	* Use at() instead of integer index access.
-See https://biomejs.dev/linter/rules/use-at-index
+See https://biomejs.dev/linter/rules/use-at-index 
 	 */
 	useAtIndex?: UseAtIndexConfiguration;
 	/**
 	* Requires following curly brace conventions.
-See https://biomejs.dev/linter/rules/use-block-statements
+See https://biomejs.dev/linter/rules/use-block-statements 
 	 */
 	useBlockStatements?: UseBlockStatementsConfiguration;
 	/**
 	* Enforce using else if instead of nested if in else clauses.
-See https://biomejs.dev/linter/rules/use-collapsed-else-if
+See https://biomejs.dev/linter/rules/use-collapsed-else-if 
 	 */
 	useCollapsedElseIf?: UseCollapsedElseIfConfiguration;
 	/**
 	* Enforce using single if instead of nested if clauses.
-See https://biomejs.dev/linter/rules/use-collapsed-if
+See https://biomejs.dev/linter/rules/use-collapsed-if 
 	 */
 	useCollapsedIf?: UseCollapsedIfConfiguration;
 	/**
 	* Enforce declaring components only within modules that export React Components exclusively.
-See https://biomejs.dev/linter/rules/use-component-export-only-modules
+See https://biomejs.dev/linter/rules/use-component-export-only-modules 
 	 */
 	useComponentExportOnlyModules?: UseComponentExportOnlyModulesConfiguration;
 	/**
 	* Require consistently using either T\[] or Array\<T>.
-See https://biomejs.dev/linter/rules/use-consistent-array-type
+See https://biomejs.dev/linter/rules/use-consistent-array-type 
 	 */
 	useConsistentArrayType?: UseConsistentArrayTypeConfiguration;
 	/**
 	* Enforce the use of new for all builtins, except String, Number and Boolean.
-See https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation
+See https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation 
 	 */
 	useConsistentBuiltinInstantiation?: UseConsistentBuiltinInstantiationConfiguration;
 	/**
 	* This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
-See https://biomejs.dev/linter/rules/use-consistent-curly-braces
+See https://biomejs.dev/linter/rules/use-consistent-curly-braces 
 	 */
 	useConsistentCurlyBraces?: UseConsistentCurlyBracesConfiguration;
 	/**
 	* Require consistent accessibility modifiers on class properties and methods.
-See https://biomejs.dev/linter/rules/use-consistent-member-accessibility
+See https://biomejs.dev/linter/rules/use-consistent-member-accessibility 
 	 */
 	useConsistentMemberAccessibility?: UseConsistentMemberAccessibilityConfiguration;
 	/**
 	* Require the consistent declaration of object literals. Defaults to explicit definitions.
-See https://biomejs.dev/linter/rules/use-consistent-object-definitions
+See https://biomejs.dev/linter/rules/use-consistent-object-definitions 
 	 */
 	useConsistentObjectDefinitions?: UseConsistentObjectDefinitionsConfiguration;
 	/**
 	* Enforce type definitions to consistently use either interface or type.
-See https://biomejs.dev/linter/rules/use-consistent-type-definitions
+See https://biomejs.dev/linter/rules/use-consistent-type-definitions 
 	 */
 	useConsistentTypeDefinitions?: UseConsistentTypeDefinitionsConfiguration;
 	/**
 	* Require const declarations for variables that are only assigned once.
-See https://biomejs.dev/linter/rules/use-const
+See https://biomejs.dev/linter/rules/use-const 
 	 */
 	useConst?: UseConstConfiguration;
 	/**
 	* Enforce default function parameters and optional function parameters to be last.
-See https://biomejs.dev/linter/rules/use-default-parameter-last
+See https://biomejs.dev/linter/rules/use-default-parameter-last 
 	 */
 	useDefaultParameterLast?: UseDefaultParameterLastConfiguration;
 	/**
 	* Require the default clause in switch statements.
-See https://biomejs.dev/linter/rules/use-default-switch-clause
+See https://biomejs.dev/linter/rules/use-default-switch-clause 
 	 */
 	useDefaultSwitchClause?: UseDefaultSwitchClauseConfiguration;
 	/**
 	* Require specifying the reason argument when using @deprecated directive.
-See https://biomejs.dev/linter/rules/use-deprecated-reason
+See https://biomejs.dev/linter/rules/use-deprecated-reason 
 	 */
 	useDeprecatedReason?: UseDeprecatedReasonConfiguration;
 	/**
 	* Require that each enum member value be explicitly initialized.
-See https://biomejs.dev/linter/rules/use-enum-initializers
+See https://biomejs.dev/linter/rules/use-enum-initializers 
 	 */
 	useEnumInitializers?: UseEnumInitializersConfiguration;
 	/**
 	* Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
-See https://biomejs.dev/linter/rules/use-explicit-length-check
+See https://biomejs.dev/linter/rules/use-explicit-length-check 
 	 */
 	useExplicitLengthCheck?: UseExplicitLengthCheckConfiguration;
 	/**
 	* Disallow the use of Math.pow in favor of the ** operator.
-See https://biomejs.dev/linter/rules/use-exponentiation-operator
+See https://biomejs.dev/linter/rules/use-exponentiation-operator 
 	 */
 	useExponentiationOperator?: UseExponentiationOperatorConfiguration;
 	/**
 	* Promotes the use of export type for types.
-See https://biomejs.dev/linter/rules/use-export-type
+See https://biomejs.dev/linter/rules/use-export-type 
 	 */
 	useExportType?: UseExportTypeConfiguration;
 	/**
 	* Require that all exports are declared after all non-export statements.
-See https://biomejs.dev/linter/rules/use-exports-last
+See https://biomejs.dev/linter/rules/use-exports-last 
 	 */
 	useExportsLast?: UseExportsLastConfiguration;
 	/**
 	* Enforce naming conventions for JavaScript and TypeScript filenames.
-See https://biomejs.dev/linter/rules/use-filenaming-convention
+See https://biomejs.dev/linter/rules/use-filenaming-convention 
 	 */
 	useFilenamingConvention?: UseFilenamingConventionConfiguration;
 	/**
 	* Prefer using for...of loops over standard for loops where possible.
-See https://biomejs.dev/linter/rules/use-for-of
+See https://biomejs.dev/linter/rules/use-for-of 
 	 */
 	useForOf?: UseForOfConfiguration;
 	/**
 	* This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
-See https://biomejs.dev/linter/rules/use-fragment-syntax
+See https://biomejs.dev/linter/rules/use-fragment-syntax 
 	 */
 	useFragmentSyntax?: UseFragmentSyntaxConfiguration;
 	/**
 	* Validates that all enum values are capitalized.
-See https://biomejs.dev/linter/rules/use-graphql-naming-convention
+See https://biomejs.dev/linter/rules/use-graphql-naming-convention 
 	 */
 	useGraphqlNamingConvention?: UseGraphqlNamingConventionConfiguration;
 	/**
 	* Enforce that getters and setters for the same property are adjacent in class and object definitions.
-See https://biomejs.dev/linter/rules/use-grouped-accessor-pairs
+See https://biomejs.dev/linter/rules/use-grouped-accessor-pairs 
 	 */
 	useGroupedAccessorPairs?: UseGroupedAccessorPairsConfiguration;
 	/**
 	* Promotes the use of import type for types.
-See https://biomejs.dev/linter/rules/use-import-type
+See https://biomejs.dev/linter/rules/use-import-type 
 	 */
 	useImportType?: UseImportTypeConfiguration;
 	/**
 	* Require all enum members to be literal values.
-See https://biomejs.dev/linter/rules/use-literal-enum-members
+See https://biomejs.dev/linter/rules/use-literal-enum-members 
 	 */
 	useLiteralEnumMembers?: UseLiteralEnumMembersConfiguration;
 	/**
 	* Enforce naming conventions for everything across a codebase.
-See https://biomejs.dev/linter/rules/use-naming-convention
+See https://biomejs.dev/linter/rules/use-naming-convention 
 	 */
 	useNamingConvention?: UseNamingConventionConfiguration;
 	/**
 	* Promotes the usage of node:assert/strict over node:assert.
-See https://biomejs.dev/linter/rules/use-node-assert-strict
+See https://biomejs.dev/linter/rules/use-node-assert-strict 
 	 */
 	useNodeAssertStrict?: UseNodeAssertStrictConfiguration;
 	/**
 	* Enforces using the node: protocol for Node.js builtin modules.
-See https://biomejs.dev/linter/rules/use-nodejs-import-protocol
+See https://biomejs.dev/linter/rules/use-nodejs-import-protocol 
 	 */
 	useNodejsImportProtocol?: UseNodejsImportProtocolConfiguration;
 	/**
 	* Use the Number properties instead of global ones.
-See https://biomejs.dev/linter/rules/use-number-namespace
+See https://biomejs.dev/linter/rules/use-number-namespace 
 	 */
 	useNumberNamespace?: UseNumberNamespaceConfiguration;
 	/**
 	* Enforce the use of numeric separators in numeric literals.
-See https://biomejs.dev/linter/rules/use-numeric-separators
+See https://biomejs.dev/linter/rules/use-numeric-separators 
 	 */
 	useNumericSeparators?: UseNumericSeparatorsConfiguration;
 	/**
 	* Prefer object spread over Object.assign() when constructing new objects.
-See https://biomejs.dev/linter/rules/use-object-spread
+See https://biomejs.dev/linter/rules/use-object-spread 
 	 */
 	useObjectSpread?: UseObjectSpreadConfiguration;
 	/**
 	* Enforce that components are defined as functions and never as classes.
-See https://biomejs.dev/linter/rules/use-react-function-components
+See https://biomejs.dev/linter/rules/use-react-function-components 
 	 */
 	useReactFunctionComponents?: UseReactFunctionComponentsConfiguration;
 	/**
 	* Enforce marking members as readonly if they are never modified outside the constructor.
-See https://biomejs.dev/linter/rules/use-readonly-class-properties
+See https://biomejs.dev/linter/rules/use-readonly-class-properties 
 	 */
 	useReadonlyClassProperties?: UseReadonlyClassPropertiesConfiguration;
 	/**
 	* Prevent extra closing tags for components without children.
-See https://biomejs.dev/linter/rules/use-self-closing-elements
+See https://biomejs.dev/linter/rules/use-self-closing-elements 
 	 */
 	useSelfClosingElements?: UseSelfClosingElementsConfiguration;
 	/**
 	* Require assignment operator shorthand where possible.
-See https://biomejs.dev/linter/rules/use-shorthand-assign
+See https://biomejs.dev/linter/rules/use-shorthand-assign 
 	 */
 	useShorthandAssign?: UseShorthandAssignConfiguration;
 	/**
 	* Enforce using function types instead of object type with call signatures.
-See https://biomejs.dev/linter/rules/use-shorthand-function-type
+See https://biomejs.dev/linter/rules/use-shorthand-function-type 
 	 */
 	useShorthandFunctionType?: UseShorthandFunctionTypeConfiguration;
 	/**
 	* Disallow multiple variable declarations in the same variable statement.
-See https://biomejs.dev/linter/rules/use-single-var-declarator
+See https://biomejs.dev/linter/rules/use-single-var-declarator 
 	 */
 	useSingleVarDeclarator?: UseSingleVarDeclaratorConfiguration;
 	/**
 	* Require a description parameter for the Symbol().
-See https://biomejs.dev/linter/rules/use-symbol-description
+See https://biomejs.dev/linter/rules/use-symbol-description 
 	 */
 	useSymbolDescription?: UseSymbolDescriptionConfiguration;
 	/**
 	* Prefer template literals over string concatenation.
-See https://biomejs.dev/linter/rules/use-template
+See https://biomejs.dev/linter/rules/use-template 
 	 */
 	useTemplate?: UseTemplateConfiguration;
 	/**
 	* Require new when throwing an error.
-See https://biomejs.dev/linter/rules/use-throw-new-error
+See https://biomejs.dev/linter/rules/use-throw-new-error 
 	 */
 	useThrowNewError?: UseThrowNewErrorConfiguration;
 	/**
 	* Disallow throwing non-Error values.
-See https://biomejs.dev/linter/rules/use-throw-only-error
+See https://biomejs.dev/linter/rules/use-throw-only-error 
 	 */
 	useThrowOnlyError?: UseThrowOnlyErrorConfiguration;
 	/**
 	* Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
-See https://biomejs.dev/linter/rules/use-trim-start-end
+See https://biomejs.dev/linter/rules/use-trim-start-end 
 	 */
 	useTrimStartEnd?: UseTrimStartEndConfiguration;
 	/**
 	* Disallow overload signatures that can be unified into a single signature.
-See https://biomejs.dev/linter/rules/use-unified-type-signatures
+See https://biomejs.dev/linter/rules/use-unified-type-signatures 
 	 */
 	useUnifiedTypeSignatures?: UseUnifiedTypeSignaturesConfiguration;
 }
@@ -2577,407 +2588,407 @@ See https://biomejs.dev/linter/rules/use-unified-type-signatures
 export interface Suspicious {
 	/**
 	* Disallow the use of alert, confirm, and prompt.
-See https://biomejs.dev/linter/rules/no-alert
+See https://biomejs.dev/linter/rules/no-alert 
 	 */
 	noAlert?: NoAlertConfiguration;
 	/**
 	* Use standard constants instead of approximated literals.
-See https://biomejs.dev/linter/rules/no-approximative-numeric-constant
+See https://biomejs.dev/linter/rules/no-approximative-numeric-constant 
 	 */
 	noApproximativeNumericConstant?: NoApproximativeNumericConstantConfiguration;
 	/**
 	* Discourage the usage of Array index in keys.
-See https://biomejs.dev/linter/rules/no-array-index-key
+See https://biomejs.dev/linter/rules/no-array-index-key 
 	 */
 	noArrayIndexKey?: NoArrayIndexKeyConfiguration;
 	/**
 	* Disallow assignments in expressions.
-See https://biomejs.dev/linter/rules/no-assign-in-expressions
+See https://biomejs.dev/linter/rules/no-assign-in-expressions 
 	 */
 	noAssignInExpressions?: NoAssignInExpressionsConfiguration;
 	/**
 	* Disallows using an async function as a Promise executor.
-See https://biomejs.dev/linter/rules/no-async-promise-executor
+See https://biomejs.dev/linter/rules/no-async-promise-executor 
 	 */
 	noAsyncPromiseExecutor?: NoAsyncPromiseExecutorConfiguration;
 	/**
 	* Prevents the use of the ! pattern in the first position of files.includes in the configuration file.
-See https://biomejs.dev/linter/rules/no-biome-first-exception
+See https://biomejs.dev/linter/rules/no-biome-first-exception 
 	 */
 	noBiomeFirstException?: NoBiomeFirstExceptionConfiguration;
 	/**
 	* Disallow bitwise operators.
-See https://biomejs.dev/linter/rules/no-bitwise-operators
+See https://biomejs.dev/linter/rules/no-bitwise-operators 
 	 */
 	noBitwiseOperators?: NoBitwiseOperatorsConfiguration;
 	/**
 	* Disallow reassigning exceptions in catch clauses.
-See https://biomejs.dev/linter/rules/no-catch-assign
+See https://biomejs.dev/linter/rules/no-catch-assign 
 	 */
 	noCatchAssign?: NoCatchAssignConfiguration;
 	/**
 	* Disallow reassigning class members.
-See https://biomejs.dev/linter/rules/no-class-assign
+See https://biomejs.dev/linter/rules/no-class-assign 
 	 */
 	noClassAssign?: NoClassAssignConfiguration;
 	/**
 	* Prevent comments from being inserted as text nodes.
-See https://biomejs.dev/linter/rules/no-comment-text
+See https://biomejs.dev/linter/rules/no-comment-text 
 	 */
 	noCommentText?: NoCommentTextConfiguration;
 	/**
 	* Disallow comparing against -0.
-See https://biomejs.dev/linter/rules/no-compare-neg-zero
+See https://biomejs.dev/linter/rules/no-compare-neg-zero 
 	 */
 	noCompareNegZero?: NoCompareNegZeroConfiguration;
 	/**
 	* Disallow labeled statements that are not loops.
-See https://biomejs.dev/linter/rules/no-confusing-labels
+See https://biomejs.dev/linter/rules/no-confusing-labels 
 	 */
 	noConfusingLabels?: NoConfusingLabelsConfiguration;
 	/**
 	* Disallow void type outside of generic or return types.
-See https://biomejs.dev/linter/rules/no-confusing-void-type
+See https://biomejs.dev/linter/rules/no-confusing-void-type 
 	 */
 	noConfusingVoidType?: NoConfusingVoidTypeConfiguration;
 	/**
 	* Disallow the use of console.
-See https://biomejs.dev/linter/rules/no-console
+See https://biomejs.dev/linter/rules/no-console 
 	 */
 	noConsole?: NoConsoleConfiguration;
 	/**
 	* Disallow TypeScript const enum.
-See https://biomejs.dev/linter/rules/no-const-enum
+See https://biomejs.dev/linter/rules/no-const-enum 
 	 */
 	noConstEnum?: NoConstEnumConfiguration;
 	/**
 	* Disallow expressions where the operation doesn't affect the value.
-See https://biomejs.dev/linter/rules/no-constant-binary-expressions
+See https://biomejs.dev/linter/rules/no-constant-binary-expressions 
 	 */
 	noConstantBinaryExpressions?: NoConstantBinaryExpressionsConfiguration;
 	/**
 	* Prevents from having control characters and some escape sequences that match control characters in regular expression literals.
-See https://biomejs.dev/linter/rules/no-control-characters-in-regex
+See https://biomejs.dev/linter/rules/no-control-characters-in-regex 
 	 */
 	noControlCharactersInRegex?: NoControlCharactersInRegexConfiguration;
 	/**
 	* Disallow the use of debugger.
-See https://biomejs.dev/linter/rules/no-debugger
+See https://biomejs.dev/linter/rules/no-debugger 
 	 */
 	noDebugger?: NoDebuggerConfiguration;
 	/**
 	* Disallow direct assignments to document.cookie.
-See https://biomejs.dev/linter/rules/no-document-cookie
+See https://biomejs.dev/linter/rules/no-document-cookie 
 	 */
 	noDocumentCookie?: NoDocumentCookieConfiguration;
 	/**
 	* Prevents importing next/document outside of pages/_document.jsx in Next.js projects.
-See https://biomejs.dev/linter/rules/no-document-import-in-page
+See https://biomejs.dev/linter/rules/no-document-import-in-page 
 	 */
 	noDocumentImportInPage?: NoDocumentImportInPageConfiguration;
 	/**
 	* Require the use of === and !==.
-See https://biomejs.dev/linter/rules/no-double-equals
+See https://biomejs.dev/linter/rules/no-double-equals 
 	 */
 	noDoubleEquals?: NoDoubleEqualsConfiguration;
 	/**
 	* Disallow duplicate @import rules.
-See https://biomejs.dev/linter/rules/no-duplicate-at-import-rules
+See https://biomejs.dev/linter/rules/no-duplicate-at-import-rules 
 	 */
 	noDuplicateAtImportRules?: NoDuplicateAtImportRulesConfiguration;
 	/**
 	* Disallow duplicate case labels.
-See https://biomejs.dev/linter/rules/no-duplicate-case
+See https://biomejs.dev/linter/rules/no-duplicate-case 
 	 */
 	noDuplicateCase?: NoDuplicateCaseConfiguration;
 	/**
 	* Disallow duplicate class members.
-See https://biomejs.dev/linter/rules/no-duplicate-class-members
+See https://biomejs.dev/linter/rules/no-duplicate-class-members 
 	 */
 	noDuplicateClassMembers?: NoDuplicateClassMembersConfiguration;
 	/**
 	* Disallow duplicate custom properties within declaration blocks.
-See https://biomejs.dev/linter/rules/no-duplicate-custom-properties
+See https://biomejs.dev/linter/rules/no-duplicate-custom-properties 
 	 */
 	noDuplicateCustomProperties?: NoDuplicateCustomPropertiesConfiguration;
 	/**
 	* Disallow duplicate conditions in if-else-if chains.
-See https://biomejs.dev/linter/rules/no-duplicate-else-if
+See https://biomejs.dev/linter/rules/no-duplicate-else-if 
 	 */
 	noDuplicateElseIf?: NoDuplicateElseIfConfiguration;
 	/**
 	* No duplicated fields in GraphQL operations.
-See https://biomejs.dev/linter/rules/no-duplicate-fields
+See https://biomejs.dev/linter/rules/no-duplicate-fields 
 	 */
 	noDuplicateFields?: NoDuplicateFieldsConfiguration;
 	/**
 	* Disallow duplicate names within font families.
-See https://biomejs.dev/linter/rules/no-duplicate-font-names
+See https://biomejs.dev/linter/rules/no-duplicate-font-names 
 	 */
 	noDuplicateFontNames?: NoDuplicateFontNamesConfiguration;
 	/**
 	* Prevents JSX properties to be assigned multiple times.
-See https://biomejs.dev/linter/rules/no-duplicate-jsx-props
+See https://biomejs.dev/linter/rules/no-duplicate-jsx-props 
 	 */
 	noDuplicateJsxProps?: NoDuplicateJsxPropsConfiguration;
 	/**
 	* Disallow two keys with the same name inside objects.
-See https://biomejs.dev/linter/rules/no-duplicate-object-keys
+See https://biomejs.dev/linter/rules/no-duplicate-object-keys 
 	 */
 	noDuplicateObjectKeys?: NoDuplicateObjectKeysConfiguration;
 	/**
 	* Disallow duplicate function parameter name.
-See https://biomejs.dev/linter/rules/no-duplicate-parameters
+See https://biomejs.dev/linter/rules/no-duplicate-parameters 
 	 */
 	noDuplicateParameters?: NoDuplicateParametersConfiguration;
 	/**
 	* Disallow duplicate properties within declaration blocks.
-See https://biomejs.dev/linter/rules/no-duplicate-properties
+See https://biomejs.dev/linter/rules/no-duplicate-properties 
 	 */
 	noDuplicateProperties?: NoDuplicatePropertiesConfiguration;
 	/**
 	* Disallow duplicate selectors within keyframe blocks.
-See https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block
+See https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block 
 	 */
 	noDuplicateSelectorsKeyframeBlock?: NoDuplicateSelectorsKeyframeBlockConfiguration;
 	/**
 	* A describe block should not contain duplicate hooks.
-See https://biomejs.dev/linter/rules/no-duplicate-test-hooks
+See https://biomejs.dev/linter/rules/no-duplicate-test-hooks 
 	 */
 	noDuplicateTestHooks?: NoDuplicateTestHooksConfiguration;
 	/**
 	* Disallow CSS empty blocks.
-See https://biomejs.dev/linter/rules/no-empty-block
+See https://biomejs.dev/linter/rules/no-empty-block 
 	 */
 	noEmptyBlock?: NoEmptyBlockConfiguration;
 	/**
 	* Disallow empty block statements and static blocks.
-See https://biomejs.dev/linter/rules/no-empty-block-statements
+See https://biomejs.dev/linter/rules/no-empty-block-statements 
 	 */
 	noEmptyBlockStatements?: NoEmptyBlockStatementsConfiguration;
 	/**
 	* Disallow the declaration of empty interfaces.
-See https://biomejs.dev/linter/rules/no-empty-interface
+See https://biomejs.dev/linter/rules/no-empty-interface 
 	 */
 	noEmptyInterface?: NoEmptyInterfaceConfiguration;
 	/**
 	* Disallow variables from evolving into any type through reassignments.
-See https://biomejs.dev/linter/rules/no-evolving-types
+See https://biomejs.dev/linter/rules/no-evolving-types 
 	 */
 	noEvolvingTypes?: NoEvolvingTypesConfiguration;
 	/**
 	* Disallow the any type usage.
-See https://biomejs.dev/linter/rules/no-explicit-any
+See https://biomejs.dev/linter/rules/no-explicit-any 
 	 */
 	noExplicitAny?: NoExplicitAnyConfiguration;
 	/**
 	* Disallow using export or module.exports in files containing tests.
-See https://biomejs.dev/linter/rules/no-exports-in-test
+See https://biomejs.dev/linter/rules/no-exports-in-test 
 	 */
 	noExportsInTest?: NoExportsInTestConfiguration;
 	/**
 	* Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.
-See https://biomejs.dev/linter/rules/no-extra-non-null-assertion
+See https://biomejs.dev/linter/rules/no-extra-non-null-assertion 
 	 */
 	noExtraNonNullAssertion?: NoExtraNonNullAssertionConfiguration;
 	/**
 	* Disallow fallthrough of switch clauses.
-See https://biomejs.dev/linter/rules/no-fallthrough-switch-clause
+See https://biomejs.dev/linter/rules/no-fallthrough-switch-clause 
 	 */
 	noFallthroughSwitchClause?: NoFallthroughSwitchClauseConfiguration;
 	/**
 	* Disallow focused tests.
-See https://biomejs.dev/linter/rules/no-focused-tests
+See https://biomejs.dev/linter/rules/no-focused-tests 
 	 */
 	noFocusedTests?: NoFocusedTestsConfiguration;
 	/**
 	* Disallow reassigning function declarations.
-See https://biomejs.dev/linter/rules/no-function-assign
+See https://biomejs.dev/linter/rules/no-function-assign 
 	 */
 	noFunctionAssign?: NoFunctionAssignConfiguration;
 	/**
 	* Disallow assignments to native objects and read-only global variables.
-See https://biomejs.dev/linter/rules/no-global-assign
+See https://biomejs.dev/linter/rules/no-global-assign 
 	 */
 	noGlobalAssign?: NoGlobalAssignConfiguration;
 	/**
 	* Use Number.isFinite instead of global isFinite.
-See https://biomejs.dev/linter/rules/no-global-is-finite
+See https://biomejs.dev/linter/rules/no-global-is-finite 
 	 */
 	noGlobalIsFinite?: NoGlobalIsFiniteConfiguration;
 	/**
 	* Use Number.isNaN instead of global isNaN.
-See https://biomejs.dev/linter/rules/no-global-is-nan
+See https://biomejs.dev/linter/rules/no-global-is-nan 
 	 */
 	noGlobalIsNan?: NoGlobalIsNanConfiguration;
 	/**
 	* Prevent using the next/head module in pages/_document.js on Next.js projects.
-See https://biomejs.dev/linter/rules/no-head-import-in-document
+See https://biomejs.dev/linter/rules/no-head-import-in-document 
 	 */
 	noHeadImportInDocument?: NoHeadImportInDocumentConfiguration;
 	/**
 	* Disallow use of implicit any type on variable declarations.
-See https://biomejs.dev/linter/rules/no-implicit-any-let
+See https://biomejs.dev/linter/rules/no-implicit-any-let 
 	 */
 	noImplicitAnyLet?: NoImplicitAnyLetConfiguration;
 	/**
 	* Disallow assigning to imported bindings.
-See https://biomejs.dev/linter/rules/no-import-assign
+See https://biomejs.dev/linter/rules/no-import-assign 
 	 */
 	noImportAssign?: NoImportAssignConfiguration;
 	/**
 	* Disallow invalid !important within keyframe declarations.
-See https://biomejs.dev/linter/rules/no-important-in-keyframe
+See https://biomejs.dev/linter/rules/no-important-in-keyframe 
 	 */
 	noImportantInKeyframe?: NoImportantInKeyframeConfiguration;
 	/**
 	* Disallows the use of irregular whitespace characters.
-See https://biomejs.dev/linter/rules/no-irregular-whitespace
+See https://biomejs.dev/linter/rules/no-irregular-whitespace 
 	 */
 	noIrregularWhitespace?: NoIrregularWhitespaceConfiguration;
 	/**
 	* Disallow labels that share a name with a variable.
-See https://biomejs.dev/linter/rules/no-label-var
+See https://biomejs.dev/linter/rules/no-label-var 
 	 */
 	noLabelVar?: NoLabelVarConfiguration;
 	/**
 	* Disallow characters made with multiple code points in character class syntax.
-See https://biomejs.dev/linter/rules/no-misleading-character-class
+See https://biomejs.dev/linter/rules/no-misleading-character-class 
 	 */
 	noMisleadingCharacterClass?: NoMisleadingCharacterClassConfiguration;
 	/**
 	* Enforce proper usage of new and constructor.
-See https://biomejs.dev/linter/rules/no-misleading-instantiator
+See https://biomejs.dev/linter/rules/no-misleading-instantiator 
 	 */
 	noMisleadingInstantiator?: NoMisleadingInstantiatorConfiguration;
 	/**
 	* Checks that the assertion function, for example expect, is placed inside an it() function call.
-See https://biomejs.dev/linter/rules/no-misplaced-assertion
+See https://biomejs.dev/linter/rules/no-misplaced-assertion 
 	 */
 	noMisplacedAssertion?: NoMisplacedAssertionConfiguration;
 	/**
 	* Disallow shorthand assign when variable appears on both sides.
-See https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign
+See https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign 
 	 */
 	noMisrefactoredShorthandAssign?: NoMisrefactoredShorthandAssignConfiguration;
 	/**
 	* Disallow non-null assertions after optional chaining expressions.
-See https://biomejs.dev/linter/rules/no-non-null-asserted-optional-chain
+See https://biomejs.dev/linter/rules/no-non-null-asserted-optional-chain 
 	 */
 	noNonNullAssertedOptionalChain?: NoNonNullAssertedOptionalChainConfiguration;
 	/**
 	* Disallow octal escape sequences in string literals.
-See https://biomejs.dev/linter/rules/no-octal-escape
+See https://biomejs.dev/linter/rules/no-octal-escape 
 	 */
 	noOctalEscape?: NoOctalEscapeConfiguration;
 	/**
 	* Disallow direct use of Object.prototype builtins.
-See https://biomejs.dev/linter/rules/no-prototype-builtins
+See https://biomejs.dev/linter/rules/no-prototype-builtins 
 	 */
 	noPrototypeBuiltins?: NoPrototypeBuiltinsConfiguration;
 	/**
 	* Disallow the use if quickfix.biome inside editor settings file.
-See https://biomejs.dev/linter/rules/no-quickfix-biome
+See https://biomejs.dev/linter/rules/no-quickfix-biome 
 	 */
 	noQuickfixBiome?: NoQuickfixBiomeConfiguration;
 	/**
 	* Prevents React-specific JSX properties from being used.
-See https://biomejs.dev/linter/rules/no-react-specific-props
+See https://biomejs.dev/linter/rules/no-react-specific-props 
 	 */
 	noReactSpecificProps?: NoReactSpecificPropsConfiguration;
 	/**
 	* Disallow variable, function, class, and type redeclarations in the same scope.
-See https://biomejs.dev/linter/rules/no-redeclare
+See https://biomejs.dev/linter/rules/no-redeclare 
 	 */
 	noRedeclare?: NoRedeclareConfiguration;
 	/**
 	* Prevents from having redundant "use strict".
-See https://biomejs.dev/linter/rules/no-redundant-use-strict
+See https://biomejs.dev/linter/rules/no-redundant-use-strict 
 	 */
 	noRedundantUseStrict?: NoRedundantUseStrictConfiguration;
 	/**
 	* Disallow comparisons where both sides are exactly the same.
-See https://biomejs.dev/linter/rules/no-self-compare
+See https://biomejs.dev/linter/rules/no-self-compare 
 	 */
 	noSelfCompare?: NoSelfCompareConfiguration;
 	/**
 	* Disallow identifiers from shadowing restricted names.
-See https://biomejs.dev/linter/rules/no-shadow-restricted-names
+See https://biomejs.dev/linter/rules/no-shadow-restricted-names 
 	 */
 	noShadowRestrictedNames?: NoShadowRestrictedNamesConfiguration;
 	/**
 	* Disallow shorthand properties that override related longhand properties.
-See https://biomejs.dev/linter/rules/no-shorthand-property-overrides
+See https://biomejs.dev/linter/rules/no-shorthand-property-overrides 
 	 */
 	noShorthandPropertyOverrides?: NoShorthandPropertyOverridesConfiguration;
 	/**
 	* Disallow disabled tests.
-See https://biomejs.dev/linter/rules/no-skipped-tests
+See https://biomejs.dev/linter/rules/no-skipped-tests 
 	 */
 	noSkippedTests?: NoSkippedTestsConfiguration;
 	/**
 	* Prevents the use of sparse arrays (arrays with holes).
-See https://biomejs.dev/linter/rules/no-sparse-array
+See https://biomejs.dev/linter/rules/no-sparse-array 
 	 */
 	noSparseArray?: NoSparseArrayConfiguration;
 	/**
 	* It detects possible "wrong" semicolons inside JSX elements.
-See https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx
+See https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx 
 	 */
 	noSuspiciousSemicolonInJsx?: NoSuspiciousSemicolonInJsxConfiguration;
 	/**
 	* Disallow template literal placeholder syntax in regular strings.
-See https://biomejs.dev/linter/rules/no-template-curly-in-string
+See https://biomejs.dev/linter/rules/no-template-curly-in-string 
 	 */
 	noTemplateCurlyInString?: NoTemplateCurlyInStringConfiguration;
 	/**
 	* Disallow then property.
-See https://biomejs.dev/linter/rules/no-then-property
+See https://biomejs.dev/linter/rules/no-then-property 
 	 */
 	noThenProperty?: NoThenPropertyConfiguration;
 	/**
 	* Prevents the use of the TypeScript directive @ts-ignore.
-See https://biomejs.dev/linter/rules/no-ts-ignore
+See https://biomejs.dev/linter/rules/no-ts-ignore 
 	 */
 	noTsIgnore?: NoTsIgnoreConfiguration;
 	/**
 	* Disallow let or var variables that are read but never assigned.
-See https://biomejs.dev/linter/rules/no-unassigned-variables
+See https://biomejs.dev/linter/rules/no-unassigned-variables 
 	 */
 	noUnassignedVariables?: NoUnassignedVariablesConfiguration;
 	/**
 	* Disallow unknown at-rules.
-See https://biomejs.dev/linter/rules/no-unknown-at-rules
+See https://biomejs.dev/linter/rules/no-unknown-at-rules 
 	 */
 	noUnknownAtRules?: NoUnknownAtRulesConfiguration;
 	/**
 	* Disallow unsafe declaration merging between interfaces and classes.
-See https://biomejs.dev/linter/rules/no-unsafe-declaration-merging
+See https://biomejs.dev/linter/rules/no-unsafe-declaration-merging 
 	 */
 	noUnsafeDeclarationMerging?: NoUnsafeDeclarationMergingConfiguration;
 	/**
 	* Disallow using unsafe negation.
-See https://biomejs.dev/linter/rules/no-unsafe-negation
+See https://biomejs.dev/linter/rules/no-unsafe-negation 
 	 */
 	noUnsafeNegation?: NoUnsafeNegationConfiguration;
 	/**
 	* Disallow unnecessary escapes in string literals.
-See https://biomejs.dev/linter/rules/no-useless-escape-in-string
+See https://biomejs.dev/linter/rules/no-useless-escape-in-string 
 	 */
 	noUselessEscapeInString?: NoUselessEscapeInStringConfiguration;
 	/**
 	* Disallow useless backreferences in regular expression literals that always match an empty string.
-See https://biomejs.dev/linter/rules/no-useless-regex-backrefs
+See https://biomejs.dev/linter/rules/no-useless-regex-backrefs 
 	 */
 	noUselessRegexBackrefs?: NoUselessRegexBackrefsConfiguration;
 	/**
 	* Disallow the use of var.
-See https://biomejs.dev/linter/rules/no-var
+See https://biomejs.dev/linter/rules/no-var 
 	 */
 	noVar?: NoVarConfiguration;
 	/**
 	* Disallow with statements in non-strict contexts.
-See https://biomejs.dev/linter/rules/no-with
+See https://biomejs.dev/linter/rules/no-with 
 	 */
 	noWith?: NoWithConfiguration;
 	/**
@@ -2986,77 +2997,77 @@ See https://biomejs.dev/linter/rules/no-with
 	recommended?: boolean;
 	/**
 	* Disallow the use of overload signatures that are not next to each other.
-See https://biomejs.dev/linter/rules/use-adjacent-overload-signatures
+See https://biomejs.dev/linter/rules/use-adjacent-overload-signatures 
 	 */
 	useAdjacentOverloadSignatures?: UseAdjacentOverloadSignaturesConfiguration;
 	/**
 	* Ensure async functions utilize await.
-See https://biomejs.dev/linter/rules/use-await
+See https://biomejs.dev/linter/rules/use-await 
 	 */
 	useAwait?: UseAwaitConfiguration;
 	/**
 	* Promotes the correct usage for ignoring folders in the configuration file.
-See https://biomejs.dev/linter/rules/use-biome-ignore-folder
+See https://biomejs.dev/linter/rules/use-biome-ignore-folder 
 	 */
 	useBiomeIgnoreFolder?: UseBiomeIgnoreFolderConfiguration;
 	/**
 	* Enforce default clauses in switch statements to be last.
-See https://biomejs.dev/linter/rules/use-default-switch-clause-last
+See https://biomejs.dev/linter/rules/use-default-switch-clause-last 
 	 */
 	useDefaultSwitchClauseLast?: UseDefaultSwitchClauseLastConfiguration;
 	/**
 	* Enforce passing a message value when creating a built-in error.
-See https://biomejs.dev/linter/rules/use-error-message
+See https://biomejs.dev/linter/rules/use-error-message 
 	 */
 	useErrorMessage?: UseErrorMessageConfiguration;
 	/**
 	* Enforce get methods to always return a value.
-See https://biomejs.dev/linter/rules/use-getter-return
+See https://biomejs.dev/linter/rules/use-getter-return 
 	 */
 	useGetterReturn?: UseGetterReturnConfiguration;
 	/**
 	* Enforces the use of a recommended display strategy with Google Fonts.
-See https://biomejs.dev/linter/rules/use-google-font-display
+See https://biomejs.dev/linter/rules/use-google-font-display 
 	 */
 	useGoogleFontDisplay?: UseGoogleFontDisplayConfiguration;
 	/**
 	* Require for-in loops to include an if statement.
-See https://biomejs.dev/linter/rules/use-guard-for-in
+See https://biomejs.dev/linter/rules/use-guard-for-in 
 	 */
 	useGuardForIn?: UseGuardForInConfiguration;
 	/**
 	* Use Array.isArray() instead of instanceof Array.
-See https://biomejs.dev/linter/rules/use-is-array
+See https://biomejs.dev/linter/rules/use-is-array 
 	 */
 	useIsArray?: UseIsArrayConfiguration;
 	/**
 	* Enforce consistent return values in iterable callbacks.
-See https://biomejs.dev/linter/rules/use-iterable-callback-return
+See https://biomejs.dev/linter/rules/use-iterable-callback-return 
 	 */
 	useIterableCallbackReturn?: UseIterableCallbackReturnConfiguration;
 	/**
 	* Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
-See https://biomejs.dev/linter/rules/use-namespace-keyword
+See https://biomejs.dev/linter/rules/use-namespace-keyword 
 	 */
 	useNamespaceKeyword?: UseNamespaceKeywordConfiguration;
 	/**
 	* Enforce using the digits argument with Number#toFixed().
-See https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument
+See https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument 
 	 */
 	useNumberToFixedDigitsArgument?: UseNumberToFixedDigitsArgumentConfiguration;
 	/**
 	* Use static Response methods instead of new Response() constructor when possible.
-See https://biomejs.dev/linter/rules/use-static-response-methods
+See https://biomejs.dev/linter/rules/use-static-response-methods 
 	 */
 	useStaticResponseMethods?: UseStaticResponseMethodsConfiguration;
 	/**
 	* Enforce the use of the directive "use strict" in script files.
-See https://biomejs.dev/linter/rules/use-strict-mode
+See https://biomejs.dev/linter/rules/use-strict-mode 
 	 */
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
-export type RuleAssistPlainConfiguration = 'off' | 'on';
+export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
@@ -3073,18 +3084,24 @@ export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
 }
-export type NoAccessKeyConfiguration = RulePlainConfiguration | RuleWithNoAccessKeyOptions;
+export type NoAccessKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAccessKeyOptions;
 export type NoAriaHiddenOnFocusableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAriaHiddenOnFocusableOptions;
 export type NoAriaUnsupportedElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAriaUnsupportedElementsOptions;
-export type NoAutofocusConfiguration = RulePlainConfiguration | RuleWithNoAutofocusOptions;
+export type NoAutofocusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAutofocusOptions;
 export type NoDistractingElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDistractingElementsOptions;
-export type NoHeaderScopeConfiguration = RulePlainConfiguration | RuleWithNoHeaderScopeOptions;
+export type NoHeaderScopeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHeaderScopeOptions;
 export type NoInteractiveElementToNoninteractiveRoleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInteractiveElementToNoninteractiveRoleOptions;
@@ -3103,7 +3120,9 @@ export type NoNoninteractiveTabindexConfiguration =
 export type NoPositiveTabindexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPositiveTabindexOptions;
-export type NoRedundantAltConfiguration = RulePlainConfiguration | RuleWithNoRedundantAltOptions;
+export type NoRedundantAltConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedundantAltOptions;
 export type NoRedundantRolesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantRolesOptions;
@@ -3113,7 +3132,9 @@ export type NoStaticElementInteractionsConfiguration =
 export type NoSvgWithoutTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvgWithoutTitleOptions;
-export type UseAltTextConfiguration = RulePlainConfiguration | RuleWithUseAltTextOptions;
+export type UseAltTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAltTextOptions;
 export type UseAnchorContentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAnchorContentOptions;
@@ -3126,7 +3147,9 @@ export type UseAriaPropsForRoleConfiguration =
 export type UseAriaPropsSupportedByRoleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAriaPropsSupportedByRoleOptions;
-export type UseButtonTypeConfiguration = RulePlainConfiguration | RuleWithUseButtonTypeOptions;
+export type UseButtonTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseButtonTypeOptions;
 export type UseFocusableInteractiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFocusableInteractiveOptions;
@@ -3136,19 +3159,27 @@ export type UseGenericFontNamesConfiguration =
 export type UseHeadingContentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseHeadingContentOptions;
-export type UseHtmlLangConfiguration = RulePlainConfiguration | RuleWithUseHtmlLangOptions;
-export type UseIframeTitleConfiguration = RulePlainConfiguration | RuleWithUseIframeTitleOptions;
+export type UseHtmlLangConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseHtmlLangOptions;
+export type UseIframeTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIframeTitleOptions;
 export type UseKeyWithClickEventsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseKeyWithClickEventsOptions;
 export type UseKeyWithMouseEventsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseKeyWithMouseEventsOptions;
-export type UseMediaCaptionConfiguration = RulePlainConfiguration | RuleWithUseMediaCaptionOptions;
+export type UseMediaCaptionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMediaCaptionOptions;
 export type UseSemanticElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSemanticElementsOptions;
-export type UseValidAnchorConfiguration = RulePlainConfiguration | RuleWithUseValidAnchorOptions;
+export type UseValidAnchorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidAnchorOptions;
 export type UseValidAriaPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidAriaPropsOptions;
@@ -3161,13 +3192,21 @@ export type UseValidAriaValuesConfiguration =
 export type UseValidAutocompleteConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidAutocompleteOptions;
-export type UseValidLangConfiguration = RulePlainConfiguration | RuleWithUseValidLangOptions;
+export type UseValidLangConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidLangOptions;
 export type NoAdjacentSpacesInRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAdjacentSpacesInRegexOptions;
-export type NoArgumentsConfiguration = RulePlainConfiguration | RuleWithNoArgumentsOptions;
-export type NoBannedTypesConfiguration = RulePlainConfiguration | RuleWithNoBannedTypesOptions;
-export type NoCommaOperatorConfiguration = RulePlainConfiguration | RuleWithNoCommaOperatorOptions;
+export type NoArgumentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArgumentsOptions;
+export type NoBannedTypesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBannedTypesOptions;
+export type NoCommaOperatorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCommaOperatorOptions;
 export type NoEmptyTypeParametersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyTypeParametersOptions;
@@ -3186,7 +3225,9 @@ export type NoExtraBooleanCastConfiguration =
 export type NoFlatMapIdentityConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFlatMapIdentityOptions;
-export type NoForEachConfiguration = RulePlainConfiguration | RuleWithNoForEachOptions;
+export type NoForEachConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoForEachOptions;
 export type NoImplicitCoercionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImplicitCoercionsOptions;
@@ -3196,8 +3237,12 @@ export type NoImportantStylesConfiguration =
 export type NoStaticOnlyClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoStaticOnlyClassOptions;
-export type NoThisInStaticConfiguration = RulePlainConfiguration | RuleWithNoThisInStaticOptions;
-export type NoUselessCatchConfiguration = RulePlainConfiguration | RuleWithNoUselessCatchOptions;
+export type NoThisInStaticConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoThisInStaticOptions;
+export type NoUselessCatchConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessCatchOptions;
 export type NoUselessConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessConstructorOptions;
@@ -3213,11 +3258,15 @@ export type NoUselessEscapeInRegexConfiguration =
 export type NoUselessFragmentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessFragmentsOptions;
-export type NoUselessLabelConfiguration = RulePlainConfiguration | RuleWithNoUselessLabelOptions;
+export type NoUselessLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessLabelOptions;
 export type NoUselessLoneBlockStatementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessLoneBlockStatementsOptions;
-export type NoUselessRenameConfiguration = RulePlainConfiguration | RuleWithNoUselessRenameOptions;
+export type NoUselessRenameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessRenameOptions;
 export type NoUselessStringConcatConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessStringConcatOptions;
@@ -3239,14 +3288,24 @@ export type NoUselessTypeConstraintConfiguration =
 export type NoUselessUndefinedInitializationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessUndefinedInitializationOptions;
-export type NoVoidConfiguration = RulePlainConfiguration | RuleWithNoVoidOptions;
+export type NoVoidConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVoidOptions;
 export type UseArrowFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArrowFunctionOptions;
-export type UseDateNowConfiguration = RulePlainConfiguration | RuleWithUseDateNowOptions;
-export type UseFlatMapConfiguration = RulePlainConfiguration | RuleWithUseFlatMapOptions;
-export type UseIndexOfConfiguration = RulePlainConfiguration | RuleWithUseIndexOfOptions;
-export type UseLiteralKeysConfiguration = RulePlainConfiguration | RuleWithUseLiteralKeysOptions;
+export type UseDateNowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDateNowOptions;
+export type UseFlatMapConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseFlatMapOptions;
+export type UseIndexOfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIndexOfOptions;
+export type UseLiteralKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLiteralKeysOptions;
 export type UseNumericLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNumericLiteralsOptions;
@@ -3262,9 +3321,15 @@ export type UseSimpleNumberKeysConfiguration =
 export type UseSimplifiedLogicExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSimplifiedLogicExpressionOptions;
-export type UseWhileConfiguration = RulePlainConfiguration | RuleWithUseWhileOptions;
-export type NoChildrenPropConfiguration = RulePlainConfiguration | RuleWithNoChildrenPropOptions;
-export type NoConstAssignConfiguration = RulePlainConfiguration | RuleWithNoConstAssignOptions;
+export type UseWhileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseWhileOptions;
+export type NoChildrenPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoChildrenPropOptions;
+export type NoConstAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConstAssignOptions;
 export type NoConstantConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantConditionOptions;
@@ -3277,7 +3342,9 @@ export type NoConstructorReturnConfiguration =
 export type NoEmptyCharacterClassInRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyCharacterClassInRegexOptions;
-export type NoEmptyPatternConfiguration = RulePlainConfiguration | RuleWithNoEmptyPatternOptions;
+export type NoEmptyPatternConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptyPatternOptions;
 export type NoGlobalDirnameFilenameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoGlobalDirnameFilenameOptions;
@@ -3311,15 +3378,21 @@ export type NoMissingVarFunctionConfiguration =
 export type NoNestedComponentDefinitionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNestedComponentDefinitionsOptions;
-export type NoNodejsModulesConfiguration = RulePlainConfiguration | RuleWithNoNodejsModulesOptions;
+export type NoNodejsModulesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNodejsModulesOptions;
 export type NoNonoctalDecimalEscapeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonoctalDecimalEscapeOptions;
-export type NoPrecisionLossConfiguration = RulePlainConfiguration | RuleWithNoPrecisionLossOptions;
+export type NoPrecisionLossConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPrecisionLossOptions;
 export type NoPrivateImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPrivateImportsOptions;
-export type NoProcessGlobalConfiguration = RulePlainConfiguration | RuleWithNoProcessGlobalOptions;
+export type NoProcessGlobalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProcessGlobalOptions;
 export type NoQwikUseVisibleTaskConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoQwikUseVisibleTaskOptions;
@@ -3332,8 +3405,12 @@ export type NoRenderReturnValueConfiguration =
 export type NoRestrictedElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedElementsOptions;
-export type NoSelfAssignConfiguration = RulePlainConfiguration | RuleWithNoSelfAssignOptions;
-export type NoSetterReturnConfiguration = RulePlainConfiguration | RuleWithNoSetterReturnOptions;
+export type NoSelfAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfAssignOptions;
+export type NoSetterReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSetterReturnOptions;
 export type NoSolidDestructuredPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSolidDestructuredPropsOptions;
@@ -3367,23 +3444,33 @@ export type NoUnknownPseudoElementConfiguration =
 export type NoUnknownTypeSelectorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownTypeSelectorOptions;
-export type NoUnknownUnitConfiguration = RulePlainConfiguration | RuleWithNoUnknownUnitOptions;
+export type NoUnknownUnitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnknownUnitOptions;
 export type NoUnmatchableAnbSelectorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmatchableAnbSelectorOptions;
-export type NoUnreachableConfiguration = RulePlainConfiguration | RuleWithNoUnreachableOptions;
+export type NoUnreachableConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnreachableOptions;
 export type NoUnreachableSuperConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnreachableSuperOptions;
-export type NoUnsafeFinallyConfiguration = RulePlainConfiguration | RuleWithNoUnsafeFinallyOptions;
+export type NoUnsafeFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeFinallyOptions;
 export type NoUnsafeOptionalChainingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeOptionalChainingOptions;
 export type NoUnusedFunctionParametersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedFunctionParametersOptions;
-export type NoUnusedImportsConfiguration = RulePlainConfiguration | RuleWithNoUnusedImportsOptions;
-export type NoUnusedLabelsConfiguration = RulePlainConfiguration | RuleWithNoUnusedLabelsOptions;
+export type NoUnusedImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedImportsOptions;
+export type NoUnusedLabelsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedLabelsOptions;
 export type NoUnusedPrivateClassMembersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedPrivateClassMembersOptions;
@@ -3405,11 +3492,15 @@ export type UseGraphqlNamedOperationsConfiguration =
 export type UseHookAtTopLevelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseHookAtTopLevelOptions;
-export type UseImageSizeConfiguration = RulePlainConfiguration | RuleWithUseImageSizeOptions;
+export type UseImageSizeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImageSizeOptions;
 export type UseImportExtensionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseImportExtensionsOptions;
-export type UseIsNanConfiguration = RulePlainConfiguration | RuleWithUseIsNanOptions;
+export type UseIsNanConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIsNanOptions;
 export type UseJsonImportAttributesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseJsonImportAttributesOptions;
@@ -3431,25 +3522,42 @@ export type UseUniqueElementIdsConfiguration =
 export type UseValidForDirectionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidForDirectionOptions;
-export type UseValidTypeofConfiguration = RulePlainConfiguration | RuleWithUseValidTypeofOptions;
-export type UseYieldConfiguration = RulePlainConfiguration | RuleWithUseYieldOptions;
-export type NoContinueConfiguration = RulePlainConfiguration | RuleWithNoContinueOptions;
+export type UseValidTypeofConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidTypeofOptions;
+export type UseYieldConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseYieldOptions;
+export type NoContinueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoContinueOptions;
 export type NoDeprecatedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDeprecatedImportsOptions;
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
-export type NoEmptySourceConfiguration = RulePlainConfiguration | RuleWithNoEmptySourceOptions;
+export type NoEmptySourceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptySourceOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
-export type NoForInConfiguration = RulePlainConfiguration | RuleWithNoForInOptions;
-export type NoImportCyclesConfiguration = RulePlainConfiguration | RuleWithNoImportCyclesOptions;
+export type NoForInConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoForInOptions;
+export type NoImportCyclesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImportCyclesOptions;
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
-export type NoJsxLiteralsConfiguration = RulePlainConfiguration | RuleWithNoJsxLiteralsOptions;
+export type NoJsxLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLiteralsOptions;
+export type NoLeakedRenderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLeakedRenderOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -3462,8 +3570,12 @@ export type NoParametersOnlyUsedInRecursionConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
-export type NoShadowConfiguration = RulePlainConfiguration | RuleWithNoShadowOptions;
-export type NoSyncScriptsConfiguration = RulePlainConfiguration | RuleWithNoSyncScriptsOptions;
+export type NoShadowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoShadowOptions;
+export type NoSyncScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncScriptsOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -3512,9 +3624,15 @@ export type UseDeprecatedDateConfiguration =
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
-export type UseExplicitTypeConfiguration = RulePlainConfiguration | RuleWithUseExplicitTypeOptions;
-export type UseFindConfiguration = RulePlainConfiguration | RuleWithUseFindOptions;
-export type UseMaxParamsConfiguration = RulePlainConfiguration | RuleWithUseMaxParamsOptions;
+export type UseExplicitTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExplicitTypeOptions;
+export type UseFindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseFindOptions;
+export type UseMaxParamsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMaxParamsOptions;
 export type UseQwikMethodUsageConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikMethodUsageOptions;
@@ -3524,7 +3642,9 @@ export type UseQwikValidLexicalScopeConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
-export type UseSpreadConfiguration = RulePlainConfiguration | RuleWithUseSpreadOptions;
+export type UseSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSpreadOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
@@ -3549,22 +3669,36 @@ export type UseVueValidVElseIfConfiguration =
 export type UseVueValidVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVHtmlOptions;
-export type UseVueValidVIfConfiguration = RulePlainConfiguration | RuleWithUseVueValidVIfOptions;
-export type UseVueValidVOnConfiguration = RulePlainConfiguration | RuleWithUseVueValidVOnOptions;
+export type UseVueValidVIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVIfOptions;
+export type UseVueValidVOnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVOnOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
-export type NoAwaitInLoopsConfiguration = RulePlainConfiguration | RuleWithNoAwaitInLoopsOptions;
-export type NoBarrelFileConfiguration = RulePlainConfiguration | RuleWithNoBarrelFileOptions;
-export type NoDeleteConfiguration = RulePlainConfiguration | RuleWithNoDeleteOptions;
+export type NoAwaitInLoopsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAwaitInLoopsOptions;
+export type NoBarrelFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBarrelFileOptions;
+export type NoDeleteConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDeleteOptions;
 export type NoDynamicNamespaceImportAccessConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDynamicNamespaceImportAccessOptions;
-export type NoImgElementConfiguration = RulePlainConfiguration | RuleWithNoImgElementOptions;
+export type NoImgElementConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImgElementOptions;
 export type NoNamespaceImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNamespaceImportOptions;
-export type NoReExportAllConfiguration = RulePlainConfiguration | RuleWithNoReExportAllOptions;
+export type NoReExportAllConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReExportAllOptions;
 export type NoUnwantedPolyfillioConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnwantedPolyfillioOptions;
@@ -3577,36 +3711,60 @@ export type UseSolidForComponentConfiguration =
 export type UseTopLevelRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelRegexOptions;
-export type NoBlankTargetConfiguration = RulePlainConfiguration | RuleWithNoBlankTargetOptions;
+export type NoBlankTargetConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBlankTargetOptions;
 export type NoDangerouslySetInnerHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDangerouslySetInnerHtmlOptions;
 export type NoDangerouslySetInnerHtmlWithChildrenConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDangerouslySetInnerHtmlWithChildrenOptions;
-export type NoGlobalEvalConfiguration = RulePlainConfiguration | RuleWithNoGlobalEvalOptions;
-export type NoSecretsConfiguration = RulePlainConfiguration | RuleWithNoSecretsOptions;
-export type NoCommonJsConfiguration = RulePlainConfiguration | RuleWithNoCommonJsOptions;
-export type NoDefaultExportConfiguration = RulePlainConfiguration | RuleWithNoDefaultExportOptions;
+export type NoGlobalEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoGlobalEvalOptions;
+export type NoSecretsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSecretsOptions;
+export type NoCommonJsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCommonJsOptions;
+export type NoDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDefaultExportOptions;
 export type NoDescendingSpecificityConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDescendingSpecificityOptions;
-export type NoDoneCallbackConfiguration = RulePlainConfiguration | RuleWithNoDoneCallbackOptions;
-export type NoEnumConfiguration = RulePlainConfiguration | RuleWithNoEnumOptions;
+export type NoDoneCallbackConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDoneCallbackOptions;
+export type NoEnumConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEnumOptions;
 export type NoExportedImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExportedImportsOptions;
-export type NoHeadElementConfiguration = RulePlainConfiguration | RuleWithNoHeadElementOptions;
+export type NoHeadElementConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoHeadElementOptions;
 export type NoImplicitBooleanConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImplicitBooleanOptions;
 export type NoInferrableTypesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInferrableTypesOptions;
-export type NoMagicNumbersConfiguration = RulePlainConfiguration | RuleWithNoMagicNumbersOptions;
-export type NoNamespaceConfiguration = RulePlainConfiguration | RuleWithNoNamespaceOptions;
-export type NoNegationElseConfiguration = RulePlainConfiguration | RuleWithNoNegationElseOptions;
-export type NoNestedTernaryConfiguration = RulePlainConfiguration | RuleWithNoNestedTernaryOptions;
+export type NoMagicNumbersConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMagicNumbersOptions;
+export type NoNamespaceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNamespaceOptions;
+export type NoNegationElseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNegationElseOptions;
+export type NoNestedTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedTernaryOptions;
 export type NoNonNullAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonNullAssertionOptions;
@@ -3616,7 +3774,9 @@ export type NoParameterAssignConfiguration =
 export type NoParameterPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParameterPropertiesOptions;
-export type NoProcessEnvConfiguration = RulePlainConfiguration | RuleWithNoProcessEnvOptions;
+export type NoProcessEnvConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProcessEnvOptions;
 export type NoRestrictedGlobalsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedGlobalsOptions;
@@ -3629,12 +3789,18 @@ export type NoRestrictedTypesConfiguration =
 export type NoShoutyConstantsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShoutyConstantsOptions;
-export type NoSubstrConfiguration = RulePlainConfiguration | RuleWithNoSubstrOptions;
+export type NoSubstrConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSubstrOptions;
 export type NoUnusedTemplateLiteralConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedTemplateLiteralOptions;
-export type NoUselessElseConfiguration = RulePlainConfiguration | RuleWithNoUselessElseOptions;
-export type NoValueAtRuleConfiguration = RulePlainConfiguration | RuleWithNoValueAtRuleOptions;
+export type NoUselessElseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessElseOptions;
+export type NoValueAtRuleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoValueAtRuleOptions;
 export type NoYodaExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYodaExpressionOptions;
@@ -3644,14 +3810,18 @@ export type UseArrayLiteralsConfiguration =
 export type UseAsConstAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAsConstAssertionOptions;
-export type UseAtIndexConfiguration = RulePlainConfiguration | RuleWithUseAtIndexOptions;
+export type UseAtIndexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAtIndexOptions;
 export type UseBlockStatementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBlockStatementsOptions;
 export type UseCollapsedElseIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseCollapsedElseIfOptions;
-export type UseCollapsedIfConfiguration = RulePlainConfiguration | RuleWithUseCollapsedIfOptions;
+export type UseCollapsedIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCollapsedIfOptions;
 export type UseComponentExportOnlyModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseComponentExportOnlyModulesOptions;
@@ -3673,7 +3843,9 @@ export type UseConsistentObjectDefinitionsConfiguration =
 export type UseConsistentTypeDefinitionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTypeDefinitionsOptions;
-export type UseConstConfiguration = RulePlainConfiguration | RuleWithUseConstOptions;
+export type UseConstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConstOptions;
 export type UseDefaultParameterLastConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDefaultParameterLastOptions;
@@ -3692,12 +3864,18 @@ export type UseExplicitLengthCheckConfiguration =
 export type UseExponentiationOperatorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExponentiationOperatorOptions;
-export type UseExportTypeConfiguration = RulePlainConfiguration | RuleWithUseExportTypeOptions;
-export type UseExportsLastConfiguration = RulePlainConfiguration | RuleWithUseExportsLastOptions;
+export type UseExportTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExportTypeOptions;
+export type UseExportsLastConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExportsLastOptions;
 export type UseFilenamingConventionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFilenamingConventionOptions;
-export type UseForOfConfiguration = RulePlainConfiguration | RuleWithUseForOfOptions;
+export type UseForOfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseForOfOptions;
 export type UseFragmentSyntaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFragmentSyntaxOptions;
@@ -3707,7 +3885,9 @@ export type UseGraphqlNamingConventionConfiguration =
 export type UseGroupedAccessorPairsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGroupedAccessorPairsOptions;
-export type UseImportTypeConfiguration = RulePlainConfiguration | RuleWithUseImportTypeOptions;
+export type UseImportTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImportTypeOptions;
 export type UseLiteralEnumMembersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLiteralEnumMembersOptions;
@@ -3726,7 +3906,9 @@ export type UseNumberNamespaceConfiguration =
 export type UseNumericSeparatorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNumericSeparatorsOptions;
-export type UseObjectSpreadConfiguration = RulePlainConfiguration | RuleWithUseObjectSpreadOptions;
+export type UseObjectSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseObjectSpreadOptions;
 export type UseReactFunctionComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentsOptions;
@@ -3748,22 +3930,30 @@ export type UseSingleVarDeclaratorConfiguration =
 export type UseSymbolDescriptionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSymbolDescriptionOptions;
-export type UseTemplateConfiguration = RulePlainConfiguration | RuleWithUseTemplateOptions;
+export type UseTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTemplateOptions;
 export type UseThrowNewErrorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThrowNewErrorOptions;
 export type UseThrowOnlyErrorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThrowOnlyErrorOptions;
-export type UseTrimStartEndConfiguration = RulePlainConfiguration | RuleWithUseTrimStartEndOptions;
+export type UseTrimStartEndConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTrimStartEndOptions;
 export type UseUnifiedTypeSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnifiedTypeSignaturesOptions;
-export type NoAlertConfiguration = RulePlainConfiguration | RuleWithNoAlertOptions;
+export type NoAlertConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAlertOptions;
 export type NoApproximativeNumericConstantConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoApproximativeNumericConstantOptions;
-export type NoArrayIndexKeyConfiguration = RulePlainConfiguration | RuleWithNoArrayIndexKeyOptions;
+export type NoArrayIndexKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArrayIndexKeyOptions;
 export type NoAssignInExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAssignInExpressionsOptions;
@@ -3776,9 +3966,15 @@ export type NoBiomeFirstExceptionConfiguration =
 export type NoBitwiseOperatorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBitwiseOperatorsOptions;
-export type NoCatchAssignConfiguration = RulePlainConfiguration | RuleWithNoCatchAssignOptions;
-export type NoClassAssignConfiguration = RulePlainConfiguration | RuleWithNoClassAssignOptions;
-export type NoCommentTextConfiguration = RulePlainConfiguration | RuleWithNoCommentTextOptions;
+export type NoCatchAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCatchAssignOptions;
+export type NoClassAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoClassAssignOptions;
+export type NoCommentTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCommentTextOptions;
 export type NoCompareNegZeroConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoCompareNegZeroOptions;
@@ -3788,26 +3984,36 @@ export type NoConfusingLabelsConfiguration =
 export type NoConfusingVoidTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConfusingVoidTypeOptions;
-export type NoConsoleConfiguration = RulePlainConfiguration | RuleWithNoConsoleOptions;
-export type NoConstEnumConfiguration = RulePlainConfiguration | RuleWithNoConstEnumOptions;
+export type NoConsoleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConsoleOptions;
+export type NoConstEnumConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConstEnumOptions;
 export type NoConstantBinaryExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantBinaryExpressionsOptions;
 export type NoControlCharactersInRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoControlCharactersInRegexOptions;
-export type NoDebuggerConfiguration = RulePlainConfiguration | RuleWithNoDebuggerOptions;
+export type NoDebuggerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDebuggerOptions;
 export type NoDocumentCookieConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDocumentCookieOptions;
 export type NoDocumentImportInPageConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDocumentImportInPageOptions;
-export type NoDoubleEqualsConfiguration = RulePlainConfiguration | RuleWithNoDoubleEqualsOptions;
+export type NoDoubleEqualsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDoubleEqualsOptions;
 export type NoDuplicateAtImportRulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateAtImportRulesOptions;
-export type NoDuplicateCaseConfiguration = RulePlainConfiguration | RuleWithNoDuplicateCaseOptions;
+export type NoDuplicateCaseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateCaseOptions;
 export type NoDuplicateClassMembersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateClassMembersOptions;
@@ -3841,45 +4047,63 @@ export type NoDuplicateSelectorsKeyframeBlockConfiguration =
 export type NoDuplicateTestHooksConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateTestHooksOptions;
-export type NoEmptyBlockConfiguration = RulePlainConfiguration | RuleWithNoEmptyBlockOptions;
+export type NoEmptyBlockConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptyBlockOptions;
 export type NoEmptyBlockStatementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyBlockStatementsOptions;
 export type NoEmptyInterfaceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyInterfaceOptions;
-export type NoEvolvingTypesConfiguration = RulePlainConfiguration | RuleWithNoEvolvingTypesOptions;
-export type NoExplicitAnyConfiguration = RulePlainConfiguration | RuleWithNoExplicitAnyOptions;
-export type NoExportsInTestConfiguration = RulePlainConfiguration | RuleWithNoExportsInTestOptions;
+export type NoEvolvingTypesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEvolvingTypesOptions;
+export type NoExplicitAnyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExplicitAnyOptions;
+export type NoExportsInTestConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExportsInTestOptions;
 export type NoExtraNonNullAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtraNonNullAssertionOptions;
 export type NoFallthroughSwitchClauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFallthroughSwitchClauseOptions;
-export type NoFocusedTestsConfiguration = RulePlainConfiguration | RuleWithNoFocusedTestsOptions;
+export type NoFocusedTestsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoFocusedTestsOptions;
 export type NoFunctionAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFunctionAssignOptions;
-export type NoGlobalAssignConfiguration = RulePlainConfiguration | RuleWithNoGlobalAssignOptions;
+export type NoGlobalAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoGlobalAssignOptions;
 export type NoGlobalIsFiniteConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoGlobalIsFiniteOptions;
-export type NoGlobalIsNanConfiguration = RulePlainConfiguration | RuleWithNoGlobalIsNanOptions;
+export type NoGlobalIsNanConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoGlobalIsNanOptions;
 export type NoHeadImportInDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoHeadImportInDocumentOptions;
 export type NoImplicitAnyLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImplicitAnyLetOptions;
-export type NoImportAssignConfiguration = RulePlainConfiguration | RuleWithNoImportAssignOptions;
+export type NoImportAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImportAssignOptions;
 export type NoImportantInKeyframeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImportantInKeyframeOptions;
 export type NoIrregularWhitespaceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIrregularWhitespaceOptions;
-export type NoLabelVarConfiguration = RulePlainConfiguration | RuleWithNoLabelVarOptions;
+export type NoLabelVarConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLabelVarOptions;
 export type NoMisleadingCharacterClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingCharacterClassOptions;
@@ -3895,35 +4119,51 @@ export type NoMisrefactoredShorthandAssignConfiguration =
 export type NoNonNullAssertedOptionalChainConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonNullAssertedOptionalChainOptions;
-export type NoOctalEscapeConfiguration = RulePlainConfiguration | RuleWithNoOctalEscapeOptions;
+export type NoOctalEscapeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoOctalEscapeOptions;
 export type NoPrototypeBuiltinsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPrototypeBuiltinsOptions;
-export type NoQuickfixBiomeConfiguration = RulePlainConfiguration | RuleWithNoQuickfixBiomeOptions;
+export type NoQuickfixBiomeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoQuickfixBiomeOptions;
 export type NoReactSpecificPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactSpecificPropsOptions;
-export type NoRedeclareConfiguration = RulePlainConfiguration | RuleWithNoRedeclareOptions;
+export type NoRedeclareConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedeclareOptions;
 export type NoRedundantUseStrictConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantUseStrictOptions;
-export type NoSelfCompareConfiguration = RulePlainConfiguration | RuleWithNoSelfCompareOptions;
+export type NoSelfCompareConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfCompareOptions;
 export type NoShadowRestrictedNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowRestrictedNamesOptions;
 export type NoShorthandPropertyOverridesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShorthandPropertyOverridesOptions;
-export type NoSkippedTestsConfiguration = RulePlainConfiguration | RuleWithNoSkippedTestsOptions;
-export type NoSparseArrayConfiguration = RulePlainConfiguration | RuleWithNoSparseArrayOptions;
+export type NoSkippedTestsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSkippedTestsOptions;
+export type NoSparseArrayConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSparseArrayOptions;
 export type NoSuspiciousSemicolonInJsxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSuspiciousSemicolonInJsxOptions;
 export type NoTemplateCurlyInStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTemplateCurlyInStringOptions;
-export type NoThenPropertyConfiguration = RulePlainConfiguration | RuleWithNoThenPropertyOptions;
-export type NoTsIgnoreConfiguration = RulePlainConfiguration | RuleWithNoTsIgnoreOptions;
+export type NoThenPropertyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoThenPropertyOptions;
+export type NoTsIgnoreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTsIgnoreOptions;
 export type NoUnassignedVariablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnassignedVariablesOptions;
@@ -3943,24 +4183,36 @@ export type NoUselessRegexBackrefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessRegexBackrefsOptions;
 export type NoVarConfiguration = RulePlainConfiguration | RuleWithNoVarOptions;
-export type NoWithConfiguration = RulePlainConfiguration | RuleWithNoWithOptions;
+export type NoWithConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoWithOptions;
 export type UseAdjacentOverloadSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAdjacentOverloadSignaturesOptions;
-export type UseAwaitConfiguration = RulePlainConfiguration | RuleWithUseAwaitOptions;
+export type UseAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAwaitOptions;
 export type UseBiomeIgnoreFolderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBiomeIgnoreFolderOptions;
 export type UseDefaultSwitchClauseLastConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDefaultSwitchClauseLastOptions;
-export type UseErrorMessageConfiguration = RulePlainConfiguration | RuleWithUseErrorMessageOptions;
-export type UseGetterReturnConfiguration = RulePlainConfiguration | RuleWithUseGetterReturnOptions;
+export type UseErrorMessageConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseErrorMessageOptions;
+export type UseGetterReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGetterReturnOptions;
 export type UseGoogleFontDisplayConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGoogleFontDisplayOptions;
-export type UseGuardForInConfiguration = RulePlainConfiguration | RuleWithUseGuardForInOptions;
-export type UseIsArrayConfiguration = RulePlainConfiguration | RuleWithUseIsArrayOptions;
+export type UseGuardForInConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGuardForInOptions;
+export type UseIsArrayConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIsArrayOptions;
 export type UseIterableCallbackReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIterableCallbackReturnOptions;
@@ -3973,7 +4225,9 @@ export type UseNumberToFixedDigitsArgumentConfiguration =
 export type UseStaticResponseMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStaticResponseMethodsOptions;
-export type UseStrictModeConfiguration = RulePlainConfiguration | RuleWithUseStrictModeOptions;
+export type UseStrictModeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseStrictModeOptions;
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
 	identifierOrder?: SortOrder;
@@ -3985,7 +4239,7 @@ export interface UseSortedKeysOptions {
 	sortOrder?: SortOrder;
 }
 export type UseSortedPropertiesOptions = {};
-export type RulePlainConfiguration = 'off' | 'on' | 'info' | 'warn' | 'error';
+export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -4684,6 +4938,10 @@ export interface RuleWithNoIncrementDecrementOptions {
 export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
+}
+export interface RuleWithNoLeakedRenderOptions {
+	level: RulePlainConfiguration;
+	options?: NoLeakedRenderOptions;
 }
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
@@ -5674,11 +5932,11 @@ export interface RuleWithUseStrictModeOptions {
 	options?: UseStrictModeOptions;
 }
 export type ImportGroups = ImportGroup[];
-export type SortOrder = 'natural' | 'lexicographic';
+export type SortOrder = "natural" | "lexicographic";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
-export type FixKind = 'none' | 'safe' | 'unsafe';
+export type FixKind = "none" | "safe" | "unsafe";
 export type NoAccessKeyOptions = {};
 export type NoAriaHiddenOnFocusableOptions = {};
 export type NoAriaUnsupportedElementsOptions = {};
@@ -5834,7 +6092,7 @@ export interface NoPrivateImportsOptions {
 	/**
 	* The default visibility to assume for symbols without visibility tag.
 
-Default: **public**.
+Default: **public**. 
 	 */
 	defaultVisibility?: Visibility;
 }
@@ -5845,7 +6103,7 @@ export type NoRenderReturnValueOptions = {};
 export interface NoRestrictedElementsOptions {
 	/**
 	* Elements to restrict.
-Each key is the element name, and the value is the message to show when the element is used.
+Each key is the element name, and the value is the message to show when the element is used. 
 	 */
 	elements?: CustomRestrictedElements;
 }
@@ -5923,7 +6181,7 @@ export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
-extension the source file has in your project.
+extension the source file has in your project. 
 	 */
 	forceJsExtensions?: boolean;
 }
@@ -5941,7 +6199,7 @@ export type UseSingleJsDocAsteriskOptions = {};
 export interface UseUniqueElementIdsOptions {
 	/**
 	* Component names that accept an `id` prop that does not translate
-to a DOM element id.
+to a DOM element id. 
 	 */
 	excludedComponents?: string[];
 }
@@ -5964,7 +6222,7 @@ export interface NoImportCyclesOptions {
 	* Ignores type-only imports when finding an import cycle. A type-only import (`import type`)
 will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type
 imports (`import { type Foo }`) aren't considered as type-only because it's not removed by
-the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
+the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default. 
 	 */
 	ignoreTypes?: boolean;
 }
@@ -5988,6 +6246,9 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export interface NoLeakedRenderOptions {
+	validStrategies?: string[];
+}
 export type NoMisusedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
@@ -6002,7 +6263,7 @@ export type NoUnresolvedImportsOptions = {};
 export type NoUnusedExpressionsOptions = {};
 /**
 	* Options for the `noUselessCatchBinding` rule.
-Currently empty; reserved for future extensions (e.g. allowlist of names).
+Currently empty; reserved for future extensions (e.g. allowlist of names). 
 	 */
 export type NoUselessCatchBindingOptions = {};
 export type NoUselessUndefinedOptions = {};
@@ -6019,7 +6280,7 @@ export interface UseConsistentArrowReturnOptions {
 	/**
 	* Determines whether the rule enforces a consistent style when the return value is an object literal.
 
-This option is only applicable when used in conjunction with the `asNeeded` option.
+This option is only applicable when used in conjunction with the `asNeeded` option. 
 	 */
 	requireForObjectLiteral?: boolean;
 	/**
@@ -6107,7 +6368,7 @@ export type UseTopLevelRegexOptions = {};
 export interface NoBlankTargetOptions {
 	/**
 	* List of domains where `target="_blank"` is allowed without
-`rel="noopener"`.
+`rel="noopener"`. 
 	 */
 	allowDomains?: string[];
 	/**
@@ -6231,7 +6492,7 @@ export interface UseFilenamingConventionOptions {
 	requireAscii?: boolean;
 	/**
 	* If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
-This does not affect other [Case].
+This does not affect other [Case]. 
 	 */
 	strictCase?: boolean;
 }
@@ -6260,7 +6521,7 @@ export interface UseNamingConventionOptions {
 	requireAscii?: boolean;
 	/**
 	* If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
-This does not affect other [Case].
+This does not affect other [Case]. 
 	 */
 	strictCase?: boolean;
 }
@@ -6328,7 +6589,7 @@ export interface NoDoubleEqualsOptions {
 	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check
 both for `null` or `undefined`.
 
-If `false`, no such exception will be made.
+If `false`, no such exception will be made. 
 	 */
 	ignoreNull?: boolean;
 }
@@ -6417,7 +6678,7 @@ export type UseNumberToFixedDigitsArgumentOptions = {};
 export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
-export type Visibility = 'public' | 'package' | 'private';
+export type Visibility = "public" | "package" | "private";
 /**
  * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
  */
@@ -6427,13 +6688,13 @@ export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-For example, for React's `useEffect()` hook, the closure index is 0.
+For example, for React's `useEffect()` hook, the closure index is 0. 
 	 */
 	closureIndex?: number;
 	/**
 	* The "position" of the array of dependencies, starting from zero.
 
-For example, for React's `useEffect()` hook, the dependencies index is 1.
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
 	 */
 	dependenciesIndex?: number;
 	/**
@@ -6448,32 +6709,32 @@ or use a number/an array of numbers to mark the "positions" in the
 return array as stable.
 
 For example, for React's `useRef()` hook the value would be `true`,
-while for `useState()` it would be `[1]`.
+while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
 }
-export type UseConsistentArrowReturnStyle = 'asNeeded' | 'always' | 'never';
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 /**
  * The GraphQL description style to enforce.
  */
-export type UseConsistentGraphqlDescriptionsStyle = 'block' | 'inline';
+export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
-export type PropertyAssignmentMode = 'allow' | 'deny';
+export type PropertyAssignmentMode = "allow" | "deny";
 export type Paths = string | PathOptions;
 export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
-export type ConsistentArrayType = 'shorthand' | 'generic';
-export type Accessibility = 'noPublic' | 'explicit' | 'none';
-export type ObjectPropertySyntax = 'explicit' | 'shorthand';
-export type ConsistentTypeDefinition = 'interface' | 'type';
+export type ConsistentArrayType = "shorthand" | "generic";
+export type Accessibility = "noPublic" | "explicit" | "none";
+export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
 /**
  * The style to apply when importing types.
  */
-export type UseImportTypeStyle = 'auto' | 'inlineType' | 'separatedType';
+export type UseImportTypeStyle = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -6529,7 +6790,12 @@ export interface CustomRestrictedTypeOptions {
 /**
  * Supported cases for file names.
  */
-export type FilenameCase = 'camelCase' | 'export' | 'kebab-case' | 'PascalCase' | 'snake_case';
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export type Formats = Format[];
 export interface Selector {
 	/**
@@ -6554,68 +6820,77 @@ export type SourcesMatcher = SourceMatcher | SourceMatcher[];
 /**
  * Supported cases.
  */
-export type Format = 'camelCase' | 'CONSTANT_CASE' | 'PascalCase' | 'snake_case';
+export type Format =
+	| "camelCase"
+	| "CONSTANT_CASE"
+	| "PascalCase"
+	| "snake_case";
 export type Kind =
-	| 'class'
-	| 'enum'
-	| 'interface'
-	| 'enumMember'
-	| 'importNamespace'
-	| 'exportNamespace'
-	| 'variable'
-	| 'const'
-	| 'let'
-	| 'using'
-	| 'var'
-	| 'catchParameter'
-	| 'indexParameter'
-	| 'exportAlias'
-	| 'importAlias'
-	| 'classGetter'
-	| 'classSetter'
-	| 'classMethod'
-	| 'objectLiteralProperty'
-	| 'objectLiteralGetter'
-	| 'objectLiteralSetter'
-	| 'objectLiteralMethod'
-	| 'typeAlias'
-	| 'any'
-	| 'typeLike'
-	| 'function'
-	| 'namespaceLike'
-	| 'namespace'
-	| 'functionParameter'
-	| 'typeParameter'
-	| 'classMember'
-	| 'classProperty'
-	| 'objectLiteralMember'
-	| 'typeMember'
-	| 'typeGetter'
-	| 'typeProperty'
-	| 'typeSetter'
-	| 'typeMethod';
+	| "class"
+	| "enum"
+	| "interface"
+	| "enumMember"
+	| "importNamespace"
+	| "exportNamespace"
+	| "variable"
+	| "const"
+	| "let"
+	| "using"
+	| "var"
+	| "catchParameter"
+	| "indexParameter"
+	| "exportAlias"
+	| "importAlias"
+	| "classGetter"
+	| "classSetter"
+	| "classMethod"
+	| "objectLiteralProperty"
+	| "objectLiteralGetter"
+	| "objectLiteralSetter"
+	| "objectLiteralMethod"
+	| "typeAlias"
+	| "any"
+	| "typeLike"
+	| "function"
+	| "namespaceLike"
+	| "namespace"
+	| "functionParameter"
+	| "typeParameter"
+	| "classMember"
+	| "classProperty"
+	| "objectLiteralMember"
+	| "typeMember"
+	| "typeGetter"
+	| "typeProperty"
+	| "typeSetter"
+	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
-export type Scope = 'any' | 'global';
+export type Scope = "any" | "global";
 export type NegatablePredefinedSourceMatcher =
-	| ':ALIAS:'
-	| ':BUN:'
-	| ':NODE:'
-	| ':PACKAGE:'
-	| ':PACKAGE_WITH_PROTOCOL:'
-	| ':PATH:'
-	| ':URL:'
-	| '!:ALIAS:'
-	| '!:BUN:'
-	| '!:NODE:'
-	| '!:PACKAGE:'
-	| '!:PACKAGE_WITH_PROTOCOL:'
-	| '!:PATH:'
-	| '!:URL:';
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:"
+	| "!:ALIAS:"
+	| "!:BUN:"
+	| "!:NODE:"
+	| "!:PACKAGE:"
+	| "!:PACKAGE_WITH_PROTOCOL:"
+	| "!:PATH:"
+	| "!:URL:";
 /**
  * Glob to match against import sources.
  */
 export type ImportSourceGlob = Glob;
-export type RestrictedModifier = 'abstract' | 'private' | 'protected' | 'readonly' | 'static';
+export type RestrictedModifier =
+	| "abstract"
+	| "private"
+	| "protected"
+	| "readonly"
+	| "static";
 export interface UpdateSettingsResult {
 	diagnostics: Diagnostic[];
 }
@@ -6640,453 +6915,453 @@ export interface Advices {
 	advices: Advice[];
 }
 export type Category =
-	| 'lint/a11y/noAccessKey'
-	| 'lint/a11y/noAriaHiddenOnFocusable'
-	| 'lint/a11y/noAriaUnsupportedElements'
-	| 'lint/a11y/noAutofocus'
-	| 'lint/a11y/noDistractingElements'
-	| 'lint/a11y/noHeaderScope'
-	| 'lint/a11y/noInteractiveElementToNoninteractiveRole'
-	| 'lint/a11y/noLabelWithoutControl'
-	| 'lint/a11y/noNoninteractiveElementInteractions'
-	| 'lint/a11y/noNoninteractiveElementToInteractiveRole'
-	| 'lint/a11y/noNoninteractiveTabindex'
-	| 'lint/a11y/noPositiveTabindex'
-	| 'lint/a11y/noRedundantAlt'
-	| 'lint/a11y/noRedundantRoles'
-	| 'lint/a11y/noStaticElementInteractions'
-	| 'lint/a11y/noSvgWithoutTitle'
-	| 'lint/a11y/useAltText'
-	| 'lint/a11y/useAnchorContent'
-	| 'lint/a11y/useAriaActivedescendantWithTabindex'
-	| 'lint/a11y/useAriaPropsForRole'
-	| 'lint/a11y/useAriaPropsSupportedByRole'
-	| 'lint/a11y/useButtonType'
-	| 'lint/a11y/useFocusableInteractive'
-	| 'lint/a11y/useGenericFontNames'
-	| 'lint/a11y/useHeadingContent'
-	| 'lint/a11y/useHtmlLang'
-	| 'lint/a11y/useIframeTitle'
-	| 'lint/a11y/useKeyWithClickEvents'
-	| 'lint/a11y/useKeyWithMouseEvents'
-	| 'lint/a11y/useMediaCaption'
-	| 'lint/a11y/useSemanticElements'
-	| 'lint/a11y/useValidAnchor'
-	| 'lint/a11y/useValidAriaProps'
-	| 'lint/a11y/useValidAriaRole'
-	| 'lint/a11y/useValidAriaValues'
-	| 'lint/a11y/useValidAutocomplete'
-	| 'lint/a11y/useValidLang'
-	| 'lint/complexity/noAdjacentSpacesInRegex'
-	| 'lint/complexity/noArguments'
-	| 'lint/complexity/noBannedTypes'
-	| 'lint/complexity/noCommaOperator'
-	| 'lint/complexity/noEmptyTypeParameters'
-	| 'lint/complexity/noExcessiveCognitiveComplexity'
-	| 'lint/complexity/noExcessiveLinesPerFunction'
-	| 'lint/complexity/noExcessiveNestedTestSuites'
-	| 'lint/complexity/noExtraBooleanCast'
-	| 'lint/complexity/noFlatMapIdentity'
-	| 'lint/complexity/noForEach'
-	| 'lint/complexity/noImplicitCoercions'
-	| 'lint/complexity/noImportantStyles'
-	| 'lint/complexity/noStaticOnlyClass'
-	| 'lint/complexity/noThisInStatic'
-	| 'lint/complexity/noUselessCatch'
-	| 'lint/complexity/noUselessConstructor'
-	| 'lint/complexity/noUselessContinue'
-	| 'lint/complexity/noUselessEmptyExport'
-	| 'lint/complexity/noUselessEscapeInRegex'
-	| 'lint/complexity/noUselessFragments'
-	| 'lint/complexity/noUselessLabel'
-	| 'lint/complexity/noUselessLoneBlockStatements'
-	| 'lint/complexity/noUselessRename'
-	| 'lint/complexity/noUselessStringConcat'
-	| 'lint/complexity/noUselessStringRaw'
-	| 'lint/complexity/noUselessSwitchCase'
-	| 'lint/complexity/noUselessTernary'
-	| 'lint/complexity/noUselessThisAlias'
-	| 'lint/complexity/noUselessTypeConstraint'
-	| 'lint/complexity/noUselessUndefinedInitialization'
-	| 'lint/complexity/noVoid'
-	| 'lint/complexity/useArrowFunction'
-	| 'lint/complexity/useDateNow'
-	| 'lint/complexity/useFlatMap'
-	| 'lint/complexity/useIndexOf'
-	| 'lint/complexity/useLiteralKeys'
-	| 'lint/complexity/useNumericLiterals'
-	| 'lint/complexity/useOptionalChain'
-	| 'lint/complexity/useRegexLiterals'
-	| 'lint/complexity/useSimpleNumberKeys'
-	| 'lint/complexity/useSimplifiedLogicExpression'
-	| 'lint/complexity/useWhile'
-	| 'lint/correctness/noChildrenProp'
-	| 'lint/correctness/noConstAssign'
-	| 'lint/correctness/noConstantCondition'
-	| 'lint/correctness/noConstantMathMinMaxClamp'
-	| 'lint/correctness/noConstructorReturn'
-	| 'lint/correctness/noEmptyCharacterClassInRegex'
-	| 'lint/correctness/noEmptyPattern'
-	| 'lint/correctness/noGlobalDirnameFilename'
-	| 'lint/correctness/noGlobalObjectCalls'
-	| 'lint/correctness/noInnerDeclarations'
-	| 'lint/correctness/noInvalidBuiltinInstantiation'
-	| 'lint/correctness/noInvalidConstructorSuper'
-	| 'lint/correctness/noInvalidDirectionInLinearGradient'
-	| 'lint/correctness/noInvalidGridAreas'
-	| 'lint/correctness/noInvalidNewBuiltin'
-	| 'lint/correctness/noInvalidPositionAtImportRule'
-	| 'lint/correctness/noInvalidUseBeforeDeclaration'
-	| 'lint/correctness/noMissingVarFunction'
-	| 'lint/correctness/noNestedComponentDefinitions'
-	| 'lint/correctness/noNewSymbol'
-	| 'lint/correctness/noNodejsModules'
-	| 'lint/correctness/noNonoctalDecimalEscape'
-	| 'lint/correctness/noPrecisionLoss'
-	| 'lint/correctness/noPrivateImports'
-	| 'lint/correctness/noProcessGlobal'
-	| 'lint/correctness/noQwikUseVisibleTask'
-	| 'lint/correctness/noReactPropAssignments'
-	| 'lint/correctness/noRenderReturnValue'
-	| 'lint/correctness/noRestrictedElements'
-	| 'lint/correctness/noSelfAssign'
-	| 'lint/correctness/noSetterReturn'
-	| 'lint/correctness/noSolidDestructuredProps'
-	| 'lint/correctness/noStringCaseMismatch'
-	| 'lint/correctness/noSwitchDeclarations'
-	| 'lint/correctness/noUndeclaredDependencies'
-	| 'lint/correctness/noUndeclaredVariables'
-	| 'lint/correctness/noUnknownFunction'
-	| 'lint/correctness/noUnknownMediaFeatureName'
-	| 'lint/correctness/noUnknownProperty'
-	| 'lint/correctness/noUnknownPseudoClass'
-	| 'lint/correctness/noUnknownPseudoClassSelector'
-	| 'lint/correctness/noUnknownPseudoElement'
-	| 'lint/correctness/noUnknownTypeSelector'
-	| 'lint/correctness/noUnknownUnit'
-	| 'lint/correctness/noUnmatchableAnbSelector'
-	| 'lint/correctness/noUnreachable'
-	| 'lint/correctness/noUnreachableSuper'
-	| 'lint/correctness/noUnsafeFinally'
-	| 'lint/correctness/noUnsafeOptionalChaining'
-	| 'lint/correctness/noUnusedFunctionParameters'
-	| 'lint/correctness/noUnusedImports'
-	| 'lint/correctness/noUnusedLabels'
-	| 'lint/correctness/noUnusedPrivateClassMembers'
-	| 'lint/correctness/noUnusedVariables'
-	| 'lint/correctness/noVoidElementsWithChildren'
-	| 'lint/correctness/noVoidTypeReturn'
-	| 'lint/correctness/useExhaustiveDependencies'
-	| 'lint/correctness/useGraphqlNamedOperations'
-	| 'lint/correctness/useHookAtTopLevel'
-	| 'lint/correctness/useImageSize'
-	| 'lint/correctness/useImportExtensions'
-	| 'lint/correctness/useIsNan'
-	| 'lint/correctness/useJsonImportAttributes'
-	| 'lint/correctness/useJsxKeyInIterable'
-	| 'lint/correctness/useParseIntRadix'
-	| 'lint/correctness/useQwikClasslist'
-	| 'lint/correctness/useSingleJsDocAsterisk'
-	| 'lint/correctness/useUniqueElementIds'
-	| 'lint/correctness/useValidForDirection'
-	| 'lint/correctness/useValidTypeof'
-	| 'lint/correctness/useYield'
-	| 'lint/nursery/noColorInvalidHex'
-	| 'lint/nursery/noContinue'
-	| 'lint/nursery/noDeprecatedImports'
-	| 'lint/nursery/noDuplicateDependencies'
-	| 'lint/nursery/noEmptySource'
-	| 'lint/nursery/noFloatingPromises'
-	| 'lint/nursery/noForIn'
-	| 'lint/nursery/noImplicitCoercion'
-	| 'lint/nursery/noImportCycles'
-	| 'lint/nursery/noIncrementDecrement'
-	| 'lint/nursery/noJsxLiterals'
-	| 'lint/nursery/noLeakedConditionalRendering'
-	| 'lint/nursery/noMissingGenericFamilyKeyword'
-	| 'lint/nursery/noMisusedPromises'
-	| 'lint/nursery/noNextAsyncClientComponent'
-	| 'lint/nursery/noParametersOnlyUsedInRecursion'
-	| 'lint/nursery/noReactForwardRef'
-	| 'lint/nursery/noShadow'
-	| 'lint/nursery/noSyncScripts'
-	| 'lint/nursery/noUnknownAttribute'
-	| 'lint/nursery/noUnnecessaryConditions'
-	| 'lint/nursery/noUnresolvedImports'
-	| 'lint/nursery/noUnusedExpressions'
-	| 'lint/nursery/noUnwantedPolyfillio'
-	| 'lint/nursery/noUselessBackrefInRegex'
-	| 'lint/nursery/noUselessCatchBinding'
-	| 'lint/nursery/noUselessUndefined'
-	| 'lint/nursery/noVueDataObjectDeclaration'
-	| 'lint/nursery/noVueDuplicateKeys'
-	| 'lint/nursery/noVueReservedKeys'
-	| 'lint/nursery/noVueReservedProps'
-	| 'lint/nursery/noVueVIfWithVFor'
-	| 'lint/nursery/useAnchorHref'
-	| 'lint/nursery/useArraySortCompare'
-	| 'lint/nursery/useBiomeSuppressionComment'
-	| 'lint/nursery/useConsistentArrowReturn'
-	| 'lint/nursery/useConsistentGraphqlDescriptions'
-	| 'lint/nursery/useConsistentObjectDefinition'
-	| 'lint/nursery/useDeprecatedDate'
-	| 'lint/nursery/useExhaustiveSwitchCases'
-	| 'lint/nursery/useExplicitFunctionReturnType'
-	| 'lint/nursery/useExplicitType'
-	| 'lint/nursery/useFind'
-	| 'lint/nursery/useImportRestrictions'
-	| 'lint/nursery/useJsxCurlyBraceConvention'
-	| 'lint/nursery/useMaxParams'
-	| 'lint/nursery/useQwikMethodUsage'
-	| 'lint/nursery/useQwikValidLexicalScope'
-	| 'lint/nursery/useSortedClasses'
-	| 'lint/nursery/useSpread'
-	| 'lint/nursery/useUniqueGraphqlOperationName'
-	| 'lint/nursery/useVueDefineMacrosOrder'
-	| 'lint/nursery/useVueHyphenatedAttributes'
-	| 'lint/nursery/useVueMultiWordComponentNames'
-	| 'lint/nursery/useVueValidVBind'
-	| 'lint/nursery/useVueValidVElse'
-	| 'lint/nursery/useVueValidVElseIf'
-	| 'lint/nursery/useVueValidVFor'
-	| 'lint/nursery/useVueValidVHtml'
-	| 'lint/nursery/useVueValidVIf'
-	| 'lint/nursery/useVueValidVModel'
-	| 'lint/nursery/useVueValidVOn'
-	| 'lint/performance/noAccumulatingSpread'
-	| 'lint/performance/noAwaitInLoops'
-	| 'lint/performance/noBarrelFile'
-	| 'lint/performance/noDelete'
-	| 'lint/performance/noDynamicNamespaceImportAccess'
-	| 'lint/performance/noImgElement'
-	| 'lint/performance/noNamespaceImport'
-	| 'lint/performance/noReExportAll'
-	| 'lint/performance/noUnwantedPolyfillio'
-	| 'lint/performance/useGoogleFontPreconnect'
-	| 'lint/performance/useSolidForComponent'
-	| 'lint/performance/useTopLevelRegex'
-	| 'lint/security/noBlankTarget'
-	| 'lint/security/noDangerouslySetInnerHtml'
-	| 'lint/security/noDangerouslySetInnerHtmlWithChildren'
-	| 'lint/security/noGlobalEval'
-	| 'lint/security/noSecrets'
-	| 'lint/style/noCommonJs'
-	| 'lint/style/noDefaultExport'
-	| 'lint/style/noDescendingSpecificity'
-	| 'lint/style/noDoneCallback'
-	| 'lint/style/noEnum'
-	| 'lint/style/noExportedImports'
-	| 'lint/style/noHeadElement'
-	| 'lint/style/noImplicitBoolean'
-	| 'lint/style/noInferrableTypes'
-	| 'lint/style/noMagicNumbers'
-	| 'lint/style/noNamespace'
-	| 'lint/style/noNegationElse'
-	| 'lint/style/noNestedTernary'
-	| 'lint/style/noNonNullAssertion'
-	| 'lint/style/noParameterAssign'
-	| 'lint/style/noParameterProperties'
-	| 'lint/style/noProcessEnv'
-	| 'lint/style/noRestrictedGlobals'
-	| 'lint/style/noRestrictedImports'
-	| 'lint/style/noRestrictedTypes'
-	| 'lint/style/noShoutyConstants'
-	| 'lint/style/noSubstr'
-	| 'lint/style/noUnusedTemplateLiteral'
-	| 'lint/style/noUselessElse'
-	| 'lint/style/noValueAtRule'
-	| 'lint/style/noYodaExpression'
-	| 'lint/style/useArrayLiterals'
-	| 'lint/style/useAsConstAssertion'
-	| 'lint/style/useAtIndex'
-	| 'lint/style/useBlockStatements'
-	| 'lint/style/useCollapsedElseIf'
-	| 'lint/style/useCollapsedIf'
-	| 'lint/style/useComponentExportOnlyModules'
-	| 'lint/style/useConsistentArrayType'
-	| 'lint/style/useConsistentBuiltinInstantiation'
-	| 'lint/style/useConsistentCurlyBraces'
-	| 'lint/style/useConsistentMemberAccessibility'
-	| 'lint/style/useConsistentObjectDefinitions'
-	| 'lint/style/useConsistentTypeDefinitions'
-	| 'lint/style/useConst'
-	| 'lint/style/useDefaultParameterLast'
-	| 'lint/style/useDefaultSwitchClause'
-	| 'lint/style/useDeprecatedReason'
-	| 'lint/style/useEnumInitializers'
-	| 'lint/style/useExplicitLengthCheck'
-	| 'lint/style/useExponentiationOperator'
-	| 'lint/style/useExportType'
-	| 'lint/style/useExportsLast'
-	| 'lint/style/useFilenamingConvention'
-	| 'lint/style/useForOf'
-	| 'lint/style/useFragmentSyntax'
-	| 'lint/style/useGraphqlNamingConvention'
-	| 'lint/style/useGroupedAccessorPairs'
-	| 'lint/style/useImportType'
-	| 'lint/style/useLiteralEnumMembers'
-	| 'lint/style/useNamingConvention'
-	| 'lint/style/useNodeAssertStrict'
-	| 'lint/style/useNodejsImportProtocol'
-	| 'lint/style/useNumberNamespace'
-	| 'lint/style/useNumericSeparators'
-	| 'lint/style/useObjectSpread'
-	| 'lint/style/useReactFunctionComponents'
-	| 'lint/style/useReadonlyClassProperties'
-	| 'lint/style/useSelfClosingElements'
-	| 'lint/style/useShorthandArrayType'
-	| 'lint/style/useShorthandAssign'
-	| 'lint/style/useShorthandFunctionType'
-	| 'lint/style/useSingleCaseStatement'
-	| 'lint/style/useSingleVarDeclarator'
-	| 'lint/style/useSymbolDescription'
-	| 'lint/style/useTemplate'
-	| 'lint/style/useThrowNewError'
-	| 'lint/style/useThrowOnlyError'
-	| 'lint/style/useTrimStartEnd'
-	| 'lint/style/useUnifiedTypeSignatures'
-	| 'lint/suspicious/noAlert'
-	| 'lint/suspicious/noApproximativeNumericConstant'
-	| 'lint/suspicious/noArrayIndexKey'
-	| 'lint/suspicious/noAssignInExpressions'
-	| 'lint/suspicious/noAsyncPromiseExecutor'
-	| 'lint/suspicious/noBiomeFirstException'
-	| 'lint/suspicious/noBitwiseOperators'
-	| 'lint/suspicious/noCatchAssign'
-	| 'lint/suspicious/noClassAssign'
-	| 'lint/suspicious/noCommentText'
-	| 'lint/suspicious/noCompareNegZero'
-	| 'lint/suspicious/noConfusingLabels'
-	| 'lint/suspicious/noConfusingVoidType'
-	| 'lint/suspicious/noConsole'
-	| 'lint/suspicious/noConstEnum'
-	| 'lint/suspicious/noConstantBinaryExpressions'
-	| 'lint/suspicious/noControlCharactersInRegex'
-	| 'lint/suspicious/noDebugger'
-	| 'lint/suspicious/noDocumentCookie'
-	| 'lint/suspicious/noDocumentImportInPage'
-	| 'lint/suspicious/noDoubleEquals'
-	| 'lint/suspicious/noDuplicateAtImportRules'
-	| 'lint/suspicious/noDuplicateCase'
-	| 'lint/suspicious/noDuplicateClassMembers'
-	| 'lint/suspicious/noDuplicateCustomProperties'
-	| 'lint/suspicious/noDuplicateElseIf'
-	| 'lint/suspicious/noDuplicateFields'
-	| 'lint/suspicious/noDuplicateFontNames'
-	| 'lint/suspicious/noDuplicateJsxProps'
-	| 'lint/suspicious/noDuplicateObjectKeys'
-	| 'lint/suspicious/noDuplicateParameters'
-	| 'lint/suspicious/noDuplicateProperties'
-	| 'lint/suspicious/noDuplicateSelectorsKeyframeBlock'
-	| 'lint/suspicious/noDuplicateTestHooks'
-	| 'lint/suspicious/noEmptyBlock'
-	| 'lint/suspicious/noEmptyBlockStatements'
-	| 'lint/suspicious/noEmptyInterface'
-	| 'lint/suspicious/noEvolvingTypes'
-	| 'lint/suspicious/noExplicitAny'
-	| 'lint/suspicious/noExportsInTest'
-	| 'lint/suspicious/noExtraNonNullAssertion'
-	| 'lint/suspicious/noFallthroughSwitchClause'
-	| 'lint/suspicious/noFocusedTests'
-	| 'lint/suspicious/noFunctionAssign'
-	| 'lint/suspicious/noGlobalAssign'
-	| 'lint/suspicious/noGlobalIsFinite'
-	| 'lint/suspicious/noGlobalIsNan'
-	| 'lint/suspicious/noHeadImportInDocument'
-	| 'lint/suspicious/noImplicitAnyLet'
-	| 'lint/suspicious/noImportAssign'
-	| 'lint/suspicious/noImportantInKeyframe'
-	| 'lint/suspicious/noIrregularWhitespace'
-	| 'lint/suspicious/noLabelVar'
-	| 'lint/suspicious/noMisleadingCharacterClass'
-	| 'lint/suspicious/noMisleadingInstantiator'
-	| 'lint/suspicious/noMisplacedAssertion'
-	| 'lint/suspicious/noMisrefactoredShorthandAssign'
-	| 'lint/suspicious/noNonNullAssertedOptionalChain'
-	| 'lint/suspicious/noOctalEscape'
-	| 'lint/suspicious/noPrototypeBuiltins'
-	| 'lint/suspicious/noQuickfixBiome'
-	| 'lint/suspicious/noReactSpecificProps'
-	| 'lint/suspicious/noRedeclare'
-	| 'lint/suspicious/noRedundantUseStrict'
-	| 'lint/suspicious/noSelfCompare'
-	| 'lint/suspicious/noShadowRestrictedNames'
-	| 'lint/suspicious/noShorthandPropertyOverrides'
-	| 'lint/suspicious/noSkippedTests'
-	| 'lint/suspicious/noSparseArray'
-	| 'lint/suspicious/noSuspiciousSemicolonInJsx'
-	| 'lint/suspicious/noTemplateCurlyInString'
-	| 'lint/suspicious/noThenProperty'
-	| 'lint/suspicious/noTsIgnore'
-	| 'lint/suspicious/noUnassignedVariables'
-	| 'lint/suspicious/noUnknownAtRules'
-	| 'lint/suspicious/noUnsafeDeclarationMerging'
-	| 'lint/suspicious/noUnsafeNegation'
-	| 'lint/suspicious/noUselessEscapeInString'
-	| 'lint/suspicious/noUselessRegexBackrefs'
-	| 'lint/suspicious/noVar'
-	| 'lint/suspicious/noWith'
-	| 'lint/suspicious/useAdjacentOverloadSignatures'
-	| 'lint/suspicious/useAwait'
-	| 'lint/suspicious/useBiomeIgnoreFolder'
-	| 'lint/suspicious/useDefaultSwitchClauseLast'
-	| 'lint/suspicious/useErrorMessage'
-	| 'lint/suspicious/useGetterReturn'
-	| 'lint/suspicious/useGoogleFontDisplay'
-	| 'lint/suspicious/useGuardForIn'
-	| 'lint/suspicious/useIsArray'
-	| 'lint/suspicious/useIterableCallbackReturn'
-	| 'lint/suspicious/useNamespaceKeyword'
-	| 'lint/suspicious/useNumberToFixedDigitsArgument'
-	| 'lint/suspicious/useStaticResponseMethods'
-	| 'lint/suspicious/useStrictMode'
-	| 'assist/source/useSortedKeys'
-	| 'assist/source/useSortedProperties'
-	| 'assist/source/useSortedAttributes'
-	| 'assist/source/organizeImports'
-	| 'syntax/correctness/noTypeOnlyImportAttributes'
-	| 'syntax/correctness/noSuperWithoutExtends'
-	| 'syntax/correctness/noInitializerWithDefinite'
-	| 'syntax/correctness/noDuplicatePrivateClassMembers'
-	| 'files/missingHandler'
-	| 'format'
-	| 'check'
-	| 'ci'
-	| 'stdin'
-	| 'init'
-	| 'configuration'
-	| 'assist'
-	| 'migrate'
-	| 'deserialize'
-	| 'plugin'
-	| 'project'
-	| 'search'
-	| 'internalError/io'
-	| 'internalError/fs'
-	| 'internalError/panic'
-	| 'reporter/parse'
-	| 'reporter/format'
-	| 'reporter/violations'
-	| 'parse'
-	| 'lint'
-	| 'lint/a11y'
-	| 'lint/complexity'
-	| 'lint/correctness'
-	| 'lint/nursery'
-	| 'lint/performance'
-	| 'lint/security'
-	| 'lint/style'
-	| 'lint/suspicious'
-	| 'lint/plugin'
-	| 'suppressions/parse'
-	| 'suppressions/unknownGroup'
-	| 'suppressions/unknownRule'
-	| 'suppressions/unknownAction'
-	| 'suppressions/unused'
-	| 'suppressions/incorrect'
-	| 'args/fileNotFound'
-	| 'flags/invalid'
-	| 'semanticTests';
+	| "lint/a11y/noAccessKey"
+	| "lint/a11y/noAriaHiddenOnFocusable"
+	| "lint/a11y/noAriaUnsupportedElements"
+	| "lint/a11y/noAutofocus"
+	| "lint/a11y/noDistractingElements"
+	| "lint/a11y/noHeaderScope"
+	| "lint/a11y/noInteractiveElementToNoninteractiveRole"
+	| "lint/a11y/noLabelWithoutControl"
+	| "lint/a11y/noNoninteractiveElementInteractions"
+	| "lint/a11y/noNoninteractiveElementToInteractiveRole"
+	| "lint/a11y/noNoninteractiveTabindex"
+	| "lint/a11y/noPositiveTabindex"
+	| "lint/a11y/noRedundantAlt"
+	| "lint/a11y/noRedundantRoles"
+	| "lint/a11y/noStaticElementInteractions"
+	| "lint/a11y/noSvgWithoutTitle"
+	| "lint/a11y/useAltText"
+	| "lint/a11y/useAnchorContent"
+	| "lint/a11y/useAriaActivedescendantWithTabindex"
+	| "lint/a11y/useAriaPropsForRole"
+	| "lint/a11y/useAriaPropsSupportedByRole"
+	| "lint/a11y/useButtonType"
+	| "lint/a11y/useFocusableInteractive"
+	| "lint/a11y/useGenericFontNames"
+	| "lint/a11y/useHeadingContent"
+	| "lint/a11y/useHtmlLang"
+	| "lint/a11y/useIframeTitle"
+	| "lint/a11y/useKeyWithClickEvents"
+	| "lint/a11y/useKeyWithMouseEvents"
+	| "lint/a11y/useMediaCaption"
+	| "lint/a11y/useSemanticElements"
+	| "lint/a11y/useValidAnchor"
+	| "lint/a11y/useValidAriaProps"
+	| "lint/a11y/useValidAriaRole"
+	| "lint/a11y/useValidAriaValues"
+	| "lint/a11y/useValidAutocomplete"
+	| "lint/a11y/useValidLang"
+	| "lint/complexity/noAdjacentSpacesInRegex"
+	| "lint/complexity/noArguments"
+	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noCommaOperator"
+	| "lint/complexity/noEmptyTypeParameters"
+	| "lint/complexity/noExcessiveCognitiveComplexity"
+	| "lint/complexity/noExcessiveLinesPerFunction"
+	| "lint/complexity/noExcessiveNestedTestSuites"
+	| "lint/complexity/noExtraBooleanCast"
+	| "lint/complexity/noFlatMapIdentity"
+	| "lint/complexity/noForEach"
+	| "lint/complexity/noImplicitCoercions"
+	| "lint/complexity/noImportantStyles"
+	| "lint/complexity/noStaticOnlyClass"
+	| "lint/complexity/noThisInStatic"
+	| "lint/complexity/noUselessCatch"
+	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessContinue"
+	| "lint/complexity/noUselessEmptyExport"
+	| "lint/complexity/noUselessEscapeInRegex"
+	| "lint/complexity/noUselessFragments"
+	| "lint/complexity/noUselessLabel"
+	| "lint/complexity/noUselessLoneBlockStatements"
+	| "lint/complexity/noUselessRename"
+	| "lint/complexity/noUselessStringConcat"
+	| "lint/complexity/noUselessStringRaw"
+	| "lint/complexity/noUselessSwitchCase"
+	| "lint/complexity/noUselessTernary"
+	| "lint/complexity/noUselessThisAlias"
+	| "lint/complexity/noUselessTypeConstraint"
+	| "lint/complexity/noUselessUndefinedInitialization"
+	| "lint/complexity/noVoid"
+	| "lint/complexity/useArrowFunction"
+	| "lint/complexity/useDateNow"
+	| "lint/complexity/useFlatMap"
+	| "lint/complexity/useIndexOf"
+	| "lint/complexity/useLiteralKeys"
+	| "lint/complexity/useNumericLiterals"
+	| "lint/complexity/useOptionalChain"
+	| "lint/complexity/useRegexLiterals"
+	| "lint/complexity/useSimpleNumberKeys"
+	| "lint/complexity/useSimplifiedLogicExpression"
+	| "lint/complexity/useWhile"
+	| "lint/correctness/noChildrenProp"
+	| "lint/correctness/noConstAssign"
+	| "lint/correctness/noConstantCondition"
+	| "lint/correctness/noConstantMathMinMaxClamp"
+	| "lint/correctness/noConstructorReturn"
+	| "lint/correctness/noEmptyCharacterClassInRegex"
+	| "lint/correctness/noEmptyPattern"
+	| "lint/correctness/noGlobalDirnameFilename"
+	| "lint/correctness/noGlobalObjectCalls"
+	| "lint/correctness/noInnerDeclarations"
+	| "lint/correctness/noInvalidBuiltinInstantiation"
+	| "lint/correctness/noInvalidConstructorSuper"
+	| "lint/correctness/noInvalidDirectionInLinearGradient"
+	| "lint/correctness/noInvalidGridAreas"
+	| "lint/correctness/noInvalidNewBuiltin"
+	| "lint/correctness/noInvalidPositionAtImportRule"
+	| "lint/correctness/noInvalidUseBeforeDeclaration"
+	| "lint/correctness/noMissingVarFunction"
+	| "lint/correctness/noNestedComponentDefinitions"
+	| "lint/correctness/noNewSymbol"
+	| "lint/correctness/noNodejsModules"
+	| "lint/correctness/noNonoctalDecimalEscape"
+	| "lint/correctness/noPrecisionLoss"
+	| "lint/correctness/noPrivateImports"
+	| "lint/correctness/noProcessGlobal"
+	| "lint/correctness/noQwikUseVisibleTask"
+	| "lint/correctness/noReactPropAssignments"
+	| "lint/correctness/noRenderReturnValue"
+	| "lint/correctness/noRestrictedElements"
+	| "lint/correctness/noSelfAssign"
+	| "lint/correctness/noSetterReturn"
+	| "lint/correctness/noSolidDestructuredProps"
+	| "lint/correctness/noStringCaseMismatch"
+	| "lint/correctness/noSwitchDeclarations"
+	| "lint/correctness/noUndeclaredDependencies"
+	| "lint/correctness/noUndeclaredVariables"
+	| "lint/correctness/noUnknownFunction"
+	| "lint/correctness/noUnknownMediaFeatureName"
+	| "lint/correctness/noUnknownProperty"
+	| "lint/correctness/noUnknownPseudoClass"
+	| "lint/correctness/noUnknownPseudoClassSelector"
+	| "lint/correctness/noUnknownPseudoElement"
+	| "lint/correctness/noUnknownTypeSelector"
+	| "lint/correctness/noUnknownUnit"
+	| "lint/correctness/noUnmatchableAnbSelector"
+	| "lint/correctness/noUnreachable"
+	| "lint/correctness/noUnreachableSuper"
+	| "lint/correctness/noUnsafeFinally"
+	| "lint/correctness/noUnsafeOptionalChaining"
+	| "lint/correctness/noUnusedFunctionParameters"
+	| "lint/correctness/noUnusedImports"
+	| "lint/correctness/noUnusedLabels"
+	| "lint/correctness/noUnusedPrivateClassMembers"
+	| "lint/correctness/noUnusedVariables"
+	| "lint/correctness/noVoidElementsWithChildren"
+	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useExhaustiveDependencies"
+	| "lint/correctness/useGraphqlNamedOperations"
+	| "lint/correctness/useHookAtTopLevel"
+	| "lint/correctness/useImageSize"
+	| "lint/correctness/useImportExtensions"
+	| "lint/correctness/useIsNan"
+	| "lint/correctness/useJsonImportAttributes"
+	| "lint/correctness/useJsxKeyInIterable"
+	| "lint/correctness/useParseIntRadix"
+	| "lint/correctness/useQwikClasslist"
+	| "lint/correctness/useSingleJsDocAsterisk"
+	| "lint/correctness/useUniqueElementIds"
+	| "lint/correctness/useValidForDirection"
+	| "lint/correctness/useValidTypeof"
+	| "lint/correctness/useYield"
+	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noContinue"
+	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noEmptySource"
+	| "lint/nursery/noFloatingPromises"
+	| "lint/nursery/noForIn"
+	| "lint/nursery/noImplicitCoercion"
+	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedRender"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noShadow"
+	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noUnknownAttribute"
+	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnusedExpressions"
+	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCatchBinding"
+	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueDataObjectDeclaration"
+	| "lint/nursery/noVueDuplicateKeys"
+	| "lint/nursery/noVueReservedKeys"
+	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useArraySortCompare"
+	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useDeprecatedDate"
+	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFind"
+	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSpread"
+	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useVueDefineMacrosOrder"
+	| "lint/nursery/useVueHyphenatedAttributes"
+	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueValidVBind"
+	| "lint/nursery/useVueValidVElse"
+	| "lint/nursery/useVueValidVElseIf"
+	| "lint/nursery/useVueValidVFor"
+	| "lint/nursery/useVueValidVHtml"
+	| "lint/nursery/useVueValidVIf"
+	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueValidVOn"
+	| "lint/performance/noAccumulatingSpread"
+	| "lint/performance/noAwaitInLoops"
+	| "lint/performance/noBarrelFile"
+	| "lint/performance/noDelete"
+	| "lint/performance/noDynamicNamespaceImportAccess"
+	| "lint/performance/noImgElement"
+	| "lint/performance/noNamespaceImport"
+	| "lint/performance/noReExportAll"
+	| "lint/performance/noUnwantedPolyfillio"
+	| "lint/performance/useGoogleFontPreconnect"
+	| "lint/performance/useSolidForComponent"
+	| "lint/performance/useTopLevelRegex"
+	| "lint/security/noBlankTarget"
+	| "lint/security/noDangerouslySetInnerHtml"
+	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
+	| "lint/security/noGlobalEval"
+	| "lint/security/noSecrets"
+	| "lint/style/noCommonJs"
+	| "lint/style/noDefaultExport"
+	| "lint/style/noDescendingSpecificity"
+	| "lint/style/noDoneCallback"
+	| "lint/style/noEnum"
+	| "lint/style/noExportedImports"
+	| "lint/style/noHeadElement"
+	| "lint/style/noImplicitBoolean"
+	| "lint/style/noInferrableTypes"
+	| "lint/style/noMagicNumbers"
+	| "lint/style/noNamespace"
+	| "lint/style/noNegationElse"
+	| "lint/style/noNestedTernary"
+	| "lint/style/noNonNullAssertion"
+	| "lint/style/noParameterAssign"
+	| "lint/style/noParameterProperties"
+	| "lint/style/noProcessEnv"
+	| "lint/style/noRestrictedGlobals"
+	| "lint/style/noRestrictedImports"
+	| "lint/style/noRestrictedTypes"
+	| "lint/style/noShoutyConstants"
+	| "lint/style/noSubstr"
+	| "lint/style/noUnusedTemplateLiteral"
+	| "lint/style/noUselessElse"
+	| "lint/style/noValueAtRule"
+	| "lint/style/noYodaExpression"
+	| "lint/style/useArrayLiterals"
+	| "lint/style/useAsConstAssertion"
+	| "lint/style/useAtIndex"
+	| "lint/style/useBlockStatements"
+	| "lint/style/useCollapsedElseIf"
+	| "lint/style/useCollapsedIf"
+	| "lint/style/useComponentExportOnlyModules"
+	| "lint/style/useConsistentArrayType"
+	| "lint/style/useConsistentBuiltinInstantiation"
+	| "lint/style/useConsistentCurlyBraces"
+	| "lint/style/useConsistentMemberAccessibility"
+	| "lint/style/useConsistentObjectDefinitions"
+	| "lint/style/useConsistentTypeDefinitions"
+	| "lint/style/useConst"
+	| "lint/style/useDefaultParameterLast"
+	| "lint/style/useDefaultSwitchClause"
+	| "lint/style/useDeprecatedReason"
+	| "lint/style/useEnumInitializers"
+	| "lint/style/useExplicitLengthCheck"
+	| "lint/style/useExponentiationOperator"
+	| "lint/style/useExportType"
+	| "lint/style/useExportsLast"
+	| "lint/style/useFilenamingConvention"
+	| "lint/style/useForOf"
+	| "lint/style/useFragmentSyntax"
+	| "lint/style/useGraphqlNamingConvention"
+	| "lint/style/useGroupedAccessorPairs"
+	| "lint/style/useImportType"
+	| "lint/style/useLiteralEnumMembers"
+	| "lint/style/useNamingConvention"
+	| "lint/style/useNodeAssertStrict"
+	| "lint/style/useNodejsImportProtocol"
+	| "lint/style/useNumberNamespace"
+	| "lint/style/useNumericSeparators"
+	| "lint/style/useObjectSpread"
+	| "lint/style/useReactFunctionComponents"
+	| "lint/style/useReadonlyClassProperties"
+	| "lint/style/useSelfClosingElements"
+	| "lint/style/useShorthandArrayType"
+	| "lint/style/useShorthandAssign"
+	| "lint/style/useShorthandFunctionType"
+	| "lint/style/useSingleCaseStatement"
+	| "lint/style/useSingleVarDeclarator"
+	| "lint/style/useSymbolDescription"
+	| "lint/style/useTemplate"
+	| "lint/style/useThrowNewError"
+	| "lint/style/useThrowOnlyError"
+	| "lint/style/useTrimStartEnd"
+	| "lint/style/useUnifiedTypeSignatures"
+	| "lint/suspicious/noAlert"
+	| "lint/suspicious/noApproximativeNumericConstant"
+	| "lint/suspicious/noArrayIndexKey"
+	| "lint/suspicious/noAssignInExpressions"
+	| "lint/suspicious/noAsyncPromiseExecutor"
+	| "lint/suspicious/noBiomeFirstException"
+	| "lint/suspicious/noBitwiseOperators"
+	| "lint/suspicious/noCatchAssign"
+	| "lint/suspicious/noClassAssign"
+	| "lint/suspicious/noCommentText"
+	| "lint/suspicious/noCompareNegZero"
+	| "lint/suspicious/noConfusingLabels"
+	| "lint/suspicious/noConfusingVoidType"
+	| "lint/suspicious/noConsole"
+	| "lint/suspicious/noConstEnum"
+	| "lint/suspicious/noConstantBinaryExpressions"
+	| "lint/suspicious/noControlCharactersInRegex"
+	| "lint/suspicious/noDebugger"
+	| "lint/suspicious/noDocumentCookie"
+	| "lint/suspicious/noDocumentImportInPage"
+	| "lint/suspicious/noDoubleEquals"
+	| "lint/suspicious/noDuplicateAtImportRules"
+	| "lint/suspicious/noDuplicateCase"
+	| "lint/suspicious/noDuplicateClassMembers"
+	| "lint/suspicious/noDuplicateCustomProperties"
+	| "lint/suspicious/noDuplicateElseIf"
+	| "lint/suspicious/noDuplicateFields"
+	| "lint/suspicious/noDuplicateFontNames"
+	| "lint/suspicious/noDuplicateJsxProps"
+	| "lint/suspicious/noDuplicateObjectKeys"
+	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateProperties"
+	| "lint/suspicious/noDuplicateSelectorsKeyframeBlock"
+	| "lint/suspicious/noDuplicateTestHooks"
+	| "lint/suspicious/noEmptyBlock"
+	| "lint/suspicious/noEmptyBlockStatements"
+	| "lint/suspicious/noEmptyInterface"
+	| "lint/suspicious/noEvolvingTypes"
+	| "lint/suspicious/noExplicitAny"
+	| "lint/suspicious/noExportsInTest"
+	| "lint/suspicious/noExtraNonNullAssertion"
+	| "lint/suspicious/noFallthroughSwitchClause"
+	| "lint/suspicious/noFocusedTests"
+	| "lint/suspicious/noFunctionAssign"
+	| "lint/suspicious/noGlobalAssign"
+	| "lint/suspicious/noGlobalIsFinite"
+	| "lint/suspicious/noGlobalIsNan"
+	| "lint/suspicious/noHeadImportInDocument"
+	| "lint/suspicious/noImplicitAnyLet"
+	| "lint/suspicious/noImportAssign"
+	| "lint/suspicious/noImportantInKeyframe"
+	| "lint/suspicious/noIrregularWhitespace"
+	| "lint/suspicious/noLabelVar"
+	| "lint/suspicious/noMisleadingCharacterClass"
+	| "lint/suspicious/noMisleadingInstantiator"
+	| "lint/suspicious/noMisplacedAssertion"
+	| "lint/suspicious/noMisrefactoredShorthandAssign"
+	| "lint/suspicious/noNonNullAssertedOptionalChain"
+	| "lint/suspicious/noOctalEscape"
+	| "lint/suspicious/noPrototypeBuiltins"
+	| "lint/suspicious/noQuickfixBiome"
+	| "lint/suspicious/noReactSpecificProps"
+	| "lint/suspicious/noRedeclare"
+	| "lint/suspicious/noRedundantUseStrict"
+	| "lint/suspicious/noSelfCompare"
+	| "lint/suspicious/noShadowRestrictedNames"
+	| "lint/suspicious/noShorthandPropertyOverrides"
+	| "lint/suspicious/noSkippedTests"
+	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noSuspiciousSemicolonInJsx"
+	| "lint/suspicious/noTemplateCurlyInString"
+	| "lint/suspicious/noThenProperty"
+	| "lint/suspicious/noTsIgnore"
+	| "lint/suspicious/noUnassignedVariables"
+	| "lint/suspicious/noUnknownAtRules"
+	| "lint/suspicious/noUnsafeDeclarationMerging"
+	| "lint/suspicious/noUnsafeNegation"
+	| "lint/suspicious/noUselessEscapeInString"
+	| "lint/suspicious/noUselessRegexBackrefs"
+	| "lint/suspicious/noVar"
+	| "lint/suspicious/noWith"
+	| "lint/suspicious/useAdjacentOverloadSignatures"
+	| "lint/suspicious/useAwait"
+	| "lint/suspicious/useBiomeIgnoreFolder"
+	| "lint/suspicious/useDefaultSwitchClauseLast"
+	| "lint/suspicious/useErrorMessage"
+	| "lint/suspicious/useGetterReturn"
+	| "lint/suspicious/useGoogleFontDisplay"
+	| "lint/suspicious/useGuardForIn"
+	| "lint/suspicious/useIsArray"
+	| "lint/suspicious/useIterableCallbackReturn"
+	| "lint/suspicious/useNamespaceKeyword"
+	| "lint/suspicious/useNumberToFixedDigitsArgument"
+	| "lint/suspicious/useStaticResponseMethods"
+	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedProperties"
+	| "assist/source/useSortedAttributes"
+	| "assist/source/organizeImports"
+	| "syntax/correctness/noTypeOnlyImportAttributes"
+	| "syntax/correctness/noSuperWithoutExtends"
+	| "syntax/correctness/noInitializerWithDefinite"
+	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "files/missingHandler"
+	| "format"
+	| "check"
+	| "ci"
+	| "stdin"
+	| "init"
+	| "configuration"
+	| "assist"
+	| "migrate"
+	| "deserialize"
+	| "plugin"
+	| "project"
+	| "search"
+	| "internalError/io"
+	| "internalError/fs"
+	| "internalError/panic"
+	| "reporter/parse"
+	| "reporter/format"
+	| "reporter/violations"
+	| "parse"
+	| "lint"
+	| "lint/a11y"
+	| "lint/complexity"
+	| "lint/correctness"
+	| "lint/nursery"
+	| "lint/performance"
+	| "lint/security"
+	| "lint/style"
+	| "lint/suspicious"
+	| "lint/plugin"
+	| "suppressions/parse"
+	| "suppressions/unknownGroup"
+	| "suppressions/unknownRule"
+	| "suppressions/unknownAction"
+	| "suppressions/unused"
+	| "suppressions/incorrect"
+	| "args/fileNotFound"
+	| "flags/invalid"
+	| "semanticTests";
 export interface Location {
 	path?: Resource;
 	sourceCode?: string;
@@ -7096,13 +7371,13 @@ export type MarkupBuf = MarkupNodeBuf[];
 /**
  * The severity to associate to a diagnostic.
  */
-export type Severity = 'hint' | 'information' | 'warning' | 'error' | 'fatal';
+export type Severity = "hint" | "information" | "warning" | "error" | "fatal";
 export type DiagnosticTags = DiagnosticTag[];
 /**
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
 See the [Visitor] trait for additional documentation on all the supported
-advice types.
+advice types. 
 	 */
 export type Advice =
 	| { log: [LogCategory, MarkupBuf] }
@@ -7115,7 +7390,7 @@ export type Advice =
 /**
  * Represents the resource a diagnostic is associated with.
  */
-export type Resource = 'argv' | 'memory' | { file: string };
+export type Resource = "argv" | "memory" | { file: string };
 export type TextRange = [TextSize, TextSize];
 export interface MarkupNodeBuf {
 	content: string;
@@ -7123,19 +7398,19 @@ export interface MarkupNodeBuf {
 }
 /**
 	* Internal enum used to automatically generate bit offsets for [DiagnosticTags]
-and help with the implementation of `serde` and `schemars` for tags.
+and help with the implementation of `serde` and `schemars` for tags. 
 	 */
 export type DiagnosticTag =
-	| 'fixable'
-	| 'internal'
-	| 'unnecessaryCode'
-	| 'deprecatedCode'
-	| 'verbose';
+	| "fixable"
+	| "internal"
+	| "unnecessaryCode"
+	| "deprecatedCode"
+	| "verbose";
 /**
 	* The category for a log advice, defines how the message should be presented
-to the user.
+to the user. 
 	 */
-export type LogCategory = 'none' | 'info' | 'warn' | 'error';
+export type LogCategory = "none" | "info" | "warn" | "error";
 export interface TextEdit {
 	dictionary: string;
 	ops: CompressedOp[];
@@ -7146,19 +7421,21 @@ export type TextSize = number;
  * Enumeration of all the supported markup elements
  */
 export type MarkupElement =
-	| 'Emphasis'
-	| 'Dim'
-	| 'Italic'
-	| 'Underline'
-	| 'Error'
-	| 'Success'
-	| 'Warn'
-	| 'Info'
-	| 'Debug'
-	| 'Trace'
-	| 'Inverse'
+	| "Emphasis"
+	| "Dim"
+	| "Italic"
+	| "Underline"
+	| "Error"
+	| "Success"
+	| "Warn"
+	| "Info"
+	| "Debug"
+	| "Trace"
+	| "Inverse"
 	| { Hyperlink: { href: string } };
-export type CompressedOp = { diffOp: DiffOp } | { equalLines: { line_count: number } };
+export type CompressedOp =
+	| { diffOp: DiffOp }
+	| { equalLines: { line_count: number } };
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -7182,7 +7459,7 @@ export interface BacktraceSymbol {
 export interface OpenProjectParams {
 	/**
 	* Whether the folder should be opened as a project, even if no
-`biome.json` can be found.
+`biome.json` can be found. 
 	 */
 	openUninitialized: boolean;
 	/**
@@ -7207,18 +7484,18 @@ export interface ScanProjectParams {
 	/**
 	* Whether the watcher should watch this path.
 
-Does nothing if the watcher is already watching this path.
+Does nothing if the watcher is already watching this path. 
 	 */
 	watch: boolean;
 }
 export type ScanKind =
-	| 'noScanner'
-	| 'knownFiles'
+	| "noScanner"
+	| "knownFiles"
 	| {
 			targetedKnownFiles: {
 				/**
 	* Determines whether the file scanner should descend into
-subdirectories of the target paths.
+subdirectories of the target paths. 
 	 */
 				descendFromTargets: boolean;
 				/**
@@ -7226,12 +7503,12 @@ subdirectories of the target paths.
 
 If a target path indicates a folder, all files within are scanned as well.
 
-Target paths must be absolute.
+Target paths must be absolute. 
 	 */
 				targetPaths: BiomePath[];
 			};
 	  }
-	| 'project';
+	| "project";
 export interface ScanProjectResult {
 	/**
 	 * A list of child configuration files found inside the project
@@ -7259,17 +7536,17 @@ export interface OpenFileParams {
 speed up subsequent reparsing if the document has been edited.
 
 This should only be enabled if reparsing is to be expected, such as when
-the file is opened through the LSP Proxy.
+the file is opened through the LSP Proxy. 
 	 */
 	persistNodeCache?: boolean;
 	projectKey: ProjectKey;
 }
 export type FileContent =
-	| { content: string; type: 'fromClient'; version: number }
-	| { type: 'fromServer' };
+	| { content: string; type: "fromClient"; version: number }
+	| { type: "fromServer" };
 export type DocumentFileSource =
-	| 'Ignore'
-	| 'Unknown'
+	| "Ignore"
+	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
@@ -7279,7 +7556,7 @@ export type DocumentFileSource =
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
-For example, if inside an Astro file, a top-level return statement is allowed.
+For example, if inside an Astro file, a top-level return statement is allowed. 
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -7305,9 +7582,9 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EmbeddingKind =
-	| 'Vue'
-	| 'Svelte'
-	| 'None'
+	| "Vue"
+	| "Svelte"
+	| "None"
 	| {
 			Astro: {
 				/**
@@ -7316,40 +7593,46 @@ export type EmbeddingKind =
 				frontmatter: boolean;
 			};
 	  };
-export type Language = 'javaScript' | { typeScript: { definition_file: boolean } };
+export type Language =
+	| "javaScript"
+	| { typeScript: { definition_file: boolean } };
 /**
 	* Is the source file an ECMAScript Module or Script.
-Changes the parsing semantic.
+Changes the parsing semantic. 
 	 */
-export type ModuleKind = 'script' | 'module';
-export type LanguageVariant = 'standard' | 'standardRestricted' | 'jsx';
+export type ModuleKind = "script" | "module";
+export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 /**
 	* Enum of the different ECMAScript standard versions.
 The versions are ordered in increasing order; The newest version comes last.
 
-Defaults to the latest stable ECMAScript standard.
+Defaults to the latest stable ECMAScript standard. 
 	 */
-export type LanguageVersion = 'eS2022' | 'eSNext';
+export type LanguageVersion = "eS2022" | "eSNext";
 /**
  * It represents the extension of the file
  */
-export type JsonFileVariant = 'standard' | 'jsonc';
+export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
 Currently, Biome aims to be compatible with
 the latest Recommendation level standards.
 
-It also supports Tailwind CSS syntax additions, when the parser option is enabled.
+It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
-export type CssVariant = 'standard' | 'cssModules' | 'tailwindCss';
+export type CssVariant = "standard" | "cssModules" | "tailwindCss";
 /**
  * The style of GraphQL contained in the file.
  */
-export type GraphqlVariant = 'standard';
-export type HtmlVariant = { Standard: HtmlTextExpressions } | 'Astro' | 'Vue' | 'Svelte';
-export type GritVariant = 'Standard';
-export type HtmlTextExpressions = 'None' | 'Single' | 'Double';
+export type GraphqlVariant = "standard";
+export type HtmlVariant =
+	| { Standard: HtmlTextExpressions }
+	| "Astro"
+	| "Vue"
+	| "Svelte";
+export type GritVariant = "Standard";
+export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -7372,7 +7655,7 @@ export interface FileExitsParams {
 export interface PathIsIgnoredParams {
 	/**
 	* Whether the path is ignored for specific features e.g. `formatter.includes`.
-When this field is empty, Biome checks only `files.includes`.
+When this field is empty, Biome checks only `files.includes`. 
 	 */
 	features: FeatureName;
 	/**
@@ -7385,7 +7668,7 @@ When this field is empty, Biome checks only `files.includes`.
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export type IgnoreKind = 'path' | 'ancestors';
+export type IgnoreKind = "path" | "ancestors";
 export interface UpdateModuleGraphParams {
 	path: BiomePath;
 	/**
@@ -7393,7 +7676,7 @@ export interface UpdateModuleGraphParams {
 	 */
 	updateKind: UpdateKind;
 }
-export type UpdateKind = 'addOrUpdate' | 'remove';
+export type UpdateKind = "addOrUpdate" | "remove";
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -7462,13 +7745,13 @@ specifier itself.
   "./foo": "/absolute/path/to/foo.js",
   "react": "react"
 }
-```
+``` 
 	 */
 	staticImportPaths: Record<string, string>;
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to.
+Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	staticImports: Record<string, string>;
 }
@@ -7489,7 +7772,7 @@ export interface PullDiagnosticsParams {
 }
 export type RuleCategories = RuleCategory[];
 export type AnalyzerSelector = string;
-export type RuleCategory = 'syntax' | 'lint' | 'action' | 'transformation';
+export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
 	errors: number;
@@ -7518,7 +7801,7 @@ export interface CodeAction {
 	* The category of a code action, this type maps directly to the
 [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
 	| { quickFix: string }
@@ -7528,7 +7811,7 @@ export type ActionCategory =
 /**
 	* A Suggestion that is provided by Biome's linter, and
 can be reported to the user, and can be automatically
-applied if it has the right [`Applicability`].
+applied if it has the right [`Applicability`]. 
 	 */
 export interface CodeSuggestion {
 	applicability: Applicability;
@@ -7540,18 +7823,30 @@ export interface CodeSuggestion {
 /**
 	* The sub-category of a refactor code action.
 
-[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information:
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
 	 */
-export type RefactorKind = 'none' | 'extract' | 'inline' | 'rewrite' | { other: string };
+export type RefactorKind =
+	| "none"
+	| "extract"
+	| "inline"
+	| "rewrite"
+	| { other: string };
 /**
  * The sub-category of a source code action
  */
-export type SourceActionKind = 'fixAll' | 'none' | 'organizeImports' | { other: string };
-export type OtherActionCategory = 'inlineSuppression' | 'toplevelSuppression' | { generic: string };
+export type SourceActionKind =
+	| "fixAll"
+	| "none"
+	| "organizeImports"
+	| { other: string };
+export type OtherActionCategory =
+	| "inlineSuppression"
+	| "toplevelSuppression"
+	| { generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
-export type Applicability = 'always' | 'maybeIncorrect';
+export type Applicability = "always" | "maybeIncorrect";
 export interface PullDiagnosticsAndActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
@@ -7613,7 +7908,10 @@ export interface FixFileParams {
 /**
  * Which fixes should be applied during the analyzing phase
  */
-export type FixFileMode = 'safeFixes' | 'safeAndUnsafeFixes' | 'applySuppressions';
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -7662,7 +7960,7 @@ export interface ParsePatternParams {
 	defaultLanguage: GritTargetLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = 'CSS' | 'JavaScript';
+export type GritTargetLanguage = "CSS" | "JavaScript";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }
@@ -7699,10 +7997,12 @@ export interface Workspace {
 	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
 	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
 	getModuleGraph(params: GetModuleGraphParams): Promise<GetModuleGraphResult>;
-	pullDiagnostics(params: PullDiagnosticsParams): Promise<PullDiagnosticsResult>;
+	pullDiagnostics(
+		params: PullDiagnosticsParams,
+	): Promise<PullDiagnosticsResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	pullDiagnosticsAndActions(
-		params: PullDiagnosticsAndActionsParams
+		params: PullDiagnosticsAndActionsParams,
 	): Promise<PullDiagnosticsAndActionsResult>;
 	formatFile(params: FormatFileParams): Promise<Printed>;
 	formatRange(params: FormatRangeParams): Promise<Printed>;
@@ -7717,97 +8017,97 @@ export interface Workspace {
 export function createWorkspace(transport: Transport): Workspace {
 	return {
 		fileFeatures(params) {
-			return transport.request('biome/file_features', params);
+			return transport.request("biome/file_features", params);
 		},
 		updateSettings(params) {
-			return transport.request('biome/update_settings', params);
+			return transport.request("biome/update_settings", params);
 		},
 		openProject(params) {
-			return transport.request('biome/open_project', params);
+			return transport.request("biome/open_project", params);
 		},
 		scanProject(params) {
-			return transport.request('biome/scan_project', params);
+			return transport.request("biome/scan_project", params);
 		},
 		openFile(params) {
-			return transport.request('biome/open_file', params);
+			return transport.request("biome/open_file", params);
 		},
 		changeFile(params) {
-			return transport.request('biome/change_file', params);
+			return transport.request("biome/change_file", params);
 		},
 		closeFile(params) {
-			return transport.request('biome/close_file', params);
+			return transport.request("biome/close_file", params);
 		},
 		fileExists(params) {
-			return transport.request('biome/file_exists', params);
+			return transport.request("biome/file_exists", params);
 		},
 		isPathIgnored(params) {
-			return transport.request('biome/is_path_ignored', params);
+			return transport.request("biome/is_path_ignored", params);
 		},
 		updateModuleGraph(params) {
-			return transport.request('biome/update_module_graph', params);
+			return transport.request("biome/update_module_graph", params);
 		},
 		getSyntaxTree(params) {
-			return transport.request('biome/get_syntax_tree', params);
+			return transport.request("biome/get_syntax_tree", params);
 		},
 		checkFileSize(params) {
-			return transport.request('biome/check_file_size', params);
+			return transport.request("biome/check_file_size", params);
 		},
 		getFileContent(params) {
-			return transport.request('biome/get_file_content', params);
+			return transport.request("biome/get_file_content", params);
 		},
 		getControlFlowGraph(params) {
-			return transport.request('biome/get_control_flow_graph', params);
+			return transport.request("biome/get_control_flow_graph", params);
 		},
 		getFormatterIr(params) {
-			return transport.request('biome/get_formatter_ir', params);
+			return transport.request("biome/get_formatter_ir", params);
 		},
 		getTypeInfo(params) {
-			return transport.request('biome/get_type_info', params);
+			return transport.request("biome/get_type_info", params);
 		},
 		getRegisteredTypes(params) {
-			return transport.request('biome/get_registered_types', params);
+			return transport.request("biome/get_registered_types", params);
 		},
 		getSemanticModel(params) {
-			return transport.request('biome/get_semantic_model', params);
+			return transport.request("biome/get_semantic_model", params);
 		},
 		getModuleGraph(params) {
-			return transport.request('biome/get_module_graph', params);
+			return transport.request("biome/get_module_graph", params);
 		},
 		pullDiagnostics(params) {
-			return transport.request('biome/pull_diagnostics', params);
+			return transport.request("biome/pull_diagnostics", params);
 		},
 		pullActions(params) {
-			return transport.request('biome/pull_actions', params);
+			return transport.request("biome/pull_actions", params);
 		},
 		pullDiagnosticsAndActions(params) {
-			return transport.request('biome/pull_diagnostics_and_actions', params);
+			return transport.request("biome/pull_diagnostics_and_actions", params);
 		},
 		formatFile(params) {
-			return transport.request('biome/format_file', params);
+			return transport.request("biome/format_file", params);
 		},
 		formatRange(params) {
-			return transport.request('biome/format_range', params);
+			return transport.request("biome/format_range", params);
 		},
 		formatOnType(params) {
-			return transport.request('biome/format_on_type', params);
+			return transport.request("biome/format_on_type", params);
 		},
 		fixFile(params) {
-			return transport.request('biome/fix_file', params);
+			return transport.request("biome/fix_file", params);
 		},
 		rename(params) {
-			return transport.request('biome/rename', params);
+			return transport.request("biome/rename", params);
 		},
 		parsePattern(params) {
-			return transport.request('biome/parse_pattern', params);
+			return transport.request("biome/parse_pattern", params);
 		},
 		searchPattern(params) {
-			return transport.request('biome/search_pattern', params);
+			return transport.request("biome/search_pattern", params);
 		},
 		dropPattern(params) {
-			return transport.request('biome/drop_pattern', params);
+			return transport.request("biome/drop_pattern", params);
 		},
 		destroy() {
 			transport.destroy();
-		}
+		},
 	};
 }
