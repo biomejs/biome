@@ -62,15 +62,15 @@ BindingId(7) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 1
+Module TypeId(0) => number: 1
 
-Module TypeId(1) => value: true
+Module TypeId(1) => bool: true
 
-Module TypeId(2) => value: a
+Module TypeId(2) => string: a
 
-Module TypeId(3) => value: b
+Module TypeId(3) => string: b
 
-Module TypeId(4) => value: c
+Module TypeId(4) => string: c
 
 Module TypeId(5) => Module(0) TypeId(2) | Module(0) TypeId(3) | Module(0) TypeId(4)
 

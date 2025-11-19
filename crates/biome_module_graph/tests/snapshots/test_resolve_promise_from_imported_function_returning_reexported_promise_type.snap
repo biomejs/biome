@@ -95,9 +95,9 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: true
+Module TypeId(0) => bool: true
 
-Module TypeId(1) => value: false
+Module TypeId(1) => bool: false
 
 Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
 
@@ -157,7 +157,7 @@ Module TypeId(0) => Promise
 
 Module TypeId(1) => Module(0) TypeId(7)
 
-Module TypeId(2) => value: true
+Module TypeId(2) => bool: true
 
 Module TypeId(3) => Object {
   prototype: No prototype

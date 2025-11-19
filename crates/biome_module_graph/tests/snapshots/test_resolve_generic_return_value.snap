@@ -66,7 +66,7 @@ Module TypeId(1) => Promise
 
 Module TypeId(2) => Promise.resolve
 
-Module TypeId(3) => value: 1
+Module TypeId(3) => number: 1
 
 Module TypeId(4) => Module(0) TypeId(10)
 
@@ -109,7 +109,7 @@ Full TypeId(1) => Promise
 
 Full TypeId(2) => Promise.resolve
 
-Full TypeId(3) => value: 1
+Full TypeId(3) => number: 1
 
 Full TypeId(4) => Module(0) TypeId(10)
 

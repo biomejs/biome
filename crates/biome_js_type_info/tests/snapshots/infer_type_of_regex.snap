@@ -5,19 +5,12 @@ expression: content
 ## Input
 
 ```ts
-const a = 1 === 1;
+/ab+c/;
 
 ```
 
 ## Result
 
 ```
-a => bool: true
-
-```
-
-## Registered types
-
-```
-Global TypeId(0) => bool: true
+regex: /ab+c/
 ```
