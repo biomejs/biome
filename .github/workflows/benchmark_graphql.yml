@@ -2,6 +2,7 @@ name: Benchmarks GraphQL
 
 on:
   workflow_dispatch:
+  merge_group:
   pull_request:
     types: [ opened, synchronize ]
     branches:
