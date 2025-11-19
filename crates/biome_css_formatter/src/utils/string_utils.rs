@@ -334,20 +334,11 @@ impl Format<CssFormatContext> for FormatDimension {
 ///
 /// The function takes and returns ownership so that we can return the original and not reallocate if it is not modified.
 ///
+/// ***Note:*** Input is expected to be lowercase.
+///
 /// # Reference
 ///
 ///  [Absolute length units](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#absolute_length_units)
-///
-/// # Examples
-///
-/// ```rust
-/// use biome_css_formatter::utils::string_utils::map_dimension_casing;
-///
-/// assert_eq!(map_dimension_casing("hz".to_string()), "Hz");
-/// assert_eq!(map_dimension_casing("khz".to_string()), "kHz");
-/// assert_eq!(map_dimension_casing("q".to_string()), "Q");
-/// assert_eq!(map_dimension_casing("unknown".to_string()), "unknown");
-/// ```
 fn map_dimension_casing(value: String) -> String {
     match value.as_str() {
         "hz" => String::from("Hz"),
