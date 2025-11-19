@@ -11,9 +11,9 @@ use biome_parser::token_set;
 use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
+use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::property::GenericComponentValueList;
-use crate::syntax::value::parse_error::expected_expression;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
 
@@ -75,6 +75,7 @@ pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
     p.at(T![attr]) && p.nth_at(1, T!['('])
 }
 
+/// Parses an attribute function.
 #[inline]
 pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attr_function(p) {
@@ -180,11 +181,10 @@ impl ParseRecovery for AttrNameListParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // 1. At a new attr name
-        // 2. At end of attr name and at fallback value
+        // 2. At fallback value
         // 3. At end of attr() or maybe type()
         // 4. At the end of the declaration
-        // 5. At a new line, most likely indicating the end of the declaration
-        p.at(T![|]) || p.at(T![,]) || p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+        p.at(T![|]) || p.at(T![,]) || p.at(T![')']) || p.at(T![;])
     }
 }
 
@@ -208,8 +208,7 @@ impl ParseSeparatedList for AttrNameList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        // TODO: right expected fn
-        parsed_element.or_recover(p, &AttrNameListParseRecovery, expected_expression)
+        parsed_element.or_recover(p, &AttrNameListParseRecovery, expected_identifier)
     }
 
     fn separating_element_kind(&mut self) -> Self::Kind {

@@ -10,9 +10,11 @@ use biome_parser::token_set;
 use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
+use crate::syntax::is_at_identifier;
 use crate::syntax::is_at_string;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::parse_string;
-use crate::syntax::value::parse_error::expected_expression;
+use crate::syntax::value::parse_error::expected_syntax_component;
 
 const SYNTAX_TYPE_NAME_SET: TokenSet<CssSyntaxKind> = token_set![
     T![angle],
@@ -75,7 +77,6 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_syntax_component(p: &mut CssParser) -> ParsedSyntax {
-    // todo: guard
     let m = p.start();
 
     parse_any_syntax_single_component(p).ok();
@@ -90,7 +91,9 @@ fn parse_any_syntax_single_component(p: &mut CssParser) -> ParsedSyntax {
         return parse_syntax_type(p);
     }
 
-    // todo: ident
+    if is_at_identifier(p) {
+        return parse_regular_identifier(p);
+    }
 
     Absent
 }
@@ -163,8 +166,7 @@ impl ParseSeparatedList for SyntaxComponentList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        // TODO: right expected fn
-        parsed_element.or_recover(p, &SyntaxTypeListParseRecovery, expected_expression)
+        parsed_element.or_recover(p, &SyntaxTypeListParseRecovery, expected_syntax_component)
     }
 
     fn separating_element_kind(&mut self) -> Self::Kind {
