@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_large_hex.js
+---
+# Input
+```js
+// Large hex literals, previously failed as they exceed i64
+Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+
+```
+
+# Diagnostics
+```
+invalid_large_hex.js:2:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    1 │ // Large hex literals, previously failed as they exceed i64
+  > 2 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i It always evaluates to 0x10000000000000000.
+  
+    1 │ // Large hex literals, previously failed as they exceed i64
+  > 2 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+      │          ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Unsafe fix: Swap 0x10000000000000000 with 0x20000000000000000.
+  
+    1 1 │   // Large hex literals, previously failed as they exceed i64
+    2   │ - Math.min(0x10000000000000000,·Math.max(0x20000000000000000,·x));
+      2 │ + Math.min(0x20000000000000000,·Math.max(0x10000000000000000,·x));
+    3 3 │   
+  
+
+```
