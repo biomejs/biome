@@ -197,7 +197,7 @@ pub struct Source {
             biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions,
         >,
     >,
-    #[doc = "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members"]
+    #[doc = "Sort interface members by key."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_interface_members: Option<
         RuleAssistConfiguration<
