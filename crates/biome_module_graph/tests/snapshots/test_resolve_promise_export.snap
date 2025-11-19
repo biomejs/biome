@@ -40,7 +40,7 @@ BindingId(1) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: value
+Module TypeId(0) => string: value
 
 Module TypeId(1) => Module(0) TypeId(3)
 
