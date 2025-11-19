@@ -39,32 +39,6 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub NoDuplicatedSpreadPropsQuery =
-        JsxOpeningElement
-        | JsxSelfClosingElement
-}
-
-fn validate_attributes(list: &JsxAttributeList) -> Option<String> {
-    let mut seen_spreads = HashSet::new();
-
-    for attribute in list {
-        if let AnyJsxAttribute::JsxSpreadAttribute(spread) = attribute
-            && let Some(argument) = spread.argument().ok()
-            && let Some(express) = argument.as_js_identifier_expression()
-        {
-            let name = express.name().ok()?;
-            let value_token = name.value_token().ok()?;
-            let text = value_token.text_trimmed().to_string();
-            if !seen_spreads.insert(text.clone()) {
-                return Some(text);
-            }
-        }
-    }
-
-    None
-}
-
 impl Rule for NoDuplicatedSpreadProps {
     type Query = Ast<NoDuplicatedSpreadPropsQuery>;
     type State = String;
@@ -101,4 +75,30 @@ impl Rule for NoDuplicatedSpreadProps {
             }),
         )
     }
+}
+
+declare_node_union! {
+    pub NoDuplicatedSpreadPropsQuery =
+        JsxOpeningElement
+        | JsxSelfClosingElement
+}
+
+fn validate_attributes(list: &JsxAttributeList) -> Option<String> {
+    let mut seen_spreads = HashSet::new();
+
+    for attribute in list {
+        if let AnyJsxAttribute::JsxSpreadAttribute(spread) = attribute
+            && let Some(argument) = spread.argument().ok()
+            && let Some(express) = argument.as_js_identifier_expression()
+            && let Some(name) = express.name().ok()
+            && let Some(value_token) = name.value_token().ok()
+        {
+            let text = value_token.text_trimmed().to_string();
+            if !seen_spreads.insert(text.clone()) {
+                return Some(text);
+            }
+        }
+    }
+
+    None
 }
