@@ -318,32 +318,21 @@ impl Format<CssFormatContext> for FormatDimension {
                     [format_replaced(
                         &self.token,
                         &text(
-                            &map_dimension_casing(lowercase),
+                            // Most CSS dimensions can be formatted as lower case, but there are
+                            // a few that are more commonly formatted with some uppercase characters.
+                            // This maps those few cases to the correct casing. This matches the
+                            // behavior of the Prettier formatter.
+                            &match lowercase.as_str() {
+                                "hz" => String::from("Hz"),
+                                "khz" => String::from("kHz"),
+                                "q" => String::from("Q"),
+                                _ => lowercase,
+                            },
                             self.token.text_trimmed_range().start()
                         ),
                     )]
                 )
             }
         }
-    }
-}
-
-/// Most CSS dimensions can be formatted as lower case, but there are a few that are more commonly
-/// formatted with some uppercase characters. This function maps those few cases to the correct casing and returns the
-/// rest as-is. This matches the behavior of the Prettier formatter.
-///
-/// The function takes and returns ownership so that we can return the original and not reallocate if it is not modified.
-///
-/// ***Note:*** Input is expected to be lowercase.
-///
-/// # Reference
-///
-///  [Absolute length units](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#absolute_length_units)
-fn map_dimension_casing(value: String) -> String {
-    match value.as_str() {
-        "hz" => String::from("Hz"),
-        "khz" => String::from("kHz"),
-        "q" => String::from("Q"),
-        _ => value,
     }
 }
