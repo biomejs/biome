@@ -234,7 +234,7 @@ rayon                = "1.11.0"
 regex                = "1.12.2"
 rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
-schemars             = { version = "1.0.4", features = ["indexmap2", "smallvec1"] }
+schemars             = { version = "1.1.0", features = ["indexmap2", "smallvec1"] }
 serde                = { version = "1.0.228", features = ["derive"] }
 serde_json           = "1.0.145"
 similar              = "2.7.0"
@@ -255,7 +255,7 @@ ureq                 = "3.1.4"
 url                  = "2.5.7"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"
-windows              = "0.61.3"
+windows              = "0.62.2"
 
 [profile.dev.package.biome_wasm]
 debug     = true
