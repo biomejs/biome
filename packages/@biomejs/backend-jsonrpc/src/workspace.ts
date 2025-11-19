@@ -6181,6 +6181,11 @@ export type UseHookAtTopLevelOptions = {};
 export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
+	* A map of file extensions to their suggested replacements.
+For example, `{"ts": "js"}` would suggest `.js` extensions for TypeScript imports. 
+	 */
+	extensionMappings?: Record<string, string>;
+	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
 extension the source file has in your project. 
 	 */

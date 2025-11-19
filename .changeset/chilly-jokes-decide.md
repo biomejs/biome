@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
 Added a new assist action `useSortedInterfaceMembers` that sorts TypeScript interface members, for readability.
