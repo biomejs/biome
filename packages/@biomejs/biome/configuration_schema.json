@@ -11674,7 +11674,7 @@
 			"type": "object",
 			"properties": {
 				"extensionMappings": {
-					"description": "A map of file extensions to their suggested replacements. For example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
+					"description": "A map of file extensions to their suggested replacements.\nFor example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
 					"type": ["object", "null"],
 					"additionalProperties": { "type": "string" }
 				},
