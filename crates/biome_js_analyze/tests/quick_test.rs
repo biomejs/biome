@@ -25,13 +25,17 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
+#[ignore]
 #[test]
 fn quick_test() {
-    const FILENAME: &str = "App.tsx";
-    const SOURCE: &str = r#"
-    const Component = ({ elements }) => {
-        return <div>{elements.length && <List elements={elements}/>}</div>
-    }
+    const FILENAME: &str = "dummyFile.ts";
+    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+
+type PostcssOptions = Parameters<postcssModules>[0]
+
+export function f(options: PostcssOptions) {
+	console.log(options)
+}
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -48,7 +52,7 @@ fn quick_test() {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("nursery", "noLeakedConditionalRendering");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

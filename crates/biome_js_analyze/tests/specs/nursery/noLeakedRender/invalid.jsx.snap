@@ -1,0 +1,193 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid cases with default options (both 'coerce' and 'ternary' strategies)
+
+const Example1 = () => {
+	return (
+		<>
+			{0 && <Something />}
+			{'' && <Something />}
+			{NaN && <Something />}
+		</>
+	);
+};
+
+const Component1 = ({ count, title }) => {
+	return <div>{count && title}</div>;
+};
+
+const Component2 = ({ count }) => {
+	return <div>{count && <span>There are {count} results</span>}</div>;
+};
+
+const Component3 = ({ elements }) => {
+	return <div>{elements.length && <List elements={elements} />}</div>;
+};
+
+const Component4 = ({ nestedCollection }) => {
+	return (
+		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
+	);
+};
+
+const Component5 = ({ elements }) => {
+	return <div>{elements[0] && <List elements={elements} />}</div>;
+};
+
+const Component6 = ({ numberA, numberB }) => {
+	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
+};
+
+```
+
+# Diagnostics
+```
+invalid.jsx:6:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    4 │ 	return (
+    5 │ 		<>
+  > 6 │ 			{0 && <Something />}
+      │ 			 ^^^^^^^^^^^^^^^^^^
+    7 │ 			{'' && <Something />}
+    8 │ 			{NaN && <Something />}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:7:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    5 │ 		<>
+    6 │ 			{0 && <Something />}
+  > 7 │ 			{'' && <Something />}
+      │ 			 ^^^^^^^^^^^^^^^^^^^
+    8 │ 			{NaN && <Something />}
+    9 │ 		</>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:14:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    13 │ const Component1 = ({ count, title }) => {
+  > 14 │ 	return <div>{count && title}</div>;
+       │ 	             ^^^^^^^^^^^^^^
+    15 │ };
+    16 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:18:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    17 │ const Component2 = ({ count }) => {
+  > 18 │ 	return <div>{count && <span>There are {count} results</span>}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ };
+    20 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:22:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    21 │ const Component3 = ({ elements }) => {
+  > 22 │ 	return <div>{elements.length && <List elements={elements} />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ };
+    24 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:27:9 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    25 │ const Component4 = ({ nestedCollection }) => {
+    26 │ 	return (
+  > 27 │ 		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
+       │ 		      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	);
+    29 │ };
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:32:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    31 │ const Component5 = ({ elements }) => {
+  > 32 │ 	return <div>{elements[0] && <List elements={elements} />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ };
+    34 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:36:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    35 │ const Component6 = ({ numberA, numberB }) => {
+  > 36 │ 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ };
+    38 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```

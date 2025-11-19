@@ -6,36 +6,94 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
-use biome_rule_options::no_leaked_conditional_rendering::NoLeakedConditionalRenderingOptions;
+use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
 
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Prevent problematic leaked values from being rendered.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// This rule prevents values that might cause unintentionally rendered values
+    /// or rendering crashes in React JSX. When using conditional rendering with the
+    /// logical AND operator (`&&`), if the left-hand side evaluates to a falsy value like
+    /// `0`, `NaN`, or any empty string, these values will be rendered instead of rendering nothing.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// Similarly, when using ternary operators with problematic alternate values like `null`,
+    /// `undefined`, or `false`, it can cause rendering issues or crashes.
+    ///
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```jsx,expect_diagnostic
+    /// const Component = () => {
+    ///   const count = 0;
+    ///   return <div>{count && <span>Count: {count}</span>}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// const Component = () => {
+    ///   const items = [];
+    ///   return <div>{items.length && <List items={items} />}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// const Component = () => {
+    ///   const user = null;
+    ///   return <div>{user && <Profile user={user} />}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// const Component = () => {
+    ///   const condition = false;
+    ///   return <div>{condition ? <Content /> : null}</div>;
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```jsx
+    /// const Component = () => {
+    ///   const count = 0;
+    ///   return <div>{count > 0 && <span>Count: {count}</span>}</div>;
+    /// }
     /// ```
     ///
-    pub NoLeakedConditionalRendering {
+    /// ```jsx
+    /// const Component = () => {
+    ///   const items = [];
+    ///   return <div>{!!items.length && <List items={items} />}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx
+    /// const Component = () => {
+    ///   const user = null;
+    ///   return <div>{user ? <Profile user={user} /> : null}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx
+    /// const Component = () => {
+    ///   const condition = false;
+    ///   return <div>{condition ? <Content /> : <Fallback />}</div>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx
+    /// const Component = () => {
+    ///   const isReady = true;
+    ///   return <div>{isReady && <Content />}</div>;
+    /// }
+    /// ```
+
+    pub NoLeakedRender{
         version: "next",
-        name: "noLeakedConditionalRendering",
+        name: "noLeakedRender",
         language: "js",
         recommended: false,
     }
@@ -47,7 +105,7 @@ const TERNARY_INVALID_ALTERNATE_VALUES: &[&str] = &["null", "undefined", "false"
 
 const DEFAULT_VALID_STRATEGIES: &[&str] = &[TERNARY_STRATEGY, COERCE_STRATEGY];
 
-pub enum NoLeakedConditionalRenderingState {
+pub enum NoLeakedRenderState {
     NoPotentialLeakedRender,
 }
 
@@ -72,11 +130,11 @@ declare_node_union! {
     pub Query = JsLogicalExpression | JsConditionalExpression
 }
 
-impl Rule for NoLeakedConditionalRendering {
+impl Rule for NoLeakedRender {
     type Query = Semantic<Query>;
-    type State = NoLeakedConditionalRenderingState;
+    type State = NoLeakedRenderState;
     type Signals = Option<Self::State>;
-    type Options = NoLeakedConditionalRenderingOptions;
+    type Options = NoLeakedRenderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
@@ -152,7 +210,7 @@ impl Rule for NoLeakedConditionalRendering {
                     return None;
                 }
 
-                return Some(NoLeakedConditionalRenderingState::NoPotentialLeakedRender);
+                return Some(NoLeakedRenderState::NoPotentialLeakedRender);
             }
             Query::JsConditionalExpression(expr) => {
                 if valid_strategies
@@ -172,28 +230,49 @@ impl Rule for NoLeakedConditionalRendering {
                     return None;
                 }
 
-                return Some(NoLeakedConditionalRenderingState::NoPotentialLeakedRender);
+                return Some(NoLeakedRenderState::NoPotentialLeakedRender);
             }
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        match state {
-            NoLeakedConditionalRenderingState::NoPotentialLeakedRender {
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.range(),
-                    markup! {
-                        "Potential leaked value that might cause unintentionally rendered values or rendering crashes"
-                    },
+        match node {
+            Query::JsLogicalExpression(_) => {
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        node.range(),
+                        markup! {
+                            "Potential leaked value that might cause unintended rendering."
+                        },
+                    )
+                    .note(markup! {
+                        "JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output."
+                    })
+                    .note(markup! {
+                        "Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression."
+                    })
                 )
-                .note(markup! {
-                    "This note will give you more information."
-                }),
-            ),
+            }
+            Query::JsConditionalExpression(_) => {
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        node.range(),
+                        markup! {
+                            "Potential leaked value that might cause unintended rendering."
+                        },
+                    )
+                    .note(markup! {
+                        "This happens When you use ternary operators in JSX with alternate values like null,undefined, or false"
+                    })
+                    .note(markup! {
+                        "Replace with a safe alternate value like an empty string or another JSX element"
+                    })
+                )
+            }
         }
     }
 }

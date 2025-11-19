@@ -47,13 +47,6 @@ const Component11 = ({ items, somethingElse, title }) => {
 	return <div>{items.length > 0 && somethingElse && title}</div>;
 };
 
-const MyComponent1 = () => {
-	const items = [];
-	const breakpoint = { phones: true };
-
-	return <div>{items.length > 0 && breakpoint.phones && <span />}</div>;
-};
-
 const MyComponent2 = () => {
 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
 };

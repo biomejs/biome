@@ -4,7 +4,7 @@
     "enabled": true,
     "rules": {
       "nursery": {
-        "noLeakedConditionalRendering": {
+        "noLeakedRender": {
           "level": "error",
           "options": {
             "validStrategies": ["ternary"]
