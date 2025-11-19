@@ -2040,6 +2040,11 @@ See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope
 	 */
 	useQwikValidLexicalScope?: UseQwikValidLexicalScopeConfiguration;
 	/**
+	* Enforce RegExp#exec over String#match if no global flag is provided.
+See https://biomejs.dev/linter/rules/use-regexp-exec 
+	 */
+	useRegexpExec?: UseRegexpExecConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -3631,6 +3636,9 @@ export type UseQwikMethodUsageConfiguration =
 export type UseQwikValidLexicalScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikValidLexicalScopeOptions;
+export type UseRegexpExecConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseRegexpExecOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5047,6 +5055,10 @@ export interface RuleWithUseQwikValidLexicalScopeOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikValidLexicalScopeOptions;
 }
+export interface RuleWithUseRegexpExecOptions {
+	level: RulePlainConfiguration;
+	options?: UseRegexpExecOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6293,6 +6305,7 @@ export interface UseMaxParamsOptions {
 }
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
+export type UseRegexpExecOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7098,6 +7111,7 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"

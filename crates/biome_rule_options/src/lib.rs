@@ -343,6 +343,7 @@ pub mod use_qwik_valid_lexical_scope;
 pub mod use_react_function_components;
 pub mod use_readonly_class_properties;
 pub mod use_regex_literals;
+pub mod use_regexp_exec;
 pub mod use_self_closing_elements;
 pub mod use_semantic_elements;
 pub mod use_shorthand_assign;

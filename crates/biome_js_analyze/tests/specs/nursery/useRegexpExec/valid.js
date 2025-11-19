@@ -1,0 +1,17 @@
+/* should not generate diagnostics */
+/thing/.exec('something');
+
+'some things are just things'.match(/thing/g);
+
+const text = 'something';
+const search = /thing/;
+search.exec(text);
+
+const text1 = 'something';
+const search1 = /thing/g;
+text1.match(search1);
+
+const obj = {
+	match: () => { }
+}
+obj.match(/thing/)

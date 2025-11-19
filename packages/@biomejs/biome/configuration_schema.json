@@ -5293,6 +5293,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useRegexpExec": {
+					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRegexpExecConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -9106,6 +9113,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseRegexpExecOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRegexpExecOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"properties": {
@@ -12007,6 +12023,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseRegexpExecConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRegexpExecOptions" }
+			]
+		},
+		"UseRegexpExecOptions": { "type": "object", "additionalProperties": false },
 		"UseSelfClosingElementsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
