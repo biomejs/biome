@@ -49,12 +49,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// const Component = () => {
-    ///   const condition = false;
-    ///   return <div>{condition ? <Content /> : null}</div>;
-    /// }
-    /// ```
     ///
     /// ### Valid
     ///
@@ -91,6 +85,7 @@ declare_lint_rule! {
     ///   const isReady = true;
     ///   return <div>{isReady && <Content />}</div>;
     /// }
+    /// ```
     ///
     /// ### `validStrategies`
     ///
@@ -108,7 +103,9 @@ declare_lint_rule! {
     ///     }
     ///   }
     /// }
+    /// ```
     ///
+    /// ```json
     /// {
     ///   "noLeakedRender": {
     ///     "options": {
