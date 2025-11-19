@@ -1,3 +1,26 @@
 div {
-	--percentage-2: attr(data-percentage type(<number> | <time>));
+	/* basic usage */
+	--basic-1: attr(data-count);
+	--basic-2: attr(href);
+
+	/* with type */
+	--px-type: attr(data-width px);
+	--rem-type: attr(data-size rem);
+	--raw-string-type: attr(data-name raw-string);
+	--custom-ident-type: attr(id type(<custom-ident>));
+	--number-type: attr(data-count type(<number>));
+	--multiple-types: attr(data-size type(<length> | <percentage>));
+
+	/* with fallback */
+	--number-fallback: attr(data-count type(<number>), 0);
+	--ident-fallback: attr(data-width px, inherit);
+	--string-fallback: attr(data-something, "default");
+
+  --interpolated: " (source: " attr(cite) ") ";
+
+	--percentage: attr(data-percentage %, 100%);
+
+	--comma-separated-multiplier: attr(data-size type(<length>#));
+	--space-separated-multiplier: attr(data-size type(<length>+));
+	--multiple-separators: attr(data-size type(<length># | <percentage>+));
 }

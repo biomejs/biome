@@ -301,6 +301,7 @@ pub enum CssSyntaxKind {
     CSS_NUMBER,
     CSS_PARAMETER,
     CSS_PERCENTAGE,
+    CSS_PERCENT_SIGN,
     CSS_RATIO,
     CSS_FUNCTION,
     CSS_STRING,

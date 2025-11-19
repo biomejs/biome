@@ -328,6 +328,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_NUMBER",
         "CSS_PARAMETER",
         "CSS_PERCENTAGE",
+        "CSS_PERCENT_SIGN",
         "CSS_RATIO",
         "CSS_FUNCTION",
         "CSS_STRING",

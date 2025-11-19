@@ -1827,204 +1827,10 @@ impl CssDistanceUnit {
         Self { syntax }
     }
     pub fn as_fields(&self) -> CssDistanceUnitFields {
-        CssDistanceUnitFields {
-            cap_token: self.cap_token(),
-            ch_token: self.ch_token(),
-            em_token: self.em_token(),
-            ex_token: self.ex_token(),
-            ic_token: self.ic_token(),
-            lh_token: self.lh_token(),
-            rcap_token: self.rcap_token(),
-            rch_token: self.rch_token(),
-            rem_token: self.rem_token(),
-            rex_token: self.rex_token(),
-            ric_token: self.ric_token(),
-            rlh_token: self.rlh_token(),
-            dvh_token: self.dvh_token(),
-            dvw_token: self.dvw_token(),
-            lvh_token: self.lvh_token(),
-            lvw_token: self.lvw_token(),
-            svh_token: self.svh_token(),
-            svw_token: self.svw_token(),
-            vb_token: self.vb_token(),
-            vh_token: self.vh_token(),
-            vi_token: self.vi_token(),
-            vmax_token: self.vmax_token(),
-            vmin_token: self.vmin_token(),
-            vw_token: self.vw_token(),
-            cqb_token: self.cqb_token(),
-            cqh_token: self.cqh_token(),
-            cqi_token: self.cqi_token(),
-            cqmax_token: self.cqmax_token(),
-            cqmin_token: self.cqmin_token(),
-            cqw_token: self.cqw_token(),
-            cm_token: self.cm_token(),
-            in_token: self.in_token(),
-            mm_token: self.mm_token(),
-            pc_token: self.pc_token(),
-            pt_token: self.pt_token(),
-            px_token: self.px_token(),
-            q_token: self.q_token(),
-            deg_token: self.deg_token(),
-            grad_token: self.grad_token(),
-            rad_token: self.rad_token(),
-            turn_token: self.turn_token(),
-            ms_token: self.ms_token(),
-            s_token: self.s_token(),
-            hz_token: self.hz_token(),
-            khz_token: self.khz_token(),
-            fr_token: self.fr_token(),
-            dpcm_token: self.dpcm_token(),
-            dpi_token: self.dpi_token(),
-            dppx_token: self.dppx_token(),
-        }
+        CssDistanceUnitFields { unit: self.unit() }
     }
-    pub fn cap_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn unit(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
-    }
-    pub fn ch_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn em_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn ex_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn ic_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
-    }
-    pub fn lh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
-    }
-    pub fn rcap_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 6usize)
-    }
-    pub fn rch_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
-    }
-    pub fn rem_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 8usize)
-    }
-    pub fn rex_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 9usize)
-    }
-    pub fn ric_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 10usize)
-    }
-    pub fn rlh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 11usize)
-    }
-    pub fn dvh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 12usize)
-    }
-    pub fn dvw_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 13usize)
-    }
-    pub fn lvh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 14usize)
-    }
-    pub fn lvw_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 15usize)
-    }
-    pub fn svh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 16usize)
-    }
-    pub fn svw_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 17usize)
-    }
-    pub fn vb_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 18usize)
-    }
-    pub fn vh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 19usize)
-    }
-    pub fn vi_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 20usize)
-    }
-    pub fn vmax_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 21usize)
-    }
-    pub fn vmin_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 22usize)
-    }
-    pub fn vw_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 23usize)
-    }
-    pub fn cqb_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 24usize)
-    }
-    pub fn cqh_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 25usize)
-    }
-    pub fn cqi_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 26usize)
-    }
-    pub fn cqmax_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 27usize)
-    }
-    pub fn cqmin_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 28usize)
-    }
-    pub fn cqw_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 29usize)
-    }
-    pub fn cm_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 30usize)
-    }
-    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 31usize)
-    }
-    pub fn mm_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 32usize)
-    }
-    pub fn pc_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 33usize)
-    }
-    pub fn pt_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 34usize)
-    }
-    pub fn px_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 35usize)
-    }
-    pub fn q_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 36usize)
-    }
-    pub fn deg_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 37usize)
-    }
-    pub fn grad_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 38usize)
-    }
-    pub fn rad_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 39usize)
-    }
-    pub fn turn_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 40usize)
-    }
-    pub fn ms_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 41usize)
-    }
-    pub fn s_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 42usize)
-    }
-    pub fn hz_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 43usize)
-    }
-    pub fn khz_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 44usize)
-    }
-    pub fn fr_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 45usize)
-    }
-    pub fn dpcm_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 46usize)
-    }
-    pub fn dpi_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 47usize)
-    }
-    pub fn dppx_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 48usize)
     }
 }
 impl Serialize for CssDistanceUnit {
@@ -2037,55 +1843,7 @@ impl Serialize for CssDistanceUnit {
 }
 #[derive(Serialize)]
 pub struct CssDistanceUnitFields {
-    pub cap_token: SyntaxResult<SyntaxToken>,
-    pub ch_token: SyntaxResult<SyntaxToken>,
-    pub em_token: SyntaxResult<SyntaxToken>,
-    pub ex_token: SyntaxResult<SyntaxToken>,
-    pub ic_token: SyntaxResult<SyntaxToken>,
-    pub lh_token: SyntaxResult<SyntaxToken>,
-    pub rcap_token: SyntaxResult<SyntaxToken>,
-    pub rch_token: SyntaxResult<SyntaxToken>,
-    pub rem_token: SyntaxResult<SyntaxToken>,
-    pub rex_token: SyntaxResult<SyntaxToken>,
-    pub ric_token: SyntaxResult<SyntaxToken>,
-    pub rlh_token: SyntaxResult<SyntaxToken>,
-    pub dvh_token: SyntaxResult<SyntaxToken>,
-    pub dvw_token: SyntaxResult<SyntaxToken>,
-    pub lvh_token: SyntaxResult<SyntaxToken>,
-    pub lvw_token: SyntaxResult<SyntaxToken>,
-    pub svh_token: SyntaxResult<SyntaxToken>,
-    pub svw_token: SyntaxResult<SyntaxToken>,
-    pub vb_token: SyntaxResult<SyntaxToken>,
-    pub vh_token: SyntaxResult<SyntaxToken>,
-    pub vi_token: SyntaxResult<SyntaxToken>,
-    pub vmax_token: SyntaxResult<SyntaxToken>,
-    pub vmin_token: SyntaxResult<SyntaxToken>,
-    pub vw_token: SyntaxResult<SyntaxToken>,
-    pub cqb_token: SyntaxResult<SyntaxToken>,
-    pub cqh_token: SyntaxResult<SyntaxToken>,
-    pub cqi_token: SyntaxResult<SyntaxToken>,
-    pub cqmax_token: SyntaxResult<SyntaxToken>,
-    pub cqmin_token: SyntaxResult<SyntaxToken>,
-    pub cqw_token: SyntaxResult<SyntaxToken>,
-    pub cm_token: SyntaxResult<SyntaxToken>,
-    pub in_token: SyntaxResult<SyntaxToken>,
-    pub mm_token: SyntaxResult<SyntaxToken>,
-    pub pc_token: SyntaxResult<SyntaxToken>,
-    pub pt_token: SyntaxResult<SyntaxToken>,
-    pub px_token: SyntaxResult<SyntaxToken>,
-    pub q_token: SyntaxResult<SyntaxToken>,
-    pub deg_token: SyntaxResult<SyntaxToken>,
-    pub grad_token: SyntaxResult<SyntaxToken>,
-    pub rad_token: SyntaxResult<SyntaxToken>,
-    pub turn_token: SyntaxResult<SyntaxToken>,
-    pub ms_token: SyntaxResult<SyntaxToken>,
-    pub s_token: SyntaxResult<SyntaxToken>,
-    pub hz_token: SyntaxResult<SyntaxToken>,
-    pub khz_token: SyntaxResult<SyntaxToken>,
-    pub fr_token: SyntaxResult<SyntaxToken>,
-    pub dpcm_token: SyntaxResult<SyntaxToken>,
-    pub dpi_token: SyntaxResult<SyntaxToken>,
-    pub dppx_token: SyntaxResult<SyntaxToken>,
+    pub unit: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDocumentAtRule {
@@ -5019,6 +4777,41 @@ pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub expression: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPercentSign {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPercentSign {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPercentSignFields {
+        CssPercentSignFields {
+            percent_token: self.percent_token(),
+        }
+    }
+    pub fn percent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssPercentSign {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPercentSignFields {
+    pub percent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPercentage {
@@ -9518,7 +9311,7 @@ impl AnyCssAttrType {
 pub enum AnyCssAttrUnit {
     CssBogusAttrUnit(CssBogusAttrUnit),
     CssDistanceUnit(CssDistanceUnit),
-    CssPercentage(CssPercentage),
+    CssPercentSign(CssPercentSign),
 }
 impl AnyCssAttrUnit {
     pub fn as_css_bogus_attr_unit(&self) -> Option<&CssBogusAttrUnit> {
@@ -9533,9 +9326,9 @@ impl AnyCssAttrUnit {
             _ => None,
         }
     }
-    pub fn as_css_percentage(&self) -> Option<&CssPercentage> {
+    pub fn as_css_percent_sign(&self) -> Option<&CssPercentSign> {
         match &self {
-            Self::CssPercentage(item) => Some(item),
+            Self::CssPercentSign(item) => Some(item),
             _ => None,
         }
     }
@@ -14119,61 +13912,7 @@ impl std::fmt::Debug for CssDistanceUnit {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssDistanceUnit")
-                .field("cap_token", &support::DebugSyntaxResult(self.cap_token()))
-                .field("ch_token", &support::DebugSyntaxResult(self.ch_token()))
-                .field("em_token", &support::DebugSyntaxResult(self.em_token()))
-                .field("ex_token", &support::DebugSyntaxResult(self.ex_token()))
-                .field("ic_token", &support::DebugSyntaxResult(self.ic_token()))
-                .field("lh_token", &support::DebugSyntaxResult(self.lh_token()))
-                .field("rcap_token", &support::DebugSyntaxResult(self.rcap_token()))
-                .field("rch_token", &support::DebugSyntaxResult(self.rch_token()))
-                .field("rem_token", &support::DebugSyntaxResult(self.rem_token()))
-                .field("rex_token", &support::DebugSyntaxResult(self.rex_token()))
-                .field("ric_token", &support::DebugSyntaxResult(self.ric_token()))
-                .field("rlh_token", &support::DebugSyntaxResult(self.rlh_token()))
-                .field("dvh_token", &support::DebugSyntaxResult(self.dvh_token()))
-                .field("dvw_token", &support::DebugSyntaxResult(self.dvw_token()))
-                .field("lvh_token", &support::DebugSyntaxResult(self.lvh_token()))
-                .field("lvw_token", &support::DebugSyntaxResult(self.lvw_token()))
-                .field("svh_token", &support::DebugSyntaxResult(self.svh_token()))
-                .field("svw_token", &support::DebugSyntaxResult(self.svw_token()))
-                .field("vb_token", &support::DebugSyntaxResult(self.vb_token()))
-                .field("vh_token", &support::DebugSyntaxResult(self.vh_token()))
-                .field("vi_token", &support::DebugSyntaxResult(self.vi_token()))
-                .field("vmax_token", &support::DebugSyntaxResult(self.vmax_token()))
-                .field("vmin_token", &support::DebugSyntaxResult(self.vmin_token()))
-                .field("vw_token", &support::DebugSyntaxResult(self.vw_token()))
-                .field("cqb_token", &support::DebugSyntaxResult(self.cqb_token()))
-                .field("cqh_token", &support::DebugSyntaxResult(self.cqh_token()))
-                .field("cqi_token", &support::DebugSyntaxResult(self.cqi_token()))
-                .field(
-                    "cqmax_token",
-                    &support::DebugSyntaxResult(self.cqmax_token()),
-                )
-                .field(
-                    "cqmin_token",
-                    &support::DebugSyntaxResult(self.cqmin_token()),
-                )
-                .field("cqw_token", &support::DebugSyntaxResult(self.cqw_token()))
-                .field("cm_token", &support::DebugSyntaxResult(self.cm_token()))
-                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .field("mm_token", &support::DebugSyntaxResult(self.mm_token()))
-                .field("pc_token", &support::DebugSyntaxResult(self.pc_token()))
-                .field("pt_token", &support::DebugSyntaxResult(self.pt_token()))
-                .field("px_token", &support::DebugSyntaxResult(self.px_token()))
-                .field("q_token", &support::DebugSyntaxResult(self.q_token()))
-                .field("deg_token", &support::DebugSyntaxResult(self.deg_token()))
-                .field("grad_token", &support::DebugSyntaxResult(self.grad_token()))
-                .field("rad_token", &support::DebugSyntaxResult(self.rad_token()))
-                .field("turn_token", &support::DebugSyntaxResult(self.turn_token()))
-                .field("ms_token", &support::DebugSyntaxResult(self.ms_token()))
-                .field("s_token", &support::DebugSyntaxResult(self.s_token()))
-                .field("hz_token", &support::DebugSyntaxResult(self.hz_token()))
-                .field("khz_token", &support::DebugSyntaxResult(self.khz_token()))
-                .field("fr_token", &support::DebugSyntaxResult(self.fr_token()))
-                .field("dpcm_token", &support::DebugSyntaxResult(self.dpcm_token()))
-                .field("dpi_token", &support::DebugSyntaxResult(self.dpi_token()))
-                .field("dppx_token", &support::DebugSyntaxResult(self.dppx_token()))
+                .field("unit", &support::DebugSyntaxResult(self.unit()))
                 .finish()
         } else {
             f.debug_struct("CssDistanceUnit").finish()
@@ -17769,6 +17508,56 @@ impl From<CssParenthesizedExpression> for SyntaxNode {
 }
 impl From<CssParenthesizedExpression> for SyntaxElement {
     fn from(n: CssParenthesizedExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPercentSign {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PERCENT_SIGN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PERCENT_SIGN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPercentSign {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPercentSign")
+                .field(
+                    "percent_token",
+                    &support::DebugSyntaxResult(self.percent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPercentSign").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssPercentSign> for SyntaxNode {
+    fn from(n: CssPercentSign) -> Self {
+        n.syntax
+    }
+}
+impl From<CssPercentSign> for SyntaxElement {
+    fn from(n: CssPercentSign) -> Self {
         n.syntax.into()
     }
 }
@@ -23537,27 +23326,27 @@ impl From<CssDistanceUnit> for AnyCssAttrUnit {
         Self::CssDistanceUnit(node)
     }
 }
-impl From<CssPercentage> for AnyCssAttrUnit {
-    fn from(node: CssPercentage) -> Self {
-        Self::CssPercentage(node)
+impl From<CssPercentSign> for AnyCssAttrUnit {
+    fn from(node: CssPercentSign) -> Self {
+        Self::CssPercentSign(node)
     }
 }
 impl AstNode for AnyCssAttrUnit {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAttrUnit::KIND_SET
         .union(CssDistanceUnit::KIND_SET)
-        .union(CssPercentage::KIND_SET);
+        .union(CssPercentSign::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_ATTR_UNIT | CSS_DISTANCE_UNIT | CSS_PERCENTAGE
+            CSS_BOGUS_ATTR_UNIT | CSS_DISTANCE_UNIT | CSS_PERCENT_SIGN
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_ATTR_UNIT => Self::CssBogusAttrUnit(CssBogusAttrUnit { syntax }),
             CSS_DISTANCE_UNIT => Self::CssDistanceUnit(CssDistanceUnit { syntax }),
-            CSS_PERCENTAGE => Self::CssPercentage(CssPercentage { syntax }),
+            CSS_PERCENT_SIGN => Self::CssPercentSign(CssPercentSign { syntax }),
             _ => return None,
         };
         Some(res)
@@ -23566,14 +23355,14 @@ impl AstNode for AnyCssAttrUnit {
         match self {
             Self::CssBogusAttrUnit(it) => it.syntax(),
             Self::CssDistanceUnit(it) => it.syntax(),
-            Self::CssPercentage(it) => it.syntax(),
+            Self::CssPercentSign(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusAttrUnit(it) => it.into_syntax(),
             Self::CssDistanceUnit(it) => it.into_syntax(),
-            Self::CssPercentage(it) => it.into_syntax(),
+            Self::CssPercentSign(it) => it.into_syntax(),
         }
     }
 }
@@ -23582,7 +23371,7 @@ impl std::fmt::Debug for AnyCssAttrUnit {
         match self {
             Self::CssBogusAttrUnit(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDistanceUnit(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssPercentage(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssPercentSign(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -23591,7 +23380,7 @@ impl From<AnyCssAttrUnit> for SyntaxNode {
         match n {
             AnyCssAttrUnit::CssBogusAttrUnit(it) => it.into_syntax(),
             AnyCssAttrUnit::CssDistanceUnit(it) => it.into_syntax(),
-            AnyCssAttrUnit::CssPercentage(it) => it.into_syntax(),
+            AnyCssAttrUnit::CssPercentSign(it) => it.into_syntax(),
         }
     }
 }
@@ -31646,6 +31435,11 @@ impl std::fmt::Display for CssParameter {
     }
 }
 impl std::fmt::Display for CssParenthesizedExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPercentSign {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

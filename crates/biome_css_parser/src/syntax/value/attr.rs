@@ -1,11 +1,13 @@
 use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
+use biome_parser::TokenSet;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::token_set;
 use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
@@ -14,6 +16,59 @@ use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_expression;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
+
+const CSS_DISTANCE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set![
+    T![%],
+    T![cap],
+    T![ch],
+    T![em],
+    T![ex],
+    T![ic],
+    T![lh],
+    T![rcap],
+    T![rch],
+    T![rem],
+    T![rex],
+    T![ric],
+    T![rlh],
+    T![dvh],
+    T![dvw],
+    T![lvh],
+    T![lvw],
+    T![svh],
+    T![svw],
+    T![vb],
+    T![vh],
+    T![vi],
+    T![vmax],
+    T![vmin],
+    T![vw],
+    T![cqb],
+    T![cqh],
+    T![cqi],
+    T![cqmax],
+    T![cqmin],
+    T![cqw],
+    T![cm],
+    T![in],
+    T![mm],
+    T![pc],
+    T![pt],
+    T![px],
+    T![q],
+    T![deg],
+    T![grad],
+    T![rad],
+    T![turn],
+    T![ms],
+    T![s],
+    T![hz],
+    T![khz],
+    T![fr],
+    T![dpcm],
+    T![dpi],
+    T![dppx],
+];
 
 #[inline]
 pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
@@ -77,7 +132,7 @@ fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_unit(p: &mut CssParser) -> bool {
-    p.at(T![%])
+    p.at_ts(CSS_DISTANCE_UNIT_SET)
 }
 
 #[inline]
@@ -87,8 +142,14 @@ fn parse_attr_unit(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![%]);
-    Present(m.complete(p, CSS_PERCENTAGE))
+
+    if p.at(T![%]) {
+        p.bump(T![%]);
+        return Present(m.complete(p, CSS_PERCENT_SIGN));
+    }
+
+    p.bump_ts(CSS_DISTANCE_UNIT_SET);
+    Present(m.complete(p, CSS_DISTANCE_UNIT))
 }
 
 #[inline]

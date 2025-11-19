@@ -31,6 +31,8 @@ const SYNTAX_TYPE_NAME_SET: TokenSet<CssSyntaxKind> = token_set![
     T![transform_function],
 ];
 
+const SYNTAX_MULTIPLIER_SET: TokenSet<CssSyntaxKind> = token_set![T![#], T![+]];
+
 #[inline]
 pub(crate) fn is_at_type_function(p: &mut CssParser) -> bool {
     p.at(T![type]) && p.nth_at(1, T!['('])
@@ -61,10 +63,7 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_syntax_type(p) {
-        // let m = p.start();
-        let list = SyntaxComponentList.parse_list(p);
-        dbg!(list);
-        // return Present(m.complete(p, CSS_SYNTAX_COMPONENT_LIST));
+        return Present(SyntaxComponentList.parse_list(p));
     }
 
     if is_at_string(p) {
@@ -80,7 +79,7 @@ fn parse_syntax_component(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     parse_any_syntax_single_component(p).ok();
-    // parse_syntax_multiplier(p).ok();
+    parse_syntax_multiplier(p).ok();
 
     Present(m.complete(p, CSS_SYNTAX_COMPONENT))
 }
@@ -97,9 +96,19 @@ fn parse_any_syntax_single_component(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_syntax_multiplier(p: &mut CssParser) -> bool {
+    p.at_ts(SYNTAX_MULTIPLIER_SET)
+}
+
+#[inline]
 fn parse_syntax_multiplier(p: &mut CssParser) -> ParsedSyntax {
-    // todo: guard
-    Absent
+    if !is_at_syntax_multiplier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(SYNTAX_MULTIPLIER_SET);
+    Present(m.complete(p, CSS_SYNTAX_MULTIPLIER))
 }
 
 #[inline]
