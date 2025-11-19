@@ -17,20 +17,23 @@ use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
 
+/// https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#distance_units
 const CSS_DISTANCE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set![
-    T![%],
+    // local font-relative units
     T![cap],
     T![ch],
     T![em],
     T![ex],
     T![ic],
     T![lh],
+    // root font-relative units
     T![rcap],
     T![rch],
     T![rem],
     T![rex],
     T![ric],
     T![rlh],
+    // viewport units
     T![dvh],
     T![dvw],
     T![lvh],
@@ -43,12 +46,14 @@ const CSS_DISTANCE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set![
     T![vmax],
     T![vmin],
     T![vw],
+    // container units
     T![cqb],
     T![cqh],
     T![cqi],
     T![cqmax],
     T![cqmin],
     T![cqw],
+    // absolute length units
     T![cm],
     T![in],
     T![mm],
@@ -56,15 +61,19 @@ const CSS_DISTANCE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set![
     T![pt],
     T![px],
     T![q],
+    // angle units
     T![deg],
     T![grad],
     T![rad],
     T![turn],
+    // time units
     T![ms],
     T![s],
     T![hz],
     T![khz],
+    // flex units
     T![fr],
+    // resolution units
     T![dpcm],
     T![dpi],
     T![dppx],
@@ -133,7 +142,7 @@ fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_unit(p: &mut CssParser) -> bool {
-    p.at_ts(CSS_DISTANCE_UNIT_SET)
+    p.at(T![%]) || p.at_ts(CSS_DISTANCE_UNIT_SET)
 }
 
 #[inline]
@@ -155,7 +164,7 @@ fn parse_attr_unit(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_fallback_value(p: &mut CssParser) -> bool {
-    p.at(T![,]) // && p.nth_at(1, T![ident])
+    p.at(T![,])
 }
 
 #[inline]
