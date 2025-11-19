@@ -18,7 +18,7 @@ instanceof Promise
 ## Registered types
 
 ```
-Global TypeId(0) => value: value
+Global TypeId(0) => string: value
 
 Global TypeId(1) => Call unresolved reference "resolve" (scope ID: 0)(Global TypeId(0))
 
