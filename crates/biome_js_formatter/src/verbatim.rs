@@ -117,7 +117,7 @@ impl Format<JsFormatContext> for FormatJsVerbatimNode<'_> {
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            self.node.text_trimmed_range().start(),
+            Some(self.node.text_trimmed_range().start()),
         )
         .fmt(f)?;
 

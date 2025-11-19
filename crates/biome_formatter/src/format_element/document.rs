@@ -9,7 +9,6 @@ use crate::{
     IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
 };
 use crate::{format, write};
-use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
 
@@ -311,25 +310,13 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             let new_element = match element {
                                 // except for token because source_position is unknown
                                 FormatElement::Token { .. } => element.clone(),
-                                FormatElement::Text {
-                                    text,
-                                    source_position,
-                                } => {
+                                FormatElement::Text { text } => {
                                     let text = text.to_string().replace('"', "\\\"");
-                                    FormatElement::Text {
-                                        text: text.into(),
-                                        source_position: *source_position,
-                                    }
+                                    FormatElement::Text { text: text.into() }
                                 }
-                                FormatElement::LocatedTokenText {
-                                    slice,
-                                    source_position,
-                                } => {
+                                FormatElement::LocatedTokenText { slice } => {
                                     let text = slice.to_string().replace('"', "\\\"");
-                                    FormatElement::Text {
-                                        text: text.into(),
-                                        source_position: *source_position,
-                                    }
+                                    FormatElement::Text { text: text.into() }
                                 }
                                 _ => unreachable!(),
                             };
@@ -362,6 +349,13 @@ impl Format<IrFormatContext> for &[FormatElement] {
                 },
                 FormatElement::ExpandParent => {
                     write!(f, [token("expand_parent")])?;
+                }
+
+                FormatElement::SourcePosition(position) => {
+                    write!(
+                        f,
+                        [text(&std::format!("source_position({:?})", position), None),]
+                    )?;
                 }
 
                 FormatElement::LineSuffixBoundary => {
@@ -398,7 +392,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             write!(
                                 f,
                                 [
-                                    text(&std::format!("<interned {index}>"), TextSize::default()),
+                                    text(&std::format!("<interned {index}>"), None),
                                     space(),
                                     &interned.deref(),
                                 ]
@@ -407,10 +401,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         Some(reference) => {
                             write!(
                                 f,
-                                [text(
-                                    &std::format!("<ref interned *{reference}>"),
-                                    TextSize::default()
-                                )]
+                                [text(&std::format!("<ref interned *{reference}>"), None)]
                             )?;
                         }
                     }
@@ -430,10 +421,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                     f,
                                     [
                                         token("<END_TAG_WITHOUT_START<"),
-                                        text(
-                                            &std::format!("{:?}", tag.kind()),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("{:?}", tag.kind()), None),
                                         token(">>"),
                                     ]
                                 )?;
@@ -448,12 +436,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                         token(")"),
                                         soft_line_break_or_space(),
                                         token("ERROR<START_END_TAG_MISMATCH<start: "),
-                                        text(&std::format!("{start_kind:?}"), TextSize::default()),
+                                        text(&std::format!("{start_kind:?}"), None),
                                         token(", end: "),
-                                        text(
-                                            &std::format!("{:?}", tag.kind()),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("{:?}", tag.kind()), None),
                                         token(">>")
                                     ]
                                 )?;
@@ -485,7 +470,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("align("),
-                                    text(&count.to_string(), TextSize::default()),
+                                    text(&count.to_string(), None),
                                     token(","),
                                     space(),
                                 ]
@@ -507,10 +492,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 write!(
                                     f,
                                     [
-                                        text(
-                                            &std::format!("\"{group_id:?}\""),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("\"{group_id:?}\""), None),
                                         token(","),
                                         space(),
                                     ]
@@ -533,7 +515,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("indent_if_group_breaks("),
-                                    text(&std::format!("\"{id:?}\""), TextSize::default()),
+                                    text(&std::format!("\"{id:?}\""), None),
                                     token(","),
                                     space(),
                                 ]
@@ -554,10 +536,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 write!(
                                     f,
                                     [
-                                        text(
-                                            &std::format!("\"{group_id:?}\""),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("\"{group_id:?}\""), None),
                                         token(","),
                                         space(),
                                     ]
@@ -570,7 +549,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("label("),
-                                    text(&std::format!("\"{label_id:?}\""), TextSize::default()),
+                                    text(&std::format!("\"{label_id:?}\""), None),
                                     token(","),
                                     space(),
                                 ]
@@ -618,10 +597,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     ContentArrayEnd,
                     token(")"),
                     soft_line_break_or_space(),
-                    text(
-                        &std::format!("<START_WITHOUT_END<{top:?}>>"),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("<START_WITHOUT_END<{top:?}>>"), None),
                 ]
             )?;
         }
@@ -791,7 +767,6 @@ impl FormatElements for [FormatElement] {
 mod tests {
     use biome_js_syntax::JsSyntaxKind;
     use biome_js_syntax::JsSyntaxToken;
-    use biome_rowan::TextSize;
 
     use crate::SimpleFormatContext;
     use crate::prelude::*;
@@ -925,14 +900,12 @@ mod tests {
     fn escapes_quotes() {
         let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\"bar\"", [], []);
         let token_text = FormatElement::LocatedTokenText {
-            source_position: TextSize::default(),
             slice: token.token_text(),
         };
 
         let mut document = Document::from(vec![
             FormatElement::Text {
                 text: "\"foo\"".into(),
-                source_position: TextSize::default(),
             },
             token_text,
         ]);

@@ -5,7 +5,7 @@ use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     TransformSourceMap,
 };
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Default)]
 struct FormatSemanticModelOptions;
@@ -92,7 +92,7 @@ impl Format<FormatSemanticModelContext> for Rule {
             [
                 text(
                     self.node().syntax().text_trimmed().into_text().text(),
-                    self.node().syntax().text_trimmed_range().start()
+                    Some(self.node().syntax().text_trimmed_range().start())
                 ),
                 token(":"),
                 space(),
@@ -108,13 +108,13 @@ impl Format<FormatSemanticModelContext> for Selector {
         write!(
             f,
             [
-                text(self.text().into_text().text(), self.range().start()),
+                text(self.text().into_text().text(), Some(self.range().start())),
                 token(":"),
                 space(),
                 &self.specificity(),
                 space(),
                 token(" @ "),
-                text(range.as_str(), TextSize::default()),
+                text(range.as_str(), None),
             ]
         )
     }
@@ -126,13 +126,13 @@ impl Format<FormatSemanticModelContext> for Specificity {
             f,
             [
                 token("("),
-                text(self.0.to_string().as_str(), TextSize::default()),
+                text(self.0.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.1.to_string().as_str(), TextSize::default()),
+                text(self.1.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.2.to_string().as_str(), TextSize::default()),
+                text(self.2.to_string().as_str(), None),
                 token(")")
             ]
         )
@@ -141,7 +141,6 @@ impl Format<FormatSemanticModelContext> for Specificity {
 
 #[cfg(test)]
 mod tests {
-
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
 

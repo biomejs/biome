@@ -1147,7 +1147,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
 ///         write!(f, [
 ///             hard_line_break(),
-///             text(&self.0, TextSize::from(0)),
+///             text(&self.0, None),
 ///             hard_line_break(),
 ///         ])
 ///     }
