@@ -866,7 +866,7 @@
 					]
 				},
 				"noInvalidUseBeforeDeclaration": {
-					"description": "Disallow the use of variables and function parameters before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
+					"description": "Disallow the use of variables, function parameters, classes, and enums before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidUseBeforeDeclarationConfiguration" },
 						{ "type": "null" }
@@ -4334,6 +4334,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSyncScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSyncScriptsOptions" }
+			]
+		},
+		"NoSyncScriptsOptions": { "type": "object", "additionalProperties": false },
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4995,6 +5002,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVIfWithVForConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVIfWithVForOptions" }
+			]
+		},
+		"NoVueVIfWithVForOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5118,6 +5135,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSyncScripts": {
+					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAttribute": {
 					"description": "Disallow unknown DOM properties.\nSee https://biomejs.dev/linter/rules/no-unknown-attribute",
 					"anyOf": [
@@ -5188,6 +5212,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueVIfWithVFor": {
+					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -5231,6 +5262,13 @@
 					"description": "Enforce types in functions, methods, variables, and parameters.\nSee https://biomejs.dev/linter/rules/use-explicit-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExplicitTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useFind": {
+					"description": "Enforce the use of Array.prototype.find() over Array.prototype.filter() followed by [0] when looking for a single result.\nSee https://biomejs.dev/linter/rules/use-find",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseFindConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5280,6 +5318,13 @@
 					"description": "Enforce specific order of Vue compiler macros.\nSee https://biomejs.dev/linter/rules/use-vue-define-macros-order",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueDefineMacrosOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueHyphenatedAttributes": {
+					"description": "Enforce hyphenated (kebab-case) attribute names in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueHyphenatedAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5753,10 +5798,70 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleDomain": {
+			"description": "Rule domains",
+			"oneOf": [
+				{
+					"description": "React library rules",
+					"type": "string",
+					"const": "react"
+				},
+				{ "description": "Testing rules", "type": "string", "const": "test" },
+				{
+					"description": "Solid.js framework rules",
+					"type": "string",
+					"const": "solid"
+				},
+				{
+					"description": "Next.js framework rules",
+					"type": "string",
+					"const": "next"
+				},
+				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"const": "qwik"
+				},
+				{
+					"description": "Vue.js framework rules",
+					"type": "string",
+					"const": "vue"
+				},
+				{
+					"description": "For rules that require querying multiple files inside a project",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"const": "tailwind"
+				}
+			]
+		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Enables only the recommended rules for this domain",
+					"type": "string",
+					"const": "recommended"
+				}
+			]
+		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/definitions/RuleDomain" }
+			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
+			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -7485,6 +7590,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSyncScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSyncScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTemplateCurlyInStringOptions": {
 			"type": "object",
 			"properties": {
@@ -8083,6 +8197,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueVIfWithVForOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVIfWithVForOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoWithOptions": {
 			"type": "object",
 			"properties": {
@@ -8514,6 +8637,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseFilenamingConventionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseFindOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseFindOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9268,6 +9400,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueDefineMacrosOrderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueHyphenatedAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueHyphenatedAttributesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11345,6 +11487,13 @@
 			},
 			"additionalProperties": false
 		},
+		"UseFindConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseFindOptions" }
+			]
+		},
+		"UseFindOptions": { "type": "object", "additionalProperties": false },
 		"UseFlatMapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12238,6 +12387,32 @@
 					"description": "The order of the Vue define macros.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueHyphenatedAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueHyphenatedAttributesOptions" }
+			]
+		},
+		"UseVueHyphenatedAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "List of attribute names to ignore when checking for hyphenated attributes.",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" },
+					"uniqueItems": true
+				},
+				"ignoreTags": {
+					"description": "List of HTML tags to ignore when checking for hyphenated attributes.",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" },
+					"uniqueItems": true
 				}
 			},
 			"additionalProperties": false

@@ -71,7 +71,7 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => value: foo
+Module TypeId(0) => string: foo
 
 Module TypeId(1) => unknown
 

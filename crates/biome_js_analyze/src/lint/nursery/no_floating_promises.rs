@@ -292,10 +292,10 @@ impl Rule for NoFloatingPromises {
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
                         make::token(JsSyntaxKind::AWAIT_KW)
                             .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        expression.clone().trim_leading_trivia()?,
+                        expression.clone().trim_comments_and_trivia()?,
                     ));
 
-                mutation.replace_node(expression, await_expression);
+                mutation.replace_node_transfer_trivia(expression, await_expression);
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),

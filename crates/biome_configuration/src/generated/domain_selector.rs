@@ -8,6 +8,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("nursery", "noNextAsyncClientComponent"),
+        RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),
         RuleFilter::Rule("performance", "useGoogleFontPreconnect"),
@@ -30,6 +31,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
+        RuleFilter::Rule("nursery", "useFind"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -54,6 +56,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
         RuleFilter::Rule("nursery", "noReactForwardRef"),
+        RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("nursery", "noUnknownAttribute"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),

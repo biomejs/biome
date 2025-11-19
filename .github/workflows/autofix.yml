@@ -1,6 +1,7 @@
 name: autofix.ci # needed to securely identify the workflow
 
 on:
+  merge_group:
   pull_request:
     branches:
       - main

@@ -46,7 +46,7 @@ Module TypeId(3) => Module(0) TypeId(2).initialise
 
 Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
 
-Module TypeId(5) => value: foo
+Module TypeId(5) => string: foo
 
 Module TypeId(6) => Module(0) TypeId(10)
 

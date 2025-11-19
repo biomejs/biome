@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoForIn {
-        version: "next",
+        version: "2.3.6",
         name: "noForIn",
         language: "js",
         recommended: false,
