@@ -24,7 +24,7 @@ use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, js_module_info::JsModuleVisitor,
 };
 
-pub(crate) use fs_proxy::ModuleGraphFsProxy;
+pub use fs_proxy::ModuleGraphFsProxy;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
     "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",

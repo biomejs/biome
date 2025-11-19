@@ -1,0 +1,52 @@
+{
+  "name": "@repo/api",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    ".env.*"
+  ],
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "check-biome": "biome check",
+    "check-circular": "madge --circular --extensions ts ./src --ts-config ./tsconfig.json",
+    "test": "vitest",
+    "build": "tsdown",
+    "clean": "del-cli dist isolate",
+    "coverage": "vitest run --coverage",
+    "deploy": "firebase deploy --project demo-mono-ts --only functions",
+    "emulate": "firebase emulators:start --project demo-mono-ts --only functions"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/functions-framework": "^4.0.0",
+    "@repo/common": "workspace:*",
+    "@repo/core": "workspace:*",
+    "@typed-firestore/server": "2.0.0",
+    "body-parser": "^2.2.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.3.0",
+    "nocache": "^4.0.0",
+    "remeda": "^2.20.0",
+    "source-map-support": "^0.5.21",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@codecompose/typescript-config": "^2.2.0",
+    "@types/body-parser": "^1.19.5",
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.3.0",
+    "@types/source-map-support": "^0.5.10",
+    "del-cli": "^6.0.0",
+    "madge": "^8.0.0",
+    "tsdown": "^0.14.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.4"
+  }
+}

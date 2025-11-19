@@ -177,7 +177,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Re-exports are tracked in this map as well. The exception is "blanket"
     /// re-exports, such as `export * from "other-module"`. Those are tracked in
-    /// [Self::forwarding_exports] instead.
+    /// [Self::blanket_reexports] instead.
     pub exports: Exports,
 
     /// Re-exports that apply to all symbols from another module, without

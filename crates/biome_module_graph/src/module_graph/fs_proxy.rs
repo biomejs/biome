@@ -5,7 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use super::ModuleGraph;
 
-pub(crate) struct ModuleGraphFsProxy<'a> {
+pub struct ModuleGraphFsProxy<'a> {
     fs: &'a dyn FsWithResolverProxy,
     module_graph: &'a ModuleGraph,
     project_layout: &'a ProjectLayout,

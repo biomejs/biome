@@ -9,16 +9,19 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
+use biome_js_parser::{JsParserOptions, parse};
+use biome_js_syntax::{AnyJsExpression, AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource};
 use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport, ModuleGraph,
-    ModuleResolver, ResolvedPath,
+    ModuleGraphFsProxy, ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
+use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -120,6 +123,24 @@ fn get_fixtures_path() -> Utf8PathBuf {
     path.join("crates/biome_module_graph/tests/fixtures")
 }
 
+fn insert_node_manifest(
+    fs: &impl FileSystem,
+    project_layout: &ProjectLayout,
+    package_path: Utf8PathBuf,
+) {
+    let package_json_path = package_path.join("package.json");
+    project_layout.insert_node_manifest(package_path, {
+        deserialize_from_json_str::<PackageJson>(
+            &fs.read_file_from_path(&package_json_path)
+                .expect("package.json must be readable"),
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .into_deserialized()
+        .expect("package.json must parse")
+    });
+}
+
 #[test]
 fn test_resolve_relative_import() {
     let (fs, project_layout) = create_test_project_layout();
@@ -205,46 +226,13 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     let fs = OsFileSystem::new(fixtures_path.clone());
 
     let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(format!("{fixtures_path}/frontend").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/frontend/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    project_layout.insert_node_manifest(format!("{fixtures_path}/shared").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/shared/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    project_layout.insert_node_manifest(
-        format!("{fixtures_path}/frontend/node_modules/shared").into(),
-        {
-            let path = Utf8PathBuf::from(format!(
-                "{fixtures_path}/frontend/node_modules/shared/package.json"
-            ));
-            deserialize_from_json_str::<PackageJson>(
-                &fs.read_file_from_path(&path)
-                    .expect("package.json must be readable"),
-                JsonParserOptions::default(),
-                "package.json",
-            )
-            .into_deserialized()
-            .expect("package.json must parse")
-        },
+    insert_node_manifest(&fs, &project_layout, fixtures_path.join("frontend"));
+    insert_node_manifest(
+        &fs,
+        &project_layout,
+        fixtures_path.join("frontend/node_modules/shared"),
     );
+    insert_node_manifest(&fs, &project_layout, fixtures_path.join("shared"));
 
     let added_paths = [
         BiomePath::new(format!("{fixtures_path}/frontend/src/bar.ts")),
@@ -2129,6 +2117,69 @@ fn test_resolve_swr_types() {
     assert!(mutate_result_ty.is_promise_instance());
 }
 
+#[test]
+fn test_resolve_type_from_symlinked_pnpm_dependency_in_monorepo() {
+    let fixtures_path = get_fixtures_path().join("pnpm-mono");
+
+    let fs = OsFileSystem::new(fixtures_path.clone());
+
+    let server_package_path = fixtures_path.join("node_modules/.pnpm/@typed-firestore+server@2.0.0_firebase-admin@13.4.0_encoding@0.1.13__firebase-functions_8d5bf6c1ffe6eb686c52361f663d4298/node_modules/@typed-firestore/server");
+
+    let project_layout = ProjectLayout::default();
+    insert_node_manifest(&fs, &project_layout, fixtures_path.join("services/api"));
+    insert_node_manifest(&fs, &project_layout, server_package_path.clone());
+
+    let added_paths = [
+        BiomePath::new(server_package_path.join("dist/documents/get-document.d.ts")),
+        BiomePath::new(server_package_path.join("dist/documents/index.d.ts")),
+        BiomePath::new(server_package_path.join("dist/index.d.ts")),
+        BiomePath::new(server_package_path.join("dist/index.js")),
+        BiomePath::new(fixtures_path.join("services/api/src/index.ts")),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    // First verify the resolution works.
+    assert_eq!(
+        resolve(
+            "@typed-firestore/server",
+            &fixtures_path.join("services/api"),
+            &ModuleGraphFsProxy::new(&fs, &module_graph, &project_layout),
+            &options
+        ),
+        Ok(server_package_path.join("dist/index.d.ts"))
+    );
+
+    // Now grab the index module.
+    let index_module = module_graph
+        .module_info_for_path(&fixtures_path.join("services/api/src/index.ts"))
+        .expect("module must exist");
+
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        Arc::new(module_graph),
+    ));
+
+    // And verify the type of the `getDocument` import.
+    let get_document_id = resolver
+        .resolve_type_of(&Text::new_static("getDocument"), ScopeId::GLOBAL)
+        .expect("getDocument binding not found");
+
+    let get_document_ty = resolver.resolved_type_for_id(get_document_id);
+    let _get_document_ty_string = format!("{:?}", get_document_ty.deref()); // for debugging
+    assert!(get_document_ty.is_function_with_return_type(|ty| ty.is_promise_instance()));
+}
+
 fn find_files_recursively_in_directory(
     directory: &Utf8Path,
     predicate: impl Fn(&Utf8Path) -> bool,
@@ -2139,4 +2190,113 @@ fn find_files_recursively_in_directory(
         .filter_map(|entry| Utf8Path::from_path(entry.path()).map(Utf8Path::to_path_buf))
         .filter(|path| predicate(path))
         .collect()
+}
+
+#[test]
+fn test_resolve_cors_call_expression() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/cors.ts".into(),
+        r#"
+        /// <reference types="node" />
+
+import { IncomingHttpHeaders } from "http";
+
+type StaticOrigin = boolean | string | RegExp | Array<boolean | string | RegExp>;
+
+type CustomOrigin = (
+    requestOrigin: string | undefined,
+    callback: (err: Error | null, origin?: StaticOrigin) => void,
+) => void;
+
+declare namespace e {
+    interface CorsRequest {
+        method?: string | undefined;
+        headers: IncomingHttpHeaders;
+    }
+    interface CorsOptions {
+        /**
+         * @default '*'
+         */
+        origin?: StaticOrigin | CustomOrigin | undefined;
+        /**
+         * @default 'GET,HEAD,PUT,PATCH,POST,DELETE'
+         */
+        methods?: string | string[] | undefined;
+        allowedHeaders?: string | string[] | undefined;
+        exposedHeaders?: string | string[] | undefined;
+        credentials?: boolean | undefined;
+        maxAge?: number | undefined;
+        /**
+         * @default false
+         */
+        preflightContinue?: boolean | undefined;
+        /**
+         * @default 204
+         */
+        optionsSuccessStatus?: number | undefined;
+    }
+    type CorsOptionsDelegate<T extends CorsRequest = CorsRequest> = (
+        req: T,
+        callback: (err: Error | null, options?: CorsOptions) => void,
+    ) => void;
+}
+
+declare function e<T extends e.CorsRequest = e.CorsRequest>(
+    options?: e.CorsOptions | e.CorsOptionsDelegate<T>,
+): (
+    req: T,
+    res: {
+        statusCode?: number | undefined;
+        setHeader(key: string, value: string): any;
+        end(): any;
+    },
+    next: (err?: any) => any,
+) => void;
+export = e;
+"#,
+    );
+
+    const INDEX_CODE: &str = "import cors from './cors';\ncors();\n";
+
+    fs.insert("/src/index.ts".into(), INDEX_CODE);
+
+    let added_paths = [
+        BiomePath::new("/src/cors.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, module_graph));
+
+    let parsed = parse(INDEX_CODE, JsFileSource::ts(), JsParserOptions::default());
+    assert!(parsed.diagnostics().is_empty());
+    let expr = get_expression(&parsed.tree());
+
+    let result_ty = resolver.resolved_type_of_expression(&expr);
+    let _result_string_ty = format!("{result_ty:?}"); // for debugging
+    assert!(result_ty.is_function_with_return_type(|ty| ty.is_void_keyword()));
+}
+
+/// Returns the first top-level expression found within the given `root`.
+fn get_expression(root: &AnyJsRoot) -> AnyJsExpression {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => expr.expression().ok(),
+            _ => None,
+        })
+        .expect("cannot find expression")
 }
