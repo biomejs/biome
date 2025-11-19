@@ -1,35 +1,36 @@
-use crate::JsRuleAction;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsxAttribute, JsxAttributeList, jsx_ext::AnyJsxElement};
+use biome_html_syntax::HtmlAttribute;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_access_key::NoAccessKeyOptions;
 
+use crate::HtmlRuleAction;
+
 declare_lint_rule! {
-    /// Enforce that the `accessKey` attribute is not used on any HTML element.
+    /// Enforce that the `accesskey` attribute is not used on any HTML element.
     ///
-    /// The `accessKey` assigns a keyboard shortcut to the current element. However, the `accessKey` value
+    /// The `accesskey` assigns a keyboard shortcut to the current element. However, the `accesskey` value
     /// can conflict with keyboard commands used by screen readers and keyboard-only users, which leads to
     /// inconsistent keyboard actions across applications. To avoid accessibility complications,
-    /// this rule suggests users remove the `accessKey` attribute on elements.
+    /// this rule suggests users remove the `accesskey` attribute on elements.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
-    /// <input type="submit" accessKey="s" value="Submit" />
+    /// ```html,expect_diagnostic
+    /// <input type="submit" accesskey="s" value="Submit" />
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <a href="https://webaim.org/" accessKey="w">WebAIM.org</a>
+    /// ```html,expect_diagnostic
+    /// <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <button accessKey="n">Next</button>
+    /// ```html,expect_diagnostic
+    /// <button accesskey="n">Next</button>
     /// ```
     ///
     /// ## Resources
@@ -38,9 +39,9 @@ declare_lint_rule! {
     /// - [MDN `accesskey` documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/accesskey)
     ///
     pub NoAccessKey {
-        version: "1.0.0",
+        version: "next",
         name: "noAccessKey",
-        language: "jsx",
+        language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-access-key").same()],
         recommended: true,
         severity: Severity::Error,
@@ -49,33 +50,18 @@ declare_lint_rule! {
 }
 
 impl Rule for NoAccessKey {
-    type Query = Ast<JsxAttribute>;
+    type Query = Ast<HtmlAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoAccessKeyOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.name_value_token().ok()?.text_trimmed() != "accessKey" {
-            return None;
+        if is_accesskey_attribute(node) {
+            return Some(());
         }
 
-        let element = node
-            .parent::<JsxAttributeList>()
-            .and_then(|list| list.parent::<AnyJsxElement>())?;
-
-        // We do not know if the `accessKey` prop is used for HTML elements
-        // or for user-created React components
-        if element.is_custom_component() {
-            return None;
-        }
-
-        let attribute_value = node.initializer()?.value().ok()?;
-        if attribute_value.is_value_null_or_undefined() {
-            return None;
-        }
-
-        Some(())
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -85,27 +71,34 @@ impl Rule for NoAccessKey {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "Avoid the "<Emphasis>"accessKey"</Emphasis>" attribute to reduce inconsistencies between \
+                    "Avoid the "<Emphasis>"accesskey"</Emphasis>" attribute to reduce inconsistencies between \
                     keyboard shortcuts and screen reader keyboard commands."
                 },
             ).note(
                 markup! {
-                    "Assigning keyboard shortcuts using the "<Emphasis>"accessKey"</Emphasis>" attribute leads to \
+                    "Assigning keyboard shortcuts using the "<Emphasis>"accesskey"</Emphasis>" attribute leads to \
                     inconsistent keyboard actions across applications."
                 },
             )
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(node.clone());
-        Some(JsRuleAction::new(
+        Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }.to_owned(),
+            markup! { "Remove the "<Emphasis>"accesskey"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }
+}
+
+fn is_accesskey_attribute(node: &HtmlAttribute) -> bool {
+    node.name().is_ok_and(|name| {
+        name.value_token()
+            .is_ok_and(|value_token| value_token.text_trimmed() == "accesskey")
+    })
 }

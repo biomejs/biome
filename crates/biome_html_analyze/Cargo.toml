@@ -19,6 +19,7 @@ biome_diagnostics        = { workspace = true }
 biome_html_factory       = { workspace = true }
 biome_html_syntax        = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 schemars                 = { workspace = true, optional = true }
