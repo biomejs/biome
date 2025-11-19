@@ -16,7 +16,7 @@ interface _TestInterface {
 
 # Diagnostics
 ```
-sortable_after_non_sortable.ts:1:1 lint/nursery/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━
+sortable_after_non_sortable.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━
 
   i The interface members are not sorted by key.
   

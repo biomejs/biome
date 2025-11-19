@@ -451,7 +451,7 @@ pub type UseSortedClasses =
 pub type UseSortedKeys =
     <assist::source::use_sorted_keys::UseSortedKeys as biome_analyze::Rule>::Options;
 pub type UseSortedInterfaceMembers =
-    <lint::nursery::use_sorted_interface_members::UseSortedInterfaceMembers as biome_analyze::Rule>::Options;
+    <assist::source::use_sorted_interface_members::UseSortedInterfaceMembers as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::suspicious::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseSymbolDescription =

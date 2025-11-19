@@ -5300,13 +5300,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useSortedInterfaceMembers": {
-					"description": "Sort interface members by key.\nSee https://biomejs.dev/linter/rules/use-sorted-interface-members",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSpread": {
 					"description": "Enforce the use of the spread operator over .apply().\nSee https://biomejs.dev/linter/rules/use-spread",
 					"anyOf": [
@@ -5786,6 +5779,14 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedAttributesOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -9211,16 +9212,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseSortedInterfaceMembersOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseSpreadOptions": {
 			"type": "object",
 			"properties": {
@@ -9711,6 +9702,13 @@
 					"description": "Enforce attribute sorting in JSX elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedAttributesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12159,8 +12157,8 @@
 		},
 		"UseSortedInterfaceMembersConfiguration": {
 			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseSortedInterfaceMembersOptions" }
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedInterfaceMembersOptions" }
 			]
 		},
 		"UseSortedInterfaceMembersOptions": {
