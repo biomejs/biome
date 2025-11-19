@@ -14,3 +14,7 @@ const Valid3 = () => {
 const Valid4 = () => {
 	return <script src="" defer />
 }
+
+const Valid5 = () => {
+	return <script src="" type="module" />
+}

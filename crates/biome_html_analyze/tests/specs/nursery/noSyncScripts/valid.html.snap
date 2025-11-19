@@ -13,4 +13,6 @@ expression: valid.html
 
 <script src="" defer></script>
 
+<script src="" type="module"></script>
+
 ```
