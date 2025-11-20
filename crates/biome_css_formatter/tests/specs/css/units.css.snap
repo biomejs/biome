@@ -27,6 +27,7 @@ info: css/units.css
   a: 5CM;
   a: 5MM;
   a: 5Q;
+  a: 5q;
   a: 5IN;
   a: 5PT;
   a: 5PC;
@@ -37,7 +38,9 @@ info: css/units.css
   a: 5S;
   a: 5MS;
   a: 5HZ;
+  a: 5hz;
   a: 5KHZ;
+  a: 5kHz;
   a: 5DPI;
   a: 5DPCM;
   a: 5DPPX;
@@ -49,6 +52,7 @@ info: css/units.css
   /* http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/ */
   a: 0\0;
 }
+
 ```
 
 
@@ -89,6 +93,7 @@ Quote style: Double Quotes
 	a: 5cm;
 	a: 5mm;
 	a: 5Q;
+	a: 5Q;
 	a: 5in;
 	a: 5pt;
 	a: 5pc;
@@ -99,6 +104,8 @@ Quote style: Double Quotes
 	a: 5s;
 	a: 5ms;
 	a: 5Hz;
+	a: 5Hz;
+	a: 5kHz;
 	a: 5kHz;
 	a: 5dpi;
 	a: 5dpcm;

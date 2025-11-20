@@ -24,7 +24,7 @@
   a: 5CM;
   a: 5MM;
   a: 5Q;
-  a: 5q;
+  b: 5q;
   a: 5IN;
   a: 5PT;
   a: 5PC;
@@ -35,9 +35,9 @@
   a: 5S;
   a: 5MS;
   a: 5hZ;
-  a: 5hz;
+  b: 5hz;
   a: 5KhZ;
-  a: 5khz;
+  b: 5khz;
   a: 5DPI;
   a: 5DPCM;
   a: 5DPPX;
