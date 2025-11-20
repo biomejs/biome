@@ -66,5 +66,5 @@ const MyComponent5 = () => {
 
 const isOpen1 = 0;
 const Component7 = () => {
-	return <Popover open={isOpen && items.length > 0} />;
+	return <Popover open={isOpen1 && items.length > 0} />;
 };

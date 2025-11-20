@@ -72,7 +72,7 @@ const MyComponent5 = () => {
 
 const isOpen1 = 0;
 const Component7 = () => {
-	return <Popover open={isOpen && items.length > 0} />;
+	return <Popover open={isOpen1 && items.length > 0} />;
 };
 
 ```
@@ -90,7 +90,7 @@ invalid.jsx:6:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
     7 │ 			{'' && <Something />}
     8 │ 			{NaN && <Something />}
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -109,7 +109,7 @@ invalid.jsx:7:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
     8 │ 			{NaN && <Something />}
     9 │ 		</>
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -128,7 +128,7 @@ invalid.jsx:8:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
      9 │ 		</>
     10 │ 	);
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -146,7 +146,7 @@ invalid.jsx:14:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     15 │ };
     16 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -164,7 +164,7 @@ invalid.jsx:18:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     19 │ };
     20 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -182,7 +182,7 @@ invalid.jsx:22:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     23 │ };
     24 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -201,7 +201,7 @@ invalid.jsx:27:9 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     28 │ 	);
     29 │ };
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -219,7 +219,7 @@ invalid.jsx:32:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     33 │ };
     34 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -237,7 +237,7 @@ invalid.jsx:36:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     37 │ };
     38 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -261,7 +261,7 @@ invalid.jsx:42:5 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     47 │ 		</>
     48 │ 	);
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -279,7 +279,7 @@ invalid.jsx:52:12 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     53 │ };
     54 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -297,7 +297,7 @@ invalid.jsx:56:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     57 │ };
     58 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -351,7 +351,7 @@ invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     65 │ };
     66 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
@@ -365,12 +365,12 @@ invalid.jsx:69:24 lint/nursery/noLeakedRender ━━━━━━━━━━━�
   
     67 │ const isOpen1 = 0;
     68 │ const Component7 = () => {
-  > 69 │ 	return <Popover open={isOpen && items.length > 0} />;
-       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 69 │ 	return <Popover open={isOpen1 && items.length > 0} />;
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     70 │ };
     71 │ 
   
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
