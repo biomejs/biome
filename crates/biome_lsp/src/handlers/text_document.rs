@@ -1,15 +1,15 @@
-use std::sync::Arc;
-
 use crate::diagnostics::LspError;
+use crate::session::ConfigurationStatus;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
-use biome_fs::BiomePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
-    ScanKind,
+    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
 };
-use tower_lsp_server::lsp_types;
+use camino::Utf8PathBuf;
+use std::sync::Arc;
+use tower_lsp_server::{UriExt, lsp_types};
 use tracing::{debug, error, field, info};
 
 /// Handler for `textDocument/didOpen` LSP notification
@@ -31,36 +31,79 @@ pub(crate) async fn did_open(
     let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
 
     let path = session.file_path(&url)?;
+
     let project_key = match session.project_for_path(&path) {
         Some(project_key) => project_key,
         None => {
             info!("No open project for path: {path:?}. Opening new project.");
-            let parent_path = BiomePath::new(
-                path.parent()
-                    .map(|parent| parent.to_path_buf())
-                    .unwrap_or_default(),
-            );
-            let result = session.workspace.open_project(OpenProjectParams {
-                path: parent_path.clone(),
-                open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
-            })?;
-            let scan_kind = if result.scan_kind.is_none() {
-                ScanKind::KnownFiles
+
+            let project_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+
+            // First check if the current file belongs to any registered workspace folder.
+            // If so, return that folder; otherwise, use the folder computed by did_open.
+            let project_path = if let Some(workspace_folders) = session.get_workspace_folders() {
+                if let Some(ws_root) = workspace_folders
+                    .iter()
+                    .filter_map(|folder| {
+                        folder.uri.to_file_path().map(|p| {
+                            Utf8PathBuf::from_path_buf(p.to_path_buf())
+                                .expect("To have a valid UTF-8 path")
+                        })
+                    })
+                    .find(|ws| project_path.starts_with(ws))
+                {
+                    ws_root
+                } else {
+                    project_path.clone()
+                }
+            } else if let Some(base_path) = session.base_path() {
+                if project_path.starts_with(&base_path) {
+                    base_path
+                } else {
+                    project_path.clone()
+                }
             } else {
-                result.scan_kind
+                project_path
             };
-            session
-                .insert_and_scan_project(result.project_key, parent_path, scan_kind)
+
+            session.set_configuration_status(ConfigurationStatus::Loading);
+            eprintln!(
+                "Loading configuration from text_document {:?}",
+                &project_path
+            );
+            if !session.has_initialized() {
+                session.load_extension_settings().await;
+            }
+            let status = session
+                .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
                 .await;
-            result.project_key
+
+            session.set_configuration_status(status);
+
+            if status.is_loaded() {
+                match session.project_for_path(&path) {
+                    Some(project_key) => project_key,
+
+                    None => {
+                        error!("Could not find project for {path}");
+
+                        return Ok(());
+                    }
+                }
+            } else {
+                error!("Configuration could not be loaded for {path}");
+
+                return Ok(());
+            }
         }
     };
 
     let is_ignored = session
         .workspace
-        .is_path_ignored(IsPathIgnoredParams {
+        .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
             features: FeaturesBuilder::new().build(),
@@ -108,7 +151,7 @@ pub(crate) async fn did_change(
         return Ok(());
     }
     let features = FeaturesBuilder::new().build();
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,

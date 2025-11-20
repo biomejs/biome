@@ -47,33 +47,15 @@ statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
 import {    something } from "file.svelte";
 statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
 import     { type     something } from "file.svelte";
 const hello  :      string      = "world";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
-import { type something } from "file.svelte";
-const hello: string = "world";
 </script>
 <div></div>"#;
 
@@ -157,6 +139,21 @@ const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
 	reallyLongAttributeName2={anotherLongValue}>
 	Hi
 </Foo>;
+"#;
+
+const SPACING_GRAPHQLS_SANITY_BEFORE: &str = r#"  scalar Time
+  scalar UUID
+
+
+ type   User   {
+  id:  UUID!
+   name: String!
+    updatedAt: Time!
+ }
+
+
+
+
 "#;
 
 const APPLY_ATTRIBUTE_POSITION_BEFORE: &str = r#"<Foo className={style}	reallyLongAttributeName1={longComplexValue}
@@ -2981,8 +2978,6 @@ fn format_svelte_implicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_implicit_js_files_write",
@@ -3041,8 +3036,6 @@ fn format_svelte_explicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_explicit_js_files_write",
@@ -3067,8 +3060,6 @@ fn format_empty_svelte_js_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, "<div></div>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3128,8 +3119,6 @@ fn format_svelte_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_files_write",
@@ -3154,8 +3143,6 @@ fn format_empty_svelte_ts_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, "<script></script>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3365,6 +3352,31 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 }
 
 #[test]
+fn can_format_graphphs_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.graphqls");
+    fs.insert(file_path.into(), SPACING_GRAPHQLS_SANITY_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "can_format_graphphs_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn applies_custom_bracket_spacing_for_graphql() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3403,7 +3415,6 @@ fn applies_custom_bracket_spacing_for_graphql() {
     ));
 }
 
-/// Change this when HTML formatting is enabled by default
 #[test]
 fn html_disabled_by_default() {
     let fs = MemoryFileSystem::default();
@@ -3419,12 +3430,6 @@ fn html_disabled_by_default() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert!(matches!(
-        result,
-        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
-    ));
-
-    assert_file_contents(&fs, file_path, "<!DOCTYPE HTML>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3502,6 +3507,67 @@ fn format_skip_parse_errors_continues_with_valid_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_skip_parse_errors_continues_with_valid_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_format_file_with_syntax_errors() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", invalid.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_file_with_syntax_errors",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_format_file_with_syntax_errors_when_flag_enabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--format-with-errors=true",
+                "--write",
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_file_with_syntax_errors_when_flag_enabled",
         fs,
         console,
         result,

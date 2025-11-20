@@ -39,7 +39,7 @@ snapshot_kind: text
   <div alt={function(e) {} } />
   <img alt={() => void 0} />
   <Img />
-  <Component>test</Compoennt>
+  <Component>test</Component>
   <img alt={alt || "Alt text" } />
   <img alt={photo.caption} />;
   <img alt={bar()} />;

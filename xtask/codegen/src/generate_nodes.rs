@@ -4,7 +4,7 @@ use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashMap;
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let (node_defs, node_boilerplate_impls): (Vec<_>, Vec<_>) = ast
@@ -427,7 +427,9 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         .find(|e| &e.name == *current_enum)
                         .is_some_and(|node| node.fields.iter().any(|field| field.is_unordered()));
 
-                    if variant_is_enum.is_some() || variant_is_dynamic {
+                    let variant_is_list = ast.is_list(current_enum);
+
+                    if variant_is_enum.is_some() || variant_is_dynamic || variant_is_list {
                         quote! {
                             #variant_name::cast(syntax)?
                         }
@@ -550,10 +552,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .map(|_| {
                     (
                         quote! {
-                            &it.syntax
+                            it.syntax()
                         },
                         quote! {
-                            it.syntax
+                            it.into_syntax()
                         },
                     )
                 })
@@ -622,7 +624,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     impl From<#name> for SyntaxNode {
                         fn from(n: #name) -> Self {
                             match n {
-                                #(#name::#all_variant_names(it) => it.into(),)*
+                                #(#name::#all_variant_names(it) => it.into_syntax(),)*
                             }
                         }
                     }
@@ -987,7 +989,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .replace("T ! [ ", "crate::T![")
         .replace(" ] )", "])");
 
-    let pretty = xtask::reformat(ast)?;
+    let pretty = xtask_glue::reformat(ast)?;
     Ok(pretty)
 }
 
@@ -1069,18 +1071,14 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
                     // last element, otherwise Rust warns about the value being unused.
                     if is_last {
                         quote! {
-                            if let Some(element) = &current_element {
-                                if #field_predicate {
-                                    slot_map[#this_field_index] = current_slot;
-                                }
+                            if let Some(element) = &current_element && #field_predicate {
+                                slot_map[#this_field_index] = current_slot;
                             }
                         }
                     } else {
                         quote! {
-                            if let Some(element) = &current_element {
-                                if #field_predicate {
-                                    slot_map[#this_field_index] = current_slot;
-                                }
+                            if let Some(element) = &current_element && #field_predicate {
+                                slot_map[#this_field_index] = current_slot;
                             }
                             current_slot += 1;
                             current_element = children.next();
@@ -1188,6 +1186,20 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
 pub fn should_token_be_quoted(token: &str) -> bool {
     matches!(
         token,
-        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_" | "__" | "`" | "```" | "{{" | "}}"
+        "$=" | "$_"
+            | "U+"
+            | "<![CDATA["
+            | "]]>"
+            | "   "
+            | "_"
+            | "__"
+            | "`"
+            | "```"
+            | "{{"
+            | "}}"
+            | "{@"
+            | "{#"
+            | "{/"
+            | "{:"
     )
 }

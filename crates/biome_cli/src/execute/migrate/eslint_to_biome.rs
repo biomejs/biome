@@ -342,10 +342,7 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options
-                            .globals
-                            .enabled()
-                            .collect::<rustc_hash::FxHashSet<_>>();
+                        let globals = language_options.globals.enabled().collect();
                         let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
@@ -356,13 +353,13 @@ impl eslint_eslint::FlatConfigData {
                         to_biome_includes(&flat_config_object.files, &flat_config_object.ignores);
                     override_pat.includes = (!includes.is_empty())
                         .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
-                    if let Some(rules) = flat_config_object.rules {
-                        if !rules.is_empty() {
-                            override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
-                                rules: Some(rules.into_biome_rules(options, &mut results)),
-                                ..Default::default()
-                            });
-                        }
+                    if let Some(rules) = flat_config_object.rules
+                        && !rules.is_empty()
+                    {
+                        override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
+                            rules: Some(rules.into_biome_rules(options, &mut results)),
+                            ..Default::default()
+                        });
                     }
                     overrides.0.push(override_pat);
                 }
@@ -481,18 +478,18 @@ fn migrate_eslint_rule(
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
         eslint_eslint::Rule::NoConsole(conf) => {
-            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.suspicious.get_or_insert_with(Default::default);
-                    if let SeverityOrGroup::Group(group) = group {
-                        group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
-                            biome_config::RuleWithFixOptions {
-                                level: severity.into(),
-                                fix: None,
-                                options: *Box::new((*rule_options).into()),
-                            },
-                        ));
-                    }
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: *Box::new((*rule_options).into()),
+                        },
+                    ));
                 }
             }
         }
@@ -512,13 +509,14 @@ fn migrate_eslint_rule(
                 });
                 let group = rules.style.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
+                    let globals = globals.collect::<FxHashMap<_, _>>();
                     group.no_restricted_globals =
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: severity.into(),
                                 options: *Box::new(
                                     no_restricted_globals::NoRestrictedGlobalsOptions {
-                                        denied_globals: globals.collect::<FxHashMap<_, _>>(),
+                                        denied_globals: (!globals.is_empty()).then_some(globals),
                                     },
                                 ),
                             },
@@ -527,69 +525,68 @@ fn migrate_eslint_rule(
             }
         }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
-            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.a11y.get_or_insert_with(Default::default);
-                    if let SeverityOrGroup::Group(group) = group {
-                        group.use_valid_aria_role =
-                            Some(biome_config::RuleFixConfiguration::WithOptions(
-                                biome_config::RuleWithFixOptions {
-                                    level: severity.into(),
-                                    fix: None,
-                                    options: *Box::new((*rule_options).into()),
-                                },
-                            ));
-                    }
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.a11y.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_valid_aria_role =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: *Box::new((*rule_options).into()),
+                            },
+                        ));
                 }
             }
         }
         eslint_eslint::Rule::TypeScriptArrayType(conf) => {
-            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.style.get_or_insert_with(Default::default);
-                    if let SeverityOrGroup::Group(group) = group {
-                        group.use_consistent_array_type =
-                            Some(biome_config::RuleFixConfiguration::WithOptions(
-                                biome_config::RuleWithFixOptions {
-                                    level: severity.into(),
-                                    fix: None,
-                                    options: rule_options.into(),
-                                },
-                            ));
-                    }
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_array_type =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: rule_options.into(),
+                            },
+                        ));
                 }
             }
         }
         eslint_eslint::Rule::TypeScriptConsistentTypeImports(conf) => {
-            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.style.get_or_insert_with(Default::default);
-                    if let SeverityOrGroup::Group(group) = group {
-                        group.use_import_type =
-                            Some(biome_config::RuleFixConfiguration::WithOptions(
-                                biome_config::RuleWithFixOptions {
-                                    level: severity.into(),
-                                    fix: None,
-                                    options: rule_options.into(),
-                                },
-                            ));
-                    }
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_import_type = Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: rule_options.into(),
+                        },
+                    ));
                 }
             }
         }
         eslint_eslint::Rule::TypeScriptExplicitMemberAccessibility(conf) => {
-            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.style.get_or_insert_with(Default::default);
-                    if let SeverityOrGroup::Group(group) = group {
-                        group.use_consistent_member_accessibility =
-                            Some(biome_config::RuleConfiguration::WithOptions(
-                                biome_config::RuleWithOptions {
-                                    level: severity.into(),
-                                    options: rule_options.into(),
-                                },
-                            ));
-                    }
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_member_accessibility =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: rule_options.into(),
+                            },
+                        ));
                 }
             }
         }
@@ -638,10 +635,10 @@ fn to_biome_includes(
         includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
     }
     if !ignores.is_empty() {
-        if includes.is_empty() {
-            if let Ok(glob) = "**".parse() {
-                includes.push(glob);
-            }
+        if includes.is_empty()
+            && let Ok(glob) = "**".parse()
+        {
+            includes.push(glob);
         }
         includes.extend(ignores.iter().filter_map(|glob| {
             // ESLint supports negation: https://eslint.org/docs/latest/use/configure/ignore#unignoring-files-and-directories

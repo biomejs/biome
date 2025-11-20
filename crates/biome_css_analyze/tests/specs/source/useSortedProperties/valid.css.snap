@@ -82,7 +82,7 @@ expression: valid.css
   color: black;
   pointer-events:·none;
   border:·1px·solid·black;
-  transition:·opactity·1s·ease;
+  transition:·opacity·1s·ease;
 }
 
 
@@ -110,4 +110,5 @@ expression: valid.css
   box-sizing: border-box;
   position-anchor: --position-anchor;
 }
+
 ```

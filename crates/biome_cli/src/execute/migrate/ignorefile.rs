@@ -80,10 +80,10 @@ mod tests {
     fn comments_and_empty_lines() {
         const IGNORE_FILE_CONTENT: &str = r#"
 # Comment 1
-# folloed by a blank line
+# followed by a blank line
 
 # Comment 2
-# folloed by a blank line (trailing space are ignored)
+# followed by a blank line (trailing spaces are ignored)
 
         "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);

@@ -104,18 +104,18 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     let mut printed_lines = false;
 
     for line_index in IntoIter::new(context_start..=context_end) {
-        if let Some(ellipsis_range) = &ellipsis_range {
-            if ellipsis_range.contains(&line_index) {
-                if *ellipsis_range.start() == line_index {
-                    for _ in 0..max_gutter_len.get() {
-                        fmt.write_str(" ")?;
-                    }
-
-                    fmt.write_markup(markup! { <Emphasis>"    ...\n"</Emphasis> })?;
-                    printed_lines = true;
+        if let Some(ellipsis_range) = &ellipsis_range
+            && ellipsis_range.contains(&line_index)
+        {
+            if *ellipsis_range.start() == line_index {
+                for _ in 0..max_gutter_len.get() {
+                    fmt.write_str(" ")?;
                 }
-                continue;
+
+                fmt.write_markup(markup! { <Emphasis>"    ...\n"</Emphasis> })?;
+                printed_lines = true;
             }
+            continue;
         }
 
         let line_start = match source_file.line_start(line_index.to_zero_indexed()) {

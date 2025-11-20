@@ -1,7 +1,9 @@
+pub(crate) mod checkstyle;
 pub(crate) mod github;
 pub(crate) mod gitlab;
 pub(crate) mod json;
 pub(crate) mod junit;
+pub(crate) mod rdjson;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 
@@ -10,7 +12,7 @@ use crate::execute::Execution;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
-use camino::Utf8PathBuf;
+use camino::Utf8Path;
 use serde::Serialize;
 use std::collections::BTreeSet;
 use std::io;
@@ -37,6 +39,7 @@ pub struct TraversalSummary {
     pub scanner_duration: Option<Duration>,
     pub errors: u32,
     pub warnings: u32,
+    pub infos: u32,
     pub skipped: usize,
     pub suggested_fixes_skipped: u32,
     pub diagnostics_not_printed: u32,
@@ -62,7 +65,7 @@ pub trait ReporterVisitor {
     fn report_handled_paths(
         &mut self,
         _evaluated_paths: BTreeSet<BiomePath>,
-        _working_directory: Option<Utf8PathBuf>,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         Ok(())
     }
@@ -73,6 +76,7 @@ pub trait ReporterVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()>;
 }
 

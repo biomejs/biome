@@ -73,7 +73,7 @@ impl BenchCase {
         content.map(|code| {
             println!("[{}] - using [{}]", filename.clone().fg(red()), path);
             Self {
-                id: filename.to_string(),
+                id: filename.clone(),
                 code,
                 path,
             }

@@ -10395,16 +10395,16 @@ impl AstNode for AnyGritCodeSnippetSource {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBacktickSnippetLiteral(it) => &it.syntax,
-            Self::GritLanguageSpecificSnippet(it) => &it.syntax,
-            Self::GritRawBacktickSnippetLiteral(it) => &it.syntax,
+            Self::GritBacktickSnippetLiteral(it) => it.syntax(),
+            Self::GritLanguageSpecificSnippet(it) => it.syntax(),
+            Self::GritRawBacktickSnippetLiteral(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBacktickSnippetLiteral(it) => it.syntax,
-            Self::GritLanguageSpecificSnippet(it) => it.syntax,
-            Self::GritRawBacktickSnippetLiteral(it) => it.syntax,
+            Self::GritBacktickSnippetLiteral(it) => it.into_syntax(),
+            Self::GritLanguageSpecificSnippet(it) => it.into_syntax(),
+            Self::GritRawBacktickSnippetLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -10420,9 +10420,9 @@ impl std::fmt::Debug for AnyGritCodeSnippetSource {
 impl From<AnyGritCodeSnippetSource> for SyntaxNode {
     fn from(n: AnyGritCodeSnippetSource) -> Self {
         match n {
-            AnyGritCodeSnippetSource::GritBacktickSnippetLiteral(it) => it.into(),
-            AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(it) => it.into(),
-            AnyGritCodeSnippetSource::GritRawBacktickSnippetLiteral(it) => it.into(),
+            AnyGritCodeSnippetSource::GritBacktickSnippetLiteral(it) => it.into_syntax(),
+            AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(it) => it.into_syntax(),
+            AnyGritCodeSnippetSource::GritRawBacktickSnippetLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -10476,18 +10476,18 @@ impl AstNode for AnyGritContainer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusContainer(it) => &it.syntax,
-            Self::GritListAccessor(it) => &it.syntax,
-            Self::GritMapAccessor(it) => &it.syntax,
-            Self::GritVariable(it) => &it.syntax,
+            Self::GritBogusContainer(it) => it.syntax(),
+            Self::GritListAccessor(it) => it.syntax(),
+            Self::GritMapAccessor(it) => it.syntax(),
+            Self::GritVariable(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusContainer(it) => it.syntax,
-            Self::GritListAccessor(it) => it.syntax,
-            Self::GritMapAccessor(it) => it.syntax,
-            Self::GritVariable(it) => it.syntax,
+            Self::GritBogusContainer(it) => it.into_syntax(),
+            Self::GritListAccessor(it) => it.into_syntax(),
+            Self::GritMapAccessor(it) => it.into_syntax(),
+            Self::GritVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -10504,10 +10504,10 @@ impl std::fmt::Debug for AnyGritContainer {
 impl From<AnyGritContainer> for SyntaxNode {
     fn from(n: AnyGritContainer) -> Self {
         match n {
-            AnyGritContainer::GritBogusContainer(it) => it.into(),
-            AnyGritContainer::GritListAccessor(it) => it.into(),
-            AnyGritContainer::GritMapAccessor(it) => it.into(),
-            AnyGritContainer::GritVariable(it) => it.into(),
+            AnyGritContainer::GritBogusContainer(it) => it.into_syntax(),
+            AnyGritContainer::GritListAccessor(it) => it.into_syntax(),
+            AnyGritContainer::GritMapAccessor(it) => it.into_syntax(),
+            AnyGritContainer::GritVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -10587,21 +10587,21 @@ impl AstNode for AnyGritDefinition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusDefinition(it) => &it.syntax,
-            Self::GritFunctionDefinition(it) => &it.syntax,
-            Self::GritJavascriptFunctionDefinition(it) => &it.syntax,
-            Self::GritPatternDefinition(it) => &it.syntax,
-            Self::GritPredicateDefinition(it) => &it.syntax,
+            Self::GritBogusDefinition(it) => it.syntax(),
+            Self::GritFunctionDefinition(it) => it.syntax(),
+            Self::GritJavascriptFunctionDefinition(it) => it.syntax(),
+            Self::GritPatternDefinition(it) => it.syntax(),
+            Self::GritPredicateDefinition(it) => it.syntax(),
             Self::AnyGritPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusDefinition(it) => it.syntax,
-            Self::GritFunctionDefinition(it) => it.syntax,
-            Self::GritJavascriptFunctionDefinition(it) => it.syntax,
-            Self::GritPatternDefinition(it) => it.syntax,
-            Self::GritPredicateDefinition(it) => it.syntax,
+            Self::GritBogusDefinition(it) => it.into_syntax(),
+            Self::GritFunctionDefinition(it) => it.into_syntax(),
+            Self::GritJavascriptFunctionDefinition(it) => it.into_syntax(),
+            Self::GritPatternDefinition(it) => it.into_syntax(),
+            Self::GritPredicateDefinition(it) => it.into_syntax(),
             Self::AnyGritPattern(it) => it.into_syntax(),
         }
     }
@@ -10621,12 +10621,12 @@ impl std::fmt::Debug for AnyGritDefinition {
 impl From<AnyGritDefinition> for SyntaxNode {
     fn from(n: AnyGritDefinition) -> Self {
         match n {
-            AnyGritDefinition::AnyGritPattern(it) => it.into(),
-            AnyGritDefinition::GritBogusDefinition(it) => it.into(),
-            AnyGritDefinition::GritFunctionDefinition(it) => it.into(),
-            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => it.into(),
-            AnyGritDefinition::GritPatternDefinition(it) => it.into(),
-            AnyGritDefinition::GritPredicateDefinition(it) => it.into(),
+            AnyGritDefinition::AnyGritPattern(it) => it.into_syntax(),
+            AnyGritDefinition::GritBogusDefinition(it) => it.into_syntax(),
+            AnyGritDefinition::GritFunctionDefinition(it) => it.into_syntax(),
+            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => it.into_syntax(),
+            AnyGritDefinition::GritPatternDefinition(it) => it.into_syntax(),
+            AnyGritDefinition::GritPredicateDefinition(it) => it.into_syntax(),
         }
     }
 }
@@ -10670,14 +10670,14 @@ impl AstNode for AnyGritLanguageDeclaration {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusLanguageDeclaration(it) => &it.syntax,
-            Self::GritLanguageDeclaration(it) => &it.syntax,
+            Self::GritBogusLanguageDeclaration(it) => it.syntax(),
+            Self::GritLanguageDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusLanguageDeclaration(it) => it.syntax,
-            Self::GritLanguageDeclaration(it) => it.syntax,
+            Self::GritBogusLanguageDeclaration(it) => it.into_syntax(),
+            Self::GritLanguageDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -10692,8 +10692,8 @@ impl std::fmt::Debug for AnyGritLanguageDeclaration {
 impl From<AnyGritLanguageDeclaration> for SyntaxNode {
     fn from(n: AnyGritLanguageDeclaration) -> Self {
         match n {
-            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => it.into(),
-            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => it.into(),
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => it.into_syntax(),
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -10737,14 +10737,14 @@ impl AstNode for AnyGritLanguageFlavorKind {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusLanguageFlavorKind(it) => &it.syntax,
-            Self::GritLanguageFlavorKind(it) => &it.syntax,
+            Self::GritBogusLanguageFlavorKind(it) => it.syntax(),
+            Self::GritLanguageFlavorKind(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusLanguageFlavorKind(it) => it.syntax,
-            Self::GritLanguageFlavorKind(it) => it.syntax,
+            Self::GritBogusLanguageFlavorKind(it) => it.into_syntax(),
+            Self::GritLanguageFlavorKind(it) => it.into_syntax(),
         }
     }
 }
@@ -10759,8 +10759,8 @@ impl std::fmt::Debug for AnyGritLanguageFlavorKind {
 impl From<AnyGritLanguageFlavorKind> for SyntaxNode {
     fn from(n: AnyGritLanguageFlavorKind) -> Self {
         match n {
-            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => it.into(),
-            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => it.into(),
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => it.into_syntax(),
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => it.into_syntax(),
         }
     }
 }
@@ -10799,14 +10799,14 @@ impl AstNode for AnyGritLanguageName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusLanguageName(it) => &it.syntax,
-            Self::GritLanguageName(it) => &it.syntax,
+            Self::GritBogusLanguageName(it) => it.syntax(),
+            Self::GritLanguageName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusLanguageName(it) => it.syntax,
-            Self::GritLanguageName(it) => it.syntax,
+            Self::GritBogusLanguageName(it) => it.into_syntax(),
+            Self::GritLanguageName(it) => it.into_syntax(),
         }
     }
 }
@@ -10821,8 +10821,8 @@ impl std::fmt::Debug for AnyGritLanguageName {
 impl From<AnyGritLanguageName> for SyntaxNode {
     fn from(n: AnyGritLanguageName) -> Self {
         match n {
-            AnyGritLanguageName::GritBogusLanguageName(it) => it.into(),
-            AnyGritLanguageName::GritLanguageName(it) => it.into(),
+            AnyGritLanguageName::GritBogusLanguageName(it) => it.into_syntax(),
+            AnyGritLanguageName::GritLanguageName(it) => it.into_syntax(),
         }
     }
 }
@@ -10861,13 +10861,13 @@ impl AstNode for AnyGritListAccessorSubject {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritList(it) => &it.syntax,
+            Self::GritList(it) => it.syntax(),
             Self::AnyGritContainer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritList(it) => it.syntax,
+            Self::GritList(it) => it.into_syntax(),
             Self::AnyGritContainer(it) => it.into_syntax(),
         }
     }
@@ -10883,8 +10883,8 @@ impl std::fmt::Debug for AnyGritListAccessorSubject {
 impl From<AnyGritListAccessorSubject> for SyntaxNode {
     fn from(n: AnyGritListAccessorSubject) -> Self {
         match n {
-            AnyGritListAccessorSubject::AnyGritContainer(it) => it.into(),
-            AnyGritListAccessorSubject::GritList(it) => it.into(),
+            AnyGritListAccessorSubject::AnyGritContainer(it) => it.into_syntax(),
+            AnyGritListAccessorSubject::GritList(it) => it.into_syntax(),
         }
     }
 }
@@ -10933,15 +10933,15 @@ impl AstNode for AnyGritListIndex {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritIntLiteral(it) => &it.syntax,
-            Self::GritNegativeIntLiteral(it) => &it.syntax,
+            Self::GritIntLiteral(it) => it.syntax(),
+            Self::GritNegativeIntLiteral(it) => it.syntax(),
             Self::AnyGritContainer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritIntLiteral(it) => it.syntax,
-            Self::GritNegativeIntLiteral(it) => it.syntax,
+            Self::GritIntLiteral(it) => it.into_syntax(),
+            Self::GritNegativeIntLiteral(it) => it.into_syntax(),
             Self::AnyGritContainer(it) => it.into_syntax(),
         }
     }
@@ -10958,9 +10958,9 @@ impl std::fmt::Debug for AnyGritListIndex {
 impl From<AnyGritListIndex> for SyntaxNode {
     fn from(n: AnyGritListIndex) -> Self {
         match n {
-            AnyGritListIndex::AnyGritContainer(it) => it.into(),
-            AnyGritListIndex::GritIntLiteral(it) => it.into(),
-            AnyGritListIndex::GritNegativeIntLiteral(it) => it.into(),
+            AnyGritListIndex::AnyGritContainer(it) => it.into_syntax(),
+            AnyGritListIndex::GritIntLiteral(it) => it.into_syntax(),
+            AnyGritListIndex::GritNegativeIntLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -11000,13 +11000,13 @@ impl AstNode for AnyGritListPattern {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritDotdotdot(it) => &it.syntax,
+            Self::GritDotdotdot(it) => it.syntax(),
             Self::AnyGritPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritDotdotdot(it) => it.syntax,
+            Self::GritDotdotdot(it) => it.into_syntax(),
             Self::AnyGritPattern(it) => it.into_syntax(),
         }
     }
@@ -11022,8 +11022,8 @@ impl std::fmt::Debug for AnyGritListPattern {
 impl From<AnyGritListPattern> for SyntaxNode {
     fn from(n: AnyGritListPattern) -> Self {
         match n {
-            AnyGritListPattern::AnyGritPattern(it) => it.into(),
-            AnyGritListPattern::GritDotdotdot(it) => it.into(),
+            AnyGritListPattern::AnyGritPattern(it) => it.into_syntax(),
+            AnyGritListPattern::GritDotdotdot(it) => it.into_syntax(),
         }
     }
 }
@@ -11120,28 +11120,28 @@ impl AstNode for AnyGritLiteral {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusLiteral(it) => &it.syntax,
-            Self::GritBooleanLiteral(it) => &it.syntax,
-            Self::GritCodeSnippet(it) => &it.syntax,
-            Self::GritDoubleLiteral(it) => &it.syntax,
-            Self::GritIntLiteral(it) => &it.syntax,
-            Self::GritList(it) => &it.syntax,
-            Self::GritMap(it) => &it.syntax,
-            Self::GritStringLiteral(it) => &it.syntax,
-            Self::GritUndefinedLiteral(it) => &it.syntax,
+            Self::GritBogusLiteral(it) => it.syntax(),
+            Self::GritBooleanLiteral(it) => it.syntax(),
+            Self::GritCodeSnippet(it) => it.syntax(),
+            Self::GritDoubleLiteral(it) => it.syntax(),
+            Self::GritIntLiteral(it) => it.syntax(),
+            Self::GritList(it) => it.syntax(),
+            Self::GritMap(it) => it.syntax(),
+            Self::GritStringLiteral(it) => it.syntax(),
+            Self::GritUndefinedLiteral(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusLiteral(it) => it.syntax,
-            Self::GritBooleanLiteral(it) => it.syntax,
-            Self::GritCodeSnippet(it) => it.syntax,
-            Self::GritDoubleLiteral(it) => it.syntax,
-            Self::GritIntLiteral(it) => it.syntax,
-            Self::GritList(it) => it.syntax,
-            Self::GritMap(it) => it.syntax,
-            Self::GritStringLiteral(it) => it.syntax,
-            Self::GritUndefinedLiteral(it) => it.syntax,
+            Self::GritBogusLiteral(it) => it.into_syntax(),
+            Self::GritBooleanLiteral(it) => it.into_syntax(),
+            Self::GritCodeSnippet(it) => it.into_syntax(),
+            Self::GritDoubleLiteral(it) => it.into_syntax(),
+            Self::GritIntLiteral(it) => it.into_syntax(),
+            Self::GritList(it) => it.into_syntax(),
+            Self::GritMap(it) => it.into_syntax(),
+            Self::GritStringLiteral(it) => it.into_syntax(),
+            Self::GritUndefinedLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -11163,15 +11163,15 @@ impl std::fmt::Debug for AnyGritLiteral {
 impl From<AnyGritLiteral> for SyntaxNode {
     fn from(n: AnyGritLiteral) -> Self {
         match n {
-            AnyGritLiteral::GritBogusLiteral(it) => it.into(),
-            AnyGritLiteral::GritBooleanLiteral(it) => it.into(),
-            AnyGritLiteral::GritCodeSnippet(it) => it.into(),
-            AnyGritLiteral::GritDoubleLiteral(it) => it.into(),
-            AnyGritLiteral::GritIntLiteral(it) => it.into(),
-            AnyGritLiteral::GritList(it) => it.into(),
-            AnyGritLiteral::GritMap(it) => it.into(),
-            AnyGritLiteral::GritStringLiteral(it) => it.into(),
-            AnyGritLiteral::GritUndefinedLiteral(it) => it.into(),
+            AnyGritLiteral::GritBogusLiteral(it) => it.into_syntax(),
+            AnyGritLiteral::GritBooleanLiteral(it) => it.into_syntax(),
+            AnyGritLiteral::GritCodeSnippet(it) => it.into_syntax(),
+            AnyGritLiteral::GritDoubleLiteral(it) => it.into_syntax(),
+            AnyGritLiteral::GritIntLiteral(it) => it.into_syntax(),
+            AnyGritLiteral::GritList(it) => it.into_syntax(),
+            AnyGritLiteral::GritMap(it) => it.into_syntax(),
+            AnyGritLiteral::GritStringLiteral(it) => it.into_syntax(),
+            AnyGritLiteral::GritUndefinedLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -11210,13 +11210,13 @@ impl AstNode for AnyGritMapAccessorSubject {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritMap(it) => &it.syntax,
+            Self::GritMap(it) => it.syntax(),
             Self::AnyGritContainer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritMap(it) => it.syntax,
+            Self::GritMap(it) => it.into_syntax(),
             Self::AnyGritContainer(it) => it.into_syntax(),
         }
     }
@@ -11232,8 +11232,8 @@ impl std::fmt::Debug for AnyGritMapAccessorSubject {
 impl From<AnyGritMapAccessorSubject> for SyntaxNode {
     fn from(n: AnyGritMapAccessorSubject) -> Self {
         match n {
-            AnyGritMapAccessorSubject::AnyGritContainer(it) => it.into(),
-            AnyGritMapAccessorSubject::GritMap(it) => it.into(),
+            AnyGritMapAccessorSubject::AnyGritContainer(it) => it.into_syntax(),
+            AnyGritMapAccessorSubject::GritMap(it) => it.into_syntax(),
         }
     }
 }
@@ -11270,14 +11270,14 @@ impl AstNode for AnyGritMapElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusMapElement(it) => &it.syntax,
-            Self::GritMapElement(it) => &it.syntax,
+            Self::GritBogusMapElement(it) => it.syntax(),
+            Self::GritMapElement(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusMapElement(it) => it.syntax,
-            Self::GritMapElement(it) => it.syntax,
+            Self::GritBogusMapElement(it) => it.into_syntax(),
+            Self::GritMapElement(it) => it.into_syntax(),
         }
     }
 }
@@ -11292,8 +11292,8 @@ impl std::fmt::Debug for AnyGritMapElement {
 impl From<AnyGritMapElement> for SyntaxNode {
     fn from(n: AnyGritMapElement) -> Self {
         match n {
-            AnyGritMapElement::GritBogusMapElement(it) => it.into(),
-            AnyGritMapElement::GritMapElement(it) => it.into(),
+            AnyGritMapElement::GritBogusMapElement(it) => it.into_syntax(),
+            AnyGritMapElement::GritMapElement(it) => it.into_syntax(),
         }
     }
 }
@@ -11329,14 +11329,14 @@ impl AstNode for AnyGritMapKey {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritName(it) => &it.syntax,
-            Self::GritVariable(it) => &it.syntax,
+            Self::GritName(it) => it.syntax(),
+            Self::GritVariable(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritName(it) => it.syntax,
-            Self::GritVariable(it) => it.syntax,
+            Self::GritName(it) => it.into_syntax(),
+            Self::GritVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -11351,8 +11351,8 @@ impl std::fmt::Debug for AnyGritMapKey {
 impl From<AnyGritMapKey> for SyntaxNode {
     fn from(n: AnyGritMapKey) -> Self {
         match n {
-            AnyGritMapKey::GritName(it) => it.into(),
-            AnyGritMapKey::GritVariable(it) => it.into(),
+            AnyGritMapKey::GritName(it) => it.into_syntax(),
+            AnyGritMapKey::GritVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -11392,13 +11392,13 @@ impl AstNode for AnyGritMaybeCurlyPattern {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritCurlyPattern(it) => &it.syntax,
+            Self::GritCurlyPattern(it) => it.syntax(),
             Self::AnyGritPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritCurlyPattern(it) => it.syntax,
+            Self::GritCurlyPattern(it) => it.into_syntax(),
             Self::AnyGritPattern(it) => it.into_syntax(),
         }
     }
@@ -11414,8 +11414,8 @@ impl std::fmt::Debug for AnyGritMaybeCurlyPattern {
 impl From<AnyGritMaybeCurlyPattern> for SyntaxNode {
     fn from(n: AnyGritMaybeCurlyPattern) -> Self {
         match n {
-            AnyGritMaybeCurlyPattern::AnyGritPattern(it) => it.into(),
-            AnyGritMaybeCurlyPattern::GritCurlyPattern(it) => it.into(),
+            AnyGritMaybeCurlyPattern::AnyGritPattern(it) => it.into_syntax(),
+            AnyGritMaybeCurlyPattern::GritCurlyPattern(it) => it.into_syntax(),
         }
     }
 }
@@ -11462,15 +11462,15 @@ impl AstNode for AnyGritMaybeNamedArg {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusNamedArg(it) => &it.syntax,
-            Self::GritNamedArg(it) => &it.syntax,
+            Self::GritBogusNamedArg(it) => it.syntax(),
+            Self::GritNamedArg(it) => it.syntax(),
             Self::AnyGritPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusNamedArg(it) => it.syntax,
-            Self::GritNamedArg(it) => it.syntax,
+            Self::GritBogusNamedArg(it) => it.into_syntax(),
+            Self::GritNamedArg(it) => it.into_syntax(),
             Self::AnyGritPattern(it) => it.into_syntax(),
         }
     }
@@ -11487,9 +11487,9 @@ impl std::fmt::Debug for AnyGritMaybeNamedArg {
 impl From<AnyGritMaybeNamedArg> for SyntaxNode {
     fn from(n: AnyGritMaybeNamedArg) -> Self {
         match n {
-            AnyGritMaybeNamedArg::AnyGritPattern(it) => it.into(),
-            AnyGritMaybeNamedArg::GritBogusNamedArg(it) => it.into(),
-            AnyGritMaybeNamedArg::GritNamedArg(it) => it.into(),
+            AnyGritMaybeNamedArg::AnyGritPattern(it) => it.into_syntax(),
+            AnyGritMaybeNamedArg::GritBogusNamedArg(it) => it.into_syntax(),
+            AnyGritMaybeNamedArg::GritNamedArg(it) => it.into_syntax(),
         }
     }
 }
@@ -11829,87 +11829,87 @@ impl AstNode for AnyGritPattern {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritAddOperation(it) => &it.syntax,
-            Self::GritAssignmentAsPattern(it) => &it.syntax,
-            Self::GritBogusPattern(it) => &it.syntax,
-            Self::GritBracketedPattern(it) => &it.syntax,
-            Self::GritBubble(it) => &it.syntax,
-            Self::GritDivOperation(it) => &it.syntax,
-            Self::GritDot(it) => &it.syntax,
-            Self::GritEvery(it) => &it.syntax,
-            Self::GritFiles(it) => &it.syntax,
-            Self::GritLike(it) => &it.syntax,
-            Self::GritListAccessor(it) => &it.syntax,
-            Self::GritMapAccessor(it) => &it.syntax,
-            Self::GritModOperation(it) => &it.syntax,
-            Self::GritMulOperation(it) => &it.syntax,
-            Self::GritNodeLike(it) => &it.syntax,
-            Self::GritPatternAccumulate(it) => &it.syntax,
-            Self::GritPatternAfter(it) => &it.syntax,
-            Self::GritPatternAnd(it) => &it.syntax,
-            Self::GritPatternAny(it) => &it.syntax,
-            Self::GritPatternAs(it) => &it.syntax,
-            Self::GritPatternBefore(it) => &it.syntax,
-            Self::GritPatternContains(it) => &it.syntax,
-            Self::GritPatternIfElse(it) => &it.syntax,
-            Self::GritPatternIncludes(it) => &it.syntax,
-            Self::GritPatternLimit(it) => &it.syntax,
-            Self::GritPatternMaybe(it) => &it.syntax,
-            Self::GritPatternNot(it) => &it.syntax,
-            Self::GritPatternOr(it) => &it.syntax,
-            Self::GritPatternOrElse(it) => &it.syntax,
-            Self::GritPatternWhere(it) => &it.syntax,
-            Self::GritRegexPattern(it) => &it.syntax,
-            Self::GritRewrite(it) => &it.syntax,
-            Self::GritSequential(it) => &it.syntax,
-            Self::GritSome(it) => &it.syntax,
-            Self::GritSubOperation(it) => &it.syntax,
-            Self::GritUnderscore(it) => &it.syntax,
-            Self::GritVariable(it) => &it.syntax,
-            Self::GritWithin(it) => &it.syntax,
+            Self::GritAddOperation(it) => it.syntax(),
+            Self::GritAssignmentAsPattern(it) => it.syntax(),
+            Self::GritBogusPattern(it) => it.syntax(),
+            Self::GritBracketedPattern(it) => it.syntax(),
+            Self::GritBubble(it) => it.syntax(),
+            Self::GritDivOperation(it) => it.syntax(),
+            Self::GritDot(it) => it.syntax(),
+            Self::GritEvery(it) => it.syntax(),
+            Self::GritFiles(it) => it.syntax(),
+            Self::GritLike(it) => it.syntax(),
+            Self::GritListAccessor(it) => it.syntax(),
+            Self::GritMapAccessor(it) => it.syntax(),
+            Self::GritModOperation(it) => it.syntax(),
+            Self::GritMulOperation(it) => it.syntax(),
+            Self::GritNodeLike(it) => it.syntax(),
+            Self::GritPatternAccumulate(it) => it.syntax(),
+            Self::GritPatternAfter(it) => it.syntax(),
+            Self::GritPatternAnd(it) => it.syntax(),
+            Self::GritPatternAny(it) => it.syntax(),
+            Self::GritPatternAs(it) => it.syntax(),
+            Self::GritPatternBefore(it) => it.syntax(),
+            Self::GritPatternContains(it) => it.syntax(),
+            Self::GritPatternIfElse(it) => it.syntax(),
+            Self::GritPatternIncludes(it) => it.syntax(),
+            Self::GritPatternLimit(it) => it.syntax(),
+            Self::GritPatternMaybe(it) => it.syntax(),
+            Self::GritPatternNot(it) => it.syntax(),
+            Self::GritPatternOr(it) => it.syntax(),
+            Self::GritPatternOrElse(it) => it.syntax(),
+            Self::GritPatternWhere(it) => it.syntax(),
+            Self::GritRegexPattern(it) => it.syntax(),
+            Self::GritRewrite(it) => it.syntax(),
+            Self::GritSequential(it) => it.syntax(),
+            Self::GritSome(it) => it.syntax(),
+            Self::GritSubOperation(it) => it.syntax(),
+            Self::GritUnderscore(it) => it.syntax(),
+            Self::GritVariable(it) => it.syntax(),
+            Self::GritWithin(it) => it.syntax(),
             Self::AnyGritLiteral(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritAddOperation(it) => it.syntax,
-            Self::GritAssignmentAsPattern(it) => it.syntax,
-            Self::GritBogusPattern(it) => it.syntax,
-            Self::GritBracketedPattern(it) => it.syntax,
-            Self::GritBubble(it) => it.syntax,
-            Self::GritDivOperation(it) => it.syntax,
-            Self::GritDot(it) => it.syntax,
-            Self::GritEvery(it) => it.syntax,
-            Self::GritFiles(it) => it.syntax,
-            Self::GritLike(it) => it.syntax,
-            Self::GritListAccessor(it) => it.syntax,
-            Self::GritMapAccessor(it) => it.syntax,
-            Self::GritModOperation(it) => it.syntax,
-            Self::GritMulOperation(it) => it.syntax,
-            Self::GritNodeLike(it) => it.syntax,
-            Self::GritPatternAccumulate(it) => it.syntax,
-            Self::GritPatternAfter(it) => it.syntax,
-            Self::GritPatternAnd(it) => it.syntax,
-            Self::GritPatternAny(it) => it.syntax,
-            Self::GritPatternAs(it) => it.syntax,
-            Self::GritPatternBefore(it) => it.syntax,
-            Self::GritPatternContains(it) => it.syntax,
-            Self::GritPatternIfElse(it) => it.syntax,
-            Self::GritPatternIncludes(it) => it.syntax,
-            Self::GritPatternLimit(it) => it.syntax,
-            Self::GritPatternMaybe(it) => it.syntax,
-            Self::GritPatternNot(it) => it.syntax,
-            Self::GritPatternOr(it) => it.syntax,
-            Self::GritPatternOrElse(it) => it.syntax,
-            Self::GritPatternWhere(it) => it.syntax,
-            Self::GritRegexPattern(it) => it.syntax,
-            Self::GritRewrite(it) => it.syntax,
-            Self::GritSequential(it) => it.syntax,
-            Self::GritSome(it) => it.syntax,
-            Self::GritSubOperation(it) => it.syntax,
-            Self::GritUnderscore(it) => it.syntax,
-            Self::GritVariable(it) => it.syntax,
-            Self::GritWithin(it) => it.syntax,
+            Self::GritAddOperation(it) => it.into_syntax(),
+            Self::GritAssignmentAsPattern(it) => it.into_syntax(),
+            Self::GritBogusPattern(it) => it.into_syntax(),
+            Self::GritBracketedPattern(it) => it.into_syntax(),
+            Self::GritBubble(it) => it.into_syntax(),
+            Self::GritDivOperation(it) => it.into_syntax(),
+            Self::GritDot(it) => it.into_syntax(),
+            Self::GritEvery(it) => it.into_syntax(),
+            Self::GritFiles(it) => it.into_syntax(),
+            Self::GritLike(it) => it.into_syntax(),
+            Self::GritListAccessor(it) => it.into_syntax(),
+            Self::GritMapAccessor(it) => it.into_syntax(),
+            Self::GritModOperation(it) => it.into_syntax(),
+            Self::GritMulOperation(it) => it.into_syntax(),
+            Self::GritNodeLike(it) => it.into_syntax(),
+            Self::GritPatternAccumulate(it) => it.into_syntax(),
+            Self::GritPatternAfter(it) => it.into_syntax(),
+            Self::GritPatternAnd(it) => it.into_syntax(),
+            Self::GritPatternAny(it) => it.into_syntax(),
+            Self::GritPatternAs(it) => it.into_syntax(),
+            Self::GritPatternBefore(it) => it.into_syntax(),
+            Self::GritPatternContains(it) => it.into_syntax(),
+            Self::GritPatternIfElse(it) => it.into_syntax(),
+            Self::GritPatternIncludes(it) => it.into_syntax(),
+            Self::GritPatternLimit(it) => it.into_syntax(),
+            Self::GritPatternMaybe(it) => it.into_syntax(),
+            Self::GritPatternNot(it) => it.into_syntax(),
+            Self::GritPatternOr(it) => it.into_syntax(),
+            Self::GritPatternOrElse(it) => it.into_syntax(),
+            Self::GritPatternWhere(it) => it.into_syntax(),
+            Self::GritRegexPattern(it) => it.into_syntax(),
+            Self::GritRewrite(it) => it.into_syntax(),
+            Self::GritSequential(it) => it.into_syntax(),
+            Self::GritSome(it) => it.into_syntax(),
+            Self::GritSubOperation(it) => it.into_syntax(),
+            Self::GritUnderscore(it) => it.into_syntax(),
+            Self::GritVariable(it) => it.into_syntax(),
+            Self::GritWithin(it) => it.into_syntax(),
             Self::AnyGritLiteral(it) => it.into_syntax(),
         }
     }
@@ -11962,45 +11962,45 @@ impl std::fmt::Debug for AnyGritPattern {
 impl From<AnyGritPattern> for SyntaxNode {
     fn from(n: AnyGritPattern) -> Self {
         match n {
-            AnyGritPattern::AnyGritLiteral(it) => it.into(),
-            AnyGritPattern::GritAddOperation(it) => it.into(),
-            AnyGritPattern::GritAssignmentAsPattern(it) => it.into(),
-            AnyGritPattern::GritBogusPattern(it) => it.into(),
-            AnyGritPattern::GritBracketedPattern(it) => it.into(),
-            AnyGritPattern::GritBubble(it) => it.into(),
-            AnyGritPattern::GritDivOperation(it) => it.into(),
-            AnyGritPattern::GritDot(it) => it.into(),
-            AnyGritPattern::GritEvery(it) => it.into(),
-            AnyGritPattern::GritFiles(it) => it.into(),
-            AnyGritPattern::GritLike(it) => it.into(),
-            AnyGritPattern::GritListAccessor(it) => it.into(),
-            AnyGritPattern::GritMapAccessor(it) => it.into(),
-            AnyGritPattern::GritModOperation(it) => it.into(),
-            AnyGritPattern::GritMulOperation(it) => it.into(),
-            AnyGritPattern::GritNodeLike(it) => it.into(),
-            AnyGritPattern::GritPatternAccumulate(it) => it.into(),
-            AnyGritPattern::GritPatternAfter(it) => it.into(),
-            AnyGritPattern::GritPatternAnd(it) => it.into(),
-            AnyGritPattern::GritPatternAny(it) => it.into(),
-            AnyGritPattern::GritPatternAs(it) => it.into(),
-            AnyGritPattern::GritPatternBefore(it) => it.into(),
-            AnyGritPattern::GritPatternContains(it) => it.into(),
-            AnyGritPattern::GritPatternIfElse(it) => it.into(),
-            AnyGritPattern::GritPatternIncludes(it) => it.into(),
-            AnyGritPattern::GritPatternLimit(it) => it.into(),
-            AnyGritPattern::GritPatternMaybe(it) => it.into(),
-            AnyGritPattern::GritPatternNot(it) => it.into(),
-            AnyGritPattern::GritPatternOr(it) => it.into(),
-            AnyGritPattern::GritPatternOrElse(it) => it.into(),
-            AnyGritPattern::GritPatternWhere(it) => it.into(),
-            AnyGritPattern::GritRegexPattern(it) => it.into(),
-            AnyGritPattern::GritRewrite(it) => it.into(),
-            AnyGritPattern::GritSequential(it) => it.into(),
-            AnyGritPattern::GritSome(it) => it.into(),
-            AnyGritPattern::GritSubOperation(it) => it.into(),
-            AnyGritPattern::GritUnderscore(it) => it.into(),
-            AnyGritPattern::GritVariable(it) => it.into(),
-            AnyGritPattern::GritWithin(it) => it.into(),
+            AnyGritPattern::AnyGritLiteral(it) => it.into_syntax(),
+            AnyGritPattern::GritAddOperation(it) => it.into_syntax(),
+            AnyGritPattern::GritAssignmentAsPattern(it) => it.into_syntax(),
+            AnyGritPattern::GritBogusPattern(it) => it.into_syntax(),
+            AnyGritPattern::GritBracketedPattern(it) => it.into_syntax(),
+            AnyGritPattern::GritBubble(it) => it.into_syntax(),
+            AnyGritPattern::GritDivOperation(it) => it.into_syntax(),
+            AnyGritPattern::GritDot(it) => it.into_syntax(),
+            AnyGritPattern::GritEvery(it) => it.into_syntax(),
+            AnyGritPattern::GritFiles(it) => it.into_syntax(),
+            AnyGritPattern::GritLike(it) => it.into_syntax(),
+            AnyGritPattern::GritListAccessor(it) => it.into_syntax(),
+            AnyGritPattern::GritMapAccessor(it) => it.into_syntax(),
+            AnyGritPattern::GritModOperation(it) => it.into_syntax(),
+            AnyGritPattern::GritMulOperation(it) => it.into_syntax(),
+            AnyGritPattern::GritNodeLike(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternAccumulate(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternAfter(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternAnd(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternAny(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternAs(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternBefore(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternContains(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternIfElse(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternIncludes(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternLimit(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternMaybe(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternNot(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternOr(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternOrElse(it) => it.into_syntax(),
+            AnyGritPattern::GritPatternWhere(it) => it.into_syntax(),
+            AnyGritPattern::GritRegexPattern(it) => it.into_syntax(),
+            AnyGritPattern::GritRewrite(it) => it.into_syntax(),
+            AnyGritPattern::GritSequential(it) => it.into_syntax(),
+            AnyGritPattern::GritSome(it) => it.into_syntax(),
+            AnyGritPattern::GritSubOperation(it) => it.into_syntax(),
+            AnyGritPattern::GritUnderscore(it) => it.into_syntax(),
+            AnyGritPattern::GritVariable(it) => it.into_syntax(),
+            AnyGritPattern::GritWithin(it) => it.into_syntax(),
         }
     }
 }
@@ -12205,52 +12205,52 @@ impl AstNode for AnyGritPredicate {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusPredicate(it) => &it.syntax,
-            Self::GritBooleanLiteral(it) => &it.syntax,
-            Self::GritBracketedPredicate(it) => &it.syntax,
-            Self::GritPredicateAccumulate(it) => &it.syntax,
-            Self::GritPredicateAnd(it) => &it.syntax,
-            Self::GritPredicateAny(it) => &it.syntax,
-            Self::GritPredicateAssignment(it) => &it.syntax,
-            Self::GritPredicateCall(it) => &it.syntax,
-            Self::GritPredicateEqual(it) => &it.syntax,
-            Self::GritPredicateGreater(it) => &it.syntax,
-            Self::GritPredicateGreaterEqual(it) => &it.syntax,
-            Self::GritPredicateIfElse(it) => &it.syntax,
-            Self::GritPredicateLess(it) => &it.syntax,
-            Self::GritPredicateLessEqual(it) => &it.syntax,
-            Self::GritPredicateMatch(it) => &it.syntax,
-            Self::GritPredicateMaybe(it) => &it.syntax,
-            Self::GritPredicateNot(it) => &it.syntax,
-            Self::GritPredicateNotEqual(it) => &it.syntax,
-            Self::GritPredicateOr(it) => &it.syntax,
-            Self::GritPredicateReturn(it) => &it.syntax,
-            Self::GritPredicateRewrite(it) => &it.syntax,
+            Self::GritBogusPredicate(it) => it.syntax(),
+            Self::GritBooleanLiteral(it) => it.syntax(),
+            Self::GritBracketedPredicate(it) => it.syntax(),
+            Self::GritPredicateAccumulate(it) => it.syntax(),
+            Self::GritPredicateAnd(it) => it.syntax(),
+            Self::GritPredicateAny(it) => it.syntax(),
+            Self::GritPredicateAssignment(it) => it.syntax(),
+            Self::GritPredicateCall(it) => it.syntax(),
+            Self::GritPredicateEqual(it) => it.syntax(),
+            Self::GritPredicateGreater(it) => it.syntax(),
+            Self::GritPredicateGreaterEqual(it) => it.syntax(),
+            Self::GritPredicateIfElse(it) => it.syntax(),
+            Self::GritPredicateLess(it) => it.syntax(),
+            Self::GritPredicateLessEqual(it) => it.syntax(),
+            Self::GritPredicateMatch(it) => it.syntax(),
+            Self::GritPredicateMaybe(it) => it.syntax(),
+            Self::GritPredicateNot(it) => it.syntax(),
+            Self::GritPredicateNotEqual(it) => it.syntax(),
+            Self::GritPredicateOr(it) => it.syntax(),
+            Self::GritPredicateReturn(it) => it.syntax(),
+            Self::GritPredicateRewrite(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusPredicate(it) => it.syntax,
-            Self::GritBooleanLiteral(it) => it.syntax,
-            Self::GritBracketedPredicate(it) => it.syntax,
-            Self::GritPredicateAccumulate(it) => it.syntax,
-            Self::GritPredicateAnd(it) => it.syntax,
-            Self::GritPredicateAny(it) => it.syntax,
-            Self::GritPredicateAssignment(it) => it.syntax,
-            Self::GritPredicateCall(it) => it.syntax,
-            Self::GritPredicateEqual(it) => it.syntax,
-            Self::GritPredicateGreater(it) => it.syntax,
-            Self::GritPredicateGreaterEqual(it) => it.syntax,
-            Self::GritPredicateIfElse(it) => it.syntax,
-            Self::GritPredicateLess(it) => it.syntax,
-            Self::GritPredicateLessEqual(it) => it.syntax,
-            Self::GritPredicateMatch(it) => it.syntax,
-            Self::GritPredicateMaybe(it) => it.syntax,
-            Self::GritPredicateNot(it) => it.syntax,
-            Self::GritPredicateNotEqual(it) => it.syntax,
-            Self::GritPredicateOr(it) => it.syntax,
-            Self::GritPredicateReturn(it) => it.syntax,
-            Self::GritPredicateRewrite(it) => it.syntax,
+            Self::GritBogusPredicate(it) => it.into_syntax(),
+            Self::GritBooleanLiteral(it) => it.into_syntax(),
+            Self::GritBracketedPredicate(it) => it.into_syntax(),
+            Self::GritPredicateAccumulate(it) => it.into_syntax(),
+            Self::GritPredicateAnd(it) => it.into_syntax(),
+            Self::GritPredicateAny(it) => it.into_syntax(),
+            Self::GritPredicateAssignment(it) => it.into_syntax(),
+            Self::GritPredicateCall(it) => it.into_syntax(),
+            Self::GritPredicateEqual(it) => it.into_syntax(),
+            Self::GritPredicateGreater(it) => it.into_syntax(),
+            Self::GritPredicateGreaterEqual(it) => it.into_syntax(),
+            Self::GritPredicateIfElse(it) => it.into_syntax(),
+            Self::GritPredicateLess(it) => it.into_syntax(),
+            Self::GritPredicateLessEqual(it) => it.into_syntax(),
+            Self::GritPredicateMatch(it) => it.into_syntax(),
+            Self::GritPredicateMaybe(it) => it.into_syntax(),
+            Self::GritPredicateNot(it) => it.into_syntax(),
+            Self::GritPredicateNotEqual(it) => it.into_syntax(),
+            Self::GritPredicateOr(it) => it.into_syntax(),
+            Self::GritPredicateReturn(it) => it.into_syntax(),
+            Self::GritPredicateRewrite(it) => it.into_syntax(),
         }
     }
 }
@@ -12284,27 +12284,27 @@ impl std::fmt::Debug for AnyGritPredicate {
 impl From<AnyGritPredicate> for SyntaxNode {
     fn from(n: AnyGritPredicate) -> Self {
         match n {
-            AnyGritPredicate::GritBogusPredicate(it) => it.into(),
-            AnyGritPredicate::GritBooleanLiteral(it) => it.into(),
-            AnyGritPredicate::GritBracketedPredicate(it) => it.into(),
-            AnyGritPredicate::GritPredicateAccumulate(it) => it.into(),
-            AnyGritPredicate::GritPredicateAnd(it) => it.into(),
-            AnyGritPredicate::GritPredicateAny(it) => it.into(),
-            AnyGritPredicate::GritPredicateAssignment(it) => it.into(),
-            AnyGritPredicate::GritPredicateCall(it) => it.into(),
-            AnyGritPredicate::GritPredicateEqual(it) => it.into(),
-            AnyGritPredicate::GritPredicateGreater(it) => it.into(),
-            AnyGritPredicate::GritPredicateGreaterEqual(it) => it.into(),
-            AnyGritPredicate::GritPredicateIfElse(it) => it.into(),
-            AnyGritPredicate::GritPredicateLess(it) => it.into(),
-            AnyGritPredicate::GritPredicateLessEqual(it) => it.into(),
-            AnyGritPredicate::GritPredicateMatch(it) => it.into(),
-            AnyGritPredicate::GritPredicateMaybe(it) => it.into(),
-            AnyGritPredicate::GritPredicateNot(it) => it.into(),
-            AnyGritPredicate::GritPredicateNotEqual(it) => it.into(),
-            AnyGritPredicate::GritPredicateOr(it) => it.into(),
-            AnyGritPredicate::GritPredicateReturn(it) => it.into(),
-            AnyGritPredicate::GritPredicateRewrite(it) => it.into(),
+            AnyGritPredicate::GritBogusPredicate(it) => it.into_syntax(),
+            AnyGritPredicate::GritBooleanLiteral(it) => it.into_syntax(),
+            AnyGritPredicate::GritBracketedPredicate(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateAccumulate(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateAnd(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateAny(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateAssignment(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateCall(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateEqual(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateGreater(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateGreaterEqual(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateIfElse(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateLess(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateLessEqual(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateMatch(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateMaybe(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateNot(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateNotEqual(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateOr(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateReturn(it) => it.into_syntax(),
+            AnyGritPredicate::GritPredicateRewrite(it) => it.into_syntax(),
         }
     }
 }
@@ -12361,8 +12361,8 @@ impl std::fmt::Debug for AnyGritPredicateMatchSubject {
 impl From<AnyGritPredicateMatchSubject> for SyntaxNode {
     fn from(n: AnyGritPredicateMatchSubject) -> Self {
         match n {
-            AnyGritPredicateMatchSubject::AnyGritContainer(it) => it.into(),
-            AnyGritPredicateMatchSubject::AnyGritLiteral(it) => it.into(),
+            AnyGritPredicateMatchSubject::AnyGritContainer(it) => it.into_syntax(),
+            AnyGritPredicateMatchSubject::AnyGritLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -12401,14 +12401,14 @@ impl AstNode for AnyGritRegex {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritRegexLiteral(it) => &it.syntax,
-            Self::GritSnippetRegexLiteral(it) => &it.syntax,
+            Self::GritRegexLiteral(it) => it.syntax(),
+            Self::GritSnippetRegexLiteral(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritRegexLiteral(it) => it.syntax,
-            Self::GritSnippetRegexLiteral(it) => it.syntax,
+            Self::GritRegexLiteral(it) => it.into_syntax(),
+            Self::GritSnippetRegexLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -12423,8 +12423,8 @@ impl std::fmt::Debug for AnyGritRegex {
 impl From<AnyGritRegex> for SyntaxNode {
     fn from(n: AnyGritRegex) -> Self {
         match n {
-            AnyGritRegex::GritRegexLiteral(it) => it.into(),
-            AnyGritRegex::GritSnippetRegexLiteral(it) => it.into(),
+            AnyGritRegex::GritRegexLiteral(it) => it.into_syntax(),
+            AnyGritRegex::GritSnippetRegexLiteral(it) => it.into_syntax(),
         }
     }
 }
@@ -12461,14 +12461,14 @@ impl AstNode for AnyGritVersion {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::GritBogusVersion(it) => &it.syntax,
-            Self::GritVersion(it) => &it.syntax,
+            Self::GritBogusVersion(it) => it.syntax(),
+            Self::GritVersion(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::GritBogusVersion(it) => it.syntax,
-            Self::GritVersion(it) => it.syntax,
+            Self::GritBogusVersion(it) => it.into_syntax(),
+            Self::GritVersion(it) => it.into_syntax(),
         }
     }
 }
@@ -12483,8 +12483,8 @@ impl std::fmt::Debug for AnyGritVersion {
 impl From<AnyGritVersion> for SyntaxNode {
     fn from(n: AnyGritVersion) -> Self {
         match n {
-            AnyGritVersion::GritBogusVersion(it) => it.into(),
-            AnyGritVersion::GritVersion(it) => it.into(),
+            AnyGritVersion::GritBogusVersion(it) => it.into_syntax(),
+            AnyGritVersion::GritVersion(it) => it.into_syntax(),
         }
     }
 }

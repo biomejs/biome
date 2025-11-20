@@ -90,9 +90,9 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
                 write!(
                     f,
                     [
-                        if_group_fits_on_line(&text("(")),
+                        if_group_fits_on_line(&token("(")),
                         consequent,
-                        if_group_fits_on_line(&text(")"))
+                        if_group_fits_on_line(&token(")"))
                     ]
                 )?;
             } else {
@@ -746,14 +746,14 @@ fn is_jsx_conditional_chain(outer_most: &JsConditionalExpression) -> bool {
         || recurse(outer_most.alternate())
 }
 
-fn format_jsx_chain_consequent(expression: &AnyJsExpression) -> FormatJsxChainExpression {
+fn format_jsx_chain_consequent(expression: &AnyJsExpression) -> FormatJsxChainExpression<'_> {
     FormatJsxChainExpression {
         expression,
         alternate: false,
     }
 }
 
-fn format_jsx_chain_alternate(alternate: &AnyJsExpression) -> FormatJsxChainExpression {
+fn format_jsx_chain_alternate(alternate: &AnyJsExpression) -> FormatJsxChainExpression<'_> {
     FormatJsxChainExpression {
         expression: alternate,
         alternate: true,
@@ -802,9 +802,9 @@ impl Format<JsFormatContext> for FormatJsxChainExpression<'_> {
             write!(
                 f,
                 [
-                    if_group_breaks(&text("(")),
+                    if_group_breaks(&token("(")),
                     soft_block_indent(&format_expression),
-                    if_group_breaks(&text(")"))
+                    if_group_breaks(&token(")"))
                 ]
             )
         }

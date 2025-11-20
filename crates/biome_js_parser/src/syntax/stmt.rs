@@ -1389,8 +1389,7 @@ fn parse_variable_declarator(
 
         if let (Some(initializer), Some(ts_annotation)) =
             (initializer.as_mut(), ts_annotation.as_ref())
-        {
-            if ts_annotation.kind(p) == TS_DEFINITE_VARIABLE_ANNOTATION {
+            && ts_annotation.kind(p) == TS_DEFINITE_VARIABLE_ANNOTATION {
                 // test_err ts ts_definite_variable_with_initializer
                 // let a!: string = "test";
                 p.error(
@@ -1400,7 +1399,6 @@ fn parse_variable_declarator(
                         .with_detail(ts_annotation.range(p), "Annotation")
                 );
             }
-        }
 
         p.state_mut().name_map = last_name_map;
         p.state_mut().duplicate_binding_parent = duplicate_binding_parent;
@@ -1412,15 +1410,14 @@ fn parse_variable_declarator(
         let is_in_for_in = is_in_for_loop && p.at(T![in]);
 
         if is_in_for_of || is_in_for_in {
-            if TypeScript.is_supported(p) {
-                if let Some(mut ts_annotation) = ts_annotation {
+            if TypeScript.is_supported(p)
+                && let Some(mut ts_annotation) = ts_annotation {
                     let err = p
                         .err_builder("`for` statement declarators cannot have a type annotation", ts_annotation.range(p));
 
                     p.error(err);
                     ts_annotation.change_to_bogus(p);
                 }
-            }
 
 
             // test_err js using_declaration_not_allowed_in_for_in_statement
@@ -1771,21 +1768,21 @@ fn parse_for_statement(p: &mut JsParser) -> ParsedSyntax {
 
     let mut completed = m.complete(p, kind);
 
-    if kind != JS_FOR_OF_STATEMENT {
-        if let Some(await_range) = await_range {
-            p.error(
-                p.err_builder(
-                    "await can only be used in conjunction with `for...of` statements",
-                    await_range,
-                )
-                .with_detail(await_range, "Remove the await here")
-                .with_detail(
-                    completed.range(p),
-                    "or convert this to a `for...of` statement",
-                ),
-            );
-            completed.change_kind(p, JS_BOGUS_STATEMENT)
-        }
+    if kind != JS_FOR_OF_STATEMENT
+        && let Some(await_range) = await_range
+    {
+        p.error(
+            p.err_builder(
+                "await can only be used in conjunction with `for...of` statements",
+                await_range,
+            )
+            .with_detail(await_range, "Remove the await here")
+            .with_detail(
+                completed.range(p),
+                "or convert this to a `for...of` statement",
+            ),
+        );
+        completed.change_kind(p, JS_BOGUS_STATEMENT)
     }
 
     Present(completed)
@@ -1886,10 +1883,11 @@ impl ParseNodeList for SwitchCasesList {
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
         let clause = parse_switch_clause(p, &mut self.first_default);
 
-        if let Present(marker) = &clause {
-            if marker.kind(p) == JS_DEFAULT_CLAUSE && self.first_default.is_none() {
-                self.first_default = Some(marker.range(p));
-            }
+        if let Present(marker) = &clause
+            && marker.kind(p) == JS_DEFAULT_CLAUSE
+            && self.first_default.is_none()
+        {
+            self.first_default = Some(marker.range(p));
         }
 
         clause
@@ -2010,14 +2008,13 @@ fn parse_catch_declaration(p: &mut JsParser) -> ParsedSyntax {
                     let annotation = p.start();
                     p.bump(T![:]);
 
-                    if let Some(ty) = parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type) {
-                        if !matches!(ty.kind(p), TS_ANY_TYPE | TS_UNKNOWN_TYPE) {
+                    if let Some(ty) = parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type)
+                        && !matches!(ty.kind(p), TS_ANY_TYPE | TS_UNKNOWN_TYPE) {
                             p.error(
                                 p
                                     .err_builder("Catch clause variable type annotation must be 'any' or 'unknown' if specified.", ty.range(p))
                             );
                         }
-                    }
 
                     Present(annotation.complete(p, TS_TYPE_ANNOTATION))
                 },

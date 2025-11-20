@@ -22,3 +22,4 @@ pub type CssSyntaxElement = biome_rowan::SyntaxElement<CssLanguage>;
 pub type CssSyntaxNodeChildren = biome_rowan::SyntaxNodeChildren<CssLanguage>;
 pub type CssSyntaxElementChildren = biome_rowan::SyntaxElementChildren<CssLanguage>;
 pub type CssSyntaxList = biome_rowan::SyntaxList<CssLanguage>;
+pub type CssSyntaxNodeWithOffset = biome_rowan::SyntaxNodeWithOffset<CssLanguage>;

@@ -1,13 +1,13 @@
 #![deny(clippy::use_self)]
 
-use crate::prelude::{format_bogus_node, format_suppressed_node};
-pub(crate) use crate::trivia::*;
+use crate::prelude::*;
 use biome_formatter::comments::Comments;
+use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxToken};
+use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -20,19 +20,26 @@ mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
+pub(crate) mod separated;
 mod svelte;
 mod trivia;
 pub mod utils;
 mod verbatim;
+mod vue;
 
-/// Formats a Html file based on its features.
+/// Formats a HTML file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
 pub fn format_node(
     options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    biome_formatter::format_node(root, HtmlFormatLanguage::new(options))
+    biome_formatter::format_node(
+        root,
+        HtmlFormatLanguage::new(options),
+        delegate_fmt_embedded_nodes,
+    )
 }
 
 /// Used to get an object that knows how to format this object.
@@ -155,9 +162,15 @@ impl FormatLanguage for HtmlFormatLanguage {
         self,
         root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<biome_formatter::TransformSourceMap>,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
-        HtmlFormatContext::new(self.options, comments).with_source_map(source_map)
+        let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
+        if delegate_fmt_embedded_nodes {
+            context.with_fmt_embedded_nodes()
+        } else {
+            context
+        }
     }
 }
 
@@ -207,8 +220,28 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        self.fmt_fields(node, f)?;
+        if let Some(range) = self.embedded_node_range(node, f) {
+            // Tokens that belong to embedded nodes are formatted later on,
+            // so we track them, even though they aren't formatted now during this pass.
+            let state = f.state_mut();
+            for token in node.syntax().tokens() {
+                state.track_token(&token);
+            }
+
+            f.write_elements(vec![
+                FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Tag(EndEmbedded),
+            ])?;
+        } else {
+            self.fmt_fields(node, f)?;
+        }
         Ok(())
+    }
+
+    /// Whether this node contains content that needs to be formatted by an external formatter.
+    /// If so, the function must return the range of the nodes that will be formatted in the second phase.
+    fn embedded_node_range(&self, _node: &N, _f: &mut HtmlFormatter) -> Option<TextRange> {
+        None
     }
 
     /// Formats the node's fields.
@@ -224,7 +257,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
     fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
+        format_html_leading_comments(node.syntax()).fmt(f)
     }
 
     /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
@@ -245,7 +278,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
     fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_trailing_comments(node.syntax()).fmt(f)
+        format_html_trailing_comments(node.syntax()).fmt(f)
     }
 }
 
@@ -276,7 +309,6 @@ impl IntoFormat<HtmlFormatContext> for HtmlSyntaxToken {
 }
 
 /// Formatting specific [Iterator] extensions
-#[expect(dead_code)]
 pub(crate) trait FormattedIterExt {
     /// Converts every item to an object that knows how to format it.
     fn formatted<Context>(self) -> FormattedIter<Self, Self::Item, Context>

@@ -132,7 +132,7 @@ impl Rule for NoUnusedFunctionParameters {
         let binding = ctx.query();
         let declaration = binding.declaration()?;
 
-        let ignore_rest_siblings = ctx.options().ignore_rest_siblings;
+        let ignore_rest_siblings = ctx.options().ignore_rest_siblings();
 
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();
@@ -146,8 +146,7 @@ impl Rule for NoUnusedFunctionParameters {
             // e.g. `{ a, ...rest }`
             if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
-            {
-                if declaration
+                && declaration
                     .syntax()
                     .siblings(Direction::Next)
                     .last()
@@ -157,9 +156,8 @@ impl Rule for NoUnusedFunctionParameters {
                             JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
                         )
                     })
-                {
-                    return None;
-                }
+            {
+                return None;
             }
         }
 

@@ -199,10 +199,10 @@ impl Rule for NoDuplicateObjectKeys {
                 }
             }
         }
-        if let Some(NodeOrToken::Token(next_token)) = member.next_sibling_or_token() {
-            if next_token.kind() == JsSyntaxKind::COMMA {
-                mutation.remove_token(next_token);
-            }
+        if let Some(NodeOrToken::Token(next_token)) = member.next_sibling_or_token()
+            && next_token.kind() == JsSyntaxKind::COMMA
+        {
+            mutation.remove_token(next_token);
         }
         mutation.remove_element(member.into());
         Some(JsRuleAction::new(
@@ -254,7 +254,9 @@ impl TryFrom<&AnyJsObjectMember> for DefinedProperty {
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
                 Ok(Self::Property(member.syntax().index() as u32))
             }
-            AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => Err(()),
+            AnyJsObjectMember::JsBogusMember(_)
+            | AnyJsObjectMember::JsSpread(_)
+            | AnyJsObjectMember::JsMetavariable(_) => Err(()),
         }
     }
 }

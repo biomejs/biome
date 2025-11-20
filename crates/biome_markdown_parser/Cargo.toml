@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_markdown_parser"
+publish              = false
 repository.workspace = true
 version              = "0.0.1"
 
@@ -17,16 +18,17 @@ biome_markdown_factory = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
-biome_test_utils       = { workspace = true }
 biome_unicode_table    = { workspace = true }
 tracing                = { workspace = true }
 unicode-bom            = { workspace = true }
 
 [dev-dependencies]
+biome_test_utils  = { path = "../biome_test_utils" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
+
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 mod assist;
+mod fonts;
 mod keywords;
 mod lint;
 mod order;
@@ -13,8 +14,8 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
+    PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_css_syntax::{CssLanguage, TextRange};
 use biome_diagnostics::Error;
@@ -69,7 +70,7 @@ where
     fn parse_linter_suppression_comment(
         text: &str,
         piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
+    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for suppression in parse_suppression_comment(text) {
@@ -95,7 +96,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors, categories) = registry.build();
+    let (registry, services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -108,17 +109,22 @@ where
         parse_linter_suppression_comment,
         Box::new(CssSuppressionAction),
         &mut emit_signal,
-        categories,
     );
-
-    for plugin in plugins {
-        if plugin.supports_css() {
-            analyzer.add_plugin(plugin.clone());
-        }
-    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
+    }
+
+    for plugin in plugins {
+        // SAFETY: The plugin target language is correctly checked here.
+        unsafe {
+            if plugin.language() == PluginTargetLanguage::Css {
+                analyzer.add_visitor(
+                    Phases::Syntax,
+                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
+                )
+            }
+        }
     }
 
     (

@@ -1,0 +1,231 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<div>Fuga magnam facilis. Voluptatem quaerat porro.{{
+
+
+	x => {
+	const hello = 'world'
+	return hello;
+	}
+
+
+	}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+
+<div>Too small: {{ x < 5 }} {{ y / 16}}</div>
+
+<div>{{ call(fn({ inner })) }}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@5..51 "Fuga magnam facilis. Voluptatem quaerat porro." [] [],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@51..53 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@53..108 "\n\n\n\tx => {\n\tconst hello = 'world'\n\treturn hello;\n\t}\n\n\n\t" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@108..111 "}}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@111..142 "reprehenderit voluptates minus" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@142..144 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@144..179 "console.log(  short_interpolation )" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@179..182 "}}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@182..187 "nemo." [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@187..188 "<" [] [],
+                slash_token: SLASH@188..189 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@189..192 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@192..193 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@193..196 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@196..199 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@199..200 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@200..211 "Too small:" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@211..213 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@213..220 " x < 5 " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@220..223 "}}" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@223..225 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@225..232 " y / 16" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@232..234 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@234..235 "<" [] [],
+                slash_token: SLASH@235..236 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@236..239 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@239..240 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@240..243 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@243..246 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@246..247 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@247..249 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@249..270 " call(fn({ inner })) " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@270..272 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@272..273 "<" [] [],
+                slash_token: SLASH@273..274 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@274..277 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@277..278 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@278..279 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..279
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..278
+    0: HTML_ELEMENT@0..193
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..187
+        0: HTML_CONTENT@5..51
+          0: HTML_LITERAL@5..51 "Fuga magnam facilis. Voluptatem quaerat porro." [] []
+        1: HTML_DOUBLE_TEXT_EXPRESSION@51..111
+          0: L_DOUBLE_CURLY@51..53 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@53..108
+            0: HTML_LITERAL@53..108 "\n\n\n\tx => {\n\tconst hello = 'world'\n\treturn hello;\n\t}\n\n\n\t" [] []
+          2: R_DOUBLE_CURLY@108..111 "}}" [] [Whitespace(" ")]
+        2: HTML_CONTENT@111..142
+          0: HTML_LITERAL@111..142 "reprehenderit voluptates minus" [] [Whitespace(" ")]
+        3: HTML_DOUBLE_TEXT_EXPRESSION@142..182
+          0: L_DOUBLE_CURLY@142..144 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@144..179
+            0: HTML_LITERAL@144..179 "console.log(  short_interpolation )" [] []
+          2: R_DOUBLE_CURLY@179..182 "}}" [] [Whitespace(" ")]
+        4: HTML_CONTENT@182..187
+          0: HTML_LITERAL@182..187 "nemo." [] []
+      2: HTML_CLOSING_ELEMENT@187..193
+        0: L_ANGLE@187..188 "<" [] []
+        1: SLASH@188..189 "/" [] []
+        2: HTML_TAG_NAME@189..192
+          0: HTML_LITERAL@189..192 "div" [] []
+        3: R_ANGLE@192..193 ">" [] []
+    1: HTML_ELEMENT@193..240
+      0: HTML_OPENING_ELEMENT@193..200
+        0: L_ANGLE@193..196 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@196..199
+          0: HTML_LITERAL@196..199 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@199..199
+        3: R_ANGLE@199..200 ">" [] []
+      1: HTML_ELEMENT_LIST@200..234
+        0: HTML_CONTENT@200..211
+          0: HTML_LITERAL@200..211 "Too small:" [] [Whitespace(" ")]
+        1: HTML_DOUBLE_TEXT_EXPRESSION@211..223
+          0: L_DOUBLE_CURLY@211..213 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@213..220
+            0: HTML_LITERAL@213..220 " x < 5 " [] []
+          2: R_DOUBLE_CURLY@220..223 "}}" [] [Whitespace(" ")]
+        2: HTML_DOUBLE_TEXT_EXPRESSION@223..234
+          0: L_DOUBLE_CURLY@223..225 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@225..232
+            0: HTML_LITERAL@225..232 " y / 16" [] []
+          2: R_DOUBLE_CURLY@232..234 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@234..240
+        0: L_ANGLE@234..235 "<" [] []
+        1: SLASH@235..236 "/" [] []
+        2: HTML_TAG_NAME@236..239
+          0: HTML_LITERAL@236..239 "div" [] []
+        3: R_ANGLE@239..240 ">" [] []
+    2: HTML_ELEMENT@240..278
+      0: HTML_OPENING_ELEMENT@240..247
+        0: L_ANGLE@240..243 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@243..246
+          0: HTML_LITERAL@243..246 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@246..246
+        3: R_ANGLE@246..247 ">" [] []
+      1: HTML_ELEMENT_LIST@247..272
+        0: HTML_DOUBLE_TEXT_EXPRESSION@247..272
+          0: L_DOUBLE_CURLY@247..249 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@249..270
+            0: HTML_LITERAL@249..270 " call(fn({ inner })) " [] []
+          2: R_DOUBLE_CURLY@270..272 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@272..278
+        0: L_ANGLE@272..273 "<" [] []
+        1: SLASH@273..274 "/" [] []
+        2: HTML_TAG_NAME@274..277
+          0: HTML_LITERAL@274..277 "div" [] []
+        3: R_ANGLE@277..278 ">" [] []
+  4: EOF@278..279 "" [Newline("\n")] []
+
+```

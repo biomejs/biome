@@ -146,7 +146,7 @@ impl BiomeDiagnostic {
 
     pub fn root_in_root(nested_path: String, root_path: Option<String>) -> Self {
         Self::RootInRoot(RootInRoot {
-            path: nested_path.to_string(),
+            path: nested_path.clone(),
             other_path: root_path,
         })
     }
@@ -279,10 +279,10 @@ impl CantLoadExtendFile {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }
@@ -345,10 +345,10 @@ impl CantResolve {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }

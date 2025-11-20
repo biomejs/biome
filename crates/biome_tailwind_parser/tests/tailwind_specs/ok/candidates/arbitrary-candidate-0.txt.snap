@@ -1,0 +1,64 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+[color:red]/50
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwArbitraryCandidate {
+                l_brack_token: L_BRACKET@0..1 "[" [] [],
+                property_token: TW_PROPERTY@1..6 "color" [] [],
+                colon_token: COLON@6..7 ":" [] [],
+                value_token: TW_VALUE@7..10 "red" [] [],
+                r_brack_token: R_BRACKET@10..11 "]" [] [],
+                modifier: TwModifier {
+                    slash_token: SLASH@11..12 "/" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@12..15 "50" [] [Newline("\n")],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@15..15 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..15
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..15
+    0: TW_FULL_CANDIDATE@0..15
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_ARBITRARY_CANDIDATE@0..15
+        0: L_BRACKET@0..1 "[" [] []
+        1: TW_PROPERTY@1..6 "color" [] []
+        2: COLON@6..7 ":" [] []
+        3: TW_VALUE@7..10 "red" [] []
+        4: R_BRACKET@10..11 "]" [] []
+        5: TW_MODIFIER@11..15
+          0: SLASH@11..12 "/" [] []
+          1: TW_NAMED_VALUE@12..15
+            0: TW_VALUE@12..15 "50" [] [Newline("\n")]
+      3: (empty)
+  2: EOF@15..15 "" [] []
+
+```

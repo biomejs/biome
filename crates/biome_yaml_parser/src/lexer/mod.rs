@@ -19,11 +19,14 @@ pub(crate) struct YamlLexer<'src> {
     /// Diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
 
-    /// Hiarchy of block scopes covering the lexer's current coordinate
+    /// Hierarchy of block scopes covering the lexer's current coordinate
     scopes: Vec<BlockScope>,
 
     /// Cache of tokens to be emitted to the parser
     tokens: LinkedList<LexToken>,
+
+    /// Cache of tokens that should only be emitted after the current scope has been properly closed.
+    cached_scope_closing_tokens: Option<LinkedList<LexToken>>,
 }
 
 impl<'src> YamlLexer<'src> {
@@ -34,6 +37,7 @@ impl<'src> YamlLexer<'src> {
             scopes: Default::default(),
             current_coordinate: Default::default(),
             tokens: LexToken::default().into(),
+            cached_scope_closing_tokens: None,
         }
     }
 
@@ -49,12 +53,8 @@ impl<'src> YamlLexer<'src> {
     /// ```
     fn consume_tokens(&mut self) {
         let Some(current) = self.current_byte() else {
-            while let Some(scope) = self.scopes.pop() {
-                self.tokens.push_back(LexToken::pseudo(
-                    scope.close_token_kind(),
-                    self.current_coordinate,
-                ));
-            }
+            let mut tokens = self.close_all_scopes();
+            self.tokens.append(&mut tokens);
             self.tokens
                 .push_back(LexToken::pseudo(EOF, self.current_coordinate));
             return;
@@ -62,24 +62,232 @@ impl<'src> YamlLexer<'src> {
 
         let start = self.text_position();
 
-        let mut result = match (current, self.peek_byte()) {
-            _ if is_start_of_trivia(current) => {
-                BlockScopedTokens::trivia(self.consume_trivia(current))
-            }
-            (current, peek) if maybe_at_mapping_start(current, peek) => {
+        let mut tokens = match current {
+            c if is_break(c) => self.evaluate_block_scope(),
+            c if is_space(c) => self.consume_whitespace_token().into(),
+            b'#' => self.consume_comment().into(),
+            b'.' if self.is_at_doc_end() => self.consume_doc_end(),
+            current if maybe_at_mapping_start(current, self.peek_byte()) => {
                 self.consume_potential_mapping_start(current)
             }
             // ':', '?', '-' can be a valid plain token start
-            (b'?', _) => self.consume_explicit_mapping_key(),
-            (b'-', _) => self.consume_sequence_entry(),
-            (b':', _) => self.consume_empty_mapping_key(),
+            b'?' | b':' => self.consume_mapping_key(current),
+            b'-' => self.consume_sequence_entry(),
+            b'|' | b'>' => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
         };
-        if let Some(scope) = result.scope {
-            self.scopes.push(scope)
-        }
-        self.tokens.append(&mut result.tokens);
+        self.tokens.append(&mut tokens);
 
+        debug_assert!(self.text_position() > start, "Lexer did not advance");
+    }
+
+    fn consume_sequence_entry(&mut self) -> LinkedList<LexToken> {
+        self.assert_byte(b'-');
+        let indicator = self.consume_byte_as_token(T![-]);
+
+        if self
+            .scopes
+            .last()
+            .is_none_or(|scope| scope.indent_with_dash(indicator.start))
+        {
+            let mut tokens = LinkedList::new();
+            tokens.push_back(indicator);
+            tokens.push_front(LexToken::pseudo(SEQUENCE_START, indicator.start));
+            self.scopes
+                .push(BlockScope::new_sequence_scope(indicator.start));
+            tokens
+        } else {
+            indicator.into()
+        }
+    }
+
+    /// Consume a known mapping key, indicated by either '?' or ':'.
+    /// '?' signifies an explicit mapping key, while ':' represents an empty one.
+    /// For example, `: abc` is a valid yaml mapping, which is equivalent
+    /// to `{null: abc}`
+    fn consume_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
+        debug_assert!(matches!(current, b'?' | b':'));
+        let indicator = if current == b'?' {
+            self.consume_byte_as_token(T![?])
+        } else {
+            self.consume_byte_as_token(T![:])
+        };
+        if self
+            .scopes
+            .last()
+            .is_none_or(|scope| scope.indent(indicator.start))
+        {
+            let mut tokens = LinkedList::new();
+            tokens.push_front(LexToken::pseudo(MAPPING_START, indicator.start));
+            tokens.push_back(indicator);
+            self.scopes
+                .push(BlockScope::new_mapping_scope(indicator.start));
+            tokens
+        } else {
+            indicator.into()
+        }
+    }
+
+    /// Consume and disambiguate a YAML value to determine whether it's a YAML block map or just a
+    /// YAML flow value
+    fn consume_potential_mapping_start(&mut self, current: u8) -> LinkedList<LexToken> {
+        debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
+
+        let start = self.current_coordinate;
+        let mut tokens = self.consume_potential_mapping_key(current);
+        if self.scopes.last().is_none_or(|scope| scope.indent(start)) {
+            // Potentially start of a mapping collection
+            if let Some(mut trivia_tokens) = self.cached_scope_closing_tokens.take() {
+                // Either flow tokens that end prematurely, or plain followed by newline, so can't be a mapping key
+                let tokens_end = tokens.back().map_or(start, |token| token.end);
+                tokens.push_front(LexToken::pseudo(FLOW_START, start));
+                tokens.push_back(LexToken::pseudo(FLOW_END, tokens_end));
+                tokens.append(&mut trivia_tokens);
+            } else if self.is_at_mapping_indicator() {
+                let indicator = self.consume_byte_as_token(T![:]);
+                tokens.push_front(LexToken::pseudo(MAPPING_START, start));
+                tokens.push_back(indicator);
+                self.scopes.push(BlockScope::new_mapping_scope(start));
+            } else {
+                // Just a normal flow value
+                tokens.push_front(LexToken::pseudo(FLOW_START, start));
+                // Consume any trailing trivia remaining before closing the flow, as we must not
+                // have trailing trivia followed FLOW_END token
+                let mut trivia = self.consume_trivia(true);
+                tokens.append(&mut trivia);
+                tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
+            }
+        } else if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
+            // A mapping key that ends prematurely
+            tokens.append(&mut trivia);
+        } else if self.is_at_mapping_indicator() {
+            // At a valid mapping key, lex the `:` so that the lexer wouldn't confuse it with a
+            // standalone `:` token, which indicate the start of an empty mapping key
+            let indicator = self.consume_byte_as_token(T![:]);
+            tokens.push_back(indicator);
+        }
+        tokens
+    }
+
+    fn consume_block_scalar(&mut self, current: u8) -> LinkedList<LexToken> {
+        debug_assert!(matches!(current, b'|' | b'>'));
+
+        let mut tokens = LinkedList::new();
+
+        let style_token = if current == b'|' {
+            self.consume_byte_as_token(T![|])
+        } else {
+            self.consume_byte_as_token(T![>])
+        };
+        tokens.push_back(style_token);
+
+        let mut headers = self.consume_block_header_tokens();
+        tokens.append(&mut headers);
+
+        tokens.push_back(self.lex_block_content());
+
+        // Block content trailing trivia
+        if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
+            tokens.append(&mut trivia);
+        }
+
+        tokens
+    }
+
+    /// Lex block scalar header indicators, returning tokens and indent size
+    fn consume_block_header_tokens(&mut self) -> LinkedList<LexToken> {
+        let mut tokens = LinkedList::new();
+
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'0'..=b'9' => {
+                    tokens.push_back(self.consume_indentation_indicator(current));
+                }
+                b'-' => {
+                    tokens.push_back(self.consume_byte_as_token(T![-]));
+                }
+                b'+' => {
+                    tokens.push_back(self.consume_byte_as_token(T![+]));
+                }
+                _ => break,
+            }
+        }
+
+        let mut trivia = self.consume_trailing_trivia();
+        tokens.append(&mut trivia);
+
+        tokens
+    }
+
+    fn consume_indentation_indicator(&mut self, first_digit: u8) -> LexToken {
+        debug_assert!(first_digit.is_ascii_digit());
+        let start_coordinate = self.current_coordinate;
+        let start_pos = self.text_position();
+        self.advance(1);
+
+        let has_more_digits = self.current_byte().is_some_and(|c| c.is_ascii_digit());
+        let starts_with_zero = first_digit == b'0';
+
+        let kind = if starts_with_zero || has_more_digits {
+            // Consume any remaining digits for better diagnostic
+            while self.current_byte().is_some_and(|c| c.is_ascii_digit()) {
+                self.advance(1);
+            }
+
+            let err = ParseDiagnostic::new(
+                "Indentation indicator must be between '1' and '9'",
+                start_pos..self.text_position(),
+            );
+            self.diagnostics.push(err);
+            ERROR_TOKEN
+        } else {
+            INDENTATION_INDICATOR
+        };
+        LexToken::new(kind, start_coordinate, self.current_coordinate)
+    }
+
+    /// Lex the content of a block scalar.
+    /// We don't need to take into account the indentation size declared in the header, since it's
+    /// only relevant when we need to extract/format the content of the scalar.
+    /// By ignoring the declared indentation and just lex the block content like a plain
+    /// literal, we can provide better diagnostic messages when the content is indented less
+    /// than the declared value.
+    /// A syntax analyzer rule can then be used to identify erroneous blocks.
+    /// Start with the newline followed the header, to handle cases where the block content is
+    /// empty
+    fn lex_block_content(&mut self) -> LexToken {
+        debug_assert!(self.current_byte().is_none_or(is_break));
+        let start = self.current_coordinate;
+
+        while let Some(current) = self.current_byte() {
+            if is_break(current) {
+                let might_be_token_end = self.current_coordinate;
+                if !self.is_scalar_continuation() {
+                    return LexToken::new(BLOCK_CONTENT_LITERAL, start, might_be_token_end);
+                }
+            } else {
+                self.advance(1);
+            }
+        }
+
+        LexToken::new(BLOCK_CONTENT_LITERAL, start, self.current_coordinate)
+    }
+
+    fn evaluate_block_scope(&mut self) -> LinkedList<LexToken> {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let start = self.current_coordinate;
+        let mut trivia = self.consume_trivia(false);
+        let mut scope_end_tokens = self.close_breached_scopes(start);
+        scope_end_tokens.append(&mut trivia);
+        scope_end_tokens
+    }
+
+    /// Close all violated scopes, and emit closing tokens right after the last non trivia token
+    fn close_breached_scopes(
+        &mut self,
+        scope_end_coordinate: TextCoordinate,
+    ) -> LinkedList<LexToken> {
+        let mut scope_end_tokens = LinkedList::new();
         while let Some(scope) = self.scopes.pop() {
             if scope.contains(
                 self.current_coordinate,
@@ -88,99 +296,69 @@ impl<'src> YamlLexer<'src> {
                 self.scopes.push(scope);
                 break;
             } else {
-                self.tokens.push_back(LexToken::pseudo(
+                scope_end_tokens.push_back(LexToken::pseudo(
                     scope.close_token_kind(),
-                    self.current_coordinate,
+                    scope_end_coordinate,
                 ));
             }
         }
-
-        self.tokens.append(&mut result.trailing_trivia);
-
-        debug_assert!(self.text_position() > start, "Lexer did not advance");
+        scope_end_tokens
     }
 
-    fn consume_sequence_entry(&mut self) -> BlockScopedTokens {
-        self.assert_byte(b'-');
-        let token = self.consume_byte(T![-]);
-        BlockScopedTokens::sequence_entry(token, self.scopes.last())
-    }
-
-    fn consume_explicit_mapping_key(&mut self) -> BlockScopedTokens {
-        self.assert_byte(b'?');
-        let token = self.consume_byte(T![?]);
-        BlockScopedTokens::empty_mapping_key(token, self.scopes.last())
-    }
-
-    /// Mapping key can be empty. For example, `: abc` is a valid yaml mapping, which is equivalent
-    /// to `{null: abc}`
-    fn consume_empty_mapping_key(&mut self) -> BlockScopedTokens {
-        let indicator = self.consume_byte(T![:]);
-        BlockScopedTokens::empty_mapping_key(indicator, self.scopes.last())
-    }
-
-    /// Consume and disambiguate a YAML value to determine whether it's a YAML block map or just a
-    /// YAML flow value
-    fn consume_potential_mapping_start(&mut self, current: u8) -> BlockScopedTokens {
-        debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
-
-        let start = self.current_coordinate;
-        match self.consume_potential_mapping_key(current) {
-            FlowScopedTokens::Closed(tokens, trailing_trivia) => {
-                BlockScopedTokens::flow_value(tokens, start, trailing_trivia)
-            }
-            FlowScopedTokens::Continuable(tokens) => {
-                if self.is_at_mapping_indicator() {
-                    let indicator = self.consume_byte(T![:]);
-                    BlockScopedTokens::filled_mapping_key(tokens, indicator, self.scopes.last())
-                } else {
-                    BlockScopedTokens::flow_value(tokens, start, LinkedList::new())
-                }
-            }
+    fn close_all_scopes(&mut self) -> LinkedList<LexToken> {
+        let tokens = LinkedList::new();
+        while let Some(scope) = self.scopes.pop() {
+            self.tokens.push_back(LexToken::pseudo(
+                scope.close_token_kind(),
+                self.current_coordinate,
+            ));
         }
+        tokens
     }
 
     /// Consume a YAML flow value that can be used inside an implicit mapping key
     /// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
-    fn consume_potential_mapping_key(&mut self, current: u8) -> FlowScopedTokens {
+    fn consume_potential_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
         if is_flow_collection_indicator(current) {
             self.consume_flow_collection()
         } else if current == b'"' {
-            self.consume_double_quoted_literal()
+            self.consume_double_quoted_literal().into()
         } else if current == b'\'' {
-            self.consume_single_quoted_literal()
+            self.consume_single_quoted_literal().into()
         } else {
-            self.consume_plain_literal(current, false)
+            self.consume_plain_literal(current, false).into()
         }
     }
 
     /// A yaml collection is a JSON-like data structure
-    fn consume_flow_collection(&mut self) -> FlowScopedTokens {
+    fn consume_flow_collection(&mut self) -> LinkedList<LexToken> {
         let mut current_depth: usize = 0;
         let mut collection_tokens = LinkedList::new();
 
         // https://yaml.org/spec/1.2.2/#rule-c-ns-flow-map-json-key-entry
         // Usually a ':' character has to be follow by a blank character to be lexed as a standalone
         // T![:] token
-        // However, for JSON-compability, the spec allows ':' followed a JSON-like key to be lexed
+        // However, for JSON-compatibility, the spec allows ':' followed a JSON-like key to be lexed
         // as is, T![:], instead of a potential start of a plain token
         // According to the spec:
         // `{"a"    :b}`
         // Should be lexed as `{"a": b}`, instead of `{"a" (missing colon) :b}`
         let mut just_lexed_json_key = false;
         while let Some(current) = self.current_byte() {
-            let tokens = match (current, self.peek_byte()) {
-                _ if is_start_of_trivia(current) => {
-                    let trivia = self.consume_trivia(current);
-                    if self.no_longer_flow() {
-                        FlowScopedTokens::Closed(LinkedList::new(), trivia)
-                    } else {
-                        FlowScopedTokens::Continuable(trivia)
-                    }
+            if is_break(current) {
+                if let Some(mut trivia) = self.evaluate_flow_scope() {
+                    collection_tokens.append(&mut trivia);
+                    continue;
+                } else {
+                    break;
                 }
+            }
+            let token = match (current, self.peek_byte()) {
+                (c, _) if is_space(c) => self.consume_whitespace_token(),
+                (b'#', _) => self.consume_comment(),
                 (b':', _) if just_lexed_json_key => {
                     just_lexed_json_key = false;
-                    self.consume_byte(T![:]).into()
+                    self.consume_byte_as_token(T![:])
                 }
                 (b'\'', _) => {
                     just_lexed_json_key = true;
@@ -192,49 +370,46 @@ impl<'src> YamlLexer<'src> {
                 }
                 (b'[', _) => {
                     current_depth += 1;
-                    self.consume_byte(T!['[']).into()
+                    self.consume_byte_as_token(T!['['])
                 }
                 (b']', _) => {
                     just_lexed_json_key = true;
                     current_depth = current_depth.saturating_sub(1);
-                    self.consume_byte(T![']']).into()
+                    self.consume_byte_as_token(T![']'])
                 }
                 (b'{', _) => {
                     current_depth += 1;
-                    self.consume_byte(T!['{']).into()
+                    self.consume_byte_as_token(T!['{'])
                 }
                 (b'}', _) => {
                     just_lexed_json_key = true;
                     current_depth = current_depth.saturating_sub(1);
-                    self.consume_byte(T!['}']).into()
+                    self.consume_byte_as_token(T!['}'])
                 }
-                (b',', _) => self.consume_byte(T![,]).into(),
+                (b',', _) => self.consume_byte_as_token(T![,]),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
                     self.consume_plain_literal(current, true)
                 }
-                // ':', '?', '-' can be a valid plain token start
-                (b':', _) => self.consume_byte(T![:]).into(),
-                (b'?', _) => self.consume_byte(T![?]).into(),
-                (b'-', _) => self.consume_byte(T![-]).into(),
-                _ => self.consume_unexpected_token().into(),
+                // ':', '?', '-' can be a valid plain token start, so it must be placed after plain
+                (b':', _) => self.consume_byte_as_token(T![:]),
+                (b'?', _) => self.consume_byte_as_token(T![?]),
+                (b'-', _) => self.consume_byte_as_token(T![-]),
+                _ => self.consume_unexpected_token(),
             };
-            match tokens {
-                FlowScopedTokens::Continuable(mut tokens) => collection_tokens.append(&mut tokens),
-                FlowScopedTokens::Closed(mut tokens, trailing_trivia) => {
-                    collection_tokens.append(&mut tokens);
-                    return FlowScopedTokens::Closed(collection_tokens, trailing_trivia);
-                }
+            collection_tokens.push_back(token);
+            if self.cached_scope_closing_tokens.is_some() {
+                break;
             }
             if current_depth == 0 {
                 break;
             }
         }
-        FlowScopedTokens::Continuable(collection_tokens)
+        collection_tokens
     }
 
     // https://yaml.org/spec/1.2.2/#rule-ns-plain
     // TODO: parse multiline plain scalar at current indentation level
-    fn consume_plain_literal(&mut self, current: u8, in_flow_collection: bool) -> FlowScopedTokens {
+    fn consume_plain_literal(&mut self, current: u8, in_flow_collection: bool) -> LexToken {
         debug_assert!(is_start_of_plain(
             current,
             self.peek_byte(),
@@ -257,30 +432,30 @@ impl<'src> YamlLexer<'src> {
                     .is_some_and(|c| is_plain_safe(c, in_flow_collection))
             {
                 // Don't advance past the next plain safe char since there's no guarantee that next
-                // char is conformant. For example, in `[::]`, the second colon shouldn't be part
+                // char is compliant. For example, in `[::]`, the second colon shouldn't be part
                 // of the plain literal even though it's "plain safe"
                 self.advance(1); // ':'
-            } else if is_blank(c) {
-                let blank = self.consume_blank();
-                // Handle trailing trivia
-                if self.no_longer_flow() {
-                    let plain = LexToken::new(PLAIN_LITERAL, start, blank.start);
-                    return FlowScopedTokens::Closed(plain.into(), blank.into());
+            } else if is_space(c) {
+                self.consume_whitespaces();
+            } else if is_break(c) {
+                let might_be_token_end = self.current_coordinate;
+                if !self.is_scalar_continuation() {
+                    return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
                 }
             } else {
                 break;
             }
         }
-        LexToken::new(PLAIN_LITERAL, start, self.current_coordinate).into()
+        LexToken::new(PLAIN_LITERAL, start, self.current_coordinate)
     }
 
     // https://yaml.org/spec/1.2.2/#731-double-quoted-style
-    fn consume_double_quoted_literal(&mut self) -> FlowScopedTokens {
+    fn consume_double_quoted_literal(&mut self) -> LexToken {
         self.assert_byte(b'"');
         let start = self.current_coordinate;
         self.advance(1);
 
-        loop {
+        let token_end = loop {
             match self.current_byte() {
                 Some(b'\\') => {
                     if matches!(self.peek_byte(), Some(b'"')) {
@@ -291,13 +466,13 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(b'"') => {
                     self.advance(1);
-                    break;
+                    break self.current_coordinate;
                 }
-                Some(current) if is_blank(current) => {
-                    let blank = self.consume_blank();
-                    if self.no_longer_flow() {
-                        let quoted = LexToken::new(DOUBLE_QUOTED_LITERAL, start, blank.start);
-                        return FlowScopedTokens::Closed(quoted.into(), blank.into());
+                Some(c) if is_space(c) => self.consume_whitespaces(),
+                Some(c) if is_break(c) => {
+                    let might_be_token_end = self.current_coordinate;
+                    if !self.is_scalar_continuation() {
+                        break might_be_token_end;
                     }
                 }
                 Some(_) => self.advance(1),
@@ -307,34 +482,36 @@ impl<'src> YamlLexer<'src> {
                         self.text_position()..self.text_position(),
                     );
                     self.diagnostics.push(err);
-                    break;
+                    break self.current_coordinate;
                 }
             }
-        }
-        LexToken::new(DOUBLE_QUOTED_LITERAL, start, self.current_coordinate).into()
+        };
+        LexToken::new(DOUBLE_QUOTED_LITERAL, start, token_end)
     }
 
     // https://yaml.org/spec/1.2.2/#732-single-quoted-style
-    fn consume_single_quoted_literal(&mut self) -> FlowScopedTokens {
+    fn consume_single_quoted_literal(&mut self) -> LexToken {
         self.assert_byte(b'\'');
         let start = self.current_coordinate;
         self.advance(1);
 
-        loop {
+        let token_end = loop {
             match self.current_byte() {
                 Some(b'\'') => {
                     if matches!(self.peek_byte(), Some(b'\'')) {
                         self.advance(2)
                     } else {
                         self.advance(1);
-                        break;
+                        break self.current_coordinate;
                     }
                 }
-                Some(current) if is_blank(current) => {
-                    let blank = self.consume_blank();
-                    if self.no_longer_flow() {
-                        let quoted = LexToken::new(SINGLE_QUOTED_LITERAL, start, blank.start);
-                        return FlowScopedTokens::Closed(quoted.into(), blank.into());
+                Some(current) if is_space(current) => {
+                    self.consume_whitespaces();
+                }
+                Some(current) if is_break(current) => {
+                    let might_be_token_end = self.current_coordinate;
+                    if !self.is_scalar_continuation() {
+                        break might_be_token_end;
                     }
                 }
                 Some(_) => self.advance(1),
@@ -344,65 +521,115 @@ impl<'src> YamlLexer<'src> {
                         self.text_position()..self.text_position(),
                     );
                     self.diagnostics.push(err);
-                    break;
+                    break self.current_coordinate;
                 }
             }
-        }
-        LexToken::new(SINGLE_QUOTED_LITERAL, start, self.current_coordinate).into()
+        };
+        LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
+    }
+
+    fn is_at_doc_end(&self) -> bool {
+        let is_dot = |c: u8| c == b'.';
+        // A DOC_END token can be evaluated as a plain token if it's not placed at the start of
+        // line
+        self.current_coordinate.column == 0
+            && self.current_byte().is_some_and(is_dot)
+            && self.peek_byte().is_some_and(is_dot)
+            && self.byte_at(2).is_some_and(is_dot)
+    }
+
+    fn consume_doc_end(&mut self) -> LinkedList<LexToken> {
+        self.assert_byte(b'.');
+        debug_assert_eq!(self.byte_at(1), Some(b'.'));
+        debug_assert_eq!(self.byte_at(2), Some(b'.'));
+        let start = self.current_coordinate;
+        let mut tokens = self.close_all_scopes();
+        self.advance(3);
+        tokens.push_back(LexToken::new(DOC_END, start, self.current_coordinate));
+        let mut trivia = self.consume_trailing_trivia();
+        tokens.append(&mut trivia);
+
+        tokens
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
-    fn consume_byte(&mut self, tok: YamlSyntaxKind) -> LexToken {
+    fn consume_byte_as_token(&mut self, tok: YamlSyntaxKind) -> LexToken {
         let start = self.current_coordinate;
         self.advance(1);
         LexToken::new(tok, start, self.current_coordinate)
     }
 
-    /// Consume all trivia tokens. The lexer is guaranteed to land on a non trivia token after this,
-    /// which it can then use to check if it's still within the current scope or has broken out
-    fn consume_trivia(&mut self, current: u8) -> LinkedList<LexToken> {
-        debug_assert!(current == b'#' || is_blank(current));
-        let mut tokens = LinkedList::new();
-        let mut start = self.current_coordinate;
-        while let Some(current) = self.current_byte() {
-            if is_space(current) {
-                self.consume_whitespaces();
-                tokens.push_back(LexToken::new(WHITESPACE, start, self.current_coordinate));
-                start = self.current_coordinate
-            } else if is_break(current) {
-                self.consume_newline();
-                self.current_coordinate = self.current_coordinate.enter_new_line();
-                tokens.push_back(LexToken::new(NEWLINE, start, self.current_coordinate));
-                start = self.current_coordinate
-            } else if current == b'#' {
-                let token = self.consume_comment();
-                tokens.push_back(token);
-                start = self.current_coordinate
-            } else {
-                break;
-            }
+    /// Check whether the next line break closes the current flow collection
+    /// Return a list of trivia if this is not the end of the current flow
+    fn evaluate_flow_scope(&mut self) -> Option<LinkedList<LexToken>> {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let start = self.current_coordinate;
+        let mut trivia = self.consume_trivia(false);
+        if self.breach_parent_scope() {
+            let mut scope_end_tokens = self.close_breached_scopes(start);
+            scope_end_tokens.append(&mut trivia);
+            self.cached_scope_closing_tokens = Some(scope_end_tokens);
+            None
+        } else {
+            Some(trivia)
         }
-        tokens
     }
 
-    /// Consume all whitespace characters and newlines into a single token
-    fn consume_blank(&mut self) -> LexToken {
-        let mut is_newline = false;
-        let start = self.current_coordinate;
+    fn consume_trivia(&mut self, trailing: bool) -> LinkedList<LexToken> {
+        let mut trivia = LinkedList::new();
         while let Some(current) = self.current_byte() {
             if is_space(current) {
-                self.consume_whitespaces();
+                trivia.push_back(self.consume_whitespace_token());
             } else if is_break(current) {
-                self.consume_newline();
-                self.current_coordinate = self.current_coordinate.enter_new_line();
-                is_newline = true;
+                if trailing {
+                    break;
+                }
+                trivia.push_back(self.consume_newline_token());
+            } else if current == b'#' {
+                trivia.push_back(self.consume_comment());
             } else {
                 break;
             }
         }
-        let kind = if is_newline { NEWLINE } else { WHITESPACE };
-        LexToken::new(kind, start, self.current_coordinate)
+        trivia
+    }
+
+    fn is_scalar_continuation(&mut self) -> bool {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let start = self.current_coordinate;
+        let mut trivia = LinkedList::new();
+        while let Some(current) = self.current_byte() {
+            if is_space(current) {
+                trivia.push_back(self.consume_whitespace_token());
+            } else if is_break(current) {
+                trivia.push_back(self.consume_newline_token());
+            } else {
+                break;
+            }
+        }
+        if self.breach_parent_scope() {
+            let mut scope_end_tokens = self.close_breached_scopes(start);
+            scope_end_tokens.append(&mut trivia);
+            self.cached_scope_closing_tokens = Some(scope_end_tokens);
+            false
+        } else {
+            true
+        }
+    }
+
+    fn consume_whitespace_token(&mut self) -> LexToken {
+        debug_assert!(self.current_byte().is_some_and(is_space));
+        let start = self.current_coordinate;
+        self.consume_whitespaces();
+        LexToken::new(WHITESPACE, start, self.current_coordinate)
+    }
+
+    fn consume_newline_token(&mut self) -> LexToken {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let start = self.current_coordinate;
+        self.consume_newline();
+        LexToken::new(NEWLINE, start, self.current_coordinate)
     }
 
     fn consume_comment(&mut self) -> LexToken {
@@ -421,23 +648,50 @@ impl<'src> YamlLexer<'src> {
         self.assert_current_char_boundary();
         let start = self.current_coordinate;
 
+        self.consume_unexpected_character();
+        LexToken::new(ERROR_TOKEN, start, self.current_coordinate)
+    }
+
+    /// Some constructs, like block header or document end (`...`), don't allow any trailing tokens
+    /// except for trivia.
+    /// This function is responsible for consuming the trailing trivia and any unexpected tokens
+    fn consume_trailing_trivia(&mut self) -> LinkedList<LexToken> {
+        self.assert_current_char_boundary();
+
+        let mut tokens = self.consume_trivia(true);
+
+        if self.current_byte().is_none_or(is_break) {
+            return tokens;
+        }
+
+        let start = self.current_coordinate;
+        while let Some(c) = self.current_byte() {
+            if is_break(c) {
+                break;
+            }
+            self.advance_char_unchecked();
+        }
+        tokens.push_back(LexToken::new(ERROR_TOKEN, start, self.current_coordinate));
+        tokens
+    }
+
+    fn consume_unexpected_character(&mut self) {
+        self.assert_current_char_boundary();
+
         let char = self.current_char_unchecked();
         let err = ParseDiagnostic::new(
-            format!("unexpected character `{char}`"),
+            format!("Unexpected character `{char}`"),
             self.text_position()..self.text_position() + char.text_len(),
         );
         self.diagnostics.push(err);
         self.advance(char.len_utf8());
-        LexToken::new(ERROR_TOKEN, start, self.current_coordinate)
     }
 
     fn is_at_mapping_indicator(&self) -> bool {
         self.current_byte().is_some_and(|c| c == b':') && self.peek_byte().is_none_or(is_blank)
     }
 
-    // Flow node must be indented by at least one more space than the parent's scope
-    // https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
-    fn no_longer_flow(&self) -> bool {
+    fn breach_parent_scope(&self) -> bool {
         self.scopes
             .last()
             .is_some_and(|scope| !scope.indent(self.current_coordinate))
@@ -524,7 +778,7 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
     /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
-    /// Must be called at a valid UT8 char boundary
+    /// Must be called at a valid UTF8 char boundary
     fn consume_whitespaces(&mut self) {
         self.assert_current_char_boundary();
 
@@ -550,6 +804,33 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
                         .with_hint("Use a regular whitespace character instead. For more detail, please check https://yaml.org/spec/1.2.2/#55-white-space-characters"),
                 )
             }
+        }
+    }
+
+    /// Consume just one newline/line break.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UTF8 char boundary
+    fn consume_newline(&mut self) -> bool {
+        self.assert_current_char_boundary();
+
+        match self.current_byte() {
+            Some(b'\n') => {
+                self.advance(1);
+                self.current_coordinate = self.current_coordinate.enter_new_line();
+                true
+            }
+            Some(b'\r') => {
+                if self.peek_byte() == Some(b'\n') {
+                    self.advance(2)
+                } else {
+                    self.advance(1)
+                }
+                self.current_coordinate = self.current_coordinate.enter_new_line();
+                true
+            }
+
+            _ => false,
         }
     }
 }
@@ -648,14 +929,14 @@ impl BlockScope {
         }
     }
 
-    fn contains(&self, coordinate: TextCoordinate, is_dash: bool) -> bool {
+    fn contains(&self, coordinate: TextCoordinate, is_sequence_entry: bool) -> bool {
         match self {
             Self::Sequence(border) => {
                 // Since a sequence entry can start on the same column as a map entry, we have to check
                 // whether the current entry is a map or a sequence entry.
                 // If it's a map entry and starts on the same column as the current sequence scope, it
                 // belongs to the parent scope instead.
-                coordinate.column > *border || (is_dash && coordinate.column == *border)
+                coordinate.column > *border || (is_sequence_entry && coordinate.column == *border)
             }
             Self::Map(border) => coordinate.column >= *border,
         }
@@ -669,137 +950,11 @@ impl BlockScope {
     }
 }
 
-struct BlockScopedTokens {
-    scope: Option<BlockScope>,
-    tokens: LinkedList<LexToken>,
-    trailing_trivia: LinkedList<LexToken>,
-}
-
-impl BlockScopedTokens {
-    fn empty_mapping_key(indicator: LexToken, parent_scope: Option<&BlockScope>) -> Self {
-        if parent_scope.is_none_or(|scope| scope.indent(indicator.start)) {
-            let mut tokens = LinkedList::new();
-            tokens.push_front(LexToken::pseudo(MAPPING_START, indicator.start));
-            tokens.push_back(indicator);
-            Self {
-                scope: Some(BlockScope::new_mapping_scope(indicator.start)),
-                tokens,
-                trailing_trivia: LinkedList::default(),
-            }
-        } else {
-            Self {
-                scope: None,
-                tokens: indicator.into(),
-                trailing_trivia: LinkedList::default(),
-            }
-        }
-    }
-
-    fn filled_mapping_key(
-        mut tokens: LinkedList<LexToken>,
-        indicator: LexToken,
-        parent_scope: Option<&BlockScope>,
-    ) -> Self {
-        let start = tokens.front().map_or(indicator.start, |token| token.start);
-        tokens.push_back(indicator);
-
-        if parent_scope.is_none_or(|scope| scope.indent(start)) {
-            tokens.push_front(LexToken::pseudo(MAPPING_START, start));
-            Self {
-                scope: Some(BlockScope::new_mapping_scope(start)),
-                tokens,
-                trailing_trivia: LinkedList::new(),
-            }
-        } else {
-            Self {
-                scope: None,
-                tokens,
-                trailing_trivia: LinkedList::new(),
-            }
-        }
-    }
-
-    fn sequence_entry(indicator: LexToken, parent_scope: Option<&BlockScope>) -> Self {
-        debug_assert_eq!(indicator.kind, T![-]);
-        if parent_scope.is_none_or(|scope| scope.indent_with_dash(indicator.start)) {
-            let mut tokens = LinkedList::new();
-            tokens.push_back(indicator);
-            tokens.push_front(LexToken::pseudo(SEQUENCE_START, indicator.start));
-            Self {
-                scope: Some(BlockScope::new_sequence_scope(indicator.start)),
-                tokens,
-                trailing_trivia: LinkedList::new(),
-            }
-        } else {
-            Self {
-                scope: None,
-                tokens: indicator.into(),
-                trailing_trivia: LinkedList::new(),
-            }
-        }
-    }
-
-    fn flow_value(
-        mut tokens: LinkedList<LexToken>,
-        start: TextCoordinate,
-        trailing_trivia: LinkedList<LexToken>,
-    ) -> Self {
-        let start = tokens.front().map_or(start, |token| token.start);
-        let end = tokens.back().map_or(start, |token| token.end);
-        tokens.push_front(LexToken::pseudo(FLOW_START, start));
-        tokens.push_back(LexToken::pseudo(FLOW_END, end));
-        Self {
-            scope: None,
-            tokens,
-            trailing_trivia,
-        }
-    }
-
-    fn trivia(trailing_trivia: LinkedList<LexToken>) -> Self {
-        Self {
-            scope: None,
-            tokens: LinkedList::new(),
-            trailing_trivia,
-        }
-    }
-}
-
-impl From<LexToken> for BlockScopedTokens {
-    fn from(token: LexToken) -> Self {
-        BlockScopedTokens {
-            scope: None,
-            tokens: token.into(),
-            trailing_trivia: LinkedList::default(),
-        }
-    }
-}
-
-impl From<LinkedList<LexToken>> for BlockScopedTokens {
-    fn from(tokens: LinkedList<LexToken>) -> Self {
-        BlockScopedTokens {
-            scope: None,
-            tokens,
-            trailing_trivia: LinkedList::default(),
-        }
-    }
-}
-
-enum FlowScopedTokens {
-    Continuable(LinkedList<LexToken>),
-    Closed(LinkedList<LexToken>, LinkedList<LexToken>),
-}
-
-impl From<LexToken> for FlowScopedTokens {
-    fn from(value: LexToken) -> Self {
-        Self::Continuable(value.into())
-    }
-}
-
 #[derive(Debug, Default, Clone, Copy)]
 struct TextCoordinate {
     /// The byte position in the source text.
     offset: usize,
-    /// The number of bytes since the last new line.
+    /// The number of bytes since the last newline.
     column: usize,
 }
 
@@ -858,11 +1013,6 @@ fn is_plain_safe(c: u8, in_flow_collection: bool) -> bool {
 #[inline]
 fn is_non_blank_char(c: u8) -> bool {
     !is_blank(c)
-}
-
-#[inline]
-fn is_start_of_trivia(c: u8) -> bool {
-    is_blank(c) || c == b'#'
 }
 
 #[inline]

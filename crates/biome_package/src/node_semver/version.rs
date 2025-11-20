@@ -26,11 +26,11 @@ use std::str::FromStr;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Version {
     /// The major version number. Incremented for incompatible API changes.
-    pub major: u64,
+    pub major: u16,
     /// The minor version number. Incremented for backwards-compatible functionality additions.
-    pub minor: u64,
+    pub minor: u16,
     /// The patch version number. Incremented for backwards-compatible bug fixes.
-    pub patch: u64,
+    pub patch: u16,
     /// Pre-release version identifiers (e.g., ("alpha", "1") for "1.2.3-alpha.1").
     pub prerelease: Vec<String>,
     /// Build metadata identifiers (e.g., ("20130313144700") for "1.2.3+20130313144700").
@@ -80,7 +80,7 @@ impl Version {
     /// assert!(version.prerelease.is_empty());
     /// assert!(version.build.is_empty());
     /// ```
-    pub fn new(major: u64, minor: u64, patch: u64) -> Self {
+    pub fn new(major: u16, minor: u16, patch: u16) -> Self {
         Self {
             major,
             minor,
@@ -119,6 +119,16 @@ impl Version {
         }
         self.prerelease = prerelease;
         Ok(self)
+    }
+
+    /// Adds a minimum prerelease to the version.
+    ///
+    /// A minimum prerelease can be added to a version to avoid any possible
+    /// prerelease from being considered less than the version.
+    #[inline]
+    pub fn with_minimum_prerelease(mut self) -> Self {
+        self.prerelease = vec!["0".to_string()];
+        self
     }
 
     /// Adds build metadata identifiers to this version.
@@ -198,6 +208,64 @@ impl Version {
             other => other,
         }
     }
+
+    /// Increments the version to the next possible major version.
+    ///
+    /// In case of overflow, nothing will happen.
+    pub fn inc_major(&self) -> Self {
+        Self::new(self.major.saturating_add(1), 0, 0)
+    }
+
+    /// Increments the version to the next possible minor version.
+    ///
+    /// In case of overflow, it will increment the major version instead.
+    pub fn inc_minor(&self) -> Self {
+        if let Some(incremented_minor) = self.minor.checked_add(1) {
+            Self::new(self.major, incremented_minor, 0)
+        } else {
+            self.inc_major()
+        }
+    }
+
+    /// Increments the version to the next possible patch version.
+    ///
+    /// In case of overflow, it will increment the minor version instead.
+    pub fn inc_patch(&self) -> Self {
+        if let Some(incremented_patch) = self.patch.checked_add(1) {
+            Self::new(self.major, self.minor, incremented_patch)
+        } else {
+            self.inc_minor()
+        }
+    }
+
+    /// Decrements the version to the previous possible major version.
+    ///
+    /// In case of underflow, nothing will happen.
+    pub fn dec_major(&self) -> Self {
+        Self::new(self.major.saturating_sub(1), 0, 0)
+    }
+
+    /// Decrements the version to the previous possible minor version.
+    ///
+    /// In case of underflow, it will decrement the major version instead.
+    pub fn dec_minor(&self) -> Self {
+        if let Some(decremented_minor) = self.minor.checked_sub(1) {
+            Self::new(self.major, decremented_minor, 0)
+        } else {
+            self.dec_major()
+        }
+    }
+
+    /// Decrements the version to the previous possible patch version.
+    ///
+    /// In case of underflow, it will decrement the minor version instead.
+    pub fn dec_patch(&self) -> Self {
+        if let Some(decremented_patch) = self.patch.checked_sub(1) {
+            Self::new(self.major, self.minor, decremented_patch)
+        } else {
+            self.dec_minor()
+        }
+    }
 }
 
 impl PartialOrd for Version {
@@ -231,24 +299,29 @@ impl FromStr for Version {
         };
 
         let parts: Vec<&str> = core_part.split('.').collect();
-        if parts.len() != 3 {
+        if parts.is_empty() || parts.len() > 3 {
             return Err(VersionError::InvalidFormat);
         }
 
         let major = parse_number(parts[0])?;
-        let minor = parse_number(parts[1])?;
-        let patch = parse_number(parts[2])?;
+        let minor = match parts.get(1) {
+            Some(minor) => parse_number(minor)?,
+            None => 0,
+        };
+        let patch = match parts.get(2) {
+            Some(patch) => parse_number(patch)?,
+            None => 0,
+        };
 
         let mut version = Self::new(major, minor, patch);
 
         if let Some(prerelease) = prerelease_part {
-            let prerelease_parts: Vec<String> =
-                prerelease.split('.').map(|s| s.to_string()).collect();
+            let prerelease_parts = prerelease.split('.').map(|s| s.to_string()).collect();
             version = version.with_prerelease(prerelease_parts)?;
         }
 
         if let Some(build) = build_part {
-            let build_parts: Vec<String> = build.split('.').map(|s| s.to_string()).collect();
+            let build_parts = build.split('.').map(|s| s.to_string()).collect();
             version = version.with_build(build_parts)?;
         }
 
@@ -281,7 +354,7 @@ impl fmt::Display for Version {
 ///
 /// Returns `VersionError::InvalidNumber` if the string is empty, contains
 /// non-numeric characters, or has leading zeros.
-fn parse_number(s: &str) -> Result<u64, VersionError> {
+fn parse_number(s: &str) -> Result<u16, VersionError> {
     if s.is_empty() {
         return Err(VersionError::InvalidNumber);
     }
@@ -316,7 +389,7 @@ fn is_valid_identifier(s: &str) -> bool {
 ///   when all preceding identifiers are equal
 fn compare_prerelease(a: &[String], b: &[String]) -> Ordering {
     for (part_a, part_b) in a.iter().zip(b.iter()) {
-        match (part_a.parse::<u64>(), part_b.parse::<u64>()) {
+        match (part_a.parse::<u16>(), part_b.parse::<u16>()) {
             (Ok(num_a), Ok(num_b)) => match num_a.cmp(&num_b) {
                 Ordering::Equal => {}
                 other => return other,
@@ -348,12 +421,32 @@ mod tests {
     }
 
     #[test]
+    fn test_missing_patch() {
+        let version = "1.2".parse::<Version>().unwrap();
+        assert_eq!(version.major, 1);
+        assert_eq!(version.minor, 2);
+        assert_eq!(version.patch, 0);
+        assert!(version.prerelease.is_empty());
+        assert!(version.build.is_empty());
+    }
+
+    #[test]
+    fn test_missing_minor() {
+        let version = "1".parse::<Version>().unwrap();
+        assert_eq!(version.major, 1);
+        assert_eq!(version.minor, 0);
+        assert_eq!(version.patch, 0);
+        assert!(version.prerelease.is_empty());
+        assert!(version.build.is_empty());
+    }
+
+    #[test]
     fn test_version_with_prerelease() {
         let version = "1.2.3-alpha.1".parse::<Version>().unwrap();
         assert_eq!(version.major, 1);
         assert_eq!(version.minor, 2);
         assert_eq!(version.patch, 3);
-        assert_eq!(version.prerelease, vec!["alpha", "1"]);
+        assert_eq!(version.prerelease, &["alpha", "1"]);
         assert!(version.build.is_empty());
     }
 
@@ -364,7 +457,7 @@ mod tests {
         assert_eq!(version.minor, 2);
         assert_eq!(version.patch, 3);
         assert!(version.prerelease.is_empty());
-        assert_eq!(version.build, vec!["20130313144700"]);
+        assert_eq!(version.build, &["20130313144700"]);
     }
 
     #[test]
@@ -373,8 +466,8 @@ mod tests {
         assert_eq!(version.major, 1);
         assert_eq!(version.minor, 2);
         assert_eq!(version.patch, 3);
-        assert_eq!(version.prerelease, vec!["beta"]);
-        assert_eq!(version.build, vec!["exp", "sha", "5114f85"]);
+        assert_eq!(version.prerelease, &["beta"]);
+        assert_eq!(version.build, &["exp", "sha", "5114f85"]);
     }
 
     #[test]
@@ -422,7 +515,6 @@ mod tests {
 
     #[test]
     fn test_invalid_versions() {
-        assert!("1.2".parse::<Version>().is_err());
         assert!("1.2.3.4".parse::<Version>().is_err());
         assert!("01.2.3".parse::<Version>().is_err());
         assert!("1.02.3".parse::<Version>().is_err());
@@ -436,13 +528,11 @@ mod tests {
         assert!("xyz".parse::<Version>().is_err());
         assert!("1.2.3-+".parse::<Version>().is_err());
         assert!("1.2.3.DEV.SNAPSHOT".parse::<Version>().is_err());
-        assert!("1.2-SNAPSHOT-123".parse::<Version>().is_err());
         assert!(
             "1.2.31.2.3----RC-SNAPSHOT.12.09.1--..12+788"
                 .parse::<Version>()
                 .is_err()
         );
-        assert!("1.2-RC-SNAPSHOT".parse::<Version>().is_err());
         assert!("1.0.0+".parse::<Version>().is_err());
         assert!("1.0.0-".parse::<Version>().is_err());
         assert!("1.0.0-+".parse::<Version>().is_err());
@@ -452,7 +542,6 @@ mod tests {
         assert!("1.0.0-123..456".parse::<Version>().is_err());
         assert!("1.0.0+123..456".parse::<Version>().is_err());
         assert!("not-a-version".parse::<Version>().is_err());
-        assert!("1.2-3".parse::<Version>().is_err());
     }
 
     #[test]
@@ -464,6 +553,9 @@ mod tests {
             "1.1.2-prerelease+meta",
             "1.1.2+meta",
             "1.1.2+meta-valid",
+            "1.2-SNAPSHOT-123",
+            "1.2-RC-SNAPSHOT",
+            "1.2-3",
             "1.0.0-alpha",
             "1.0.0-beta",
             "1.0.0-alpha.beta",

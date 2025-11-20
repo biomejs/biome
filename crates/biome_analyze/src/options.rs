@@ -3,7 +3,7 @@ use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
-use std::fmt::Debug;
+use std::borrow::Cow;
 use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
@@ -69,6 +69,9 @@ pub struct AnalyzerConfiguration {
     /// Allows choosing a different JSX quote when applying fixes inside the lint rules
     pub preferred_jsx_quote: PreferredQuote,
 
+    /// Allows applying the right indentation in fix suggestions.
+    preferred_indentation: PreferredIndentation,
+
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     jsx_runtime: Option<JsxRuntime>,
 
@@ -99,6 +102,14 @@ impl AnalyzerConfiguration {
 
     pub fn with_preferred_jsx_quote(mut self, preferred_jsx_quote: PreferredQuote) -> Self {
         self.preferred_jsx_quote = preferred_jsx_quote;
+        self
+    }
+
+    pub fn with_preferred_indentation(
+        mut self,
+        preferred_indentation: PreferredIndentation,
+    ) -> Self {
+        self.preferred_indentation = preferred_indentation;
         self
     }
 
@@ -137,16 +148,12 @@ impl AnalyzerOptions {
         self
     }
 
-    pub fn push_globals(&mut self, globals: Vec<Box<str>>) {
+    pub fn push_globals(&mut self, globals: impl IntoIterator<Item = Box<str>>) {
         self.configuration.globals.extend(globals);
     }
 
-    pub fn globals(&self) -> Vec<&str> {
-        self.configuration
-            .globals
-            .iter()
-            .map(AsRef::as_ref)
-            .collect()
+    pub fn globals(&self) -> &[Box<str>] {
+        &self.configuration.globals
     }
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
@@ -172,12 +179,16 @@ impl AnalyzerOptions {
             .get_rule_fix_kind(&RuleKey::rule::<R>())
     }
 
-    pub fn preferred_quote(&self) -> &PreferredQuote {
-        &self.configuration.preferred_quote
+    pub fn preferred_quote(&self) -> PreferredQuote {
+        self.configuration.preferred_quote
     }
 
-    pub fn preferred_jsx_quote(&self) -> &PreferredQuote {
-        &self.configuration.preferred_jsx_quote
+    pub fn preferred_jsx_quote(&self) -> PreferredQuote {
+        self.configuration.preferred_jsx_quote
+    }
+
+    pub fn preferred_indentation(&self) -> PreferredIndentation {
+        self.configuration.preferred_indentation
     }
 
     pub fn css_modules(&self) -> bool {
@@ -185,7 +196,28 @@ impl AnalyzerOptions {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
+pub enum PreferredIndentation {
+    /// Use tabs for indentation.
+    #[default]
+    Tab,
+    /// Use the given amount of spaces for indentation.
+    Spaces(u8),
+}
+
+impl PreferredIndentation {
+    /// Returns the indentation in its string form.
+    pub fn to_string(self) -> Cow<'static, str> {
+        match self {
+            Self::Tab => Cow::Borrowed("\t"),
+            Self::Spaces(tab_width) => {
+                Cow::Owned(std::iter::repeat_n(' ', tab_width as usize).collect())
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default)]
 pub enum PreferredQuote {
     /// Double quotes
     #[default]

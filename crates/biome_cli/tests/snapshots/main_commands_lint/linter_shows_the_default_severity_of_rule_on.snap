@@ -59,6 +59,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
+  - noMagicNumbers
   - noNamespace
   - noNegationElse
   - noNestedTernary
@@ -86,6 +87,8 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
   - useConsistentMemberAccessibility
+  - useConsistentObjectDefinitions
+  - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
@@ -94,23 +97,32 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
+  - useExportsLast
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
+  - useGraphqlNamingConvention
+  - useGroupedAccessorPairs
   - useImportType
   - useLiteralEnumMembers
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
+  - useNumericSeparators
+  - useObjectSpread
+  - useReactFunctionComponents
+  - useReadonlyClassProperties
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType
   - useSingleVarDeclarator
+  - useSymbolDescription
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
+  - useUnifiedTypeSignatures
   
 
 ```

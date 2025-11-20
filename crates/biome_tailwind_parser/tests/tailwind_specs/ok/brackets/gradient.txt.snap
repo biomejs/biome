@@ -1,0 +1,159 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-radial-[at_50%_75%] from-sky-200 via-blue-400 to-indigo-900 to-90%
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..9 "bg-radial" [] [],
+                minus_token: DASH@9..10 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@10..11 "[" [] [],
+                    value_token: TW_VALUE@11..21 "at_50%_75%" [] [],
+                    r_brack_token: R_BRACKET@21..22 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@22..23 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@23..27 "from" [] [],
+                minus_token: DASH@27..28 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@28..35 "sky-200" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@35..36 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@36..39 "via" [] [],
+                minus_token: DASH@39..40 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@40..48 "blue-400" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@48..49 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@49..51 "to" [] [],
+                minus_token: DASH@51..52 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@52..62 "indigo-900" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@62..63 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@63..65 "to" [] [],
+                minus_token: DASH@65..66 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@66..70 "90%" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@70..70 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..70
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..70
+    0: TW_FULL_CANDIDATE@0..22
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..22
+        0: TW_BASE@0..9 "bg-radial" [] []
+        1: DASH@9..10 "-" [] []
+        2: TW_ARBITRARY_VALUE@10..22
+          0: L_BRACKET@10..11 "[" [] []
+          1: TW_VALUE@11..21 "at_50%_75%" [] []
+          2: R_BRACKET@21..22 "]" [] []
+        3: (empty)
+      3: (empty)
+    1: WHITESPACE@22..23 " " [] []
+    2: TW_FULL_CANDIDATE@23..35
+      0: TW_VARIANT_LIST@23..23
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@23..35
+        0: TW_BASE@23..27 "from" [] []
+        1: DASH@27..28 "-" [] []
+        2: TW_NAMED_VALUE@28..35
+          0: TW_VALUE@28..35 "sky-200" [] []
+        3: (empty)
+      3: (empty)
+    3: WHITESPACE@35..36 " " [] []
+    4: TW_FULL_CANDIDATE@36..48
+      0: TW_VARIANT_LIST@36..36
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@36..48
+        0: TW_BASE@36..39 "via" [] []
+        1: DASH@39..40 "-" [] []
+        2: TW_NAMED_VALUE@40..48
+          0: TW_VALUE@40..48 "blue-400" [] []
+        3: (empty)
+      3: (empty)
+    5: WHITESPACE@48..49 " " [] []
+    6: TW_FULL_CANDIDATE@49..62
+      0: TW_VARIANT_LIST@49..49
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@49..62
+        0: TW_BASE@49..51 "to" [] []
+        1: DASH@51..52 "-" [] []
+        2: TW_NAMED_VALUE@52..62
+          0: TW_VALUE@52..62 "indigo-900" [] []
+        3: (empty)
+      3: (empty)
+    7: WHITESPACE@62..63 " " [] []
+    8: TW_FULL_CANDIDATE@63..70
+      0: TW_VARIANT_LIST@63..63
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@63..70
+        0: TW_BASE@63..65 "to" [] []
+        1: DASH@65..66 "-" [] []
+        2: TW_NAMED_VALUE@66..70
+          0: TW_VALUE@66..70 "90%" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@70..70 "" [] []
+
+```

@@ -31,7 +31,7 @@ impl FormatNodeRule<TsExternalModuleDeclaration> for FormatTsExternalModuleDecla
                 write!(f, [space(), body.format()])?;
             }
             None if f.options().semicolons().is_always() => {
-                write!(f, [text(";")])?;
+                write!(f, [token(";")])?;
             }
             None => {}
         }

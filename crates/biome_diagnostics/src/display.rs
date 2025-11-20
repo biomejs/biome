@@ -513,7 +513,9 @@ impl Visit for PrintAdvices<'_, '_> {
                             self.0.write_markup(markup!({ header_cell }))?;
                             if index < headers.len() - 1 {
                                 self.0.write_markup(
-                                    markup! {{Padding::new(padding + longest_cell.saturating_sub(header_cell.text_len()))}},
+                                    markup! {
+                                        {Padding::new(padding + longest_cell.saturating_sub(header_cell.text_len()))}
+                                    },
                                 )?;
                             }
                         }
@@ -684,6 +686,15 @@ fn is_terminal_program(name: &str) -> bool {
         env::var("TERM_PROGRAM").is_ok_and(|program| program == name)
             || env::var("TERMINAL_EMULATOR").is_ok_and(|program| program == name)
     }
+}
+
+/// Prints [MarkupBuf] to a [String]
+pub fn markup_to_string(markup: &MarkupBuf) -> Option<String> {
+    let mut buffer = Vec::new();
+    let mut write = fmt::Termcolor(termcolor::NoColor::new(&mut buffer));
+    let mut fmt = fmt::Formatter::new(&mut write);
+    fmt.write_markup(markup! { {markup} }).ok()?;
+    String::from_utf8(buffer).ok()
 }
 
 #[cfg(test)]

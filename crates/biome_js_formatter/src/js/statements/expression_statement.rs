@@ -29,13 +29,11 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
             .syntax()
             .prev_sibling()
             .and_then(|sibling| sibling.last_token())
+            && token.kind() == T![;]
+            && !token.has_leading_comments()
+            && get_lines_before_token(&token) > 1
         {
-            if token.kind() == T![;]
-                && !token.has_leading_comments()
-                && get_lines_before_token(&token) > 1
-            {
-                write!(f, [empty_line()])?;
-            }
+            write!(f, [empty_line()])?;
         }
 
         if f.options().semicolons().is_as_needed()
@@ -43,17 +41,17 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
             && !is_after_bogus
             && (needs_parentheses || needs_semicolon(node))
         {
-            write!(f, [text(";")])?;
+            write!(f, [token(";")])?;
         }
 
         if needs_parentheses {
-            write!(f, [text("(")])?;
+            write!(f, [token("(")])?;
         }
 
         self.fmt_fields(node, f)?;
 
         if needs_parentheses {
-            write!(f, [text(")")])?;
+            write!(f, [token(")")])?;
         }
 
         Ok(())

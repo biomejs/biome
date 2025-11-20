@@ -1,0 +1,110 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#key expression}
+	something
+{/key}
+
+{#key key}
+	something
+{/key}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteKeyBlock {
+            opening_block: SvelteKeyOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                key_token: KEY_KW@2..5 "key" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@5..16 " expression" [] [],
+                },
+                r_curly_token: R_CURLY@16..17 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@17..28 "something" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_block: SvelteKeyClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@28..31 "{/" [Newline("\n")] [],
+                key_token: KEY_KW@31..34 "key" [] [],
+                r_curly_token: R_CURLY@34..35 "}" [] [],
+            },
+        },
+        SvelteKeyBlock {
+            opening_block: SvelteKeyOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@35..39 "{#" [Newline("\n"), Newline("\n")] [],
+                key_token: KEY_KW@39..42 "key" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@42..46 " key" [] [],
+                },
+                r_curly_token: R_CURLY@46..47 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@47..58 "something" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_block: SvelteKeyClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] [],
+                key_token: KEY_KW@61..64 "key" [] [],
+                r_curly_token: R_CURLY@64..65 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..66
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..65
+    0: SVELTE_KEY_BLOCK@0..35
+      0: SVELTE_KEY_OPENING_BLOCK@0..17
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: KEY_KW@2..5 "key" [] []
+        2: HTML_TEXT_EXPRESSION@5..16
+          0: HTML_LITERAL@5..16 " expression" [] []
+        3: R_CURLY@16..17 "}" [] []
+      1: HTML_ELEMENT_LIST@17..28
+        0: HTML_CONTENT@17..28
+          0: HTML_LITERAL@17..28 "something" [Newline("\n"), Whitespace("\t")] []
+      2: SVELTE_KEY_CLOSING_BLOCK@28..35
+        0: SV_CURLY_SLASH@28..31 "{/" [Newline("\n")] []
+        1: KEY_KW@31..34 "key" [] []
+        2: R_CURLY@34..35 "}" [] []
+    1: SVELTE_KEY_BLOCK@35..65
+      0: SVELTE_KEY_OPENING_BLOCK@35..47
+        0: SV_CURLY_HASH@35..39 "{#" [Newline("\n"), Newline("\n")] []
+        1: KEY_KW@39..42 "key" [] []
+        2: HTML_TEXT_EXPRESSION@42..46
+          0: HTML_LITERAL@42..46 " key" [] []
+        3: R_CURLY@46..47 "}" [] []
+      1: HTML_ELEMENT_LIST@47..58
+        0: HTML_CONTENT@47..58
+          0: HTML_LITERAL@47..58 "something" [Newline("\n"), Whitespace("\t")] []
+      2: SVELTE_KEY_CLOSING_BLOCK@58..65
+        0: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] []
+        1: KEY_KW@61..64 "key" [] []
+        2: R_CURLY@64..65 "}" [] []
+  4: EOF@65..66 "" [Newline("\n")] []
+
+```

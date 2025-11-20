@@ -102,7 +102,7 @@ macro_rules! generate_target_node {
                 }
             }
 
-            pub fn owned_text(&self) -> Cow<str> {
+            pub fn owned_text(&self) -> Cow<'_, str> {
                 match self {
                     $(Self::$lang(Node(node)) => Cow::Owned(node.text_with_trivia().to_string())),+,
                     $(Self::$lang(Token(token)) => Cow::Borrowed(token.text())),+
@@ -378,7 +378,7 @@ impl GritAstNode for GritTargetNode<'_> {
         }
     }
 
-    fn text(&self) -> GritResult<Cow<str>> {
+    fn text(&self) -> GritResult<Cow<'_, str>> {
         Ok(Cow::Borrowed(self.text()))
     }
 

@@ -232,13 +232,13 @@ impl FromStr for EditorConfig {
                     // Ignore comments
                 }
                 Some(b'[') => {
-                    if let Some((section_name, options)) = last_section.take() {
-                        if !options.is_all_none() {
-                            sections.push(EditorConfigSection {
-                                glob: section_name.to_string(),
-                                options,
-                            });
-                        }
+                    if let Some((section_name, options)) = last_section.take()
+                        && !options.is_all_none()
+                    {
+                        sections.push(EditorConfigSection {
+                            glob: section_name.to_string(),
+                            options,
+                        });
                     }
                     if let Some(section_name) = line[1..].trim_ascii().strip_suffix(']') {
                         last_section = Some((section_name, EditorConfigOptions::default()))
@@ -300,13 +300,13 @@ impl FromStr for EditorConfig {
             // `+ 1` for the newline `\n`
             offset += line.len() as u32 + 1;
         }
-        if let Some((section_name, options)) = last_section.take() {
-            if !options.is_all_none() {
-                sections.push(EditorConfigSection {
-                    glob: section_name.to_string(),
-                    options,
-                });
-            }
+        if let Some((section_name, options)) = last_section.take()
+            && !options.is_all_none()
+        {
+            sections.push(EditorConfigSection {
+                glob: section_name.to_string(),
+                options,
+            });
         }
         Ok(Self { root, sections })
     }

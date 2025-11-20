@@ -1,0 +1,848 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+custom-selector:state() {}
+custom-selector:state(checked {}
+custom-selector:state checked) {}
+custom-selector:state(first second) {}
+custom-selector:state(123) {}
+custom-selector:state("string") {}
+:host(:state(first second))::before {}
+:host(:state(123))::before {}
+:host(:state("string"))::before {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..15 "custom-selector" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@15..16 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@16..21 "state" [] [],
+                                    },
+                                    L_PAREN@21..22 "(" [] [],
+                                    R_PAREN@22..24 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@24..25 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@25..26 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@26..42 "custom-selector" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@42..43 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@43..48 "state" [] [],
+                                    },
+                                    L_PAREN@48..49 "(" [] [],
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@49..57 "checked" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@57..58 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@58..59 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@59..75 "custom-selector" [Newline("\n")] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@75..76 ":" [] [],
+                                class: CssPseudoClassIdentifier {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@76..81 "state" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@81..82 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@82..89 "checked" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        R_PAREN@89..91 ")" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@91..92 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@92..93 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@93..109 "custom-selector" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@109..110 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@110..115 "state" [] [],
+                                    },
+                                    L_PAREN@115..116 "(" [] [],
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@116..122 "first" [] [Whitespace(" ")],
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            IDENT@122..128 "second" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@128..130 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@130..131 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@131..132 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@132..148 "custom-selector" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@148..149 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@149..154 "state" [] [],
+                                    },
+                                    L_PAREN@154..155 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CSS_NUMBER_LITERAL@155..158 "123" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@158..160 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@160..161 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@161..162 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@162..178 "custom-selector" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@178..179 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@179..184 "state" [] [],
+                                    },
+                                    L_PAREN@184..185 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CSS_STRING_LITERAL@185..193 "\"string\"" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@193..195 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@195..196 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@196..197 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@197..199 ":" [Newline("\n")] [],
+                            class: CssPseudoClassFunctionCompoundSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@199..203 "host" [] [],
+                                },
+                                l_paren_token: L_PAREN@203..204 "(" [] [],
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@204..205 ":" [] [],
+                                            class: CssBogusPseudoClass {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@205..210 "state" [] [],
+                                                    },
+                                                    L_PAREN@210..211 "(" [] [],
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@211..217 "first" [] [Whitespace(" ")],
+                                                    },
+                                                    CssBogus {
+                                                        items: [
+                                                            IDENT@217..223 "second" [] [],
+                                                        ],
+                                                    },
+                                                    R_PAREN@223..224 ")" [] [],
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@224..225 ")" [] [],
+                            },
+                        },
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@225..227 "::" [] [],
+                            element: CssPseudoElementIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@227..234 "before" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@234..235 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@235..236 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@236..238 ":" [Newline("\n")] [],
+                            class: CssPseudoClassFunctionCompoundSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@238..242 "host" [] [],
+                                },
+                                l_paren_token: L_PAREN@242..243 "(" [] [],
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@243..244 ":" [] [],
+                                            class: CssBogusPseudoClass {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@244..249 "state" [] [],
+                                                    },
+                                                    L_PAREN@249..250 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CSS_NUMBER_LITERAL@250..253 "123" [] [],
+                                                        ],
+                                                    },
+                                                    R_PAREN@253..254 ")" [] [],
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@254..255 ")" [] [],
+                            },
+                        },
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@255..257 "::" [] [],
+                            element: CssPseudoElementIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@257..264 "before" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@264..265 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@265..266 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@266..268 ":" [Newline("\n")] [],
+                            class: CssPseudoClassFunctionCompoundSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@268..272 "host" [] [],
+                                },
+                                l_paren_token: L_PAREN@272..273 "(" [] [],
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@273..274 ":" [] [],
+                                            class: CssBogusPseudoClass {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@274..279 "state" [] [],
+                                                    },
+                                                    L_PAREN@279..280 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CSS_STRING_LITERAL@280..288 "\"string\"" [] [],
+                                                        ],
+                                                    },
+                                                    R_PAREN@288..289 ")" [] [],
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@289..290 ")" [] [],
+                            },
+                        },
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@290..292 "::" [] [],
+                            element: CssPseudoElementIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@292..299 "before" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@299..300 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@300..301 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@301..302 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..302
+  0: (empty)
+  1: CSS_RULE_LIST@0..301
+    0: CSS_QUALIFIED_RULE@0..26
+      0: CSS_SELECTOR_LIST@0..24
+        0: CSS_COMPOUND_SELECTOR@0..24
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..15
+            0: (empty)
+            1: CSS_IDENTIFIER@0..15
+              0: IDENT@0..15 "custom-selector" [] []
+          2: CSS_SUB_SELECTOR_LIST@15..24
+            0: CSS_PSEUDO_CLASS_SELECTOR@15..24
+              0: COLON@15..16 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@16..24
+                0: CSS_IDENTIFIER@16..21
+                  0: IDENT@16..21 "state" [] []
+                1: L_PAREN@21..22 "(" [] []
+                2: R_PAREN@22..24 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@24..26
+        0: L_CURLY@24..25 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@25..25
+        2: R_CURLY@25..26 "}" [] []
+    1: CSS_QUALIFIED_RULE@26..59
+      0: CSS_SELECTOR_LIST@26..57
+        0: CSS_COMPOUND_SELECTOR@26..57
+          0: CSS_NESTED_SELECTOR_LIST@26..26
+          1: CSS_TYPE_SELECTOR@26..42
+            0: (empty)
+            1: CSS_IDENTIFIER@26..42
+              0: IDENT@26..42 "custom-selector" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@42..57
+            0: CSS_PSEUDO_CLASS_SELECTOR@42..57
+              0: COLON@42..43 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@43..57
+                0: CSS_IDENTIFIER@43..48
+                  0: IDENT@43..48 "state" [] []
+                1: L_PAREN@48..49 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER@49..57
+                  0: IDENT@49..57 "checked" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@57..59
+        0: L_CURLY@57..58 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@58..58
+        2: R_CURLY@58..59 "}" [] []
+    2: CSS_QUALIFIED_RULE@59..93
+      0: CSS_SELECTOR_LIST@59..91
+        0: CSS_COMPLEX_SELECTOR@59..89
+          0: CSS_COMPOUND_SELECTOR@59..81
+            0: CSS_NESTED_SELECTOR_LIST@59..59
+            1: CSS_TYPE_SELECTOR@59..75
+              0: (empty)
+              1: CSS_IDENTIFIER@59..75
+                0: IDENT@59..75 "custom-selector" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@75..81
+              0: CSS_PSEUDO_CLASS_SELECTOR@75..81
+                0: COLON@75..76 ":" [] []
+                1: CSS_PSEUDO_CLASS_IDENTIFIER@76..81
+                  0: CSS_IDENTIFIER@76..81
+                    0: IDENT@76..81 "state" [] []
+          1: CSS_SPACE_LITERAL@81..82 " " [] []
+          2: CSS_COMPOUND_SELECTOR@82..89
+            0: CSS_NESTED_SELECTOR_LIST@82..82
+            1: CSS_TYPE_SELECTOR@82..89
+              0: (empty)
+              1: CSS_IDENTIFIER@82..89
+                0: IDENT@82..89 "checked" [] []
+            2: CSS_SUB_SELECTOR_LIST@89..89
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@89..91
+          0: R_PAREN@89..91 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@91..93
+        0: L_CURLY@91..92 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@92..92
+        2: R_CURLY@92..93 "}" [] []
+    3: CSS_QUALIFIED_RULE@93..132
+      0: CSS_SELECTOR_LIST@93..130
+        0: CSS_COMPOUND_SELECTOR@93..130
+          0: CSS_NESTED_SELECTOR_LIST@93..93
+          1: CSS_TYPE_SELECTOR@93..109
+            0: (empty)
+            1: CSS_IDENTIFIER@93..109
+              0: IDENT@93..109 "custom-selector" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@109..130
+            0: CSS_PSEUDO_CLASS_SELECTOR@109..130
+              0: COLON@109..110 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@110..130
+                0: CSS_IDENTIFIER@110..115
+                  0: IDENT@110..115 "state" [] []
+                1: L_PAREN@115..116 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER@116..122
+                  0: IDENT@116..122 "first" [] [Whitespace(" ")]
+                3: CSS_BOGUS@122..128
+                  0: IDENT@122..128 "second" [] []
+                4: R_PAREN@128..130 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@130..132
+        0: L_CURLY@130..131 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@131..131
+        2: R_CURLY@131..132 "}" [] []
+    4: CSS_QUALIFIED_RULE@132..162
+      0: CSS_SELECTOR_LIST@132..160
+        0: CSS_COMPOUND_SELECTOR@132..160
+          0: CSS_NESTED_SELECTOR_LIST@132..132
+          1: CSS_TYPE_SELECTOR@132..148
+            0: (empty)
+            1: CSS_IDENTIFIER@132..148
+              0: IDENT@132..148 "custom-selector" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@148..160
+            0: CSS_PSEUDO_CLASS_SELECTOR@148..160
+              0: COLON@148..149 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@149..160
+                0: CSS_IDENTIFIER@149..154
+                  0: IDENT@149..154 "state" [] []
+                1: L_PAREN@154..155 "(" [] []
+                2: CSS_BOGUS@155..158
+                  0: CSS_NUMBER_LITERAL@155..158 "123" [] []
+                3: R_PAREN@158..160 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@160..162
+        0: L_CURLY@160..161 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@161..161
+        2: R_CURLY@161..162 "}" [] []
+    5: CSS_QUALIFIED_RULE@162..197
+      0: CSS_SELECTOR_LIST@162..195
+        0: CSS_COMPOUND_SELECTOR@162..195
+          0: CSS_NESTED_SELECTOR_LIST@162..162
+          1: CSS_TYPE_SELECTOR@162..178
+            0: (empty)
+            1: CSS_IDENTIFIER@162..178
+              0: IDENT@162..178 "custom-selector" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@178..195
+            0: CSS_PSEUDO_CLASS_SELECTOR@178..195
+              0: COLON@178..179 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@179..195
+                0: CSS_IDENTIFIER@179..184
+                  0: IDENT@179..184 "state" [] []
+                1: L_PAREN@184..185 "(" [] []
+                2: CSS_BOGUS@185..193
+                  0: CSS_STRING_LITERAL@185..193 "\"string\"" [] []
+                3: R_PAREN@193..195 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@195..197
+        0: L_CURLY@195..196 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@196..196
+        2: R_CURLY@196..197 "}" [] []
+    6: CSS_QUALIFIED_RULE@197..236
+      0: CSS_SELECTOR_LIST@197..234
+        0: CSS_COMPOUND_SELECTOR@197..234
+          0: CSS_NESTED_SELECTOR_LIST@197..197
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@197..234
+            0: CSS_PSEUDO_CLASS_SELECTOR@197..225
+              0: COLON@197..199 ":" [Newline("\n")] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@199..225
+                0: CSS_IDENTIFIER@199..203
+                  0: IDENT@199..203 "host" [] []
+                1: L_PAREN@203..204 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@204..224
+                  0: CSS_NESTED_SELECTOR_LIST@204..204
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@204..224
+                    0: CSS_PSEUDO_CLASS_SELECTOR@204..224
+                      0: COLON@204..205 ":" [] []
+                      1: CSS_BOGUS_PSEUDO_CLASS@205..224
+                        0: CSS_IDENTIFIER@205..210
+                          0: IDENT@205..210 "state" [] []
+                        1: L_PAREN@210..211 "(" [] []
+                        2: CSS_CUSTOM_IDENTIFIER@211..217
+                          0: IDENT@211..217 "first" [] [Whitespace(" ")]
+                        3: CSS_BOGUS@217..223
+                          0: IDENT@217..223 "second" [] []
+                        4: R_PAREN@223..224 ")" [] []
+                3: R_PAREN@224..225 ")" [] []
+            1: CSS_PSEUDO_ELEMENT_SELECTOR@225..234
+              0: COLON2@225..227 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_IDENTIFIER@227..234
+                0: CSS_IDENTIFIER@227..234
+                  0: IDENT@227..234 "before" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@234..236
+        0: L_CURLY@234..235 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@235..235
+        2: R_CURLY@235..236 "}" [] []
+    7: CSS_QUALIFIED_RULE@236..266
+      0: CSS_SELECTOR_LIST@236..264
+        0: CSS_COMPOUND_SELECTOR@236..264
+          0: CSS_NESTED_SELECTOR_LIST@236..236
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@236..264
+            0: CSS_PSEUDO_CLASS_SELECTOR@236..255
+              0: COLON@236..238 ":" [Newline("\n")] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@238..255
+                0: CSS_IDENTIFIER@238..242
+                  0: IDENT@238..242 "host" [] []
+                1: L_PAREN@242..243 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@243..254
+                  0: CSS_NESTED_SELECTOR_LIST@243..243
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@243..254
+                    0: CSS_PSEUDO_CLASS_SELECTOR@243..254
+                      0: COLON@243..244 ":" [] []
+                      1: CSS_BOGUS_PSEUDO_CLASS@244..254
+                        0: CSS_IDENTIFIER@244..249
+                          0: IDENT@244..249 "state" [] []
+                        1: L_PAREN@249..250 "(" [] []
+                        2: CSS_BOGUS@250..253
+                          0: CSS_NUMBER_LITERAL@250..253 "123" [] []
+                        3: R_PAREN@253..254 ")" [] []
+                3: R_PAREN@254..255 ")" [] []
+            1: CSS_PSEUDO_ELEMENT_SELECTOR@255..264
+              0: COLON2@255..257 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_IDENTIFIER@257..264
+                0: CSS_IDENTIFIER@257..264
+                  0: IDENT@257..264 "before" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@264..266
+        0: L_CURLY@264..265 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@265..265
+        2: R_CURLY@265..266 "}" [] []
+    8: CSS_QUALIFIED_RULE@266..301
+      0: CSS_SELECTOR_LIST@266..299
+        0: CSS_COMPOUND_SELECTOR@266..299
+          0: CSS_NESTED_SELECTOR_LIST@266..266
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@266..299
+            0: CSS_PSEUDO_CLASS_SELECTOR@266..290
+              0: COLON@266..268 ":" [Newline("\n")] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@268..290
+                0: CSS_IDENTIFIER@268..272
+                  0: IDENT@268..272 "host" [] []
+                1: L_PAREN@272..273 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@273..289
+                  0: CSS_NESTED_SELECTOR_LIST@273..273
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@273..289
+                    0: CSS_PSEUDO_CLASS_SELECTOR@273..289
+                      0: COLON@273..274 ":" [] []
+                      1: CSS_BOGUS_PSEUDO_CLASS@274..289
+                        0: CSS_IDENTIFIER@274..279
+                          0: IDENT@274..279 "state" [] []
+                        1: L_PAREN@279..280 "(" [] []
+                        2: CSS_BOGUS@280..288
+                          0: CSS_STRING_LITERAL@280..288 "\"string\"" [] []
+                        3: R_PAREN@288..289 ")" [] []
+                3: R_PAREN@289..290 ")" [] []
+            1: CSS_PSEUDO_ELEMENT_SELECTOR@290..299
+              0: COLON2@290..292 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_IDENTIFIER@292..299
+                0: CSS_IDENTIFIER@292..299
+                  0: IDENT@292..299 "before" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@299..301
+        0: L_CURLY@299..300 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@300..300
+        2: R_CURLY@300..301 "}" [] []
+  2: EOF@301..302 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_class_function_custom_identifier_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+  > 1 │ custom-selector:state() {}
+      │                       ^
+    2 │ custom-selector:state(checked {}
+    3 │ custom-selector:state checked) {}
+  
+  i Expected an identifier here.
+  
+  > 1 │ custom-selector:state() {}
+      │                       ^
+    2 │ custom-selector:state(checked {}
+    3 │ custom-selector:state checked) {}
+  
+pseudo_class_function_custom_identifier_error.css:2:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    1 │ custom-selector:state() {}
+  > 2 │ custom-selector:state(checked {}
+      │                               ^
+    3 │ custom-selector:state checked) {}
+    4 │ custom-selector:state(first second) {}
+  
+  i Remove {
+  
+pseudo_class_function_custom_identifier_error.css:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    1 │ custom-selector:state() {}
+    2 │ custom-selector:state(checked {}
+  > 3 │ custom-selector:state checked) {}
+      │                              ^
+    4 │ custom-selector:state(first second) {}
+    5 │ custom-selector:state(123) {}
+  
+  i Remove )
+  
+pseudo_class_function_custom_identifier_error.css:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'first second'.
+  
+    2 │ custom-selector:state(checked {}
+    3 │ custom-selector:state checked) {}
+  > 4 │ custom-selector:state(first second) {}
+      │                       ^^^^^^^^^^^^
+    5 │ custom-selector:state(123) {}
+    6 │ custom-selector:state("string") {}
+  
+  i Expected an identifier here.
+  
+    2 │ custom-selector:state(checked {}
+    3 │ custom-selector:state checked) {}
+  > 4 │ custom-selector:state(first second) {}
+      │                       ^^^^^^^^^^^^
+    5 │ custom-selector:state(123) {}
+    6 │ custom-selector:state("string") {}
+  
+pseudo_class_function_custom_identifier_error.css:5:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '123'.
+  
+    3 │ custom-selector:state checked) {}
+    4 │ custom-selector:state(first second) {}
+  > 5 │ custom-selector:state(123) {}
+      │                       ^^^
+    6 │ custom-selector:state("string") {}
+    7 │ :host(:state(first second))::before {}
+  
+  i Expected an identifier here.
+  
+    3 │ custom-selector:state checked) {}
+    4 │ custom-selector:state(first second) {}
+  > 5 │ custom-selector:state(123) {}
+      │                       ^^^
+    6 │ custom-selector:state("string") {}
+    7 │ :host(:state(first second))::before {}
+  
+pseudo_class_function_custom_identifier_error.css:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"string"'.
+  
+    4 │ custom-selector:state(first second) {}
+    5 │ custom-selector:state(123) {}
+  > 6 │ custom-selector:state("string") {}
+      │                       ^^^^^^^^
+    7 │ :host(:state(first second))::before {}
+    8 │ :host(:state(123))::before {}
+  
+  i Expected an identifier here.
+  
+    4 │ custom-selector:state(first second) {}
+    5 │ custom-selector:state(123) {}
+  > 6 │ custom-selector:state("string") {}
+      │                       ^^^^^^^^
+    7 │ :host(:state(first second))::before {}
+    8 │ :host(:state(123))::before {}
+  
+pseudo_class_function_custom_identifier_error.css:7:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'first second'.
+  
+    5 │ custom-selector:state(123) {}
+    6 │ custom-selector:state("string") {}
+  > 7 │ :host(:state(first second))::before {}
+      │              ^^^^^^^^^^^^
+    8 │ :host(:state(123))::before {}
+    9 │ :host(:state("string"))::before {}
+  
+  i Expected an identifier here.
+  
+    5 │ custom-selector:state(123) {}
+    6 │ custom-selector:state("string") {}
+  > 7 │ :host(:state(first second))::before {}
+      │              ^^^^^^^^^^^^
+    8 │ :host(:state(123))::before {}
+    9 │ :host(:state("string"))::before {}
+  
+pseudo_class_function_custom_identifier_error.css:8:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '123'.
+  
+     6 │ custom-selector:state("string") {}
+     7 │ :host(:state(first second))::before {}
+   > 8 │ :host(:state(123))::before {}
+       │              ^^^
+     9 │ :host(:state("string"))::before {}
+    10 │ 
+  
+  i Expected an identifier here.
+  
+     6 │ custom-selector:state("string") {}
+     7 │ :host(:state(first second))::before {}
+   > 8 │ :host(:state(123))::before {}
+       │              ^^^
+     9 │ :host(:state("string"))::before {}
+    10 │ 
+  
+pseudo_class_function_custom_identifier_error.css:9:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"string"'.
+  
+     7 │ :host(:state(first second))::before {}
+     8 │ :host(:state(123))::before {}
+   > 9 │ :host(:state("string"))::before {}
+       │              ^^^^^^^^
+    10 │ 
+  
+  i Expected an identifier here.
+  
+     7 │ :host(:state(first second))::before {}
+     8 │ :host(:state(123))::before {}
+   > 9 │ :host(:state("string"))::before {}
+       │              ^^^^^^^^
+    10 │ 
+  
+```

@@ -82,7 +82,7 @@ impl Rule for NoUselessStringRaw {
                 },
             )
             .note(markup! {
-                "Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \\n, \\t, \\r, \\\\, \\\", \\\'."
+                "Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \\n, \\t, \\r, \\\\, \\\", \\\'."
             }),
         )
     }

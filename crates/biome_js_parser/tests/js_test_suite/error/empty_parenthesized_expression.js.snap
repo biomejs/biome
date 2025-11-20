@@ -55,7 +55,7 @@ JsModule {
 ```
 empty_parenthesized_expression.js:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Parenthesized expression didnt contain anything
+  × Parenthesized expression didn't contain anything
   
   > 1 │ ();
       │  ^

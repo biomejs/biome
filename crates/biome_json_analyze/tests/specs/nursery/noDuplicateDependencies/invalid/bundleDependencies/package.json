@@ -1,0 +1,8 @@
+{
+  "name": "invalid-bundle-dependencies",
+  "bundleDependencies": [
+    "foo",
+    "bar",
+    "foo"
+  ]
+}

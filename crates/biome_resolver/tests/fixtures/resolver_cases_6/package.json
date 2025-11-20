@@ -1,3 +1,11 @@
 {
-    "name": "resolver_cases_6"
+    "name": "resolver_cases_6",
+    "imports": {
+        "#*": [
+            "./src/*",
+            "./src/*.ts",
+            "./src/*.tsx",
+            "./src/*/index.ts"
+        ]
+    }
 }

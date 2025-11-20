@@ -224,7 +224,7 @@ fn breaks_early(statement: AnyJsStatement) -> Option<()> {
                 stmt_stack.push((else_clause.alternate().ok()?, metadata));
             }
             AnyJsStatement::JsSwitchStatement(switch_stmt) => {
-                // To simplify, We do not take fallthoughs into account.
+                // To simplify, We do not take fallthroughs into account.
                 // Thus, this can miss some useless else.
                 let cases = switch_stmt.cases();
                 let Some(last_case) = cases.last() else {

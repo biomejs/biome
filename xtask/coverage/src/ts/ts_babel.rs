@@ -9,7 +9,7 @@ use biome_rowan::SyntaxKind;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";
 
@@ -51,7 +51,7 @@ impl TestCase for BabelTypescriptTestCase {
             self.name().to_string(),
             self.code.clone(),
             source_type,
-            options.clone(),
+            options,
         );
 
         let result = biome_js_parser::parse(&self.code, source_type, options);
@@ -125,19 +125,19 @@ impl TestSuite for BabelTypescriptTestSuite {
         let mut should_fail = false;
         let mut variant = LanguageVariant::Standard;
 
-        if output_json_path.exists() {
-            if let Some(content) = check_file_encoding(&output_json_path) {
-                should_fail = content.contains("\"errors\":");
-            }
+        if output_json_path.exists()
+            && let Some(content) = check_file_encoding(&output_json_path)
+        {
+            should_fail = content.contains("\"errors\":");
         }
 
-        if options_path.exists() {
-            if let Some(content) = check_file_encoding(&options_path) {
-                should_fail = should_fail || content.contains("\"throws\":");
+        if options_path.exists()
+            && let Some(content) = check_file_encoding(&options_path)
+        {
+            should_fail = should_fail || content.contains("\"throws\":");
 
-                if content.contains("jsx") {
-                    variant = LanguageVariant::Jsx;
-                }
+            if content.contains("jsx") {
+                variant = LanguageVariant::Jsx;
             }
         };
 

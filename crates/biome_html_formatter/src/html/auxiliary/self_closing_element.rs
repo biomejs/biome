@@ -1,6 +1,6 @@
 use crate::{
     html::lists::attribute_list::FormatHtmlAttributeListOptions, prelude::*,
-    utils::metadata::is_canonical_html_tag,
+    utils::metadata::should_lowercase_html_tag,
 };
 use biome_formatter::write;
 use biome_html_syntax::{HtmlSelfClosingElement, HtmlSelfClosingElementFields};
@@ -18,7 +18,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         let self_close_void_elements = f.options().self_close_void_elements();
         let name = name?;
-        let is_canonical_html_tag = is_canonical_html_tag(&name);
+        let is_canonical_html_element = should_lowercase_html_tag(f, &name);
 
         write!(f, [l_angle_token.format(), name.format()])?;
 
@@ -29,7 +29,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 attributes
                     .format()
                     .with_options(FormatHtmlAttributeListOptions {
-                        is_canonical_html_element: is_canonical_html_tag,
+                        is_canonical_html_element,
                         tag_name: Some(name.clone()),
                     })
                     .fmt(f)?;
@@ -58,7 +58,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     if slash_token.is_some() {
                         write!(f, [slash_token.format()])?;
                     } else {
-                        write!(f, [text("/")])?;
+                        write!(f, [token("/")])?;
                     }
                 }
                 // We remove the slash only from void elements

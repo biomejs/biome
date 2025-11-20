@@ -93,11 +93,11 @@ impl<'de> serde::Deserialize<'de> for Backtrace {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Backtrace {
-    fn schema_name() -> String {
-        String::from("Backtrace")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Backtrace")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<SerializedFrame>>::json_schema(generator)
     }
 }
@@ -162,10 +162,10 @@ impl NativeBacktrace {
             })
         });
 
-        if let Some(top_frame) = top_frame {
-            if let Some(bottom_frames) = frames.get(top_frame + 1..) {
-                frames = bottom_frames;
-            }
+        if let Some(top_frame) = top_frame
+            && let Some(bottom_frames) = frames.get(top_frame + 1..)
+        {
+            frames = bottom_frames;
         }
 
         let bottom_frame = frames.iter().position(|frame| {
@@ -176,10 +176,10 @@ impl NativeBacktrace {
             })
         });
 
-        if let Some(bottom_frame) = bottom_frame {
-            if let Some(top_frames) = frames.get(..bottom_frame + 1) {
-                frames = top_frames;
-            }
+        if let Some(bottom_frame) = bottom_frame
+            && let Some(top_frames) = frames.get(..bottom_frame + 1)
+        {
+            frames = top_frames;
         }
 
         frames

@@ -1,19 +1,23 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod generated;
+mod attr_ext;
 pub mod element_ext;
 mod file_source;
+mod generated;
+mod script_type;
+mod string_ext;
 mod syntax_node;
 
-pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::{HtmlFileSource, HtmlVariant};
+pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
+pub use generated::*;
+pub use script_type::*;
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
-    HTML_CLOSING_ELEMENT,
+    HTML_BOGUS_TEXT_EXPRESSION, HTML_CLOSING_ELEMENT,
 };
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
@@ -32,7 +36,7 @@ impl From<HtmlSyntaxKind> for u16 {
 
 impl HtmlSyntaxKind {
     pub fn is_comments(self) -> bool {
-        matches!(self, Self::HTML_COMMENT)
+        matches!(self, Self::COMMENT)
     }
 
     #[inline]
@@ -57,6 +61,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
             kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ELEMENT,
             kind if AnyAstroFrontmatterElement::can_cast(*kind) => ASTRO_BOGUS_FRONTMATTER,
+            kind if AnyHtmlTextExpression::can_cast(*kind) => HTML_BOGUS_TEXT_EXPRESSION,
             HTML_CLOSING_ELEMENT => HTML_BOGUS_ELEMENT,
 
             _ => HTML_BOGUS,
@@ -102,7 +107,7 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
             }
         } else if value.is_comments() {
             match value {
-                HtmlSyntaxKind::HTML_COMMENT => Ok(Self::SingleLineComment),
+                HtmlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Comment"),
             }
         } else {

@@ -2,6 +2,7 @@ use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalS
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
+use camino::{Utf8Path, Utf8PathBuf};
 use quick_junit::{NonSuccessKind, Report, TestCase, TestCaseStatus, TestSuite};
 use std::fmt::{Display, Formatter};
 use std::io;
@@ -11,12 +12,18 @@ pub(crate) struct JunitReporter {
     pub(crate) execution: Execution,
     pub(crate) summary: TraversalSummary,
     pub(crate) verbose: bool,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
 impl Reporter for JunitReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.working_directory.as_deref(),
+        )?;
         Ok(())
     }
 }
@@ -58,6 +65,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         let diagnostics = payload.diagnostics.iter().filter(|diagnostic| {
             if diagnostic.tags().is_verbose() {
@@ -82,8 +90,8 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
 
                 status.set_description(format!(
                     "line {row:?}, col {col:?}, {body}",
-                    row = start.line_number.to_zero_indexed(),
-                    col = start.column_number.to_zero_indexed(),
+                    row = start.line_number.get(),
+                    col = start.column_number.get(),
                     body = message
                 ));
                 let mut case = TestCase::new(

@@ -183,7 +183,7 @@ impl Format<JsFormatContext> for JsxRawSpace {
             QuoteStyle::Single => "{' '}",
         };
 
-        write!(f, [text(jsx_space)])
+        write!(f, [token(jsx_space)])
     }
 }
 

@@ -135,10 +135,10 @@ fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<bool> {
         });
     }
 
-    if let Some(identifier) = any_expr.as_js_reference_identifier() {
-        if identifier.is_undefined() {
-            return Some(true);
-        }
+    if let Some(identifier) = any_expr.as_js_reference_identifier()
+        && identifier.is_undefined()
+    {
+        return Some(true);
     }
 
     None

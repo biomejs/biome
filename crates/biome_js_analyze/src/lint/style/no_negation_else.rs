@@ -136,15 +136,15 @@ declare_node_union! {
 }
 
 fn is_negation(node: &AnyJsExpression) -> bool {
-    if let AnyJsExpression::JsUnaryExpression(node) = node {
-        if node.operator() == Ok(JsUnaryOperator::LogicalNot) {
-            if let Ok(AnyJsExpression::JsUnaryExpression(inner_unary)) = node.argument() {
-                // Some users use double exclamation to convert a value to a boolean
-                // e.g. `!!0`
-                return inner_unary.operator() != Ok(JsUnaryOperator::LogicalNot);
-            }
-            return true;
+    if let AnyJsExpression::JsUnaryExpression(node) = node
+        && node.operator() == Ok(JsUnaryOperator::LogicalNot)
+    {
+        if let Ok(AnyJsExpression::JsUnaryExpression(inner_unary)) = node.argument() {
+            // Some users use double exclamation to convert a value to a boolean
+            // e.g. `!!0`
+            return inner_unary.operator() != Ok(JsUnaryOperator::LogicalNot);
         }
+        return true;
     }
     false
 }

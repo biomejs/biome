@@ -12,11 +12,11 @@ use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
-    JsExport, JsOwnExport, ModuleGraph,
-    js_module_info::{JsModuleInfoInner, scope::TsBindingReference},
+    JsExport, JsImportPath, JsOwnExport, ModuleGraph,
+    js_module_info::{JsModuleInfoInner, scope::TsBindingReference, utils::reached_too_many_types},
 };
 
-use super::JsModuleInfo;
+use super::{JsModuleInfo, JsModuleInfoDiagnostic};
 
 const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
@@ -42,7 +42,6 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 /// statements.
 ///
 /// The module resolver is typically consumed through the `Typed` service.
-#[derive(Debug)]
 pub struct ModuleResolver {
     module_graph: Arc<ModuleGraph>,
 
@@ -68,6 +67,9 @@ pub struct ModuleResolver {
     /// Maps from `TypeId` indices in module 0 to indices in our own `types`
     /// store.
     type_id_map: Vec<TypeId>,
+
+    /// Diagnostics emitted during the resolution of types
+    diagnostics: Vec<JsModuleInfoDiagnostic>,
 }
 
 impl ModuleResolver {
@@ -81,6 +83,7 @@ impl ModuleResolver {
             expressions: Default::default(),
             types: TypeStore::with_capacity(num_initial_types),
             type_id_map: Default::default(),
+            diagnostics: Default::default(),
         };
 
         resolver.run_inference();
@@ -184,7 +187,7 @@ impl ModuleResolver {
         let mut i = 0;
         while i < self.modules.len() {
             let module = self.modules[i].clone();
-            for resolved_path in module.static_import_paths.values() {
+            for JsImportPath { resolved_path, .. } in module.static_import_paths.values() {
                 self.register_module(resolved_path.clone());
             }
 
@@ -215,6 +218,11 @@ impl ModuleResolver {
 
             let mut i = 0;
             while i < self.types.len() {
+                if let Err(diagnostic) = reached_too_many_types(i) {
+                    self.diagnostics.push(diagnostic);
+                    return;
+                }
+
                 if let Some(ty) = self.types.get(i).flattened(self) {
                     self.types.replace(i, ty);
                     did_flatten = true;
@@ -318,7 +326,7 @@ impl TypeResolver for ModuleResolver {
         self.types.get_by_id(id)
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
             TypeResolverLevel::Full => Some(ResolvedTypeData::from((id, self.get_by_id(id.id())))),
             TypeResolverLevel::Thin => {
@@ -401,7 +409,11 @@ impl TypeResolver for ModuleResolver {
         }
     }
 
-    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         let id = self.resolved_id_for_expression(expr);
         match self.get_by_resolved_id(id) {
             Some(resolved) => Cow::Owned(resolved.to_data()),

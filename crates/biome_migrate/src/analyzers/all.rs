@@ -58,10 +58,10 @@ impl Rule for RulesAll {
         } else {
             // Otherwise, the current node is the last member of the list.
             // Find a previous sibling token and remove it if found to keep as a valid JSON.
-            if let Some(SyntaxElement::Token(prev_token)) = node.syntax().prev_sibling_or_token() {
-                if prev_token.kind() == T![,] {
-                    mutation.remove_token(prev_token);
-                }
+            if let Some(SyntaxElement::Token(prev_token)) = node.syntax().prev_sibling_or_token()
+                && prev_token.kind() == T![,]
+            {
+                mutation.remove_token(prev_token);
             }
         }
 

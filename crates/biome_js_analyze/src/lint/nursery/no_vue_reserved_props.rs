@@ -98,7 +98,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueReservedProps {
-        version: "next",
+        version: "2.1.2",
         name: "noVueReservedProps",
         language: "js",
         recommended: true,
@@ -119,6 +119,7 @@ impl Rule for NoVueReservedProps {
             ctx.query(),
             ctx.model(),
             ctx.source_type::<JsFileSource>(),
+            ctx.file_path(),
         ) else {
             return Box::new([]);
         };

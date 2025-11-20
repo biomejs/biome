@@ -3,6 +3,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
+use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use path_absolutize::Absolutize;
 use serde::Serialize;
@@ -17,11 +18,17 @@ pub struct GitLabReporter {
     pub(crate) execution: Execution,
     pub(crate) diagnostics: DiagnosticsPayload,
     pub(crate) verbose: bool,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics,
+            self.verbose,
+            self.working_directory.as_deref(),
+        )?;
         Ok(())
     }
 }
@@ -74,6 +81,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
         let diagnostics = GitLabDiagnostics {
@@ -165,11 +173,7 @@ impl Display for GitLabDiagnostics<'_> {
                 let initial_fingerprint = self.compute_initial_fingerprint(biome_diagnostic, &path);
                 let fingerprint = hasher.rehash_until_unique(initial_fingerprint);
 
-                GitLabDiagnostic::try_from_diagnostic(
-                    biome_diagnostic,
-                    path.to_string(),
-                    fingerprint,
-                )
+                GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, path.clone(), fingerprint)
             })
             .collect();
         let serialized = serde_json::to_string_pretty(&gitlab_diagnostics)?;
@@ -201,7 +205,9 @@ impl<'a> GitLabDiagnostic<'a> {
         fingerprint: u64,
     ) -> Option<Self> {
         let location = diagnostic.location();
-        let span = location.span?;
+        let span = location
+            .span
+            .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
         let source_code = location.source_code?;
         let description = PrintDescription(diagnostic).to_string();
         let begin = match SourceFile::new(source_code).location(span.start()) {

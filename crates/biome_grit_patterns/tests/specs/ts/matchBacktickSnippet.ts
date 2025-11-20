@@ -1,0 +1,1 @@
+buildConfig({ foo: "bar" });

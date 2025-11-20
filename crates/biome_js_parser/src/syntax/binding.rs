@@ -321,16 +321,16 @@ impl ParseObjectPattern for ObjectBindingPattern {
             let inner = parse_binding_pattern(p, ExpressionContext::default())
                 .or_add_diagnostic(p, expected_identifier);
 
-            if let Some(mut inner) = inner {
-                if inner.kind(p) != JS_IDENTIFIER_BINDING {
-                    let inner_range = inner.range(p);
-                    // Don't add multiple errors
-                    if inner.kind(p) != JS_BOGUS_BINDING {
-                        p.error(p.err_builder("Expected identifier binding", inner_range,).with_hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
-                    }
-
-                    inner.change_kind(p, JS_BOGUS_BINDING);
+            if let Some(mut inner) = inner
+                && inner.kind(p) != JS_IDENTIFIER_BINDING
+            {
+                let inner_range = inner.range(p);
+                // Don't add multiple errors
+                if inner.kind(p) != JS_BOGUS_BINDING {
+                    p.error(p.err_builder("Expected identifier binding", inner_range,).with_hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
                 }
+
+                inner.change_kind(p, JS_BOGUS_BINDING);
             }
 
             Present(m.complete(p, JS_OBJECT_BINDING_PATTERN_REST))

@@ -24,8 +24,8 @@ use std::ops::Sub;
 /// comments must be kept immediately adjacent after formatting to preserve this behavior.
 ///
 /// There isn't much documentation about this behavior, but it is mentioned on the JSDoc repo
-/// for documentation: https://github.com/jsdoc/jsdoc.github.io/issues/40. Prettier also
-/// implements the same behavior: https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178
+/// for documentation: <https://github.com/jsdoc/jsdoc.github.io/issues/40>. Prettier also
+/// implements the same behavior: <https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178>
 pub fn should_nestle_adjacent_doc_comments<L: Language>(
     first_comment: &SourceComment<L>,
     second_comment: &SourceComment<L>,
@@ -43,7 +43,7 @@ pub fn should_nestle_adjacent_doc_comments<L: Language>(
 /// Formats the leading comments of `node`
 pub const fn format_leading_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatLeadingComments<L> {
+) -> FormatLeadingComments<'_, L> {
     FormatLeadingComments::Node(node)
 }
 
@@ -108,7 +108,7 @@ where
 /// Formats the trailing comments of `node`.
 pub const fn format_trailing_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatTrailingComments<L> {
+) -> FormatTrailingComments<'_, L> {
     FormatTrailingComments::Node(node)
 }
 
@@ -207,7 +207,7 @@ where
 /// Formats the dangling comments of `node`.
 pub const fn format_dangling_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatDanglingComments<L> {
+) -> FormatDanglingComments<'_, L> {
     FormatDanglingComments::Node {
         node,
         indent: DanglingIndentMode::None,
@@ -605,7 +605,7 @@ where
 /// Formats the skipped token trivia of `token`.
 pub const fn format_skipped_token_trivia<L: Language>(
     token: &SyntaxToken<L>,
-) -> FormatSkippedTokenTrivia<L> {
+) -> FormatSkippedTokenTrivia<'_, L> {
     FormatSkippedTokenTrivia { token }
 }
 

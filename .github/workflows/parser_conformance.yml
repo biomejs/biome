@@ -1,6 +1,7 @@
 # Test coverage job. It is run on pull request because it prints the results via comment
 name: Parser conformance and comparison
 on:
+  merge_group:
   pull_request:
     branches:
       - main
@@ -25,18 +26,15 @@ jobs:
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           submodules: recursive
-
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
@@ -54,7 +52,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           clean: false
           ref: main

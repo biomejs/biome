@@ -201,7 +201,8 @@ impl FileSystem for MemoryFileSystem {
     }
 
     fn path_exists(&self, path: &Utf8Path) -> bool {
-        self.path_is_file(path)
+        let files = self.files.0.read();
+        files.contains_key(path)
     }
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {

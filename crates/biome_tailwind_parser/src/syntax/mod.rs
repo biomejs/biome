@@ -2,6 +2,7 @@ use crate::parser::TailwindParser;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
+use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -55,7 +56,8 @@ impl ParseSeparatedList for CandidateList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
+                .enable_recovery_on_line_break(),
             expected_candidate,
         )
     }
@@ -67,11 +69,18 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     VariantList.parse_list(p);
 
-    let candidate = parse_functional_or_static_candidate(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
-        expected_candidate,
-    );
+    if p.at(T![-]) {
+        p.bump_with_context(T![-], TailwindLexContext::SawNegative);
+    }
+
+    let candidate = parse_arbitrary_candidate(p)
+        .or_else(|| parse_functional_or_static_candidate(p))
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
+                .enable_recovery_on_line_break(),
+            expected_candidate,
+        );
 
     match candidate {
         Ok(_) => {}
@@ -109,10 +118,11 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
 
-    p.bump(DASH);
+    p.expect(T![-]);
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, NEWLINE, T![!], EOF]),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]])
+            .enable_recovery_on_line_break(),
         expected_value,
     ) {
         Ok(_) => {}
@@ -137,6 +147,50 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     Present(m.complete(p, TW_FUNCTIONAL_CANDIDATE))
 }
 
+fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(T!['[']) {
+        return Absent;
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    if !p.expect_with_context(T!['['], TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(TW_PROPERTY, TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(T![:], TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(TW_VALUE, TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect(T![']']) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    if !p.at(T![/]) {
+        return Present(m.complete(p, TW_ARBITRARY_CANDIDATE));
+    }
+
+    if p.at(T![/]) {
+        parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+    }
+
+    Present(m.complete(p, TW_ARBITRARY_CANDIDATE))
+}
+
 fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
     if !p.expect(T![/]) {
@@ -145,10 +199,7 @@ fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(
-            TW_BOGUS_MODIFIER,
-            token_set![WHITESPACE, NEWLINE, T![!], EOF],
-        ),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]]),
         expected_value,
     ) {
         Ok(_) => {}

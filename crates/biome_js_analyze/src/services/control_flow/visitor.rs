@@ -264,10 +264,10 @@ where
             None => return,
         };
 
-        if let Some(builder) = visitor.builder.as_mut() {
-            if state.exit(node, builder, stack).is_err() {
-                visitor.builder.take();
-            }
+        if let Some(builder) = visitor.builder.as_mut()
+            && state.exit(node, builder, stack).is_err()
+        {
+            visitor.builder.take();
         }
     }
 }

@@ -40,24 +40,143 @@ x => {
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,5 +4,5 @@
-   return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
-   voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
-   vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
+@@ -1,8 +1,26 @@
+-<!--interpolations in html should be treated as normal text-->
+-<div>
+-  Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
+-  return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
+-  voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
+-  vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
 -  minus {{console.log( short_interpolation )}} nemo.
-+  minus {{console.log( short_interpolation ) }} nemo.
- </div>
+-</div>
++<!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
++
++
++x => {
++    const hello = 'world'
++    return hello;
++}
++
++
++
++}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
++
++
++    some_variable
++
++
++
++}} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
++
++                    preserve
++
++                    invalid
++
++                    interpolation
++
++}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
 ```
 
 # Output
 
 ```html
-<!--interpolations in html should be treated as normal text-->
-<div>
-  Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
-  return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
-  voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
-  vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
-  minus {{console.log( short_interpolation ) }} nemo.
-</div>
+<!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
+
+
+x => {
+    const hello = 'world'
+    return hello;
+}
+
+
+
+}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
+
+
+    some_variable
+
+
+
+}} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
+
+                    preserve
+
+                    invalid
+
+                    interpolation
+
+}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+```
+
+# Errors
+```
+example.html:1:114 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+   > 1 │ <!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
+       │                                                                                                                  ^^
+   > 2 │ 
+   > 3 │ 
+   > 4 │ x => {
+        ...
+   > 9 │ 
+  > 10 │ 
+  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
+       │ ^^
+    12 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+example.html:11:72 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
+       │                                                                        ^^
+  > 12 │ 
+        ...
+  > 17 │ 
+  > 18 │ }} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
+       │ ^^
+    19 │ 
+    20 │                     preserve
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+example.html:18:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 18 │ }} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
+       │                                                                 ^^
+  > 19 │ 
+        ...
+  > 24 │                     interpolation
+  > 25 │ 
+  > 26 │ }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+       │ ^^
+    27 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+example.html:26:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    24 │                     interpolation
+    25 │ 
+  > 26 │ }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <!--interpolations in html should be treated as normal text--><div>Fuga magnam facilis. Voluptatem quaerat porro.{{
+   26: }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
 ```

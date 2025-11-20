@@ -61,6 +61,14 @@ pub fn is_js_id_start(c: char) -> bool {
 /// Tests if `c` is a valid continuation of a js identifier.
 #[inline]
 pub fn is_js_id_continue(c: char) -> bool {
+    // KATAKANA MIDDLE DOT (U+30FB) and HALFWIDTH KATAKANA MIDDLE DOT (U+FF65) have been added to
+    // the ID_Continue property in Unicode 15.1, but they're still invalid in ECMAScript.
+    // ref: https://github.com/evanw/esbuild/pull/3424
+    // ref: https://github.com/oxc-project/oxc/pull/12829
+    if c == '・' || c == '･' {
+        return false;
+    }
+
     c == '$' || c == '\u{200d}' || c == '\u{200c}' || ID_Continue(c)
 }
 

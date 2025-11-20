@@ -357,16 +357,18 @@ where
         let globals = self.options.globals();
         let preferred_quote = self.options.preferred_quote();
         let preferred_jsx_quote = self.options.preferred_jsx_quote();
+        let preferred_indentation = self.options.preferred_indentation();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
             self.root,
             self.services,
-            &globals,
+            globals,
             self.options.file_path.as_path(),
             &options,
             preferred_quote,
             preferred_jsx_quote,
+            preferred_indentation,
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )
@@ -398,11 +400,12 @@ where
             &self.query_result,
             self.root,
             self.services,
-            &globals,
+            globals,
             self.options.file_path.as_path(),
             &options,
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
+            self.options.preferred_indentation(),
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )
@@ -418,22 +421,22 @@ where
                     message: action.message,
                 });
             };
-            if let Some(text_range) = R::text_range(&ctx, &self.state) {
-                if let Some(suppression_action) = R::inline_suppression(
+            if let Some(text_range) = R::text_range(&ctx, &self.state)
+                && let Some(suppression_action) = R::inline_suppression(
                     &ctx,
                     &text_range,
                     self.suppression_action,
                     self.options.suppression_reason.as_deref(),
-                ) {
-                    let action = AnalyzerAction {
-                        rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                        category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
-                        applicability: Applicability::Always,
-                        mutation: suppression_action.mutation,
-                        message: suppression_action.message,
-                    };
-                    actions.push(action);
-                }
+                )
+            {
+                let action = AnalyzerAction {
+                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
+                    category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                    applicability: Applicability::Always,
+                    mutation: suppression_action.mutation,
+                    message: suppression_action.message,
+                };
+                actions.push(action);
             }
 
             if let Some(suppression_action) =
@@ -462,11 +465,12 @@ where
             &self.query_result,
             self.root,
             self.services,
-            &globals,
+            globals,
             self.options.file_path.as_path(),
             &options,
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
+            self.options.preferred_indentation(),
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )

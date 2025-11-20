@@ -5,6 +5,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 ## Table of Contents
 
 - [🚀 Contributing](#-contributing)
+  * [AI assistance notice](#ai-assistance-notice)
   * [Asking questions, making proposals](#asking-questions-making-proposals)
   * [Reporting bugs](#reporting-bugs)
   * [Getting Started](#getting-started)
@@ -42,6 +43,30 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     + [Core Contributors team](#core-contributors-team)
     + [Maintainers team](#maintainers-team)
     + [Past Maintainers](#past-maintainers)
+
+## AI assistance notice
+
+> [!IMPORTANT]
+>
+> If you are using **any kind of AI assistance** to contribute to Biome,
+> it must be disclosed in the pull request.
+
+If you relied on AI assistance to make a pull request, you must disclose it in the
+pull request, together with the extent of the usage. For example, if you used
+AI to generate docs or tests, you must say it.
+An example disclosure:
+
+- > This PR was written primarily by Claude Code.
+- > I consulted ChatGPT to understand the codebase but the solution
+  > was fully authored manually by myself.
+
+Providing this information helps reviewers understand the context of the
+pull request and apply the right level of scrutiny, ensuring a smoother
+and more efficient review process.
+
+AI assistance isn't always perfect, even when used with the utmost care.
+
+Please be respectful to maintainers and disclose AI assistance.
 
 ## Asking questions, making proposals
 
@@ -454,13 +479,17 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ### Regular releases
 
-When releasing a new **minor** or **major** version of a Biome, follow these steps:
+Before starting release:
 
-1. [ ] Before starting the release, make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+1. [ ] Make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+
+1. [ ] Replace all `version: "next"` with the new version number in the metadata of the rules. This should be automated , but you can use `scripts/update-next-version.sh` if you need to do it manually.
+
+When releasing a new **minor** or **major** version of a Biome, follow these steps:
 
 1. [ ] Create a PR from `next` to `main`. Make sure that code conflicts are fixed and the new features have relative docs PR.
 
-1. [ ] Merge `next` to `main`.
+1. [ ] Merge `next` to `main`. **Using merge commit is recommended here**, do not use squash merge as it removes the commit history.
 
 1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
@@ -469,12 +498,6 @@ When releasing a new **minor** or **major** version of a Biome, follow these ste
    This field must be updated to the new version.
 
 1. [ ] Merge the `ci: release` PR, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
-
-1. [ ] Update the generated documentation in the `next` branch of the [website](https://github.com/biomejs/website):
-   `BIOME_VERSION=<version> pnpm run codegen:all`.
-   This will also copy the configuration schema in the right place.
-
-1. [ ] Merge the website's `next` branch into `main` with a PR. Once merged, the documentation will automatically deploy.
 
 1. [ ] After releasing a major version number, you may want to update the `update-preview-version.mjs` script to make sure that future previews indicate a version number with a higher patch version than is currently indicated in the `package.json` manifests.
 
@@ -513,6 +536,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
+- [Maikel @Netail](https://github.com/netail)
 - [Marat Dulin @mdevils](https://github.com/mdevils)
 - [Vladimir Ivanov_@vlad](https://github.com/vladimir-ivanov)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)

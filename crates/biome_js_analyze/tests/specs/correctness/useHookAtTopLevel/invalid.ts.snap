@@ -1,17 +1,17 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
-const Component1 = () => {
+const useHook = () => {
   useEffect() as [];
 };
 
 const Component2 = () => {
   if (a == 1) {
-      Component1();
+      useHook();
   }
 };
 
@@ -19,23 +19,14 @@ const Component2 = () => {
 
 # Diagnostics
 ```
-invalid.ts:2:3 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:7 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render.
-  
-    1 │ const Component1 = () => {
-  > 2 │   useEffect() as [];
-      │   ^^^^^^^^^
-    3 │ };
-    4 │ 
-  
-  i This is the call path until the hook.
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
     5 │ const Component2 = () => {
-  > 6 │   if (a == 1) {
-      │                
-  > 7 │       Component1();
-      │       ^^^^^^^^^^^^
+    6 │   if (a == 1) {
+  > 7 │       useHook();
+      │       ^^^^^^^
     8 │   }
     9 │ };
   

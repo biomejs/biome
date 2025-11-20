@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_rule_options"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
@@ -15,7 +16,8 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
-biome_glob               = { workspace = true, features = ["biome_deserialize"] }
+biome_glob               = { workspace = true, features = ["biome_deserialize", "serde"] }
+biome_js_syntax          = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true, features = ["biome_rowan"] }
@@ -25,6 +27,7 @@ regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
+serde_json               = { workspace = true, optional = true }
 smallvec                 = { workspace = true }
 
 [lints]
@@ -32,4 +35,4 @@ workspace = true
 
 
 [features]
-schema = ["dep:schemars"]
+schema = ["dep:schemars", "dep:serde_json"]

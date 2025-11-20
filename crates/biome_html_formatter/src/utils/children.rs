@@ -7,9 +7,9 @@ use biome_formatter::{
     Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
 };
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement};
-use biome_rowan::{SyntaxResult, TextLen, TextRange, TextSize, TokenText};
+use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext};
+use crate::{HtmlFormatter, context::HtmlFormatContext};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -75,6 +75,11 @@ pub(crate) enum HtmlChild {
     /// A Single word in a HTML text. For example, the words for `a b\nc` are `[a, b, c]`
     Word(HtmlWord),
 
+    /// A comment in a HTML text.
+    ///
+    /// This is considered a separate kind of "word" here because we must preserve whitespace between text and comments.
+    Comment(HtmlWord),
+
     /// A ` ` whitespace
     ///
     /// ```html
@@ -116,6 +121,11 @@ pub(crate) enum HtmlChild {
 
     /// Any other content that isn't a text. Should be formatted as is.
     NonText(AnyHtmlElement),
+
+    /// Any content that should be formatted verbatim, and not transformed in any way.
+    ///
+    /// Used for content that has formatting suppressed.
+    Verbatim(AnyHtmlElement),
 }
 
 impl HtmlChild {
@@ -158,102 +168,84 @@ pub(crate) struct HtmlRawSpace;
 
 impl Format<HtmlFormatContext> for HtmlRawSpace {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        write!(f, [text(" ")])
+        write!(f, [token(" ")])
     }
 }
 
 pub(crate) fn html_split_children<I>(
     children: I,
-    _comments: &HtmlComments,
+    f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
     I: IntoIterator<Item = AnyHtmlElement>,
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
 
-    let mut prev_was_content = false;
+    let mut prev_child_was_content = false;
     for child in children {
-        match child {
-            AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
-                // Split the text into words
-                // Keep track if there's any leading/trailing empty line, new line or whitespace
+        let element_has_content = matches!(
+            &child,
+            AnyHtmlElement::AnyHtmlContent(
+                AnyHtmlContent::HtmlContent(_) | AnyHtmlContent::HtmlEmbeddedContent(_)
+            )
+        );
 
-                let value_token = text.value_token()?;
-                let mut chunks = HtmlSplitChunksIterator::new(value_token.text()).peekable();
-
-                // Text starting with a whitespace
-                if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
-                    // SAFETY: We just checked this above.
-                    match chunks.next().unwrap() {
-                        (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                            if whitespace.contains('\n') && !prev_was_content {
-                                if chunks.peek().is_none() {
-                                    // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
-                                    // It can be entirely removed from the content without changing the semantics.
-                                    let newlines =
-                                        whitespace.bytes().filter(|b| *b == b'\n').count();
-
-                                    // Keep up to one blank line between tags.
-                                    // ```html
-                                    // <div>
-                                    //
-                                    //   <MyElement />
-                                    // </div>
-                                    // ```
-                                    if newlines > 1 {
-                                        builder.entry(HtmlChild::EmptyLine);
-                                    }
-
-                                    continue;
-                                }
-
-                                builder.entry(HtmlChild::Newline)
-                            } else {
-                                builder.entry(HtmlChild::Whitespace)
-                            }
-                        }
-                        _ => unreachable!(),
-                    }
+        if element_has_content {
+            let (text_syntax, value_token) = match &child {
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
+                    (text.syntax(), text.value_token()?)
                 }
-
-                while let Some(chunk) = chunks.next() {
-                    match chunk {
-                        (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                            // Only handle trailing whitespace. Words must always be joined by new lines
-                            if chunks.peek().is_none() {
-                                if whitespace.contains('\n') {
-                                    builder.entry(HtmlChild::Newline);
-                                } else {
-                                    builder.entry(HtmlChild::Whitespace)
-                                }
-                            }
-                        }
-
-                        (relative_start, HtmlTextChunk::Word(word)) => {
-                            let text = value_token
-                                .token_text()
-                                .slice(TextRange::at(relative_start, word.text_len()));
-                            let source_position = value_token.text_range().start() + relative_start;
-
-                            builder.entry(HtmlChild::Word(HtmlWord::new(text, source_position)));
-                        }
-                    }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text)) => {
+                    (text.syntax(), text.value_token()?)
                 }
-                prev_was_content = true;
+                _ => unreachable!(
+                    "You should update the condition of `element_has_content` to handle this case."
+                ),
+            };
+            // Split the text into words
+            // Keep track if there's any leading/trailing empty line, new line or whitespace
+
+            let is_suppressed = f.comments().is_suppressed(text_syntax);
+            if is_suppressed {
+                builder.entry(HtmlChild::Verbatim(child));
+                continue;
             }
-            child => {
-                let text = child.to_string();
-                let mut chunks = HtmlSplitChunksIterator::new(&text).peekable();
+            f.state_mut().track_token(&value_token);
+            // Manually mark these comments as formatted because they are. Because we override the formatting of text content in here, the formatter does not seem to recognize them as formatted.
+            // We do have to manually check to make sure the comment's text range is actually inside this node's text range. Some comments may be included in this call to `leading_trailing_comments` that are not actually part of this node.
 
-                // Text starting with a whitespace
-                if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
-                    // SAFETY: We just checked this above.
-                    match chunks.next().unwrap() {
-                        (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                            if whitespace.contains('\n') {
+            let mut trailing_comments_to_format = vec![];
+            for comment in f.comments().leading_dangling_trailing_comments(text_syntax) {
+                let comment_range = comment.piece().text_range();
+                // TODO: might be able to make this a debug assertion instead
+                if comment_range.start() >= value_token.text_range().start()
+                    && comment_range.end() <= value_token.text_range().end()
+                {
+                    comment.mark_formatted();
+                }
+            }
+            for comment in f.comments().trailing_comments(text_syntax) {
+                let comment_range = comment.piece().text_range();
+                // TODO: might be able to make this a debug assertion instead
+                if !(comment_range.start() >= value_token.text_range().start()
+                    && comment_range.end() <= value_token.text_range().end())
+                {
+                    trailing_comments_to_format.push(comment);
+                }
+            }
+
+            let mut chunks = HtmlSplitChunksIterator::new(value_token.text()).peekable();
+
+            // Text starting with a whitespace
+            if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
+                // SAFETY: We just checked this above.
+                match chunks.next().unwrap() {
+                    (_, HtmlTextChunk::Whitespace(whitespace)) => {
+                        if whitespace.contains('\n') && !prev_child_was_content {
+                            if chunks.peek().is_none() {
                                 // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
                                 // It can be entirely removed from the content without changing the semantics.
-                                let newlines = whitespace.chars().filter(|c| *c == '\n').count();
+                                let newlines = whitespace.bytes().filter(|b| *b == b'\n').count();
 
                                 // Keep up to one blank line between tags.
                                 // ```html
@@ -264,20 +256,147 @@ where
                                 // ```
                                 if newlines > 1 {
                                     builder.entry(HtmlChild::EmptyLine);
-                                } else {
-                                    builder.entry(HtmlChild::Newline);
                                 }
+
+                                continue;
+                            }
+
+                            builder.entry(HtmlChild::Newline)
+                        } else {
+                            // if there's newlines before a comment, we need to preserve them
+                            if whitespace.contains('\n')
+                                && matches!(chunks.peek(), Some(&(_, HtmlTextChunk::Comment(_))))
+                            {
+                                builder.entry(HtmlChild::Newline)
                             } else {
                                 builder.entry(HtmlChild::Whitespace)
                             }
                         }
-                        _ => unreachable!(),
+                    }
+                    _ => unreachable!(),
+                }
+            }
+
+            let mut prev_chunk_was_comment = false;
+            while let Some(chunk) = chunks.next() {
+                match chunk {
+                    (_, HtmlTextChunk::Whitespace(whitespace)) => {
+                        // Only handle trailing whitespace. Words must always be joined by new lines
+                        let newlines = whitespace.chars().filter(|b| *b == '\n').count();
+                        match chunks.peek() {
+                            Some(&(_, HtmlTextChunk::Comment(_))) => {
+                                // if the next chunk is a comment, preserve the whitespace
+                                if newlines >= 2 {
+                                    builder.entry(HtmlChild::EmptyLine)
+                                } else if newlines == 1 {
+                                    builder.entry(HtmlChild::Newline)
+                                } else {
+                                    builder.entry(HtmlChild::Whitespace)
+                                }
+                            }
+                            None => {
+                                if newlines >= 1 {
+                                    builder.entry(HtmlChild::Newline)
+                                } else {
+                                    builder.entry(HtmlChild::Whitespace)
+                                }
+                            }
+                            _ => {
+                                // if the previous chunk was a comment, we need to preserve the whitespace before the next chunk.
+                                if prev_chunk_was_comment {
+                                    if newlines >= 2 {
+                                        builder.entry(HtmlChild::EmptyLine)
+                                    } else if newlines == 1 {
+                                        builder.entry(HtmlChild::Newline)
+                                    } else {
+                                        builder.entry(HtmlChild::Whitespace)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    (relative_start, HtmlTextChunk::Word(word)) => {
+                        let text = value_token
+                            .token_text()
+                            .slice(TextRange::at(relative_start, word.text_len()));
+                        let source_position = value_token.text_range().start() + relative_start;
+
+                        builder.entry(HtmlChild::Word(HtmlWord::new(text, source_position)));
+                    }
+                    (relative_start, HtmlTextChunk::Comment(word)) => {
+                        let text = value_token
+                            .token_text()
+                            .slice(TextRange::at(relative_start, word.text_len()));
+                        let source_position = value_token.text_range().start() + relative_start;
+
+                        builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
                     }
                 }
-
-                builder.entry(HtmlChild::NonText(child));
-                prev_was_content = false;
+                prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
             }
+
+            // There may be trailing comments that we attached to the content if this is the last child of an Element. They won't show up in the `value_token.text()` because they are actually attached to the leading token of the closing tag. This means we have to format them manually.
+            for comment in trailing_comments_to_format {
+                // This might not actually be the best way to handle the whitespace before the comment. If there are bugs here involving whitespace preceding the comment, try this:
+                // Instead of the below match on `comment.lines_before()`, try to include the whitespace in the sliced range from the token text. Right now, that preceding whitespace is excluded, and we add it back in via the `lines_before` match below.
+                match comment.lines_before() {
+                    0 => {}
+                    1 => builder.entry(HtmlChild::Newline),
+                    _ => builder.entry(HtmlChild::EmptyLine),
+                }
+                let token = comment.piece().as_piece().token();
+                let text = token.token_text();
+
+                builder.entry(HtmlChild::Comment(HtmlWord::new(
+                    text.slice(comment.piece().text_range() - token.text_range().start()),
+                    comment.piece().text_range().start(),
+                )));
+                comment.mark_formatted();
+            }
+
+            prev_child_was_content = true;
+        } else {
+            let text = child.to_string();
+            let mut chunks = HtmlSplitChunksIterator::new(&text).peekable();
+
+            // Text starting with a whitespace
+            if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
+                // SAFETY: We just checked this above.
+                match chunks.next().unwrap() {
+                    (_, HtmlTextChunk::Whitespace(whitespace)) => {
+                        if whitespace.contains('\n') {
+                            // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
+                            // It can be entirely removed from the content without changing the semantics.
+                            let newlines = whitespace.chars().filter(|c| *c == '\n').count();
+
+                            // Keep up to one blank line between tags.
+                            // ```html
+                            // <div>
+                            //
+                            //   <MyElement />
+                            // </div>
+                            // ```
+                            if newlines > 1 {
+                                builder.entry(HtmlChild::EmptyLine);
+                            } else {
+                                builder.entry(HtmlChild::Newline);
+                            }
+                        } else {
+                            builder.entry(HtmlChild::Whitespace)
+                        }
+                    }
+                    _ => unreachable!(),
+                }
+            }
+
+            let is_suppressed = f.comments().is_suppressed(child.syntax());
+            if is_suppressed {
+                builder.entry(HtmlChild::Verbatim(child.clone()));
+            } else {
+                builder.entry(HtmlChild::NonText(child.clone()));
+            }
+            prev_child_was_content = false;
         }
     }
 
@@ -304,7 +423,13 @@ impl HtmlSplitChildrenBuilder {
             Some(last @ (HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace)) => {
                 if matches!(child, HtmlChild::Whitespace) {
                     *last = child;
-                } else if matches!(child, HtmlChild::NonText(_) | HtmlChild::Word(_)) {
+                } else if matches!(
+                    child,
+                    HtmlChild::NonText(_)
+                        | HtmlChild::Word(_)
+                        | HtmlChild::Comment(_)
+                        | HtmlChild::Verbatim(_)
+                ) {
                     self.buffer.push(child);
                 }
             }
@@ -321,6 +446,7 @@ impl HtmlSplitChildrenBuilder {
 enum HtmlTextChunk<'a> {
     Whitespace(&'a str),
     Word(&'a str),
+    Comment(&'a str),
 }
 
 /// Splits a text into whitespace only and non-whitespace chunks.
@@ -352,16 +478,54 @@ impl<'a> Iterator for HtmlSplitChunksIterator<'a> {
         self.position += char.text_len();
 
         let is_whitespace = matches!(char, ' ' | '\n' | '\t' | '\r');
+        let mut maybe_comment = char == '<';
+        let mut definitely_comment = false;
+        let mut seen_end_comment_chars = 0;
 
         while let Some(next) = self.chars.peek() {
-            let next_is_whitespace = matches!(next, ' ' | '\n' | '\t' | '\r');
+            if maybe_comment && !definitely_comment {
+                match (self.position - start, next) {
+                    (idx, '!') if idx == 1.into() => {}
+                    (idx, '-') if idx == 2.into() || idx == 3.into() => {}
+                    (idx, _) if idx == 4.into() => {
+                        definitely_comment = true;
+                    }
+                    _ => {
+                        maybe_comment = false;
+                    }
+                }
+            }
 
-            if is_whitespace != next_is_whitespace {
-                break;
+            if definitely_comment {
+                match (seen_end_comment_chars, next) {
+                    (0, '-') => seen_end_comment_chars += 1,
+                    (1, '-') => seen_end_comment_chars += 1,
+                    (2, '>') => seen_end_comment_chars += 1,
+                    _ => seen_end_comment_chars = 0,
+                }
+            } else {
+                let next_is_whitespace = matches!(next, ' ' | '\n' | '\t' | '\r');
+
+                if is_whitespace != next_is_whitespace {
+                    break;
+                }
             }
 
             self.position += next.text_len();
             self.chars.next();
+
+            if seen_end_comment_chars == 3 {
+                break;
+            }
+            // we also need to stop progressing if we encounter a comment start
+            let peek_end = self.position + TextSize::from(4);
+            if !definitely_comment
+                && peek_end <= TextSize::from(self.text.len() as u32)
+                && self.text.is_char_boundary(peek_end.into())
+                && &self.text[TextRange::new(self.position, peek_end)] == "<!--"
+            {
+                break;
+            }
         }
 
         let range = TextRange::new(start, self.position);
@@ -369,6 +533,8 @@ impl<'a> Iterator for HtmlSplitChunksIterator<'a> {
 
         let chunk = if is_whitespace {
             HtmlTextChunk::Whitespace(slice)
+        } else if definitely_comment {
+            HtmlTextChunk::Comment(slice)
         } else {
             HtmlTextChunk::Word(slice)
         };

@@ -8,6 +8,7 @@ use super::{
     Mode,
     js_kinds_src::{AstSrc, Field},
 };
+use crate::generate_grit_mappings;
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
@@ -25,7 +26,7 @@ use biome_string_case::Case;
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
 use std::str::FromStr;
-use xtask::{Result, project_root};
+use xtask_glue::{Result, project_root};
 
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";
@@ -111,6 +112,10 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         let target_language_constants_file = target_language_path.join("constants.rs");
         let contents = generate_target_language_constants(&ast, language_kind)?;
         update(target_language_constants_file.as_path(), &contents, mode)?;
+
+        let grit_mappings_file = target_language_path.join("generated_mappings.rs");
+        let contents = generate_grit_mappings(&ast, language_kind)?;
+        update(grit_mappings_file.as_path(), &contents, mode)?;
     }
 
     Ok(())
@@ -305,7 +310,7 @@ fn classify_node_rule(grammar: &Grammar, rule: &Rule, name: &str) -> NodeRuleCla
             } else {
                 NodeRuleClassification::List {
                     separator: None,
-                    element_name: element_type.to_string(),
+                    element_name: element_type.clone(),
                 }
             }
         }

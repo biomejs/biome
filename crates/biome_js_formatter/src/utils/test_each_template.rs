@@ -169,7 +169,7 @@ struct EachTemplateSeparator;
 
 impl Format<JsFormatContext> for EachTemplateSeparator {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        write!(f, [text("|")])
+        write!(f, [token("|")])
     }
 }
 
@@ -290,10 +290,10 @@ impl Format<JsFormatContext> for EachTemplateTable {
 
                 match element {
                     EachTemplateElement::Column(column) => {
-                        let mut text = column.text.to_string();
+                        let mut column_text = column.text.clone();
 
-                        if current_column != 0 && (!is_last_in_row || !text.is_empty()) {
-                            text = std::format!(" {text}");
+                        if current_column != 0 && (!is_last_in_row || !column_text.is_empty()) {
+                            column_text = std::format!(" {column_text}");
                         }
 
                         // align the column based on the maximum column width in the table
@@ -312,13 +312,13 @@ impl Format<JsFormatContext> for EachTemplateTable {
                                         .into(),
                                 );
 
-                                text.push_str(&padding);
+                                column_text.push_str(&padding);
                             }
 
-                            text.push(' ');
+                            column_text.push(' ');
                         }
 
-                        write!(f, [dynamic_text(&text, column.range.start())])?;
+                        write!(f, [text(&column_text, column.range.start())])?;
 
                         if !is_last_in_row {
                             write!(f, [EachTemplateSeparator])?;

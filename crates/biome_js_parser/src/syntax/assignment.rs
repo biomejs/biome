@@ -351,17 +351,17 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
 
         let target = parse_assignment_pattern(p).or_add_diagnostic(p, expected_assignment_target);
 
-        if let Some(mut target) = target {
-            if matches!(
+        if let Some(mut target) = target
+            && matches!(
                 target.kind(p),
                 JS_OBJECT_ASSIGNMENT_PATTERN | JS_ARRAY_ASSIGNMENT_PATTERN
-            ) {
-                target.change_kind(p, JS_BOGUS_ASSIGNMENT);
-                p.error(p.err_builder(
-                    "object and array assignment targets are not allowed in rest patterns",
-                    target.range(p),
-                ));
-            }
+            )
+        {
+            target.change_kind(p, JS_BOGUS_ASSIGNMENT);
+            p.error(p.err_builder(
+                "object and array assignment targets are not allowed in rest patterns",
+                target.range(p),
+            ));
         }
 
         Present(m.complete(p, JS_OBJECT_ASSIGNMENT_PATTERN_REST))
@@ -527,14 +527,14 @@ impl RewriteParseEvents for ReparseAssignment {
     fn token(&mut self, token: RewriteToken, p: &mut RewriteParser) {
         let parent = self.parents.last_mut();
 
-        if let Some((parent_kind, _)) = parent {
-            if matches!(
+        if let Some((parent_kind, _)) = parent
+            && matches!(
                 *parent_kind,
                 JS_COMPUTED_MEMBER_ASSIGNMENT | JS_STATIC_MEMBER_ASSIGNMENT
-            ) && token.kind == T![?.]
-            {
-                *parent_kind = JS_BOGUS_ASSIGNMENT
-            }
+            )
+            && token.kind == T![?.]
+        {
+            *parent_kind = JS_BOGUS_ASSIGNMENT
         }
 
         p.bump(token)

@@ -54,12 +54,16 @@ impl ConditionalType {
                 return ConditionalType::Unknown;
             }
 
-            let derive_from_reference = |reference: &TypeReference| -> ConditionalType {
-                let reference = ty.apply_module_id_to_reference(reference);
-                match resolver.resolve_and_get(&reference) {
+            let derive_from_resolved_reference = |reference: &TypeReference| -> ConditionalType {
+                match resolver.resolve_and_get(reference) {
                     Some(ty) => derive_conditional_type(ty, resolver, depth),
                     None => ConditionalType::Unknown,
                 }
+            };
+
+            let derive_from_reference = |reference: &TypeReference| -> ConditionalType {
+                let reference = ty.apply_module_id_to_reference(reference);
+                derive_from_resolved_reference(&reference)
             };
 
             match ConditionalType::from_data_shallow(ty.as_raw_data()) {
@@ -103,10 +107,10 @@ impl ConditionalType {
                         }
                     }
                     TypeData::Reference(reference) => derive_from_reference(reference),
-                    TypeData::Union(union) => {
+                    TypeData::Union(_) => {
                         let mut conditional = ConditionalType::Unknown;
-                        for ty in union.types() {
-                            let next = derive_from_reference(ty);
+                        for ty in ty.flattened_union_variants(resolver) {
+                            let next = derive_from_resolved_reference(&ty);
                             conditional = if conditional == ConditionalType::Unknown {
                                 next
                             } else {
@@ -413,9 +417,9 @@ fn to_filtered_value(
                 }
             }
             TypeData::Reference(reference) => reference_to_non_nullish_value(reference),
-            TypeData::Union(union) => {
-                let types = union
-                    .types()
+            TypeData::Union(_) => {
+                let types: Vec<_> = resolved.flattened_union_variants(resolver).collect();
+                let types = types
                     .iter()
                     .filter_map(|reference| {
                         let ty = resolver
@@ -427,7 +431,7 @@ fn to_filtered_value(
                     .collect();
                 Some(TypeData::union_of(resolver, types))
             }
-            _ => None,
+            _ => Some(resolved.clone()),
         },
         FilteredData::Stripped => None,
     }

@@ -1,0 +1,96 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+[:40px] w-5
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@0..1 "[" [] [],
+                    TW_SELECTOR@1..6 ":40px" [] [],
+                    R_BRACKET@6..7 "]" [] [],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@7..8 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@8..9 "w" [] [],
+                minus_token: DASH@9..10 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@10..12 "5" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@12..12 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..12
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..12
+    0: TW_FULL_CANDIDATE@0..7
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_BOGUS_CANDIDATE@0..7
+        0: L_BRACKET@0..1 "[" [] []
+        1: TW_SELECTOR@1..6 ":40px" [] []
+        2: R_BRACKET@6..7 "]" [] []
+      3: (empty)
+    1: WHITESPACE@7..8 " " [] []
+    2: TW_FULL_CANDIDATE@8..12
+      0: TW_VARIANT_LIST@8..8
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@8..12
+        0: TW_BASE@8..9 "w" [] []
+        1: DASH@9..10 "-" [] []
+        2: TW_NAMED_VALUE@10..12
+          0: TW_VALUE@10..12 "5" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@12..12 "" [] []
+
+```
+
+## Diagnostics
+
+```
+missing-property.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[:40px]'.
+  
+  > 1 │ [:40px] w-5
+      │ ^^^^^^^
+    2 │ 
+  
+  i Expected a candidate here.
+  
+  > 1 │ [:40px] w-5
+      │ ^^^^^^^
+    2 │ 
+  
+```

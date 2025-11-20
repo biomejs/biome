@@ -15,6 +15,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_DOCKER_REPO: biomejs/docker
   BIOME_RELEASE_CLI_EVENT: biome-release-cli-event
 
 jobs:
@@ -22,15 +23,15 @@ jobs:
     name: Release
     outputs:
       hasChangesets: ${{ steps.changesets-action.outputs.hasChangesets }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-small
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - name: Setup Node.js 22.x
+      - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22
+          node-version: 24.11.1
 
       - name: Install pnpm
         run: |
@@ -40,6 +41,24 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Update rule version metadata
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+          pnpm exec changeset status --output="changeset_status.json"
+          NEW_VERSION=$(jq -r '.releases[] | select(.name=="@biomejs/biome") | .newVersion' changeset_status.json)
+          rm changeset_status.json
+          if [ -z "$NEW_VERSION" ]; then
+            echo "No new @biomejs/biome version detected; skipping rule version metadata update."
+            exit 0
+          fi
+          scripts/update-next-version.sh --replace "$NEW_VERSION"
+
+      # The changeset action does a hard reset, so we need to save
+      # the changes in a stash so they can be popped later in the `version` command
+      - name: Stash changes
+        run: git stash push -u -m __automated-changes
 
       - name: Create Release Pull Request
         id: changesets-action
@@ -53,7 +72,7 @@ jobs:
 
   # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-small
     needs: changesets
     if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
@@ -62,12 +81,12 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - name: Setup Node.js 22.x
+      - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22
+          node-version: 24.11.1
 
       - name: Check CLI version changes
         id: cli-version-changed
@@ -91,16 +110,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
           - os: depot-macos-14
@@ -115,7 +134,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install Rust toolchain
         run: rustup target add ${{ matrix.target }}
@@ -127,7 +146,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@c99cc51b309eee71a866715cfa08c922f11cf898 # v2.56.19
+        uses: taiki-e/install-action@537c30d2b45cc3aa3fb35e2bbcfb61ef93fd6f02 # v2.62.52
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -147,12 +166,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022-4'
+        if: matrix.os == 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022-4'
+        if: matrix.os != 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -169,24 +188,26 @@ jobs:
   build-binaries-gnu:
     needs: version
     if: needs.version.outputs.cli-version
+    env:
+      RUST_BACKTRACE: 1
     strategy:
       matrix:
         include:
           - os: depot-ubuntu-24.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-4
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
 
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.88.0-bullseye@sha256:b315f988b86912bafa7afd39a6ded0a497bf850ec36578ca9a3bdd6a14d5db4e
+      image: rust:1.91.1-bullseye@sha256:8d9b5e80062dcdb7f037b4eef92a6649632034d6811652e028706ea93db64159
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Set jemalloc page size for linux-arm64
         if: matrix.code-target == 'linux-arm64'
@@ -223,7 +244,7 @@ jobs:
     if: needs.version.outputs.cli-version
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -254,25 +275,24 @@ jobs:
       version: ${{ needs.version.outputs.js-api-version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 24.11.1
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Cache pnpm modules
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
       - name: Compile backends
         run: |
           pnpm --filter @biomejs/js-api run build:wasm-bundler
@@ -298,7 +318,7 @@ jobs:
 
   publish-cli:
     name: Publish CLI
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs:
       - build-binaries
       - build-binaries-gnu
@@ -309,7 +329,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Download CLI artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -325,7 +345,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 24.11.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
@@ -348,16 +368,14 @@ jobs:
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package  --tag latest --access public --provenance; fi; done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package  --tag latest --access public; fi; done
 
       - name: Publish release for @biomejs/biome
         run: |
           bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
 
       - name: Create GitHub @biomejs/biome release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -372,18 +390,24 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
 
-      - name: Dispatch event on release
+      - name: Codegen website schema
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
           event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
           client-payload: |
-            { "sha": "${{ env.GITHUB_SHA }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
+            { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
+      - name: Generate docker images
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_DOCKER_REPO }}
+          event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
 
   publish-js-api:
     name: Publish JS API
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs: build-js-api
     if: needs.build-js-api.outputs.version
     environment: npm-publish
@@ -391,7 +415,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Download JS API artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -402,7 +426,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 24.11.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
@@ -416,15 +440,13 @@ jobs:
 
       - name: Publish npm package as latest
         run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish release for @biomejs/js-api
         run: |
           bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
 
       - name: Create GitHub @biomejs/js-api release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

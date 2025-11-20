@@ -39,6 +39,11 @@ impl ImportGroups {
             })
     }
 }
+impl biome_deserialize::Merge for ImportGroups {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
+}
 
 pub struct ImportCandidate<'a> {
     pub has_type_token: bool,
@@ -310,21 +315,27 @@ impl TryFrom<String> for NegatablePredefinedSourceMatcher {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
-    fn schema_name() -> String {
-        "NegatablePredefinedSourceMatcher".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("NegatablePredefinedSourceMatcher")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         let schema = PredefinedSourceMatcher::json_schema(generator);
-        let mut schema_object = schema.into_object();
-        // Add negated variants
-        if let Some(enum_values) = &mut schema_object.enum_values {
-            for index in 0..enum_values.len() {
-                if let Some(val) = enum_values[index].as_str() {
-                    enum_values.push(format!("!{val}").into());
+        // Get the schema as a JSON object
+        if let Some(obj) = schema.as_object() {
+            let mut new_obj = obj.clone();
+            // Add negated variants to the enum
+            if let Some(enum_values) = new_obj.get_mut("enum").and_then(|v| v.as_array_mut()) {
+                let original_len = enum_values.len();
+                for index in 0..original_len {
+                    if let Some(val) = enum_values[index].as_str() {
+                        enum_values.push(serde_json::Value::from(format!("!{val}")));
+                    }
                 }
             }
+            schemars::Schema::from(new_obj)
+        } else {
+            schema
         }
-        schema_object.into()
     }
 }
 

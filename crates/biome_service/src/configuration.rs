@@ -4,7 +4,7 @@ use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -22,6 +22,7 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_analyze::METADATA as html_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
@@ -114,7 +115,7 @@ impl LoadedConfiguration {
     }
 
     /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
-    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter<'_> {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }
 }
@@ -437,12 +438,14 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -468,12 +471,20 @@ pub trait ConfigurationExt {
 }
 
 impl ConfigurationExt for Configuration {
-    /// Mutates the configuration so that any fields that have not been configured explicitly are
-    /// filled in with their values from configs listed in the `extends` field.
+    /// Mutates the configuration so that any fields that have not been
+    /// configured explicitly are filled in with their values from configs
+    /// listed in the `extends` field.
     ///
     /// The `extends` configs are applied from left to right.
     ///
-    /// If a configuration can't be resolved from the file system, the operation will fail.
+    /// If a configuration can't be resolved from the file system, the operation
+    /// will fail.
+    ///
+    /// `file_path` is the path to the configuration file and is used for
+    /// resolving relative paths in the `extends` field.
+    ///
+    /// `external_resolution_base_path` is used for resolving non-relative
+    /// `extends` entries.
     fn apply_extends(
         &mut self,
         fs: &dyn FsWithResolverProxy,
@@ -691,24 +702,30 @@ pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
-    skip: &'a [RuleSelector],
-    only: &'a [RuleSelector],
+    skip: &'a [AnalyzerSelector],
+    only: &'a [AnalyzerSelector],
 }
 
 impl<'a> ProjectScanComputer<'a> {
-    pub fn new(
-        configuration: &'a Configuration,
-        skip: &'a [RuleSelector],
-        only: &'a [RuleSelector],
-    ) -> Self {
+    pub fn new(configuration: &'a Configuration) -> Self {
         let enabled_rules = configuration.get_linter_rules().as_enabled_rules();
         Self {
             enabled_rules,
             requires_project_scan: false,
-            skip,
-            only,
             configuration,
+            skip: &[],
+            only: &[],
         }
+    }
+
+    pub fn with_rule_selectors(
+        mut self,
+        skip: &'a [AnalyzerSelector],
+        only: &'a [AnalyzerSelector],
+    ) -> Self {
+        self.skip = skip;
+        self.only = only;
+        self
     }
 
     /// Computes and return the [ScanKind] required by this project
@@ -747,13 +764,18 @@ impl<'a> ProjectScanComputer<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
         if !self.only.is_empty() {
-            if self.only.contains(&selector) {
-                let domains = R::METADATA.domains;
-                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            for selector in self.only.iter() {
+                if selector.match_rule::<R>() {
+                    let domains = R::METADATA.domains;
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    break;
+                }
             }
-        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+            && self.enabled_rules.contains(&filter)
+        {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
@@ -803,7 +825,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
 mod tests {
     use super::*;
     use biome_configuration::analyzer::{
-        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+        Correctness, DomainSelector, RuleDomainValue, RuleDomains, RuleSelector, SeverityOrGroup,
     };
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
@@ -821,7 +843,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::NoScanner
         );
     }
@@ -840,7 +862,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -864,7 +886,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -888,12 +910,12 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[RuleSelector::Rule("correctness", "noPrivateImports")],
-                &[]
-            )
-            .compute(),
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()],
+                    &[]
+                )
+                .compute(),
             ScanKind::NoScanner
         );
     }
@@ -917,13 +939,37 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[],
-                &[RuleSelector::Rule("correctness", "noPrivateImports")]
-            )
-            .compute(),
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[],
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()]
+                )
+                .compute(),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_a_domain_contains_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("project").into()])
+                .compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_not_return_project_if_a_domain_does_not_contain_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
         );
     }
 }

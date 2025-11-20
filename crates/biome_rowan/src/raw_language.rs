@@ -248,27 +248,27 @@ impl SyntaxFactory for RawLanguageSyntaxFactory {
                 let mut current_element = elements.next();
                 let mut slots: RawNodeSlots<3> = Default::default();
 
-                if let Some(element) = &current_element {
-                    if element.kind() == RawLanguageKind::L_PAREN_TOKEN {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == RawLanguageKind::L_PAREN_TOKEN
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
 
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == RawLanguageKind::LITERAL_EXPRESSION {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == RawLanguageKind::LITERAL_EXPRESSION
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
 
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == RawLanguageKind::R_PAREN_TOKEN {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == RawLanguageKind::R_PAREN_TOKEN
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
 
                 slots.next_slot();

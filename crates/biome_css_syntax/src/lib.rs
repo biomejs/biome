@@ -3,18 +3,20 @@
 #[macro_use]
 mod file_source;
 mod generated;
+pub mod selector_ext;
 pub mod stmt_ext;
+mod string_ext;
 mod syntax_node;
 
 pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::CssFileSource;
+pub use file_source::{CssFileSource, CssVariant};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for CssSyntaxKind {
     fn from(d: u16) -> Self {
@@ -180,4 +182,16 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
             Err(())
         }
     }
+}
+
+/// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
+pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
+    let mut text = token.token_text_trimmed();
+    if token.kind() == CssSyntaxKind::CSS_STRING_LITERAL {
+        // remove string delimiters
+        // SAFETY: string literal token have a delimiters at the start and the end of the string
+        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        text = text.slice(range);
+    }
+    text
 }

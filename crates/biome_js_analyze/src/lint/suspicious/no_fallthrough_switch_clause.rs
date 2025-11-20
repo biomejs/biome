@@ -110,34 +110,33 @@ impl Rule for NoFallthroughSwitchClause {
             for instruction in block.instructions.iter() {
                 match instruction.kind {
                     InstructionKind::Statement => {
-                        if let Some(node) = &instruction.node {
-                            if let Some(switch_stmt) =
+                        if let Some(node) = &instruction.node
+                            && let Some(switch_stmt) =
                                 node.parent().and_then(JsSwitchStatement::cast)
-                            {
-                                // We assume that a block has a single switch.
-                                // If this assertion fails, then it is likely a change in the
-                                // implementation of the Control Flow Graph
-                                debug_assert!(!is_switch);
-                                is_switch = true;
-                                let switch_clause_nodes = switch_stmt.cases();
-                                let mut default_clause = None;
-                                switch_clauses.reserve_exact(switch_clause_nodes.len());
-                                block_to_switch_clause_range.reserve(switch_clause_nodes.len());
-                                // Register in-order the switch cases, but the default clause which
-                                // is inserted at the end.
-                                // This mimics the order of the jumps in a blocks.
-                                // The default clause, if any is the last (unconditional) jump.
-                                for switch_clause in switch_clause_nodes {
-                                    if JsDefaultClause::can_cast(switch_clause.syntax().kind()) {
-                                        has_default_clause = true;
-                                        default_clause = Some(switch_clause);
-                                    } else {
-                                        switch_clauses.push_back(switch_clause);
-                                    }
+                        {
+                            // We assume that a block has a single switch.
+                            // If this assertion fails, then it is likely a change in the
+                            // implementation of the Control Flow Graph
+                            debug_assert!(!is_switch);
+                            is_switch = true;
+                            let switch_clause_nodes = switch_stmt.cases();
+                            let mut default_clause = None;
+                            switch_clauses.reserve_exact(switch_clause_nodes.len());
+                            block_to_switch_clause_range.reserve(switch_clause_nodes.len());
+                            // Register in-order the switch cases, but the default clause which
+                            // is inserted at the end.
+                            // This mimics the order of the jumps in a blocks.
+                            // The default clause, if any is the last (unconditional) jump.
+                            for switch_clause in switch_clause_nodes {
+                                if JsDefaultClause::can_cast(switch_clause.syntax().kind()) {
+                                    has_default_clause = true;
+                                    default_clause = Some(switch_clause);
+                                } else {
+                                    switch_clauses.push_back(switch_clause);
                                 }
-                                if let Some(default_clause) = default_clause.take() {
-                                    switch_clauses.push_back(default_clause);
-                                }
+                            }
+                            if let Some(default_clause) = default_clause.take() {
+                                switch_clauses.push_back(default_clause);
                             }
                         }
                     }

@@ -1,17 +1,17 @@
 mod charset;
 mod color_profile;
-mod container;
+pub(crate) mod container;
 mod counter_style;
 mod document;
-mod error;
-mod feature;
+pub(crate) mod error;
+pub(crate) mod feature;
 mod font_face;
 mod font_feature_values;
 mod font_palette_values;
 mod import;
 mod keyframes;
 mod layer;
-mod media;
+pub(crate) mod media;
 mod namespace;
 mod page;
 mod parse_error;
@@ -19,37 +19,62 @@ mod position_try;
 mod property;
 mod scope;
 mod starting_style;
-mod supports;
+pub(crate) mod supports;
+mod tailwind;
 mod unknown;
 mod value;
 mod view_transition;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::charset::parse_charset_at_rule;
-use crate::syntax::at_rule::color_profile::parse_color_profile_at_rule;
-use crate::syntax::at_rule::container::parse_container_at_rule;
-use crate::syntax::at_rule::counter_style::parse_counter_style_at_rule;
+use crate::syntax::at_rule::color_profile::{
+    parse_color_profile_at_rule, parse_color_profile_at_rule_declarator,
+};
+use crate::syntax::at_rule::container::{
+    parse_container_at_rule, parse_container_at_rule_declarator,
+};
+use crate::syntax::at_rule::counter_style::{
+    parse_counter_style_at_rule, parse_counter_style_at_rule_declarator,
+};
 use crate::syntax::at_rule::document::parse_document_at_rule;
-use crate::syntax::at_rule::font_face::parse_font_face_at_rule;
+use crate::syntax::at_rule::font_face::{
+    parse_font_face_at_rule, parse_font_face_at_rule_declarator,
+};
 use crate::syntax::at_rule::font_feature_values::parse_font_feature_values_at_rule;
-use crate::syntax::at_rule::font_palette_values::parse_font_palette_values_at_rule;
+use crate::syntax::at_rule::font_palette_values::{
+    parse_font_palette_values_at_rule, parse_font_palette_values_at_rule_declarator,
+};
 use crate::syntax::at_rule::import::parse_import_at_rule;
 use crate::syntax::at_rule::keyframes::parse_keyframes_at_rule;
 use crate::syntax::at_rule::layer::parse_layer_at_rule;
-use crate::syntax::at_rule::media::parse_media_at_rule;
+use crate::syntax::at_rule::media::{parse_media_at_rule, parse_media_at_rule_declarator};
 use crate::syntax::at_rule::namespace::parse_namespace_at_rule;
 use crate::syntax::at_rule::page::parse_page_at_rule;
-use crate::syntax::at_rule::position_try::parse_position_try_at_rule;
-use crate::syntax::at_rule::property::parse_property_at_rule;
-use crate::syntax::at_rule::scope::parse_scope_at_rule;
-use crate::syntax::at_rule::starting_style::parse_starting_style_at_rule;
-use crate::syntax::at_rule::supports::parse_supports_at_rule;
+use crate::syntax::at_rule::position_try::{
+    parse_position_try_at_rule, parse_position_try_at_rule_declarator,
+};
+use crate::syntax::at_rule::property::{parse_property_at_rule, parse_property_at_rule_declarator};
+use crate::syntax::at_rule::scope::{parse_scope_at_rule, parse_scope_at_rule_declarator};
+use crate::syntax::at_rule::starting_style::{
+    parse_starting_style_at_rule, parse_starting_style_at_rule_declarator,
+};
+use crate::syntax::at_rule::supports::{parse_supports_at_rule, parse_supports_at_rule_declarator};
+use crate::syntax::at_rule::tailwind::{
+    parse_apply_at_rule, parse_config_at_rule, parse_custom_variant_at_rule, parse_plugin_at_rule,
+    parse_reference_at_rule, parse_slot_at_rule, parse_source_at_rule, parse_theme_at_rule,
+    parse_utility_at_rule, parse_variant_at_rule,
+};
 use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
 use crate::syntax::at_rule::value::parse_value_at_rule;
-use crate::syntax::at_rule::view_transition::parse_view_transition_at_rule;
-use crate::syntax::parse_error::expected_any_at_rule;
+use crate::syntax::at_rule::view_transition::{
+    parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
+};
+
+use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
+
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
@@ -106,7 +131,103 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![value] => parse_value_at_rule(p),
         T![position_try] => parse_position_try_at_rule(p),
         T![view_transition] => parse_view_transition_at_rule(p),
+        // Tailwind at rules
+        T![theme] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_theme_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![utility] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_utility_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![variant] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_variant_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![custom_variant] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_custom_variant_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+
+        T![apply] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_apply_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![source] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_source_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![reference] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_reference_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+
+        T![config] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_config_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![plugin] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_plugin_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![slot] => CssSyntaxFeatures::Tailwind
+            .parse_exclusive_syntax(p, parse_slot_at_rule, |p, m| {
+                tailwind_disabled(p, m.range(p))
+            })
+            .or_else(|| parse_unknown_at_rule(p)),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
+    }
+}
+
+#[inline]
+pub(crate) fn parse_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![@]);
+    parse_any_at_rule_declarator(p).or_add_diagnostic(p, expected_any_at_rule);
+
+    Present(m.complete(p, CSS_AT_RULE_DECLARATOR))
+}
+
+#[inline]
+pub(crate) fn parse_any_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    match p.cur() {
+        // Conditional-block declarators
+        T![media] => parse_media_at_rule_declarator(p, T![')']),
+        T![container] => parse_container_at_rule_declarator(p),
+        T![supports] => parse_supports_at_rule_declarator(p),
+        T![scope] => parse_scope_at_rule_declarator(p),
+        T![starting_style] => parse_starting_style_at_rule_declarator(p),
+
+        // Declaration-block declarators
+        T![color_profile] => parse_color_profile_at_rule_declarator(p),
+        T![counter_style] => parse_counter_style_at_rule_declarator(p),
+        T![font_face] => parse_font_face_at_rule_declarator(p),
+        T![font_palette_values] => parse_font_palette_values_at_rule_declarator(p),
+        T![position_try] => parse_position_try_at_rule_declarator(p),
+        T![property] => parse_property_at_rule_declarator(p),
+        T![view_transition] => parse_view_transition_at_rule_declarator(p),
+
+        // Unknown: create a bogus child so the wrapper can complete
+        _ => {
+            let bogus = p.start();
+            p.error(expected_any_at_rule(p, p.cur_range()));
+            p.bump_any();
+            Present(bogus.complete(p, CSS_BOGUS))
+        }
     }
 }

@@ -232,6 +232,7 @@ impl TwFullCandidate {
     pub fn as_fields(&self) -> TwFullCandidateFields {
         TwFullCandidateFields {
             variants: self.variants(),
+            negative_token: self.negative_token(),
             candidate: self.candidate(),
             excl_token: self.excl_token(),
         }
@@ -239,11 +240,14 @@ impl TwFullCandidate {
     pub fn variants(&self) -> TwVariantList {
         support::list(&self.syntax, 0usize)
     }
+    pub fn negative_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn candidate(&self) -> SyntaxResult<AnyTwCandidate> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn excl_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwFullCandidate {
@@ -257,6 +261,7 @@ impl Serialize for TwFullCandidate {
 #[derive(Serialize)]
 pub struct TwFullCandidateFields {
     pub variants: TwVariantList,
+    pub negative_token: Option<SyntaxToken>,
     pub candidate: SyntaxResult<AnyTwCandidate>,
     pub excl_token: Option<SyntaxToken>,
 }
@@ -952,6 +957,10 @@ impl std::fmt::Debug for TwFullCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwFullCandidate")
                 .field("variants", &self.variants())
+                .field(
+                    "negative_token",
+                    &support::DebugOptionalElement(self.negative_token()),
+                )
                 .field("candidate", &support::DebugSyntaxResult(self.candidate()))
                 .field(
                     "excl_token",
@@ -1376,18 +1385,18 @@ impl AstNode for AnyTwCandidate {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwArbitraryCandidate(it) => &it.syntax,
-            Self::TwBogusCandidate(it) => &it.syntax,
-            Self::TwFunctionalCandidate(it) => &it.syntax,
-            Self::TwStaticCandidate(it) => &it.syntax,
+            Self::TwArbitraryCandidate(it) => it.syntax(),
+            Self::TwBogusCandidate(it) => it.syntax(),
+            Self::TwFunctionalCandidate(it) => it.syntax(),
+            Self::TwStaticCandidate(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwArbitraryCandidate(it) => it.syntax,
-            Self::TwBogusCandidate(it) => it.syntax,
-            Self::TwFunctionalCandidate(it) => it.syntax,
-            Self::TwStaticCandidate(it) => it.syntax,
+            Self::TwArbitraryCandidate(it) => it.into_syntax(),
+            Self::TwBogusCandidate(it) => it.into_syntax(),
+            Self::TwFunctionalCandidate(it) => it.into_syntax(),
+            Self::TwStaticCandidate(it) => it.into_syntax(),
         }
     }
 }
@@ -1404,10 +1413,10 @@ impl std::fmt::Debug for AnyTwCandidate {
 impl From<AnyTwCandidate> for SyntaxNode {
     fn from(n: AnyTwCandidate) -> Self {
         match n {
-            AnyTwCandidate::TwArbitraryCandidate(it) => it.into(),
-            AnyTwCandidate::TwBogusCandidate(it) => it.into(),
-            AnyTwCandidate::TwFunctionalCandidate(it) => it.into(),
-            AnyTwCandidate::TwStaticCandidate(it) => it.into(),
+            AnyTwCandidate::TwArbitraryCandidate(it) => it.into_syntax(),
+            AnyTwCandidate::TwBogusCandidate(it) => it.into_syntax(),
+            AnyTwCandidate::TwFunctionalCandidate(it) => it.into_syntax(),
+            AnyTwCandidate::TwStaticCandidate(it) => it.into_syntax(),
         }
     }
 }
@@ -1444,14 +1453,14 @@ impl AstNode for AnyTwFullCandidate {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwBogusCandidate(it) => &it.syntax,
-            Self::TwFullCandidate(it) => &it.syntax,
+            Self::TwBogusCandidate(it) => it.syntax(),
+            Self::TwFullCandidate(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwBogusCandidate(it) => it.syntax,
-            Self::TwFullCandidate(it) => it.syntax,
+            Self::TwBogusCandidate(it) => it.into_syntax(),
+            Self::TwFullCandidate(it) => it.into_syntax(),
         }
     }
 }
@@ -1466,8 +1475,8 @@ impl std::fmt::Debug for AnyTwFullCandidate {
 impl From<AnyTwFullCandidate> for SyntaxNode {
     fn from(n: AnyTwFullCandidate) -> Self {
         match n {
-            AnyTwFullCandidate::TwBogusCandidate(it) => it.into(),
-            AnyTwFullCandidate::TwFullCandidate(it) => it.into(),
+            AnyTwFullCandidate::TwBogusCandidate(it) => it.into_syntax(),
+            AnyTwFullCandidate::TwFullCandidate(it) => it.into_syntax(),
         }
     }
 }
@@ -1503,14 +1512,14 @@ impl AstNode for AnyTwModifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwBogusModifier(it) => &it.syntax,
-            Self::TwModifier(it) => &it.syntax,
+            Self::TwBogusModifier(it) => it.syntax(),
+            Self::TwModifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwBogusModifier(it) => it.syntax,
-            Self::TwModifier(it) => it.syntax,
+            Self::TwBogusModifier(it) => it.into_syntax(),
+            Self::TwModifier(it) => it.into_syntax(),
         }
     }
 }
@@ -1525,8 +1534,8 @@ impl std::fmt::Debug for AnyTwModifier {
 impl From<AnyTwModifier> for SyntaxNode {
     fn from(n: AnyTwModifier) -> Self {
         match n {
-            AnyTwModifier::TwBogusModifier(it) => it.into(),
-            AnyTwModifier::TwModifier(it) => it.into(),
+            AnyTwModifier::TwBogusModifier(it) => it.into_syntax(),
+            AnyTwModifier::TwModifier(it) => it.into_syntax(),
         }
     }
 }
@@ -1580,18 +1589,18 @@ impl AstNode for AnyTwValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwArbitraryValue(it) => &it.syntax,
-            Self::TwBogusValue(it) => &it.syntax,
-            Self::TwCssVariableValue(it) => &it.syntax,
-            Self::TwNamedValue(it) => &it.syntax,
+            Self::TwArbitraryValue(it) => it.syntax(),
+            Self::TwBogusValue(it) => it.syntax(),
+            Self::TwCssVariableValue(it) => it.syntax(),
+            Self::TwNamedValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwArbitraryValue(it) => it.syntax,
-            Self::TwBogusValue(it) => it.syntax,
-            Self::TwCssVariableValue(it) => it.syntax,
-            Self::TwNamedValue(it) => it.syntax,
+            Self::TwArbitraryValue(it) => it.into_syntax(),
+            Self::TwBogusValue(it) => it.into_syntax(),
+            Self::TwCssVariableValue(it) => it.into_syntax(),
+            Self::TwNamedValue(it) => it.into_syntax(),
         }
     }
 }
@@ -1608,10 +1617,10 @@ impl std::fmt::Debug for AnyTwValue {
 impl From<AnyTwValue> for SyntaxNode {
     fn from(n: AnyTwValue) -> Self {
         match n {
-            AnyTwValue::TwArbitraryValue(it) => it.into(),
-            AnyTwValue::TwBogusValue(it) => it.into(),
-            AnyTwValue::TwCssVariableValue(it) => it.into(),
-            AnyTwValue::TwNamedValue(it) => it.into(),
+            AnyTwValue::TwArbitraryValue(it) => it.into_syntax(),
+            AnyTwValue::TwBogusValue(it) => it.into_syntax(),
+            AnyTwValue::TwCssVariableValue(it) => it.into_syntax(),
+            AnyTwValue::TwNamedValue(it) => it.into_syntax(),
         }
     }
 }
@@ -1665,18 +1674,18 @@ impl AstNode for AnyTwVariant {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::TwArbitraryVariant(it) => &it.syntax,
-            Self::TwBogusVariant(it) => &it.syntax,
-            Self::TwFunctionalVariant(it) => &it.syntax,
-            Self::TwStaticVariant(it) => &it.syntax,
+            Self::TwArbitraryVariant(it) => it.syntax(),
+            Self::TwBogusVariant(it) => it.syntax(),
+            Self::TwFunctionalVariant(it) => it.syntax(),
+            Self::TwStaticVariant(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::TwArbitraryVariant(it) => it.syntax,
-            Self::TwBogusVariant(it) => it.syntax,
-            Self::TwFunctionalVariant(it) => it.syntax,
-            Self::TwStaticVariant(it) => it.syntax,
+            Self::TwArbitraryVariant(it) => it.into_syntax(),
+            Self::TwBogusVariant(it) => it.into_syntax(),
+            Self::TwFunctionalVariant(it) => it.into_syntax(),
+            Self::TwStaticVariant(it) => it.into_syntax(),
         }
     }
 }
@@ -1693,10 +1702,10 @@ impl std::fmt::Debug for AnyTwVariant {
 impl From<AnyTwVariant> for SyntaxNode {
     fn from(n: AnyTwVariant) -> Self {
         match n {
-            AnyTwVariant::TwArbitraryVariant(it) => it.into(),
-            AnyTwVariant::TwBogusVariant(it) => it.into(),
-            AnyTwVariant::TwFunctionalVariant(it) => it.into(),
-            AnyTwVariant::TwStaticVariant(it) => it.into(),
+            AnyTwVariant::TwArbitraryVariant(it) => it.into_syntax(),
+            AnyTwVariant::TwBogusVariant(it) => it.into_syntax(),
+            AnyTwVariant::TwFunctionalVariant(it) => it.into_syntax(),
+            AnyTwVariant::TwStaticVariant(it) => it.into_syntax(),
         }
     }
 }

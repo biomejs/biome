@@ -1,6 +1,6 @@
 use crate::react::components::ReactComponentInfo;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -101,6 +101,7 @@ declare_lint_rule! {
         name: "useComponentExportOnlyModules",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components").inspired()],
+        domains: &[RuleDomain::React],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -125,10 +126,10 @@ impl Rule for UseComponentExportOnlyModules {
     type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if let Some(file_name) = ctx.file_path().file_name() {
-            if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
-                return Vec::new().into_boxed_slice();
-            }
+        if let Some(file_name) = ctx.file_path().file_name()
+            && !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext))
+        {
+            return Vec::new().into_boxed_slice();
         }
         let root = ctx.query();
         let mut local_components: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
@@ -153,14 +154,11 @@ impl Rule for UseComponentExportOnlyModules {
                     stmt,
                     AnyJsStatement::JsFunctionDeclaration(_)
                         | AnyJsStatement::JsClassDeclaration(_)
-                ) {
-                    if let Some(ReactComponentInfo {
-                        name: Some(name), ..
-                    }) = ReactComponentInfo::from_declaration(stmt.syntax())
-                    {
-                        local_components
-                            .insert(name.text_trimmed().into(), name.text_trimmed_range());
-                    }
+                ) && let Some(ReactComponentInfo {
+                    name: Some(name), ..
+                }) = ReactComponentInfo::from_declaration(stmt.syntax())
+                {
+                    local_components.insert(name.text_trimmed().into(), name.text_trimmed_range());
                 }
             } else if let AnyJsModuleItem::JsExport(export) = item {
                 // Explore exported component declarations
@@ -173,15 +171,19 @@ impl Rule for UseComponentExportOnlyModules {
                         .identifier
                         .as_ref()
                         .and_then(|x| x.name_token())
+                        && ctx
+                            .options()
+                            .allow_export_names
+                            .iter()
+                            .flatten()
+                            .any(|export_name| {
+                                export_name.as_ref() == exported_item_id.text_trimmed()
+                            })
                     {
-                        if ctx.options().allow_export_names.iter().any(|export_name| {
-                            export_name.as_ref() == exported_item_id.text_trimmed()
-                        }) {
-                            continue;
-                        }
+                        continue;
                     }
                     // Allow exporting constants along with components
-                    if ctx.options().allow_constant_export
+                    if ctx.options().allow_constant_export()
                         && exported_item
                             .exported
                             .clone()
@@ -197,13 +199,11 @@ impl Rule for UseComponentExportOnlyModules {
 
                     if let Some(AnyJsExported::AnyIdentifier(identifier)) =
                         exported_item.exported.as_ref()
+                        && let Some(name) = identifier.name_token()
+                        && local_components.contains_key(name.text_trimmed())
                     {
-                        if let Some(name) = identifier.name_token() {
-                            if local_components.contains_key(name.text_trimmed()) {
-                                exported_component_ids.push(exported_item);
-                                continue;
-                            }
-                        }
+                        exported_component_ids.push(exported_item);
+                        continue;
                     }
 
                     if ReactComponentInfo::from_exported_item(&exported_item).is_some() {

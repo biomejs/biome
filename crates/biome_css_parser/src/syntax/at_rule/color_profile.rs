@@ -23,10 +23,24 @@ pub(crate) fn parse_color_profile_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    parse_color_profile_at_rule_declarator(p).ok();
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_COLOR_PROFILE_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_color_profile_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_color_profile_at_rule(p) {
+        return Absent;
+    }
+
+    // Declarator marker
+    let m_decl = p.start();
     p.bump(T![color_profile]);
 
     // TODO: This should actually be `<dashed-ident> | device-cmyk`.
-    let kind = if parse_custom_identifier(p, CssLexContext::Regular)
+    let decl_kind = if parse_custom_identifier(p, CssLexContext::Regular)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, COLOR_PROFILE_RECOVERY_SET)
@@ -35,14 +49,13 @@ pub(crate) fn parse_color_profile_at_rule(p: &mut CssParser) -> ParsedSyntax {
         )
         .is_ok()
     {
-        CSS_COLOR_PROFILE_AT_RULE
+        CSS_COLOR_PROFILE_AT_RULE_DECLARATOR
     } else {
-        CSS_BOGUS_AT_RULE
+        // Produce a bogus declarator node; the wrapper will still complete.
+        CSS_BOGUS
     };
 
-    parse_declaration_block(p);
-
-    Present(m.complete(p, kind))
+    Present(m_decl.complete(p, decl_kind))
 }
 
 const COLOR_PROFILE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];

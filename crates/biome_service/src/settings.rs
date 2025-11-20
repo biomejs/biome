@@ -6,17 +6,16 @@ use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
-use biome_configuration::html::HtmlConfiguration;
+use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
-use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, CssConfiguration, DEFAULT_SCANNER_IGNORE_ENTRIES,
+    FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration,
+    GritConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -32,6 +31,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
+use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -39,28 +39,13 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::Arc;
 use tracing::instrument;
-
-const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".netlify",
-    b".output",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".turbo",
-    b".vercel",
-    b".DS_Store",
-    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
-    b"RedisCommander.d.ts",
-];
 
 /// Settings active in a project.
 ///
@@ -88,9 +73,18 @@ pub struct Settings {
     pub override_settings: OverrideSettings,
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
+
+    // TODO: remove once HTML full support is stable
+    pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 }
 
 impl Settings {
+    pub fn experimental_full_html_support_enabled(&self) -> bool {
+        self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
     pub fn source(&self) -> Option<Configuration> {
         self.source.as_ref().map(|source| {
             let (config, _) = source.deref().clone();
@@ -157,7 +151,8 @@ impl Settings {
         }
         // html settings
         if let Some(html) = configuration.html {
-            self.languages.html = html.into()
+            self.experimental_full_html_support = html.experimental_full_support_enabled;
+            self.languages.html = html.into();
         }
 
         // plugin settings
@@ -195,42 +190,42 @@ impl Settings {
     }
 
     /// Returns linter rules taking overrides into account.
-    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<Rules>> {
+    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<'_, Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<RuleDomains>> {
+    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<'_, RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.domains.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
 
@@ -238,28 +233,28 @@ impl Settings {
     }
 
     /// Returns assists rules taking overrides into account.
-    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<Actions>> {
+    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<'_, Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.assist.actions.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
-    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<Plugins> {
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
@@ -272,7 +267,7 @@ impl Settings {
     }
 
     /// Return all plugins configured in setting
-    pub fn as_all_plugins(&self) -> Cow<Plugins> {
+    pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         let all_override_plugins = self
@@ -311,17 +306,24 @@ impl Settings {
 
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
+    ///
+    /// `path` is expected to point to a file and not a directory.
     #[inline]
     pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
         let feature_includes_files = match feature {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
             FeatureKind::Assist => &self.assist.includes,
+            FeatureKind::HtmlFullSupport => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };
 
-        !feature_includes_files.is_included(path)
+        if is_dir(path) {
+            !feature_includes_files.is_dir_included(path)
+        } else {
+            !feature_includes_files.is_file_included(path)
+        }
     }
 }
 
@@ -600,14 +602,17 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.formatter = formatter.into();
         }
 
-        // NOTE: uncomment once ready
-        // if let Some(linter) = html.linter {
-        //     language_setting.linter = linter.into();
-        // }
-        //
-        // if let Some(assist) = html.assist {
-        //     language_setting.assist = assist.into();
-        // }
+        if let Some(parser) = html.parser {
+            language_setting.parser = parser.into();
+        }
+
+        if let Some(linter) = html.linter {
+            language_setting.linter = linter.into();
+        }
+
+        if let Some(assist) = html.assist {
+            language_setting.assist = assist.into();
+        }
 
         language_setting
     }
@@ -627,6 +632,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
+    type ParserOptions: Default;
+
     /// Settings related to the environment/runtime in which the language is used.
     type EnvironmentSettings: Default;
 
@@ -635,6 +642,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
 
     /// Retrieve the environment settings of the current language
     fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings>;
+
+    /// Retrieve the parser options that belong to this language
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
@@ -858,13 +873,7 @@ impl VcsIgnoredPatterns {
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {
-            let ignore_directory = if gitignore.path().is_file() {
-                // SAFETY: if it's a file, it always has a parent
-                gitignore.path().parent().unwrap()
-            } else {
-                gitignore.path()
-            };
-            if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
+            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
                 gitignore.matched(stripped_path, is_dir).is_ignore()
             } else {
                 false
@@ -935,15 +944,37 @@ impl Includes {
         current_globs.extend(globs.into());
     }
 
-    /// Returns whether the given `path` is included.
+    /// Returns whether the given `file_path` is included.
+    ///
+    /// `file_path` must point to an ordinary file. If it is a directory, you
+    /// should use [Self::is_dir_included()] instead.
     #[inline]
-    pub fn is_included(&self, path: &Utf8Path) -> bool {
-        self.is_unset()
-            || if is_dir(path) {
-                self.matches_directory_with_exceptions(path)
-            } else {
-                self.matches_with_exceptions(path)
-            }
+    pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_with_exceptions(file_path)
+    }
+
+    /// Returns whether the given `dir_path` is included.
+    ///
+    /// `file_path` must point to a directory. If it is a file, you should use
+    /// [Self::is_file_included()] instead.
+    #[inline]
+    pub fn is_dir_included(&self, dir_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_directory_with_exceptions(dir_path)
+    }
+
+    /// Returns whether the given `path` is force-ignored.
+    #[inline]
+    pub fn is_force_ignored(&self, path: &Utf8Path) -> bool {
+        let Some(globs) = self.globs.as_ref() else {
+            return false;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
+        } else {
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        candidate_path.matches_forced_negation(globs)
     }
 
     /// Returns `true` is no globs are set.
@@ -1064,6 +1095,19 @@ impl Settings {
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
+    pub fn parse_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::ParserOptions
+    where
+        L: ServiceLanguage,
+    {
+        let overrides = &self.override_settings;
+        let editor_settings = &L::lookup_settings(&self.languages).parser;
+        L::resolve_parse_options(overrides, editor_settings, path, file_source)
+    }
+
     pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
@@ -1117,16 +1161,36 @@ impl Settings {
             .iter()
             .rev()
             .find_map(|pattern| {
-                if let Some(enabled) = pattern.formatter.format_with_errors {
-                    if pattern.is_file_included(path) {
-                        return Some(enabled);
-                    }
+                if let Some(enabled) = pattern.formatter.format_with_errors
+                    && pattern.is_file_included(path)
+                {
+                    return Some(enabled);
                 }
                 None
             })
             .or(self.formatter.format_with_errors)
             .unwrap_or_default()
             .into()
+    }
+
+    /// Returns the maximum file size setting for the given `file_path`.
+    pub fn get_max_file_size(&self, file_path: &Utf8Path) -> usize {
+        let limit = self
+            .override_settings
+            .patterns
+            .iter()
+            .rev()
+            .find_map(|pattern| {
+                if pattern.is_file_included(file_path) {
+                    pattern.files.max_size
+                } else {
+                    None
+                }
+            })
+            .or(self.files.max_size)
+            .unwrap_or_default();
+
+        usize::from(limit)
     }
 }
 
@@ -1230,6 +1294,18 @@ impl OverrideSettings {
         }
     }
 
+    pub(crate) fn apply_override_html_parser_options(
+        &self,
+        path: &Utf8Path,
+        options: &mut HtmlParseOptions,
+    ) {
+        for pattern in self.patterns.iter() {
+            if pattern.is_file_included(path) {
+                pattern.apply_overrides_to_html_parser_options(options);
+            }
+        }
+    }
+
     /// Scans the override rules and returns the parser options of the first matching override.
     pub fn apply_override_css_parser_options(
         &self,
@@ -1324,6 +1400,11 @@ impl OverrideSettings {
                         biome_graphql_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_html_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
 
                 if let Some(actions) = pattern.assist.actions.as_ref() {
@@ -1345,6 +1426,11 @@ impl OverrideSettings {
                     push_to_analyzer_assist(
                         actions,
                         biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_assist(
+                        actions,
+                        biome_html_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
                 }
@@ -1427,6 +1513,9 @@ impl OverrideSettingPattern {
             .or(formatter.attribute_position)
         {
             options.set_attribute_position(attribute_position);
+        }
+        if let Some(operator_line_break) = js_formatter.operator_linebreak {
+            options.set_operator_linebreak(operator_line_break);
         }
     }
 
@@ -1596,6 +1685,14 @@ impl OverrideSettingPattern {
         }
     }
 
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+        let html_parser = &self.languages.html.parser;
+
+        if let Some(interpolation) = html_parser.interpolation {
+            options.set_double_text_expression(interpolation.value());
+        }
+    }
+
     fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
         let css_parser = &self.languages.css.parser;
 
@@ -1604,6 +1701,9 @@ impl OverrideSettingPattern {
         }
         if let Some(css_modules) = css_parser.css_modules_enabled {
             options.css_modules = css_modules.value();
+        }
+        if let Some(tailwind_directives) = css_parser.tailwind_directives {
+            options.tailwind_directives = tailwind_directives.value();
         }
     }
 
@@ -1762,6 +1862,9 @@ fn to_css_language_settings(
         .or(parent_parser.allow_wrong_line_comments);
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
+    language_setting.parser.tailwind_directives = parser
+        .tailwind_directives
+        .or(parent_parser.tailwind_directives);
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;

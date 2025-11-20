@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
@@ -11,14 +12,17 @@ use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use xtask::*;
 use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
 use xtask_codegen::{to_capitalized, update};
+use xtask_glue::*;
 
 // ======= LINT ======
 #[derive(Default)]
 struct LintRulesVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+    /// Mapping from domain to group/rule
+    /// e.g next => (<group>/<rule>, <group>/<rule>)
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
 }
 
 impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
@@ -36,6 +40,13 @@ impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
     }
 }
 
@@ -87,6 +98,25 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
             + 'static,
     {
         self.groups
@@ -177,6 +207,25 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let rule_options_root = get_analyzer_rule_options_path();
     let lib_root = rule_options_root.join("lib.rs");
@@ -190,6 +239,8 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {
@@ -227,7 +278,7 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let content = quote! {
         #( #lib_exports )*
     };
-    update(lib_root.as_path(), &xtask::reformat(content)?, &mode)?;
+    update(lib_root.as_path(), &xtask_glue::reformat(content)?, &mode)?;
 
     Ok(())
 }
@@ -247,6 +298,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -264,6 +317,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         &mode,
         RuleCategory::Action,
     )?;
+
+    generate_for_domains(lint_visitor.domains, &mode)?;
 
     Ok(())
 }
@@ -723,10 +778,10 @@ fn generate_for_groups(
                     #(
                         if let Some(rules) = rules.#group_idents.as_ref() {
                             for rule_name in #group_pascal_idents::GROUP_RULES {
-                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                        analyzer_rules.push_rule(rule_key, rule_options);
-                                    }
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name)
+                                    && let Some(rule_key) = metadata.find_rule(#group_strings, rule_name)
+                                {
+                                    analyzer_rules.push_rule(rule_key, rule_options);
                                 }
                             }
                         }
@@ -747,10 +802,10 @@ fn generate_for_groups(
                     #(
                         if let Some(rules) = rules.#group_idents.as_ref() {
                             for rule_name in #group_pascal_idents::GROUP_RULES {
-                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                        analyzer_rules.push_rule(rule_key, rule_options);
-                                    }
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name)
+                                    && let Some(rule_key) = metadata.find_rule(#group_strings, rule_name)
+                                {
+                                    analyzer_rules.push_rule(rule_key, rule_options);
                                 }
                             }
                         }
@@ -775,8 +830,8 @@ fn generate_for_groups(
     } else {
         &root.join("rules.rs")
     };
-    update(path, &xtask::reformat(configuration)?, mode)?;
-    update(file_name, &xtask::reformat(push_rules)?, mode)?;
+    update(path, &xtask_glue::reformat(configuration)?, mode)?;
+    update(file_name, &xtask_glue::reformat(push_rules)?, mode)?;
 
     Ok(())
 }
@@ -834,7 +889,20 @@ fn generate_group_struct(
                     }
                 }
             }
-            docs
+
+            let kebab_rule_name = Case::Kebab.convert(rule);
+            let url = if kind == RuleCategory::Action {
+                format!("https://biomejs.dev/assist/actions/{}", kebab_rule_name)
+            } else {
+                format!("https://biomejs.dev/linter/rules/{}", kebab_rule_name)
+            };
+
+            if !docs.is_empty() {
+                let docs = docs.trim_end_matches('.');
+                format!("{}.\nSee {}", docs, url)
+            } else {
+                format!("See {}", url)
+            }
         };
 
         let rule_position = Literal::u8_unsuffixed(index as u8);
@@ -881,23 +949,23 @@ fn generate_group_struct(
         });
 
         rule_enabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref() {
-                if rule.is_enabled() {
-                    index_set.insert(RuleFilter::Rule(
-                        Self::GROUP_NAME,
-                        Self::GROUP_RULES[#rule_position],
-                    ));
-                }
+            if let Some(rule) = self.#rule_identifier.as_ref()
+                && rule.is_enabled()
+            {
+                index_set.insert(RuleFilter::Rule(
+                    Self::GROUP_NAME,
+                    Self::GROUP_RULES[#rule_position],
+                ));
             }
         });
         rule_disabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref() {
-                if rule.is_disabled() {
-                    index_set.insert(RuleFilter::Rule(
-                        Self::GROUP_NAME,
-                        Self::GROUP_RULES[#rule_position],
-                    ));
-                }
+            if let Some(rule) = self.#rule_identifier.as_ref()
+                && rule.is_disabled()
+            {
+                index_set.insert(RuleFilter::Rule(
+                    Self::GROUP_NAME,
+                    Self::GROUP_RULES[#rule_position],
+                ));
             }
         });
 
@@ -937,7 +1005,7 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
-                /// It enables the recommended rules for this group
+                /// Enables the recommended rules for this group
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
@@ -1010,7 +1078,7 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
-                /// It enables the recommended rules for this group
+                /// Enables the recommended rules for this group
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
@@ -1102,4 +1170,80 @@ fn generate_group_struct(
             }
         }
     }
+}
+
+fn generate_for_domains(
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
+    mode: &Mode,
+) -> Result<()> {
+    let destination =
+        project_root().join("crates/biome_configuration/src/generated/domain_selector.rs");
+
+    let mut as_rule_filters_arms = vec![];
+    let mut match_rule_arms = vec![];
+    let mut lazy_locks = vec![];
+    for (domain_name, data) in domains {
+        let vector = data
+            .iter()
+            .map(|(group, rules)| {
+                quote! {
+                    RuleFilter::Rule(#group, #rules)
+                }
+            })
+            .collect::<Vec<_>>();
+        let domain_filters = Ident::new(
+            &format!("{}_FILTERS", domain_name.to_ascii_uppercase()),
+            Span::call_site(),
+        );
+
+        lazy_locks.push(quote! {
+            static #domain_filters: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+                vec![
+                    #( #vector ),*
+                ]
+            });
+        });
+
+        let domain_as_string = Literal::string(domain_name);
+        as_rule_filters_arms.push(quote! {
+            #domain_as_string => #domain_filters.clone()
+        });
+        match_rule_arms.push(quote! {
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
+        });
+    }
+
+    let stream = quote! {
+        use std::sync::LazyLock;
+        use crate::analyzer::DomainSelector;
+        use biome_analyze::{Rule, RuleFilter};
+
+        #( #lazy_locks )*
+
+        impl DomainSelector {
+            pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
+                match self.0 {
+                    #( #as_rule_filters_arms ),*,
+                    _ => unreachable!(
+                        "DomainFilter::as_rule_filters: domain {} not found",
+                        self.0
+                    )
+                }
+            }
+
+            pub fn match_rule<R>(&self) -> bool
+                where
+                    R: Rule,
+            {
+                match self.0 {
+                    #( #match_rule_arms ),*,
+                    _ => false,
+                }
+            }
+        }
+    };
+
+    update(destination.as_path(), &xtask_glue::reformat(stream)?, mode)?;
+
+    Ok(())
 }

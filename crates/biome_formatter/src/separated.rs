@@ -22,7 +22,7 @@ where
 }
 
 /// Formats a single element inside a separated list.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct FormatSeparatedElement<N, R, C>
 where
     N: AstNode,
@@ -100,12 +100,12 @@ where
                 TrailingSeparator::Allowed => {
                     write!(
                         f,
-                        [if_group_breaks(&text(self.separator))
+                        [if_group_breaks(&token(self.separator))
                             .with_group_id(self.options.group_id)]
                     )?;
                 }
                 TrailingSeparator::Mandatory => {
-                    text(self.separator).fmt(f)?;
+                    token(self.separator).fmt(f)?;
                 }
                 TrailingSeparator::Omit | TrailingSeparator::Disallowed => { /* no op */ }
             }

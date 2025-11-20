@@ -182,7 +182,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-import defer * as feature from "./some-feature.js";
+import.defer("foo", { with: { type: 'json' } })
     "#;
 
     let root = parse(code, JsFileSource::ts(), JsParserOptions::default());

@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use rustc_hash::{FxHashMap, FxHashSet};
+
 use biome_analyze::{FixKind, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -7,22 +9,21 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression, T, TsTypeofType,
+    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression,
+    JsReferenceIdentifier, T, TsTypeofType,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
-use rustc_hash::{FxHashMap, FxHashSet};
+use biome_rule_options::use_exhaustive_dependencies::{
+    StableHookResult, UseExhaustiveDependenciesOptions,
+};
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
-
-use biome_rule_options::use_exhaustive_dependencies::{
-    StableHookResult, UseExhaustiveDependenciesOptions,
-};
 
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
@@ -47,6 +48,7 @@ declare_lint_rule! {
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
+    /// - `useEffectEvent`
     ///
     /// If you want to add more hooks to the rule, check the [options](#options).
     ///
@@ -223,7 +225,7 @@ declare_lint_rule! {
     /// hook always have the same identity and should be omitted as such.
     ///
     /// You can configure custom hooks that return stable results in one of
-    /// three ways:
+    /// four ways:
     ///
     /// * `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
@@ -231,6 +233,8 @@ declare_lint_rule! {
     ///   marks the given index or indices to be stable. An example of a React
     ///   hook that would be configured like this is `useState()`.
     /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
+    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///   object and marks the given property or properties to be stable.
     ///
     /// #### Example
     ///
@@ -300,6 +304,7 @@ impl Default for HookConfigMaps {
                 true,
             ),
             StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+            StableReactHookConfiguration::new("useEffectEvent", StableHookResult::Identity, true),
         ]);
 
         Self {
@@ -312,15 +317,15 @@ impl Default for HookConfigMaps {
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
-        for hook in &hooks.hooks {
-            if let Some(stable_result) = &hook.stable_result {
-                if *stable_result != StableHookResult::None {
-                    result.stable_config.insert(StableReactHookConfiguration {
-                        hook_name: hook.name.clone(),
-                        result: stable_result.clone(),
-                        builtin: false,
-                    });
-                }
+        for hook in hooks.hooks.iter().flatten() {
+            if let Some(stable_result) = &hook.stable_result
+                && *stable_result != StableHookResult::None
+            {
+                result.stable_config.insert(StableReactHookConfiguration {
+                    hook_name: hook.name.clone(),
+                    result: stable_result.clone(),
+                    builtin: false,
+                });
             }
             if let (Some(closure_index), Some(dependencies_index)) =
                 (hook.closure_index, hook.dependencies_index)
@@ -638,7 +643,7 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
         }
     }
 
-    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    // elements are inserted in reverse, thus we have to reverse the iteration.
     vec.into_iter().rev()
 }
 
@@ -692,7 +697,7 @@ impl Rule for UseExhaustiveDependencies {
                         .into_boxed_slice();
                 }
                 None => {
-                    return if options.report_missing_dependencies_array {
+                    return if options.report_missing_dependencies_array() {
                         vec![Fix::MissingDependenciesArray {
                             function_name_range: result.function_name_range,
                         }]
@@ -825,7 +830,7 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            if options.report_unnecessary_dependencies && !excessive_deps.is_empty() {
+            if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
                     component_function,
@@ -998,7 +1003,11 @@ impl Rule for UseExhaustiveDependencies {
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
                     node.ancestors()
-                        .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                        .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
+                            Some(node) => Some(make::js_identifier_expression(node).into()),
+                            _ => node.cast::<AnyJsExpression>(),
+                        })
+                        .and_then(|node| node.trim_trivia())
                         .map(AnyJsArrayElement::AnyJsExpression)
                 });
 

@@ -1,6 +1,7 @@
 # Jobs run on pull request
 name: Pull request
 on:
+  merge_group:
   pull_request:
     branches:
       - main
@@ -25,27 +26,6 @@ env:
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
 
 jobs:
-  format:
-    name: Format project
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
-        with:
-          components: rustfmt
-          bins: taplo-cli
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run format
-        run: |
-          cargo fmt --all --check
-          taplo format --check
-
   lint:
     name: Lint project
     runs-on: ${{ matrix.os }}
@@ -58,9 +38,7 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -69,27 +47,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy
-        run: |
-          cargo lint
-          cargo run -p rules_check
+        run: cargo lint
 
   check-dependencies:
     name: Check Dependencies
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
           channel: nightly
+          bins: cargo-udeps
           cache: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install udeps
-        run: cargo install cargo-udeps --locked
       - name: Detect unused dependencies using udeps
         run: cargo +nightly udeps --all-targets
 
@@ -99,13 +72,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
           - os: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -113,16 +84,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --features=js_plugin
 
   e2e-tests:
     name: End-to-end tests
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -138,12 +107,10 @@ jobs:
 
   documentation:
     name: Documentation
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -152,37 +119,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doc command
         run: cargo documentation
-
-  codegen:
-    name: Codegen
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
-        with:
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run the grammar codegen
-        run: cargo codegen grammar
-      - name: Run the analyzer codegen
-        run: cargo codegen analyzer
-      - name: Run the configuration codegen
-        run: cargo codegen-configuration
-      - name: Run the schema codegen
-        run: cargo codegen-schema
-      - name: Run the bindings codegen
-        run: cargo codegen-bindings
-      - name: Run the migrate codegen
-        run: cargo codegen-migrate
-      - name: Check for git diff
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            git status
-            git diff
-            exit 1
-          fi

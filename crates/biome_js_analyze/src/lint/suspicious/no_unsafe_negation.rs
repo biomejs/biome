@@ -81,7 +81,7 @@ impl Rule for NoUnsafeNegation {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        // The action could be splitted to three steps
+        // The action could be split to three steps
         // 1. Remove `!` operator of unary expression
         // 2. Wrap the expression with `()`, convert the expression to a `JsParenthesizedExpression`
         // 3. Replace the `JsParenthesizedExpression` to `JsUnaryExpression` by adding a `JsUnaryOperator::LogicalNot`

@@ -12,7 +12,7 @@ impl FormatRule<GraphqlObjectValueMemberList> for FormatGraphqlObjectValueMember
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
         f.join_with(&format_args!(
-            if_group_fits_on_line(&format_args![text(","), space()]),
+            if_group_fits_on_line(&format_args![token(","), space()]),
             soft_line_break(),
         ))
         .entries(node.iter().formatted())

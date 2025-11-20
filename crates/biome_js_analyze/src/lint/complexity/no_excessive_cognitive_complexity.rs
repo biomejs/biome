@@ -82,7 +82,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let calculated_score = ctx.query().score.calculated_score;
-        (calculated_score > ctx.options().max_allowed_complexity.get()).then_some(())
+        (calculated_score > ctx.options().max_allowed_complexity().get()).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -91,9 +91,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
             score: ComplexityScore { calculated_score },
         } = ctx.query();
 
-        let NoExcessiveCognitiveComplexityOptions {
-            max_allowed_complexity,
-        } = ctx.options();
+        let max_allowed_complexity = ctx.options().max_allowed_complexity();
 
         let range = function_like
             .name_range()
@@ -273,20 +271,20 @@ impl CognitiveComplexityVisitor {
                     self.stack.push(function_state);
                 }
             }
-        } else if let Some(state) = self.stack.last_mut() {
-            if state.score < MAX_SCORE {
-                if increases_nesting(node) {
-                    state.nesting_level = state.nesting_level.saturating_sub(1);
-                } else if let Some(alternate) =
-                    JsElseClause::cast_ref(node).and_then(|js_else| js_else.alternate().ok())
-                {
-                    state.nesting_level = if alternate.as_js_if_statement().is_some() {
-                        // Prevent double nesting inside else-if.
-                        state.nesting_level.saturating_add(1)
-                    } else {
-                        state.nesting_level.saturating_sub(1)
-                    };
-                }
+        } else if let Some(state) = self.stack.last_mut()
+            && state.score < MAX_SCORE
+        {
+            if increases_nesting(node) {
+                state.nesting_level = state.nesting_level.saturating_sub(1);
+            } else if let Some(alternate) =
+                JsElseClause::cast_ref(node).and_then(|js_else| js_else.alternate().ok())
+            {
+                state.nesting_level = if alternate.as_js_if_statement().is_some() {
+                    // Prevent double nesting inside else-if.
+                    state.nesting_level.saturating_add(1)
+                } else {
+                    state.nesting_level.saturating_sub(1)
+                };
             }
         }
     }

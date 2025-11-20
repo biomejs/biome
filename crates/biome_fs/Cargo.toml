@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_fs"
+publish              = true
 repository.workspace = true
 version              = "0.5.7"
 
@@ -19,7 +20,7 @@ crossbeam         = { workspace = true }
 directories       = "6.0.0"
 enumflags2        = { workspace = true, features = ["serde"] }
 papaya            = { workspace = true }
-parking_lot       = { version = "0.12.4", features = ["arc_lock"] }
+parking_lot       = { version = "0.12.5", features = ["arc_lock"] }
 path-absolutize   = { workspace = true }
 rayon             = { workspace = true }
 rustc-hash        = { workspace = true }

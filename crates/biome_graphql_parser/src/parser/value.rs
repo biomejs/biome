@@ -133,7 +133,7 @@ pub(crate) fn parse_value(p: &mut GraphqlParser) -> ParsedSyntax {
     } else if is_at_object(p) {
         parse_object(p)
     } else {
-        return Absent;
+        Absent
     }
 }
 

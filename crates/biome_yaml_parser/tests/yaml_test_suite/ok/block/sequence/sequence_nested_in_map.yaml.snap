@@ -63,14 +63,14 @@ YamlRoot {
                                     },
                                 },
                             ],
-                            sequence_end_token: SEQUENCE_END@10..11 "" [Newline("\n")] [],
+                            sequence_end_token: SEQUENCE_END@10..10 "" [] [],
                         },
                     },
                     YamlBlockMapImplicitEntry {
                         key: YamlFlowYamlNode {
                             properties: missing (optional),
                             content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@11..12 "d" [] [],
+                                value_token: PLAIN_LITERAL@10..12 "d" [Newline("\n")] [],
                             },
                         },
                         colon_token: COLON@12..13 ":" [] [],
@@ -99,13 +99,13 @@ YamlRoot {
         0: MAPPING_START@0..0 "" [] []
         1: (empty)
         2: YAML_BLOCK_MAP_ENTRY_LIST@0..13
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..11
+          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..10
             0: YAML_FLOW_YAML_NODE@0..1
               0: (empty)
               1: YAML_PLAIN_SCALAR@0..1
                 0: PLAIN_LITERAL@0..1 "a" [] []
             1: COLON@1..2 ":" [] []
-            2: YAML_BLOCK_SEQUENCE@2..11
+            2: YAML_BLOCK_SEQUENCE@2..10
               0: SEQUENCE_START@2..3 "" [Newline("\n")] []
               1: (empty)
               2: YAML_BLOCK_SEQUENCE_ENTRY_LIST@3..10
@@ -127,12 +127,12 @@ YamlRoot {
                       1: YAML_PLAIN_SCALAR@9..10
                         0: PLAIN_LITERAL@9..10 "c" [] []
                     2: FLOW_END@10..10 "" [] []
-              3: SEQUENCE_END@10..11 "" [Newline("\n")] []
-          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@11..13
-            0: YAML_FLOW_YAML_NODE@11..12
+              3: SEQUENCE_END@10..10 "" [] []
+          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@10..13
+            0: YAML_FLOW_YAML_NODE@10..12
               0: (empty)
-              1: YAML_PLAIN_SCALAR@11..12
-                0: PLAIN_LITERAL@11..12 "d" [] []
+              1: YAML_PLAIN_SCALAR@10..12
+                0: PLAIN_LITERAL@10..12 "d" [Newline("\n")] []
             1: COLON@12..13 ":" [] []
             2: (empty)
         3: MAPPING_END@13..14 "" [Newline("\n")] []

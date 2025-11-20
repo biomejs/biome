@@ -29,7 +29,7 @@
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | 繁體中文 | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
+  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | 繁體中文 | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Polski](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pl.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
 </div>
 
 <br>
@@ -38,7 +38,7 @@
 
 **Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
+**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **[超過 340 條規則](https://biomejs.dev/linter/javascript/rules)**。
 它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
 **Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/editors/first-party-extensions/)。
@@ -162,6 +162,12 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.egstock.co.jp/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/egstock/b18c836/logo/256.png?height=256" width="80" alt="EGSTOCK, Inc. logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
       </td>
     </tr>
   </tbody>

@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// class A {
     ///     protected constructor() {
     ///         this.prop = 1;
@@ -165,11 +165,11 @@ impl Rule for NoUselessConstructor {
             }
         }
         let class = constructor.syntax().ancestors().find_map(AnyJsClass::cast);
-        if let Some(class) = &class {
-            if !class.decorators().is_empty() {
-                // Ignore decorated classes
-                return None;
-            }
+        if let Some(class) = &class
+            && !class.decorators().is_empty()
+        {
+            // Ignore decorated classes
+            return None;
         }
         let mut body_statements = constructor.body().ok()?.statements().iter();
         let Some(first) = body_statements.next() else {

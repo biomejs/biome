@@ -284,26 +284,25 @@ fn process_diff_lines<'lines, 'diff>(
 
         if let (Some(inserted_before_line), Some(inserted_after_line)) =
             (inserted_before_line, inserted_after_line)
+            && inserted_before_line.diffs == inserted_after_line.diffs
         {
-            if inserted_before_line.diffs == inserted_after_line.diffs {
-                let line = inserted_lines
-                    .remove(&LineKey::before(before_line))
-                    .unwrap();
+            let line = inserted_lines
+                .remove(&LineKey::before(before_line))
+                .unwrap();
 
-                inserted_lines.remove(&LineKey::after(after_line)).unwrap();
+            inserted_lines.remove(&LineKey::after(after_line)).unwrap();
 
-                inserted_lines.insert(
-                    LineKey {
-                        before_line: Some(before_line),
-                        after_line: Some(after_line),
-                    },
-                    GroupDiffsLine {
-                        before_line: Some(before_line),
-                        after_line: Some(after_line),
-                        diffs: line.diffs,
-                    },
-                );
-            }
+            inserted_lines.insert(
+                LineKey {
+                    before_line: Some(before_line),
+                    after_line: Some(after_line),
+                },
+                GroupDiffsLine {
+                    before_line: Some(before_line),
+                    after_line: Some(after_line),
+                    diffs: line.diffs,
+                },
+            );
         }
     }
 
@@ -509,12 +508,12 @@ fn print_full_diff(
             line_type = ChangeTag::Delete;
         }
 
-        if let Some(last_displayed_line) = last_displayed_line {
-            if last_displayed_line + 1 != i {
-                fmt.write_markup(markup! {
-                    <Emphasis>"  "{"\u{b7}".repeat(line_no_length)}" \u{2502} \n"</Emphasis>
-                })?;
-            }
+        if let Some(last_displayed_line) = last_displayed_line
+            && last_displayed_line + 1 != i
+        {
+            fmt.write_markup(markup! {
+                <Emphasis>"  "{"\u{b7}".repeat(line_no_length)}" \u{2502} \n"</Emphasis>
+            })?;
         }
 
         last_displayed_line = Some(i);

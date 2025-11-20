@@ -11,7 +11,16 @@ use serde::{Deserialize, Serialize};
 #[deserializable(with_validator)]
 pub struct NoForEachOptions {
     /// A list of variable names allowed for `forEach` calls.
-    pub allowed_identifiers: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub allowed_identifiers: Option<Box<[Box<str>]>>,
+}
+
+impl biome_deserialize::Merge for NoForEachOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(allowed_identifiers) = other.allowed_identifiers {
+            self.allowed_identifiers = Some(allowed_identifiers);
+        }
+    }
 }
 
 impl DeserializableValidator for NoForEachOptions {
@@ -24,6 +33,7 @@ impl DeserializableValidator for NoForEachOptions {
         if self
             .allowed_identifiers
             .iter()
+            .flatten()
             .any(|identifier| identifier.is_empty() || identifier.contains('.'))
         {
             ctx

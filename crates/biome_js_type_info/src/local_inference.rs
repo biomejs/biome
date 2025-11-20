@@ -2,19 +2,20 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
     JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement,
+    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsInitializerClause,
+    JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
     JsSetterObjectMember, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
     JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
     TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
@@ -832,6 +833,7 @@ impl TypeData {
                         name,
                         ty: TypeReference::unknown(),
                         is_optional: false,
+                        is_rest: false,
                     })])
                 }
                 Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
@@ -1477,26 +1479,7 @@ impl FunctionParameter {
                 is_rest: false,
             }),
             AnyJsParameter::JsRestParameter(param) => {
-                let ty = param
-                    .type_annotation()
-                    .and_then(|annotation| annotation.ty().ok())
-                    .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
-                    .unwrap_or_default();
-                let bindings = param
-                    .binding()
-                    .ok()
-                    .and_then(|binding| {
-                        FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
-                            resolver, scope_id, &binding, &ty,
-                        )
-                    })
-                    .unwrap_or_default();
-                Self::Pattern(PatternFunctionParameter {
-                    ty: resolver.reference_to_owned_data(ty),
-                    bindings,
-                    is_optional: false,
-                    is_rest: true,
-                })
+                Self::from_js_rest_parameter(resolver, scope_id, param)
             }
             AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
                 name: Text::new_static("this"),
@@ -1506,6 +1489,7 @@ impl FunctionParameter {
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .unwrap_or_default(),
                 is_optional: false,
+                is_rest: false,
             }),
         }
     }
@@ -1515,16 +1499,47 @@ impl FunctionParameter {
         scope_id: ScopeId,
         param: &JsFormalParameter,
     ) -> Self {
-        let name = param
-            .binding()
-            .ok()
+        Self::from_binding_with_annotation(
+            resolver,
+            scope_id,
+            param.binding(),
+            param.type_annotation(),
+            param.question_mark_token().is_some(),
+            false,
+        )
+    }
+
+    pub fn from_js_rest_parameter(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        param: &JsRestParameter,
+    ) -> Self {
+        Self::from_binding_with_annotation(
+            resolver,
+            scope_id,
+            param.binding(),
+            param.type_annotation(),
+            false,
+            true,
+        )
+    }
+
+    fn from_binding_with_annotation(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        binding: SyntaxResult<AnyJsBindingPattern>,
+        annotation: Option<TsTypeAnnotation>,
+        is_optional: bool,
+        is_rest: bool,
+    ) -> Self {
+        let name = binding
             .as_ref()
-            .and_then(|binding| binding.as_any_js_binding())
-            .and_then(|binding| binding.as_js_identifier_binding())
+            .ok()
+            .and_then(AnyJsBindingPattern::as_any_js_binding)
+            .and_then(AnyJsBinding::as_js_identifier_binding)
             .and_then(|identifier| identifier.name_token().ok())
             .map(|token| token.token_text_trimmed().into());
-        let ty = param
-            .type_annotation()
+        let ty = annotation
             .and_then(|annotation| annotation.ty().ok())
             .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
             .unwrap_or_default();
@@ -1532,11 +1547,11 @@ impl FunctionParameter {
             Self::Named(NamedFunctionParameter {
                 name,
                 ty: resolver.reference_to_owned_data(ty),
-                is_optional: param.question_mark_token().is_some(),
+                is_optional,
+                is_rest,
             })
         } else {
-            let bindings = param
-                .binding()
+            let bindings = binding
                 .ok()
                 .and_then(|binding| {
                     FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
@@ -1547,8 +1562,8 @@ impl FunctionParameter {
             Self::Pattern(PatternFunctionParameter {
                 bindings,
                 ty: resolver.reference_to_owned_data(ty),
-                is_optional: param.question_mark_token().is_some(),
-                is_rest: false,
+                is_optional,
+                is_rest,
             })
         }
     }
@@ -1972,6 +1987,10 @@ impl TypeMember {
                 // TODO: Handle spread operator
                 None
             }
+            AnyJsObjectMember::JsMetavariable(_) => {
+                // Standalone metavariable object members (e.g. $...) do not contribute type info
+                None
+            }
         }
     }
 
@@ -2030,29 +2049,41 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsGetterSignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let function = Function {
-                        is_async: false,
-                        type_parameters: [].into(),
-                        name: Some(name.clone().into()),
-                        parameters: [].into(),
-                        return_type: ReturnType::Type(getter_return_type(
-                            resolver,
-                            scope_id,
-                            member.type_annotation(),
-                            None,
-                        )),
-                    };
-                    let ty = resolver.register_and_resolve(function.into()).into();
-                    Self {
-                        kind: TypeMemberKind::Getter(name.into()),
-                        ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
-                    }
+                let name = member.name().ok().and_then(|name| name.name())?;
+                let function = Function {
+                    is_async: false,
+                    type_parameters: [].into(),
+                    name: Some(name.clone().into()),
+                    parameters: [].into(),
+                    return_type: ReturnType::Type(getter_return_type(
+                        resolver,
+                        scope_id,
+                        member.type_annotation(),
+                        None,
+                    )),
+                };
+                let ty = resolver.register_and_resolve(function.into()).into();
+                Some(Self {
+                    kind: TypeMemberKind::Getter(name.into()),
+                    ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                 })
             }
-            AnyTsTypeMember::TsIndexSignatureTypeMember(_member) => {
-                // TODO: Handle index signatures
-                None
+            AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
+                let key_ty = member
+                    .parameter()
+                    .and_then(|parameter| parameter.type_annotation())
+                    .and_then(|annotation| annotation.ty())
+                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .ok()?;
+                let value_ty = member
+                    .type_annotation()
+                    .and_then(|annotation| annotation.ty())
+                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .ok()?;
+                Some(Self {
+                    kind: TypeMemberKind::IndexSignature(key_ty),
+                    ty: value_ty,
+                })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
@@ -2292,16 +2323,16 @@ fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
                 ) {
                     None
                 } else {
-                    Some(matches!(
-                        node,
-                        AnyJsExpression::JsObjectExpression(_)
-                            | AnyJsExpression::JsClassExpression(_)
-                    ))
+                    Some(false)
                 }
-            } else if AnyJsClass::can_cast(node.kind()) {
-                Some(true)
             } else {
-                None
+                Some(
+                    JsInitializerClause::can_cast(node.kind())
+                        && node
+                            .parent()
+                            .is_some_and(|parent| JsPropertyClassMember::can_cast(parent.kind()))
+                        || JsPropertyObjectMember::can_cast(node.kind()),
+                )
             }
         })
         .unwrap_or_default()
@@ -2548,7 +2579,7 @@ fn type_from_function_body(
 ) -> TypeData {
     let mut return_types: Vec<_> = body
         .syntax()
-        .descendants()
+        .pruned_descendents(|node| !AnyJsFunction::can_cast(node.kind()))
         .filter_map(JsReturnStatement::cast)
         .map(|return_statement| {
             return_statement.argument().map_or(

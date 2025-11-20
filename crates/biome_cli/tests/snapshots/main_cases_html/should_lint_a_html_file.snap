@@ -1,0 +1,63 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<div scope="col"></div>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.html:1:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the scope attribute on elements other than th elements.
+  
+  > 1 │ <div scope="col"></div>
+      │      ^^^^^^^^^^^
+    2 │ 
+  
+  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
+                so it should be placed on th elements to provide accessibility to screen readers.
+  
+  i Follow the links for more information,
+                WCAG 1.3.1
+                WCAG 4.1.1
+  
+  i Unsafe fix: Remove the scope attribute.
+  
+    1 │ <div·scope="col"></div>
+      │      -----------       
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

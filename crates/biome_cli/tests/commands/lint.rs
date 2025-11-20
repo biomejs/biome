@@ -1215,7 +1215,7 @@ fn include_files_in_symlinked_subdir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
@@ -1273,7 +1273,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
@@ -4073,6 +4073,64 @@ bar();"#
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "linter_can_resolve_imported_symbols",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_enables_project_domain_based_on_extended_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "extends": ["biome.base.json"] }"#.as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.base.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_enables_project_domain_based_on_extended_config",
         fs,
         console,
         result,

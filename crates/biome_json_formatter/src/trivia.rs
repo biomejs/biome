@@ -12,7 +12,7 @@ pub(crate) struct FormatRemoved<'a> {
     token: &'a JsonSyntaxToken,
 }
 
-pub(crate) fn format_removed(token: &JsonSyntaxToken) -> FormatRemoved {
+pub(crate) fn format_removed(token: &JsonSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 

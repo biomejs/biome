@@ -20,7 +20,7 @@ typeof foo;
 ## Registered types
 
 ```
-Thin TypeId(0) => value: foo
+Thin TypeId(0) => string: foo
 
-Global TypeId(0) => value: foo
+Global TypeId(0) => string: foo
 ```

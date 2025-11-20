@@ -5,6 +5,7 @@ documentation        = "https://docs.rs/biome_html_factory"
 edition.workspace    = true
 license.workspace    = true
 name                 = "biome_html_factory"
+publish              = true
 repository.workspace = true
 version              = "0.5.7"
 

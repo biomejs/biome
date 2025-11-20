@@ -10,17 +10,17 @@
 //! - **Version parsing and comparison**: Parse semantic versions and compare them
 //!   according to SemVer 2.0.0 precedence rules
 //! - **Range parsing and matching**: Parse version ranges and test if versions satisfy them
-//! - **Utility functions**: High-level functions for common semver operations
 //!
 //! # Examples
 //!
 //! ## Basic version parsing and comparison
 //!
 //! ```
-//! use biome_package::node_semver::{Version, parse_version};
+//! use biome_package::node_semver::Version;
+//! use std::str::FromStr;
 //!
 //! let v1: Version = "1.2.3".parse().unwrap();
-//! let v2 = parse_version("1.2.4").unwrap();
+//! let v2 = Version::from_str("1.2.4").unwrap();
 //!
 //! assert!(v1 < v2);
 //! assert_eq!(v1.major, 1);
@@ -36,29 +36,7 @@
 //! let range: Range = "^1.2.3".parse().unwrap();
 //! let version: Version = "1.5.0".parse().unwrap();
 //!
-//! assert!(range.satisfies(&version));
-//! ```
-//!
-//! ## High-level utility functions
-//!
-//! ```
-//! use biome_package::node_semver::{satisfies, max_satisfying, allows_any, allows_all};
-//!
-//! // Test if a version satisfies a range
-//! assert!(satisfies("1.2.4", "~1.2.3").unwrap());
-//!
-//! // Find the maximum satisfying version from a list
-//! let versions = vec!["1.2.3", "1.2.4", "1.3.0", "2.0.0"];
-//! let max = max_satisfying(&versions, "^1.2.0").unwrap().unwrap();
-//! assert_eq!(max.to_string(), "1.3.0");
-//!
-//! // Test if ranges have overlap
-//! assert!(allows_any("^1.2.3", "~1.5.0").unwrap());    // Both match 1.5.x
-//! assert!(!allows_any("^1.2.3", "^2.0.0").unwrap());   // No overlap
-//!
-//! // Test if one range encompasses another
-//! assert!(allows_all("~1.2.3", "^1.0.0").unwrap());    // ^1.0.0 encompasses ~1.2.3
-//! assert!(!allows_all("^1.0.0", "~1.2.3").unwrap());   // ~1.2.3 doesn't encompass ^1.0.0
+//! assert!(range.includes(&version));
 //! ```
 //!
 //! # Supported Range Operators
@@ -79,13 +57,8 @@
 //! All parsing operations return `Result` types with descriptive error information.
 //! The implementation is designed to be panic-free and handle all edge cases gracefully.
 
-mod parser;
 mod range;
 mod version;
 
-pub use parser::{
-    allows_all, allows_any, intersects, max_satisfying, min_satisfying, parse_range, parse_version,
-    satisfies, valid_range,
-};
-pub use range::{Comparator, Range, RangeError, RangeOperator};
+pub use range::{Comparator, ComparatorOperator, Range, RangeError, RangeOperator};
 pub use version::{Version, VersionError};

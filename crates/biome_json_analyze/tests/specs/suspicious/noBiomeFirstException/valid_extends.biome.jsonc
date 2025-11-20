@@ -1,0 +1,9 @@
+// should not generate diagnostics
+{
+	"extends": "//",
+	"files": {
+		"includes": [
+			"!**/dist"
+		]
+	}
+}

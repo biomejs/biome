@@ -6,9 +6,7 @@ use biome_js_syntax::{
     AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
     TsTypeParameterName, inner_string_text,
 };
-use biome_js_syntax::{
-    AnyJsImportClause, AnyJsNamedImportSpecifier, AnyJsxAttributeName, AnyTsType, JsxAttribute,
-};
+use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::TextSize;
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TokenText, syntax::Preorder};
 use rustc_hash::FxHashMap;
@@ -548,10 +546,9 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
                         if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
                             declaration.parent_binding_pattern_declaration()
+                            && declarator.declaration().is_some_and(|x| x.is_var())
                         {
-                            if declarator.declaration().is_some_and(|x| x.is_var()) {
-                                hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
-                            }
+                            hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
@@ -651,6 +648,7 @@ impl SemanticEventExtractor {
                             .and_then(|clause| clause.type_token());
                         if type_token.is_none() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                            self.push_binding(None, BindingName::Type(name.clone()), info.clone());
                         } else {
                             self.push_binding(None, BindingName::Type(name), info);
                         }
@@ -711,18 +709,6 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn is_inside_jsx_ref_attribute(node: &JsSyntaxNode) -> bool {
-        node.ancestors()
-            .find_map(JsxAttribute::cast)
-            .and_then(|attr| attr.name().ok())
-            .is_some_and(|attr_name| match attr_name {
-                AnyJsxAttributeName::JsxName(jsx_name) => jsx_name
-                    .value_token()
-                    .is_ok_and(|token| token.text_trimmed() == "ref"),
-                _ => false,
-            })
-    }
-
     fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
         let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
@@ -742,14 +728,6 @@ impl SemanticEventExtractor {
                     );
                     return;
                 };
-
-                if parent.kind() == JS_IDENTIFIER_EXPRESSION
-                    && Self::is_inside_jsx_ref_attribute(&parent)
-                {
-                    self.push_reference(BindingName::Value(name), Reference::Write(range));
-                    return;
-                }
-
                 match parent.kind() {
                     JS_EXPORT_NAMED_SHORTHAND_SPECIFIER | JS_EXPORT_NAMED_SPECIFIER => {
                         self.push_reference(
@@ -1035,7 +1013,6 @@ impl SemanticEventExtractor {
                                     is_read: !reference.is_write(),
                                     range: reference.range(),
                                 });
-                                continue;
                             }
                             // Handle edge case where a parameter has the same name that a parameter type name
                             // For example `(stream: stream.T) => {}`

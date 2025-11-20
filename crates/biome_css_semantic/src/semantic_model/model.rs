@@ -1,14 +1,17 @@
 use biome_css_syntax::{
-    CssComposesPropertyValue, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
-    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot,
-    CssSupportsAtRule, CssSyntaxNode,
+    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
+    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
+    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
+    CssSupportsAtRule,
 };
 use biome_rowan::{
-    AstNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
+    AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
+    declare_node_union,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;
 use std::{collections::BTreeMap, rc::Rc};
+
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -38,8 +41,8 @@ impl SemanticModel {
         &self.data.global_custom_variables
     }
 
-    pub fn get_rule_by_id(&self, id: RuleId) -> Option<&Rule> {
-        self.data.rules_by_id.get(&id)
+    pub fn get_rule_by_id(&self, id: &RuleId) -> Option<&Rule> {
+        self.data.rules_by_id.get(id)
     }
 
     /// Returns the rule that contains the given range.
@@ -64,6 +67,15 @@ impl SemanticModel {
                 .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         }
+    }
+
+    /// Returns an iterator over the specificity of all rules in source order.
+    pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> + '_ {
+        self.data
+            .range_to_rule
+            .values()
+            .flat_map(|rule| rule.selectors())
+            .map(|selector| selector.specificity())
     }
 }
 
@@ -103,7 +115,7 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub(crate) id: RuleId,
-    pub(crate) node: RuleNode,
+    pub(crate) node: AnyRuleStart,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -117,27 +129,12 @@ pub struct Rule {
     pub(crate) specificity: Specificity,
 }
 
-declare_node_union! {
-    pub RuleNode = CssQualifiedRule | CssNestedQualifiedRule | CssMediaAtRule | CssSupportsAtRule
-}
-
-impl RuleNode {
-    pub fn text_trimmed_range(&self) -> TextRange {
-        match self {
-            Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
-        }
-    }
-}
-
 impl Rule {
     pub fn id(&self) -> RuleId {
         self.id
     }
 
-    pub fn node(&self) -> &RuleNode {
+    pub fn node(&self) -> &AnyRuleStart {
         &self.node
     }
 
@@ -153,8 +150,8 @@ impl Rule {
         &self.declarations
     }
 
-    pub fn parent_id(&self) -> Option<RuleId> {
-        self.parent_id
+    pub fn parent_id(&self) -> Option<&RuleId> {
+        self.parent_id.as_ref()
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
@@ -163,6 +160,47 @@ impl Rule {
 
     pub fn specificity(&self) -> Specificity {
         self.specificity
+    }
+
+    pub const fn is_media_rule(&self) -> bool {
+        matches!(self.node, AnyRuleStart::CssMediaAtRule(_))
+    }
+}
+
+declare_node_union! {
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssStartingStyleAtRule | CssSupportsAtRule
+}
+
+impl AnyRuleStart {
+    pub fn text_trimmed_range(&self) -> TextRange {
+        match self {
+            Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssContainerAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssStartingStyleAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
+        }
+    }
+}
+
+declare_node_union! {
+    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector
+}
+
+impl AnyCssSelectorLike {
+    pub fn has_nesting_selectors(&self) -> bool {
+        match self {
+            Self::CssCompoundSelector(node) => !node.nesting_selectors().is_empty(),
+            Self::CssComplexSelector(node) => node.nesting_level() > 0,
+        }
+    }
+
+    pub fn nesting_level(&self) -> usize {
+        match self {
+            Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
+            Self::CssComplexSelector(node) => node.nesting_level(),
+        }
     }
 }
 
@@ -175,22 +213,22 @@ impl Rule {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    pub(crate) node: CssSyntaxNode,
+    pub(crate) node: AnyCssSelectorLike,
     /// The specificity of the selector.
     pub(crate) specificity: Specificity,
 }
 
 impl Selector {
-    pub fn node(&self) -> &CssSyntaxNode {
+    pub fn node(&self) -> &AnyCssSelectorLike {
         &self.node
     }
 
     pub fn text(&self) -> SyntaxNodeText {
-        self.node.text_trimmed()
+        self.node.syntax().text_trimmed()
     }
 
     pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+        self.node.syntax().text_trimmed_range()
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -231,9 +269,9 @@ impl std::ops::Add for Specificity {
 
 impl std::ops::AddAssign for Specificity {
     fn add_assign(&mut self, rhs: Self) {
-        self.0 = rhs.0;
-        self.1 = rhs.1;
-        self.2 = rhs.2;
+        self.0 += rhs.0;
+        self.1 += rhs.1;
+        self.2 += rhs.2;
     }
 }
 

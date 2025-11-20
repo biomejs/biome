@@ -5,8 +5,9 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsxAttribute, JsxOpeningElement, JsxSelfClosingElement};
-use biome_rowan::{AstNode, declare_node_union};
+use biome_js_syntax::JsxAttribute;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rowan::AstNode;
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
@@ -61,30 +62,35 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub AnyOpeningElement = JsxOpeningElement | JsxSelfClosingElement
-}
-
 impl Rule for UseSemanticElements {
-    type Query = Ast<AnyOpeningElement>;
+    type Query = Ast<AnyJsxElement>;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;
     type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let role_attribute = match node {
-            AnyOpeningElement::JsxOpeningElement(node) => node.find_attribute_by_name("role")?,
-            AnyOpeningElement::JsxSelfClosingElement(node) => {
-                node.find_attribute_by_name("role")?
-            }
-        };
+
+        if node.is_custom_component() || node.is_custom_element() {
+            return None;
+        }
+
+        let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.as_static_value()?;
         let role_value = role_value.as_string_constant()?;
 
         // Allow `role="img"` on any element. For more information, see:
         // <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role>
         if role_value == "img" {
+            return None;
+        }
+
+        // For the following roles, the associated elements are impractical:
+        // - combobox: <select> is not possible to implement many valid comboboxes (see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
+        // - option: <option> in browsers have divergent/unexpected behavior, with Safari hiding elements by default.
+        // - listbox: <datalist> isn’t always correct for all listbox uses
+        // See https://www.w3.org/WAI/ARIA/apg/patterns/combobox/. In most examples, roles are explicit
+        if role_value == "combobox" || role_value == "listbox" || role_value == "option" {
             return None;
         }
 

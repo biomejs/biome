@@ -163,7 +163,7 @@ impl Rule for UseEnumInitializers {
                         let enum_name = enum_name.text();
                         Some(AnyJsLiteralExpression::JsStringLiteralExpression(
                             make::js_string_literal_expression(
-                                if ctx.as_preferred_quote().is_double() {
+                                if ctx.preferred_quote().is_double() {
                                     make::js_string_literal(enum_name)
                                 } else {
                                     make::js_string_literal_single_quotes(enum_name)
@@ -177,7 +177,7 @@ impl Rule for UseEnumInitializers {
                     has_mutations = true;
 
                     // When creating the replacement node we first need to remove the trailing trivia.
-                    // Otherwise nodes without a trailing comma will add [JsSyntacKind::EQ] and [EnumInitializer]
+                    // Otherwise nodes without a trailing comma will add [JsSyntaxKind::EQ] and [EnumInitializer]
                     // after it.
                     let new_enum_member = enum_member
                         .clone()
