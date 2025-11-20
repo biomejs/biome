@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Updates CSS formatting of dimension units to use correct casing for `Q`, `Hz` and `kHz`.
+Fixed CSS formatting of dimension units to use correct casing for `Q`, `Hz` and `kHz`.
 
 **Before:**
 
