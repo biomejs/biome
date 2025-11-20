@@ -84,14 +84,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,file=foobar.js
+    /// ```js,file=foobaz.js
     /// export function foo() {
-    ///     console.log("foobar");
+    ///     console.log("foobaz");
     /// }
     ///
-    /// export * as bar from './foobar.js';
+    /// export * as baz from './foobaz.js';
     ///
-    /// import { bar } from './foobar.js';
+    /// import { baz } from './foobaz.js';
     /// ```
     ///
     /// ```ts,file=types.ts
