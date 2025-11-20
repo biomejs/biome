@@ -241,14 +241,14 @@ fn find_cycle(
             if !seen.insert(resolved_path.clone()) {
                 continue;
             }
-          
+
             if path == ctx.file_path() {
                 // https://github.com/biomejs/biome/issues/6569
                 // prevent flagging on import cycles when they are isolated to a single file
                 if stack.is_empty() && start_path == path {
                     continue;
                 }
-              
+
                 // Return all the paths from `start_path` to `resolved_path`:
                 let paths = Some(start_path.to_string())
                     .into_iter()
