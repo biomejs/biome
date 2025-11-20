@@ -31,7 +31,6 @@ info: css/units/values.css
   a: 5CM;
   a: 5MM;
   a: 5Q;
-  b: 5q;
   a: 5IN;
   a: 5PT;
   a: 5PC;
@@ -42,9 +41,7 @@ info: css/units/values.css
   a: 5S;
   a: 5MS;
   a: 5hZ;
-  b: 5hz;
   a: 5KhZ;
-  b: 5khz;
   a: 5DPI;
   a: 5DPCM;
   a: 5DPPX;
@@ -71,23 +68,7 @@ info: css/units/values.css
  }
  
  .cssUnits {
-@@ -26,6 +24,7 @@
-   a: 5cm;
-   a: 5mm;
-   a: 5Q;
-+  b: 5Q;
-   a: 5in;
-   a: 5pt;
-   a: 5pc;
-@@ -36,12 +35,14 @@
-   a: 5s;
-   a: 5ms;
-   a: 5Hz;
-+  b: 5Hz;
-   a: 5kHz;
-+  b: 5kHz;
-   a: 5dpi;
-   a: 5dpcm;
+@@ -42,6 +40,6 @@
    a: 5dppx;
    a: 5x;
  
@@ -127,7 +108,6 @@ info: css/units/values.css
   a: 5cm;
   a: 5mm;
   a: 5Q;
-  b: 5Q;
   a: 5in;
   a: 5pt;
   a: 5pc;
@@ -138,9 +118,7 @@ info: css/units/values.css
   a: 5s;
   a: 5ms;
   a: 5Hz;
-  b: 5Hz;
   a: 5kHz;
-  b: 5kHz;
   a: 5dpi;
   a: 5dpcm;
   a: 5dppx;
