@@ -3738,6 +3738,10 @@ export interface UseSortedAttributesOptions {
 }
 export interface UseSortedInterfaceMembersOptions {}
 export interface UseSortedKeysOptions {
+	/**
+	 * When enabled, groups object keys by their value's nesting depth before sorting. Simple values (primitives, single-line arrays, single-line objects) are sorted first, followed by nested values (multi-line objects, multi-line arrays).
+	 */
+	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
 export interface UseSortedPropertiesOptions {}

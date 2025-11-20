@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: group-by-nesting-lexicographic.js
+---
+# Input
+```js
+const obj = {
+  name: "Sample Item",
+  details: {
+    description: "This is a nested object",
+    status: "active"
+  },
+  id: "12345",
+  tags: ["short", "array"],
+  metadata: {
+    created: "2024-01-01",
+    updated: "2024-01-02"
+  },
+  count: 42,
+  multiLineArray: [
+    "item1",
+    "item2",
+    "item3"
+  ]
+};
+
+```
+
+# Diagnostics
+```
+group-by-nesting-lexicographic.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by nesting level and key.
+  
+     1 │ const obj = {
+   > 2 │   name: "Sample Item",
+       │   ^^^^^^^^^^^^^^^^^^^^
+   > 3 │   details: {
+   > 4 │     description: "This is a nested object",
+        ...
+  > 17 │     "item3"
+  > 18 │   ]
+       │   ^
+    19 │ };
+    20 │ 
+  
+  i Safe fix: Sort the object properties by key.
+  
+     1  1 │   const obj = {
+     2    │ - ··name:·"Sample·Item",
+     3    │ - ··details:·{
+        2 │ + ··count:·42,
+        3 │ + ··id:·"12345",
+        4 │ + ··name:·"Sample·Item",
+        5 │ + ··tags:·["short",·"array"],
+        6 │ + ··details:·{
+     4  7 │       description: "This is a nested object",
+     5  8 │       status: "active"
+     6  9 │     },
+     7    │ - ··id:·"12345",
+     8    │ - ··tags:·["short",·"array"],
+     9    │ - ··metadata:·{
+       10 │ + ··metadata:·{
+    10 11 │       created: "2024-01-01",
+    11 12 │       updated: "2024-01-02"
+    12    │ - ··},
+    13    │ - ··count:·42,
+       13 │ + ··},
+    14 14 │     multiLineArray: [
+    15 15 │       "item1",
+  
+
+```
