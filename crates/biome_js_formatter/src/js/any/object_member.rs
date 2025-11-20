@@ -10,6 +10,7 @@ impl FormatRule<AnyJsObjectMember> for FormatAnyJsObjectMember {
         match node {
             AnyJsObjectMember::JsBogusMember(node) => node.format().fmt(f),
             AnyJsObjectMember::JsGetterObjectMember(node) => node.format().fmt(f),
+            AnyJsObjectMember::JsMetavariable(node) => node.format().fmt(f),
             AnyJsObjectMember::JsMethodObjectMember(node) => node.format().fmt(f),
             AnyJsObjectMember::JsPropertyObjectMember(node) => node.format().fmt(f),
             AnyJsObjectMember::JsSetterObjectMember(node) => node.format().fmt(f),

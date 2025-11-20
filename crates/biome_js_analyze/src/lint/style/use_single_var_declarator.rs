@@ -190,11 +190,11 @@ impl Rule for UseSingleVarDeclarator {
                         builder = builder.with_semicolon_token(semicolon_token)
                     }
                     let mut result = builder.build();
-                    if let Some(Ok(separator)) = separators.next() {
-                        if separator.has_trailing_comments() {
-                            result = result
-                                .append_trivia_pieces(separator.trailing_trivia().pieces())?;
-                        }
+                    if let Some(Ok(separator)) = separators.next()
+                        && separator.has_trailing_comments()
+                    {
+                        result =
+                            result.append_trivia_pieces(separator.trailing_trivia().pieces())?;
                     }
 
                     Some(Some(result.into_syntax().into()))

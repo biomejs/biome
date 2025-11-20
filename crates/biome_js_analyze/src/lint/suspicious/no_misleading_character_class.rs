@@ -335,16 +335,13 @@ fn diagnostic_regex_class(
                 if
                     !matches!(prev_char_type, CharType::None | CharType::ZeroWidthJoiner)
                     && end < char_class.len()
-                {
-                    if let Some((c, len)) = decode_next_codepoint(&char_class[end..], is_in_string) {
-                        if c != 0x200D {
+                    && let Some((c, len)) = decode_next_codepoint(&char_class[end..], is_in_string)
+                        && c != 0x200D {
                             return Some(RuleState {
                                 range: TextRange::new((prev_char_index as u32).into(), ((end + len) as u32).into()),
                                 message: Message::JoinedCharSequence,
                             });
                         }
-                    }
-                }
                 prev_char_type = CharType::ZeroWidthJoiner;
             }
             _ => {

@@ -8,6 +8,6 @@ function SuppressionComments1() {
 function SuppressionComments2() {
 	beforeReturn();
 	return;
-	// biome-ignore lint/correctness/noUnreachable: supress warning
+	// biome-ignore lint/correctness/noUnreachable: suppress warning
 	afterReturn();
 }

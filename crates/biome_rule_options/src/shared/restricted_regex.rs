@@ -98,13 +98,19 @@ impl biome_deserialize::Deserializable for RestrictedRegex {
     }
 }
 
+impl biome_deserialize::Merge for RestrictedRegex {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
+}
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RestrictedRegex {
-    fn schema_name() -> String {
-        "Regex".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Regex")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -203,7 +209,7 @@ fn validate_restricted_regex(pattern: &str) -> Result<(), RestrictedRegexError> 
                 // Anchors are implicit and always present in a restricted regex
                 return Err(RestrictedRegexError::new(
                     regex::Error::Syntax(
-                        "Anchors `^` and `$` are not supported. They are implciitly present."
+                        "Anchors `^` and `$` are not supported. They are implicitly present."
                             .to_string(),
                     ),
                     i,

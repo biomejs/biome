@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: always.invalid.js
+---
+# Input
+```js
+const returnsSequenceArrow = () => (a, b)
+
+const returnsAwaitArrow = async () => await fetchData()
+
+
+```
+
+# Diagnostics
+```
+always.invalid.js:1:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+  > 1 │ const returnsSequenceArrow = () => (a, b)
+      │                              ^^^^^^^^^^^^
+    2 │ 
+    3 │ const returnsAwaitArrow = async () => await fetchData()
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
+      1 │ + const·returnsSequenceArrow·=·()·=>·{
+      2 │ + → return·a,·b;
+      3 │ + }
+    2 4 │   
+    3 5 │   const returnsAwaitArrow = async () => await fetchData()
+  
+
+```
+
+```
+always.invalid.js:3:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+    1 │ const returnsSequenceArrow = () => (a, b)
+    2 │ 
+  > 3 │ const returnsAwaitArrow = async () => await fetchData()
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    1 1 │   const returnsSequenceArrow = () => (a, b)
+    2 2 │   
+    3   │ - const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
+      3 │ + const·returnsAwaitArrow·=·async·()·=>·{
+      4 │ + → return·await·fetchData();
+      5 │ + }
+    4 6 │   
+    5 7 │   
+  
+
+```

@@ -14,6 +14,7 @@ use {
 ///
 /// It is a logic error for `start` to be greater than `end`.
 #[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
+#[repr(C)]
 pub struct TextRange {
     // Invariant: start <= end
     start: TextSize,

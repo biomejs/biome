@@ -32,7 +32,7 @@ impl FormatNodeRule<JsNewExpression> for FormatJsNewExpression {
                 write!(f, [arguments.format()])
             }
             None => {
-                write!(f, [text("("), text(")")])
+                write!(f, [token("("), token(")")])
             }
         }
     }

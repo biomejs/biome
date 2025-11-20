@@ -13,8 +13,7 @@ use biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions;
 declare_lint_rule! {
     /// Prevents React-specific JSX properties from being used.
     ///
-    /// This rule is intended for use in JSX-based frameworks (mainly **Solid.js**)
-    /// that do not use React-style prop names.
+    /// This rule is intended for use in JSX-based frameworks (such as Qwik, Solid, etc.) that do not use React-style prop names.
     ///
     /// ## Examples
     ///
@@ -37,7 +36,7 @@ declare_lint_rule! {
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
-        domains: &[RuleDomain::Solid],
+        domains: &[RuleDomain::Solid, RuleDomain::Qwik],
     }
 }
 

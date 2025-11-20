@@ -123,7 +123,7 @@ impl WeakGreenElement {
         }
     }
 
-    fn as_deref(&self) -> GreenElementRef {
+    fn as_deref(&self) -> GreenElementRef<'_> {
         match self {
             Self::Node { ptr } => GreenElementRef::Node(unsafe { ptr.as_ref() }),
             Self::Token { ptr } => GreenElementRef::Token(unsafe { ptr.as_ref() }),
@@ -197,7 +197,7 @@ impl NodeData {
 
     /// Returns an iterator over the siblings of this node. The iterator is positioned at the current node.
     #[inline]
-    fn green_siblings(&self) -> Option<Siblings> {
+    fn green_siblings(&self) -> Option<Siblings<'_>> {
         match &self.parent()?.green() {
             GreenElementRef::Node(ptr) => Some(Siblings::new(ptr, self.slot())),
             GreenElementRef::Token(_) => {

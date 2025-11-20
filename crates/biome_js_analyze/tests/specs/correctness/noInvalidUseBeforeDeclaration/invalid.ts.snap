@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -9,10 +8,19 @@ class C {
     constructor(readonly a = b, readonly b = 0) {}
 }
 
+const member = E.A;
 enum E {
     A = B,
     B,
 }
+
+namespace Ns {
+	const c = new Class();
+}
+class Class {}
+
+x;
+import x = require("file");
 
 ```
 
@@ -40,24 +48,70 @@ invalid.ts:2:30 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
 ```
 
 ```
-invalid.ts:6:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This enum is used before its declaration.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const member = E.A;
+      │                ^
+    6 │ enum E {
+    7 │     A = B,
+  
+  i The enum is declared here:
+  
+    5 │ const member = E.A;
+  > 6 │ enum E {
+      │      ^
+    7 │     A = B,
+    8 │     B,
+  
+
+```
+
+```
+invalid.ts:7:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This enum member is used before its declaration.
   
-    5 │ enum E {
-  > 6 │     A = B,
+    5 │ const member = E.A;
+    6 │ enum E {
+  > 7 │     A = B,
       │         ^
-    7 │     B,
-    8 │ }
+    8 │     B,
+    9 │ }
   
   i The enum member is declared here:
   
-    5 │ enum E {
-    6 │     A = B,
-  > 7 │     B,
-      │     ^
-    8 │ }
-    9 │ 
+     6 │ enum E {
+     7 │     A = B,
+   > 8 │     B,
+       │     ^
+     9 │ }
+    10 │ 
+  
+
+```
+
+```
+invalid.ts:16:1 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    14 │ class Class {}
+    15 │ 
+  > 16 │ x;
+       │ ^
+    17 │ import x = require("file");
+    18 │ 
+  
+  i The variable is declared here:
+  
+    16 │ x;
+  > 17 │ import x = require("file");
+       │        ^
+    18 │ 
   
 
 ```

@@ -8,6 +8,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_project_layout"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
@@ -17,6 +18,7 @@ workspace = true
 [dependencies]
 biome_package = { workspace = true }
 biome_parser  = { workspace = true }
+biome_rowan   = { workspace = true }
 camino        = { workspace = true }
 papaya        = { workspace = true }
 rustc-hash    = { workspace = true }

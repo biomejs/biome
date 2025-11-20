@@ -1,0 +1,2 @@
+@source inline("underline font-bold text-center");
+@source inline("underline font-bold text-center bg-blue-500 hover:bg-blue-700 text-white font-large py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-300 ease-in-out");

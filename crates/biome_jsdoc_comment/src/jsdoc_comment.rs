@@ -65,7 +65,7 @@ impl JsdocComment {
             && text.ends_with("*/")
     }
 
-    /// Iterates all JSDoc comments preceeding the node.
+    /// Iterates all JSDoc comments preceding the node.
     pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
     where
         F: FnMut(&str),

@@ -1,0 +1,96 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+[width:] w-5
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@0..1 "[" [] [],
+                    TW_SELECTOR@1..7 "width:" [] [],
+                    R_BRACKET@7..8 "]" [] [],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@8..9 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@9..10 "w" [] [],
+                minus_token: DASH@10..11 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@11..13 "5" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..13
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..13
+    0: TW_FULL_CANDIDATE@0..8
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_BOGUS_CANDIDATE@0..8
+        0: L_BRACKET@0..1 "[" [] []
+        1: TW_SELECTOR@1..7 "width:" [] []
+        2: R_BRACKET@7..8 "]" [] []
+      3: (empty)
+    1: WHITESPACE@8..9 " " [] []
+    2: TW_FULL_CANDIDATE@9..13
+      0: TW_VARIANT_LIST@9..9
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@9..13
+        0: TW_BASE@9..10 "w" [] []
+        1: DASH@10..11 "-" [] []
+        2: TW_NAMED_VALUE@11..13
+          0: TW_VALUE@11..13 "5" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@13..13 "" [] []
+
+```
+
+## Diagnostics
+
+```
+missing-value-in-arbitrary.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[width:]'.
+  
+  > 1 │ [width:] w-5
+      │ ^^^^^^^^
+    2 │ 
+  
+  i Expected a candidate here.
+  
+  > 1 │ [width:] w-5
+      │ ^^^^^^^^
+    2 │ 
+  
+```

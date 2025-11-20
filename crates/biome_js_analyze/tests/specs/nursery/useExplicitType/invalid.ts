@@ -58,7 +58,7 @@ const arrowFn = () => {
 };
 
 // does not support detecting a return of a function inside other statements like if, switch, etc.
-// we check only the first statment
+// we check only the first statement
 const arrowFn = (a: number) => {
 	if (a === 1) {
 		return (): void => {};

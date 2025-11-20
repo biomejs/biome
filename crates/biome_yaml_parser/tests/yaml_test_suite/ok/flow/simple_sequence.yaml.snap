@@ -1,0 +1,108 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+[1, 'abc', "xyz", plain with
+space]
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: missing (optional),
+                    content: YamlFlowSequence {
+                        l_brack_token: L_BRACK@0..1 "[" [] [],
+                        entries: YamlFlowSequenceEntryList [
+                            YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@1..2 "1" [] [],
+                                },
+                            },
+                            COMMA@2..4 "," [] [Whitespace(" ")],
+                            YamlFlowJsonNode {
+                                properties: missing (optional),
+                                content: YamlSingleQuotedScalar {
+                                    value_token: SINGLE_QUOTED_LITERAL@4..9 "'abc'" [] [],
+                                },
+                            },
+                            COMMA@9..11 "," [] [Whitespace(" ")],
+                            YamlFlowJsonNode {
+                                properties: missing (optional),
+                                content: YamlDoubleQuotedScalar {
+                                    value_token: DOUBLE_QUOTED_LITERAL@11..16 "\"xyz\"" [] [],
+                                },
+                            },
+                            COMMA@16..18 "," [] [Whitespace(" ")],
+                            YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@18..34 "plain with\nspace" [] [],
+                                },
+                            },
+                        ],
+                        r_brack_token: R_BRACK@34..35 "]" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@35..35 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..36
+  0: YAML_DOCUMENT_LIST@0..35
+    0: YAML_DOCUMENT@0..35
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..35
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..35
+          0: (empty)
+          1: YAML_FLOW_SEQUENCE@0..35
+            0: L_BRACK@0..1 "[" [] []
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@1..34
+              0: YAML_FLOW_YAML_NODE@1..2
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@1..2
+                  0: PLAIN_LITERAL@1..2 "1" [] []
+              1: COMMA@2..4 "," [] [Whitespace(" ")]
+              2: YAML_FLOW_JSON_NODE@4..9
+                0: (empty)
+                1: YAML_SINGLE_QUOTED_SCALAR@4..9
+                  0: SINGLE_QUOTED_LITERAL@4..9 "'abc'" [] []
+              3: COMMA@9..11 "," [] [Whitespace(" ")]
+              4: YAML_FLOW_JSON_NODE@11..16
+                0: (empty)
+                1: YAML_DOUBLE_QUOTED_SCALAR@11..16
+                  0: DOUBLE_QUOTED_LITERAL@11..16 "\"xyz\"" [] []
+              5: COMMA@16..18 "," [] [Whitespace(" ")]
+              6: YAML_FLOW_YAML_NODE@18..34
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@18..34
+                  0: PLAIN_LITERAL@18..34 "plain with\nspace" [] []
+            2: R_BRACK@34..35 "]" [] []
+        2: FLOW_END@35..35 "" [] []
+      4: (empty)
+  1: EOF@35..36 "" [Newline("\n")] []
+
+```

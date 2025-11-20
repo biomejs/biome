@@ -31,8 +31,6 @@ pub enum FileKinds {
     Manifest,
     /// An ignore file, like `.gitignore`
     Ignore,
-    /// The path is a directory
-    Directory,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
     #[default]
     Handleable,
@@ -54,11 +52,7 @@ pub struct BiomePath {
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = if path.is_dir() {
-            FileKinds::Directory
-        } else {
-            path.file_name().map(Self::priority).unwrap_or_default()
-        };
+        let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
             path,
             kind,
@@ -143,11 +137,6 @@ impl BiomePath {
     #[inline(always)]
     pub fn is_ignore(&self) -> bool {
         matches!(self.kind, FileKinds::Ignore)
-    }
-
-    #[inline(always)]
-    pub fn is_dir(&self) -> bool {
-        matches!(self.kind, FileKinds::Directory)
     }
 
     #[inline(always)]
@@ -254,11 +243,11 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for BiomePath {
-    fn schema_name() -> String {
-        "BiomePath".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("BiomePath")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -339,7 +328,7 @@ mod test {
         let path6 = BiomePath::new(Utf8PathBuf::from("src/frontend/biome.jsonc"));
         let path7 = BiomePath::new(Utf8PathBuf::from("src/frontend/package.json"));
 
-        let mut paths = vec![path1, path2, path3, path4, path5, path6, path7];
+        let mut paths = [path1, path2, path3, path4, path5, path6, path7];
         paths.sort();
         let mut iter = paths.iter();
         assert_eq!(iter.next().unwrap().to_string(), "src/biome.json");

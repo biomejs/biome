@@ -31,14 +31,14 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-fn.ts
     /// async function returnsPromise(): Promise<string> {
     ///   return 'value';
     /// }
     /// returnsPromise().then(() => {});
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-fn2.ts
     /// const returnsPromise = async (): Promise<string> => {
     ///   return 'value';
     /// }
@@ -47,16 +47,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts
+    /// ```js,expect_diagnostic,file=new-promise.js
     /// const promise = new Promise((resolve) => resolve('value'));
     /// promise.then(() => { }).finally(() => { });
     /// ```
     ///
-    /// ```ts
+    /// ```js,expect_diagnostic,file=promise-all.js
     /// Promise.all([p1, p2, p3])
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-method.ts
     /// class Api {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-super-method.ts
     /// class Parent {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-method2.ts
     /// class Api {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -91,7 +91,7 @@ declare_lint_rule! {
     /// api.returnsPromise().then(() => {}).finally(() => {});
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-object-method.ts
     /// const obj = {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -101,7 +101,7 @@ declare_lint_rule! {
     /// obj.returnsPromise();
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=async-prop.ts
     /// type Props = {
     ///   returnsPromise: () => Promise<void>;
     /// };
@@ -113,7 +113,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```ts,file=valid-examples.ts
     /// async function returnsPromise(): Promise<string> {
     ///   return 'value';
     /// }
@@ -141,9 +141,7 @@ declare_lint_rule! {
     ///     await this.returnsPromise();
     ///   }
     /// }
-    /// ```
     ///
-    /// ```ts
     /// type Props = {
     ///   returnsPromise: () => Promise<void>;
     /// };
@@ -294,10 +292,10 @@ impl Rule for NoFloatingPromises {
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
                         make::token(JsSyntaxKind::AWAIT_KW)
                             .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        expression.clone().trim_leading_trivia()?,
+                        expression.clone().trim_comments_and_trivia()?,
                     ));
 
-                mutation.replace_node(expression, await_expression);
+                mutation.replace_node_transfer_trivia(expression, await_expression);
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),

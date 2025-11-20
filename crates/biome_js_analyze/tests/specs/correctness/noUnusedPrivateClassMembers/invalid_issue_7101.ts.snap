@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid_issue_7101.ts
+---
+# Input
+```ts
+class TSDoubleUnusedPrivateConstructor {
+	constructor(
+		usedProperty = 3,
+		private unusedProperty: number,
+		private anotherUnusedProperty = 4
+	) {
+		// This constructor has two unused private properties
+
+	}
+}
+
+class TSPartiallyUsedPrivateConstructor {
+  constructor(private param: number) {
+		// this is not read or write as far as class members are concerned.
+    foo(param)
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_issue_7101.ts:4:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    2 │ 	constructor(
+    3 │ 		usedProperty = 3,
+  > 4 │ 		private unusedProperty: number,
+      │ 		        ^^^^^^^^^^^^^^
+    5 │ 		private anotherUnusedProperty = 4
+    6 │ 	) {
+  
+  i Unsafe fix: Remove private modifier
+  
+     1  1 │   class TSDoubleUnusedPrivateConstructor {
+     2  2 │   	constructor(
+     3    │ - → → usedProperty·=·3,
+     4    │ - → → private·unusedProperty:·number,
+        3 │ + → → usedProperty·=·3,_unusedProperty:·number,
+     5  4 │   		private anotherUnusedProperty = 4
+     6  5 │   	) {
+  
+
+```
+
+```
+invalid_issue_7101.ts:5:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    3 │ 		usedProperty = 3,
+    4 │ 		private unusedProperty: number,
+  > 5 │ 		private anotherUnusedProperty = 4
+      │ 		        ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	) {
+    7 │ 		// This constructor has two unused private properties
+  
+  i Unsafe fix: Remove private modifier
+  
+     2  2 │   	constructor(
+     3  3 │   		usedProperty = 3,
+     4    │ - → → private·unusedProperty:·number,
+     5    │ - → → private·anotherUnusedProperty·=·4
+        4 │ + → → private·unusedProperty:·number,_anotherUnusedProperty·=·4
+     6  5 │   	) {
+     7  6 │   		// This constructor has two unused private properties
+  
+
+```
+
+```
+invalid_issue_7101.ts:13:23 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This parameter is never used outside of the constructor.
+  
+    12 │ class TSPartiallyUsedPrivateConstructor {
+  > 13 │   constructor(private param: number) {
+       │                       ^^^^^
+    14 │ 		// this is not read or write as far as class members are concerned.
+    15 │     foo(param)
+  
+  i Unsafe fix: Remove private modifier
+  
+    13 │ ··constructor(private·param:·number)·{
+       │               --------                
+
+```

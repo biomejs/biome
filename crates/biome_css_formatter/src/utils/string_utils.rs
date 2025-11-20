@@ -9,8 +9,7 @@ use biome_formatter::QuoteStyle;
 use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
     Format, FormatResult,
-    prelude::{dynamic_text, write},
-    trivia::format_replaced,
+    prelude::{text, write},
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;
@@ -36,7 +35,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
                 f,
                 [format_replaced(
                     &self.token,
-                    &dynamic_text(&lowercase, self.token.text_trimmed_range().start()),
+                    &text(&lowercase, self.token.text_trimmed_range().start()),
                 )]
             ),
         }
@@ -45,7 +44,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
 
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
-    /// Variants to track tokens that are inside a CssCharasetRule
+    /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
     /// other types, will add more later
@@ -72,7 +71,7 @@ impl<'token> FormatLiteralStringToken<'token> {
         self.token
     }
 
-    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText {
+    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText<'_> {
         let token = self.token();
         debug_assert!(
             matches!(
@@ -295,5 +294,63 @@ impl<'token> LiteralStringNormaliser<'token> {
                 "{preferred_quote}{content_to_use}{preferred_quote}",
             ))
         }
+    }
+}
+
+pub(crate) struct FormatDimensionUnit {
+    token: SyntaxToken<CssLanguage>,
+}
+
+impl From<SyntaxToken<CssLanguage>> for FormatDimensionUnit {
+    fn from(value: SyntaxToken<CssLanguage>) -> Self {
+        Self { token: value }
+    }
+}
+
+impl Format<CssFormatContext> for FormatDimensionUnit {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let original = self.token.text_trimmed();
+
+        match original.to_ascii_lowercase_cow() {
+            Cow::Borrowed(lowercase) => {
+                if let Some(uppercase) = map_dimension_unit(lowercase) {
+                    write!(
+                        f,
+                        [format_replaced(
+                            &self.token,
+                            &text(&uppercase, self.token.text_trimmed_range().start()),
+                        )]
+                    )
+                } else {
+                    write!(f, [self.token.format()])
+                }
+            }
+
+            Cow::Owned(lowercase) => {
+                write!(
+                    f,
+                    [format_replaced(
+                        &self.token,
+                        &text(
+                            &map_dimension_unit(lowercase.as_str()).unwrap_or(lowercase),
+                            self.token.text_trimmed_range().start()
+                        ),
+                    )]
+                )
+            }
+        }
+    }
+}
+
+/// Most CSS dimension units can be formatted as lower case, but there are
+/// a few that are more commonly formatted with some uppercase characters.
+/// This maps those few cases to the correct casing. This matches the
+/// behavior of the Prettier formatter.
+fn map_dimension_unit(unit: &str) -> Option<String> {
+    match unit {
+        "hz" => Some(String::from("Hz")),
+        "khz" => Some(String::from("kHz")),
+        "q" => Some(String::from("Q")),
+        _ => None,
     }
 }

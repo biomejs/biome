@@ -36,7 +36,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@1..4 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..4 "dir" [] [],
+                                    },
                                     L_PAREN@4..6 "(" [] [Whitespace(" ")],
                                 ],
                             },
@@ -60,7 +62,9 @@ CssRoot {
                             colon_token: COLON@8..10 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@10..13 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@10..13 "dir" [] [],
+                                    },
                                     L_PAREN@13..14 "(" [] [],
                                     R_PAREN@14..16 ")" [] [Whitespace(" ")],
                                 ],
@@ -85,7 +89,9 @@ CssRoot {
                             colon_token: COLON@18..20 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@20..23 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@20..23 "dir" [] [],
+                                    },
                                     L_PAREN@23..24 "(" [] [],
                                     CssIdentifier {
                                         value_token: IDENT@24..28 "ltr" [] [Whitespace(" ")],
@@ -112,7 +118,9 @@ CssRoot {
                             colon_token: COLON@30..32 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@32..35 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@32..35 "dir" [] [],
+                                    },
                                     L_PAREN@35..36 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -141,7 +149,9 @@ CssRoot {
                             colon_token: COLON@46..48 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@48..51 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@48..51 "dir" [] [],
+                                    },
                                     L_PAREN@51..52 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -172,7 +182,9 @@ CssRoot {
                             colon_token: COLON@64..66 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@66..69 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@66..69 "dir" [] [],
+                                    },
                                     L_PAREN@69..70 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -202,7 +214,9 @@ CssRoot {
                             colon_token: COLON@81..83 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@83..86 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@83..86 "dir" [] [],
+                                    },
                                     L_PAREN@86..87 "(" [] [],
                                     CssIdentifier {
                                         value_token: IDENT@87..91 "ltr" [] [Whitespace(" ")],
@@ -235,7 +249,9 @@ CssRoot {
                             colon_token: COLON@100..102 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@102..105 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@102..105 "dir" [] [],
+                                    },
                                     L_PAREN@105..106 "(" [] [],
                                     CssIdentifier {
                                         value_token: IDENT@106..110 "ltr" [] [Whitespace(" ")],
@@ -269,7 +285,9 @@ CssRoot {
                             colon_token: COLON@120..122 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@122..125 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@122..125 "dir" [] [],
+                                    },
                                     L_PAREN@125..126 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -300,7 +318,9 @@ CssRoot {
                             colon_token: COLON@143..145 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@145..148 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@145..148 "dir" [] [],
+                                    },
                                     L_PAREN@148..149 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -332,7 +352,9 @@ CssRoot {
                             colon_token: COLON@167..169 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    DIR_KW@169..172 "dir" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@169..172 "dir" [] [],
+                                    },
                                     L_PAREN@172..173 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -370,7 +392,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..6
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..6
-                0: DIR_KW@1..4 "dir" [] []
+                0: CSS_IDENTIFIER@1..4
+                  0: IDENT@1..4 "dir" [] []
                 1: L_PAREN@4..6 "(" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@6..8
         0: L_CURLY@6..7 "{" [] []
@@ -385,7 +408,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@8..16
               0: COLON@8..10 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@10..16
-                0: DIR_KW@10..13 "dir" [] []
+                0: CSS_IDENTIFIER@10..13
+                  0: IDENT@10..13 "dir" [] []
                 1: L_PAREN@13..14 "(" [] []
                 2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@16..18
@@ -401,7 +425,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@18..28
               0: COLON@18..20 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@20..28
-                0: DIR_KW@20..23 "dir" [] []
+                0: CSS_IDENTIFIER@20..23
+                  0: IDENT@20..23 "dir" [] []
                 1: L_PAREN@23..24 "(" [] []
                 2: CSS_IDENTIFIER@24..28
                   0: IDENT@24..28 "ltr" [] [Whitespace(" ")]
@@ -418,7 +443,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@30..44
               0: COLON@30..32 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@32..44
-                0: DIR_KW@32..35 "dir" [] []
+                0: CSS_IDENTIFIER@32..35
+                  0: IDENT@32..35 "dir" [] []
                 1: L_PAREN@35..36 "(" [] []
                 2: CSS_BOGUS@36..44
                   0: IDENT@36..44 "invalid" [] [Whitespace(" ")]
@@ -435,7 +461,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@46..62
               0: COLON@46..48 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@48..62
-                0: DIR_KW@48..51 "dir" [] []
+                0: CSS_IDENTIFIER@48..51
+                  0: IDENT@48..51 "dir" [] []
                 1: L_PAREN@51..52 "(" [] []
                 2: CSS_BOGUS@52..60
                   0: DOT@52..53 "." [] []
@@ -454,7 +481,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@64..79
               0: COLON@64..66 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@66..79
-                0: DIR_KW@66..69 "dir" [] []
+                0: CSS_IDENTIFIER@66..69
+                  0: IDENT@66..69 "dir" [] []
                 1: L_PAREN@69..70 "(" [] []
                 2: CSS_BOGUS@70..79
                   0: DOT@70..71 "." [] []
@@ -472,7 +500,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@81..98
               0: COLON@81..83 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@83..98
-                0: DIR_KW@83..86 "dir" [] []
+                0: CSS_IDENTIFIER@83..86
+                  0: IDENT@83..86 "dir" [] []
                 1: L_PAREN@86..87 "(" [] []
                 2: CSS_IDENTIFIER@87..91
                   0: IDENT@87..91 "ltr" [] [Whitespace(" ")]
@@ -492,7 +521,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@100..118
               0: COLON@100..102 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@102..118
-                0: DIR_KW@102..105 "dir" [] []
+                0: CSS_IDENTIFIER@102..105
+                  0: IDENT@102..105 "dir" [] []
                 1: L_PAREN@105..106 "(" [] []
                 2: CSS_IDENTIFIER@106..110
                   0: IDENT@106..110 "ltr" [] [Whitespace(" ")]
@@ -513,7 +543,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@120..141
               0: COLON@120..122 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@122..141
-                0: DIR_KW@122..125 "dir" [] []
+                0: CSS_IDENTIFIER@122..125
+                  0: IDENT@122..125 "dir" [] []
                 1: L_PAREN@125..126 "(" [] []
                 2: CSS_BOGUS@126..141
                   0: IDENT@126..134 "invalid" [] [Whitespace(" ")]
@@ -532,7 +563,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@143..165
               0: COLON@143..145 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@145..165
-                0: DIR_KW@145..148 "dir" [] []
+                0: CSS_IDENTIFIER@145..148
+                  0: IDENT@145..148 "dir" [] []
                 1: L_PAREN@148..149 "(" [] []
                 2: CSS_BOGUS@149..163
                   0: IDENT@149..157 "invalid" [] [Whitespace(" ")]
@@ -552,7 +584,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@167..181
               0: COLON@167..169 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@169..181
-                0: DIR_KW@169..172 "dir" [] []
+                0: CSS_IDENTIFIER@169..172
+                  0: IDENT@169..172 "dir" [] []
                 1: L_PAREN@172..173 "(" [] []
                 2: CSS_BOGUS@173..181
                   0: DOT@173..174 "." [] []

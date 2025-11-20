@@ -240,7 +240,6 @@ impl RecessOrderMember {
     /// Returns the kind of node for ordering purposes. The nodes are sorted in the order they're declared in [NodeKindOrder].
     pub fn kind(&self) -> NodeKindOrder {
         match &self.0 {
-            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
@@ -249,6 +248,7 @@ impl RecessOrderMember {
                 AnyCssRule::CssNestedQualifiedRule(_) => NodeKindOrder::NestedRuleOrAtRule,
                 AnyCssRule::CssQualifiedRule(_) => NodeKindOrder::UnknownKind,
             },
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
                 let Some(decl) = decl_with_semicolon.declaration().ok() else {
                     return NodeKindOrder::UnknownKind;
@@ -268,6 +268,9 @@ impl RecessOrderMember {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
+                            AnyCssDeclarationName::TwValueThemeReference(_) => {
+                                NodeKindOrder::Declaration
+                            }
                         }
                     }
                 }

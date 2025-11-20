@@ -78,11 +78,15 @@ pub(crate) fn run<'a>(
             })?;
 
             let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(content, code.as_str()),
-                Some("vue") => VueFileHandler::output(content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
-                _ => code,
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
             };
             console.append(markup! {
                 {output}
@@ -149,46 +153,50 @@ pub(crate) fn run<'a>(
             (Vec::new(), Vec::new())
         };
 
-        if let Some(fix_file_mode) = mode.as_fix_file_mode() {
-            if file_features.supports_lint() || file_features.supports_assist() {
-                let mut rule_categories = RuleCategoriesBuilder::default().with_syntax();
+        if let Some(fix_file_mode) = mode.as_fix_file_mode()
+            && (file_features.supports_lint() || file_features.supports_assist())
+        {
+            let mut rule_categories = RuleCategoriesBuilder::default().with_syntax();
 
-                if file_features.supports_lint() {
-                    rule_categories = rule_categories.with_lint();
-                }
+            if file_features.supports_lint() {
+                rule_categories = rule_categories.with_lint();
+            }
 
-                if file_features.supports_assist() {
-                    rule_categories = rule_categories.with_assist();
-                }
+            if file_features.supports_assist() {
+                rule_categories = rule_categories.with_assist();
+            }
 
-                let fix_file_result = workspace.fix_file(FixFileParams {
-                    project_key,
-                    fix_file_mode: *fix_file_mode,
-                    path: biome_path.clone(),
-                    should_format: mode.is_check() && file_features.supports_format(),
-                    only: only.clone(),
-                    skip: skip.clone(),
-                    suppression_reason: None,
-                    enabled_rules: vec![],
-                    rule_categories: rule_categories.build(),
-                })?;
-                let code = fix_file_result.code;
-                let output = match biome_path.extension() {
+            let fix_file_result = workspace.fix_file(FixFileParams {
+                project_key,
+                fix_file_mode: *fix_file_mode,
+                path: biome_path.clone(),
+                should_format: mode.is_check() && file_features.supports_format(),
+                only: only.clone(),
+                skip: skip.clone(),
+                suppression_reason: None,
+                enabled_rules: vec![],
+                rule_categories: rule_categories.build(),
+            })?;
+            let code = fix_file_result.code;
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
                     Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
                     Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
                     Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                     _ => code,
-                };
-                if output != new_content {
-                    version += 1;
-                    workspace.change_file(ChangeFileParams {
-                        project_key,
-                        content: output.clone(),
-                        path: biome_path.clone(),
-                        version,
-                    })?;
-                    new_content = Cow::Owned(output);
                 }
+            } else {
+                code
+            };
+            if output != new_content {
+                version += 1;
+                workspace.change_file(ChangeFileParams {
+                    project_key,
+                    content: output.clone(),
+                    path: biome_path.clone(),
+                    version,
+                })?;
+                new_content = Cow::Owned(output);
             }
         }
 
@@ -198,11 +206,15 @@ pub(crate) fn run<'a>(
                 path: biome_path.clone(),
             })?;
             let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
-                _ => code,
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
             };
             if (mode.is_safe_fixes_enabled() || mode.is_safe_and_unsafe_fixes_enabled())
                 && output != new_content

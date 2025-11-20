@@ -30,7 +30,7 @@ impl FormatRule<SourceComment<JsonLanguage>> for FormatJsonLeadingComment {
 
             // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [dynamic_text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), source_offset)])?;
 
             source_offset += first_line.text_len();
 
@@ -41,10 +41,7 @@ impl FormatRule<SourceComment<JsonLanguage>> for FormatJsonLeadingComment {
                     1,
                     &format_once(|f| {
                         for line in lines {
-                            write!(
-                                f,
-                                [hard_line_break(), dynamic_text(line.trim(), source_offset)]
-                            )?;
+                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
 
                             source_offset += line.text_len();
                         }
@@ -102,15 +99,15 @@ fn handle_empty_list_comment(
         return CommentPlacement::Default(comment);
     }
 
-    if let Some(array) = JsonArrayValue::cast_ref(comment.enclosing_node()) {
-        if array.elements().is_empty() {
-            return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
-        }
+    if let Some(array) = JsonArrayValue::cast_ref(comment.enclosing_node())
+        && array.elements().is_empty()
+    {
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
     }
-    if let Some(object) = JsonObjectValue::cast_ref(comment.enclosing_node()) {
-        if object.json_member_list().is_empty() {
-            return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
-        }
+    if let Some(object) = JsonObjectValue::cast_ref(comment.enclosing_node())
+        && object.json_member_list().is_empty()
+    {
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
     }
 
     CommentPlacement::Default(comment)

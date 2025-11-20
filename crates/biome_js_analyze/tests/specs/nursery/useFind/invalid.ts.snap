@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+[1, 2, 3].filter(x => x > 1)[0];
+const found1 = [1, 2, 3].filter(x => x > 1)[0];
+
+[1, 2, 3].filter(x => x > 1).at(0);
+const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+
+[1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+[1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+  > 1 │ [1, 2, 3].filter(x => x > 1)[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+    3 │ 
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```
+
+```
+invalid.ts:2:16 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+    1 │ [1, 2, 3].filter(x => x > 1)[0];
+  > 2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ [1, 2, 3].filter(x => x > 1).at(0);
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+    2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+    3 │ 
+  > 4 │ [1, 2, 3].filter(x => x > 1).at(0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+    6 │ 
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```
+
+```
+invalid.ts:5:16 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+    4 │ [1, 2, 3].filter(x => x > 1).at(0);
+  > 5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+    5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+    6 │ 
+  > 7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+    9 │ 
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/useFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using Array#find() over Array#filter[0].
+  
+    7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+  > 8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Use Array#find() instead of Array#filter[0] to improve readability.
+  
+
+```

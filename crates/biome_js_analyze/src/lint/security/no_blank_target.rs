@@ -191,7 +191,7 @@ impl Rule for NoBlankTarget {
                         .split_ascii_whitespace()
                         .any(|rel| {
                             rel == "noopener"
-                                || ctx.options().allow_no_referrer && rel == "noreferrer"
+                                || ctx.options().allow_no_referrer() && rel == "noreferrer"
                         })
                         && !node.has_trailing_spread_prop(&target_attribute)
                         && !node.has_trailing_spread_prop(&rel_attribute))
@@ -265,7 +265,7 @@ impl Rule for NoBlankTarget {
         Some(RuleDiagnostic::new(
             rule_category!(),
             target_attribute.syntax().text_trimmed_range(),
-            if ctx.options().allow_no_referrer {
+            if ctx.options().allow_no_referrer() {
                 markup! {
                     "Avoid using "<Emphasis>"target=\"_blank\""</Emphasis>
                     " without "<Emphasis>"rel=\"noopener\""</Emphasis>" or "

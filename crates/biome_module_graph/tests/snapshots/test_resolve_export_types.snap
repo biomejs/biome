@@ -42,11 +42,11 @@ export const superComputer = new DeepThought();
 
 ```
 Exports {
-  "superComputer" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
-  }
   "theAnswer" => {
     ExportOwnExport => JsOwnExport::Binding(0)
+  }
+  "superComputer" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
   }
 }
 Imports {
@@ -73,13 +73,13 @@ BindingId(3) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 42
+Module TypeId(0) => number: 42
 
 Module TypeId(1) => Module(0) TypeId(0)
 
 Module TypeId(2) => number
 
-Module TypeId(3) => value: Life, The Universe, and Everything
+Module TypeId(3) => string: Life, The Universe, and Everything
 
 Module TypeId(4) => Module(0) TypeId(10)
 
@@ -96,7 +96,7 @@ Module TypeId(6) => sync Function "answerMe" {
 Module TypeId(7) => sync Function "giveMeABiggerAnswer" {
   accepts: {
     params: [
-      required delta: number (bindings: delta:number)
+      required delta: number
     ]
     type_args: []
   }

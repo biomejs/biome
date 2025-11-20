@@ -20,31 +20,7 @@ export interface OpenProjectResult {
 	 * A unique identifier for this project
 	 */
 	projectKey: ProjectKey;
-	/**
-	 * How to scan this project
-	 */
-	scanKind: ScanKind;
 }
-type ScanKind =
-	| "noScanner"
-	| "knownFiles"
-	| {
-			targetedKnownFiles: {
-				/**
-				 * Determines whether the file scanner should descend into subdirectories of the target paths.
-				 */
-				descendFromTargets: boolean;
-				/**
-* The paths to target by the scanner.
-
-If a target path indicates a folder, all files within are scanned as well.
-
-Target paths must be absolute. 
-	*/
-				targetPaths: BiomePath[];
-			};
-	  }
-	| "project";
 interface OpenFileParams {
 	content: FileContent;
 	path: BiomePath;
@@ -123,7 +99,9 @@ export interface Workspace<Configuration, Diagnostic> {
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): PullDiagnosticsResult<Diagnostic>;
+	// biome-ignore lint: code generation is broken
 	formatRange(params: FormatRangeParams): any;
+	// biome-ignore lint: code generation is broken
 	formatFile(params: FormatFileParams): any;
 	getFormatterIr(params: GetFormatterIRParams): string;
 	fixFile(params: FixFileParams): FixFileResult;

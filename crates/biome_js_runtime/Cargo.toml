@@ -1,0 +1,24 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "ECMAScript runtime for JS plugins"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_js_runtime"
+publish              = true
+repository.workspace = true
+version              = "0.0.1"
+
+[dependencies]
+biome_analyze     = { workspace = true }
+biome_diagnostics = { workspace = true }
+biome_resolver    = { workspace = true }
+biome_text_size   = { workspace = true }
+boa_engine        = { workspace = true }
+camino            = { workspace = true }
+rustc-hash        = { workspace = true }
+
+[lints]
+workspace = true

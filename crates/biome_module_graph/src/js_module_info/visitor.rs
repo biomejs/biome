@@ -1,9 +1,9 @@
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding, AnyTsModuleName,
-    JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
-    JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
+    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
+    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
@@ -12,11 +12,19 @@ use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
-    JsImport, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
+    JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
     js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
 };
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
+
+/// Extensions to try to resolve based on the extension in the import specifier.
+/// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
+const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
+    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
+    ("mjs", &["mts", "d.mts", "mjs"]),
+    ("cjs", &["cts", "d.cts", "cjs"]),
+];
 
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
@@ -65,11 +73,39 @@ impl<'a> JsModuleVisitor<'a> {
         let resolved_path = self.resolved_path_from_specifier(specifier.text());
 
         match node {
-            AnyJsImportLike::JsModuleSource(_) => {
-                collector.register_static_import_path(specifier, resolved_path);
+            AnyJsImportLike::JsModuleSource(source) => {
+                // TODO: support defer or source imports
+                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
+                    match clause {
+                        AnyJsImportClause::JsImportDefaultClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamedClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamespaceClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        _ => JsImportPhase::Default,
+                    }
+                } else {
+                    JsImportPhase::Default
+                };
+
+                collector.register_static_import_path(specifier, resolved_path, phase);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
-                collector.register_dynamic_import_path(specifier, resolved_path);
+                collector.register_dynamic_import_path(
+                    specifier,
+                    resolved_path,
+                    JsImportPhase::Default, // TODO: support defer or source imports
+                );
             }
         }
     }
@@ -199,10 +235,18 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExpression,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
-        let ty = TypeReference::from(collector.register_and_resolve(type_data));
+        match node {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                let local_name = ident.name().ok()?.name().ok()?;
+                collector.register_export(JsCollectedExport::ExportNamedDefault { local_name });
+            }
+            _ => {
+                let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
+                let ty = TypeReference::from(collector.register_and_resolve(type_data));
+                collector.register_export(JsCollectedExport::ExportDefault { ty });
+            }
+        }
 
-        collector.register_export(JsCollectedExport::ExportDefault { ty });
         Some(())
     }
 
@@ -365,31 +409,29 @@ impl<'a> JsModuleVisitor<'a> {
                             if let Ok(binding) = node.pattern() {
                                 self.visit_binding_pattern(
                                     binding,
-                                   collector,
+                                    collector,
                                 );
                             }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(node) => {
-                            if let Ok(binding) = node.binding() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.binding()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
                             node,
                         ) => {
-                            if let Ok(binding) = node.identifier() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.identifier()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsBogusBinding(_)
                         | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
@@ -416,6 +458,7 @@ impl<'a> JsModuleVisitor<'a> {
             condition_names: &["types", "import", "default"],
             default_files: &["index"],
             extensions: SUPPORTED_EXTENSIONS,
+            extension_aliases: EXTENSION_ALIASES,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

@@ -45,7 +45,7 @@ where
                     // In forced separator mode or if this element is not the last in the list, print the separator
                     match element.trailing_separator()? {
                         Some(trailing) => write!(f, [trailing.format()])?,
-                        None => text(",").fmt(f)?,
+                        None => token(",").fmt(f)?,
                     };
                 } else if let Some(separator) = element.trailing_separator()? {
                     match trailing_separator {
@@ -53,7 +53,14 @@ where
                             write!(f, [format_removed(separator)])?;
                         }
                         _ => {
-                            write!(f, [format_only_if_breaks(separator, &separator.format())])?;
+                            write!(
+                                f,
+                                [format_only_if_breaks(
+                                    separator,
+                                    &separator.format(),
+                                    on_skipped
+                                )]
+                            )?;
                         }
                     }
                 } else {

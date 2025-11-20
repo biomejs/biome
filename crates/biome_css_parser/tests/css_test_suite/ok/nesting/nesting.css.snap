@@ -1153,7 +1153,9 @@ CssRoot {
                                         CssPseudoClassSelector {
                                             colon_token: COLON@634..635 ":" [] [],
                                             class: CssPseudoClassFunctionSelectorList {
-                                                name: IS_KW@635..637 "is" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@635..637 "is" [] [],
+                                                },
                                                 l_paren_token: L_PAREN@637..638 "(" [] [],
                                                 selectors: CssSelectorList [
                                                     CssCompoundSelector {
@@ -1874,7 +1876,9 @@ CssRoot {
                                         CssPseudoClassSelector {
                                             colon_token: COLON@1057..1111 ":" [Newline("\n"), Whitespace("\t"), Comments("/* valid, no longer s ..."), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
                                             class: CssPseudoClassFunctionSelectorList {
-                                                name: IS_KW@1111..1113 "is" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1111..1113 "is" [] [],
+                                                },
                                                 l_paren_token: L_PAREN@1113..1114 "(" [] [],
                                                 selectors: CssSelectorList [
                                                     CssCompoundSelector {
@@ -2324,7 +2328,9 @@ CssRoot {
                                         CssPseudoClassSelector {
                                             colon_token: COLON@1412..1415 ":" [Newline("\n"), Whitespace("\t")] [],
                                             class: CssPseudoClassFunctionSelectorList {
-                                                name: NOT_KW@1415..1418 "not" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1415..1418 "not" [] [],
+                                                },
                                                 l_paren_token: L_PAREN@1418..1419 "(" [] [],
                                                 selectors: CssSelectorList [
                                                     CssCompoundSelector {
@@ -2596,7 +2602,9 @@ CssRoot {
                                             CssPseudoClassSelector {
                                                 colon_token: COLON@1561..1562 ":" [] [],
                                                 class: CssPseudoClassFunctionSelectorList {
-                                                    name: IS_KW@1562..1564 "is" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1562..1564 "is" [] [],
+                                                    },
                                                     l_paren_token: L_PAREN@1564..1565 "(" [] [],
                                                     selectors: CssSelectorList [
                                                         CssCompoundSelector {
@@ -3045,25 +3053,27 @@ CssRoot {
                     CssAtRule {
                         at_token: AT@1886..1889 "@" [Newline("\n"), Whitespace("\t")] [],
                         rule: CssMediaAtRule {
-                            media_token: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")],
-                            queries: CssMediaQueryList [
-                                CssMediaConditionQuery {
-                                    condition: CssMediaFeatureInParens {
-                                        l_paren_token: L_PAREN@1895..1896 "(" [] [],
-                                        feature: CssQueryFeaturePlain {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1896..1905 "min-width" [] [],
+                            declarator: CssMediaAtRuleDeclarator {
+                                media_token: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")],
+                                queries: CssMediaQueryList [
+                                    CssMediaConditionQuery {
+                                        condition: CssMediaFeatureInParens {
+                                            l_paren_token: L_PAREN@1895..1896 "(" [] [],
+                                            feature: CssQueryFeaturePlain {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1896..1905 "min-width" [] [],
+                                                },
+                                                colon_token: COLON@1905..1907 ":" [] [Whitespace(" ")],
+                                                value: CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@1907..1910 "480" [] [],
+                                                    unit_token: IDENT@1910..1912 "px" [] [],
+                                                },
                                             },
-                                            colon_token: COLON@1905..1907 ":" [] [Whitespace(" ")],
-                                            value: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@1907..1910 "480" [] [],
-                                                unit_token: IDENT@1910..1912 "px" [] [],
-                                            },
+                                            r_paren_token: R_PAREN@1912..1914 ")" [] [Whitespace(" ")],
                                         },
-                                        r_paren_token: R_PAREN@1912..1914 ")" [] [Whitespace(" ")],
                                     },
-                                },
-                            ],
+                                ],
+                            },
                             block: CssDeclarationOrRuleBlock {
                                 l_curly_token: L_CURLY@1914..1915 "{" [] [],
                                 items: CssDeclarationOrRuleList [
@@ -3791,7 +3801,8 @@ CssRoot {
                     0: CSS_PSEUDO_CLASS_SELECTOR@634..651
                       0: COLON@634..635 ":" [] []
                       1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@635..651
-                        0: IS_KW@635..637 "is" [] []
+                        0: CSS_IDENTIFIER@635..637
+                          0: IDENT@635..637 "is" [] []
                         1: L_PAREN@637..638 "(" [] []
                         2: CSS_SELECTOR_LIST@638..649
                           0: CSS_COMPOUND_SELECTOR@638..642
@@ -4258,7 +4269,8 @@ CssRoot {
                     0: CSS_PSEUDO_CLASS_SELECTOR@1057..1121
                       0: COLON@1057..1111 ":" [Newline("\n"), Whitespace("\t"), Comments("/* valid, no longer s ..."), Newline("\n"), Newline("\n"), Whitespace("\t")] []
                       1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@1111..1121
-                        0: IS_KW@1111..1113 "is" [] []
+                        0: CSS_IDENTIFIER@1111..1113
+                          0: IDENT@1111..1113 "is" [] []
                         1: L_PAREN@1113..1114 "(" [] []
                         2: CSS_SELECTOR_LIST@1114..1119
                           0: CSS_COMPOUND_SELECTOR@1114..1119
@@ -4551,7 +4563,8 @@ CssRoot {
                     0: CSS_PSEUDO_CLASS_SELECTOR@1412..1422
                       0: COLON@1412..1415 ":" [Newline("\n"), Whitespace("\t")] []
                       1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@1415..1422
-                        0: NOT_KW@1415..1418 "not" [] []
+                        0: CSS_IDENTIFIER@1415..1418
+                          0: IDENT@1415..1418 "not" [] []
                         1: L_PAREN@1418..1419 "(" [] []
                         2: CSS_SELECTOR_LIST@1419..1420
                           0: CSS_COMPOUND_SELECTOR@1419..1420
@@ -4728,7 +4741,8 @@ CssRoot {
                       0: CSS_PSEUDO_CLASS_SELECTOR@1561..1578
                         0: COLON@1561..1562 ":" [] []
                         1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@1562..1578
-                          0: IS_KW@1562..1564 "is" [] []
+                          0: CSS_IDENTIFIER@1562..1564
+                            0: IDENT@1562..1564 "is" [] []
                           1: L_PAREN@1564..1565 "(" [] []
                           2: CSS_SELECTOR_LIST@1565..1576
                             0: CSS_COMPOUND_SELECTOR@1565..1569
@@ -5016,20 +5030,21 @@ CssRoot {
           1: CSS_AT_RULE@1886..1953
             0: AT@1886..1889 "@" [Newline("\n"), Whitespace("\t")] []
             1: CSS_MEDIA_AT_RULE@1889..1953
-              0: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")]
-              1: CSS_MEDIA_QUERY_LIST@1895..1914
-                0: CSS_MEDIA_CONDITION_QUERY@1895..1914
-                  0: CSS_MEDIA_FEATURE_IN_PARENS@1895..1914
-                    0: L_PAREN@1895..1896 "(" [] []
-                    1: CSS_QUERY_FEATURE_PLAIN@1896..1912
-                      0: CSS_IDENTIFIER@1896..1905
-                        0: IDENT@1896..1905 "min-width" [] []
-                      1: COLON@1905..1907 ":" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@1907..1912
-                        0: CSS_NUMBER_LITERAL@1907..1910 "480" [] []
-                        1: IDENT@1910..1912 "px" [] []
-                    2: R_PAREN@1912..1914 ")" [] [Whitespace(" ")]
-              2: CSS_DECLARATION_OR_RULE_BLOCK@1914..1953
+              0: CSS_MEDIA_AT_RULE_DECLARATOR@1889..1914
+                0: MEDIA_KW@1889..1895 "media" [] [Whitespace(" ")]
+                1: CSS_MEDIA_QUERY_LIST@1895..1914
+                  0: CSS_MEDIA_CONDITION_QUERY@1895..1914
+                    0: CSS_MEDIA_FEATURE_IN_PARENS@1895..1914
+                      0: L_PAREN@1895..1896 "(" [] []
+                      1: CSS_QUERY_FEATURE_PLAIN@1896..1912
+                        0: CSS_IDENTIFIER@1896..1905
+                          0: IDENT@1896..1905 "min-width" [] []
+                        1: COLON@1905..1907 ":" [] [Whitespace(" ")]
+                        2: CSS_REGULAR_DIMENSION@1907..1912
+                          0: CSS_NUMBER_LITERAL@1907..1910 "480" [] []
+                          1: IDENT@1910..1912 "px" [] []
+                      2: R_PAREN@1912..1914 ")" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1914..1953
                 0: L_CURLY@1914..1915 "{" [] []
                 1: CSS_DECLARATION_OR_RULE_LIST@1915..1950
                   0: CSS_NESTED_QUALIFIED_RULE@1915..1950

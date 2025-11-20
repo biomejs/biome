@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSIngleDollarName.js
+---
+# Input
+```js
+const $ = 0;
+
+```
+
+# Diagnostics
+```
+invalidSIngleDollarName.js:1:7 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+  > 1 │ const $ = 0;
+      │       ^
+    2 │ 
+  
+
+```

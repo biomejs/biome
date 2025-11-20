@@ -184,7 +184,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@77..79 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionSelectorList {
-                                    name: MATCHES_KW@79..86 "matches" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@79..86 "matches" [] [],
+                                    },
                                     l_paren_token: L_PAREN@86..87 "(" [] [],
                                     selectors: CssSelectorList [
                                         CssCompoundSelector {
@@ -269,7 +271,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@128..129 ":" [] [],
                             class: CssPseudoClassFunctionSelectorList {
-                                name: NOT_KW@129..132 "not" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@129..132 "not" [] [],
+                                },
                                 l_paren_token: L_PAREN@132..133 "(" [] [],
                                 selectors: CssSelectorList [
                                     CssCompoundSelector {
@@ -330,7 +334,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@164..165 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@165..168 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@165..168 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@168..169 "(" [] [],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -345,7 +351,9 @@ CssRoot {
                                                 CssPseudoClassSelector {
                                                     colon_token: COLON@170..171 ":" [] [],
                                                     class: CssPseudoClassFunctionNth {
-                                                        name: NTH_CHILD_KW@171..180 "nth-child" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@171..180 "nth-child" [] [],
+                                                        },
                                                         l_paren_token: L_PAREN@180..181 "(" [] [],
                                                         selector: CssPseudoClassNthSelector {
                                                             nth: CssPseudoClassNthNumber {
@@ -369,7 +377,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@184..185 ":" [] [],
                             class: CssPseudoClassFunctionSelectorList {
-                                name: NOT_KW@185..188 "not" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@185..188 "not" [] [],
+                                },
                                 l_paren_token: L_PAREN@188..189 "(" [] [],
                                 selectors: CssSelectorList [
                                     CssCompoundSelector {
@@ -379,7 +389,9 @@ CssRoot {
                                             CssPseudoClassSelector {
                                                 colon_token: COLON@189..190 ":" [] [],
                                                 class: CssPseudoClassFunctionRelativeSelectorList {
-                                                    name_token: HAS_KW@190..193 "has" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@190..193 "has" [] [],
+                                                    },
                                                     l_paren_token: L_PAREN@193..194 "(" [] [],
                                                     relative_selectors: CssRelativeSelectorList [
                                                         CssRelativeSelector {
@@ -394,7 +406,9 @@ CssRoot {
                                                                     CssPseudoClassSelector {
                                                                         colon_token: COLON@195..196 ":" [] [],
                                                                         class: CssPseudoClassFunctionNth {
-                                                                            name: NTH_CHILD_KW@196..205 "nth-child" [] [],
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@196..205 "nth-child" [] [],
+                                                                            },
                                                                             l_paren_token: L_PAREN@205..206 "(" [] [],
                                                                             selector: CssPseudoClassNthSelector {
                                                                                 nth: CssPseudoClassNthNumber {
@@ -557,7 +571,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@367..368 ":" [] [],
                             class: CssPseudoClassFunctionSelectorList {
-                                name: IS_KW@368..370 "is" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@368..370 "is" [] [],
+                                },
                                 l_paren_token: L_PAREN@370..371 "(" [] [],
                                 selectors: CssSelectorList [
                                     CssCompoundSelector {
@@ -689,7 +705,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@436..437 ":" [] [],
                                 class: CssPseudoClassFunctionNth {
-                                    name: NTH_CHILD_KW@437..446 "nth-child" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@437..446 "nth-child" [] [],
+                                    },
                                     l_paren_token: L_PAREN@446..447 "(" [] [],
                                     selector: CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthNumber {
@@ -890,7 +908,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@77..116
                 0: COLON@77..79 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@79..116
-                  0: MATCHES_KW@79..86 "matches" [] []
+                  0: CSS_IDENTIFIER@79..86
+                    0: IDENT@79..86 "matches" [] []
                   1: L_PAREN@86..87 "(" [] []
                   2: CSS_SELECTOR_LIST@87..115
                     0: CSS_COMPOUND_SELECTOR@87..94
@@ -949,7 +968,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@128..150
               0: COLON@128..129 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@129..150
-                0: NOT_KW@129..132 "not" [] []
+                0: CSS_IDENTIFIER@129..132
+                  0: IDENT@129..132 "not" [] []
                 1: L_PAREN@132..133 "(" [] []
                 2: CSS_SELECTOR_LIST@133..148
                   0: CSS_COMPOUND_SELECTOR@133..148
@@ -990,7 +1010,8 @@ CssRoot {
             1: CSS_PSEUDO_CLASS_SELECTOR@164..184
               0: COLON@164..165 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@165..184
-                0: HAS_KW@165..168 "has" [] []
+                0: CSS_IDENTIFIER@165..168
+                  0: IDENT@165..168 "has" [] []
                 1: L_PAREN@168..169 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@169..183
                   0: CSS_RELATIVE_SELECTOR@169..183
@@ -1004,7 +1025,8 @@ CssRoot {
                         0: CSS_PSEUDO_CLASS_SELECTOR@170..183
                           0: COLON@170..171 ":" [] []
                           1: CSS_PSEUDO_CLASS_FUNCTION_NTH@171..183
-                            0: NTH_CHILD_KW@171..180 "nth-child" [] []
+                            0: CSS_IDENTIFIER@171..180
+                              0: IDENT@171..180 "nth-child" [] []
                             1: L_PAREN@180..181 "(" [] []
                             2: CSS_PSEUDO_CLASS_NTH_SELECTOR@181..182
                               0: CSS_PSEUDO_CLASS_NTH_NUMBER@181..182
@@ -1017,7 +1039,8 @@ CssRoot {
             2: CSS_PSEUDO_CLASS_SELECTOR@184..211
               0: COLON@184..185 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@185..211
-                0: NOT_KW@185..188 "not" [] []
+                0: CSS_IDENTIFIER@185..188
+                  0: IDENT@185..188 "not" [] []
                 1: L_PAREN@188..189 "(" [] []
                 2: CSS_SELECTOR_LIST@189..209
                   0: CSS_COMPOUND_SELECTOR@189..209
@@ -1027,7 +1050,8 @@ CssRoot {
                       0: CSS_PSEUDO_CLASS_SELECTOR@189..209
                         0: COLON@189..190 ":" [] []
                         1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@190..209
-                          0: HAS_KW@190..193 "has" [] []
+                          0: CSS_IDENTIFIER@190..193
+                            0: IDENT@190..193 "has" [] []
                           1: L_PAREN@193..194 "(" [] []
                           2: CSS_RELATIVE_SELECTOR_LIST@194..208
                             0: CSS_RELATIVE_SELECTOR@194..208
@@ -1041,7 +1065,8 @@ CssRoot {
                                   0: CSS_PSEUDO_CLASS_SELECTOR@195..208
                                     0: COLON@195..196 ":" [] []
                                     1: CSS_PSEUDO_CLASS_FUNCTION_NTH@196..208
-                                      0: NTH_CHILD_KW@196..205 "nth-child" [] []
+                                      0: CSS_IDENTIFIER@196..205
+                                        0: IDENT@196..205 "nth-child" [] []
                                       1: L_PAREN@205..206 "(" [] []
                                       2: CSS_PSEUDO_CLASS_NTH_SELECTOR@206..207
                                         0: CSS_PSEUDO_CLASS_NTH_NUMBER@206..207
@@ -1141,7 +1166,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@367..374
               0: COLON@367..368 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@368..374
-                0: IS_KW@368..370 "is" [] []
+                0: CSS_IDENTIFIER@368..370
+                  0: IDENT@368..370 "is" [] []
                 1: L_PAREN@370..371 "(" [] []
                 2: CSS_SELECTOR_LIST@371..372
                   0: CSS_COMPOUND_SELECTOR@371..372
@@ -1229,7 +1255,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@436..450
                 0: COLON@436..437 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_NTH@437..450
-                  0: NTH_CHILD_KW@437..446 "nth-child" [] []
+                  0: CSS_IDENTIFIER@437..446
+                    0: IDENT@437..446 "nth-child" [] []
                   1: L_PAREN@446..447 "(" [] []
                   2: CSS_PSEUDO_CLASS_NTH_SELECTOR@447..448
                     0: CSS_PSEUDO_CLASS_NTH_NUMBER@447..448

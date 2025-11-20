@@ -9,7 +9,7 @@ use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
 use biome_fs::BiomePath;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
@@ -25,9 +25,15 @@ pub(crate) struct ConsoleReporter {
 
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.working_directory.as_deref(),
+        )?;
         if self.verbose {
-            visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
+            visitor
+                .report_handled_paths(self.evaluated_paths, self.working_directory.as_deref())?;
         }
         visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
@@ -67,7 +73,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
     fn report_handled_paths(
         &mut self,
         evaluated_paths: BTreeSet<BiomePath>,
-        working_directory: Option<Utf8PathBuf>,
+        working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             advice: ListAdvice {
@@ -121,6 +127,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
         verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
@@ -252,28 +259,45 @@ impl fmt::Display for ConsoleTraversalSummary<'_> {
         let detail = SummaryDetail(mode, summary.changed);
         fmt.write_markup(markup!(<Info>{total}{detail}</Info>))?;
 
-        if summary.errors > 0 {
-            if summary.errors == 1 {
-                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" error."</Error>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" errors."</Error>))?;
-            }
-        }
-        if summary.warnings > 0 {
-            if summary.warnings == 1 {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warning."</Warn>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warnings."</Warn>))?;
-            }
-        }
-
+        // The search emits info diagnostics, so we use if control-flow to print a different message
         if let TraversalMode::Search { .. } = mode {
             if summary.matches == 1 {
                 fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" match."</Info>))?
             } else {
                 fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" matches."</Info>))?
             };
-        };
+        } else {
+            if summary.errors > 0 {
+                if summary.errors == 1 {
+                    fmt.write_markup(
+                        markup!("\n"<Error>"Found "{summary.errors}" error."</Error>),
+                    )?;
+                } else {
+                    fmt.write_markup(
+                        markup!("\n"<Error>"Found "{summary.errors}" errors."</Error>),
+                    )?;
+                }
+            }
+            if summary.warnings > 0 {
+                if summary.warnings == 1 {
+                    fmt.write_markup(
+                        markup!("\n"<Warn>"Found "{summary.warnings}" warning."</Warn>),
+                    )?;
+                } else {
+                    fmt.write_markup(
+                        markup!("\n"<Warn>"Found "{summary.warnings}" warnings."</Warn>),
+                    )?;
+                }
+            }
+
+            if summary.infos > 0 {
+                if summary.infos == 1 {
+                    fmt.write_markup(markup!("\n"<Info>"Found "{summary.infos}" info."</Info>))?;
+                } else {
+                    fmt.write_markup(markup!("\n"<Info>"Found "{summary.infos}" infos."</Info>))?;
+                }
+            }
+        }
         Ok(())
     }
 }

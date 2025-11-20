@@ -33,7 +33,7 @@ where
 /// It needs to be sorted by depth in decreasing order, then by range start and
 /// by slot in increasing order.
 ///
-/// This is necesasry so we can aggregate all changes to the same node using "peek".
+/// This is necessary so we can aggregate all changes to the same node using "peek".
 #[derive(Debug, Clone)]
 struct CommitChange<L: Language> {
     parent_depth: usize,
@@ -221,6 +221,37 @@ where
         self.replace_element_discard_trivia(prev_token.into(), next_token.into())
     }
 
+    /// Push a change to replace the "prev_node" with "next_node".
+    ///
+    /// - leading trivia of `prev_node`
+    /// - leading trivia of `next_node`
+    /// - trailing trivia of `prev_node`
+    /// - trailing trivia of `next_node`
+    pub fn replace_node_transfer_trivia<T>(&mut self, prev_node: T, next_node: T) -> Option<()>
+    where
+        T: AstNode<Language = L>,
+    {
+        let prev_node = prev_node.into_syntax();
+        let next_node = next_node.into_syntax();
+
+        let leading_trivia = chain_trivia_pieces(
+            prev_node.first_token()?.leading_trivia().pieces(),
+            next_node.first_token()?.leading_trivia().pieces(),
+        );
+
+        let trailing_trivia = chain_trivia_pieces(
+            prev_node.last_token()?.trailing_trivia().pieces(),
+            next_node.last_token()?.trailing_trivia().pieces(),
+        );
+        let new_node = next_node
+            .with_leading_trivia_pieces(leading_trivia)?
+            .with_trailing_trivia_pieces(trailing_trivia)?;
+
+        self.replace_element_discard_trivia(prev_node.into(), new_node.into());
+
+        Some(())
+    }
+
     /// Push a change to replace the "prev_token" with "next_token".
     ///
     /// - leading trivia of `prev_token`
@@ -350,7 +381,7 @@ where
     /// into an ordered vector "text_mutation_list" sorted by the "deleted_text_range". The reason behind it is that
     /// changes on the heap are first ordered by parent depth, but we need to construct the TextEdit from start to end.
     /// So we use binary search and insertion to populate the "text_mutation_list". Reaching the root node means all
-    /// changes have been visted. So we start to construct the TextEdit with the help of "text_edit_builder" by iterating
+    /// changes have been visited. So we start to construct the TextEdit with the help of "text_edit_builder" by iterating
     /// the collected "text_mutation_list".
     pub fn commit_with_text_range_and_edit(
         self,
@@ -360,7 +391,7 @@ where
 
         // Ordered text mutation list sorted by text range
         let mut text_mutation_list: Vec<(TextRange, Option<SyntaxElement<L>>)> =
-            // SAFETY: this is safe bacause changes from actions can only
+            // SAFETY: this is safe because changes from actions can only
             // overwrite each other, so the total number of the finalized
             // text mutations will only be less.
             Vec::with_capacity(changes.len());
@@ -405,10 +436,10 @@ where
 
                     // If we have two modifications to the same slot,
                     // last write wins
-                    if let Some(&(prev_new_node_slot, ..)) = modifications.last() {
-                        if prev_new_node_slot == next_new_node_slot {
-                            modifications.pop();
-                        }
+                    if let Some(&(prev_new_node_slot, ..)) = modifications.last()
+                        && prev_new_node_slot == next_new_node_slot
+                    {
+                        modifications.pop();
                     }
 
                     // Add to the modifications
@@ -535,7 +566,7 @@ where
 
                 return (
                     // SAFETY: If the change is propagated from the child,
-                    // this will allways be a syntax node element because
+                    // this will always be a syntax node element because
                     // that's how we construct it above.
                     //
                     // Otherwise root should still exist as a node even if
@@ -554,6 +585,10 @@ where
 
     pub fn root(&self) -> &SyntaxNode<L> {
         &self.root
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.changes.is_empty()
     }
 }
 

@@ -14,7 +14,7 @@ use std::fmt::Write;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/Typescript/tests/cases";
 const REFERENCE_PATH: &str = "xtask/coverage/Typescript/tests/baselines/reference";

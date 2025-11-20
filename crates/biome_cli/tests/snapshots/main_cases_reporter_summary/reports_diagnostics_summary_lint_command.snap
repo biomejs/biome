@@ -2,6 +2,14 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "plugins": ["plugin.grit"]
+}
+```
+
 ## `index.css`
 
 ```css
@@ -64,6 +72,19 @@ let f;
 		let f;
 ```
 
+## `plugin.grit`
+
+```grit
+
+`debugger` as $dbg where {
+    register_diagnostic(
+        message = "Found debugger statement",
+        span = $dbg
+    )
+}
+
+```
+
 # Termination Message
 
 ```block
@@ -80,7 +101,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 reporter/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The following files have parsing errors.
+  i The following files have parsing errors:
   
   - index.css
   
@@ -88,18 +109,27 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
 
   i Some lint rules or assist actions reported some violations.
   
+  i The following files have violations:
+  
+  - index.css (2 errors)
+  - index.ts (24 errors, 8 warnings)
+  - main.ts (24 errors, 8 warnings)
+  
+  i The following lint rules have violations:
+  
   Rule Name                                        Diagnostics
   
-  lint/correctness/noUnknownFunction               14 (2 error(s), 12 warning(s), 0 info(s))
-  lint/suspicious/noImplicitAnyLet                 16 (12 error(s), 4 warning(s), 0 info(s))
-  lint/suspicious/noDoubleEquals                   8 (8 error(s), 0 warning(s), 0 info(s))
-  lint/suspicious/noRedeclare                      12 (12 error(s), 0 warning(s), 0 info(s))
-  lint/suspicious/noDebugger                       8 (8 error(s), 0 warning(s), 0 info(s))
+  lint/correctness/noUnknownFunction               14 (2 errors, 12 warnings)
+  lint/suspicious/noImplicitAnyLet                 16 (12 errors, 4 warnings)
+  lint/suspicious/noDoubleEquals                   8 (8 errors)
+  lint/suspicious/noRedeclare                      12 (12 errors)
+  lint/suspicious/noDebugger                       8 (8 errors)
+  plugin                                           8 (8 errors)
 
 ```
 
 ```block
 Checked 3 files in <TIME>. No fixes applied.
-Found 43 errors.
+Found 51 errors.
 Found 16 warnings.
 ```

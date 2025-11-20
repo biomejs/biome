@@ -66,7 +66,7 @@ Module TypeId(1) => Promise
 
 Module TypeId(2) => Promise.resolve
 
-Module TypeId(3) => value: 1
+Module TypeId(3) => number: 1
 
 Module TypeId(4) => Module(0) TypeId(10)
 
@@ -89,8 +89,8 @@ Module TypeId(9) => T extends Module(0) TypeId(8)
 Module TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
     ]
     type_args: [Module(0) TypeId(9)]
   }
@@ -109,7 +109,7 @@ Full TypeId(1) => Promise
 
 Full TypeId(2) => Promise.resolve
 
-Full TypeId(3) => value: 1
+Full TypeId(3) => number: 1
 
 Full TypeId(4) => Module(0) TypeId(10)
 
@@ -132,8 +132,8 @@ Full TypeId(9) => T extends Module(0) TypeId(8)
 Full TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
     ]
     type_args: [Module(0) TypeId(9)]
   }

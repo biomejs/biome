@@ -20,7 +20,7 @@ pub(crate) struct ArrayTypeOptions {
 impl From<ArrayTypeOptions> for use_consistent_array_type::UseConsistentArrayTypeOptions {
     fn from(val: ArrayTypeOptions) -> Self {
         Self {
-            syntax: val.default.into(),
+            syntax: Some(val.default.into()),
         }
     }
 }
@@ -51,10 +51,7 @@ pub(crate) struct ConsistentTypeImportsOptions {
 impl From<ConsistentTypeImportsOptions> for use_import_type::UseImportTypeOptions {
     fn from(val: ConsistentTypeImportsOptions) -> Self {
         Self {
-            style: val
-                .fix_style
-                .map(|fix_style| fix_style.into())
-                .unwrap_or_default(),
+            style: val.fix_style.map(|fix_style| fix_style.into()),
         }
     }
 }
@@ -84,7 +81,7 @@ impl From<ExplicitMemberAccessibilityOptions>
 {
     fn from(value: ExplicitMemberAccessibilityOptions) -> Self {
         Self {
-            accessibility: value.accessibility.map(|x| x.into()).unwrap_or_default(),
+            accessibility: value.accessibility.map(|x| x.into()),
         }
     }
 }
@@ -187,9 +184,9 @@ impl From<NamingConventionOptions> for use_naming_convention::UseNamingConventio
             }
         }
         Self {
-            strict_case: false,
-            require_ascii: false,
-            conventions: conventions.into_boxed_slice(),
+            strict_case: Some(false),
+            require_ascii: Some(false),
+            conventions: (!conventions.is_empty()).then_some(conventions.into_boxed_slice()),
         }
     }
 }

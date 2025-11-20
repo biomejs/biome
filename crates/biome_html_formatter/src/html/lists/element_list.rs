@@ -13,20 +13,29 @@ use crate::{
         metadata::is_element_whitespace_sensitive_from_element,
     },
 };
-use biome_formatter::{CstFormatContext, FormatRuleWithOptions, best_fitting, prelude::*};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, GroupId, best_fitting, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
-    AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
-    HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList,
+    HtmlRoot, HtmlSyntaxToken,
 };
 use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
-    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    /// Whether the parent element that encapsulates this element list is whitespace sensitive.
     is_element_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
+
+    group: Option<GroupId>,
+}
+
+impl FormatHtmlElementList {
+    pub(crate) fn with_group_id(mut self, group: GroupId) -> Self {
+        self.group = Some(group);
+        self
+    }
 }
 
 pub(crate) struct FormatHtmlElementListOptions {
@@ -59,18 +68,35 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         if node.is_empty() {
             return Ok(());
         }
+
+        let should_delegate_fmt_embedded_nodes = f.context().should_delegate_fmt_embedded_nodes();
+        // early exit - If it's just a single HtmlEmbeddedContent node as the only child,
+        // we know the parser will only emit one of these. We can simply call its formatter and be done.
+        // This is also necessary for how we implement embedded language formatting.
+        if node.len() == 1
+            && should_delegate_fmt_embedded_nodes
+            && let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(
+                embedded_content,
+            ))) = node.first()
+        {
+            return embedded_content.format().fmt(f);
+        }
+
         let result = self.fmt_children(node, f)?;
         match result {
             FormatChildrenResult::ForceMultiline(format_multiline) => {
-                write!(f, [format_multiline])
+                write!(f, [format_multiline])?;
             }
             FormatChildrenResult::BestFitting {
                 flat_children,
                 expanded_children,
+                group_id: _,
             } => {
-                write!(f, [best_fitting![flat_children, expanded_children]])
+                write!(f, [best_fitting![flat_children, expanded_children]])?;
             }
         }
+
+        Ok(())
     }
 }
 
@@ -104,7 +130,40 @@ pub(crate) enum FormatChildrenResult {
     BestFitting {
         flat_children: FormatFlatChildren,
         expanded_children: FormatMultilineChildren,
+        group_id: Option<GroupId>,
     },
+}
+
+impl Format<HtmlFormatContext> for FormatChildrenResult {
+    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::ForceMultiline(multiline) => {
+                write!(f, [multiline])
+            }
+            Self::BestFitting {
+                flat_children,
+                expanded_children,
+                group_id,
+            } => {
+                let group_id = group_id.unwrap_or(f.group_id("element-attr-group-id"));
+
+                let expanded_children = expanded_children.memoized();
+                write!(
+                    f,
+                    [
+                        // If the attribute group breaks, prettier always breaks the children as well.
+                        &if_group_breaks(&expanded_children).with_group_id(Some(group_id)),
+                        // If the attribute group does NOT break, print whatever fits best for the children.
+                        &if_group_fits_on_line(&best_fitting![
+                            format_args![flat_children],
+                            format_args![expanded_children],
+                        ])
+                        .with_group_id(Some(group_id)),
+                    ]
+                )
+            }
+        }
+    }
 }
 
 impl FormatHtmlElementList {
@@ -113,8 +172,6 @@ impl FormatHtmlElementList {
         list: &HtmlElementList,
         f: &mut HtmlFormatter,
     ) -> FormatResult<FormatChildrenResult> {
-        self.disarm_debug_assertions(list, f);
-
         let borrowed_opening_r_angle = self
             .borrowed_tokens
             .borrowed_opening_r_angle
@@ -147,7 +204,7 @@ impl FormatHtmlElementList {
 
         let mut force_multiline = layout.is_multiline();
 
-        let mut children = html_split_children(list.iter(), f.context().comments())?;
+        let mut children = html_split_children(list.iter(), f)?;
 
         // Trim trailing new lines
         if let Some(HtmlChild::EmptyLine | HtmlChild::Newline) = children.last() {
@@ -181,6 +238,13 @@ impl FormatHtmlElementList {
                             Some(WordSeparator::BetweenWords)
                         }
 
+                        Some(HtmlChild::Comment(_)) => {
+                            // Some(WordSeparator::BetweenElements)
+                            None
+                            // FIXME: probably not correct behavior here
+                            // Some(WordSeparator::Lines(2))
+                        }
+
                         // Last word or last word before an element without any whitespace in between
                         Some(HtmlChild::NonText(next_child)) => Some(WordSeparator::EndOfText {
                             is_soft_line_break: !matches!(
@@ -190,6 +254,8 @@ impl FormatHtmlElementList {
                             is_next_element_whitespace_sensitive:
                                 is_element_whitespace_sensitive_from_element(f, next_child),
                         }),
+
+                        Some(HtmlChild::Verbatim(_)) => None,
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
                             None
@@ -207,6 +273,52 @@ impl FormatHtmlElementList {
                     } else {
                         // it's safe to write without a separator because None means that next element is a separator or end of the iterator
                         multiline.write_content(word, f);
+                    }
+                }
+
+                HtmlChild::Comment(comment) => {
+                    let memoized = comment.memoized();
+                    flat.write(&memoized, f);
+                    multiline.write_content(&memoized, f);
+                }
+
+                HtmlChild::Verbatim(element) => {
+                    // If the verbatim element is multiline, we need to force multiline mode
+                    if element.syntax().text_with_trivia().contains_char('\n') {
+                        force_multiline = true;
+                    }
+
+                    // HACK: We need the condition on formatting comments because otherwise comments will get printed twice.
+                    let should_format_comments = if let AnyHtmlElement::AnyHtmlContent(content) =
+                        element
+                    {
+                        let mut has_newline_after_comment = false;
+                        if let Some(first_token) = content.syntax().first_token() {
+                            let mut trivia_iter = first_token.leading_trivia().pieces().peekable();
+                            while let (Some(current), Some(next)) =
+                                (trivia_iter.next(), trivia_iter.peek())
+                            {
+                                if current.is_comments() && next.is_newline() {
+                                    has_newline_after_comment = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        has_newline_after_comment
+                    } else {
+                        true
+                    };
+                    if force_multiline {
+                        let content = format_suppressed_node(element.syntax())
+                            .with_format_comments(should_format_comments);
+                        multiline.write_content(&content, f);
+                    } else {
+                        let memoized = format_suppressed_node(element.syntax())
+                            .with_format_comments(should_format_comments)
+                            .memoized();
+                        flat.write(&memoized, f);
+                        multiline.write_content(&memoized, f);
                     }
                 }
 
@@ -315,8 +427,12 @@ impl FormatHtmlElementList {
                             }
                         }
 
+                        Some(HtmlChild::Comment(_)) => Some(LineMode::Hard),
+
                         // Add a hard line break if what comes after the element is not a text or is all whitespace
-                        Some(HtmlChild::NonText(next_non_text)) => {
+                        Some(
+                            HtmlChild::NonText(next_non_text) | HtmlChild::Verbatim(next_non_text),
+                        ) => {
                             // In the case of the formatter using the multiline layout, we want to treat inline elements like we do words.
                             //
                             // ```html
@@ -355,7 +471,7 @@ impl FormatHtmlElementList {
                                 if has_whitespace_between {
                                     Some(LineMode::SoftOrSpace)
                                 } else {
-                                    Some(LineMode::Soft)
+                                    None
                                 }
                             } else {
                                 Some(LineMode::Hard)
@@ -419,33 +535,10 @@ impl FormatHtmlElementList {
             Ok(FormatChildrenResult::BestFitting {
                 flat_children: flat.finish()?,
                 expanded_children: multiline.finish()?,
+                group_id: self.group,
             })
         }
     }
-
-    /// Tracks the tokens of [HtmlContent] nodes to be formatted and
-    /// asserts that the suppression comments are checked (they get ignored).
-    ///
-    /// This is necessary because the formatting of [HtmlContentList] bypasses the node formatting for
-    /// [HtmlContent] and instead, formats the nodes itself.
-    #[cfg(debug_assertions)]
-    fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use biome_formatter::CstFormatContext;
-
-        for child in node {
-            if let AnyHtmlElement::HtmlContent(text) = child {
-                f.state_mut().track_token(&text.value_token().unwrap());
-
-                // You can't suppress a text node
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(text.syntax());
-            }
-        }
-    }
-
-    #[cfg(not(debug_assertions))]
-    fn disarm_debug_assertions(&self, _: &HtmlElementList, _: &mut HtmlFormatter) {}
 
     fn layout(&self, meta: ChildrenMeta) -> HtmlChildListLayout {
         match self.layout {
@@ -465,11 +558,17 @@ impl FormatHtmlElementList {
         let mut meta = ChildrenMeta::default();
 
         for child in list {
-            use AnyHtmlElement::*;
-
             match child {
-                HtmlElement(_) | HtmlSelfClosingElement(_) => meta.any_tag = true,
-                HtmlContent(text) => {
+                AnyHtmlElement::HtmlElement(_) | AnyHtmlElement::HtmlSelfClosingElement(_) => {
+                    meta.any_tag = true
+                }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
+                    meta.meaningful_text = meta.meaningful_text
+                        || text
+                            .value_token()
+                            .is_ok_and(|token| is_meaningful_html_text(token.text()));
+                }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text)) => {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()

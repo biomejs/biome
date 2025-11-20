@@ -24,23 +24,42 @@ hello:     world
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,4 @@
-----
+@@ -1,5 +1,5 @@
+ ---
 -hello: world
-----
-+--- hello: world ---
++hello:     world
+ ---
  
  <html>
-   <head></head>
 ```
 
 # Output
 
 ```html
---- hello: world ---
+---
+hello:     world
+---
 
 <html>
   <head></head>
   <body></body>
 </html>
+```
+
+# Errors
+```
+yaml.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Frontmatter is only valid inside Astro files.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │ hello:     world
+  > 3 │ ---
+      │ ^^^
+    4 │ 
+  
+  i Remove it or rename the file to have the .astro extension.
+  
+
 ```

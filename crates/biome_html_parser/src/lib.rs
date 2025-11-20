@@ -5,20 +5,22 @@ mod parser;
 mod syntax;
 mod token_source;
 
+pub use parser::HtmlParseOptions;
+
 use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
-use biome_html_syntax::{HtmlFileSource, HtmlRoot, HtmlSyntaxNode};
-use biome_parser::AnyParse;
+use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache};
 
 /// Parses the provided string as HTML program using the provided node cache.
 pub fn parse_html_with_cache(
     source: &str,
-    file_source: HtmlFileSource,
     cache: &mut NodeCache,
+    options: HtmlParseOptions,
 ) -> HtmlParse {
-    let mut parser = HtmlParser::new(source, file_source);
+    let mut parser = HtmlParser::new(source, options);
 
     parse_root(&mut parser);
 
@@ -30,9 +32,11 @@ pub fn parse_html_with_cache(
 
     HtmlParse::new(green, diagnostics)
 }
-pub fn parse_html(source: &str, file_source: HtmlFileSource) -> HtmlParse {
+
+/// Parses an HTML code with the provided options
+pub fn parse_html(source: &str, options: HtmlParseOptions) -> HtmlParse {
     let mut cache = NodeCache::default();
-    parse_html_with_cache(source, file_source, &mut cache)
+    parse_html_with_cache(source, &mut cache, options)
 }
 
 /// A utility struct for managing the result of a parser job
@@ -101,10 +105,11 @@ impl From<HtmlParse> for AnyParse {
     fn from(parse: HtmlParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
     }
 }

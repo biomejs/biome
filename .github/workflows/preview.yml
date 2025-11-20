@@ -11,11 +11,11 @@ env:
 jobs:
   version:
     name: Generate version
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm
     outputs:
       version: ${{ env.version }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Set version
         run: |
@@ -26,16 +26,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022
+          - os: depot-windows-2022-16
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022
+          - os: depot-windows-2022-16
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
           - os: depot-macos-14
@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install Rust toolchain
         run: rustup target add ${{ matrix.target }}
@@ -62,7 +62,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@f3a27926ea13d7be3ee2f4cbb925883cf9442b56 # v2.56.7
+        uses: taiki-e/install-action@537c30d2b45cc3aa3fb35e2bbcfb61ef93fd6f02 # v2.62.52
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -73,7 +73,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
@@ -82,12 +82,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022'
+        if: matrix.os == 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022'
+        if: matrix.os != 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -106,21 +106,21 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
 
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.88.0-bullseye@sha256:8eb96c7c77c04660a95d5e256869de0a18130f97624ef75c522ea886d4e51d95
+      image: rust:1.91.1-bullseye@sha256:8d9b5e80062dcdb7f037b4eef92a6649632034d6811652e028706ea93db64159
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Set jemalloc page size for linux-arm64
         if: matrix.code-target == 'linux-arm64'
@@ -129,7 +129,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
@@ -156,7 +156,7 @@ jobs:
     needs: version
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -180,7 +180,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs:
       - build-binaries
       - build-binaries-gnu
@@ -189,7 +189,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Download CLI artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -206,7 +206,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 24.11.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Pin Corepack 0.20
@@ -229,7 +229,7 @@ jobs:
           --json output.json --comment=off
 
       - name: Read published version
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         id: version-msg
         with:
           script: |

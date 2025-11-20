@@ -1,0 +1,119 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+useTask$(() => {
+  console.log('Task executed');
+});
+
+useResource$(() => {
+  return fetch('/api/data');
+});
+
+useSignal(0);
+
+useStore({
+  count: 0,
+  name: 'Qwik'
+});
+
+useVisibleTask(() => {});
+
+useVisibleTask$ = () => {};
+
+const useVisibleTask$ = () => {};
+
+function useVisibleTask$() {}
+
+useVisibleTask$(() => {}, { strategy: 'document-idle' });
+
+const MyComponent = component$(() => {
+  useTask$(() => {
+    console.log('Component mounted');
+  });
+  return <div>Hello</div>;
+});
+
+export const App = component$(() => {
+  useTask$(({ track }) => {
+    track(() => state.value);
+    console.log('State changed');
+  });
+  return <div>App</div>;
+});
+
+console.log('Hello');
+setTimeout(() => {
+  console.log('Timeout');
+}, 1000);
+
+const handler = () => {
+  console.log('Handler');
+};
+
+class MyClass {
+  constructor() {
+    this.setup();
+  }
+  setup() {
+    console.log('Setup');
+  }
+}
+
+const setupComponent = function() {
+  console.log('Setup component');
+};
+
+async function fetchData() {
+  const response = await fetch('/api/data');
+  return response.json();
+}
+
+function* generator() {
+  yield 1;
+  yield 2;
+}
+
+const message = `Hello ${name}`;
+
+const obj = {
+  method() {
+    console.log('Method');
+  }
+};
+
+const items = [1, 2, 3].map(item => item * 2);
+
+const result = condition ? 'yes' : 'no';
+
+const value = a && b || c;
+
+const sum = a + b;
+
+const negated = !value;
+
+const property = object.property;
+
+useEffect(() => {
+  console.log('React effect');
+});
+
+useState(0);
+
+useCallback(() => {
+  console.log('React callback');
+});
+
+const text = 'useVisibleTask$';
+
+import { useTask$ } from '@builder.io/qwik';
+
+export { useTask$ };
+
+let useVisibleTask$ = 'string';
+const useVisibleTask$ = 42;
+var useVisibleTask$ = true; 
+```

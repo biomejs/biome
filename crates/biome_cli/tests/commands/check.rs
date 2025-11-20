@@ -3222,3 +3222,67 @@ fn check_returns_error_for_css_sorting() {
         result,
     ));
 }
+
+#[test]
+fn check_does_not_enable_assist() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+
+    fs.insert(
+        file.into(),
+        "import z from \"zod\"; \n import foo from \"foo\";".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--assist-enabled=false", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_does_not_enable_assist",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_format_with_syntax_errors_when_flag_enabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--format-with-errors=true",
+                "--write",
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_format_with_syntax_errors_when_flag_enabled",
+        fs,
+        console,
+        result,
+    ));
+}

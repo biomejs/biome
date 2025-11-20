@@ -1,0 +1,56 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+[background:blue]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwArbitraryCandidate {
+                l_brack_token: L_BRACKET@0..1 "[" [] [],
+                property_token: TW_PROPERTY@1..11 "background" [] [],
+                colon_token: COLON@11..12 ":" [] [],
+                value_token: TW_VALUE@12..16 "blue" [] [],
+                r_brack_token: R_BRACKET@16..18 "]" [] [Newline("\n")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@18..18 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..18
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..18
+    0: TW_FULL_CANDIDATE@0..18
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_ARBITRARY_CANDIDATE@0..18
+        0: L_BRACKET@0..1 "[" [] []
+        1: TW_PROPERTY@1..11 "background" [] []
+        2: COLON@11..12 ":" [] []
+        3: TW_VALUE@12..16 "blue" [] []
+        4: R_BRACKET@16..18 "]" [] [Newline("\n")]
+        5: (empty)
+      3: (empty)
+  2: EOF@18..18 "" [] []
+
+```

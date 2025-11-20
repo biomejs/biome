@@ -5,7 +5,8 @@ use biome_formatter::{
     LineEnding, LineWidth, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    ArrowParentheses, QuoteProperties, Semicolons, trailing_commas::TrailingCommas,
+    ArrowParentheses, OperatorLinebreak, QuoteProperties, Semicolons,
+    trailing_commas::TrailingCommas,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -73,10 +74,10 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to JavaScript (and its super languages) files.
+    /// The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
     #[bpaf(
         long("javascript-formatter-line-ending"),
-        argument("lf|crlf|cr"),
+        argument("lf|crlf|cr|auto"),
         optional
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -116,6 +117,14 @@ pub struct JsFormatterConfiguration {
     #[bpaf(long("javascript-formatter-expand"), argument("auto|always|never"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
+
+    /// When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to "after".
+    #[bpaf(
+        long("javascript-formatter-operator-linebreak"),
+        argument("before|after")
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operator_linebreak: Option<OperatorLinebreak>,
 }
 
 impl JsFormatterConfiguration {
@@ -153,5 +162,9 @@ impl JsFormatterConfiguration {
 
     pub fn expand_resolved(&self) -> Expand {
         self.expand.unwrap_or_default()
+    }
+
+    pub fn operator_linebreak_resolved(&self) -> OperatorLinebreak {
+        self.operator_linebreak.unwrap_or_default()
     }
 }

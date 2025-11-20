@@ -26,21 +26,24 @@ The analyzer allows implementors to create **three different** types of rules:
         * [Biome lint rules inspired by other lint rules](#biome-lint-rules-inspired-by-other-lint-rules)
       - [`rule_category!` macro](#rule_category-macro)
       - [Rule severity](#rule-severity)
+      - [Rule group and severity](#rule-group-and-severity)
       - [Rule domains](#rule-domains)
       - [Rule Options](#rule-options)
         * [Options for our example rule](#options-for-our-example-rule)
         * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
         * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
         * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
-        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+        * [Testing & Documenting Rule Options](#testing--documenting-rule-options)
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-      - [Semantic Model](#semantic-model)
-        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Services](#services)
+        - [Semantic Model](#semantic-model)
+          * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+        - [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-      - [Common Logic Mistakes](#common-logic-mistakes)
+      - [Common Mistakes](#common-mistakes)
         * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
     + [Testing the Rule](#testing-the-rule)
       - [Quick Test](#quick-test)
@@ -107,6 +110,10 @@ _Biome_ follows a naming convention according to what the rule does:
 We also try to ensure consistency in the naming of rules.
 Please feel free to refer to existing rules for inspiration when naming new ones.
 Here is a non-exhaustive list of common names:
+
+- `use<Framework>...`
+
+  If a rule overwhelmingly applies to a specific framework, it should be named using the `use` or `no` prefix followed by the framework name, eg. `noVueReservedProps`
 
 - `noConstant<Concept>`
 
@@ -217,7 +224,7 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
 
 1. **Generate the code for your rule** by running this command
-   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#guideline-naming-convention-for-rules))_:
+   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#naming-conventions-for-rules))_:
 
    ```shell
    # Example: Create a new JS lint rule
@@ -327,7 +334,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
 6. Implement the `diagnostic` function to define what the user will see.
 
-   Follow the [guidelines & pillars](#explain-a-rule-to-the-user) when writing the messages.
+   Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
    Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
@@ -348,7 +355,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
 
-6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
+7. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
    impl Rule for UseAwesomeTricks {
@@ -406,6 +413,9 @@ declare_lint_rule! {
     }
 }
 ```
+
+> [!TIP]
+> The `version` field indicates what Biome version the rule was released in. The `version` field must be `next`. This allows us flexibility for what version the rule will actually be released in.
 
 ##### Biome lint rules inspired by other lint rules
 
@@ -507,6 +517,28 @@ declare_lint_rule! {
 }
 ```
 
+#### Rule group and severity
+
+> [!NOTE]
+> This section is relevant to Biome maintainers when they want to move (promote) a rule to a group that is not `nursery`.
+
+We try to maintain consistency in the default severity level and group membership of the rules.
+For legacy reasons, we have some rules that don't follow these constraints.
+
+- `correctness`, `security`, and `a11y` rules **must** have a severity set to `error`.
+
+  If `error` is too strict for a rule, then it should certainly be in another group (for example `suspicious` instead of `correctness`).
+
+- `style` rules **must** have a severity set to `info` or `warn`. If in doubt, choose `info`.
+
+- `complexity` rules **must** have a severity set to `warn` or `info`. If in doubt, choose `info`.
+
+- `suspicious` rules **must** have a severity set to `warn` or `error`. If in doubt, choose `warn`.
+
+- `performance` rules **must** have a severity set to `warn`.
+
+- Actions **must** have a severity set to `info`.
+
 #### Rule domains
 
 Domains are very specific ways to collect rules that belong to the same "concept". Domains are a way for users to opt-in/opt-out rules that belong to the same domain.
@@ -539,6 +571,7 @@ Instead, if the rule is **recommended** but _doesn't have domains_, the rule is 
 > [!NOTE]
 > Before adding a new domain, please consult with the maintainers of the project.
 
+
 #### Rule Options
 
 Some rules may allow customization [using per-rule options in `biome.json`](https://biomejs.dev/linter/#rule-options).
@@ -569,9 +602,10 @@ We would like to set the options in the `biome.json` configuration file:
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "enabled": true,
       "nursery": {
-        "my-rule": {
+        "myRule": {
+          "level": "on",
           "options": {
             "behavior": "A",
             "threshold": 30,
@@ -589,21 +623,33 @@ We would like to set the options in the `biome.json` configuration file:
 The first step is to create the Rust data representation of the rule's options.
 
 ```rust
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct MyRuleOptions {
-    behavior: Behavior,
-    threshold: u8,
-    behavior_exceptions: Box<[Box<str>]>
+    behavior: Option<Behavior>,
+    threshold: Option<u8>,
+    behavior_exceptions: Option<Box<[Box<str>]>>,
 }
 
-#[derive(Clone, Debug, Default, Deserializable)]
+#[derive(Clone, Debug, Default, Deserializable, Merge)]
 pub enum Behavior {
     #[default]
     A,
     B,
     C,
+}
+
+impl biome_deserialize::Merge for MyRuleOptions {
+    fn merge_with(&mut self, other: Self) {
+        // `self` corresponds to the (shared) extended configuration.
+        // `other` is the user configuration.
+        self.behavior.merge_with(other.behavior);
+        self.threshold.merge_with(other.threshold);
+        if let Some(behavior_exceptions) = other.behavior_exceptions {
+            self.behavior_exceptions = Some(behavior_exceptions);
+        }
+    }
 }
 ```
 
@@ -615,6 +661,91 @@ they have to implement the `Deserializable` trait from the `biome_deserialize` c
 This is what the `Deserializable` keyword in the `#[derive]` statements above did.
 It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
 for you.
+
+The rule's options type have also to implement `biome_deserialize::Merge`.
+This allows merging the rule's options coming from a shared extended configuration with
+the rule's options set by a user configuration.
+In the following example, the shared configuration set `behavior` and `behaviorExceptions`.
+
+```json5
+// shared.jsonc
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "behavior": "A",
+            "behaviorExceptions": ["e"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The shared configuration is extended by the following user configuration that re-set
+`threshold` and `behaviorExceptions`.
+
+```json5
+// biome.jsonc
+{
+  "extends": ["./shared.jsonc"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "threshold": 30,
+            "behaviorExceptions": ["f"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The Implementation of the `biome_deserialize_macros::Merge` trait defines how these options
+are merged into the final one.
+The provided implementation of `biome_deserialize_macros::Merge` for `MyRuleOptions` allows
+obtaining the following result when merging the previous configuration:
+
+```json5
+// Merged result
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "behavior": "A",
+            "threshold": 30,
+            "behaviorExceptions": ["f"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+You can also use the `biome_deserialize_macros::Merge` derive macro to implement the trait.
+This is what we did for `Behavior`.
+We didn't use the `biome_deserialize_macros::Merge` derive macro for `MyRuleOptions`
+because the implementation could extend `behaviorExceptions` instead of resetting it.
+In other words, if we use the derive macro, the obtained merged `behaviorExceptions`
+could be `["e", "f"]` instead of `["f"]`.
+When merging rules options, you usually want to resetting the options instead of combining them.
+
+Note that every option is also wrapped in an `Option<_>`.
+This allows to properly merge options by tracking the ones that are set and the ones that are unset.
 
 With these types in place, you can set the associated type `Options` of the rule:
 
@@ -670,11 +801,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseMyRuleOptions {
-    #[serde(default, skip_serializing_if = "is_default")]
-    main_behavior: Behavior,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    main_behavior: Option<Behavior>,
 
-    #[serde(default, skip_serializing_if = "is_default")]
-    extra_behaviors: Vec<Behavior>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    extra_behaviors: Option<Box<[Behavior]>>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -685,8 +816,6 @@ pub enum Behavior {
     B,
     C,
 }
-
-const fn is_default() -> bool { true }
 ```
 
 ##### Testing & Documenting Rule Options
@@ -733,12 +862,15 @@ When creating a new node like this, we internally prefix them with `Any*` and po
 
 The type `AnyFunctionLike` implements the trait `AstNode`, which means that it implements all methods such as `syntax`, `children`, etc.
 
-#### Semantic Model
+#### Services
+
+There are times when a rule requires quite advanced knowledge of the behavior of language, such as control flow or where bindings are declared. Biome provides "services" to provide this type of information, so it can be calculated once and reused across multiple rules.
+
+##### Semantic Model
 
 The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
 
-
-##### How to use the query `Semantic<>` in a lint rule
+###### How to use the query `Semantic<>` in a lint rule
 
 We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
@@ -775,7 +907,7 @@ impl Rule for ForLoopCountReferences {
             .as_any_js_binding()?
             .as_js_identifier_binding()?;
 
-        // How many times this variable appers in the code
+        // How many times this variable appears in the code
         let count = binding.all_references(model).count();
 
         // Get all read references
@@ -787,6 +919,20 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
+##### Using Multiple Services in a Rule
+
+In some rare cases, a rule may require multiple services to be used together. In these cases, you don't need to pull in these services in the rule's `Query`. The rule context provides a `get_service` method to retrieve services by their type.
+
+However, you need to take into consideration that some services are created during a "second phase", for example `SemanticModel` and `ControlFlowGraph` services are created during this phase. If you pull these services when using the `Ast` query, those services won't be available. This means that you must use at least a query that runs during the second phase. The `Semantic` query, for example, runs during the second phase.
+
+```rust
+let is_root_service = ctx
+  .get_service::<IsRoot>()
+  .expect("IsRoot service not found.");
+```
+Where `IsRoot` is the name of the service you want to retrieve. The name of the service is the name of the Rust type that is stored when calling `.insert_service()`.
+
+Refer to the `src/lib.rs` file of the crate, and look at the `.insert_service()` function, and deduce the name of the service from there. Using an incorrect name will result in a panic error at runtime.
 #### Multiple Signals
 
 Some rules require you to find all possible cases upfront in `run` function.
@@ -977,9 +1123,9 @@ impl Rule for UseYield {
 }
 ```
 
-#### Common Logic Mistakes
+#### Common Mistakes
 
-There are some common mistakes that can lead to bugs or false positives in lint rules. These tips should help you avoid them and write more robust rules.
+There are some common mistakes that can lead to bugs or false positives in lint rules, or things that reviewers will always ask for. These tips should help you avoid them and write more robust rules.
 
 ##### Not checking if a variable is global
 
@@ -992,6 +1138,38 @@ console.log(); // <-- This should not be reported because `console` is redeclare
 ```
 
 To avoid this, you should consult the semantic model to check if the variable is global or not.
+
+##### Avoidable String Allocations
+
+Lots of rules require checking a string. It's tempting to call `to_string()` on something to get an owned string, but this always results in a heap allocation.
+
+Most of the time, you actually want to compare against a `&str`, or a `TokenText`. `TokenText` is most useful for those cases where you actually do need an owned value.
+
+##### Avoidable Deep Indentation
+
+Inherently, syntax trees are quite deeply nested. Biome's syntax data structures make heavy use of the `Result` and `Option` types to represent the absence of a value. It may be tempting to use `unwrap()` or `expect()` to avoid the `Result` and `Option` types, but this is not recommended because those panic. Sometimes, it's not convenient to use the `?` operator. Whatever the case may be, you might end up with something like this:
+
+```rust
+if let Ok(object_member_name) = property_object_member.name() {
+    if let Some(key_name) = object_member_name.name() {
+        if key_name.text().trim() == "data" {
+            if let Ok(value) = property_object_member.value() {
+                match value {
+...
+```
+
+Rust provides comprehensive helper functions to avoid things like this, such as `map`, `filter`, and `and_then`. Which allows you to write code that is more concise and easier to read.
+
+```rust
+property_object_member
+  .name()
+  .ok()
+  .and_then(|n| n.name())
+  .filter(|ident| ident.text().trim() == "data")
+  .and_then(|_| property_object_member.value().ok())
+  .and_then(|value| match value {
+...
+```
 
 ### Testing the Rule
 
@@ -1078,7 +1256,33 @@ The documentation needs to adhere to the following rules:
 - The next paragraphs can be used to further document the rule with as many details as you see fit.
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`.
   `### Invalid` must go first because we need to show when the rule is triggered.
-- Rule options if any, must be documented in the `## Options` section.
+- Rule options if any, must be documented in the `## Options` section, after the `## Examples` header.
+- Each option must have its own h3 header e.g. `### ignoreSiblings`, a description of what the option does, its
+  default value, a options block, and a code block where those options are applied. Depending on the option,
+  you might want to use the `expect_diagnostic` directive, or not. The final Markdown will look like this:
+  ``````md
+  ## Options
+
+  The following options are available
+
+  ### `ignoreSiblings`
+
+  This option will ignore the sibling of the spread operator.
+
+  Default: `false`
+
+  ```json,options
+  {
+    "options": {
+      "ignoreSiblings": true
+    }
+  }
+  ```
+
+  ```js,expect_diagnostic,use_options
+  const { ...sibling, id } = object;
+  ```
+  ``````
 
 #### Associated Language(s)
 
@@ -1119,25 +1323,51 @@ The documentation needs to adhere to the following rules:
 
 - **Hiding lines**
 
-  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `# `.
+  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `#`.
 
   You should usually prefer to show a concise but complete sample snippet instead.
 
+- **Multi-file snippets**
+
+  For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=<path>` property to create an in-memory file system for testing.
+
+  This is also useful to trigger type inference even for examples that only consist of individual files.
+
+  Files are organized by documentation section (Markdown headings), where all files in a section are collected before any tests run. This ensures each test has access to the complete file system regardless of definition order.
+
+  ````rust
+  /// ### Invalid
+  ///
+  /// ```js,expect_diagnostic,file=foo.js
+  /// import { bar } from "./bar.js";
+  /// export function foo() {
+  ///     return bar();
+  /// }
+  /// ```
+  ///
+  /// ```js,expect_diagnostic,file=bar.js
+  /// import { foo } from "./foo.js";
+  /// export function bar() {
+  ///     return foo();
+  /// }
+  /// ```
+  ````
+
 - **Ordering of code block properties**
 
-  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options` and/or `ignore`.
+  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
 
   The parser does not care about the order, but for consistency, modifiers should always be ordered as follows:
 
   ````rust
-  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore]
+  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
   /// ```
   ````
 
   e.g.
 
   ````rust
-  /// ```tsx,expect_diagnostic,use_options,ignore
+  /// ```tsx,expect_diagnostic,use_options,ignore,file=foobar.tsx
   /// ```
   ````
 

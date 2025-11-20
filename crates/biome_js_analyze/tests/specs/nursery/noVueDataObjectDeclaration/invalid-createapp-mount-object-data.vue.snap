@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-createapp-mount-object-data.vue
+---
+# Input
+```ts
+// createApp(...).mount with object `data`
+import { createApp } from 'vue';
+
+createApp({
+	data: {
+		foo: 'bar'
+	}
+}).mount('#app');
+
+```
+
+# Diagnostics
+```
+invalid-createapp-mount-object-data.vue:5:2 lint/nursery/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
+
+  i Found an object declaration for `data` in this component.
+  
+    4 │ createApp({
+  > 5 │ 	data: {
+      │ 	^^^^^^^
+  > 6 │ 		foo: 'bar'
+  > 7 │ 	}
+      │ 	^
+    8 │ }).mount('#app');
+    9 │ 
+  
+  i Using an object declaration for `data` is deprecated, and can result in different component instances sharing the same data.
+  
+  i Safe fix: Refactor the data object into a function returning the data object
+  
+    3  3 │   
+    4  4 │   createApp({
+    5    │ - → data:·{
+       5 │ + → data:·function()·{
+       6 │ + return·{
+    6  7 │   		foo: 'bar'
+    7    │ - → }
+       8 │ + → }
+       9 │ + }
+    8 10 │   }).mount('#app');
+    9 11 │   
+  
+
+```

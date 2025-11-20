@@ -1,0 +1,168 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<template>
+  <!-- v-else with argument -->
+  <div v-else:arg></div>
+
+  <!-- v-else with modifier -->
+  <div v-else.mod></div>
+
+  <!-- v-else with value -->
+  <div v-else="value"></div>
+
+  <!-- v-else without previous sibling having v-if/v-else-if -->
+  <div v-else></div>
+
+  <!-- v-else after element without v-if/v-else-if -->
+  <div></div>
+  <div v-else></div>
+
+  <!-- v-else on same element as v-if -->
+  <div v-if="condition" v-else></div>
+
+  <!-- v-else on same element as v-else-if -->
+  <div v-else-if="condition" v-else></div>
+
+  <!-- v-else with whitespace between but previous element lacks v-if -->
+  <div>Some content</div>
+  
+  <div v-else></div>
+</template>
+```
+
+# Diagnostics
+```
+invalid.vue:5:14 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else must not have an argument.
+  
+    3 │ <template>
+    4 │   <!-- v-else with argument -->
+  > 5 │   <div v-else:arg></div>
+      │              ^^^^
+    6 │ 
+    7 │   <!-- v-else with modifier -->
+  
+  i Remove the argument; v-else is a stand-alone control directive.
+  
+
+```
+
+```
+invalid.vue:8:14 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else must not have modifiers.
+  
+     7 │   <!-- v-else with modifier -->
+   > 8 │   <div v-else.mod></div>
+       │              ^^^^
+     9 │ 
+    10 │   <!-- v-else with value -->
+  
+  i Remove the modifier; v-else is a stand-alone control directive.
+  
+
+```
+
+```
+invalid.vue:11:14 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else must not have a value.
+  
+    10 │   <!-- v-else with value -->
+  > 11 │   <div v-else="value"></div>
+       │              ^^^^^^^^
+    12 │ 
+    13 │   <!-- v-else without previous sibling having v-if/v-else-if -->
+  
+  i Remove the value; v-else is a stand-alone control directive.
+  
+
+```
+
+```
+invalid.vue:14:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else requires a previous sibling element with v-if or v-else-if.
+  
+    13 │   <!-- v-else without previous sibling having v-if/v-else-if -->
+  > 14 │   <div v-else></div>
+       │        ^^^^^^
+    15 │ 
+    16 │   <!-- v-else after element without v-if/v-else-if -->
+  
+  i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
+  
+
+```
+
+```
+invalid.vue:18:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else requires a previous sibling element with v-if or v-else-if.
+  
+    16 │   <!-- v-else after element without v-if/v-else-if -->
+    17 │   <div></div>
+  > 18 │   <div v-else></div>
+       │        ^^^^^^
+    19 │ 
+    20 │   <!-- v-else on same element as v-if -->
+  
+  i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
+  
+
+```
+
+```
+invalid.vue:21:25 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else cannot be used on the same element as v-if or v-else-if.
+  
+    20 │   <!-- v-else on same element as v-if -->
+  > 21 │   <div v-if="condition" v-else></div>
+       │                         ^^^^^^
+    22 │ 
+    23 │   <!-- v-else on same element as v-else-if -->
+  
+  i Move v-else onto a separate element immediately following the v-if/v-else-if element.
+  
+
+```
+
+```
+invalid.vue:24:30 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else cannot be used on the same element as v-if or v-else-if.
+  
+    23 │   <!-- v-else on same element as v-else-if -->
+  > 24 │   <div v-else-if="condition" v-else></div>
+       │                              ^^^^^^
+    25 │ 
+    26 │   <!-- v-else with whitespace between but previous element lacks v-if -->
+  
+  i Move v-else onto a separate element immediately following the v-if/v-else-if element.
+  
+
+```
+
+```
+invalid.vue:29:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i v-else requires a previous sibling element with v-if or v-else-if.
+  
+    27 │   <div>Some content</div>
+    28 │   
+  > 29 │   <div v-else></div>
+       │        ^^^^^^
+    30 │ </template>
+  
+  i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
+  
+
+```

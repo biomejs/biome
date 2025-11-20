@@ -1,0 +1,19 @@
+[package]
+authors.workspace    = true
+description          = "Utilities to create Tailwind AST for biome_tailwind_factory"
+documentation        = "https://docs.rs/biome_tailwind_factory"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_tailwind_factory"
+publish              = true
+repository.workspace = true
+version              = "0.0.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_rowan           = { workspace = true }
+biome_tailwind_syntax = { workspace = true }
+
+[lints]
+workspace = true

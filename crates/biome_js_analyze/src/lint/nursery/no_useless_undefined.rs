@@ -135,17 +135,17 @@ impl Rule for NoUselessUndefined {
                         let Ok(binding_text) = decl.id() else {
                             continue;
                         };
-                        if let Some(binding) = binding_text.as_any_js_binding() {
-                            if let Some(ident_binding) = binding.as_js_identifier_binding() {
-                                let binding_text = ident_binding
-                                    .name_token()
-                                    .map(|t| t.token_text_trimmed())
-                                    .ok();
-                                signals.push(RuleState {
-                                    binding_text,
-                                    diagnostic_range: undefined_range,
-                                });
-                            }
+                        if let Some(binding) = binding_text.as_any_js_binding()
+                            && let Some(ident_binding) = binding.as_js_identifier_binding()
+                        {
+                            let binding_text = ident_binding
+                                .name_token()
+                                .map(|t| t.token_text_trimmed())
+                                .ok();
+                            signals.push(RuleState {
+                                binding_text,
+                                diagnostic_range: undefined_range,
+                            });
                         }
                     }
                 }

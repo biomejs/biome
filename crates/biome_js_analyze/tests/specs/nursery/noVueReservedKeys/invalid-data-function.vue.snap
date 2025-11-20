@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-data-function.vue
+---
+# Input
+```ts
+export default {
+    data: function() {
+        return {
+            $el: '',
+            _foo: String,
+        }
+    }
+};
+
+```
+
+# Diagnostics
+```
+invalid-data-function.vue:4:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    2 │     data: function() {
+    3 │         return {
+  > 4 │             $el: '',
+      │             ^^^
+    5 │             _foo: String,
+    6 │         }
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-data-function.vue:5:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Keys starting with an underscore are reserved in Vue.
+  
+    3 │         return {
+    4 │             $el: '',
+  > 5 │             _foo: String,
+      │             ^^^^
+    6 │         }
+    7 │     }
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

@@ -41,10 +41,10 @@ impl StripPlaceholders {
             input_code.replace_range(index..index + self.range_start_placeholder.len(), "");
             range_start_index = Some(index);
 
-            if let Some(cursor) = &mut cursor_index {
-                if *cursor > index {
-                    *cursor -= self.range_start_placeholder.len();
-                }
+            if let Some(cursor) = &mut cursor_index
+                && *cursor > index
+            {
+                *cursor -= self.range_start_placeholder.len();
             }
         }
 
@@ -52,10 +52,10 @@ impl StripPlaceholders {
             input_code.replace_range(index..index + self.range_end_placeholder.len(), "");
             range_end_index = Some(index);
 
-            if let Some(cursor) = &mut cursor_index {
-                if *cursor > index {
-                    *cursor -= self.range_end_placeholder.len();
-                }
+            if let Some(cursor) = &mut cursor_index
+                && *cursor > index
+            {
+                *cursor -= self.range_end_placeholder.len();
             }
             if let Some(cursor) = &mut range_start_index {
                 // Prettier has tests for reversed ranges

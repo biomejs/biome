@@ -4,7 +4,7 @@ use crate::language_kind::LanguageKind;
 use biome_string_case::Case;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let syntax_crate = language_kind.syntax_crate_ident();
@@ -32,11 +32,9 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                             let field_predicate = get_field_predicate(field, language_kind);
 
                             quote! {
-                                if let Some(element) = &current_element {
-                                    if #field_predicate {
-                                        slots.mark_present();
-                                        current_element = elements.next();
-                                    }
+                                if let Some(element) = &current_element && #field_predicate {
+                                    slots.mark_present();
+                                    current_element = elements.next();
                                 }
                                 slots.next_slot();
                             }
@@ -94,11 +92,9 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                 .map(|field| {
                     let field_predicate = get_field_predicate(field, language_kind);
                     quote! {
-                        if let Some(element) = &current_element {
-                            if #field_predicate {
-                                slots.mark_present();
-                                current_element = elements.next();
-                            }
+                        if let Some(element) = &current_element && #field_predicate {
+                            slots.mark_present();
+                            current_element = elements.next();
                         }
                         slots.next_slot();
                     }
@@ -176,6 +172,6 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         }
     };
 
-    let pretty = xtask::reformat(output)?;
+    let pretty = xtask_glue::reformat(output)?;
     Ok(pretty)
 }

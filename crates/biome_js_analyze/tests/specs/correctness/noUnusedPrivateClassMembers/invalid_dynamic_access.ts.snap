@@ -1,0 +1,377 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid_dynamic_access.ts
+---
+# Input
+```ts
+export class Sample {
+	private member;
+	#prop;
+
+	constructor() {
+		this.#prop = 0;
+		this.member = 0;
+	}
+
+	method(name) {
+		return this[name];
+	}
+}
+
+export class SampleAddRemove {
+	private add: () => void;
+	private append: () => void; // <- unused
+
+	constructor(private remove: () => void) {
+		this.add = () => {
+		};
+		this.remove = () => {
+		};
+	}
+
+	on(action: "add" | "remove"): void {
+		this[action]();
+	}
+}
+
+// will only make a match on the string literals and ignore anything else
+type YesNo = "yes" | "no" | { ignored: number };
+
+export class SampleYesNo {
+	private yes: () => void;
+	private no: () => void;
+	private dontKnow: () => void; // <- unused
+
+	on(action: YesNo): void {
+		this[action]();
+	}
+}
+
+export class SampleYesNoString {
+	private yes: () => void;
+	private no: () => void;
+	private dontKnow: () => void;
+
+	on(action: string): void {
+		this[action]();
+	}
+}
+
+export class SampleYesNoAny {
+	private yes: () => void;
+	private no: () => void;
+	private dontKnow: () => void;
+
+	on(action: any): void {
+		this[action]();
+	}
+}
+
+export class SampleYesNoUnknown {
+	private yes: () => void;
+	private no: () => void;
+	private dontKnow: () => void;
+
+	on(action: unknown): void {
+		this[action]();
+	}
+}
+
+
+```
+
+# Diagnostics
+```
+invalid_dynamic_access.ts:2:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    1 │ export class Sample {
+  > 2 │ 	private member;
+      │ 	        ^^^^^^
+    3 │ 	#prop;
+    4 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     1  1 │   export class Sample {
+     2    │ - → private·member;
+     3  2 │   	#prop;
+     4  3 │   
+  
+
+```
+
+```
+invalid_dynamic_access.ts:3:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    1 │ export class Sample {
+    2 │ 	private member;
+  > 3 │ 	#prop;
+      │ 	^^^^^
+    4 │ 
+    5 │ 	constructor() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     1  1 │   export class Sample {
+     2  2 │   	private member;
+     3    │ - → #prop;
+     4  3 │   
+     5  4 │   	constructor() {
+  
+
+```
+
+```
+invalid_dynamic_access.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    15 │ export class SampleAddRemove {
+    16 │ 	private add: () => void;
+  > 17 │ 	private append: () => void; // <- unused
+       │ 	        ^^^^^^
+    18 │ 
+    19 │ 	constructor(private remove: () => void) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    15 15 │   export class SampleAddRemove {
+    16 16 │   	private add: () => void;
+    17    │ - → private·append:·()·=>·void;·//·<-·unused
+    18 17 │   
+    19 18 │   	constructor(private remove: () => void) {
+  
+
+```
+
+```
+invalid_dynamic_access.ts:37:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    35 │ 	private yes: () => void;
+    36 │ 	private no: () => void;
+  > 37 │ 	private dontKnow: () => void; // <- unused
+       │ 	        ^^^^^^^^
+    38 │ 
+    39 │ 	on(action: YesNo): void {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    35 35 │   	private yes: () => void;
+    36 36 │   	private no: () => void;
+    37    │ - → private·dontKnow:·()·=>·void;·//·<-·unused
+    38 37 │   
+    39 38 │   	on(action: YesNo): void {
+  
+
+```
+
+```
+invalid_dynamic_access.ts:45:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    44 │ export class SampleYesNoString {
+  > 45 │ 	private yes: () => void;
+       │ 	        ^^^
+    46 │ 	private no: () => void;
+    47 │ 	private dontKnow: () => void;
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    43 43 │   
+    44 44 │   export class SampleYesNoString {
+    45    │ - → private·yes:·()·=>·void;
+    46 45 │   	private no: () => void;
+    47 46 │   	private dontKnow: () => void;
+  
+
+```
+
+```
+invalid_dynamic_access.ts:46:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    44 │ export class SampleYesNoString {
+    45 │ 	private yes: () => void;
+  > 46 │ 	private no: () => void;
+       │ 	        ^^
+    47 │ 	private dontKnow: () => void;
+    48 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    44 44 │   export class SampleYesNoString {
+    45 45 │   	private yes: () => void;
+    46    │ - → private·no:·()·=>·void;
+    47 46 │   	private dontKnow: () => void;
+    48 47 │   
+  
+
+```
+
+```
+invalid_dynamic_access.ts:47:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    45 │ 	private yes: () => void;
+    46 │ 	private no: () => void;
+  > 47 │ 	private dontKnow: () => void;
+       │ 	        ^^^^^^^^
+    48 │ 
+    49 │ 	on(action: string): void {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    45 45 │   	private yes: () => void;
+    46 46 │   	private no: () => void;
+    47    │ - → private·dontKnow:·()·=>·void;
+    48 47 │   
+    49 48 │   	on(action: string): void {
+  
+
+```
+
+```
+invalid_dynamic_access.ts:55:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    54 │ export class SampleYesNoAny {
+  > 55 │ 	private yes: () => void;
+       │ 	        ^^^
+    56 │ 	private no: () => void;
+    57 │ 	private dontKnow: () => void;
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    53 53 │   
+    54 54 │   export class SampleYesNoAny {
+    55    │ - → private·yes:·()·=>·void;
+    56 55 │   	private no: () => void;
+    57 56 │   	private dontKnow: () => void;
+  
+
+```
+
+```
+invalid_dynamic_access.ts:56:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    54 │ export class SampleYesNoAny {
+    55 │ 	private yes: () => void;
+  > 56 │ 	private no: () => void;
+       │ 	        ^^
+    57 │ 	private dontKnow: () => void;
+    58 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    54 54 │   export class SampleYesNoAny {
+    55 55 │   	private yes: () => void;
+    56    │ - → private·no:·()·=>·void;
+    57 56 │   	private dontKnow: () => void;
+    58 57 │   
+  
+
+```
+
+```
+invalid_dynamic_access.ts:57:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    55 │ 	private yes: () => void;
+    56 │ 	private no: () => void;
+  > 57 │ 	private dontKnow: () => void;
+       │ 	        ^^^^^^^^
+    58 │ 
+    59 │ 	on(action: any): void {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    55 55 │   	private yes: () => void;
+    56 56 │   	private no: () => void;
+    57    │ - → private·dontKnow:·()·=>·void;
+    58 57 │   
+    59 58 │   	on(action: any): void {
+  
+
+```
+
+```
+invalid_dynamic_access.ts:65:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    64 │ export class SampleYesNoUnknown {
+  > 65 │ 	private yes: () => void;
+       │ 	        ^^^
+    66 │ 	private no: () => void;
+    67 │ 	private dontKnow: () => void;
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    63 63 │   
+    64 64 │   export class SampleYesNoUnknown {
+    65    │ - → private·yes:·()·=>·void;
+    66 65 │   	private no: () => void;
+    67 66 │   	private dontKnow: () => void;
+  
+
+```
+
+```
+invalid_dynamic_access.ts:66:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    64 │ export class SampleYesNoUnknown {
+    65 │ 	private yes: () => void;
+  > 66 │ 	private no: () => void;
+       │ 	        ^^
+    67 │ 	private dontKnow: () => void;
+    68 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    64 64 │   export class SampleYesNoUnknown {
+    65 65 │   	private yes: () => void;
+    66    │ - → private·no:·()·=>·void;
+    67 66 │   	private dontKnow: () => void;
+    68 67 │   
+  
+
+```
+
+```
+invalid_dynamic_access.ts:67:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    65 │ 	private yes: () => void;
+    66 │ 	private no: () => void;
+  > 67 │ 	private dontKnow: () => void;
+       │ 	        ^^^^^^^^
+    68 │ 
+    69 │ 	on(action: unknown): void {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    65 65 │   	private yes: () => void;
+    66 66 │   	private no: () => void;
+    67    │ - → private·dontKnow:·()·=>·void;
+    68 67 │   
+    69 68 │   	on(action: unknown): void {
+  
+
+```

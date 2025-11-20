@@ -6,6 +6,7 @@ info: js/module/import/namespace_import.js
 
 ```js
 import * as all from "all"
+import defer * as all from "all"
 ```
 
 
@@ -30,8 +31,10 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
 import * as all from "all";
+import defer * as all from "all";
 ```

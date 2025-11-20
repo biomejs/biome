@@ -1,0 +1,88 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+inset-x-[20px] inset-y-[15px]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..7 "inset-x" [] [],
+                minus_token: DASH@7..8 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@8..9 "[" [] [],
+                    value_token: TW_VALUE@9..13 "20px" [] [],
+                    r_brack_token: R_BRACKET@13..14 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@14..15 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@15..22 "inset-y" [] [],
+                minus_token: DASH@22..23 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@23..24 "[" [] [],
+                    value_token: TW_VALUE@24..28 "15px" [] [],
+                    r_brack_token: R_BRACKET@28..30 "]" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@30..30 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..30
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..30
+    0: TW_FULL_CANDIDATE@0..14
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..14
+        0: TW_BASE@0..7 "inset-x" [] []
+        1: DASH@7..8 "-" [] []
+        2: TW_ARBITRARY_VALUE@8..14
+          0: L_BRACKET@8..9 "[" [] []
+          1: TW_VALUE@9..13 "20px" [] []
+          2: R_BRACKET@13..14 "]" [] []
+        3: (empty)
+      3: (empty)
+    1: WHITESPACE@14..15 " " [] []
+    2: TW_FULL_CANDIDATE@15..30
+      0: TW_VARIANT_LIST@15..15
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@15..30
+        0: TW_BASE@15..22 "inset-y" [] []
+        1: DASH@22..23 "-" [] []
+        2: TW_ARBITRARY_VALUE@23..30
+          0: L_BRACKET@23..24 "[" [] []
+          1: TW_VALUE@24..28 "15px" [] []
+          2: R_BRACKET@28..30 "]" [] [Newline("\n")]
+        3: (empty)
+      3: (empty)
+  2: EOF@30..30 "" [] []
+
+```

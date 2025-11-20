@@ -123,7 +123,7 @@ async function traverseDir(dir, input_config) {
 				// file in the specs directory
 				await fs.writeFile(path.resolve(outDir, snapFile), snapshotContent);
 			} else {
-				// Load content from file current fule
+				// Load content from the current file
 				const content = await fs.readFile(filePath, { encoding: 'utf8' });
 
 				try {

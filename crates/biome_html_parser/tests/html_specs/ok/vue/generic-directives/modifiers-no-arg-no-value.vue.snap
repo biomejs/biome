@@ -1,0 +1,233 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<p v-foo.bar></p>
+<p class="flex" v-foo.bar></p>
+<p v-foo.bar class="flex"></p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: VUE_IDENT@3..8 "v-foo" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@8..9 "." [] [],
+                                modifier_token: HTML_LITERAL@9..12 "bar" [] [],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@12..13 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@13..14 "<" [] [],
+                slash_token: SLASH@14..15 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@15..16 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@19..21 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@21..26 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@26..27 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@27..34 "\"flex\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    VueDirective {
+                        name_token: VUE_IDENT@34..39 "v-foo" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@39..40 "." [] [],
+                                modifier_token: HTML_LITERAL@40..43 "bar" [] [],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@43..44 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@44..45 "<" [] [],
+                slash_token: SLASH@45..46 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@46..47 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@47..48 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@48..50 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@50..52 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: VUE_IDENT@52..57 "v-foo" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@57..58 "." [] [],
+                                modifier_token: HTML_LITERAL@58..62 "bar" [] [Whitespace(" ")],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@62..67 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@67..68 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@68..74 "\"flex\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@74..75 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@75..76 "<" [] [],
+                slash_token: SLASH@76..77 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@77..78 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@78..79 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@79..80 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..80
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..79
+    0: HTML_ELEMENT@0..17
+      0: HTML_OPENING_ELEMENT@0..13
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..3
+          0: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@3..12
+          0: VUE_DIRECTIVE@3..12
+            0: VUE_IDENT@3..8 "v-foo" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@8..12
+              0: VUE_MODIFIER@8..12
+                0: DOT@8..9 "." [] []
+                1: HTML_LITERAL@9..12 "bar" [] []
+            3: (empty)
+        3: R_ANGLE@12..13 ">" [] []
+      1: HTML_ELEMENT_LIST@13..13
+      2: HTML_CLOSING_ELEMENT@13..17
+        0: L_ANGLE@13..14 "<" [] []
+        1: SLASH@14..15 "/" [] []
+        2: HTML_TAG_NAME@15..16
+          0: HTML_LITERAL@15..16 "p" [] []
+        3: R_ANGLE@16..17 ">" [] []
+    1: HTML_ELEMENT@17..48
+      0: HTML_OPENING_ELEMENT@17..44
+        0: L_ANGLE@17..19 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@19..21
+          0: HTML_LITERAL@19..21 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@21..43
+          0: HTML_ATTRIBUTE@21..34
+            0: HTML_ATTRIBUTE_NAME@21..26
+              0: HTML_LITERAL@21..26 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..34
+              0: EQ@26..27 "=" [] []
+              1: HTML_STRING@27..34
+                0: HTML_STRING_LITERAL@27..34 "\"flex\"" [] [Whitespace(" ")]
+          1: VUE_DIRECTIVE@34..43
+            0: VUE_IDENT@34..39 "v-foo" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@39..43
+              0: VUE_MODIFIER@39..43
+                0: DOT@39..40 "." [] []
+                1: HTML_LITERAL@40..43 "bar" [] []
+            3: (empty)
+        3: R_ANGLE@43..44 ">" [] []
+      1: HTML_ELEMENT_LIST@44..44
+      2: HTML_CLOSING_ELEMENT@44..48
+        0: L_ANGLE@44..45 "<" [] []
+        1: SLASH@45..46 "/" [] []
+        2: HTML_TAG_NAME@46..47
+          0: HTML_LITERAL@46..47 "p" [] []
+        3: R_ANGLE@47..48 ">" [] []
+    2: HTML_ELEMENT@48..79
+      0: HTML_OPENING_ELEMENT@48..75
+        0: L_ANGLE@48..50 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@50..52
+          0: HTML_LITERAL@50..52 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@52..74
+          0: VUE_DIRECTIVE@52..62
+            0: VUE_IDENT@52..57 "v-foo" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@57..62
+              0: VUE_MODIFIER@57..62
+                0: DOT@57..58 "." [] []
+                1: HTML_LITERAL@58..62 "bar" [] [Whitespace(" ")]
+            3: (empty)
+          1: HTML_ATTRIBUTE@62..74
+            0: HTML_ATTRIBUTE_NAME@62..67
+              0: HTML_LITERAL@62..67 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@67..74
+              0: EQ@67..68 "=" [] []
+              1: HTML_STRING@68..74
+                0: HTML_STRING_LITERAL@68..74 "\"flex\"" [] []
+        3: R_ANGLE@74..75 ">" [] []
+      1: HTML_ELEMENT_LIST@75..75
+      2: HTML_CLOSING_ELEMENT@75..79
+        0: L_ANGLE@75..76 "<" [] []
+        1: SLASH@76..77 "/" [] []
+        2: HTML_TAG_NAME@77..78
+          0: HTML_LITERAL@77..78 "p" [] []
+        3: R_ANGLE@78..79 ">" [] []
+  4: EOF@79..80 "" [Newline("\n")] []
+
+```

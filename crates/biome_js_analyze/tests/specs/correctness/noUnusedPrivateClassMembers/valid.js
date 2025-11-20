@@ -20,15 +20,6 @@ class UsedMember {
 
 
 class UsedMember {
-	get #usedAccessor() {}
-	set #usedAccessor(value) {}
-
-	method() {
-			this.#usedAccessor = 42;
-	}
-}
-
-class UsedMember {
 	publicMember = 42;
 }
 
@@ -132,14 +123,6 @@ class UsedMember {
 }
 
 class UsedMember {
-	set #accessorUsedInMemberAccess(value) {}
-
-	method(a) {
-			[this.#accessorUsedInMemberAccess] = a;
-	}
-}
-
-class UsedMember {
 	get #accessorWithGetterFirst() {
 			return something();
 	}
@@ -148,16 +131,6 @@ class UsedMember {
 	}
 	method() {
 			this.#accessorWithGetterFirst += 1;
-	}
-}
-
-class UsedMember {
-	#usedInInnerClass;
-
-	method(a) {
-			return class {
-					foo = a.#usedInInnerClass;
-			}
 	}
 }
 
@@ -170,12 +143,26 @@ class Foo {
 	}
 }
 
-class C {
-	set #x(value) {
-			doSomething(value);
-	}
+// issue #6994
+class UsedAssignmentExpr {
+  #val = 0;
+  method() {
+    return this.#val = 1
+  }
+}
 
-	foo() {
-			this.#x = 1;
-	}
+// issue #6933
+class UsedPreUpdateExpr {
+  #val = 0;
+  method() {
+    return ++this.#val;
+  }
+}
+
+// issue #6933
+class UsedPostUpdateExpr {
+  #val = 0;
+  method() {
+    return this.#val++;
+  }
 }

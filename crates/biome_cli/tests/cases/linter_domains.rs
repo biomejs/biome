@@ -355,3 +355,101 @@ describe("foo", () => {
         result,
     ));
 }
+
+#[test]
+fn should_enable_domain_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "recommended": false
+        },
+        "domains": {
+            "test": "all"
+        }
+    }
+}
+"#
+        .as_bytes(),
+    );
+    let test1 = Utf8Path::new("test1.js");
+    fs.insert(
+        test1.into(),
+        r#"describe.only("bar", () => {});
+"#
+        .as_bytes(),
+    );
+
+    let content = r#"
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    "#;
+    let test2 = Utf8Path::new("test2.js");
+    fs.insert(test2.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=test", test1.as_str(), test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_enable_domain_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_disable_domain_via_cli() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let test1 = Utf8Path::new("test1.js");
+    fs.insert(
+        test1.into(),
+        r#"describe.only("bar", () => {});
+"#
+        .as_bytes(),
+    );
+
+    let content = r#"
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    "#;
+    let test2 = Utf8Path::new("test2.js");
+    fs.insert(test2.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--skip=test", test1.as_str(), test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_disable_domain_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}

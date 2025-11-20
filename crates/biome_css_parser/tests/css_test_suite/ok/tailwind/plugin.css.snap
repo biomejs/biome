@@ -1,0 +1,51 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@plugin "@tailwindcss/typography";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwPluginAtRule {
+                plugin_token: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@33..34 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..35
+  0: (empty)
+  1: CSS_RULE_LIST@0..34
+    0: CSS_AT_RULE@0..34
+      0: AT@0..1 "@" [] []
+      1: TW_PLUGIN_AT_RULE@1..34
+        0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
+        1: CSS_STRING@8..33
+          0: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] []
+        2: (empty)
+        3: SEMICOLON@33..34 ";" [] []
+  2: EOF@34..35 "" [Newline("\n")] []
+
+```

@@ -8,7 +8,7 @@
 					"options": {
                         "conventions": [
 							{
-								"match": "aSepcial_CASE|(.*)"
+								"match": "aSpecial_CASE|(.*)"
 							}
                         ]
 					}

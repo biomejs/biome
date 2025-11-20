@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// The `this` argument is a specific object, which is not the same as the callee's object.
+foo.apply(obj, [1, 2, 3]);
+foo.apply(obj, args);
+obj.foo.apply(bar, args);
+
+// The number of arguments is not 2.
+foo.apply(null);
+foo.apply();
+
+```

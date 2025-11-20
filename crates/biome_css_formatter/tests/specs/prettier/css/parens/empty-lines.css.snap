@@ -26,7 +26,7 @@ $colours: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,16 @@
+@@ -1,7 +1,15 @@
 -$colours: (
 -  "text": $light-100,
 -  "background-primary": $dark-300,
@@ -39,16 +39,14 @@ $colours: (
 +
 +
 +
-+
-+
  
 -  "background-secondary": $dark-200,
 -  "background-tertiary": $dark-100
--);
++
++
 +    "background-secondary": $dark-200,
 +    "background-tertiary": $dark-100
-+)
-+;
+ );
 ```
 
 # Output
@@ -68,8 +66,7 @@ colours:
 
     "background-secondary": $dark-200,
     "background-tertiary": $dark-100
-)
-;
+);
 ```
 
 # Errors
@@ -136,6 +133,7 @@ empty-lines.css:1:11 parse ━━━━━━━━━━━━━━━━━�
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
@@ -336,6 +334,22 @@ empty-lines.css:12:2 parse ━━━━━━━━━━━━━━━━━�
     13 │ 
   
   i Remove ;
+  
+empty-lines.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    11 │     "background-tertiary": $dark-100
+    12 │ );
+  > 13 │ 
+       │ 
+  
+  i the file ends here
+  
+    11 │     "background-tertiary": $dark-100
+    12 │ );
+  > 13 │ 
+       │ 
   
 
 ```

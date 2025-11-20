@@ -1,0 +1,140 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	<div v-bind:bar.lower="'FOO'"></div>
+</template>
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@13..17 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueDirective {
+                                name_token: VUE_IDENT@17..23 "v-bind" [] [],
+                                arg: VueDirectiveArgument {
+                                    colon_token: COLON@23..24 ":" [] [],
+                                    arg: VueStaticArgument {
+                                        name_token: HTML_LITERAL@24..27 "bar" [] [],
+                                    },
+                                },
+                                modifiers: VueModifierList [
+                                    VueModifier {
+                                        dot_token: DOT@27..28 "." [] [],
+                                        modifier_token: HTML_LITERAL@28..33 "lower" [] [],
+                                    },
+                                ],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@33..34 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@34..41 "\"'FOO'\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@41..42 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@42..43 "<" [] [],
+                        slash_token: SLASH@43..44 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@44..47 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@47..48 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@48..50 "<" [Newline("\n")] [],
+                slash_token: SLASH@50..51 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@51..59 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@59..60 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@60..60 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..60
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..60
+    0: HTML_ELEMENT@0..60
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..48
+        0: HTML_ELEMENT@10..48
+          0: HTML_OPENING_ELEMENT@10..42
+            0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@13..17
+              0: HTML_LITERAL@13..17 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@17..41
+              0: VUE_DIRECTIVE@17..41
+                0: VUE_IDENT@17..23 "v-bind" [] []
+                1: VUE_DIRECTIVE_ARGUMENT@23..27
+                  0: COLON@23..24 ":" [] []
+                  1: VUE_STATIC_ARGUMENT@24..27
+                    0: HTML_LITERAL@24..27 "bar" [] []
+                2: VUE_MODIFIER_LIST@27..33
+                  0: VUE_MODIFIER@27..33
+                    0: DOT@27..28 "." [] []
+                    1: HTML_LITERAL@28..33 "lower" [] []
+                3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@33..41
+                  0: EQ@33..34 "=" [] []
+                  1: HTML_STRING@34..41
+                    0: HTML_STRING_LITERAL@34..41 "\"'FOO'\"" [] []
+            3: R_ANGLE@41..42 ">" [] []
+          1: HTML_ELEMENT_LIST@42..42
+          2: HTML_CLOSING_ELEMENT@42..48
+            0: L_ANGLE@42..43 "<" [] []
+            1: SLASH@43..44 "/" [] []
+            2: HTML_TAG_NAME@44..47
+              0: HTML_LITERAL@44..47 "div" [] []
+            3: R_ANGLE@47..48 ">" [] []
+      2: HTML_CLOSING_ELEMENT@48..60
+        0: L_ANGLE@48..50 "<" [Newline("\n")] []
+        1: SLASH@50..51 "/" [] []
+        2: HTML_TAG_NAME@51..59
+          0: HTML_LITERAL@51..59 "template" [] []
+        3: R_ANGLE@59..60 ">" [] []
+  4: EOF@60..60 "" [] []
+
+```

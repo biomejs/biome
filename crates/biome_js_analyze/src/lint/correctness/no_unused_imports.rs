@@ -66,10 +66,12 @@ declare_lint_rule! {
     /// export { B }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// // Header comment
     /// import /*inner comment */ A from 'mod'; // Associated comment
+    /// ```
     ///
+    /// ```ts,expect_diagnostic
     /// // Another header comment
     /// import {
     ///     // A's header comment
@@ -126,7 +128,7 @@ impl DerefMut for JsDocTypeModel {
 }
 
 #[derive(Default)]
-struct JsDocTypeCollectorVisitior {
+struct JsDocTypeCollectorVisitor {
     jsdoc_types: JsDocTypeModel,
 }
 
@@ -134,7 +136,7 @@ declare_node_union! {
     pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
-impl Visitor for JsDocTypeCollectorVisitior {
+impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
     fn visit(
         &mut self,
@@ -162,8 +164,9 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
     });
 }
 
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
 
 static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
@@ -247,7 +250,7 @@ impl Queryable for NoUnusedImportsQuery {
         root: &<Self::Language as Language>::Root,
     ) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitior::default);
+        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -546,10 +549,9 @@ impl Rule for NoUnusedImports {
                 for unused_specifier in unused_named_specifiers {
                     if let Some(NodeOrToken::Token(next_token)) =
                         unused_specifier.syntax().next_sibling_or_token()
+                        && next_token.kind() == T![,]
                     {
-                        if next_token.kind() == T![,] {
-                            mutation.remove_token(next_token);
-                        }
+                        mutation.remove_token(next_token);
                     }
                     mutation.remove_node(unused_specifier.clone());
                 }

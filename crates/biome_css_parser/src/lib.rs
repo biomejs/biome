@@ -6,8 +6,8 @@ use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
-use biome_parser::AnyParse;
 pub use biome_parser::prelude::*;
+use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
 pub use parser::CssParserOptions;
 
@@ -113,11 +113,12 @@ impl From<CssParse> for AnyParse {
     fn from(parse: CssParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
     }
 }
 
@@ -134,8 +135,8 @@ impl CssOffsetParse {
     }
 
     /// The offset-aware syntax node represented by this Parse result
-    pub fn syntax(&self) -> &biome_rowan::SyntaxNodeWithOffset<CssLanguage> {
-        &self.root
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<CssLanguage> {
+        self.root.clone()
     }
 
     /// Get the diagnostics which occurred when parsing
@@ -171,6 +172,19 @@ impl CssOffsetParse {
     /// Convert back to the underlying parse result, discarding offset information
     pub fn into_inner(self) -> CssParse {
         CssParse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+impl From<CssOffsetParse> for AnyParse {
+    fn from(parse: CssOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_embedded_send(),
+            diagnostics,
+        )
+        .into()
     }
 }
 

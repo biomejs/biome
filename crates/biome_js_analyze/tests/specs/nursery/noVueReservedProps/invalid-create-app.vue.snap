@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-create-app.vue
+---
+# Input
+```ts
+import {createApp} from 'vue';
+
+createApp({
+    props: [
+        'ref',
+        'key',
+        'foo'
+    ]
+}).mount('#app');
+
+```
+
+# Diagnostics
+```
+invalid-create-app.vue:5:9 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    3 │ createApp({
+    4 │     props: [
+  > 5 │         'ref',
+      │         ^^^^^
+    6 │         'key',
+    7 │         'foo'
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-create-app.vue:6:9 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    4 │     props: [
+    5 │         'ref',
+  > 6 │         'key',
+      │         ^^^^^
+    7 │         'foo'
+    8 │     ]
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

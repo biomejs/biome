@@ -103,16 +103,16 @@ impl Rule for NoDuplicateCase {
         let mut defined_tests: Vec<AnyJsExpression> = Vec::new();
         let mut signals = Vec::new();
         for case in node.cases() {
-            if let AnyJsSwitchClause::JsCaseClause(case) = case {
-                if let Ok(test) = case.test() {
-                    let define_test = defined_tests
-                        .iter()
-                        .find(|define_test| is_node_equal(define_test.syntax(), test.syntax()));
-                    if let Some(define_test) = define_test {
-                        signals.push((define_test.range(), test.range()));
-                    } else {
-                        defined_tests.push(test);
-                    }
+            if let AnyJsSwitchClause::JsCaseClause(case) = case
+                && let Ok(test) = case.test()
+            {
+                let define_test = defined_tests
+                    .iter()
+                    .find(|define_test| is_node_equal(define_test.syntax(), test.syntax()));
+                if let Some(define_test) = define_test {
+                    signals.push((define_test.range(), test.range()));
+                } else {
+                    defined_tests.push(test);
                 }
             }
         }

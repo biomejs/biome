@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -63,6 +64,22 @@ a {
             color: orange;
             color: black;
         }
+    }
+}
+
+a {
+    opacity: 1;
+    @starting-style {
+        opacity: 0;
+        opacity: 1;
+    }
+}
+
+a {
+    display: block;
+    @container (min-width: 600px) {
+        display: none;
+        display: block;
     }
 }
 
@@ -449,6 +466,58 @@ invalid.css:58:13 lint/suspicious/noDuplicateProperties ━━━━━━━━
        │             ^^^^^
     58 │             color: black;
     59 │         }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:67:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    65 │     @starting-style {
+    66 │         opacity: 0;
+  > 67 │         opacity: 1;
+       │         ^^^^^^^
+    68 │     }
+    69 │ }
+  
+  i opacity is already defined here.
+  
+    64 │     opacity: 1;
+    65 │     @starting-style {
+  > 66 │         opacity: 0;
+       │         ^^^^^^^
+    67 │         opacity: 1;
+    68 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:75:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    73 │     @container (min-width: 600px) {
+    74 │         display: none;
+  > 75 │         display: block;
+       │         ^^^^^^^
+    76 │     }
+    77 │ }
+  
+  i display is already defined here.
+  
+    72 │     display: block;
+    73 │     @container (min-width: 600px) {
+  > 74 │         display: none;
+       │         ^^^^^^^
+    75 │         display: block;
+    76 │     }
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

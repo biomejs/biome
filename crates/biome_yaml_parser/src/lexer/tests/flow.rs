@@ -50,8 +50,8 @@ map:
         WHITESPACE:2,
         FLOW_START:0,
         DOUBLE_QUOTED_LITERAL:12,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -69,8 +69,8 @@ fn lex_double_quote_as_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:5,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -250,6 +250,17 @@ plain token
 }
 
 #[test]
+fn lex_document_end_like_plain_token() {
+    assert_lex!(
+        " ...",
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:3,
+        FLOW_END:0,
+    );
+}
+
+#[test]
 fn lex_mapping_with_multiline_plain() {
     assert_lex!(
         r#"
@@ -264,8 +275,8 @@ this: is
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:22,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -286,8 +297,8 @@ key: oh no
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:5,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -312,9 +323,9 @@ normal:
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:5,
-        NEWLINE:1,
         FLOW_END:0,
         MAPPING_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -334,9 +345,9 @@ fn lex_incorrectly_nested_sequence_as_plain() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:16,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -427,8 +438,8 @@ fn lex_multi_line_flow_in_block_sequence() {
         PLAIN_LITERAL:3,
         R_BRACK:1,
         FLOW_END:0,
-        NEWLINE:1,
         SEQUENCE_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -487,9 +498,9 @@ abc]"#,
         WHITESPACE:1,
         FLOW_START:0,
         L_BRACK:1,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         FLOW_START:0,
         PLAIN_LITERAL:4,
         FLOW_END:0,
@@ -509,9 +520,9 @@ fn lex_flow_collection_closing_bracket_on_sequence_start() {
         FLOW_START:0,
         L_BRACK:1,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         FLOW_START:0,
         R_BRACK:1,
         FLOW_END:0,

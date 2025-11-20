@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSyncCallbackInsideAsyncFn.ts
+---
+# Input
+```ts
+async function doStuff(db) {
+    const txStatements: Array<(tx) => Promise<any>> = [];
+
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}
+
+async function doStuff2(db) {
+    const txStatements: Array<Promise<(tx: any) => void>> = [];
+
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt
+        }
+    });
+}
+
+```
+
+# Diagnostics
+```
+invalidSyncCallbackInsideAsyncFn.ts:6:13 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    4 │     db.transaction((tx: any) => {
+    5 │         for (const stmt of txStatements) {
+  > 6 │             stmt(tx)
+      │             ^^^^^^^^
+    7 │         }
+    8 │     });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalidSyncCallbackInsideAsyncFn.ts:16:13 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │     db.transaction((tx: any) => {
+    15 │         for (const stmt of txStatements) {
+  > 16 │             stmt
+       │             ^^^^
+    17 │         }
+    18 │     });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

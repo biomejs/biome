@@ -227,18 +227,37 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
             ts_only_syntax_error(p, "'import =' declarations", decl.range(p))
         })
     } else {
-        parse_import_clause(p).or_add_diagnostic(p, |p, range| {
-            expected_any(
-                &["default import", "namespace import", "named import"],
-                range,
-                p,
-            )
-        });
+        let clause = parse_import_clause(p);
 
-        let end = p.cur_range().start();
+        // Special handling for invalid import source syntax
+        if clause.is_absent() && p.at(T![source]) {
+            p.bump(T![source]);
+            p.error(p.err_builder(
+                "Only `import source x from \"./module\"` is valid.",
+                p.cur_range(),
+            ));
+            // Skip the rest of the invalid import statement
+            while !p.at(T![;]) && !p.at(EOF) {
+                p.bump_any();
+            }
+            if p.at(T![;]) {
+                p.bump(T![;]);
+            }
+            Present(import.complete(p, JS_IMPORT))
+        } else {
+            clause.or_add_diagnostic(p, |p, range| {
+                expected_any(
+                    &["default import", "namespace import", "named import"],
+                    range,
+                    p,
+                )
+            });
 
-        semi(p, TextRange::new(start, end));
-        Present(import.complete(p, JS_IMPORT))
+            let end = p.cur_range().start();
+
+            semi(p, TextRange::new(start, end));
+            Present(import.complete(p, JS_IMPORT))
+        }
     };
 
     p.state_mut().duplicate_binding_parent = None;
@@ -278,12 +297,20 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     let clause = match p.cur() {
         T![*] => parse_import_namespace_clause_rest(p, m),
         T!['{'] => parse_import_named_clause_rest(p, m),
-        _ if is_at_identifier_binding(p) => {
-            let default_specifier = p.start();
-            parse_identifier_binding(p).unwrap();
-            default_specifier.complete(p, JS_DEFAULT_IMPORT_SPECIFIER);
-            parse_import_default_clauses_rest(p, m, is_typed)
+        T![defer] if matches!(p.nth(1), T![*]) => parse_import_namespace_clause_rest(p, m),
+        T![source] => {
+            if !is_typed && is_nth_at_identifier_binding(p, 1) && matches!(p.nth(2), T![from]) {
+                // The source keyword should be treated as phase field, not as an identifier
+                p.eat(T![source]);
+                parse_default_import_specifier(p, m, is_typed)
+            } else if matches!(p.nth(1), T![from]) {
+                parse_default_import_specifier(p, m, is_typed)
+            } else {
+                m.abandon(p);
+                return Absent;
+            }
         }
+        _ if is_at_identifier_binding(p) => parse_default_import_specifier(p, m, is_typed),
         _ => {
             // SAFETY: Safe because the parser only eats the "type" keyword if it's followed by
             // either a *, {, or binding
@@ -343,6 +370,7 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
 }
 
 fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    p.eat(T![defer]);
     parse_namespace_import_specifier(p).or_add_diagnostic(p, expected_namespace_import);
     p.expect(T![from]);
     parse_module_source(p).or_add_diagnostic(p, expected_module_source);
@@ -1483,4 +1511,11 @@ pub(crate) fn parse_module_source(p: &mut JsParser) -> ParsedSyntax {
     } else {
         Absent
     }
+}
+
+fn parse_default_import_specifier(p: &mut JsParser, m: Marker, is_typed: bool) -> CompletedMarker {
+    let default_specifier = p.start();
+    parse_identifier_binding(p).unwrap();
+    default_specifier.complete(p, JS_DEFAULT_IMPORT_SPECIFIER);
+    parse_import_default_clauses_rest(p, m, is_typed)
 }

@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default-function-data.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// export default with function `data`
+export default {
+	data: function () {
+		return {
+			foo: 'bar'
+		};
+	}
+};
+
+```

@@ -1,7 +1,7 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
@@ -41,6 +41,7 @@ declare_lint_rule! {
         name: "noDangerouslySetInnerHtmlWithChildren",
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-danger-with-children").same()],
+        domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
     }

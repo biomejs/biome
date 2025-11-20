@@ -108,12 +108,12 @@ impl SemanticModelBuilder {
                     .insert(node.text_trimmed_range(), node.clone());
             }
             _ => {
-                if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
-                    if let Ok(conditional_true_type) = conditional_type.true_type() {
-                        let syntax = conditional_true_type.into_syntax();
-                        self.scope_node_by_range
-                            .insert(syntax.text_trimmed_range(), syntax);
-                    }
+                if let Some(conditional_type) = TsConditionalType::cast_ref(node)
+                    && let Ok(conditional_true_type) = conditional_type.true_type()
+                {
+                    let syntax = conditional_true_type.into_syntax();
+                    self.scope_node_by_range
+                        .insert(syntax.text_trimmed_range(), syntax);
                 }
             }
         }
@@ -196,11 +196,11 @@ impl SemanticModelBuilder {
                             let name = name_token.token_text_trimmed();
                             scope.bindings_by_name.insert(name, binding_id);
                         }
-                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        if let Ok(ident_token) = node.ident_token() {
-                            let name = ident_token.token_text_trimmed();
-                            scope.bindings_by_name.insert(name, binding_id);
-                        }
+                    } else if let Some(node) = TsTypeParameterName::cast_ref(node)
+                        && let Ok(ident_token) = node.ident_token()
+                    {
+                        let name = ident_token.token_text_trimmed();
+                        scope.bindings_by_name.insert(name, binding_id);
                     }
                 }
 

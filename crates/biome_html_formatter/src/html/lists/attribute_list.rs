@@ -33,7 +33,7 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &HtmlAttributeList, f: &mut HtmlFormatter) -> FormatResult<()> {
         let attribute_count = node.len();
-        let attribute_seperator = if f.options().attribute_position()
+        let attribute_separator = if f.options().attribute_position()
             == AttributePosition::Multiline
             && attribute_count > 1
         {
@@ -48,7 +48,7 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                 [
                     space(),
                     &soft_line_indent_or_space(&format_with(|f| {
-                        f.join_with(&attribute_seperator)
+                        f.join_with(&attribute_separator)
                             .entries(node.iter().map(|attribute| {
                                 // Prettier normalizes the casing for attributes, but only for elements that are known to be canonical HTML elements, as in they are defined in any version of the HTML specification.
                                 format_with(move |f| match &attribute {
@@ -60,9 +60,19 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                             tag_name: self.tag_name.clone(),
                                         })
                                         .fmt(f),
+                                    AnyHtmlAttribute::HtmlDoubleTextExpression(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::HtmlSingleTextExpression(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                     AnyHtmlAttribute::HtmlBogusAttribute(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::SvelteAttachAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::AnyVueDirective(attr) => attr.format().fmt(f),
                                 })
                             }))
                             .finish()?;

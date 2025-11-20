@@ -175,7 +175,7 @@ impl Rule for UseArrayLiterals {
                 && !type_arg.is_primitive_type()
                 && !matches!(type_arg, AnyTsType::TsReferenceType(_))
             {
-                // only wrap the type in parens if its not a literal, primative, or reference
+                // only wrap the type in parens if its not a literal, primitive, or reference
                 make::parenthesized_ts(type_arg).into()
             } else {
                 type_arg
@@ -277,11 +277,11 @@ fn get_type_arg_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
         JsNewOrCallExpression::JsCallExpression(expr) => expr.type_arguments(),
     };
     // check there's exactly one type arg
-    if let Some(type_arguments) = type_arguments {
-        if type_arguments.ts_type_argument_list().len() == 1 {
-            let list = type_arguments.ts_type_argument_list();
-            return list.first()?.ok();
-        }
+    if let Some(type_arguments) = type_arguments
+        && type_arguments.ts_type_argument_list().len() == 1
+    {
+        let list = type_arguments.ts_type_argument_list();
+        return list.first()?.ok();
     }
     None
 }

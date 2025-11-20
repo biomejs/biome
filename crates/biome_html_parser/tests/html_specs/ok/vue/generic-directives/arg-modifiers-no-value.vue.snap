@@ -1,0 +1,257 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<p v-foo:bar.baz></p>
+<p class="flex" v-foo:bar.baz></p>
+<p v-foo:bar.baz class="flex"></p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: VUE_IDENT@3..8 "v-foo" [] [],
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@8..9 ":" [] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@9..12 "bar" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@12..13 "." [] [],
+                                modifier_token: HTML_LITERAL@13..16 "baz" [] [],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                slash_token: SLASH@18..19 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@19..20 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@20..21 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@21..23 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@23..25 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@25..30 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@30..31 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@31..38 "\"flex\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    VueDirective {
+                        name_token: VUE_IDENT@38..43 "v-foo" [] [],
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@43..44 ":" [] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@44..47 "bar" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@47..48 "." [] [],
+                                modifier_token: HTML_LITERAL@48..51 "baz" [] [],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@51..52 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@52..53 "<" [] [],
+                slash_token: SLASH@53..54 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@54..55 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@55..56 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@56..58 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@58..60 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: VUE_IDENT@60..65 "v-foo" [] [],
+                        arg: VueDirectiveArgument {
+                            colon_token: COLON@65..66 ":" [] [],
+                            arg: VueStaticArgument {
+                                name_token: HTML_LITERAL@66..69 "bar" [] [],
+                            },
+                        },
+                        modifiers: VueModifierList [
+                            VueModifier {
+                                dot_token: DOT@69..70 "." [] [],
+                                modifier_token: HTML_LITERAL@70..74 "baz" [] [Whitespace(" ")],
+                            },
+                        ],
+                        initializer: missing (optional),
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@74..79 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@79..80 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@80..86 "\"flex\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@86..87 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@87..88 "<" [] [],
+                slash_token: SLASH@88..89 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@89..90 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@90..91 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@91..92 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..92
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..91
+    0: HTML_ELEMENT@0..21
+      0: HTML_OPENING_ELEMENT@0..17
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..3
+          0: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@3..16
+          0: VUE_DIRECTIVE@3..16
+            0: VUE_IDENT@3..8 "v-foo" [] []
+            1: VUE_DIRECTIVE_ARGUMENT@8..12
+              0: COLON@8..9 ":" [] []
+              1: VUE_STATIC_ARGUMENT@9..12
+                0: HTML_LITERAL@9..12 "bar" [] []
+            2: VUE_MODIFIER_LIST@12..16
+              0: VUE_MODIFIER@12..16
+                0: DOT@12..13 "." [] []
+                1: HTML_LITERAL@13..16 "baz" [] []
+            3: (empty)
+        3: R_ANGLE@16..17 ">" [] []
+      1: HTML_ELEMENT_LIST@17..17
+      2: HTML_CLOSING_ELEMENT@17..21
+        0: L_ANGLE@17..18 "<" [] []
+        1: SLASH@18..19 "/" [] []
+        2: HTML_TAG_NAME@19..20
+          0: HTML_LITERAL@19..20 "p" [] []
+        3: R_ANGLE@20..21 ">" [] []
+    1: HTML_ELEMENT@21..56
+      0: HTML_OPENING_ELEMENT@21..52
+        0: L_ANGLE@21..23 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@23..25
+          0: HTML_LITERAL@23..25 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@25..51
+          0: HTML_ATTRIBUTE@25..38
+            0: HTML_ATTRIBUTE_NAME@25..30
+              0: HTML_LITERAL@25..30 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..38
+              0: EQ@30..31 "=" [] []
+              1: HTML_STRING@31..38
+                0: HTML_STRING_LITERAL@31..38 "\"flex\"" [] [Whitespace(" ")]
+          1: VUE_DIRECTIVE@38..51
+            0: VUE_IDENT@38..43 "v-foo" [] []
+            1: VUE_DIRECTIVE_ARGUMENT@43..47
+              0: COLON@43..44 ":" [] []
+              1: VUE_STATIC_ARGUMENT@44..47
+                0: HTML_LITERAL@44..47 "bar" [] []
+            2: VUE_MODIFIER_LIST@47..51
+              0: VUE_MODIFIER@47..51
+                0: DOT@47..48 "." [] []
+                1: HTML_LITERAL@48..51 "baz" [] []
+            3: (empty)
+        3: R_ANGLE@51..52 ">" [] []
+      1: HTML_ELEMENT_LIST@52..52
+      2: HTML_CLOSING_ELEMENT@52..56
+        0: L_ANGLE@52..53 "<" [] []
+        1: SLASH@53..54 "/" [] []
+        2: HTML_TAG_NAME@54..55
+          0: HTML_LITERAL@54..55 "p" [] []
+        3: R_ANGLE@55..56 ">" [] []
+    2: HTML_ELEMENT@56..91
+      0: HTML_OPENING_ELEMENT@56..87
+        0: L_ANGLE@56..58 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@58..60
+          0: HTML_LITERAL@58..60 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@60..86
+          0: VUE_DIRECTIVE@60..74
+            0: VUE_IDENT@60..65 "v-foo" [] []
+            1: VUE_DIRECTIVE_ARGUMENT@65..69
+              0: COLON@65..66 ":" [] []
+              1: VUE_STATIC_ARGUMENT@66..69
+                0: HTML_LITERAL@66..69 "bar" [] []
+            2: VUE_MODIFIER_LIST@69..74
+              0: VUE_MODIFIER@69..74
+                0: DOT@69..70 "." [] []
+                1: HTML_LITERAL@70..74 "baz" [] [Whitespace(" ")]
+            3: (empty)
+          1: HTML_ATTRIBUTE@74..86
+            0: HTML_ATTRIBUTE_NAME@74..79
+              0: HTML_LITERAL@74..79 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@79..86
+              0: EQ@79..80 "=" [] []
+              1: HTML_STRING@80..86
+                0: HTML_STRING_LITERAL@80..86 "\"flex\"" [] []
+        3: R_ANGLE@86..87 ">" [] []
+      1: HTML_ELEMENT_LIST@87..87
+      2: HTML_CLOSING_ELEMENT@87..91
+        0: L_ANGLE@87..88 "<" [] []
+        1: SLASH@88..89 "/" [] []
+        2: HTML_TAG_NAME@89..90
+          0: HTML_LITERAL@89..90 "p" [] []
+        3: R_ANGLE@90..91 ">" [] []
+  4: EOF@91..92 "" [Newline("\n")] []
+
+```

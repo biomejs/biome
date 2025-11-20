@@ -85,7 +85,7 @@ type JsonRpcResult = Result<Box<RawValue>, TransportError>;
 /// same underlying I/O object but are represented as separate so they can be
 /// used concurrently
 ///
-/// This concurrent handling of I/O is implemented useing two "background tasks":
+/// This concurrent handling of I/O is implemented using two "background tasks":
 /// - the `write_task` pulls outgoing messages from the "write channel" and
 ///   writes them to the "write half" of the socket
 /// - the `read_task` reads incoming messages from the "read half" of the

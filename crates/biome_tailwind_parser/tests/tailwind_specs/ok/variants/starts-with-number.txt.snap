@@ -1,0 +1,54 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+2xl:table
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@0..3 "2xl" [] [],
+                },
+                COLON@3..4 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@4..10 "table" [] [Newline("\n")],
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@10..10 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..10
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..10
+    0: TW_FULL_CANDIDATE@0..10
+      0: TW_VARIANT_LIST@0..4
+        0: TW_STATIC_VARIANT@0..3
+          0: TW_BASE@0..3 "2xl" [] []
+        1: COLON@3..4 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@4..10
+        0: TW_BASE@4..10 "table" [] [Newline("\n")]
+      3: (empty)
+  2: EOF@10..10 "" [] []
+
+```

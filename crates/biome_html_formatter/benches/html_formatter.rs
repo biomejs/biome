@@ -1,6 +1,6 @@
 use biome_formatter::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
-use biome_html_parser::parse_html;
+use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{HtmlFileSource, HtmlRoot};
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
@@ -37,7 +37,7 @@ fn bench_formatter(criterion: &mut Criterion) {
             Ok(test_case) => {
                 let code = test_case.code();
                 let file_source = HtmlFileSource::try_from(test_case.path()).unwrap_or_default();
-                let parsed = parse_html(code, file_source);
+                let parsed = parse_html(code, HtmlParseOptions::from(&file_source));
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),
@@ -45,7 +45,8 @@ fn bench_formatter(criterion: &mut Criterion) {
                     |b, _| {
                         fn format(root: HtmlRoot) -> Printed {
                             let formatted =
-                                format_node(HtmlFormatOptions::default(), root.syntax()).unwrap();
+                                format_node(HtmlFormatOptions::default(), root.syntax(), false)
+                                    .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
                             printed.expect("Document to be valid")

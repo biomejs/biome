@@ -3,12 +3,13 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_module_graph::{JsModuleInfo, ModuleGraph};
+use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct ModuleGraphService(Arc<ModuleGraph>);
+pub struct ModuleGraphService(Arc<ModuleGraph>, Arc<ProjectLayout>);
 
 impl ModuleGraphService {
     pub fn module_graph(&self) -> &ModuleGraph {
@@ -17,6 +18,10 @@ impl ModuleGraphService {
 
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
         self.0.module_info_for_path(path)
+    }
+
+    pub fn project_layout(&self) -> &ProjectLayout {
+        self.1.as_ref()
     }
 }
 
@@ -41,7 +46,11 @@ impl FromServices for ModuleGraphService {
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"]))?;
 
-        Ok(Self(module_graph.clone()))
+        let project_layout: &Arc<ProjectLayout> = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ProjectLayout"]))?;
+
+        Ok(Self(module_graph.clone(), project_layout.clone()))
     }
 }
 

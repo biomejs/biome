@@ -22,8 +22,8 @@ where
 }
 
 /// Formats a single element inside a separated list.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct FormatSeparatedElement<N, R>
+#[derive(Debug, Clone)]
+pub struct FormatSeparatedElement<N, R, C>
 where
     N: AstNode,
     R: FormatSeparatedElementRule<N>,
@@ -34,9 +34,11 @@ where
     /// The separator to write if the element has no separator yet.
     separator: &'static str,
     options: FormatSeparatedOptions,
+    on_skipped: fn(&SyntaxToken<N::Language>, &mut Formatter<C>) -> FormatResult<()>,
+    on_removed: fn(&SyntaxToken<N::Language>, &mut Formatter<C>) -> FormatResult<()>,
 }
 
-impl<N, R> FormatSeparatedElement<N, R>
+impl<N, R, C> FormatSeparatedElement<N, R, C>
 where
     N: AstNode,
     R: FormatSeparatedElementRule<N>,
@@ -47,7 +49,7 @@ where
     }
 }
 
-impl<N, R, C> Format<C> for FormatSeparatedElement<N, R>
+impl<N, R, C> Format<C> for FormatSeparatedElement<N, R, C>
 where
     N: AstNode,
     N::Language: 'static,
@@ -77,7 +79,7 @@ where
                         // Use format_replaced instead of wrapping the result of format_token
                         // in order to remove only the token itself when the group doesn't break
                         // but still print its associated trivia unconditionally
-                        format_only_if_breaks(separator, &format_separator)
+                        format_only_if_breaks(separator, &format_separator, self.on_skipped)
                             .with_group_id(self.options.group_id)
                             .fmt(f)?;
                     }
@@ -88,9 +90,7 @@ where
                         // A trailing separator was present where it wasn't allowed, opt out of formatting
                         return Err(FormatError::SyntaxError);
                     }
-                    TrailingSeparator::Omit => {
-                        write!(f, [format_removed(separator)])?;
-                    }
+                    TrailingSeparator::Omit => (self.on_removed)(separator, f)?,
                 }
             } else {
                 write!(f, [format_separator])?;
@@ -100,12 +100,12 @@ where
                 TrailingSeparator::Allowed => {
                     write!(
                         f,
-                        [if_group_breaks(&text(self.separator))
+                        [if_group_breaks(&token(self.separator))
                             .with_group_id(self.options.group_id)]
                     )?;
                 }
                 TrailingSeparator::Mandatory => {
-                    text(self.separator).fmt(f)?;
+                    token(self.separator).fmt(f)?;
                 }
                 TrailingSeparator::Omit | TrailingSeparator::Disallowed => { /* no op */ }
             }
@@ -121,28 +121,40 @@ where
 
 /// Iterator for formatting separated elements. Prints the separator between each element and
 /// inserts a trailing separator if necessary
-pub struct FormatSeparatedIter<I, Node, Rule>
+pub struct FormatSeparatedIter<I, Node, Rule, C>
 where
     Node: AstNode,
+    C: CstFormatContext,
 {
     next: Option<AstSeparatedElement<Node::Language, Node>>,
     rule: Rule,
     inner: I,
     separator: &'static str,
     options: FormatSeparatedOptions,
+    on_skipped: fn(&SyntaxToken<Node::Language>, &mut Formatter<C>) -> FormatResult<()>,
+    on_removed: fn(&SyntaxToken<Node::Language>, &mut Formatter<C>) -> FormatResult<()>,
 }
 
-impl<I, Node, Rule> FormatSeparatedIter<I, Node, Rule>
+impl<I, Node, Rule, C> FormatSeparatedIter<I, Node, Rule, C>
 where
     Node: AstNode,
+    C: CstFormatContext,
 {
-    pub fn new(inner: I, separator: &'static str, rule: Rule) -> Self {
+    pub fn new(
+        inner: I,
+        separator: &'static str,
+        rule: Rule,
+        on_skipped: fn(&SyntaxToken<Node::Language>, &mut Formatter<C>) -> FormatResult<()>,
+        on_removed: fn(&SyntaxToken<Node::Language>, &mut Formatter<C>) -> FormatResult<()>,
+    ) -> Self {
         Self {
             inner,
             rule,
             separator,
             next: None,
             options: FormatSeparatedOptions::default(),
+            on_skipped,
+            on_removed,
         }
     }
 
@@ -163,13 +175,14 @@ where
     }
 }
 
-impl<I, Node, Rule> Iterator for FormatSeparatedIter<I, Node, Rule>
+impl<I, Node, Rule, C> Iterator for FormatSeparatedIter<I, Node, Rule, C>
 where
     Node: AstNode,
     I: Iterator<Item = AstSeparatedElement<Node::Language, Node>>,
     Rule: FormatSeparatedElementRule<Node> + Clone,
+    C: CstFormatContext,
 {
-    type Item = FormatSeparatedElement<Node, Rule>;
+    type Item = FormatSeparatedElement<Node, Rule, C>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let element = self.next.take().or_else(|| self.inner.next())?;
@@ -183,23 +196,27 @@ where
             is_last,
             separator: self.separator,
             options: self.options,
+            on_skipped: self.on_skipped,
+            on_removed: self.on_removed,
         })
     }
 }
 
-impl<I, Node, Rule> std::iter::FusedIterator for FormatSeparatedIter<I, Node, Rule>
+impl<I, Node, Rule, C> std::iter::FusedIterator for FormatSeparatedIter<I, Node, Rule, C>
 where
     Node: AstNode,
     I: Iterator<Item = AstSeparatedElement<Node::Language, Node>> + std::iter::FusedIterator,
     Rule: FormatSeparatedElementRule<Node> + Clone,
+    C: CstFormatContext,
 {
 }
 
-impl<I, Node, Rule> std::iter::ExactSizeIterator for FormatSeparatedIter<I, Node, Rule>
+impl<I, Node, Rule, C> std::iter::ExactSizeIterator for FormatSeparatedIter<I, Node, Rule, C>
 where
     Node: AstNode,
     I: Iterator<Item = AstSeparatedElement<Node::Language, Node>> + ExactSizeIterator,
     Rule: FormatSeparatedElementRule<Node> + Clone,
+    C: CstFormatContext,
 {
 }
 

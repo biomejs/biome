@@ -13,16 +13,22 @@ pub struct CssFileSource {
 
 /// The style of CSS contained in the file.
 ///
-/// Currently, Biome only supports plain CSS, and aims to be compatible with
+/// Currently, Biome aims to be compatible with
 /// the latest Recommendation level standards.
+///
+/// It also supports Tailwind CSS syntax additions, when the parser option is enabled.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 #[serde(rename_all = "camelCase")]
-enum CssVariant {
+pub enum CssVariant {
     #[default]
     Standard,
+    /// The file is a CSS module
+    CssModules,
+    /// The file belongs to tailwind
+    TailwindCss,
 }
 
 impl CssFileSource {
@@ -30,6 +36,24 @@ impl CssFileSource {
         Self {
             variant: CssVariant::Standard,
         }
+    }
+
+    pub fn tailwind_css() -> Self {
+        Self {
+            variant: CssVariant::TailwindCss,
+        }
+    }
+
+    pub fn is_css_modules(&self) -> bool {
+        self.variant == CssVariant::CssModules
+    }
+
+    pub fn is_tailwind_css(&self) -> bool {
+        self.variant == CssVariant::TailwindCss
+    }
+
+    pub fn set_variant(&mut self, variant: CssVariant) {
+        self.variant = variant;
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
@@ -56,6 +80,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
+            "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

@@ -1,6 +1,6 @@
 //! Hardcoded global definitions.
 
-// FIXME: Implement inference from type definitions.
+// FIXME: Implement inference from type definitions: https://github.com/biomejs/biome/issues/5977
 
 use std::{
     borrow::Cow,
@@ -11,13 +11,14 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeInstance,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
+    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
-const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_LEVEL);
 
 pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
@@ -26,7 +27,7 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
     (0..NUM_PREDEFINED_TYPES)
         .map(TypeId::new)
         .map(|id| TypeMember {
-            kind: TypeMemberKind::Named(Text::Static(global_type_name(id))),
+            kind: TypeMemberKind::Named(Text::new_static(global_type_name(id))),
             ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
         })
         .collect()
@@ -58,22 +59,25 @@ pub const PROMISE_RACE_ID: TypeId = TypeId::new(22);
 pub const PROMISE_REJECT_ID: TypeId = TypeId::new(23);
 pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(24);
 pub const PROMISE_TRY_ID: TypeId = TypeId::new(25);
-pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(26);
-pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(27);
-pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(28);
-pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(29);
-pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(30);
-pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(31);
-pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(32);
-pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(33);
-pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(34);
-pub const T_ID: TypeId = TypeId::new(35);
-pub const U_ID: TypeId = TypeId::new(36);
-pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(37);
-pub const MAP_CALLBACK_ID: TypeId = TypeId::new(38);
-pub const VOID_CALLBACK_ID: TypeId = TypeId::new(39);
-pub const FETCH_ID: TypeId = TypeId::new(40);
-pub const NUM_PREDEFINED_TYPES: usize = 41; // Must be one more than the highest `TypeId` above.
+pub const INSTANCEOF_REGEXP_ID: TypeId = TypeId::new(26);
+pub const REGEXP_ID: TypeId = TypeId::new(27);
+pub const REGEXP_EXEC_ID: TypeId = TypeId::new(28);
+pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(29);
+pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(30);
+pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(31);
+pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(32);
+pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(33);
+pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(34);
+pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(35);
+pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(36);
+pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(37);
+pub const T_ID: TypeId = TypeId::new(38);
+pub const U_ID: TypeId = TypeId::new(39);
+pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(40);
+pub const MAP_CALLBACK_ID: TypeId = TypeId::new(41);
+pub const VOID_CALLBACK_ID: TypeId = TypeId::new(42);
+pub const FETCH_ID: TypeId = TypeId::new(43);
+pub const NUM_PREDEFINED_TYPES: usize = 44; // Must be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -82,6 +86,9 @@ pub const GLOBAL_CONDITIONAL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEV
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
 pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
+pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
+pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);
 pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
 pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
@@ -139,24 +146,27 @@ pub fn global_type_name(id: TypeId) -> &'static str {
         23 => "Promise.reject",
         24 => "Promise.resolve",
         25 => "Promise.try",
-        26 => "\"bigint\"",
-        27 => "\"boolean\"",
-        28 => "\"function\"",
-        29 => "\"number\"",
-        30 => "\"object\"",
-        31 => "\"string\"",
-        32 => "\"symbol\"",
-        33 => "\"undefined\"",
-        34 => {
+        26 => "instanceof RegExp",
+        27 => "RegExp",
+        28 => "RegExp.exec",
+        29 => "\"bigint\"",
+        30 => "\"boolean\"",
+        31 => "\"function\"",
+        32 => "\"number\"",
+        33 => "\"object\"",
+        34 => "\"string\"",
+        35 => "\"symbol\"",
+        36 => "\"undefined\"",
+        37 => {
             "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" \
                 | \"string\" | \"symbol\" | \"undefined\""
         }
-        35 => "T",
-        36 => "U",
-        37 => "() => conditional",
-        38 => "<U>(item: T) => U",
-        39 => "() => void",
-        40 => "fetch",
+        38 => "T",
+        39 => "U",
+        40 => "() => conditional",
+        41 => "<U>(item: T) => U",
+        42 => "() => void",
+        43 => "fetch",
         _ => "inferred type",
     }
 }
@@ -173,12 +183,12 @@ pub struct GlobalsResolver {
 impl Default for GlobalsResolver {
     fn default() -> Self {
         let method = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::Named(Text::Static(name)),
+            kind: TypeMemberKind::Named(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
         let static_method = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::NamedStatic(Text::Static(name)),
+            kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
@@ -190,14 +200,13 @@ impl Default for GlobalsResolver {
                 TypeData::from(Function {
                     is_async: false,
                     type_parameters,
-                    name: Some(Text::Static(global_type_name(id))),
-                    parameters: [FunctionParameter {
-                        name: None,
+                    name: Some(Text::new_static(global_type_name(id))),
+                    parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                         bindings: Default::default(),
                         is_optional: false,
                         is_rest: false,
                         ty: ResolvedTypeId::new(TypeResolverLevel::Global, param_type_id).into(),
-                    }]
+                    })]
                     .into(),
                     return_type: ReturnType::Type(
                         ResolvedTypeId::new(TypeResolverLevel::Global, return_type_id).into(),
@@ -209,14 +218,24 @@ impl Default for GlobalsResolver {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(id))),
+                name: Some(Text::new_static(global_type_name(id))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             })
         };
 
+        let regexp_method_definition = |id: TypeId| {
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::new_static(global_type_name(id))),
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
+            })
+        };
+
         let string_literal = |value: &'static str| -> TypeData {
-            TypeData::from(Literal::String(Text::Static(value).into()))
+            TypeData::from(Literal::String(Text::new_static(value).into()))
         };
 
         let types = vec![
@@ -232,7 +251,7 @@ impl Default for GlobalsResolver {
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             }),
             TypeData::Class(Box::new(Class {
-                name: Some(Text::Static("Array")),
+                name: Some(Text::new_static("Array")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
@@ -241,7 +260,7 @@ impl Default for GlobalsResolver {
                     method("forEach", ARRAY_FOREACH_ID),
                     method("map", ARRAY_MAP_ID),
                     TypeMember {
-                        kind: TypeMemberKind::Named(Text::Static("length")),
+                        kind: TypeMemberKind::Named(Text::new_static("length")),
                         ty: GLOBAL_NUMBER_ID.into(),
                     },
                 ]),
@@ -267,7 +286,7 @@ impl Default for GlobalsResolver {
             TypeData::Global,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
             TypeData::Class(Box::new(Class {
-                name: Some(Text::Static("Promise")),
+                name: Some(Text::new_static("Promise")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
@@ -291,14 +310,13 @@ impl Default for GlobalsResolver {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(PROMISE_CONSTRUCTOR_ID))),
-                parameters: [FunctionParameter {
-                    name: None,
+                name: Some(Text::new_static(global_type_name(PROMISE_CONSTRUCTOR_ID))),
+                parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
                     ty: ResolvedTypeId::new(GLOBAL_LEVEL, VOID_CALLBACK_ID).into(),
-                }]
+                })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
@@ -312,6 +330,15 @@ impl Default for GlobalsResolver {
             promise_method_definition(PROMISE_REJECT_ID),
             promise_method_definition(PROMISE_RESOLVE_ID),
             promise_method_definition(PROMISE_TRY_ID),
+            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID)),
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::new_static("RegExp")),
+                type_parameters: Box::default(),
+                extends: None,
+                implements: [].into(),
+                members: Box::new([method("exec", REGEXP_EXEC_ID)]),
+            })),
+            regexp_method_definition(REGEXP_EXEC_ID),
             string_literal("bigint"),
             string_literal("boolean"),
             string_literal("function"),
@@ -331,47 +358,46 @@ impl Default for GlobalsResolver {
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ])))),
             TypeData::from(GenericTypeParameter {
-                name: Text::Static("T"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                name: Text::new_static("T"),
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(GenericTypeParameter {
-                name: Text::Static("U"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                name: Text::new_static("U"),
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(CONDITIONAL_CALLBACK_ID))),
+                name: Some(Text::new_static(global_type_name(CONDITIONAL_CALLBACK_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(MAP_CALLBACK_ID))),
-                parameters: [FunctionParameter {
-                    name: None,
+                name: Some(Text::new_static(global_type_name(MAP_CALLBACK_ID))),
+                parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     ty: GLOBAL_U_ID.into(),
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
-                }]
+                })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_U_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(VOID_CALLBACK_ID))),
+                name: Some(Text::new_static(global_type_name(VOID_CALLBACK_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(FETCH_ID))),
+                name: Some(Text::new_static(global_type_name(FETCH_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             }),
@@ -433,7 +459,7 @@ impl TypeResolver for GlobalsResolver {
         self.types.get_by_id(id)
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
     }
 
@@ -448,7 +474,6 @@ impl TypeResolver for GlobalsResolver {
                 (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
             }
             TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
 
@@ -457,8 +482,12 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
-        } else if !qualifier.type_only && qualifier.path.len() == 1 {
-            self.resolve_type_of(&qualifier.path[0], qualifier.scope_id)
+        } else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_REGEXP_ID)
+        } else if !qualifier.type_only
+            && let Some(ident) = qualifier.path.identifier()
+        {
+            self.resolve_type_of(ident, qualifier.scope_id)
         } else {
             None
         }
@@ -472,7 +501,11 @@ impl TypeResolver for GlobalsResolver {
         }
     }
 
-    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 

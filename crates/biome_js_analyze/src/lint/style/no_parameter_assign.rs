@@ -132,7 +132,7 @@ impl Rule for NoParameterAssign {
 
         if let Some(declaration) = binding.declaration() {
             let options = ctx.options();
-            if options.property_assignment == PropertyAssignmentMode::Deny
+            if options.property_assignment == Some(PropertyAssignmentMode::Deny)
                 && matches!(declaration, AnyJsBindingDeclaration::JsFormalParameter(_))
             {
                 let expressions: Vec<_> = binding

@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-props-interface.vue
+---
+# Input
+```ts
+// These are Vue v.2 reserved props, but they are not reserved in Vue v.3.
+interface Props {
+    is: string;
+    slot: string;
+    "slot-scope": string;
+}
+defineProps<Props>();
+
+```

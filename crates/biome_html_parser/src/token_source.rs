@@ -4,7 +4,9 @@ use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
 use biome_parser::prelude::BumpWithContext;
-use biome_parser::token_source::{TokenSource, TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::token_source::{
+    TokenSource, TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia,
+};
 use biome_rowan::TriviaPieceKind;
 
 pub(crate) struct HtmlTokenSource<'source> {
@@ -16,29 +18,62 @@ pub(crate) struct HtmlTokenSource<'source> {
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum HtmlLexContext {
-    /// The default state. This state is used for a majority of the lexing, which is inside html tags.
-    #[default]
-    Regular,
+    /// The default state. This state is used for lexing outside of tags.
+    ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
-    /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
-    OutsideTag,
+    /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
+    #[default]
+    Regular,
+    /// When the lexer is inside a tag, special characters are lexed as tag tokens.
+    InsideTag,
+    /// Like [InsideTag], but with Vue-specific tokens enabled.
+    InsideTagVue,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+
+    /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
+    /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
+    ///
+    /// Outside of this context, the lexer doesn't yield any particular keywords.
+    Svelte,
+
+    /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
+    /// - `{{ foo }}`
+    /// - `attr={ foo }`
+    TextExpression(TextExpressionKind),
     /// Enables the `html` keyword token.
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
     Doctype,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbeddedLanguage),
-    /// Comments are treated as text until the closing comment tag is encountered.
-    Comment,
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
     CdataSection,
-    /// Lexing the Astro frontmatter
+    /// Lexing the Astro frontmatter. When in this context, the lexer will treat `---`
+    /// as a boundary for `HTML_LITERAL`
     AstroFencedCodeBlock,
+}
+
+impl HtmlLexContext {
+    pub fn single_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Single)
+    }
+
+    pub fn double_expression() -> Self {
+        Self::TextExpression(TextExpressionKind::Double)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+pub(crate) enum TextExpressionKind {
+    // {{ expr }}
+    #[default]
+    Double,
+    // { expr }
+    Single,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
@@ -63,6 +98,14 @@ impl LexContext for HtmlLexContext {
         matches!(self, Self::Regular)
     }
 }
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum HtmlReLexContext {
+    Svelte,
+    SingleTextExpression,
+}
+
+pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
@@ -107,6 +150,25 @@ impl<'source> HtmlTokenSource<'source> {
                 }
             }
         }
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub fn checkpoint(&self) -> HtmlTokenSourceCheckpoint {
+        HtmlTokenSourceCheckpoint {
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
+        }
+    }
+
+    /// Restores the token source to a previous state
+    pub fn rewind(&mut self, checkpoint: HtmlTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
+    }
+
+    pub fn re_lex(&mut self, mode: HtmlReLexContext) -> HtmlSyntaxKind {
+        self.lexer.re_lex(mode)
     }
 }
 

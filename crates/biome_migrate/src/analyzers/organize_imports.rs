@@ -139,12 +139,10 @@ fn is_organize_imports_enabled(organize_imports_member: &JsonMember) -> bool {
                 .name()
                 .and_then(|val| val.inner_string_text())
                 .is_ok_and(|val| val.text() == "enabled")
+                && let Ok(AnyJsonValue::JsonBooleanValue(enabled)) = member_val.value()
+                && let Ok(enabled) = enabled.value_token()
             {
-                if let Ok(AnyJsonValue::JsonBooleanValue(enabled)) = member_val.value() {
-                    if let Ok(enabled) = enabled.value_token() {
-                        return enabled.text_trimmed() != "false";
-                    }
-                }
+                return enabled.text_trimmed() != "false";
             }
         }
     }

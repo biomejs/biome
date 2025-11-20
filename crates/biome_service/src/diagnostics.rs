@@ -513,7 +513,7 @@ impl Diagnostic for QueryDiagnostic {
 }
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
-    let file_source = DocumentFileSource::from_path(path);
+    let file_source = DocumentFileSource::from_path(path, false);
     WorkspaceError::source_file_not_supported(
         file_source,
         path.clone().to_string(),
@@ -577,8 +577,8 @@ impl Diagnostic for TransportError {
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum VcsDiagnostic {
-    /// When the VCS folder couldn't be found
-    NoVcsFolderFound(NoVcsFolderFound),
+    /// When the VCS ignore file can't be found
+    NoIgnoreFileFound(NoIgnoreFileFound),
     /// VCS is disabled
     DisabledVcs(DisabledVcs),
 }
@@ -608,11 +608,11 @@ impl From<CompileError> for WorkspaceError {
     category = "internalError/fs",
     severity = Error,
     message(
-        description = "Biome couldn't find the VCS folder at the following path: {path}",
-        message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
+        description = "Biome couldn't find an ignore file in the following folder: {path}",
+        message("Biome couldn't find an ignore file in the following folder: "<Emphasis>{self.path}</Emphasis>),
     )
 )]
-pub struct NoVcsFolderFound {
+pub struct NoIgnoreFileFound {
     #[location(resource)]
     pub path: String,
 }
@@ -621,7 +621,7 @@ pub struct NoVcsFolderFound {
 #[diagnostic(
     category = "internalError/fs",
     severity = Warning,
-    message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
+    message = "Biome couldn't determine a folder for the VCS integration. VCS integration will be disabled."
 )]
 pub struct DisabledVcs {}
 
@@ -698,6 +698,7 @@ mod test {
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
     use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -804,5 +805,12 @@ mod test {
             "non_utf8_path",
             Error::from(WorkspaceError::non_utf8_path(OsString::from("path.js"))),
         )
+    }
+
+    #[test]
+    fn module_diagnostic() {
+        let diagnostics = ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit())
+            .with_file_path("example.js");
+        snap_diagnostic("module_diagnostic", diagnostics);
     }
 }

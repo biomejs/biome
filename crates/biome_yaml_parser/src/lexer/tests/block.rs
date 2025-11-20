@@ -24,7 +24,7 @@ fn lex_mapping_key_special_char() {
 }
 
 #[test]
-fn lex_unambigous_mapping_and_comment() {
+fn lex_unambiguous_mapping_and_comment() {
     assert_lex!(
         "abc: #abc",
         MAPPING_START:0,
@@ -49,14 +49,14 @@ fn lex_explicit_mapping() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:2,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         QUESTION:1,
         WHITESPACE:1,
         FLOW_START:0,
@@ -81,27 +81,62 @@ fn lex_compact_mapping_in_sequence() {
         MAPPING_START:0,
         PLAIN_LITERAL:1,
         COLON:1,
-        WHITESPACE:1
+        WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:1,
-        NEWLINE:3,
         FLOW_END:0,
-        PLAIN_LITERAL:1,
-        COLON:1,
-        WHITESPACE:1
-        FLOW_START:0,
-        PLAIN_LITERAL:1,
-        NEWLINE:3,
-        FLOW_END:0,
-        PLAIN_LITERAL:1,
-        COLON:1,
-        WHITESPACE:1
-        FLOW_START:0,
-        PLAIN_LITERAL:1,
         NEWLINE:1,
+        WHITESPACE:2,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:1,
+        FLOW_END:0,
+        NEWLINE:1,
+        WHITESPACE:2,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:1,
         FLOW_END:0,
         MAPPING_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
+    );
+}
+
+#[test]
+fn lex_nested_sequence() {
+    assert_lex!(
+        r#"
+- - 10
+  - 20
+-
+"#,
+        NEWLINE:1
+        SEQUENCE_START:0
+        DASH:1
+        WHITESPACE:1
+        SEQUENCE_START:0
+        DASH:1
+        WHITESPACE:1
+        FLOW_START:0
+        PLAIN_LITERAL:2
+        FLOW_END:0
+        NEWLINE:1
+        WHITESPACE:2
+        DASH:1
+        WHITESPACE:1
+        FLOW_START:0
+        PLAIN_LITERAL:2
+        FLOW_END:0
+        SEQUENCE_END:0
+        NEWLINE:1
+        DASH:1
+        SEQUENCE_END:0
+        NEWLINE:1
     );
 }
 
@@ -128,17 +163,17 @@ fn lex_nested_compact_sequence() {
         WHITESPACE:1,
         SEQUENCE_START:0,
         DASH:1,
+        SEQUENCE_END:0,
+        SEQUENCE_END:0,
         NEWLINE:1,
         WHITESPACE:4,
-        SEQUENCE_END:0,
-        SEQUENCE_END:0,
         DASH:1,
+        SEQUENCE_END:0,
+        SEQUENCE_END:0,
         NEWLINE:1,
-        SEQUENCE_END:0,
-        SEQUENCE_END:0,
         DASH:1,
-        NEWLINE:1,
         SEQUENCE_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -180,8 +215,8 @@ fn lex_flow_collection_as_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1
         FLOW_END:0,
+        NEWLINE:1
         L_CURLY:1
         PLAIN_LITERAL:1,
         COLON:1,
@@ -198,8 +233,8 @@ fn lex_flow_collection_as_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -218,8 +253,8 @@ fn lex_block_map_empty_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         L_BRACK:1,
         PLAIN_LITERAL:1,
         COMMA:1,
@@ -230,14 +265,14 @@ fn lex_block_map_empty_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -294,9 +329,9 @@ abc:
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         PLAIN_LITERAL:3,
         COLON:1,
         NEWLINE:1,
@@ -305,9 +340,9 @@ abc:
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         COLON:1,
         NEWLINE:1
         MAPPING_END:0,
@@ -386,5 +421,175 @@ a:
         COLON:1,
         MAPPING_END:0,
         MAPPING_END:0,
+    );
+}
+
+#[test]
+fn lex_mapping_separated_by_trivia() {
+    assert_lex!(
+        r#"
+? a: 10
+# this is another trivia
+c: 30
+"#,
+        NEWLINE:1,
+        MAPPING_START:0,
+        QUESTION:1,
+        WHITESPACE:1,
+        MAPPING_START:0,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:2,
+        FLOW_END:0,
+        MAPPING_END:0,
+        NEWLINE:1,
+        COMMENT:24,
+        NEWLINE:1,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:2,
+        FLOW_END:0,
+        NEWLINE:1,
+        MAPPING_END:0,
+    );
+}
+
+#[test]
+fn lex_basic_block_scalar() {
+    assert_lex!(
+        r"|
+    hello",
+        PIPE:1,
+        BLOCK_CONTENT_LITERAL:10,
+    );
+}
+
+#[test]
+fn lex_block_scalar_with_chomping_indicator() {
+    assert_lex!(
+        "|+",
+        PIPE:1,
+        PLUS:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+
+    assert_lex!(
+        "|-",
+        PIPE:1,
+        DASH:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+}
+
+#[test]
+fn lex_block_scalar_with_indentation_indicator() {
+    assert_lex!(
+        r"|2
+    content",
+        PIPE:1,
+        INDENTATION_INDICATOR:1,
+        BLOCK_CONTENT_LITERAL:12,
+    );
+    assert_lex!(
+        "|2+",
+        PIPE:1,
+        INDENTATION_INDICATOR:1,
+        PLUS:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+    assert_lex!(
+        r#"|+2
+    content"#,
+        PIPE:1,
+        PLUS:1,
+        INDENTATION_INDICATOR:1,
+        BLOCK_CONTENT_LITERAL:12,
+    );
+}
+
+#[test]
+fn lex_block_scalar_with_comment() {
+    assert_lex!(
+        "| # comment",
+        PIPE:1,
+        WHITESPACE:1,
+        COMMENT:9,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+
+    assert_lex!(
+        r">2+     # comment with indicators
+    content",
+        R_ANGLE:1,
+        INDENTATION_INDICATOR:1,
+        PLUS:1,
+        WHITESPACE:5,
+        COMMENT:25,
+        BLOCK_CONTENT_LITERAL:12,
+    );
+}
+
+#[test]
+fn lex_invalid_block_scalar_headers() {
+    assert_lex!(
+        "|0",
+        PIPE:1,
+        ERROR_TOKEN:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+
+    assert_lex!(
+        "|12-3+",
+        PIPE:1,
+        ERROR_TOKEN:2,
+        DASH:1,
+        INDENTATION_INDICATOR:1,
+        PLUS:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+
+    assert_lex!(
+        "| bc d
+    content",
+        PIPE:1,
+        WHITESPACE:1,
+        ERROR_TOKEN:4,
+        BLOCK_CONTENT_LITERAL:12,
+    );
+}
+
+#[test]
+fn lex_block_scalar_with_empty_content() {
+    assert_lex!(
+        r"|
+    ",
+        PIPE:1,
+        BLOCK_CONTENT_LITERAL:5,
+    );
+    assert_lex!(
+        r"|",
+        PIPE:1,
+        BLOCK_CONTENT_LITERAL:0,
+    );
+    assert_lex!(
+        ">\n    \n ",
+        R_ANGLE:1,
+        BLOCK_CONTENT_LITERAL:7,
+    );
+}
+
+#[test]
+fn lex_block_scalar_mixed_indentation() {
+    assert_lex!(
+        r"|
+  line1
+    indented
+ line2",
+        PIPE:1,
+        BLOCK_CONTENT_LITERAL:28,
     );
 }

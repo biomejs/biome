@@ -107,12 +107,11 @@ impl Rule for NoConstantCondition {
         // We must verify that the conditional statement is within a generator function.
         // If the statement contains a valid yield expression returned from a `while`, `for`, or `do...while` statement,
         // we don't need to examine the statement's `test`.
-        if let Some(any_js_stmt) = conditional_stmt.body() {
-            if conditional_stmt.is_in_generator_function()
-                && has_valid_yield_expression(&any_js_stmt).unwrap_or(false)
-            {
-                return None;
-            }
+        if let Some(any_js_stmt) = conditional_stmt.body()
+            && conditional_stmt.is_in_generator_function()
+            && has_valid_yield_expression(&any_js_stmt).unwrap_or(false)
+        {
+            return None;
         }
 
         let test = conditional_stmt.test()?;

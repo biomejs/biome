@@ -1,5 +1,9 @@
 #![deny(clippy::use_self)]
 
+use std::ffi::c_int;
+use std::fmt::Write;
+use std::sync::{Arc, Once};
+
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;
@@ -12,10 +16,9 @@ use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
-use biome_package::PackageJson;
+use biome_package::{Manifest, PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{ServiceLanguage, Settings};
@@ -23,9 +26,6 @@ use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
-use std::ffi::c_int;
-use std::fmt::Write;
-use std::sync::{Arc, Once};
 
 mod bench_case;
 
@@ -41,7 +41,7 @@ pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String
     }
 }
 
-pub fn create_analyzer_options(
+pub fn create_analyzer_options<L: ServiceLanguage>(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
@@ -49,7 +49,7 @@ pub fn create_analyzer_options(
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
-    let mut analyzer_configuration = AnalyzerConfiguration::default()
+    let analyzer_configuration = AnalyzerConfiguration::default()
         .with_preferred_quote(PreferredQuote::Double)
         .with_jsx_runtime(JsxRuntime::Transparent);
     let options_file = input_file.with_extension("options.json");
@@ -71,58 +71,28 @@ pub fn create_analyzer_options(
                 })
                 .collect::<Vec<_>>(),
         );
+
+        options.with_configuration(analyzer_configuration)
     } else {
         let configuration = deserialized.into_deserialized().unwrap_or_default();
+
         let mut settings = Settings::default();
-        analyzer_configuration = analyzer_configuration.with_preferred_quote(
-            configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| js.formatter.as_ref())
-                .and_then(|f| {
-                    f.quote_style.map(|quote_style| {
-                        if quote_style.is_double() {
-                            PreferredQuote::Double
-                        } else {
-                            PreferredQuote::Single
-                        }
-                    })
-                })
-                .unwrap_or_default(),
-        );
-
-        use biome_configuration::javascript::JsxRuntime::*;
-        analyzer_configuration = analyzer_configuration.with_jsx_runtime(
-            match configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| js.jsx_runtime)
-                .unwrap_or_default()
-            {
-                ReactClassic => JsxRuntime::ReactClassic,
-                Transparent => JsxRuntime::Transparent,
-            },
-        );
-        analyzer_configuration = analyzer_configuration.with_globals(
-            configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| {
-                    js.globals
-                        .as_ref()
-                        .map(|globals| globals.iter().cloned().collect())
-                })
-                .unwrap_or_default(),
-        );
-
         settings
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        analyzer_configuration =
-            analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
+        L::resolve_analyzer_options(
+            &settings,
+            &L::lookup_settings(&settings.languages).linter,
+            L::resolve_environment(&settings),
+            &BiomePath::new(input_file),
+            &DocumentFileSource::from_path(
+                input_file,
+                settings.experimental_full_html_support_enabled(),
+            ),
+            None,
+        )
     }
-    options.with_configuration(analyzer_configuration)
 }
 
 pub fn create_formatting_options<L>(
@@ -163,7 +133,10 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let document_file_source = DocumentFileSource::from_path(input_file);
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
         settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
@@ -207,7 +180,7 @@ pub fn get_added_paths<'a>(
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}"
+                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
                 parsed.try_tree()
             })?;
@@ -224,7 +197,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
             if path.is_dir() {
                 get_js_like_paths_in_dir(&path)
             } else {
-                DocumentFileSource::from_well_known(&path)
+                DocumentFileSource::from_well_known(&path, false)
                     .is_javascript_like()
                     .then(|| BiomePath::new(path))
                     .into_iter()
@@ -234,29 +207,30 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-pub fn project_layout_with_node_manifest(
+pub fn project_layout_for_test_file(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
-    let options_file = input_file.with_extension("package.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
-        );
+    let project_layout = ProjectLayout::default();
+    let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
+
+    let package_json_file = input_file.with_extension("package.json");
+    if let Ok(json) = std::fs::read_to_string(&package_json_file) {
+        let deserialized = PackageJson::read_manifest(&fs, &package_json_file);
         if deserialized.has_errors() {
             diagnostics.extend(
                 deserialized
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
-                    })
-                    .collect::<Vec<_>>(),
+                        diagnostic_to_string(
+                            package_json_file.file_stem().unwrap(),
+                            &json,
+                            diagnostic,
+                        )
+                    }),
             );
         } else {
-            let project_layout = ProjectLayout::default();
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
@@ -264,10 +238,33 @@ pub fn project_layout_with_node_manifest(
                     .unwrap_or_default(),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
-            return Arc::new(project_layout);
         }
     }
-    Default::default()
+
+    let tsconfig_file = input_file.with_extension("tsconfig.json");
+    if let Ok(json) = std::fs::read_to_string(&tsconfig_file) {
+        let deserialized = TsConfigJson::read_manifest(&fs, &tsconfig_file);
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(tsconfig_file.file_stem().unwrap(), &json, diagnostic)
+                    }),
+            );
+        } else {
+            project_layout.insert_tsconfig(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+        }
+    }
+
+    Arc::new(project_layout)
 }
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
@@ -514,7 +511,8 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
     assert!(
         last_token.token_text_trimmed().is_empty(),
-        "the EOF token may not contain any data except trailing whitespace"
+        "the EOF token may not contain any data except trailing whitespace, but found \"{}\"",
+        last_token.token_text_trimmed()
     );
 }
 
@@ -544,7 +542,7 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
 pub fn assert_diagnostics_expectation_comment<L: Language>(
     file_path: &Utf8Path,
     syntax: &SyntaxNode<L>,
-    diagnostics_quantity: usize,
+    diagnostics: Vec<String>,
 ) {
     let no_diagnostics_comment_text = "should not generate diagnostics";
     let diagnostics_comment_text = "should generate diagnostics";
@@ -582,11 +580,14 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
         None
     });
 
-    let has_diagnostics = diagnostics_quantity > 0;
+    let has_diagnostics = !diagnostics.is_empty();
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
-                panic!("This test should not generate diagnostics\nFile: {file_path}",);
+                panic!(
+                    "This test should not generate diagnostics\nFile: {file_path}\n\nDiagnostics: {}",
+                    diagnostics.join("\n")
+                );
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {

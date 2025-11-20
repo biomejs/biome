@@ -58,14 +58,14 @@ impl Format<JsFormatContext> for TsTypeMemberItem<'_> {
             match f.options().semicolons() {
                 Semicolons::Always => {
                     if self.last {
-                        write!(f, [if_group_breaks(&text(";"))])?;
+                        write!(f, [if_group_breaks(&token(";"))])?;
                     } else {
-                        text(";").fmt(f)?;
+                        token(";").fmt(f)?;
                     }
                 }
                 Semicolons::AsNeeded => {
                     if !self.last {
-                        write!(f, [if_group_fits_on_line(&text(";"))])?;
+                        write!(f, [if_group_fits_on_line(&token(";"))])?;
                     }
                 }
             }

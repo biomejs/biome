@@ -1,3 +1,4 @@
+use crate::node_semver::{Range, VersionError};
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{
@@ -10,8 +11,6 @@ use biome_json_syntax::JsonLanguage;
 use biome_json_value::JsonValue;
 use biome_text_size::TextRange;
 use camino::Utf8Path;
-use node_semver::{Range, SemverError};
-use std::panic::catch_unwind;
 use std::{ops::Deref, str::FromStr};
 
 /// Deserialized `package.json`.
@@ -107,7 +106,10 @@ impl PackageJson {
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
-    fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
+    fn deserialize_manifest(
+        root: &LanguageRoot<Self::Language>,
+        _path: &Utf8Path,
+    ) -> Deserialized<Self> {
         deserialize_from_json_ast::<Self>(root, "")
     }
 
@@ -191,7 +193,7 @@ impl Dependencies {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Version {
-    SemVer(node_semver::Range),
+    SemVer(Range),
     Literal(String),
 }
 
@@ -200,7 +202,7 @@ impl Version {
         let range = Range::from_str(other_range);
         if let Ok(other_range) = range {
             match self {
-                Self::SemVer(range) => range.allows_any(&other_range),
+                Self::SemVer(range) => range.intersects(&other_range),
                 Self::Literal(_) => false,
             }
         } else {
@@ -353,9 +355,9 @@ impl PackageType {
     }
 }
 
-fn parse_range(range: &str) -> Result<Version, SemverError> {
-    match catch_unwind(|| Range::parse(range).map(Version::SemVer)) {
-        Ok(result) => result,
+fn parse_range(range: &str) -> Result<Version, VersionError> {
+    match Range::from_str(range).map(Version::SemVer) {
+        Ok(result) => Ok(result),
         Err(_) => Ok(Version::Literal(range.to_string())),
     }
 }

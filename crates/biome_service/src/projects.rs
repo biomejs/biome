@@ -1,8 +1,10 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult};
-use biome_fs::ConfigName;
+use crate::workspace::{
+    DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
+};
+use biome_fs::{ConfigName, FileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -123,20 +125,46 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.0.pin().get(&project_key).is_none_or(|data| {
-            let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
-            path.components().any(|component| {
-                ignore_entries
-                    .iter()
-                    .any(|entry| entry == component.as_os_str().as_encoded_bytes())
-            })
-        })
+    /// Returns whether a path is force-ignored using a forced negation (`!!`)
+    /// as part of `files.includes`.
+    pub fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return false;
+        };
+
+        // Deprecated: Check `experimentalScannerIgnores` too.
+        let ignore_entries = &project_data.root_settings.files.scanner_ignore_entries;
+        if path.components().any(|component| {
+            ignore_entries
+                .iter()
+                .any(|entry| entry == component.as_os_str().as_encoded_bytes())
+        }) {
+            return true;
+        }
+
+        let includes = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(
+                &project_data.root_settings.files.includes,
+                |(_, settings)| &settings.files.includes,
+            );
+        includes.is_force_ignored(path)
     }
 
-    pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+    pub fn is_ignored_by_top_level_config(
+        &self,
+        fs: &dyn FileSystem,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
         match self.0.pin().get(&project_key) {
-            Some(project_data) => is_ignored_by_top_level_config(project_data, path),
+            Some(project_data) => {
+                is_ignored_by_top_level_config(fs, project_data, path, ignore_kind)
+            }
             None => false,
         }
     }
@@ -144,16 +172,19 @@ impl Projects {
     #[inline]
     pub fn is_ignored(
         &self,
+        fs: &dyn FileSystem,
         project_key: ProjectKey,
         path: &Utf8Path,
         features: FeatureName,
+        ignore_kind: IgnoreKind,
     ) -> bool {
         let data = self.0.pin();
         let Some(project_data) = data.get(&project_key) else {
             return false;
         };
 
-        let is_ignored_by_top_level_config = is_ignored_by_top_level_config(project_data, path);
+        let is_ignored_by_top_level_config =
+            is_ignored_by_top_level_config(fs, project_data, path, ignore_kind);
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
@@ -170,6 +201,7 @@ impl Projects {
     #[inline(always)]
     pub fn get_file_features(
         &self,
+        fs: &dyn FileSystem,
         project_key: ProjectKey,
         path: &Utf8Path,
         features: FeatureName,
@@ -190,7 +222,6 @@ impl Projects {
         let mut file_features = FeaturesSupported::default();
         file_features = file_features.with_capabilities(capabilities);
         file_features = file_features.with_settings_and_language(settings, path, capabilities);
-
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {
@@ -200,15 +231,14 @@ impl Projects {
             .is_some_and(|dir_path| dir_path == project_data.path)
         {
             // Never ignore Biome's top-level config file
-        } else if !settings.files.includes.is_included(path)
-            || project_data.root_settings.vcs_settings.is_ignored(path)
-        {
+        } else if self.is_ignored(fs, project_key, path, features, IgnoreKind::Ancestors) {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in features.iter() {
                 if project_data
                     .root_settings
                     .is_path_ignored_for_feature(path, feature)
+                    || settings.is_path_ignored_for_feature(path, feature)
                 {
                     file_features.set_ignored(feature);
                 }
@@ -250,7 +280,7 @@ impl Projects {
         path: Utf8PathBuf,
         settings: Settings,
     ) {
-        debug!("Set nested settings for {}", path.as_str());
+        debug!("Set nested settings for {path}");
         self.0.pin().update(project_key, |data| {
             let mut nested_settings = data.nested_settings.clone();
             nested_settings.insert(path.clone(), settings.clone());
@@ -258,7 +288,7 @@ impl Projects {
             ProjectData {
                 path: data.path.clone(),
                 root_settings: data.root_settings.clone(),
-                nested_settings: nested_settings.clone(),
+                nested_settings,
             }
         });
     }
@@ -272,8 +302,7 @@ impl Projects {
         self.0
             .pin()
             .iter()
-            .find(|(_, project_data)| path.starts_with(&project_data.path))
-            .map(|(key, _)| *key)
+            .find_map(|(key, project_data)| path.starts_with(&project_data.path).then_some(*key))
     }
 
     /// Checks whether the given `path` belongs to project with the given path
@@ -297,35 +326,15 @@ impl Projects {
 
         belongs_to_project && !belongs_to_other
     }
-
-    /// Returns the maximum file size setting for the given project.
-    pub fn get_max_file_size(&self, project_key: ProjectKey, file_path: &Utf8Path) -> usize {
-        let limit = self
-            .0
-            .pin()
-            .get(&project_key)
-            .and_then(|data| {
-                data.root_settings
-                    .override_settings
-                    .patterns
-                    .first()
-                    .and_then(|pattern| {
-                        if pattern.is_file_included(file_path) {
-                            pattern.files.max_size
-                        } else {
-                            None
-                        }
-                    })
-                    .or(data.root_settings.files.max_size)
-            })
-            .unwrap_or_default();
-
-        usize::from(limit)
-    }
 }
 
 #[inline]
-fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -> bool {
+fn is_ignored_by_top_level_config(
+    fs: &dyn FileSystem,
+    project_data: &ProjectData,
+    path: &Utf8Path,
+    ignore_kind: IgnoreKind,
+) -> bool {
     // First check if the path is ignored by the `files.includes` setting
     // relevant to the given `path`.
     let includes = project_data
@@ -336,11 +345,33 @@ fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -
             &project_data.root_settings.files.includes,
             |(_, settings)| &settings.files.includes,
         );
-    let is_included = includes.is_included(path);
+    let mut is_included = if fs.path_is_dir(path) {
+        includes.is_dir_included(path)
+    } else {
+        includes.is_file_included(path)
+    };
 
+    // If necessary, check all the ancestors too.
+    if ignore_kind == IgnoreKind::Ancestors {
+        for ancestor in path.ancestors().skip(1) {
+            if !is_included || ancestor == project_data.path {
+                break;
+            }
+
+            is_included = is_included && includes.is_dir_included(ancestor)
+        }
+    }
+
+    let root_path = match ignore_kind {
+        IgnoreKind::Ancestors => Some(project_data.path.as_path()),
+        IgnoreKind::Path => None,
+    };
     // VCS settings are used from the root settings, regardless of what
     // package we are analyzing, so we ignore the `path` for those.
-    let is_ignored_by_vcs = project_data.root_settings.vcs_settings.is_ignored(path);
+    let is_ignored_by_vcs = project_data
+        .root_settings
+        .vcs_settings
+        .is_ignored(path, root_path);
 
     !is_included || is_ignored_by_vcs
 }

@@ -28,34 +28,34 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-condition.js
     /// const promise = Promise.resolve('value');
     /// if (promise) { /* This branch will always execute */ }
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-ternary-condition.js
     /// const promise = Promise.resolve('value');
     /// const val = promise ? 123 : 456; // Always evaluates to `123`.
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-filter.js
     /// // The following filter has no effect:
     /// const promise = Promise.resolve('value');
     /// [1, 2, 3].filter(() => promise);
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-while-condition.js
     /// const promise = Promise.resolve('value');
     /// while (promise) { /* This is an endless loop */ }
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=spread-promise.js
     /// // Using a `Promise` as an iterable expands to nothing:
     /// const getData = () => fetch('/');
     /// console.log({ foo: 42, ...getData() });
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-forEach.js
     /// // These `fetch`-es are not `await`-ed in order:
     /// [1, 2, 3].forEach(async value => {
     ///     await fetch(`/${value}`);
@@ -64,7 +64,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```js,file=valid-promises.js
     /// const promise = Promise.resolve('value');
     /// if (await promise) { /* Do something */ }
     ///
@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMisusedPromises {
-        version: "next",
+        version: "2.1.0",
         name: "noMisusedPromises",
         language: "ts",
         recommended: true,
@@ -275,7 +275,7 @@ fn find_misused_promise_returning_callback(
     {
         let callee_ty = ctx.type_of_expression(&call_expression.callee().ok()?);
         let function = callee_ty.as_function()?;
-        callee_ty.resolve(&function.parameters.get(argument_index)?.ty)?
+        callee_ty.resolve(function.parameters.get(argument_index)?.ty())?
     } else if let Some(new_expression) = argument_list
         .syntax()
         .ancestors()
@@ -290,7 +290,7 @@ fn find_misused_promise_returning_callback(
             .find(|member| member.kind == TypeMemberKind::Constructor)?;
         let constructor_ty = callee_ty.resolve(&constructor.ty)?;
         let constructor = constructor_ty.as_function()?;
-        constructor_ty.resolve(&constructor.parameters.get(argument_index)?.ty)?
+        constructor_ty.resolve(constructor.parameters.get(argument_index)?.ty())?
     } else {
         return None;
     };

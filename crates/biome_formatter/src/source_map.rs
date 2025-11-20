@@ -41,7 +41,7 @@ use std::iter::FusedIterator;
 ///  (a+b) + (c + d)   a + b + c + d;
 /// ```
 ///
-/// Using the above example, the following source ranges should be returned when quering with the transformed ranges:
+/// Using the above example, the following source ranges should be returned when querying with the transformed ranges:
 ///
 /// * `a` -> `a`: Should not include the leading `(`
 /// * `b` -> `b`: Should not include the trailing `)`
@@ -139,7 +139,7 @@ impl TransformSourceMap {
     }
 
     /// Returns an iterator over all deleted ranges in increasing order by their start position.
-    pub fn deleted_ranges(&self) -> DeletedRanges {
+    pub fn deleted_ranges(&self) -> DeletedRanges<'_> {
         DeletedRanges {
             source_text: self.source(),
             deleted_ranges: self.deleted_ranges.iter(),
@@ -211,7 +211,7 @@ impl TransformSourceMap {
     /// in the original, untransformed source code.
     ///
     /// The printer creates a source map that allows mapping positions from the newly formatted document
-    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::DynamicText]
+    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::Text]
     /// and [crate::FormatElement::LocatedTokenText] are relative to the transformed tree
     /// and not the original tree passed to [crate::format_node].
     ///
@@ -639,7 +639,7 @@ mod tests {
 
         let source_map = builder.finish();
 
-        // The following mapping assume the tranformed string to be (including whitespace):
+        // The following mapping assume the transformed string to be (including whitespace):
         // "a + b + c + d + e";
 
         // `a`

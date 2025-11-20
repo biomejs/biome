@@ -577,12 +577,12 @@ fn uppercase_fn<'a>(
     Ok(ResolvedPattern::from_string(string.to_uppercase()))
 }
 
-fn capitalize(s: &str) -> Cow<str> {
-    if let Some(first_char) = s.chars().next() {
-        if !first_char.is_uppercase() {
-            let rest = &s[first_char.len_utf8()..];
-            return Cow::Owned(first_char.to_ascii_uppercase().to_string() + rest);
-        }
+fn capitalize(s: &str) -> Cow<'_, str> {
+    if let Some(first_char) = s.chars().next()
+        && !first_char.is_uppercase()
+    {
+        let rest = &s[first_char.len_utf8()..];
+        return Cow::Owned(first_char.to_ascii_uppercase().to_string() + rest);
     }
     Cow::Borrowed(s)
 }

@@ -13,9 +13,9 @@ use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
-use biome_module_graph::JsExport;
 use biome_module_graph::{
-    ImportSymbol, JsImport, JsReexport, ModuleGraph, ModuleResolver, ResolvedPath,
+    ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport, ModuleGraph,
+    ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -92,7 +92,8 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     }"#,
         JsonParserOptions::default(),
     );
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
@@ -454,7 +455,7 @@ fn test_resolve_exports() {
 
     // Remove this entry, or the Windows tests fail on the path in the snapshot below:
     assert_eq!(
-        exports.remove(&Text::Static("oh\nno")),
+        exports.swap_remove(&Text::new_static("oh\nno")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -465,7 +466,7 @@ fn test_resolve_exports() {
         }))
     );
     assert_eq!(
-        exports.remove(&Text::Static("renamed2")),
+        exports.swap_remove(&Text::new_static("renamed2")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -479,7 +480,7 @@ fn test_resolve_exports() {
     );
 
     assert_eq!(
-        data.blanket_reexports.as_ref(),
+        data.blanket_reexports,
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
@@ -495,7 +496,7 @@ fn test_resolve_exports() {
         .unwrap();
     assert_eq!(data.exports.len(), 1);
     assert_eq!(
-        data.exports.get(&Text::Static("renamed")),
+        data.exports.get(&Text::new_static("renamed")),
         Some(&JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -593,7 +594,7 @@ export const promise = makePromiseCb();
     ));
 
     let promise_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
@@ -626,7 +627,7 @@ fn test_resolve_generic_mapped_value() {
     ));
 
     let mapped_id = resolver
-        .resolve_type_of(&Text::Static("mapped"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
         .expect("mapped variable not found");
     let mapped_ty = resolver.resolved_type_for_id(mapped_id);
     let _mapped_ty_string = format!("{:?}", mapped_ty.deref()); // for debugging
@@ -688,10 +689,10 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_string());
+    assert!(result_ty.is_string_or_string_literal());
 
     let snapshot =
         ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
@@ -735,10 +736,10 @@ fn test_resolve_import_as_namespace() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_number());
+    assert!(result_ty.is_number_or_number_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_import_as_namespace");
@@ -812,7 +813,7 @@ fn test_resolve_return_value_of_function() {
     ));
 
     let foo_id = resolver
-        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
         .expect("foo variable not found");
     let foo_ty = resolver.resolved_type_for_id(foo_id);
     let _foo_string_ty = format!("{foo_ty:?}");
@@ -870,7 +871,7 @@ fn test_resolve_type_of_property_with_getter() {
     ));
 
     let foo_id = resolver
-        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
         .expect("foo variable not found");
     let foo_ty = resolver.resolved_type_for_id(foo_id);
     let _foo_string_ty = format!("{foo_ty:?}");
@@ -878,6 +879,268 @@ fn test_resolve_type_of_property_with_getter() {
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
+}
+
+macro_rules! class_tests {
+    ($($name:ident: $prefix:expr,)*) => {
+    $(
+        #[test]
+        fn $name() {
+            class_this_test_helper(stringify!($name), $prefix);
+        }
+    )*
+    }
+}
+
+class_tests! {
+    test_resolve_type_of_this_in_class_plain: "class Foo",
+    test_resolve_type_of_this_in_class_assign: "const Foo = class",
+    test_resolve_type_of_this_in_class_export: "export default class Foo",
+}
+
+fn class_this_test_helper(case_name: &str, prefix: &str) {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        format!(
+            "{prefix} {}",
+            r#"
+        {
+            x = 'foo';
+            y = this.x;
+
+            get fooGetter() {
+                return this.x
+            }
+
+            arrow = () => this.x
+
+            func = function() {
+                return this.x
+            }
+
+            meth() {
+                return this.x
+            }
+
+            nestedArrow() {
+                const fn = () => this.x;
+                return fn();
+            }
+
+            inObject() {
+                const inner = {
+                    x: this.x
+                };
+                return inner.x;
+            }
+        }
+
+        const obj = new Foo();
+
+        const foo1 = obj.y;
+        const foo2 = obj.fooGetter;
+        const foo3 = obj.arrow();
+        const foo4 = obj.func();
+        const foo5 = obj.meth();
+        const foo6 = obj.nestedArrow();
+        const foo7 = obj.inObject();
+        "#
+        ),
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=7 {
+        let name = format!("foo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
+            .unwrap_or_else(|| panic!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot(case_name);
+}
+
+#[test]
+fn test_resolve_type_of_this_in_object() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        const obj = {
+            x: 'foo',
+            y: this.x,
+
+            get fooGetter() {
+                return this.x
+            },
+
+            arrow: () => this.x,
+
+            func: function() {
+                return this.x
+            },
+
+            meth() {
+                return this.x
+            },
+
+            nestedArrow() {
+                const fn = () => this.x;
+                return fn();
+            },
+
+            inObject() {
+                const inner = {
+                    x: this.x
+                };
+                return inner.x;
+            },
+        };
+
+        const foo1 = obj.fooGetter;
+        const foo2 = obj.func();
+        const foo3 = obj.meth();
+        const foo4 = obj.nestedArrow();
+        const foo5 = obj.inObject();
+
+        const notFoo1 = obj.y;
+        const notFoo2 = obj.arrow();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=5 {
+        let name = format!("foo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
+            .unwrap_or_else(|| panic!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+    for i in 1..=2 {
+        let name = format!("notFoo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
+            .unwrap_or_else(|| panic!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_type_of_this_in_object");
+}
+
+#[test]
+fn test_resolve_type_of_this_in_class_wrong_scope() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        class Foo {
+            x = 'foo';
+
+            nested() {
+                const fn = function() {
+                    return this.x;
+                }
+                return fn();
+            }
+            nested2() {
+                function fn() {
+                    return this.x;
+                }
+                return fn();
+            }
+
+            nestedObject() {
+                const inner = {
+                    fn: function() {
+                        return this.x;
+                    }
+                };
+                return inner.fn();
+            }
+            nestedObject2() {
+                const inner = {
+                    fn() {
+                        return this.x;
+                    }
+                };
+                return inner.fn();
+            }
+
+            nestedInArrow = () => {
+                const fn = function() {
+                    return this.x;
+                }
+                return fn();
+            }
+        }
+
+        const obj = new Foo();
+
+        const notFoo1 = obj.nested();
+        const notFoo2 = obj.nested2();
+        const notFoo3 = obj.nestedInArrow();
+        const notFoo4 = obj.nestedObject();
+        const notFoo5 = obj.nestedObject2();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=5 {
+        let name = format!("notFoo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
+            .unwrap_or_else(|| panic!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_type_of_this_in_class_wrong_scope");
 }
 
 #[test]
@@ -1236,7 +1499,8 @@ fn test_resolve_react_types() {
     );
 
     let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
@@ -1250,16 +1514,61 @@ fn test_resolve_react_types() {
     ));
 
     let use_callback_id = resolver
-        .resolve_type_of(&Text::Static("useCallback"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
         .expect("useCallback variable not found");
     let use_callback_ty = resolver.resolved_type_for_id(use_callback_id);
     assert!(use_callback_ty.is_function());
 
     let promise_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
+}
+
+#[test]
+fn test_resolve_redis_commander_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/RedisCommander.d.ts".into(),
+        include_bytes!("../benches/RedisCommander.d.ts"),
+    );
+    fs.insert(
+        "/index.ts".into(),
+        r#"import RedisCommander from "./RedisCommander.d.ts";
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/RedisCommander.d.ts"),
+        BiomePath::new("/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    // We previously had an issue with `RedisCommander.d.ts` that caused types
+    // to be duplicated. We should look out in this snapshot that method
+    // signatures are registered only once per signature.
+    let redis_commander_module = module_graph
+        .module_info_for_path(Utf8Path::new("/RedisCommander.d.ts"))
+        .expect("module must exist");
+    let num_registered_signatures = redis_commander_module
+        .types()
+        .iter()
+        .filter(|ty| {
+            matches!(
+                ty,
+                TypeData::Function(function)
+                    if function
+                        .name
+                        .as_ref()
+                        .is_some_and(|name| *name == "zunionstore")
+            )
+        })
+        .count();
+    assert_eq!(num_registered_signatures, 24);
 }
 
 #[test]
@@ -1306,13 +1615,78 @@ fn test_resolve_single_reexport() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.is_number());
+    assert!(ty.is_number_or_number_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_single_reexport");
+}
+
+#[test]
+fn test_resolve_type_of_union_from_imported_module() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/react.d.ts".into(),
+        r#"
+        type BogusType = false;
+
+        export type ReactPortal = BogusType;
+
+        export type ReactElement = BogusType;
+
+        export type ReactNode =
+            | ReactElement
+            | string
+            | number
+            | Iterable<ReactNode>
+            | ReactPortal
+            | boolean
+            | null
+            | undefined;
+        "#,
+    );
+    fs.insert(
+        "/src/reexport.ts".into(),
+        r#"export { type ReactElement, type ReactNode } from "../node_modules/react.d.ts";"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { type ReactNode } from "./reexport.ts";
+
+        const foo: ReactNode = undefined;
+        const bar = foo && 1;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/reexport.ts"),
+        BiomePath::new("/node_modules/react.d.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let result_id = resolver
+        .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
+        .expect("bar variable not found");
+    let ty = resolver.resolved_type_for_id(result_id);
+    assert!(ty.has_variant(|ty| ty.is_null()));
+    assert!(ty.has_variant(|ty| ty.is_undefined()));
+    assert!(ty.has_variant(|ty| ty.is_boolean_literal(false)));
+    assert!(ty.has_variant(|ty| ty.is_number_literal(0.)));
+    assert!(ty.has_variant(|ty| ty.is_number_literal(1.)));
 }
 
 #[test]
@@ -1371,16 +1745,16 @@ fn test_resolve_multiple_reexports() {
     ));
 
     let result1_id = resolver
-        .resolve_type_of(&Text::Static("result1"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
         .expect("result1 variable not found");
     let ty = resolver.resolved_type_for_id(result1_id);
-    assert!(ty.is_number());
+    assert!(ty.is_number_or_number_literal());
 
     let result2_id = resolver
-        .resolve_type_of(&Text::Static("result2"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result2"), ScopeId::GLOBAL)
         .expect("result2 variable not found");
     let ty = resolver.resolved_type_for_id(result2_id);
-    assert!(ty.is_string());
+    assert!(ty.is_string_or_string_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_multiple_reexports");
@@ -1463,7 +1837,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     ));
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
 
     let ty = resolver.resolved_type_for_id(resolved_id);
@@ -1527,7 +1901,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     ));
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
 
     let ty = resolver.resolved_type_for_id(resolved_id);
@@ -1547,7 +1921,7 @@ fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
     fs.insert(
         "/src/index.ts".into(),
         r#"
-        
+
 type FullConfiguration = InternalConfiguration & PublicConfiguration;
 
 type ScopedMutator<Data = any, T = Data> = (key: Arguments, data?: T | Promise<T> | MutatorCallback<T>, opts?: boolean | MutatorOptions<Data, T>) => Promise<T | undefined>;
@@ -1582,7 +1956,7 @@ const { mutate } = useSWRConfig();
     ));
 
     let use_swr_config_id = resolver
-        .resolve_type_of(&Text::Static("useSWRConfig"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
     let use_swr_config_ty = resolver.resolved_type_for_id(use_swr_config_id);
     let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
@@ -1592,7 +1966,7 @@ const { mutate } = useSWRConfig();
     }));
 
     let mutate_id = resolver
-        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
     let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
@@ -1624,7 +1998,7 @@ interface Bar {
     foo(): number;
     bar(): boolean;
 }
-    
+
 type Intersection = Foo & Bar;"#,
     );
 
@@ -1643,7 +2017,7 @@ type Intersection = Foo & Bar;"#,
     ));
 
     let intersection_id = resolver
-        .resolve_type_of(&Text::Static("Intersection"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
         .expect("Intersection type not found");
     let intersection_ty = resolver.resolved_type_for_id(intersection_id);
     let _intersection_ty = format!("{:?}", intersection_ty.deref()); // for debugging
@@ -1712,9 +2086,10 @@ fn test_resolve_swr_types() {
         .expect("module must exist");
     assert_eq!(
         index_module.static_import_paths.get("swr"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/index/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!("{swr_path}/dist/index/index.d.mts")),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let swr_index_module = module_graph
@@ -1724,9 +2099,12 @@ fn test_resolve_swr_types() {
         swr_index_module
             .static_import_paths
             .get("../_internal/index.mjs"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/_internal/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!(
+                "{swr_path}/dist/_internal/index.d.mts"
+            )),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let resolver = Arc::new(ModuleResolver::for_module(
@@ -1735,7 +2113,7 @@ fn test_resolve_swr_types() {
     ));
 
     let mutate_id = resolver
-        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
 
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
@@ -1743,12 +2121,82 @@ fn test_resolve_swr_types() {
     assert!(mutate_ty.is_interface_with_member(|member| member.kind().is_call_signature()));
 
     let mutate_result_id = resolver
-        .resolve_type_of(&Text::Static("mutateResult"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutateResult"), ScopeId::GLOBAL)
         .expect("mutateResult variable not found");
 
     let mutate_result_ty = resolver.resolved_type_for_id(mutate_result_id);
     let _mutate_result_ty_string = format!("{:?}", mutate_result_ty.deref()); // for debugging
     assert!(mutate_result_ty.is_promise_instance());
+}
+
+#[test]
+fn test_widening_via_assignment() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "index.ts".into(),
+        r#"
+let hey = false;
+function f() {
+    hey = true;
+}"#,
+    );
+
+    let added_paths = [BiomePath::new("index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
+
+    snapshot.assert_snapshot("test_widening_via_assignment");
+}
+
+#[test]
+fn test_widening_via_assignment_multiple_values() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "index.ts".into(),
+        r#"
+let hey = undefined;
+function f() {
+    hey = "some string";
+}
+function g() {
+    hey = 123;
+}
+"#,
+    );
+
+    let added_paths = [BiomePath::new("index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
+
+    snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
 }
 
 fn find_files_recursively_in_directory(

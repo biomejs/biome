@@ -8,7 +8,7 @@ use crate::{
     GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
     TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
     Union,
-    globals::{GLOBAL_UNDEFINED_ID, global_type_name},
+    globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -60,7 +60,7 @@ impl ResolvedTypeId {
 
     /// Applies the module ID of `self` to `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         self.0.apply_module_id_to_reference(reference)
     }
 
@@ -76,12 +76,17 @@ impl ResolvedTypeId {
 
     #[inline]
     pub const fn is_global(self) -> bool {
-        matches!(self.level(), TypeResolverLevel::Global)
+        matches!(self.0, GLOBAL_RESOLVER_ID)
     }
 
     #[inline]
     pub const fn is_at_module_level(self) -> bool {
         matches!(self.level(), TypeResolverLevel::Thin)
+    }
+
+    #[inline]
+    pub const fn is_unknown(self) -> bool {
+        matches!((self.0, self.1), (GLOBAL_RESOLVER_ID, UNKNOWN_ID))
     }
 
     #[inline]
@@ -170,7 +175,7 @@ impl ResolverId {
 
     /// Applies the module ID of `self` to the given `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         match reference {
             TypeReference::Resolved(id) => {
                 Cow::Owned(TypeReference::Resolved(self.apply_module_id(*id)))
@@ -344,7 +349,7 @@ impl<'a> ResolvedTypeData<'a> {
     /// Applies the module ID from the embedded [`ResolverId`] to the given
     /// `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         self.id.apply_module_id_to_reference(reference)
     }
 
@@ -444,7 +449,7 @@ impl<'a> ResolvedTypeMember<'a> {
     ///
     /// This means if the member represents a getter or setter, it will
     /// dereference to the type of the property being get or set.
-    pub fn deref_ty(&self, resolver: &dyn TypeResolver) -> Cow<TypeReference> {
+    pub fn deref_ty(&self, resolver: &dyn TypeResolver) -> Cow<'_, TypeReference> {
         if self.is_getter() {
             resolver
                 .resolve_and_get(&self.ty())
@@ -472,6 +477,12 @@ impl<'a> ResolvedTypeMember<'a> {
     #[inline]
     pub fn is_getter(&self) -> bool {
         self.member.is_getter()
+    }
+
+    pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        self.member.is_index_signature_with_ty(|reference| {
+            predicate(&self.apply_module_id_to_reference(reference))
+        })
     }
 
     #[inline]
@@ -504,7 +515,7 @@ impl<'a> ResolvedTypeMember<'a> {
     }
 
     /// Returns a reference to the type of the member.
-    pub fn ty(&self) -> Cow<TypeReference> {
+    pub fn ty(&self) -> Cow<'_, TypeReference> {
         self.apply_module_id_to_reference(&self.member.ty)
     }
 }
@@ -536,7 +547,7 @@ pub trait TypeResolver {
     fn get_by_id(&self, id: TypeId) -> &TypeData;
 
     /// Returns type data by its resolved ID, if possible.
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData>;
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>>;
 
     /// Returns the [`TypeReference`] to refer to a [`TypeId`] belonging to this
     /// resolver.
@@ -622,7 +633,7 @@ pub trait TypeResolver {
 
     /// Resolves a type reference and immediately returns the associated
     /// [`TypeData`] if found.
-    fn resolve_and_get(&self, ty: &TypeReference) -> Option<ResolvedTypeData> {
+    fn resolve_and_get(&self, ty: &TypeReference) -> Option<ResolvedTypeData<'_>> {
         match self
             .resolve_reference(ty)
             .and_then(|id| self.get_by_resolved_id(id))
@@ -670,7 +681,7 @@ pub trait TypeResolver {
         &mut self,
         scope_id: ScopeId,
         expression: &AnyJsExpression,
-    ) -> Cow<TypeData>;
+    ) -> Cow<'_, TypeData>;
 
     /// Resolves a type reference.
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId>;
@@ -708,6 +719,14 @@ pub trait TypeResolver {
         self.register_type(Cow::Owned(TypeData::Union(Box::new(Union(Box::new([
             ty,
             GLOBAL_UNDEFINED_ID.into(),
+        ]))))))
+    }
+
+    /// Register a new type that is a union between `current_type` and `ty`
+    fn union_with(&mut self, current_type: TypeReference, ty: TypeReference) -> TypeId {
+        self.register_type(Cow::Owned(TypeData::Union(Box::new(Union(Box::new([
+            current_type,
+            ty,
         ]))))))
     }
 
@@ -779,7 +798,7 @@ impl Resolvable for TypeReference {
 
 impl Resolvable for TypeofValue {
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
-        let ty = if self.ty == TypeReference::Unknown {
+        let ty = if self.ty.is_unknown() {
             let resolved_id = resolver
                 .resolve_type_of(&self.identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))?;
             TypeReference::Resolved(resolved_id)

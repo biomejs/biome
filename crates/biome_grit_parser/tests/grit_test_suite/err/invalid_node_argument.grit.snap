@@ -70,6 +70,6 @@ invalid_node_argument.grit:1:6 parse ━━━━━━━━━━━━━━�
       │      ^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Node arguments must be patterns, optionally preceeded by a name and an equal sign.
+  i Node arguments must be patterns, optionally preceded by a name and an equal sign.
   
 ```
