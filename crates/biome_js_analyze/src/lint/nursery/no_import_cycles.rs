@@ -170,23 +170,19 @@ fn find_cycle(
             };
 
             if resolved_path == ctx.file_path() {
+                // https://github.com/biomejs/biome/issues/6569
+                // prevent flagging on import cycles when they are isolated to a single file
+                if stack.is_empty() && start_path.as_str() == resolved_path {
+                    continue;
+                }
+
                 // Return all the paths from `start_path` to `resolved_path`:
                 let paths: Box<[Box<str>]> = Some(start_path.as_str())
                     .into_iter()
                     .map(Box::from)
-                    .chain(stack.clone().into_iter().map(|(path, _)| path))
+                    .chain(stack.into_iter().map(|(path, _)| path))
                     .chain(Some(Box::from(resolved_path.as_str())))
                     .collect();
-
-                // #6569
-                // I believe we only care about the first two imports here, if they are they are
-                // the same, they are the only chain, or further iterations will find the shorter
-                // import chain
-                if let (Some(first), Some(second)) = (paths.first(), paths.get(1))
-                    && *first == *second
-                {
-                    continue;
-                }
 
                 return Some(paths);
             }
