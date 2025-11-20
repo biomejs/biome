@@ -25,6 +25,11 @@ declare_lint_rule! {
     /// only go in a single direction, i.e. they don't point "back" to the
     /// importing file.
     ///
+    /// If a cycle is contained to a single file, i.e. a file imports from
+    /// itself, no warning is issued. This allows for encapsulation of
+    /// functions/variables into a namespace instead of using a static class
+    /// (triggers [no-static-only-class](https://biomejs.dev/linter/rules/no-static-only-class)).
+    ///
     /// :::note
     /// This rule is computationally expensive. If you are particularly
     /// pressed for lint time, or don't think you have an issue with dependency
@@ -77,6 +82,16 @@ declare_lint_rule! {
     /// export function baz() {
     ///     bar();
     /// }
+    /// ```
+    ///
+    /// ```js,file=foobar.js
+    /// export function foo() {
+    ///     console.log("foobar");
+    /// }
+    ///
+    /// export * as bar from './foobar.js';
+    ///
+    /// import { bar } from './foobar.js';
     /// ```
     ///
     /// ```ts,file=types.ts
