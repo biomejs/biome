@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidScoped.js
+---
+# Input
+```js
+// Scoped package with mixins - should trigger
+import FormMixin from '@my-org/mixins/form-validation';
+
+```
+
+# Diagnostics
+```
+invalidScoped.js:2:1 lint/nursery/noEmberMixins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from /mixins/ directories.
+  
+    1 │ // Scoped package with mixins - should trigger
+  > 2 │ import FormMixin from '@my-org/mixins/form-validation';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Mixins are deprecated in modern Ember. Use composition patterns, utility functions, or decorators instead.
+  
+  i See the Ember Octane migration guide: https://guides.emberjs.com/release/upgrading/current-edition/
+  
+
+```

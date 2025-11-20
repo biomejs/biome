@@ -56,5 +56,3 @@ foo.reduce((acc) => [...acc], [])
 ```cjs
 foo.reduce((acc, bar) => [...acc, bar], [], 123)
 ```
-
-

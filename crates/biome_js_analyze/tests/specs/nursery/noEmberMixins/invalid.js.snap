@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Basic mixin import - should trigger
+import MyMixin from 'app/mixins/my-mixin';
+
+export default class MyComponent {
+  // class body
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noEmberMixins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from /mixins/ directories.
+  
+    1 │ // Basic mixin import - should trigger
+  > 2 │ import MyMixin from 'app/mixins/my-mixin';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ export default class MyComponent {
+  
+  i Mixins are deprecated in modern Ember. Use composition patterns, utility functions, or decorators instead.
+  
+  i See the Ember Octane migration guide: https://guides.emberjs.com/release/upgrading/current-edition/
+  
+
+```

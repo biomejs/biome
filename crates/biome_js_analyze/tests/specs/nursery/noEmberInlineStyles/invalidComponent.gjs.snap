@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComponent.gjs
+---
+# Input
+```js
+// Inline style on custom component
+import Component from '@glimmer/component';
+import MyComponent from './MyComponent';
+
+export default class MyWrapper extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

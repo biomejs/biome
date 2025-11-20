@@ -10,5 +10,3 @@ import type { bar } from "bar"
 import type * as baz from "baz"
 
 ```
-
-

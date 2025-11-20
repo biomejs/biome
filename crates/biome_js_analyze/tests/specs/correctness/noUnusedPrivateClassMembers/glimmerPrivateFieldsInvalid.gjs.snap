@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerPrivateFieldsInvalid.gjs
+---
+# Input
+```js
+// #unusedPrivate is never used - should warn
+export default class MyComponent {
+  #privateCount = 0;      // Used in template - OK
+  #unusedPrivate = "test"; // NOT used anywhere - should warn!
+  #anotherUnused = 123;   // NOT used anywhere - should warn!
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerMethodCalls.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - methods used in template */
+export default class MyComponent {
+  count = 0;
+
+  increment() {
+    this.count++;
+  }
+
+  decrement() {
+    this.count--;
+  }
+
+  reset() {
+    this.count = 0;
+  }
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

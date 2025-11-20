@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerMethodsInvalid.gjs
+---
+# Input
+```js
+// unusedMethod is never used - should warn
+export default class MyComponent {
+  count = 0;
+
+  increment() {
+    this.count++;
+  }
+
+  unusedMethod() {
+    return 'never called';
+  }
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

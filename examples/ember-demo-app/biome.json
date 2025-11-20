@@ -1,0 +1,25 @@
+{
+  "files": {
+    "includes": ["app/**/*.js", "app/**/*.gjs", "tests/**/*.js"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noEmberMixins": "error",
+        "noEmberGlobalJquery": "error",
+        "noEmberPauseTest": "error",
+        "noEmberOldShims": "error",
+        "noEmberGetWithDefault": "error",
+        "noEmberAccesskeyAttribute": "error",
+        "noEmberAutofocus": "error",
+        "noEmberClassicClasses": "error",
+        "noEmberRequireComputedPropertyDependencies": "error",
+        "noEmberInlineStyles": "error",
+        "noEmberActionsHash": "error",
+        "noEmberGet": "error",
+        "noEmberPositiveTabindex": "error"
+      }
+    }
+  }
+}

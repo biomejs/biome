@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidString.js
+---
+# Input
+```js
+import { dasherize } from 'ember-string';
+
+export default function process(str) {
+  return dasherize(str);
+}
+
+```
+
+# Diagnostics
+```
+invalidString.js:1:1 lint/nursery/noEmberOldShims ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from deprecated Ember shim modules.
+  
+  > 1 │ import { dasherize } from 'ember-string';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export default function process(str) {
+  
+  i Use modern Ember module imports instead.
+  
+  i See: https://github.com/ember-cli/ember-rfc176-data
+  
+
+```

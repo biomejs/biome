@@ -28,5 +28,3 @@ console.log({
 } as Props);
 
 ```
-
-

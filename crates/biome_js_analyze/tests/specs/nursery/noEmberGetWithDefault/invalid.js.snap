@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { getWithDefault } from '@ember/object';
+
+const value = getWithDefault(obj, 'key', 'default');
+
+```
+
+# Diagnostics
+```
+invalid.js:3:15 lint/nursery/noEmberGetWithDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use the deprecated getWithDefault() method.
+  
+    1 │ import { getWithDefault } from '@ember/object';
+    2 │ 
+  > 3 │ const value = getWithDefault(obj, 'key', 'default');
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i The getWithDefault() method was deprecated in Ember 3.x and removed in Ember 4.0.
+  
+  i Use optional chaining (?.) or nullish coalescing (??) instead.
+  
+
+```

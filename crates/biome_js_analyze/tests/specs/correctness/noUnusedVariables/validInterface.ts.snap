@@ -21,5 +21,3 @@ class B implements A {
 console.log(new B());
 
 ```
-
-

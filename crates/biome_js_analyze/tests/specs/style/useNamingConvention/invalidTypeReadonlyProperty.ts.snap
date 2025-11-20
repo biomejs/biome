@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeReadonlyProperty.ts
-snapshot_kind: text
 ---
 # Input
 ```ts

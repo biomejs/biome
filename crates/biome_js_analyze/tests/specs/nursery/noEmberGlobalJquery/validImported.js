@@ -1,0 +1,9 @@
+// should not generate diagnostics
+import $ from 'jquery';
+
+// This is OK because $ is locally imported, not global
+$('.selector').hide();
+
+function myFunction() {
+  $('.another-selector').show();
+}

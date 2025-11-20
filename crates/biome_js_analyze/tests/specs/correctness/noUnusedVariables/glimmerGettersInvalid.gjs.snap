@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerGettersInvalid.gjs
+---
+# Input
+```js
+// unusedGetter is never used - should warn
+export default class MyComponent {
+  count = 0;
+
+  get formattedCount() {
+    return `Count: ${this.count}`;
+  }
+
+  get unusedGetter() {
+    return 'never used';
+  }
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

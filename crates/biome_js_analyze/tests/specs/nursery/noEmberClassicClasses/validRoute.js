@@ -1,0 +1,12 @@
+// Modern Route using native class syntax
+// should not generate diagnostics
+import Route from '@ember/routing/route';
+import { service } from '@ember/service';
+
+export default class PostRoute extends Route {
+  @service store;
+
+  model() {
+    return this.store.findAll('post');
+  }
+}

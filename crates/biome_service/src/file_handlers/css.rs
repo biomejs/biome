@@ -440,6 +440,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: None,
+        original_source_text: None,
     }
 }
 

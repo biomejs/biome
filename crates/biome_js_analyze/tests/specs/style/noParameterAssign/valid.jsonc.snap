@@ -301,5 +301,3 @@ function foo(a) { a[b] ??= c; }
 ```cjs
 function foo(arguments) { }
 ```
-
-

@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { get } from '@ember/object';
+
+const value = get(this, 'myProperty');
+
+```
+
+# Diagnostics
+```
+invalid.js:3:15 lint/nursery/noEmberGet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use get() to access properties.
+  
+    1 │ import { get } from '@ember/object';
+    2 │ 
+  > 3 │ const value = get(this, 'myProperty');
+      │               ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use native property access instead (e.g., this.property or obj.property).
+  
+
+```

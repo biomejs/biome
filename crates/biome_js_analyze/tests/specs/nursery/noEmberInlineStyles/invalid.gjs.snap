@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.gjs
+---
+# Input
+```js
+// Basic inline style on div element
+import Component from '@glimmer/component';
+
+export default class MyComponent extends Component {
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

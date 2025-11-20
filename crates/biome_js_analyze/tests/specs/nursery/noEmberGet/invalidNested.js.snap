@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNested.js
+---
+# Input
+```js
+import { get } from '@ember/object';
+
+export default class MyComponent {
+  someMethod() {
+    const obj = this.getObject();
+    return get(obj, 'property');
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalidNested.js:6:12 lint/nursery/noEmberGet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use get() to access properties.
+  
+    4 │   someMethod() {
+    5 │     const obj = this.getObject();
+  > 6 │     return get(obj, 'property');
+      │            ^^^^^^^^^^^^^^^^^^^^
+    7 │   }
+    8 │ }
+  
+  i Use native property access instead (e.g., this.property or obj.property).
+  
+
+```
