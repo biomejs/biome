@@ -1,5 +1,139 @@
 # @biomejs/biome
 
+## 2.3.4
+
+### Patch Changes
+
+- [#7989](https://github.com/biomejs/biome/pull/7989) [`4855c4a`](https://github.com/biomejs/biome/commit/4855c4a5c28d8381dd724449d43a9a60a860edaa) Thanks [@alissonlauffer](https://github.com/alissonlauffer)! - Fixed a regression in Astro frontmatter parsing where comments inside quoted strings were incorrectly detected as actual comments. This caused the parser to prematurely terminate frontmatter parsing when encountering strings like `const test = "//";`.
+  For example, the following Astro frontmatter now parses correctly:
+
+  ```astro
+  ---
+  const test = "// not a real comment";
+  ---
+  ```
+
+- [#7968](https://github.com/biomejs/biome/pull/7968) [`0b28f5f`](https://github.com/biomejs/biome/commit/0b28f5f47aa968bd2511224679ae1cfbcf708fd7) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Refactored formatter to use strict `Token` element for better performance. The new `Token` variant is optimized for static, ASCII-only text (keywords, operators, punctuation) with the following constraints:
+  - ASCII only (no Unicode characters)
+  - No newlines (`\n`, `\r`)
+  - No tab characters (`\t`)
+
+  This enables faster printing and fitting logic by using bulk string operations (`push_str`, `len()`) instead of character-by-character iteration with Unicode width calculations.
+
+- [#7941](https://github.com/biomejs/biome/pull/7941) [`19b8280`](https://github.com/biomejs/biome/commit/19b82805e013d5befc644f85f272df19ed1264ae) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7943](https://github.com/biomejs/biome/issues/7943). Rules' `options` are now properly merged with the inherited `options` from a shared configuration.
+
+  This means that you can now override a specific option from a rule without resetting the other options to their default.
+
+  Given the following shared configuration:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": {
+              "strictCase": false,
+              "conventions": [
+                {
+                  "selector": { "kind": "variable", "scope": "global" },
+                  "formats": ["CONSTANT_CASE"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  And the user configuration that extends this shared configuration:
+
+  ```json
+  {
+    "extends": ["shared.json"],
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": { "strictCase": true }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  The obtained merged configuration is now as follows:
+
+  ```json
+  {
+    "extends": ["shared.json"],
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": {
+            "level": "on",
+            "options": {
+              "strictCase": true,
+              "conventions": [
+                {
+                  "selector": { "kind": "variable", "scope": "global" },
+                  "formats": ["CONSTANT_CASE"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- [#7969](https://github.com/biomejs/biome/pull/7969) [`425963d`](https://github.com/biomejs/biome/commit/425963d636620d852547322f3f029df2ca05318c) Thanks [@ematipico](https://github.com/ematipico)! - Added support for the Svelte syntax `{@debug}`. The Biome HTML parser is now able to parse and format the blocks:
+
+  ```diff
+  -{@debug     foo,bar,    something}
+  +{@debug foo, bar, something}
+  ```
+
+- [#7986](https://github.com/biomejs/biome/pull/7986) [`3256f82`](https://github.com/biomejs/biome/commit/3256f824a15dedf6ac23485cdef2bbc92bfc7fd9) Thanks [@lisiur](https://github.com/lisiur)! - Fixed [#7981](https://github.com/biomejs/biome/issues/7981). Now Biome correctly detects and parses `lang='tsx'` and `lang='jsx'` languages when used inside in `.vue` files, when `.experimentalFullSupportEnabled` is enabled.
+
+- [#7921](https://github.com/biomejs/biome/pull/7921) [`547c2da`](https://github.com/biomejs/biome/commit/547c2da02590832d4941f017541142c17d1734a9) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7854](https://github.com/biomejs/biome/issues/7854): The CSS parser, with `tailwindDirectives` enabled, will now parse `@source inline("underline");`.
+
+- [#7856](https://github.com/biomejs/biome/pull/7856) [`c9e20c3`](https://github.com/biomejs/biome/commit/c9e20c3780b328ff59b63fa8917938d97b090148) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noContinue`](https://biomejs.dev/linter/rules/no-continue/). Disallowing the usage of the `continue` statement, structured control flow statements such as `if` should be used instead.
+
+  **Invalid:**
+
+  ```js
+  let sum = 0,
+    i;
+
+  for (i = 0; i < 10; i++) {
+    if (i >= 5) {
+      continue;
+    }
+
+    sum += i;
+  }
+  ```
+
+  **Valid:**
+
+  ```js
+  let sum = 0,
+    i;
+
+  for (i = 0; i < 10; i++) {
+    if (i < 5) {
+      sum += i;
+    }
+  }
+  ```
+
 ## 2.3.3
 
 ### Patch Changes

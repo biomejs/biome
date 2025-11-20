@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: astro/debug.svelte
+info: svelte/debug.svelte
 ---
 # Input
 

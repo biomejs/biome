@@ -479,6 +479,10 @@ pub(crate) fn parse_embedded_script(
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
                 JsFileSource::ts()
+            } else if element.is_jsx_lang() {
+                JsFileSource::jsx()
+            } else if element.is_tsx_lang() {
+                JsFileSource::tsx()
             } else {
                 JsFileSource::js_module()
             };

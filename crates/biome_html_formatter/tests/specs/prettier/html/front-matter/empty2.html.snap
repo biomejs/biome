@@ -64,6 +64,7 @@ empty2.html:5:1 parse ━━━━━━━━━━━━━━━━━━━�
   
   - element
   - text
+  - closing block
   
 
 ```

@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRelativeImport.js
+---
+# Input
+```js
+/* should generate diagnostic for relative imports by default */
+import * as utils from "./utils";
+import * as helpers from "../helpers";
+import * as shared from "@/shared";
+
+```
+
+# Diagnostics
+```
+invalidRelativeImport.js:2:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    1 │ /* should generate diagnostic for relative imports by default */
+  > 2 │ import * as utils from "./utils";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import * as helpers from "../helpers";
+    4 │ import * as shared from "@/shared";
+  
+  i Use named imports instead.
+  
+
+```
+
+```
+invalidRelativeImport.js:3:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    1 │ /* should generate diagnostic for relative imports by default */
+    2 │ import * as utils from "./utils";
+  > 3 │ import * as helpers from "../helpers";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ import * as shared from "@/shared";
+    5 │ 
+  
+  i Use named imports instead.
+  
+
+```
+
+```
+invalidRelativeImport.js:4:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    2 │ import * as utils from "./utils";
+    3 │ import * as helpers from "../helpers";
+  > 4 │ import * as shared from "@/shared";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Use named imports instead.
+  
+
+```

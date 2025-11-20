@@ -3841,6 +3841,13 @@
 		},
 		"NoNamespaceImportOptions": {
 			"type": "object",
+			"properties": {
+				"allowedModules": {
+					"description": "A list of module specifiers that are allowed to use namespace imports. Both package names (e.g., \"zod\") and relative/absolute paths (e.g., \"./utils\") are supported.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoNamespaceOptions": { "type": "object", "additionalProperties": false },

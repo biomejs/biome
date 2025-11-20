@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validWithLocalModules.js
+---
+# Input
+```js
+/* should not generate diagnostics because these local modules are in the allowlist */
+import * as helpers from "./utils/helpers";
+import * as utils from "@/utils";
+import * as shared from "../shared";
+
+```

@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::JsImportNamespaceClause;
+use biome_js_syntax::{AnyJsModuleSource, JsImportNamespaceClause};
 use biome_rowan::AstNode;
 use biome_rule_options::no_namespace_import::NoNamespaceImportOptions;
 
@@ -30,6 +30,50 @@ declare_lint_rule! {
     /// import type * as baz from "baz"
     /// ```
     ///
+    /// ## Options
+    ///
+    /// The following options are available
+    ///
+    /// ### `allowedModules`
+    ///
+    /// Allows to specify module specifiers that are permitted to use namespace imports.
+    /// This can be useful for:
+    /// - External dependencies that are designed to work with namespace imports (e.g., `zod`, `valibot`)
+    /// - Local modules that export many utilities (e.g., `./utils`, `@/helpers`)
+    ///
+    /// The `allowedModules` option takes an array of strings, where each string is a module specifier.
+    /// Both package names and relative/absolute file paths are supported.
+    ///
+    /// #### Example: External dependencies
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedModules": ["zod", "valibot"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import * as z from "zod";
+    /// import * as v from "valibot";
+    /// ```
+    ///
+    /// #### Example: Local modules
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedModules": ["./utils/helpers", "@/utils"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import * as helpers from "./utils/helpers";
+    /// import * as utils from "@/utils";
+    /// ```
+    ///
     pub NoNamespaceImport {
         version: "1.6.0",
         name: "noNamespaceImport",
@@ -52,6 +96,23 @@ impl Rule for NoNamespaceImport {
         if import_namespace_clause.type_token().is_some() {
             return None;
         }
+
+        // Check if the module is in the allowed modules list
+        if let Ok(source) = import_namespace_clause.source()
+            && let AnyJsModuleSource::JsModuleSource(js_module_source) = source
+            && let Ok(inner_text) = js_module_source.inner_string_text()
+        {
+            let module_name = inner_text.text();
+            if ctx
+                .options()
+                .allowed_modules
+                .iter()
+                .any(|allowed| allowed.as_str() == module_name)
+            {
+                return None;
+            }
+        }
+
         Some(())
     }
 

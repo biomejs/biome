@@ -12,6 +12,7 @@ impl FormatRule<AnyHtmlAttribute> for FormatAnyHtmlAttribute {
             AnyHtmlAttribute::HtmlBogusAttribute(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlDoubleTextExpression(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlSingleTextExpression(node) => node.format().fmt(f),
+            AnyHtmlAttribute::SvelteAttachAttribute(node) => node.format().fmt(f),
         }
     }
 }

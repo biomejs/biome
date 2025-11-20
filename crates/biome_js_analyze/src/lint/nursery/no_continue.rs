@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoContinue {
-        version: "next",
+        version: "2.3.4",
         name: "noContinue",
         language: "js",
         recommended: false,

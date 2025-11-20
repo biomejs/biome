@@ -61,7 +61,7 @@ HtmlRoot {
 ```
 debug-trailing-comma.svelte:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier.
+  × Expected a closing block, instead found none.
   
   > 1 │ {@debug something,}
       │                   ^

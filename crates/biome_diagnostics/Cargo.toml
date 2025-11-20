@@ -54,7 +54,7 @@ std    = []
 [dev-dependencies]
 insta      = { workspace = true }
 serde_json = { workspace = true }
-trybuild   = "=1.0.111"
+trybuild   = "=1.0.114"
 
 [lints]
 workspace = true

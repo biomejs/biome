@@ -21,6 +21,10 @@ const named = function named (this: Number) {
     return 0;
 }
 
+const withArguments = function () {
+    return arguments[0];
+}
+
 const withThisParameter = function(this: Number) {
     return 0;
 }

@@ -87,7 +87,7 @@ HtmlRoot {
 ```
 debug.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier.
+  × Expected a closing block, instead found none.
   
     1 │ {@debug
   > 2 │ {@debug something}

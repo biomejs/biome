@@ -93,12 +93,40 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlTextExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_ATTACH_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::SvelteAttachAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_CONST_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteConstBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_DEBUG_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteDebugBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_HTML_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteHtmlBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_KEY_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteKeyBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_KEY_CLOSING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteKeyClosingBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_KEY_OPENING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteKeyOpeningBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_NAME => {
                     let $pattern = unsafe { $crate::SvelteName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_RENDER_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteRenderBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {

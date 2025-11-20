@@ -4,6 +4,6 @@ use biome_html_syntax::HtmlTextExpression;
 pub(crate) struct FormatHtmlTextExpression;
 impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
     fn fmt_fields(&self, node: &HtmlTextExpression, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        format_verbatim_skipped(node.syntax()).fmt(f)
     }
 }

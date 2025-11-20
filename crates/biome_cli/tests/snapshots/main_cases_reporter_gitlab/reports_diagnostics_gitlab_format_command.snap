@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `index.ts`
 
@@ -64,5 +64,30 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-[]
+[
+  {
+    "description": "Formatter would have printed the following content:",
+    "check_name": "format",
+    "fingerprint": "15136662709985741127",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
+    "description": "Formatter would have printed the following content:",
+    "check_name": "format",
+    "fingerprint": "8454297847249184653",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  }
+]
 ```
