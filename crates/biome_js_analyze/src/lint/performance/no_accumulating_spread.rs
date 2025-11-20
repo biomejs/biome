@@ -43,12 +43,7 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => Object.assign(acc, val), []);
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
+    /// a.reduce((acc, val) => {return Object.assign([], acc, val);}, []);
     /// ```
     ///
     /// ### Valid
@@ -56,6 +51,16 @@ declare_lint_rule! {
     /// ```js
     /// var a = ['a', 'b', 'c'];
     /// a.reduce((acc, val) => {acc.push(val); return acc}, []);
+    /// ```
+    ///
+    /// ```js
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => Object.assign(acc, val), []);
+    /// ```
+    ///
+    /// ```js
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
     /// ```
     ///
     pub NoAccumulatingSpread {
