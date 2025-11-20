@@ -115,8 +115,6 @@ declare_lint_rule! {
     /// }
     /// ```
 
-    /// ```
-
     pub NoLeakedRender{
         version: "next",
         name: "noLeakedRender",
@@ -229,9 +227,8 @@ impl Rule for NoLeakedRender {
                             }
                         })
                         .and_then(|literal| literal.value_token().ok())
-                        .map_or(false, |token| {
-                            matches!(token.text_trimmed(), "true" | "false")
-                        }) {
+                        .is_some_and(|token| matches!(token.text_trimmed(), "true" | "false"))
+                        {
                             return None;
                         }
                     }
