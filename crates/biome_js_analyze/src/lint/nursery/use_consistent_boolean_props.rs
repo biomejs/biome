@@ -6,10 +6,10 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields,
+    AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute,
     JsxAttributeInitializerClause, T,
 };
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_consistent_boolean_props::{
     BooleanPropMode, UseConsistentBooleanPropsOptions,
 };
@@ -138,22 +138,6 @@ impl Rule for UseConsistentBooleanProps {
             BooleanPropMode::Explicit => {
                 // Explicit mode: add `={true}` if missing
                 if jsx_attribute.initializer().is_none() {
-                    let JsxAttributeFields {
-                        name,
-                        initializer: _,
-                    } = jsx_attribute.as_fields();
-                    let name = name.ok()?;
-                    let name_syntax = name.syntax();
-
-                    // Move trailing trivia of name_syntax to close_curly_token
-                    let last_token_of_name_syntax = name_syntax.last_token()?;
-                    let next_last_token_of_name_syntax =
-                        last_token_of_name_syntax.with_trailing_trivia([]);
-                    let next_name = name.replace_token_discard_trivia(
-                        last_token_of_name_syntax,
-                        next_last_token_of_name_syntax,
-                    )?;
-
                     let attr_value = make::jsx_expression_attribute_value(
                         make::token(JsSyntaxKind::L_CURLY),
                         biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
@@ -164,12 +148,12 @@ impl Rule for UseConsistentBooleanProps {
                         make::token(JsSyntaxKind::R_CURLY),
                     );
 
-                    let next_attr = make::jsx_attribute(next_name)
-                        .with_initializer(make::jsx_attribute_initializer_clause(
-                            make::token(T![=]),
-                            AnyJsxAttributeValue::JsxExpressionAttributeValue(attr_value),
-                        ))
-                        .build();
+                    let initializer = make::jsx_attribute_initializer_clause(
+                        make::token(T![=]),
+                        AnyJsxAttributeValue::JsxExpressionAttributeValue(attr_value),
+                    );
+
+                    let next_attr = jsx_attribute.clone().with_initializer(Some(initializer));
                     mutation_has_changes = true;
                     mutation.replace_node(jsx_attribute.clone(), next_attr);
                 }
