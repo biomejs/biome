@@ -117,64 +117,68 @@ fn is_precision_lost_in_base_10(num: &str) -> Option<bool> {
 }
 
 fn is_precision_lost_in_base_other(num: &str, radix: u8) -> bool {
-    let mut msb: Option<u64> = None;
-    let mut lsb: Option<u64> = None;
-    let mut current_bit_index: u64 = 0;
+    // radix is passed down from split_into_radix_and_number which guarantees
+    // that radix is 2, 8, 16. We've already filtered out the 10 case.
+    let bits_per_digit = match radix {
+        16 => 4,
+        8 => 3,
+        2 => 1,
+        // Shouldn't ever happen
+        _ => return false,
+    };
 
-    // Iterate over digits in reverse order (least significant first)
+    // We want to find the positions of the last set bit and the first set bit.
+    // The distance between them (max - min + 1) is the number of significant bits.
+    // If this distance > 53, the number cannot be exactly represented in an f64 (which has 53 bits of significand).
+    let mut min_bit_index: Option<u32> = None;
+    let mut current_bit_index: u32 = 0;
+
+    // Iterate over digits in reverse order (from last to first digit)
     for c in num.chars().rev() {
-        if c == '_' {
-            continue;
-        }
         let digit = match c.to_digit(radix as u32) {
             Some(d) => d,
-            None => return false, // Should not happen for valid literals
+            None => return false,
         };
 
-        // Check bits of the digit
-        let bits_per_digit = match radix {
-            16 => 4,
-            8 => 3,
-            2 => 1,
-            _ => unreachable!("radix must be 2, 8, or 16"),
-        };
+        if digit != 0 {
+            if min_bit_index.is_none() {
+                // Found the first non-zero digit (contains the first set bit of the number)
+                let trailing_zeros = digit.trailing_zeros();
+                min_bit_index = Some(current_bit_index + trailing_zeros);
+            }
 
-        for i in 0..bits_per_digit {
-            if (digit >> i) & 1 == 1 {
-                let bit_pos = current_bit_index + i;
-                if lsb.is_none() {
-                    lsb = Some(bit_pos);
+            // Calculate the last set bit for the current digit
+            let last_bit_in_digit = (u32::BITS - digit.leading_zeros()) - 1;
+            let max_bit_index = current_bit_index + last_bit_in_digit;
+
+            // Check for overflow (exponent > 1023)
+            // In IEEE 754 double precision:
+            // - The exponent bias is 1023.
+            // - The maximum valid exponent is 1023 (representing 2^1023).
+            // - 2^1024 overflows to Infinity.
+            // Thus, if the last set bit is at index 1024 or greater, the number overflows.
+            if max_bit_index >= 1024 {
+                return true;
+            }
+
+            // Check for precision loss
+            // In IEEE 754 double precision:
+            // - The significand (mantissa) has 53 bits of precision (52 stored bits + 1 implicit leading bit).
+            // - If the distance between the last set bit and the first set bit
+            //   exceeds 53 bits, the number cannot be exactly represented, as the lower bits would be truncated.
+            // Span = max - min + 1
+            // We know min_bit_index is Some because we set it above if it was None
+            if let Some(min) = min_bit_index {
+                if max_bit_index - min + 1 > 53 {
+                    return true;
                 }
-                msb = Some(bit_pos);
             }
         }
+
         current_bit_index += bits_per_digit;
     }
 
-    if let (Some(msb), Some(lsb)) = (msb, lsb) {
-        // Check for overflow (exponent > 1023)
-        // In IEEE 754 double precision:
-        // - The exponent bias is 1023.
-        // - The maximum valid exponent is 1023 (representing 2^1023).
-        // - 2^1024 overflows to Infinity.
-        // Thus, if the most significant bit is at index 1024 or greater, the number overflows.
-        if msb >= 1024 {
-            return true;
-        }
-
-        // Check for precision loss
-        // In IEEE 754 double precision:
-        // - The significand (mantissa) has 53 bits of precision (52 stored bits + 1 implicit leading bit).
-        // - If the distance between the most significant bit (MSB) and the least significant bit (LSB)
-        //   exceeds 53 bits, the number cannot be exactly represented, as the lower bits would be truncated.
-        // Span = MSB - LSB + 1
-        let span = msb - lsb + 1;
-
-        span > 53
-    } else {
-        // Value is 0
-        false
-    }
+    false
 }
 
 fn remove_leading_zeros(num: &str) -> &str {
