@@ -19,10 +19,14 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// `mode` — Controls whether boolean props should be implicit or explicit.
+    /// The following option is available
     ///
-    /// - `Implicit` (default): enforces `<Foo bar />` style for `true` values.
-    /// - `Explicit`: enforces `<Foo bar={true} />` style for `true` values.
+    /// ###  `mode`
+    ///
+    /// Controls whether boolean props should be implicit or explicit.
+    /// Supports two options - `Implicit` and `Explicit`.
+    ///
+    /// **Default**: `Implicit`
     ///
     /// ```json,ignore
     /// // Implicit mode (default)
