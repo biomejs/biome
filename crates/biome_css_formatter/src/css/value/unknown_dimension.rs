@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    utils::string_utils::{FormatDimension, FormatTokenAsLowercase},
+    utils::string_utils::{FormatDimensionUnit, FormatTokenAsLowercase},
 };
 use biome_css_syntax::{CssUnknownDimension, CssUnknownDimensionFields};
 use biome_formatter::write;
@@ -18,7 +18,7 @@ impl FormatNodeRule<CssUnknownDimension> for FormatCssUnknownDimension {
             f,
             [
                 FormatTokenAsLowercase::from(value_token?),
-                FormatDimension::from(unit_token?),
+                FormatDimensionUnit::from(unit_token?),
             ]
         );
         var_name

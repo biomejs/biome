@@ -297,17 +297,17 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 }
 
-pub(crate) struct FormatDimension {
+pub(crate) struct FormatDimensionUnit {
     token: SyntaxToken<CssLanguage>,
 }
 
-impl From<SyntaxToken<CssLanguage>> for FormatDimension {
+impl From<SyntaxToken<CssLanguage>> for FormatDimensionUnit {
     fn from(value: SyntaxToken<CssLanguage>) -> Self {
         Self { token: value }
     }
 }
 
-impl Format<CssFormatContext> for FormatDimension {
+impl Format<CssFormatContext> for FormatDimensionUnit {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let original = self.token.text_trimmed();
         match original.to_ascii_lowercase_cow() {
@@ -318,7 +318,7 @@ impl Format<CssFormatContext> for FormatDimension {
                     [format_replaced(
                         &self.token,
                         &text(
-                            // Most CSS dimensions can be formatted as lower case, but there are
+                            // Most CSS dimension units can be formatted as lower case, but there are
                             // a few that are more commonly formatted with some uppercase characters.
                             // This maps those few cases to the correct casing. This matches the
                             // behavior of the Prettier formatter.
