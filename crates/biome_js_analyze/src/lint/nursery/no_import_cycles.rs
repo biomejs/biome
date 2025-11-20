@@ -25,10 +25,9 @@ declare_lint_rule! {
     /// only go in a single direction, i.e. they don't point "back" to the
     /// importing file.
     ///
-    /// If a cycle is contained to a single file, i.e. a file imports from
-    /// itself, no warning is issued. This allows for encapsulation of
-    /// functions/variables into a namespace instead of using a static class
-    /// (triggers [no-static-only-class](https://biomejs.dev/linter/rules/no-static-only-class)).
+    /// However, files that import themselves are allowed, and the rule won't trigger for these use cases.
+    /// This allows for encapsulation of functions/variables into a namespace instead of using a
+    /// static class (triggers [noStaticOnlyClass](https://biomejs.dev/linter/rules/no-static-only-class)).
     ///
     /// :::note
     /// This rule is computationally expensive. If you are particularly

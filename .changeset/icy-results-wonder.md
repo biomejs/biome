@@ -19,3 +19,4 @@ export function example() {
 export * as Example from './example.js';
 
 import { Example } from './example.js';
+```
