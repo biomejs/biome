@@ -1,5 +1,3 @@
-@value 4XLarge 28/36px;
-
 .postCssLowerCasingValueName {
   font: 4XLarge Helvetica;
 }
@@ -25,6 +23,7 @@
   a: 5VMAX;
   a: 5CM;
   a: 5MM;
+  a: 5Q;
   a: 5q;
   a: 5IN;
   a: 5PT;
@@ -36,7 +35,9 @@
   a: 5S;
   a: 5MS;
   a: 5hZ;
+  a: 5hz;
   a: 5KhZ;
+  a: 5khz;
   a: 5DPI;
   a: 5DPCM;
   a: 5DPPX;

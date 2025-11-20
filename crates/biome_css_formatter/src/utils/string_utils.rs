@@ -310,29 +310,47 @@ impl From<SyntaxToken<CssLanguage>> for FormatDimensionUnit {
 impl Format<CssFormatContext> for FormatDimensionUnit {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let original = self.token.text_trimmed();
+
         match original.to_ascii_lowercase_cow() {
-            Cow::Borrowed(_) => write!(f, [self.token.format()]),
+            Cow::Borrowed(lowercase) => {
+                if let Some(uppercase) = map_dimension_unit(lowercase) {
+                    write!(
+                        f,
+                        [format_replaced(
+                            &self.token,
+                            &text(&uppercase, self.token.text_trimmed_range().start()),
+                        )]
+                    )
+                } else {
+                    write!(f, [self.token.format()])
+                }
+            }
+
             Cow::Owned(lowercase) => {
                 write!(
                     f,
                     [format_replaced(
                         &self.token,
                         &text(
-                            // Most CSS dimension units can be formatted as lower case, but there are
-                            // a few that are more commonly formatted with some uppercase characters.
-                            // This maps those few cases to the correct casing. This matches the
-                            // behavior of the Prettier formatter.
-                            &match lowercase.as_str() {
-                                "hz" => String::from("Hz"),
-                                "khz" => String::from("kHz"),
-                                "q" => String::from("Q"),
-                                _ => lowercase,
-                            },
+                            &map_dimension_unit(lowercase.as_str()).unwrap_or(lowercase),
                             self.token.text_trimmed_range().start()
                         ),
                     )]
                 )
             }
         }
+    }
+}
+
+/// Most CSS dimension units can be formatted as lower case, but there are
+/// a few that are more commonly formatted with some uppercase characters.
+/// This maps those few cases to the correct casing. This matches the
+/// behavior of the Prettier formatter.
+fn map_dimension_unit(unit: &str) -> Option<String> {
+    match unit {
+        "hz" => Some(String::from("Hz")),
+        "khz" => Some(String::from("kHz")),
+        "q" => Some(String::from("Q")),
+        _ => None,
     }
 }
