@@ -170,7 +170,9 @@ impl Rule for UseConsistentBooleanProps {
                     && let Some(value) = expr.as_jsx_expression_attribute_value()
                     && let Ok(inner) = value.expression()
                     && let Some(literal_expression) = inner.as_any_js_literal_expression()
-                    && literal_expression.as_js_boolean_literal_expression().is_some()
+                    && literal_expression
+                        .as_js_boolean_literal_expression()
+                        .is_some()
                 {
                     // Remove initializer
                     let next_attr = make::jsx_attribute(jsx_attribute.name().ok()?).build();
@@ -185,12 +187,16 @@ impl Rule for UseConsistentBooleanProps {
                 ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                 match mode {
-                    BooleanPropMode::Explicit => {
-                        markup! { "Add explicit `true` literal for this attribute" }.to_owned()
+                    BooleanPropMode::Explicit => markup! {
+                        "This attribute requires an explicit `true` literal. "
+                        "Add `= {true}` to the attribute."
                     }
-                    BooleanPropMode::Implicit => {
-                        markup! { "Remove explicit `true` literal for this attribute" }.to_owned()
+                    .to_owned(),
+                    BooleanPropMode::Implicit => markup! {
+                        "This attribute uses an explicit `{true}` value. "
+                        "Remove the value and leave the attribute empty."
                     }
+                    .to_owned(),
                 },
                 mutation,
             ))
