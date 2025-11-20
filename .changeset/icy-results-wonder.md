@@ -8,12 +8,14 @@ This means the following is now allowed:
 
 **example.js**
 ```js
-export function example1() {
+export function example() {
   return 1;
 }
 
-export function example2() {
-  return 2;
-}
+// Re-exports all named exports from the current module under a single namespace
+// and then imports the namespace from the current module.
+// Allows for encapsulating functions/variables into a namespace instead
+// of using a static class.
+export * as Example from './example.js';
 
-export * as Example from './test';
+import { Example } from './example.js';
