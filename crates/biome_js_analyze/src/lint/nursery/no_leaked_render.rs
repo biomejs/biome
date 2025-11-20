@@ -204,29 +204,35 @@ impl Rule for NoLeakedRender {
                     if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                         let name = ident.name().ok()?;
 
-                        if let Some(binding) = get_variable_from_context(
+                        if get_variable_from_context(
                             model,
                             left_node,
                             name.to_trimmed_text().trim(),
-                        ) {
-                            let declaration = binding.tree().declaration()?;
-
+                        )
+                        .and_then(|binding| binding.tree().declaration())
+                        .and_then(|declaration| {
                             if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
                                 declaration
                             {
-                                let initializer = declarator.initializer()?;
-                                let initializer = initializer.expression().ok()?;
-
-                                if let AnyJsExpression::AnyJsLiteralExpression(literal) =
-                                    initializer
-                                {
-                                    let literal = literal.value_token().ok()?;
-
-                                    if matches!(literal.text_trimmed(), "true" | "false") {
-                                        return None;
-                                    }
-                                }
+                                Some(declarator)
+                            } else {
+                                None
                             }
+                        })
+                        .and_then(|declarator| declarator.initializer())
+                        .and_then(|initializer| initializer.expression().ok())
+                        .and_then(|expr| {
+                            if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
+                                Some(literal)
+                            } else {
+                                None
+                            }
+                        })
+                        .and_then(|literal| literal.value_token().ok())
+                        .map_or(false, |token| {
+                            matches!(token.text_trimmed(), "true" | "false")
+                        }) {
+                            return None;
                         }
                     }
                 }
