@@ -168,10 +168,10 @@ fn is_precision_lost_in_base_other(num: &str, radix: u8) -> bool {
             //   exceeds 53 bits, the number cannot be exactly represented, as the lower bits would be truncated.
             // Span = max - min + 1
             // We know min_bit_index is Some because we set it above if it was None
-            if let Some(min) = min_bit_index {
-                if max_bit_index - min + 1 > 53 {
-                    return true;
-                }
+            if let Some(min) = min_bit_index
+                && max_bit_index - min + 1 > 53
+            {
+                return true;
             }
         }
 
