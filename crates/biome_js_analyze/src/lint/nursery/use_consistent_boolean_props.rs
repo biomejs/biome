@@ -91,7 +91,8 @@ impl Rule for UseConsistentBooleanProps {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let jsx_attribute = ctx.query();
-        let mode = &ctx.options().mode;
+        let options = ctx.options();
+        let mode = options.mode.clone().unwrap_or_default();
 
         match (mode, jsx_attribute.initializer()) {
             (BooleanPropMode::Implicit, Some(jsx_attribute_initializer_clause)) => {
@@ -107,7 +108,7 @@ impl Rule for UseConsistentBooleanProps {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let jsx_attribute = ctx.query();
-        let mode = &ctx.options().mode;
+        let mode = ctx.options().mode.clone().unwrap_or_default();
 
         let prefix = "Boolean JSX prop with value `true` should be ";
         // Determine the proper message based on mode
@@ -129,7 +130,7 @@ impl Rule for UseConsistentBooleanProps {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let jsx_attribute = ctx.query();
-        let mode = &ctx.options().mode;
+        let mode = ctx.options().mode.clone().unwrap_or_default();
 
         let mut mutation = ctx.root().begin();
         let mut mutation_has_changes = false;
