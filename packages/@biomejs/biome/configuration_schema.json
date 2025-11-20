@@ -5399,6 +5399,13 @@
 						{ "$ref": "#/$defs/UseVueValidVOnConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVText": {
+					"description": "Enforce valid v-text Vue directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9509,6 +9516,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"properties": {
@@ -12532,6 +12548,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueValidVTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVTextOptions" }
+			]
+		},
+		"UseVueValidVTextOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

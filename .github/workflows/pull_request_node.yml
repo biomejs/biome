@@ -1,6 +1,7 @@
 # Jobs run on pull request for Node.js APIs
 name: Pull request Node.js
 on:
+  merge_group:
   pull_request:
     branches:
       - main

@@ -29,6 +29,7 @@ declare_lint_rule! {
     ///     <>
     ///       <script src="https://third-party-script.js" async />
     ///       <script src="https://third-party-script.js" defer />
+    ///       <script src="https://third-party-script.js" type="module" />
     ///     </>
     ///   );
     /// }
@@ -71,6 +72,17 @@ fn validate_name(node: &AnyJsxElementName) -> Option<()> {
 
 fn validate_attributes(list: &JsxAttributeList) -> Option<()> {
     if list.find_by_name("src").is_none()
+        || list.find_by_name("type").is_some_and(|attribute| {
+            attribute.initializer().is_some_and(|initializer| {
+                initializer.value().ok().is_some_and(|value| {
+                    value.as_jsx_string().is_some_and(|jsx_string| {
+                        jsx_string
+                            .inner_string_text()
+                            .is_ok_and(|inner_string| inner_string.text() == "module")
+                    })
+                })
+            })
+        })
         || list.find_by_name("async").is_some()
         || list.find_by_name("defer").is_some()
     {

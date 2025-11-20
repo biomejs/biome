@@ -6,6 +6,8 @@ expression: invalid.html
 ```html
 <script src=""></script>
 
+<script src="" type=""></script>
+
 ```
 
 # Diagnostics
@@ -17,6 +19,23 @@ invalid.html:1:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━
   > 1 │ <script src=""></script>
       │ ^^^^^^^^^^^^^^^
     2 │ 
+    3 │ <script src="" type=""></script>
+  
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
+  
+
+```
+
+```
+invalid.html:3:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected synchronous script.
+  
+    1 │ <script src=""></script>
+    2 │ 
+  > 3 │ <script src="" type=""></script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
   

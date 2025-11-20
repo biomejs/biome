@@ -159,7 +159,7 @@ Module TypeId(18) => Module(0) TypeId(20)
 
 Module TypeId(19) => Module(0) TypeId(12)
 
-Module TypeId(20) => value: foo
+Module TypeId(20) => string: foo
 
 Module TypeId(21) => Module(0) TypeId(23)
 

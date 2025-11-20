@@ -19,3 +19,14 @@ pub(crate) fn expected_expression(p: &CssParser, range: TextRange) -> ParseDiagn
         p,
     )
 }
+
+pub(crate) fn expected_if_branch(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["if branch", "if test boolean expression"], range, p)
+}
+
+pub(crate) fn expected_if_test_boolean_expr_group(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_any(&["parenthesized boolean expression", "if test"], range, p)
+}
