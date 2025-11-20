@@ -166,13 +166,7 @@ impl Rule for UseConsistentBooleanProps {
             BooleanPropMode::Implicit => {
                 // Implicit mode: remove initializer if it is `true`
                 if let Some(init) = jsx_attribute.initializer()
-                    && let Ok(expr) = init.value()
-                    && let Some(value) = expr.as_jsx_expression_attribute_value()
-                    && let Ok(inner) = value.expression()
-                    && let Some(literal_expression) = inner.as_any_js_literal_expression()
-                    && literal_expression
-                        .as_js_boolean_literal_expression()
-                        .is_some()
+                    && is_true_literal(&init)
                 {
                     // Remove initializer
                     let next_attr = make::jsx_attribute(jsx_attribute.name().ok()?).build();
@@ -208,12 +202,16 @@ impl Rule for UseConsistentBooleanProps {
 
 /// Checks whether the given JSX attribute initializer clause represents a `true` literal. e.g. disabled={true},
 /// and NOT disabled="true" or disabled={false} etc.
-fn is_true_literal(jsx_attribute_initializer_clause: &JsxAttributeInitializerClause) -> bool {
-    if let Ok(expr) = jsx_attribute_initializer_clause.value()
-        && let Some(lit_expr) = expr.as_jsx_expression_attribute_value()
-        && let Ok(expression) = lit_expr.expression()
+fn is_true_literal(init: &JsxAttributeInitializerClause) -> bool {
+    if let Ok(expr) = init.value()
+        && let Some(jsx_expr) = expr.as_jsx_expression_attribute_value()
+        && let Ok(inner) = jsx_expr.expression()
+        && let Some(lit) = inner.as_any_js_literal_expression()
+        && let Some(boolean) = lit.as_js_boolean_literal_expression()
     {
-        return expression.syntax().text_trimmed() == "true";
+        return boolean
+            .value_token()
+            .is_ok_and(|token| token.text_trimmed() == "true");
     }
 
     false
