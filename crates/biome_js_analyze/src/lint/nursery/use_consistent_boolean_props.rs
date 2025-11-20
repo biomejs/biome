@@ -24,23 +24,9 @@ declare_lint_rule! {
     /// ###  `mode`
     ///
     /// Controls whether boolean props should be implicit or explicit.
-    /// Supports two options - `Implicit` and `Explicit`.
+    /// Supports two options - `Implicit` and `Explicit`, where as `Implicit` is the default.
     ///
-    /// **Default**: `Implicit`
-    ///
-    /// ```json,ignore
-    /// // Implicit mode (default)
-    /// {
-    ///   "useConsistentBooleanProps": { "mode": "implicit" }
-    /// }
-    ///
-    /// // Explicit mode
-    /// {
-    ///   "useConsistentBooleanProps": { "mode": "explicit" }
-    /// }
-    /// ```
-    ///
-    /// ## Examples
+    /// ## Example
     ///
     /// ### Invalid (Implicit mode)
     ///
