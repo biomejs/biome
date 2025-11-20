@@ -3672,16 +3672,7 @@
 				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
 			]
 		},
-		"NoLeakedRenderOptions": {
-			"type": "object",
-			"properties": {
-				"validStrategies": {
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				}
-			},
-			"additionalProperties": false
-		},
+		"NoLeakedRenderOptions": { "type": "object" },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

@@ -5650,7 +5650,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_import_cycles: Some(value.into()),
             no_increment_decrement: Some(value.into()),
             no_jsx_literals: Some(value.into()),
-            no_leaked_render: None,
+            no_leaked_render: Some(value.into()),
             no_misused_promises: Some(value.into()),
             no_next_async_client_component: Some(value.into()),
             no_parameters_only_used_in_recursion: Some(value.into()),

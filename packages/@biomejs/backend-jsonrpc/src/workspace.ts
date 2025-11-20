@@ -6258,9 +6258,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
-export interface NoLeakedRenderOptions {
-	validStrategies?: string[];
-}
+export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
