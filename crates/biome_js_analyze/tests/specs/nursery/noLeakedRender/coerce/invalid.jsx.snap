@@ -326,6 +326,42 @@ invalid.jsx:51:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
 ```
 
 ```
+invalid.jsx:55:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    54 │ const MyComponent3 = () => {
+  > 55 │ 	return <Something checked={isIndeterminate ? false : isChecked} />;
+       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ };
+    57 │ 
+  
+  i This happens When you use ternary operators in JSX with alternate values like null,undefined, or false
+  
+  i Replace with a safe alternate value like an empty string or another JSX element
+  
+
+```
+
+```
+invalid.jsx:59:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    58 │ const MyComponent4 = () => {
+  > 59 │ 	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ };
+    61 │ 
+  
+  i This happens When you use ternary operators in JSX with alternate values like null,undefined, or false
+  
+  i Replace with a safe alternate value like an empty string or another JSX element
+  
+
+```
+
+```
 invalid.jsx:59:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.

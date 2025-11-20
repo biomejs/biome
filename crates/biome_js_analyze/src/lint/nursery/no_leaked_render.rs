@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, JsConditionalExpression, JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
-    binding_ext::AnyJsBindingDeclaration,
+    AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsLogicalExpression,
+    JsLogicalOperator, JsSyntaxNode, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
@@ -131,7 +131,6 @@ declare_lint_rule! {
 
 const COERCE_STRATEGY: &str = "coerce";
 const TERNARY_STRATEGY: &str = "ternary";
-const TERNARY_INVALID_ALTERNATE_VALUES: &[&str] = &["null", "undefined", "false"];
 
 const DEFAULT_VALID_STRATEGIES: &[&str] = &[COERCE_STRATEGY, TERNARY_STRATEGY];
 
@@ -237,7 +236,7 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
-                return Some(true);
+                Some(true)
             }
             Query::JsConditionalExpression(expr) => {
                 if valid_strategies
@@ -247,17 +246,25 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
                 let alternate = expr.alternate().ok()?;
-                let is_problematic_alternate = TERNARY_INVALID_ALTERNATE_VALUES
-                    .iter()
-                    .any(|&s| alternate.to_trimmed_text() == s);
+                let is_problematic_alternate = match &alternate {
+                    AnyJsExpression::AnyJsLiteralExpression(literal) => match literal {
+                        AnyJsLiteralExpression::JsNullLiteralExpression(_) => true,
+                        AnyJsLiteralExpression::JsBooleanLiteralExpression(boolean) => {
+                            let value = boolean.value_token().ok()?;
+                            value.text_trimmed() == "false"
+                        }
+                        _ => false,
+                    },
+                    AnyJsExpression::JsIdentifierExpression(_) => true,
+                    _ => false,
+                };
 
                 let is_jsx_element_alt = matches!(alternate, AnyJsExpression::JsxTagExpression(_));
-
                 if !is_problematic_alternate || is_jsx_element_alt {
                     return None;
                 }
 
-                return Some(true);
+                Some(true)
             }
         }
     }
