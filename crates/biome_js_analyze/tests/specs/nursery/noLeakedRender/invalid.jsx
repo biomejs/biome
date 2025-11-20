@@ -51,3 +51,20 @@ const MyComponent1 = () => {
 const MyComponent2 = () => {
 	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
 };
+
+const MyComponent3 = () => {
+	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
+};
+
+const MyComponent4 = () => {
+	return <Something checked={v ? false : isChecked} />;
+};
+
+const MyComponent5 = () => {
+	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+};
+
+const isOpen1 = 0;
+const Component7 = () => {
+	return <Popover open={isOpen && items.length > 0} />;
+};

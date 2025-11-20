@@ -4,8 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsLogicalExpression,
-    JsLogicalOperator, JsSyntaxNode, binding_ext::AnyJsBindingDeclaration,
+    AnyJsExpression, JsConditionalExpression, JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
+    JsxExpressionAttributeValue, JsxExpressionChild, JsxTagExpression,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
@@ -19,9 +20,6 @@ declare_lint_rule! {
     /// or rendering crashes in React JSX. When using conditional rendering with the
     /// logical AND operator (`&&`), if the left-hand side evaluates to a falsy value like
     /// `0`, `NaN`, or any empty string, these values will be rendered instead of rendering nothing.
-    ///
-    /// Similarly, when using ternary operators with problematic alternate values like `null`,
-    /// `undefined`, or `false`, it can cause rendering issues or crashes.
     ///
     ///
     /// ## Examples
@@ -86,34 +84,6 @@ declare_lint_rule! {
     ///   return <div>{isReady && <Content />}</div>;
     /// }
     /// ```
-    ///
-    /// ### `validStrategies`
-    ///
-    /// An array containing "coerce", "ternary", or both (default: ["ternary", "coerce"])
-    /// Decide which strategies are considered valid to prevent leaked renders (at least 1 is required).
-    /// The "coerce" option will transform the conditional of the JSX expression to a boolean.
-    /// The "ternary" option transforms the binary expression into a ternay expression return `null`
-    /// for falsy values.
-    ///
-    /// ```json
-    /// {
-    ///   "noLeakedRender": {
-    ///     "options": {
-    ///       "validStrategies": ["coerce", "ternary"]
-    ///     }
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// ```json
-    /// {
-    ///   "noLeakedRender": {
-    ///     "options": {
-    ///       "validStrategies": ["coerce"]
-    ///     }
-    ///   }
-    /// }
-    /// ```
 
     pub NoLeakedRender{
         version: "next",
@@ -127,10 +97,13 @@ declare_lint_rule! {
     }
 }
 
-const COERCE_STRATEGY: &str = "coerce";
-const TERNARY_STRATEGY: &str = "ternary";
-
-const DEFAULT_VALID_STRATEGIES: &[&str] = &[COERCE_STRATEGY, TERNARY_STRATEGY];
+fn is_inside_jsx_expression(node: &JsSyntaxNode) -> bool {
+    node.ancestors().any(|ancestor| {
+        JsxExpressionChild::can_cast(ancestor.kind())
+            || JsxExpressionAttributeValue::can_cast(ancestor.kind())
+            || JsxTagExpression::can_cast(ancestor.kind())
+    })
+}
 
 fn get_variable_from_context(
     model: &SemanticModel,
@@ -150,11 +123,11 @@ fn get_variable_from_context(
 }
 
 declare_node_union! {
-    pub Query = JsLogicalExpression | JsConditionalExpression
+    pub NoLeakedRenderQuery = JsLogicalExpression | JsConditionalExpression
 }
 
 impl Rule for NoLeakedRender {
-    type Query = Semantic<Query>;
+    type Query = Semantic<NoLeakedRenderQuery>;
     type State = bool;
     type Signals = Option<Self::State>;
     type Options = NoLeakedRenderOptions;
@@ -163,18 +136,12 @@ impl Rule for NoLeakedRender {
         let query = ctx.query();
         let model = ctx.model();
 
-        let options = ctx.options();
-        let valid_strategies: Vec<Box<str>> =
-            if let Some(strategies) = options.valid_strategies.clone() {
-                strategies.to_vec()
-            } else {
-                DEFAULT_VALID_STRATEGIES
-                    .iter()
-                    .map(|&str| str.into())
-                    .collect()
-            };
+        if !is_inside_jsx_expression(query.syntax()) {
+            return None;
+        }
+
         match query {
-            Query::JsLogicalExpression(exp) => {
+            NoLeakedRenderQuery::JsLogicalExpression(exp) => {
                 let op = exp.operator().ok()?;
 
                 if op != JsLogicalOperator::LogicalAnd {
@@ -182,31 +149,23 @@ impl Rule for NoLeakedRender {
                 }
                 let left = exp.left().ok()?;
 
-                if valid_strategies
-                    .iter()
-                    .any(|s| s.as_ref() == COERCE_STRATEGY)
+                let is_coerce_valid_left_side = matches!(
+                    left,
+                    AnyJsExpression::JsUnaryExpression(_)
+                        | AnyJsExpression::JsCallExpression(_)
+                        | AnyJsExpression::JsBinaryExpression(_)
+                );
+                if is_coerce_valid_left_side
+                    || get_is_coerce_valid_nested_logical_expression(exp.left())
                 {
-                    let is_coerce_valid_left_side = matches!(
-                        left,
-                        AnyJsExpression::JsUnaryExpression(_)
-                            | AnyJsExpression::JsCallExpression(_)
-                            | AnyJsExpression::JsBinaryExpression(_)
-                    );
-                    if is_coerce_valid_left_side
-                        || get_is_coerce_valid_nested_logical_expression(exp.left())
-                    {
-                        return None;
-                    }
-                    let left_node = left.syntax();
+                    return None;
+                }
+                let left_node = left.syntax();
 
-                    if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
-                        let name = ident.name().ok()?;
+                if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
+                    let name = ident.name().ok()?;
 
-                        if get_variable_from_context(
-                            model,
-                            left_node,
-                            name.to_trimmed_text().trim(),
-                        )
+                    if get_variable_from_context(model, left_node, name.to_trimmed_text().trim())
                         .and_then(|binding| binding.tree().declaration())
                         .and_then(|declaration| {
                             if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
@@ -228,9 +187,8 @@ impl Rule for NoLeakedRender {
                         })
                         .and_then(|literal| literal.value_token().ok())
                         .is_some_and(|token| matches!(token.text_trimmed(), "true" | "false"))
-                        {
-                            return None;
-                        }
+                    {
+                        return None;
                     }
                 }
 
@@ -241,29 +199,12 @@ impl Rule for NoLeakedRender {
 
                 Some(true)
             }
-            Query::JsConditionalExpression(expr) => {
-                if valid_strategies
-                    .iter()
-                    .any(|s| s.as_ref() == TERNARY_STRATEGY)
-                {
-                    return None;
-                }
+            NoLeakedRenderQuery::JsConditionalExpression(expr) => {
                 let alternate = expr.alternate().ok()?;
-                let is_problematic_alternate = match &alternate {
-                    AnyJsExpression::AnyJsLiteralExpression(literal) => match literal {
-                        AnyJsLiteralExpression::JsNullLiteralExpression(_) => true,
-                        AnyJsLiteralExpression::JsBooleanLiteralExpression(boolean) => {
-                            let value = boolean.value_token().ok()?;
-                            value.text_trimmed() == "false"
-                        }
-                        _ => false,
-                    },
-                    AnyJsExpression::JsIdentifierExpression(_) => true,
-                    _ => false,
-                };
-
+                let is_alternate_identifier =
+                    matches!(alternate, AnyJsExpression::JsIdentifierExpression(_));
                 let is_jsx_element_alt = matches!(alternate, AnyJsExpression::JsxTagExpression(_));
-                if !is_problematic_alternate || is_jsx_element_alt {
+                if !is_alternate_identifier || is_jsx_element_alt {
                     return None;
                 }
 
@@ -276,7 +217,7 @@ impl Rule for NoLeakedRender {
         let node = ctx.query();
 
         match node {
-            Query::JsLogicalExpression(_) => {
+            NoLeakedRenderQuery::JsLogicalExpression(_) => {
                 Some(
                     RuleDiagnostic::new(
                         rule_category!(),
@@ -286,14 +227,14 @@ impl Rule for NoLeakedRender {
                         },
                     )
                     .note(markup! {
-                        "JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output."
+                        "JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output."
                     })
                     .note(markup! {
                         "Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression."
                     })
                 )
             }
-            Query::JsConditionalExpression(_) => {
+            NoLeakedRenderQuery::JsConditionalExpression(_) => {
                 Some(
                     RuleDiagnostic::new(
                         rule_category!(),
@@ -303,10 +244,10 @@ impl Rule for NoLeakedRender {
                         },
                     )
                     .note(markup! {
-                        "This happens When you use ternary operators in JSX with alternate values like null,undefined, or false"
+                        "This happens when you use ternary operators in JSX with alternate values that could be variables"
                     })
                     .note(markup! {
-                        "Replace with a safe alternate value like an empty string or another JSX element"
+                        "Replace with a safe alternate value like an empty string , null or another JSX element"
                     })
                 )
             }

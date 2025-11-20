@@ -58,6 +58,23 @@ const MyComponent2 = () => {
 	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
 };
 
+const MyComponent3 = () => {
+	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
+};
+
+const MyComponent4 = () => {
+	return <Something checked={v ? false : isChecked} />;
+};
+
+const MyComponent5 = () => {
+	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+};
+
+const isOpen1 = 0;
+const Component7 = () => {
+	return <Popover open={isOpen && items.length > 0} />;
+};
+
 ```
 
 # Diagnostics
@@ -261,6 +278,97 @@ invalid.jsx:52:12 lint/nursery/noLeakedRender ━━━━━━━━━━━�
        │ 	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     53 │ };
     54 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:56:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    55 │ const MyComponent3 = () => {
+  > 56 │ 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ };
+    58 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:60:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    59 │ const MyComponent4 = () => {
+  > 60 │ 	return <Something checked={v ? false : isChecked} />;
+       │ 	                           ^^^^^^^^^^^^^^^^^^^^^
+    61 │ };
+    62 │ 
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables
+  
+  i Replace with a safe alternate value like an empty string , null or another JSX element
+  
+
+```
+
+```
+invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    63 │ const MyComponent5 = () => {
+  > 64 │ 	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ };
+    66 │ 
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables
+  
+  i Replace with a safe alternate value like an empty string , null or another JSX element
+  
+
+```
+
+```
+invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    63 │ const MyComponent5 = () => {
+  > 64 │ 	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
+       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ };
+    66 │ 
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+invalid.jsx:69:24 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    67 │ const isOpen1 = 0;
+    68 │ const Component7 = () => {
+  > 69 │ 	return <Popover open={isOpen && items.length > 0} />;
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ };
+    71 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, '').React will render that value, causing unexpected UI output.
   
