@@ -164,7 +164,9 @@ impl Rule for UseConsistentBooleanProps {
                 if let Some(init) = jsx_attribute.initializer()
                     && let Ok(expr) = init.value()
                     && let Some(value) = expr.as_jsx_expression_attribute_value()
-                    && value.to_trimmed_text() == "{true}"
+                    && let Ok(inner) = value.expression()
+                    && let Some(literal_expression) = inner.as_any_js_literal_expression()
+                    && literal_expression.as_js_boolean_literal_expression().is_some()
                 {
                     // Remove initializer
                     let next_attr = make::jsx_attribute(jsx_attribute.name().ok()?).build();

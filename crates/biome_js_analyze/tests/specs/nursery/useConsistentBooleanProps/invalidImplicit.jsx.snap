@@ -8,6 +8,7 @@ expression: invalidImplicit.jsx
 <input disabled={true} />;
 <input accept={true} /** some comment */ />;
 <input /** some comment */ accept={true} />;
+<input /** some comment */ accept={ true  } />;
 
 ```
 
@@ -38,7 +39,7 @@ invalidImplicit.jsx:2:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━�
   > 2 │ <input accept={true} /** some comment */ />;
       │        ^^^^^^^^^^^^^
     3 │ <input /** some comment */ accept={true} />;
-    4 │ 
+    4 │ <input /** some comment */ accept={ true  } />;
   
   i Safe fix: Remove explicit `true` literal for this attribute
   
@@ -56,11 +57,30 @@ invalidImplicit.jsx:3:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━
     2 │ <input accept={true} /** some comment */ />;
   > 3 │ <input /** some comment */ accept={true} />;
       │                            ^^^^^^^^^^^^^
-    4 │ 
+    4 │ <input /** some comment */ accept={ true  } />;
+    5 │ 
   
   i Safe fix: Remove explicit `true` literal for this attribute
   
     3 │ <input·/**·some·comment·*/·accept={true}·/>;
       │                                  -------    
+
+```
+
+```
+invalidImplicit.jsx:4:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be implicit (omit ={true}).
+  
+    2 │ <input accept={true} /** some comment */ />;
+    3 │ <input /** some comment */ accept={true} />;
+  > 4 │ <input /** some comment */ accept={ true  } />;
+      │                            ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Safe fix: Remove explicit `true` literal for this attribute
+  
+    4 │ <input·/**·some·comment·*/·accept={·true··}·/>;
+      │                                  ----------    
 
 ```

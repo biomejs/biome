@@ -1,6 +1,7 @@
 /* should not generate diagnostics */
 // Explicit true/false
 <input disabled={true} />;
+<input disabled={  true } />;
 <input disabled={false} />;
 
 // Explicit falsy values
