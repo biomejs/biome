@@ -1155,6 +1155,7 @@ fn selector_from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
         | AnyJsClassMember::JsConstructorClassMember(_)
         | AnyJsClassMember::TsConstructorSignatureClassMember(_)
         | AnyJsClassMember::JsEmptyClassMember(_)
+        | AnyJsClassMember::JsGlimmerTemplate(_)
         | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
         AnyJsClassMember::TsIndexSignatureClassMember(member) => {
             (Kind::ClassProperty, (&member.modifiers()).into())

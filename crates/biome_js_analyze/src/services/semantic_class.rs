@@ -924,7 +924,7 @@ fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_js_parser::{JsParserOptions, Parse, parse};
+    use biome_js_parser::{JsParserOptions, Parse, parse_with_options};
     use biome_js_syntax::{AnyJsRoot, JsFileSource, JsObjectBindingPattern};
     use biome_rowan::AstNode;
 
@@ -984,7 +984,7 @@ mod tests {
     }
 
     fn parse_ts(code: &str) -> Parse<AnyJsRoot> {
-        let source = parse(code, JsFileSource::ts(), JsParserOptions::default());
+        let source = parse_with_options(code, JsFileSource::ts(), JsParserOptions::default());
 
         if source.has_errors() {
             panic!("syntax error")

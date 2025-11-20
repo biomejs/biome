@@ -176,6 +176,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "ERROR_TOKEN",
         "IDENT",
         "JSX_IDENT",
+        "GLIMMER_TEMPLATE", // <template>...</template>
         "NEWLINE",
         "WHITESPACE",
         "COMMENT",
@@ -331,6 +332,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_GETTER_CLASS_MEMBER",
         "JS_SETTER_CLASS_MEMBER",
         "JS_EMPTY_CLASS_MEMBER",
+        "JS_GLIMMER_TEMPLATE",
         "JS_PARENTHESIZED_ASSIGNMENT",
         "JS_IDENTIFIER_ASSIGNMENT",
         "JS_STATIC_MEMBER_ASSIGNMENT",

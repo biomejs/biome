@@ -2,7 +2,7 @@ use crate::{
     grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
     grit_tree::GritTargetTree,
 };
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse, parse_with_options};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use camino::Utf8Path;
@@ -34,7 +34,7 @@ impl GritTargetParser for GritJsParser {
             _ => JsFileSource::ts(),
         };
 
-        parse(source, source_type, JsParserOptions::default()).into()
+        parse(source, source_type).into()
     }
 }
 
@@ -48,7 +48,7 @@ impl Parser for GritJsParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse(
+        let parse_result = parse_with_options(
             body,
             JsFileSource::tsx(),
             JsParserOptions::default().with_metavariables(),
@@ -75,7 +75,7 @@ impl Parser for GritJsParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse(
+        let parse_result = parse_with_options(
             &context,
             JsFileSource::tsx(),
             JsParserOptions::default().with_metavariables(),

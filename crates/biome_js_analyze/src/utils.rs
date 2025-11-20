@@ -83,14 +83,14 @@ pub(crate) fn find_variable_position(
 #[cfg(test)]
 mod test {
     use crate::utils::{VariablePosition, find_variable_position};
-    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_parser::{JsParserOptions, parse_with_options};
     use biome_js_syntax::{JsBinaryExpression, JsFileSource};
     use biome_rowan::AstNode;
 
     #[test]
     fn find_variable_position_matches_on_left() {
         let source = "(a) + b";
-        let parsed = parse(
+        let parsed = parse_with_options(
             source,
             JsFileSource::js_module(),
             JsParserOptions::default(),
@@ -113,7 +113,7 @@ mod test {
     #[test]
     fn find_variable_position_matches_on_right() {
         let source = "a + b";
-        let parsed = parse(
+        let parsed = parse_with_options(
             source,
             JsFileSource::js_module(),
             JsParserOptions::default(),
@@ -136,7 +136,7 @@ mod test {
     #[test]
     fn find_variable_position_not_match() {
         let source = "a + b";
-        let parsed = parse(
+        let parsed = parse_with_options(
             source,
             JsFileSource::js_module(),
             JsParserOptions::default(),
@@ -159,7 +159,7 @@ mod test {
     #[test]
     fn find_variable_position_when_the_operator_has_no_spaces_around() {
         let source = "l-c";
-        let parsed = parse(
+        let parsed = parse_with_options(
             source,
             JsFileSource::js_module(),
             JsParserOptions::default(),

@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test that <temp> (not "template") is properly rejected
+// This tests lexer backtracking - should restore position and report clear error
+const x = <temp>content</temp>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..146 "const" [Comments("// Test that <temp> ( ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@146..148 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@148..150 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: JsBogusExpression {
+                                    items: [
+                                        L_ANGLE@150..151 "<" [] [],
+                                        TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@151..155 "temp" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                        R_ANGLE@155..156 ">" [] [],
+                                        JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@156..163 "content" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                operator_token: L_ANGLE@163..164 "<" [] [],
+                                right: JsRegexLiteralExpression {
+                                    value_token: JS_REGEX_LITERAL@164..171 "/temp>;" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@171..172 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..172
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..171
+    0: JS_VARIABLE_STATEMENT@0..171
+      0: JS_VARIABLE_DECLARATION@0..171
+        0: (empty)
+        1: CONST_KW@0..146 "const" [Comments("// Test that <temp> ( ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@146..171
+          0: JS_VARIABLE_DECLARATOR@146..171
+            0: JS_IDENTIFIER_BINDING@146..148
+              0: IDENT@146..148 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@148..171
+              0: EQ@148..150 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@150..171
+                0: JS_BOGUS_EXPRESSION@150..163
+                  0: L_ANGLE@150..151 "<" [] []
+                  1: TS_REFERENCE_TYPE@151..155
+                    0: JS_REFERENCE_IDENTIFIER@151..155
+                      0: IDENT@151..155 "temp" [] []
+                    1: (empty)
+                  2: R_ANGLE@155..156 ">" [] []
+                  3: JS_IDENTIFIER_EXPRESSION@156..163
+                    0: JS_REFERENCE_IDENTIFIER@156..163
+                      0: IDENT@156..163 "content" [] []
+                1: L_ANGLE@163..164 "<" [] []
+                2: JS_REGEX_LITERAL_EXPRESSION@164..171
+                  0: JS_REGEX_LITERAL@164..171 "/temp>;" [] []
+      1: (empty)
+  4: EOF@171..172 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_lookalike_temp.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // Test that <temp> (not "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <temp>content</temp>;
+      │           ^^^^^^^^^^^^^
+    4 │ 
+  
+  i TypeScript only syntax
+  
+glimmer_lookalike_temp.gjs:3:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    1 │ // Test that <temp> (not "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <temp>content</temp>;
+      │                                
+    4 │ 
+  
+  i ...but the line ends here
+  
+    1 │ // Test that <temp> (not "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <temp>content</temp>;
+      │                                
+    4 │ 
+  
+  i a regex literal starts there...
+  
+    1 │ // Test that <temp> (not "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <temp>content</temp>;
+      │                         ^
+    4 │ 
+  
+```

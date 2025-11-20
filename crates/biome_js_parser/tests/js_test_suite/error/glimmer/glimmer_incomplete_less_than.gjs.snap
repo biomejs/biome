@@ -1,0 +1,92 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test bare < at EOF
+// Should handle EOF gracefully after less-than
+const x = <
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..76 "const" [Comments("// Test bare < at EOF"), Newline("\n"), Comments("// Should handle EOF  ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@76..78 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@78..80 "=" [] [Whitespace(" ")],
+                            expression: JsBogusExpression {
+                                items: [
+                                    L_ANGLE@80..81 "<" [] [],
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@81..82 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..82
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..81
+    0: JS_VARIABLE_STATEMENT@0..81
+      0: JS_VARIABLE_DECLARATION@0..81
+        0: (empty)
+        1: CONST_KW@0..76 "const" [Comments("// Test bare < at EOF"), Newline("\n"), Comments("// Should handle EOF  ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@76..81
+          0: JS_VARIABLE_DECLARATOR@76..81
+            0: JS_IDENTIFIER_BINDING@76..78
+              0: IDENT@76..78 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@78..81
+              0: EQ@78..80 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS_EXPRESSION@80..81
+                0: L_ANGLE@80..81 "<" [] []
+      1: (empty)
+  4: EOF@81..82 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_incomplete_less_than.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // Test bare < at EOF
+    2 │ // Should handle EOF gracefully after less-than
+  > 3 │ const x = <
+      │           ^
+    4 │ 
+  
+  i TypeScript only syntax
+  
+```

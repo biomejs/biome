@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+
+// Glimmer template should be treated as a non-static member
+class MyComponent {
+	static helper() {
+		return 42;
+	}
+
+	<template>
+		<div>Hello World</div>
+	</template>
+}
+
+// Another test: class with only a Glimmer template (no static members)
+class SimpleComponent {
+	<template>
+		<p>Simple component</p>
+	</template>
+}
