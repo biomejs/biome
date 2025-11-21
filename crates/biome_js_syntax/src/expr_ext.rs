@@ -7,12 +7,13 @@ use crate::{
     AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
     JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
-    JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, T, TsStringLiteralType, inner_string_text,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
+    JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
+    JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
+    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
+    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence, T,
+    TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
@@ -1452,6 +1453,26 @@ impl JsStaticMemberExpression {
     /// ```
     pub fn is_optional_chain(&self) -> bool {
         AnyJsOptionalChainExpression::from(self.clone()).is_optional_chain()
+    }
+
+    /// It returns the [identifier](JsIdentifierExpression) of a static member expression
+    pub fn identifier(&self) -> Option<JsIdentifierExpression> {
+        let object = self.object().ok()?;
+        if let AnyJsExpression::JsIdentifierExpression(identifier) = object {
+            return Some(identifier);
+        }
+
+        iter::successors(object.as_js_static_member_expression().cloned(), |next| {
+            let object = next.object().ok()?;
+            object.as_js_static_member_expression().cloned()
+        })
+        .last()
+        .and_then(|expression| {
+            expression
+                .object()
+                .ok()
+                .and_then(|object| object.as_js_identifier_expression().cloned())
+        })
     }
 }
 
