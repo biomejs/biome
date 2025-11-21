@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: invalidExplicit.jsx
+---
+# Input
+```jsx
+<input disabled />;
+<input accept /** some comment */ />;
+<input /** some comment */ accept />;
+
+```
+
+# Diagnostics
+```
+invalidExplicit.jsx:1:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be explicit (={true} must be present).
+  
+  > 1 │ <input disabled />;
+      │        ^^^^^^^^
+    2 │ <input accept /** some comment */ />;
+    3 │ <input /** some comment */ accept />;
+  
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
+  
+    1 │ <input·disabled·={true}·/>;
+      │                 ++++++++   
+
+```
+
+```
+invalidExplicit.jsx:2:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be explicit (={true} must be present).
+  
+    1 │ <input disabled />;
+  > 2 │ <input accept /** some comment */ />;
+      │        ^^^^^^
+    3 │ <input /** some comment */ accept />;
+    4 │ 
+  
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
+  
+    2 │ <input·accept·/**·some·comment·*/·={true}·/**·some·comment·*/·/>;
+      │                                   ++++++++++++++++++++++++++++   
+
+```
+
+```
+invalidExplicit.jsx:3:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Boolean JSX prop with value `true` should be explicit (={true} must be present).
+  
+    1 │ <input disabled />;
+    2 │ <input accept /** some comment */ />;
+  > 3 │ <input /** some comment */ accept />;
+      │                            ^^^^^^
+    4 │ 
+  
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
+  
+    3 │ <input·/**·some·comment·*/·accept·={true}·/>;
+      │                                   ++++++++   
+
+```
