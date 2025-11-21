@@ -23,7 +23,7 @@ invalidImplicit.jsx:1:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━�
     2 │ <input accept={true} /** some comment */ />;
     3 │ <input /** some comment */ accept={true} />;
   
-  i Safe fix: Remove explicit `true` literal for this attribute
+  i Safe fix: This attribute uses an explicit `{true}` value. Remove the value and leave the attribute empty.
   
     1 │ <input·disabled={true}·/>;
       │                -------    
@@ -41,7 +41,7 @@ invalidImplicit.jsx:2:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━�
     3 │ <input /** some comment */ accept={true} />;
     4 │ <input /** some comment */ accept={ true  } />;
   
-  i Safe fix: Remove explicit `true` literal for this attribute
+  i Safe fix: This attribute uses an explicit `{true}` value. Remove the value and leave the attribute empty.
   
     2 │ <input·accept={true}·/**·some·comment·*/·/>;
       │              -------                        
@@ -60,7 +60,7 @@ invalidImplicit.jsx:3:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━
     4 │ <input /** some comment */ accept={ true  } />;
     5 │ 
   
-  i Safe fix: Remove explicit `true` literal for this attribute
+  i Safe fix: This attribute uses an explicit `{true}` value. Remove the value and leave the attribute empty.
   
     3 │ <input·/**·some·comment·*/·accept={true}·/>;
       │                                  -------    
@@ -78,7 +78,7 @@ invalidImplicit.jsx:4:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━
       │                            ^^^^^^^^^^^^^^^^
     5 │ 
   
-  i Safe fix: Remove explicit `true` literal for this attribute
+  i Safe fix: This attribute uses an explicit `{true}` value. Remove the value and leave the attribute empty.
   
     4 │ <input·/**·some·comment·*/·accept={·true··}·/>;
       │                                  ----------    

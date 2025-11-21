@@ -22,7 +22,7 @@ invalidExplicit.jsx:1:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━�
     2 │ <input accept /** some comment */ />;
     3 │ <input /** some comment */ accept />;
   
-  i Safe fix: Add explicit `true` literal for this attribute
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
   
     1 │ <input·disabled·={true}·/>;
       │                 ++++++++   
@@ -40,7 +40,7 @@ invalidExplicit.jsx:2:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━�
     3 │ <input /** some comment */ accept />;
     4 │ 
   
-  i Safe fix: Add explicit `true` literal for this attribute
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
   
     2 │ <input·accept·/**·some·comment·*/·={true}·/**·some·comment·*/·/>;
       │                                   ++++++++++++++++++++++++++++   
@@ -58,7 +58,7 @@ invalidExplicit.jsx:3:28 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━
       │                            ^^^^^^
     4 │ 
   
-  i Safe fix: Add explicit `true` literal for this attribute
+  i Safe fix: This attribute requires an explicit `true` literal. Add `= {true}` to the attribute.
   
     3 │ <input·/**·some·comment·*/·accept·={true}·/>;
       │                                   ++++++++   
