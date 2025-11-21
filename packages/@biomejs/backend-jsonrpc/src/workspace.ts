@@ -1931,6 +1931,11 @@ See https://biomejs.dev/linter/rules/no-sync-scripts
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
 	/**
+	* Disallow ternary operators.
+See https://biomejs.dev/linter/rules/no-ternary 
+	 */
+	noTernary?: NoTernaryConfiguration;
+	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
 	 */
@@ -3573,6 +3578,9 @@ export type NoShadowConfiguration =
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
+export type NoTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTernaryOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -4966,6 +4974,10 @@ export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
 }
+export interface RuleWithNoTernaryOptions {
+	level: RulePlainConfiguration;
+	options?: NoTernaryOptions;
+}
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnknownAttributeOptions;
@@ -6252,6 +6264,7 @@ export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
+export type NoTernaryOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -7082,6 +7095,7 @@ export type Category =
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
