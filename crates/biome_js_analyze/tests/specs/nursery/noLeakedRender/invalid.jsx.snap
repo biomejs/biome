@@ -328,9 +328,9 @@ invalid.jsx:60:29 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     61 │ };
     62 │ 
   
-  i This happens when you use ternary operators in JSX with alternate values that could be variables
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
   
-  i Replace with a safe alternate value like an empty string , null or another JSX element
+  i Replace with a safe alternate value like an empty string , null or another JSX element.
   
 
 ```
@@ -346,9 +346,9 @@ invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━�
     65 │ };
     66 │ 
   
-  i This happens when you use ternary operators in JSX with alternate values that could be variables
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
   
-  i Replace with a safe alternate value like an empty string , null or another JSX element
+  i Replace with a safe alternate value like an empty string , null or another JSX element.
   
 
 ```
