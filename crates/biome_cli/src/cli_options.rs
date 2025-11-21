@@ -109,7 +109,11 @@ impl CliOptions {
             Some(path) => {
                 let path = Utf8PathBuf::from(path);
                 let path = path.strip_prefix("./").unwrap_or(&path);
-                ConfigurationPathHint::FromUser(working_directory.join(path))
+                if path.is_absolute() {
+                    ConfigurationPathHint::FromUser(path.to_path_buf())
+                } else {
+                    ConfigurationPathHint::FromUser(working_directory.join(path))
+                }
             }
         }
     }
