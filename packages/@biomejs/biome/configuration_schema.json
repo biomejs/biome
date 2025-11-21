@@ -4351,6 +4351,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTernaryConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTernaryOptions" }
+			]
+		},
+		"NoTernaryOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5139,6 +5146,13 @@
 					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTernary": {
+					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTernaryConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7611,6 +7625,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTemplateCurlyInStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTernaryOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTernaryOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
