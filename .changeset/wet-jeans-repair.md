@@ -15,6 +15,6 @@ foo.reduce((acc, bar) => Object.assign(acc, bar), {})
 
 The following cases which **do** make new allocations will continue to warn:
 
-```js,expect_diagnostic
+```js
 foo.reduce((acc, bar) => Object.assign({}, acc, bar), {})
 ```
