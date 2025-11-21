@@ -275,7 +275,7 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     TreeSitterPattern {
         name: "jsx_attribute",
         biome_kind: "JSX_ATTRIBUTE",
-        slots: &[],
+        slots: &[("name", 0), ("value", 1)],
     },
     TreeSitterPattern {
         name: "jsx_element",

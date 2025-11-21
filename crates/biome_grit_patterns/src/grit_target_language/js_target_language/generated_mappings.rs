@@ -127,7 +127,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "jsx_attribute",
         kind: JsSyntaxKind::JSX_ATTRIBUTE,
-        slots: &[],
+        slots: &[("name", 0), ("value", 1)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_element",
