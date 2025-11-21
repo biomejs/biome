@@ -52,7 +52,7 @@ TwRoot =
 	candidates: TwCandidateList
 	eof: 'EOF'
 
-TwCandidateList = (AnyTwFullCandidate (' ' AnyTwFullCandidate)* ' '?)
+TwCandidateList = AnyTwFullCandidate*
 
 AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 

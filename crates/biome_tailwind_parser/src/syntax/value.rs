@@ -25,12 +25,6 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if p.at(T![-]) {
-        m.abandon(p);
-        p.rewind(checkpoint);
-        return Absent;
-    }
-
     Present(m.complete(p, TW_NAMED_VALUE))
 }
 
