@@ -11237,7 +11237,9 @@
 		"UseConsistentBooleanPropsOptions": {
 			"type": "object",
 			"properties": {
-				"mode": { "$ref": "#/$defs/BooleanPropMode", "default": "implicit" }
+				"mode": {
+					"anyOf": [{ "$ref": "#/$defs/BooleanPropMode" }, { "type": "null" }]
+				}
 			},
 			"additionalProperties": false
 		},
