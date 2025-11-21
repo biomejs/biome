@@ -255,7 +255,7 @@ impl Rule for NoLeakedRender {
                         "This happens when you use ternary operators in JSX with alternate values that could be variables."
                     })
                     .note(markup! {
-                        "Replace with a safe alternate value like an empty string , null or another JSX element"
+                        "Replace with a safe alternate value like an empty string , null or another JSX element."
                     })
                 )
             }
