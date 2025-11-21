@@ -34,6 +34,9 @@ reviews:
   finishing_touches:
     docstrings:
       enabled: false
+  pre_merge_checks:
+    docstrings:
+      mode: off
 tone_instructions: "Please keep it short and to the point. Be patient, especially with new contributors. Feel free to be witty with maintainers."
 knowledge_base:
   code_guidelines:
