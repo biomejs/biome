@@ -6,8 +6,8 @@ Fixed [#6569](https://github.com/biomejs/biome/issues/6569): Allow files to expo
 
 This means the following is now allowed:
 
-**example.js**
 ```js
+// example.js
 export function example() {
   return 1;
 }
@@ -19,4 +19,5 @@ export function example() {
 export * as Example from './example.js';
 
 import { Example } from './example.js';
+```
 ```
