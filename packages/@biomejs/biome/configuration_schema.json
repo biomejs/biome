@@ -3666,6 +3666,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLeakedRenderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
+			]
+		},
+		"NoLeakedRenderOptions": { "type": "object" },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5104,6 +5111,13 @@
 					"description": "Disallow string literals inside JSX elements.\nSee https://biomejs.dev/linter/rules/no-jsx-literals",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLeakedRender": {
+					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7011,6 +7025,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLabelWithoutControlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLeakedRenderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -1901,6 +1901,11 @@ See https://biomejs.dev/linter/rules/no-jsx-literals
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Prevent problematic leaked values from being rendered.
+See https://biomejs.dev/linter/rules/no-leaked-render 
+	 */
+	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -3560,6 +3565,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoLeakedRenderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLeakedRenderOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -4947,6 +4955,10 @@ export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
 }
+export interface RuleWithNoLeakedRenderOptions {
+	level: RulePlainConfiguration;
+	options?: NoLeakedRenderOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6258,6 +6270,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
@@ -7088,6 +7101,7 @@ export type Category =
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
