@@ -139,13 +139,13 @@ impl Rule for NoLeakedRender {
                 while let Some(current) = stack.pop() {
                     match current {
                         AnyJsExpression::JsLogicalExpression(expr) => {
-                            let left = expr.left().ok()?;
-                            let right = expr.right().ok()?;
+                            let left = expr.left().ok()?.omit_parentheses();
+                            let right = expr.right().ok()?.omit_parentheses();
                             stack.push(left);
                             stack.push(right);
                         }
                         AnyJsExpression::JsParenthesizedExpression(expr) => {
-                            stack.push(expr.expression().ok()?);
+                            stack.push(expr.expression().ok()?.omit_parentheses());
                         }
                         // If we find expressions that coerce to boolean (unary, call, binary),
                         // then the entire expression is considered safe

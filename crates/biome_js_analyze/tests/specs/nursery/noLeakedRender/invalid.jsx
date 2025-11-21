@@ -68,3 +68,16 @@ const isOpen1 = 0;
 const Component7 = () => {
 	return <Popover open={isOpen1 && items.length > 0} />;
 };
+
+const Component8 = ({ count, title }) => {
+	return <div>{(((((count))))) && ((title))}</div>;
+};
+
+const Component9 = ({ data }) => {
+	return <div>{(((((data)))) && (((((data.value))))))}</div>;
+};
+
+const Component = ({ value }) => {
+	return <div>{(((value))) && <Item />}</div>;
+};
+
