@@ -96,10 +96,6 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub NoLeakedRenderQuery = JsLogicalExpression | JsConditionalExpression
-}
-
 impl Rule for NoLeakedRender {
     type Query = Semantic<NoLeakedRenderQuery>;
     type State = bool;
@@ -265,6 +261,10 @@ impl Rule for NoLeakedRender {
             }
         }
     }
+}
+
+declare_node_union! {
+    pub NoLeakedRenderQuery = JsLogicalExpression | JsConditionalExpression
 }
 
 fn is_inside_jsx_expression(node: &JsSyntaxNode) -> bool {
