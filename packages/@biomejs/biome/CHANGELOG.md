@@ -1,5 +1,139 @@
 # @biomejs/biome
 
+## 2.3.7
+
+### Patch Changes
+
+- [#8169](https://github.com/biomejs/biome/pull/8169) [`7fdcec8`](https://github.com/biomejs/biome/commit/7fdcec8eb4ce9f28784f823ef01bd923d2c5d1cb) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7999](https://github.com/biomejs/biome/issues/7999): Correctly place `await` after leading comment in auto-fix action from `noFloatingPromises` rule.
+
+- [#8157](https://github.com/biomejs/biome/pull/8157) [`12d5b42`](https://github.com/biomejs/biome/commit/12d5b422e388a3f5a906930f2cf04b6835c05258) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#8148](https://github.com/biomejs/biome/issues/8148). [`noInvalidUseBeforeDeclaration`](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration/) no longer reports some valid use before declarations.
+
+  The following code is no longer reported as invalid:
+
+  ```ts
+  class classA {
+    C = C;
+  }
+  const C = 0;
+  ```
+
+- [#8178](https://github.com/biomejs/biome/pull/8178) [`6ba4157`](https://github.com/biomejs/biome/commit/6ba41570e088765cab5b7075f55335296a005c94) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8174](https://github.com/biomejs/biome/issues/8174), where the HTML parser would parse 2 directives as a single directive because it would not reject whitespace in Vue directives. This would cause the formatter to erroneously merge the 2 directives into one, resulting in broken code.
+
+  ```diff
+  - <Component v-else:property="123" />
+  + <Component v-else :property="123" />
+  ```
+
+- [#8088](https://github.com/biomejs/biome/pull/8088) [`0eb08e8`](https://github.com/biomejs/biome/commit/0eb08e8e34f96b5a4fd8cc67f430b614736b6d4c) Thanks [@db295](https://github.com/db295)! - Fixed [#7876](https://github.com/biomejs/biome/issues/7876): The [`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) rule now ignores imports that are used by @linkcode and @linkplain (previously supported @link and @see).
+
+  The following code will no longer be a false positive:
+
+  ```js
+  import type { a } from "a"
+
+  /**
+   * {@linkcode a}
+   */
+  function func() {}
+  ```
+
+- [#8119](https://github.com/biomejs/biome/pull/8119) [`8d64655`](https://github.com/biomejs/biome/commit/8d6465554ef9cd97f017102892f948593b0f26f1) Thanks [@ematipico](https://github.com/ematipico)! - Improved the detection of the rule `noUnnecessaryConditions`. Now the rule isn't triggered for variables that are mutated inside a module.
+
+  This logic deviates from the original rule, hence `noUnnecessaryConditions` is now marked as "inspired".
+
+  In the following example, `hey` starts as `false`, but then it's assigned to a string. The rule isn't triggered inside the `if` check.
+
+  ```js
+  let hey = false;
+
+  function test() {
+    hey = "string";
+  }
+
+  if (hey) {
+  }
+  ```
+
+- [#8149](https://github.com/biomejs/biome/pull/8149) [`e0a02bf`](https://github.com/biomejs/biome/commit/e0a02bf2cda1b7d32a1ce756d2c8b7883a320488) Thanks [@Netail](https://github.com/Netail)! - Fixed [#8144](https://github.com/biomejs/biome/issues/8144): Improve [`noSyncScripts`](https://biomejs.dev/linter/rules/no-sync-scripts), ignore script tags with `type="module"` as these are always non-blocking.
+
+- [#8182](https://github.com/biomejs/biome/pull/8182) [`e9f068e`](https://github.com/biomejs/biome/commit/e9f068ece0db13fc37d19d1db7e43d7643b9209f) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#7877](https://github.com/biomejs/biome/issues/7877): Range suppressions now handle suppressed categories properly.
+
+  **Valid:**
+
+  ```js
+  // biome-ignore-start lint: explanation
+  const foo = 1;
+  // biome-ignore-end lint: explanation
+  ```
+
+- [#8111](https://github.com/biomejs/biome/pull/8111) [`bf1a836`](https://github.com/biomejs/biome/commit/bf1a8364a7191b8180c4dc3e61f1287e1058e1ec) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Added support for parsing and formatting the [CSS if function](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/if).
+
+  **_Example_**
+
+  ```css
+  .basic-style {
+    color: if(style(--scheme: dark): #eeeeee; else: #000000;);
+  }
+  ```
+
+- [#8173](https://github.com/biomejs/biome/pull/8173) [`7fc07c1`](https://github.com/biomejs/biome/commit/7fc07c12abe755cb813b188f5c821d356c2c67c9) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8138](https://github.com/biomejs/biome/issues/8138) by reverting an internal refactor that caused a regression to the rule `noUnusedPrivateClassMembers`.
+
+- [#8119](https://github.com/biomejs/biome/pull/8119) [`8d64655`](https://github.com/biomejs/biome/commit/8d6465554ef9cd97f017102892f948593b0f26f1) Thanks [@ematipico](https://github.com/ematipico)! - Improved the type inference engine, by resolving types for variables that are assigned to multiple values.
+
+- [#8158](https://github.com/biomejs/biome/pull/8158) [`fb1458b`](https://github.com/biomejs/biome/commit/fb1458b33c1e871ae129e14cf23d76391129eb8d) Thanks [@dyc3](https://github.com/dyc3)! - Added the `useVueValidVText` lint rule to enforce valid `v-text` directives. The rule reports when `v-text` has an argument, has modifiers, or is missing a value.
+
+  Invalid:
+
+  ```vue
+  <div v-text />
+  <!-- missing value -->
+  <div v-text:aaa="foo" />
+  <!-- has argument -->
+  <div v-text.bbb="foo" />
+  <!-- has modifier -->
+  ```
+
+- [#8158](https://github.com/biomejs/biome/pull/8158) [`fb1458b`](https://github.com/biomejs/biome/commit/fb1458b33c1e871ae129e14cf23d76391129eb8d) Thanks [@dyc3](https://github.com/dyc3)! - Fixed `useVueValidVHtml` so that it will now flag empty strings, e.g. `v-html=""`
+
+- [#7078](https://github.com/biomejs/biome/pull/7078) [`bb7a15c`](https://github.com/biomejs/biome/commit/bb7a15c3d8fba790ef6f32f070dff1d719c18c33) Thanks [@emilyinure](https://github.com/emilyinure)! - Fixed [#6675](https://github.com/biomejs/biome/issues/6675): Now only flags
+  noAccumulatingSpread on Object.assign when a new object is being allocated on
+  each iteration. Before, all cases using Object.assign with reduce parameters
+  were warned despite not making new allocations.
+
+  The following code will no longer be a false positive:
+
+  ```js
+  foo.reduce((acc, bar) => Object.assign(acc, bar), {});
+  ```
+
+  The following cases which **do** make new allocations will continue to warn:
+
+  ```js
+  foo.reduce((acc, bar) => Object.assign({}, acc, bar), {});
+  ```
+
+- [#8175](https://github.com/biomejs/biome/pull/8175) [`0c8349e`](https://github.com/biomejs/biome/commit/0c8349e6869a5bc8fafdbf23f95dcee5b56c738e) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed CSS formatting of dimension units to use correct casing for `Q`, `Hz` and `kHz`.
+
+  **Before:**
+
+  ```css
+  .cssUnits {
+    a: 1Q;
+    b: 1Hz;
+    c: 1kHz;
+  }
+  ```
+
+  **After:**
+
+  ```css
+  .cssUnits {
+    a: 1Q;
+    b: 1Hz;
+    c: 1kHz;
+  }
+  ```
+
 ## 2.3.6
 
 ### Patch Changes

@@ -7,10 +7,11 @@ class TsBioo {
 }
 
 class TSUnusedPrivateConstructor {
-	constructor(private unusedProperty = 3){
+	constructor(private nusedProperty = 3){
 
 	}
 }
+
 
 class TsOnlyWrite {
 	private usedOnlyInWrite = 5;
