@@ -2,13 +2,12 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, JsConditionalExpression, JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
     JsxExpressionAttributeValue, JsxExpressionChild, JsxTagExpression,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
 
 use crate::services::semantic::Semantic;
@@ -97,31 +96,6 @@ declare_lint_rule! {
     }
 }
 
-fn is_inside_jsx_expression(node: &JsSyntaxNode) -> bool {
-    node.ancestors().any(|ancestor| {
-        JsxExpressionChild::can_cast(ancestor.kind())
-            || JsxExpressionAttributeValue::can_cast(ancestor.kind())
-            || JsxTagExpression::can_cast(ancestor.kind())
-    })
-}
-
-fn get_variable_from_context(
-    model: &SemanticModel,
-    node: &JsSyntaxNode,
-    name: &str,
-) -> Option<Binding> {
-    let scope = model.scope(node);
-
-    // Search through scope hierarchy
-    for scope in scope.ancestors() {
-        if let Some(binding) = scope.get_binding(name) {
-            return Some(binding);
-        }
-    }
-
-    None
-}
-
 declare_node_union! {
     pub NoLeakedRenderQuery = JsLogicalExpression | JsConditionalExpression
 }
@@ -149,44 +123,82 @@ impl Rule for NoLeakedRender {
                 }
                 let left = exp.left().ok()?;
 
-                let is_coerce_valid_left_side = matches!(
+                let is_left_hand_side_safe = matches!(
                     left,
                     AnyJsExpression::JsUnaryExpression(_)
                         | AnyJsExpression::JsCallExpression(_)
                         | AnyJsExpression::JsBinaryExpression(_)
                 );
-                if is_coerce_valid_left_side
-                    || get_is_coerce_valid_nested_logical_expression(exp.left())
-                {
+
+                if is_left_hand_side_safe {
                     return None;
                 }
-                let left_node = left.syntax();
+
+                let mut is_nested_left_hand_side_safe = false;
+
+                let mut stack = vec![left.clone()];
+
+                // Traverse the expression tree iteratively using a stack
+                // This allows us to check nested expressions without recursion
+                while let Some(current) = stack.pop() {
+                    match current {
+                        AnyJsExpression::JsLogicalExpression(expr) => {
+                            let left = expr.left().ok()?;
+                            let right = expr.right().ok()?;
+                            stack.push(left);
+                            stack.push(right);
+                        }
+                        AnyJsExpression::JsParenthesizedExpression(expr) => {
+                            stack.push(expr.expression().ok()?);
+                        }
+                        // If we find expressions that coerce to boolean (unary, call, binary),
+                        // then the entire expression is considered safe
+                        AnyJsExpression::JsUnaryExpression(_)
+                        | AnyJsExpression::JsCallExpression(_)
+                        | AnyJsExpression::JsBinaryExpression(_) => {
+                            is_nested_left_hand_side_safe = true;
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+
+                if is_nested_left_hand_side_safe {
+                    return None;
+                }
 
                 if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                     let name = ident.name().ok()?;
 
-                    if get_variable_from_context(model, left_node, name.to_trimmed_text().trim())
-                        .and_then(|binding| binding.tree().declaration())
-                        .and_then(|declaration| {
-                            if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
-                                declaration
-                            {
-                                Some(declarator)
-                            } else {
-                                None
-                            }
-                        })
-                        .and_then(|declarator| declarator.initializer())
-                        .and_then(|initializer| initializer.expression().ok())
-                        .and_then(|expr| {
-                            if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
-                                Some(literal)
-                            } else {
-                                None
-                            }
-                        })
-                        .and_then(|literal| literal.value_token().ok())
-                        .is_some_and(|token| matches!(token.text_trimmed(), "true" | "false"))
+                    // Use the semantic model to resolve the variable binding and check
+                    // if it's initialized with a boolean literal. This allows us to
+                    // handle cases like:
+                    // let isOpen = false;  // This is safe
+                    // return <div>{isOpen && <Content />}</div>;  // This should pass
+                    if let Some(binding) = model.binding(&name)
+                        && binding
+                            .tree()
+                            .declaration()
+                            .and_then(|declaration| {
+                                if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+                                    declaration
+                                {
+                                    Some(declarator)
+                                } else {
+                                    None
+                                }
+                            })
+                            .and_then(|declarator| declarator.initializer())
+                            .and_then(|initializer| initializer.expression().ok())
+                            .and_then(|expr| {
+                                if let AnyJsExpression::AnyJsLiteralExpression(literal) = expr {
+                                    Some(literal)
+                                } else {
+                                    None
+                                }
+                            })
+                            .and_then(|literal| literal.value_token().ok())
+                            .is_some_and(|token| matches!(token.text_trimmed(), "true" | "false"))
                     {
                         return None;
                     }
@@ -255,20 +267,10 @@ impl Rule for NoLeakedRender {
     }
 }
 
-fn get_is_coerce_valid_nested_logical_expression(node: SyntaxResult<AnyJsExpression>) -> bool {
-    match node {
-        Ok(AnyJsExpression::JsLogicalExpression(expr)) => {
-            get_is_coerce_valid_nested_logical_expression(expr.left())
-                && get_is_coerce_valid_nested_logical_expression(expr.right())
-        }
-        Ok(AnyJsExpression::JsParenthesizedExpression(expr)) => {
-            get_is_coerce_valid_nested_logical_expression(expr.expression())
-        }
-        Ok(
-            AnyJsExpression::JsUnaryExpression(_)
-            | AnyJsExpression::JsCallExpression(_)
-            | AnyJsExpression::JsBinaryExpression(_),
-        ) => true,
-        _ => false,
-    }
+fn is_inside_jsx_expression(node: &JsSyntaxNode) -> bool {
+    node.ancestors().any(|ancestor| {
+        JsxExpressionChild::can_cast(ancestor.kind())
+            || JsxExpressionAttributeValue::can_cast(ancestor.kind())
+            || JsxTagExpression::can_cast(ancestor.kind())
+    })
 }
