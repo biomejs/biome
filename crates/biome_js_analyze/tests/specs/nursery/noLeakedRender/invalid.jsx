@@ -1,4 +1,4 @@
-// Invalid cases with default options (both 'coerce' and 'ternary' strategies)
+// should generate diagnostics
 
 const Example1 = () => {
 	return (
