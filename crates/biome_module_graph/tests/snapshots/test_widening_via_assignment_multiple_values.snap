@@ -1,0 +1,98 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+let hey = undefined;
+function f() {
+	hey = "some string";
+}
+function g() {
+	hey = 123;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => undefined
+
+Module TypeId(1) => string: some string
+
+Module TypeId(2) => unknown
+
+Module TypeId(3) => number: 123
+
+Module TypeId(4) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Module TypeId(5) => Module(0) TypeId(4) | Module(0) TypeId(3)
+
+Module TypeId(6) => void
+
+Module TypeId(7) => sync Function "f" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(8) => sync Function "g" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => undefined
+
+Full TypeId(1) => string: some string
+
+Full TypeId(2) => unknown
+
+Full TypeId(3) => number: 123
+
+Full TypeId(4) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Full TypeId(5) => Module(0) TypeId(4) | Module(0) TypeId(3)
+
+Full TypeId(6) => void
+
+Full TypeId(7) => sync Function "f" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Full TypeId(8) => sync Function "g" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+```

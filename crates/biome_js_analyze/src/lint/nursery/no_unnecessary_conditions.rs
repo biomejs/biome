@@ -44,6 +44,22 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Contrary to the source rule, this rule doesn't trigger bindings that are assigned to multiple
+    /// values. In the following example, the variable `greeting` is assigned to multiple values; hence
+    /// it can't be inferred to a truthy or falsy value.
+    ///
+    /// ```ts
+    /// let greeting = false;
+    ///
+    /// function changeGreeting() {
+    ///     greeting = "Hello World!"
+    /// }
+    ///
+    /// if (greeting) {} // rule not triggered here
+    ///
+    /// ```
+    ///
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -71,7 +87,7 @@ declare_lint_rule! {
         version: "2.1.4",
         name: "noUnnecessaryConditions",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("no-unnecessary-condition").same()],
+        sources: &[RuleSource::EslintTypeScript("no-unnecessary-condition").inspired()],
         recommended: false,
         severity: Severity::Warning,
         domains: &[RuleDomain::Project],

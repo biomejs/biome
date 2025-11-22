@@ -3666,6 +3666,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLeakedRenderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
+			]
+		},
+		"NoLeakedRenderOptions": { "type": "object" },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4351,6 +4358,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTernaryConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTernaryOptions" }
+			]
+		},
+		"NoTernaryOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5100,6 +5114,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noLeakedRender": {
+					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
@@ -5139,6 +5160,13 @@
 					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTernary": {
+					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTernaryConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5374,6 +5402,13 @@
 					"description": "Enforce valid v-on directives with proper arguments, modifiers, and handlers.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-on",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVOnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVText": {
+					"description": "Enforce valid v-text Vue directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -5860,10 +5895,8 @@
 		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": {
-				"$ref": "#/components/schemas/RuleDomainValue"
-			},
-			"propertyNames": { "$ref": "#/components/schemas/RuleDomain" }
+			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
+			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -6996,6 +7029,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoLeakedRenderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMagicNumbersOptions": {
 			"type": "object",
 			"properties": {
@@ -7606,6 +7648,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTemplateCurlyInStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTernaryOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTernaryOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9475,6 +9526,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVOnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12502,6 +12562,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueValidVTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVTextOptions" }
+			]
+		},
+		"UseVueValidVTextOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

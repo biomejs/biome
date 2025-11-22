@@ -1,13 +1,16 @@
-use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::SemanticServices};
+use crate::services::semantic::SemanticServices;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsFileSource, JsVariableDeclarationClause,
-    TsDeclareStatement,
+    AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierUsage, JsClassDeclaration,
+    JsConstructorClassMember, JsFileSource, JsGetterClassMember, JsGetterObjectMember,
+    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
+    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsVariableDeclarationClause,
+    TsDeclareStatement, TsModuleDeclaration, TsPropertySignatureTypeMember,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
@@ -126,11 +129,11 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             } else {
                 declaration.range().end()
             };
-            let declaration_control_flow_root = declaration
+            let declaration_scope = declaration
                 .syntax()
                 .ancestors()
                 .skip(1)
-                .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()));
+                .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
             for reference in binding.all_references() {
                 if reference.range_start() < declaration_end {
                     let reference_syntax = reference.syntax();
@@ -154,11 +157,10 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                         // function f() { X; }
                         // const X = 0;
                         // ```
-                        && (declaration_control_flow_root.is_none() ||
-                            declaration_control_flow_root == reference_syntax
+                        && declaration_scope == reference_syntax
                                 .ancestors()
                                 .skip(1)
-                                .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
+                                .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind())
                         )
                         // ignore when used as a type.
                         // For example:
@@ -294,4 +296,22 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::JsCatchDeclaration(_) => Err(()),
         }
     }
+}
+
+declare_node_union! {
+    AnyJsVariableScope =
+        JsScript
+        | JsModule
+        | AnyJsFunction
+        | JsClassDeclaration
+        | JsConstructorClassMember
+        | JsGetterClassMember
+        | JsGetterObjectMember
+        | JsMethodClassMember
+        | JsMethodObjectMember
+        | JsSetterClassMember
+        | JsSetterObjectMember
+        | JsStaticInitializationBlockClassMember
+        | TsModuleDeclaration
+        | TsPropertySignatureTypeMember
 }

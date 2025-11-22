@@ -19,6 +19,22 @@
 	"foo.reduce((acc,value,index,array,somethingExtra) => [...acc, value], [])",
 	"foo.reduce((acc) => [...acc], [])",
 
+	// Array - Arrow return with assign
+	"foo.reduce((acc, bar) => Object.assign(acc, bar), [])",
+	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), [])",
+
+	// Array - Body return with Assign
+	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, [])",
+	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, [])",
+
+	// Object - Arrow return with assign
+	"foo.reduce((acc, bar) => Object.assign(acc, bar), {})",
+	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), {})",
+
+	// Object - Body return with Assign
+	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, {})",
+	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, {})"
+
 	// Wrong number of arguments to known method (reduce can have 1 or 2 args, but not more)
 	"foo.reduce((acc, bar) => [...acc, bar], [], 123)"
 ]

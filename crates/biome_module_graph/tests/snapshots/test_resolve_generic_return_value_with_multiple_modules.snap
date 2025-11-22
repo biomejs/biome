@@ -36,7 +36,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: bar
+Module TypeId(0) => string: bar
 
 Module TypeId(1) => Object {
   prototype: No prototype
@@ -82,7 +82,7 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => value: bar
+Module TypeId(0) => string: bar
 
 Module TypeId(1) => Object {
   prototype: No prototype
@@ -95,7 +95,7 @@ Module TypeId(3) => Module(0) TypeId(2).bar
 
 Module TypeId(4) => Import Symbol: foo from "/src/foo.ts"
 
-Module TypeId(5) => value: 1
+Module TypeId(5) => number: 1
 
 Module TypeId(6) => Call Module(0) TypeId(4)(Module(0) TypeId(3)Module(0) TypeId(5))
 ```
@@ -167,7 +167,7 @@ Full TypeId(0) => namespace for ModuleId(1)
 
 Full TypeId(1) => namespace for ModuleId(2)
 
-Full TypeId(2) => value: bar
+Full TypeId(2) => string: bar
 
 Full TypeId(3) => Object {
   prototype: No prototype
@@ -183,7 +183,7 @@ Full TypeId(5) => Module(1) TypeId(0)
 
 Full TypeId(6) => Module(2) TypeId(3)
 
-Full TypeId(7) => value: 1
+Full TypeId(7) => number: 1
 
-Full TypeId(8) => value: bar
+Full TypeId(8) => string: bar
 ```

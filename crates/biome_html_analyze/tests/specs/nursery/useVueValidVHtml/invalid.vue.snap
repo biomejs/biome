@@ -51,6 +51,24 @@ invalid.vue:5:8 lint/nursery/useVueValidVHtml ━━━━━━━━━━━�
 ```
 
 ```
+invalid.vue:8:8 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive is missing a value.
+  
+     7 │   <!-- Empty value -->
+   > 8 │   <div v-html=""></div>
+       │        ^^^^^^^^^
+     9 │   
+    10 │   <!-- Unexpected argument -->
+  
+  i v-html directives require a value containing the HTML content to render.
+  
+  i For example, use v-html="htmlContent" to render the content of the htmlContent variable.
+  
+
+```
+
+```
 invalid.vue:11:14 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The v-html directive does not accept an argument.

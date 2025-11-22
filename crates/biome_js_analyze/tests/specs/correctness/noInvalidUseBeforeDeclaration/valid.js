@@ -13,6 +13,14 @@ function h() { Y; }; const Y = 0;
 function useClassInFunction() {
 	const instance = new Class();
 }
+
 class Class {
 	static SINGLETON = new Class();
 }
+
+class classA {
+	C = C;
+  prop = new classB();
+}
+class classB {}
+const C = 0;

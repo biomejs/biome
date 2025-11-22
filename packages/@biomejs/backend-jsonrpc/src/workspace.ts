@@ -1901,6 +1901,11 @@ See https://biomejs.dev/linter/rules/no-jsx-literals
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Prevent problematic leaked values from being rendered.
+See https://biomejs.dev/linter/rules/no-leaked-render 
+	 */
+	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -1930,6 +1935,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
+	* Disallow ternary operators.
+See https://biomejs.dev/linter/rules/no-ternary 
+	 */
+	noTernary?: NoTernaryConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
@@ -2099,6 +2109,11 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-if
 See https://biomejs.dev/linter/rules/use-vue-valid-v-on 
 	 */
 	useVueValidVOn?: UseVueValidVOnConfiguration;
+	/**
+	* Enforce valid v-text Vue directives.
+See https://biomejs.dev/linter/rules/use-vue-valid-v-text 
+	 */
+	useVueValidVText?: UseVueValidVTextConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -3550,6 +3565,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoLeakedRenderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLeakedRenderOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -3568,6 +3586,9 @@ export type NoShadowConfiguration =
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
+export type NoTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTernaryOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -3667,6 +3688,9 @@ export type UseVueValidVIfConfiguration =
 export type UseVueValidVOnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVOnOptions;
+export type UseVueValidVTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVTextOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -4931,6 +4955,10 @@ export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
 }
+export interface RuleWithNoLeakedRenderOptions {
+	level: RulePlainConfiguration;
+	options?: NoLeakedRenderOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -4957,6 +4985,10 @@ export interface RuleWithNoShadowOptions {
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
+}
+export interface RuleWithNoTernaryOptions {
+	level: RulePlainConfiguration;
+	options?: NoTernaryOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -5098,6 +5130,10 @@ export interface RuleWithUseVueValidVIfOptions {
 export interface RuleWithUseVueValidVOnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVOnOptions;
+}
+export interface RuleWithUseVueValidVTextOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVTextOptions;
 }
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
@@ -6234,12 +6270,14 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
+export type NoTernaryOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -6338,6 +6376,7 @@ export interface UseVueValidVOnOptions {
 	 */
 	modifiers?: string[];
 }
+export type UseVueValidVTextOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -7062,6 +7101,7 @@ export type Category =
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
@@ -7069,6 +7109,7 @@ export type Category =
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
@@ -7112,6 +7153,7 @@ export type Category =
 	| "lint/nursery/useVueValidVIf"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueValidVOn"
+	| "lint/nursery/useVueValidVText"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

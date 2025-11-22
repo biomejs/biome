@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, AnyVueDirective};
+use biome_html_syntax::{AnyHtmlAttributeInitializer, VueDirective, inner_string_text};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_vue_valid_v_html::UseVueValidVHtmlOptions;
 
@@ -53,54 +53,36 @@ pub enum ViolationKind {
 }
 
 impl Rule for UseVueValidVHtml {
-    type Query = Ast<AnyVueDirective>;
+    type Query = Ast<VueDirective>;
     type State = ViolationKind;
     type Signals = Option<Self::State>;
     type Options = UseVueValidVHtmlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        match node {
-            AnyVueDirective::VueDirective(vue_directive) => {
-                if vue_directive.name_token().ok()?.text_trimmed() != "v-html" {
-                    return None;
-                }
+        let vue_directive = ctx.query();
+        if vue_directive.name_token().ok()?.text_trimmed() != "v-html" {
+            return None;
+        }
+        if let Some(arg) = vue_directive.arg() {
+            return Some(ViolationKind::UnexpectedArgument(arg.range()));
+        }
 
-                if let Some(arg) = vue_directive.arg() {
-                    return Some(ViolationKind::UnexpectedArgument(arg.range()));
-                }
+        if !vue_directive.modifiers().is_empty() {
+            let first_modifier = vue_directive.modifiers().iter().next()?;
+            return Some(ViolationKind::UnexpectedModifier(first_modifier.range()));
+        }
 
-                if !vue_directive.modifiers().is_empty() {
-                    let first_modifier = vue_directive.modifiers().iter().next()?;
-                    return Some(ViolationKind::UnexpectedModifier(first_modifier.range()));
-                }
-
-                if let Some(initializer) = vue_directive.initializer() {
-                    // Check if value is empty
-                    if let Ok(value) = initializer.value() {
-                        if let AnyHtmlAttributeInitializer::HtmlString(html_string) = value {
-                            // Check if the string value is empty
-                            if let Ok(token) = html_string.value_token() {
-                                if token.text().is_empty() {
-                                    return Some(ViolationKind::MissingValue);
-                                }
-                            } else {
-                                // No value token means empty string
-                                return Some(ViolationKind::MissingValue);
-                            }
-                        }
-                        // Non-string values (like expressions) are valid
-                    } else {
-                        // No value at all
-                        return Some(ViolationKind::MissingValue);
-                    }
-                } else {
-                    return Some(ViolationKind::MissingValue);
-                }
-
+        if let Some(initializer) = vue_directive.initializer()
+            && let Ok(AnyHtmlAttributeInitializer::HtmlString(html_string)) = initializer.value()
+            && let Ok(token) = html_string.value_token()
+        {
+            if inner_string_text(&token).trim().is_empty() {
+                Some(ViolationKind::MissingValue)
+            } else {
                 None
             }
-            _ => None,
+        } else {
+            Some(ViolationKind::MissingValue)
         }
     }
 

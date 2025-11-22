@@ -1402,6 +1402,17 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Promise")
     }
 
+    /// Checks whether this type qualifier references the `RegExp` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `RegExp`, without considering whether another symbol named `RegExp` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `RegExp` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_regex(&self) -> bool {
+        self.path.is_identifier("RegExp")
+    }
+
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
         self.excluded_binding_id = Some(binding_id);
         self

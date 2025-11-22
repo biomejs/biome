@@ -38,7 +38,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: bar
+Module TypeId(0) => string: bar
 
 Module TypeId(1) => sync Function "bar" {
   accepts: {
@@ -131,7 +131,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 1
+Module TypeId(0) => number: 1
 
 Module TypeId(1) => sync Function "foo" {
   accepts: {

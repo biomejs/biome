@@ -4,8 +4,12 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
-const Invalid = () => {
+const Invalid1 = () => {
 	return <script src="" />
+}
+
+const Invalid2 = () => {
+	return <script src="" type="" />
 }
 
 ```
@@ -16,11 +20,27 @@ invalid.jsx:2:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━�
 
   i Unexpected synchronous script.
   
-    1 │ const Invalid = () => {
+    1 │ const Invalid1 = () => {
   > 2 │ 	return <script src="" />
       │ 	       ^^^^^^^^^^^^^^^^^
     3 │ }
     4 │ 
+  
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute. If using Next.js, consider the Script component instead.
+  
+
+```
+
+```
+invalid.jsx:6:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected synchronous script.
+  
+    5 │ const Invalid2 = () => {
+  > 6 │ 	return <script src="" type="" />
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute. If using Next.js, consider the Script component instead.
   
