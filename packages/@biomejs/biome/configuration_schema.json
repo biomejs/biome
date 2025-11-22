@@ -3141,6 +3141,16 @@
 			]
 		},
 		"NoEnumOptions": { "type": "object", "additionalProperties": false },
+		"NoEqualsToNullConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEqualsToNullOptions" }
+			]
+		},
+		"NoEqualsToNullOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEvolvingTypesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5079,6 +5089,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEqualsToNull": {
+					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEqualsToNullConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
@@ -6583,6 +6600,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEnumOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEqualsToNullOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEqualsToNullOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -1876,6 +1876,11 @@ See https://biomejs.dev/linter/rules/no-empty-source
 	 */
 	noEmptySource?: NoEmptySourceConfiguration;
 	/**
+	* Require the use of === or !== for comparison with null.
+See https://biomejs.dev/linter/rules/no-equals-to-null 
+	 */
+	noEqualsToNull?: NoEqualsToNullConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
 	 */
@@ -3550,6 +3555,9 @@ export type NoDuplicateDependenciesConfiguration =
 export type NoEmptySourceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptySourceOptions;
+export type NoEqualsToNullConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEqualsToNullOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -4934,6 +4942,11 @@ export interface RuleWithNoEmptySourceOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptySourceOptions;
 }
+export interface RuleWithNoEqualsToNullOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoEqualsToNullOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6239,6 +6252,7 @@ export interface NoEmptySourceOptions {
 	 */
 	allowComments?: boolean;
 }
+export type NoEqualsToNullOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -7095,6 +7109,7 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
+	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
