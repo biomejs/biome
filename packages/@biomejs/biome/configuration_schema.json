@@ -3753,6 +3753,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMultiStrConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMultiStrOptions" }
+			]
+		},
+		"NoMultiStrOptions": { "type": "object", "additionalProperties": false },
 		"NoNamespaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5142,6 +5149,13 @@
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMultiStr": {
+					"description": "Disallow creating multiline strings by escaping newlines.\nSee https://biomejs.dev/linter/rules/no-multi-str",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMultiStrConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7127,6 +7141,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMultiStrOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMultiStrOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

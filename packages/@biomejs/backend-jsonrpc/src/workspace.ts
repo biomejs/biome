@@ -1916,6 +1916,11 @@ See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
+	* Disallow creating multiline strings by escaping newlines.
+See https://biomejs.dev/linter/rules/no-multi-str 
+	 */
+	noMultiStr?: NoMultiStrConfiguration;
+	/**
 	* Prevent client components from being async functions.
 See https://biomejs.dev/linter/rules/no-next-async-client-component 
 	 */
@@ -3579,6 +3584,9 @@ export type NoLeakedRenderConfiguration =
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoMultiStrConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMultiStrOptions;
 export type NoNextAsyncClientComponentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNextAsyncClientComponentOptions;
@@ -4977,6 +4985,10 @@ export interface RuleWithNoMisusedPromisesOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
 }
+export interface RuleWithNoMultiStrOptions {
+	level: RulePlainConfiguration;
+	options?: NoMultiStrOptions;
+}
 export interface RuleWithNoNextAsyncClientComponentOptions {
 	level: RulePlainConfiguration;
 	options?: NoNextAsyncClientComponentOptions;
@@ -6286,6 +6298,7 @@ export interface NoJsxLiteralsOptions {
 }
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
@@ -7119,6 +7132,7 @@ export type Category =
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
