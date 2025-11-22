@@ -1876,7 +1876,7 @@ See https://biomejs.dev/linter/rules/no-empty-source
 	 */
 	noEmptySource?: NoEmptySourceConfiguration;
 	/**
-	* Require the use of `===` and `!==` for comparison with `null`.
+	* Require the use of === or !== for comparison with null.
 See https://biomejs.dev/linter/rules/no-equals-to-null 
 	 */
 	noEqualsToNull?: NoEqualsToNullConfiguration;
@@ -4943,6 +4943,7 @@ export interface RuleWithNoEmptySourceOptions {
 	options?: NoEmptySourceOptions;
 }
 export interface RuleWithNoEqualsToNullOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoEqualsToNullOptions;
 }

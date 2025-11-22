@@ -5090,7 +5090,7 @@
 					]
 				},
 				"noEqualsToNull": {
-					"description": "Require the use of `===` or `!==` for comparison with `null`.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
+					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEqualsToNullConfiguration" },
 						{ "type": "null" }
@@ -6607,6 +6607,7 @@
 		"RuleWithNoEqualsToNullOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEqualsToNullOptions" }
 			},
