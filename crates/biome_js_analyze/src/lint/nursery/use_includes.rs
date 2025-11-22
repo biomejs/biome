@@ -19,10 +19,6 @@ declare_lint_rule! {
     /// This rule reports when an `.indexOf()` call can be replaced with an `.includes()`.
     /// Additionally, this rule reports the tests of simple regular expressions in favor of `String#includes`.
     ///
-    /// This rule will report on any receiver object of an `indexOf` method call that has an `includes` method
-    /// where the two methods have the same parameters. This includes well-known built-in types like `String`, `Array`, `ReadonlyArray`, and typed arrays,
-    /// as well as user-defined objects that have both an `indexOf` and an `includes` method.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -111,7 +107,9 @@ impl Rule for UseIncludes {
 
                 let (pattern, flags) = regex_literal.decompose().ok()?;
 
-                if is_simple_regex(&pattern, &flags) {
+                if is_simple_regex(&pattern, &flags)
+                    && is_receiver_known_to_have_includes(Some(object))
+                {
                     Some(State::RegexTest(RegexTestData {
                         call_expression: call_expr.clone(),
                         member_expression: member_expr,
@@ -393,8 +391,7 @@ fn matches_number_literal(expr: Option<&AnyJsExpression>, text: &str) -> bool {
 }
 
 // Checks if the receiver of a method call is known to have an `includes` method.
-// This is true for `string`, `array`, and `typed array` types, or if it's an
-// object literal with an 'includes' property.
+// This is true for `string`, `array`
 fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool {
     let Some(receiver_expr) = receiver else {
         return false;
@@ -410,17 +407,6 @@ fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool
         return true;
     }
 
-    if let Some(object_expression) = receiver_expr.as_js_object_expression() {
-        for member in object_expression.members() {
-            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property_member)) = member
-                && let Ok(Some(name)) = property_member.name().map(|n| n.name())
-                && name.text() == "includes"
-            {
-                return true;
-            }
-        }
-    }
-
     false
 }
 
@@ -434,5 +420,7 @@ fn is_simple_regex(pattern: &str, flags: &str) -> bool {
     // This is a simplified check.
     // For now, we check for characters that are special in regex.
     // This list is not exhaustive but covers many common cases.
-    !pattern.chars().any(|c| "\"'.\\\+*?[]^$(){}=!<>|:-".contains(c))
+    !pattern
+        .chars()
+        .any(|c| "\"'.\\+*?[]^$(){}=!<>|:-".contains(c))
 }
