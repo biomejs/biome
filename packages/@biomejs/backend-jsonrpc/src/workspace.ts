@@ -1871,6 +1871,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-dependencies
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
 	/**
+	* Disallow JSX prop spreading the same identifier multiple times.
+See https://biomejs.dev/linter/rules/no-duplicated-spread-props 
+	 */
+	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
+	/**
 	* Disallow empty sources.
 See https://biomejs.dev/linter/rules/no-empty-source 
 	 */
@@ -3557,6 +3562,9 @@ export type NoDeprecatedImportsConfiguration =
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
+export type NoDuplicatedSpreadPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicatedSpreadPropsOptions;
 export type NoEmptySourceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptySourceOptions;
@@ -4946,6 +4954,10 @@ export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithNoDuplicatedSpreadPropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicatedSpreadPropsOptions;
+}
 export interface RuleWithNoEmptySourceOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptySourceOptions;
@@ -6258,6 +6270,7 @@ export type UseYieldOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
+export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
@@ -7137,6 +7150,7 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
