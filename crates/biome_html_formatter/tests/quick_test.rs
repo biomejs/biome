@@ -20,9 +20,14 @@ fn quick_test() {
     // quick brown fox
     // "#;
     let src = r#"
-foo bar baz boof
-<!-- comment -->
-quick brown fox
+<template>
+  <template>foo</template>
+</template>
+
+<template>
+  <template>foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo</template>
+</template>
+
 "#;
     let source_type = HtmlFileSource::html();
     let tree = parse_html(src, HtmlParseOptions::from(&source_type));
