@@ -324,7 +324,7 @@ CssRoot {
                                                             L_PAREN@853..854 "(" [] [],
                                                             CssBogus {
                                                                 items: [
-                                                                    IDENT@854..860 "color" [] [Whitespace(" ")],
+                                                                    COLOR_KW@854..860 "color" [] [Whitespace(" ")],
                                                                     IDENT@860..863 "red" [] [],
                                                                 ],
                                                             },
@@ -541,7 +541,7 @@ CssRoot {
                 1: CSS_BOGUS@853..864
                   0: L_PAREN@853..854 "(" [] []
                   1: CSS_BOGUS@854..863
-                    0: IDENT@854..860 "color" [] [Whitespace(" ")]
+                    0: COLOR_KW@854..860 "color" [] [Whitespace(" ")]
                     1: IDENT@860..863 "red" [] []
                   2: R_PAREN@863..864 ")" [] []
                 2: R_PAREN@864..865 ")" [] []

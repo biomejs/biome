@@ -12,28 +12,29 @@ use biome_parser::{Parser, prelude::ParsedSyntax};
 use crate::parser::CssParser;
 use crate::syntax::is_at_identifier;
 use crate::syntax::is_at_string;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::parse_string;
 use crate::syntax::value::parse_error::expected_syntax_component;
 
-const SYNTAX_TYPE_NAME_SET: TokenSet<CssSyntaxKind> = token_set![
-    T![angle],
-    T![color],
-    T![custom_ident],
-    T![image],
-    T![integer],
-    T![length],
-    T![length_percentage],
-    T![percentage],
-    T![resolution],
-    T![string],
-    T![number],
-    T![time],
-    T![url],
-    T![transform_function],
-];
-
 const SYNTAX_MULTIPLIER_SET: TokenSet<CssSyntaxKind> = token_set![T![#], T![+]];
+
+const KNOWN_SYNTAX_TYPE_NAMES: [&str; 14] = [
+    "angle",
+    "color",
+    "custom-ident",
+    "image",
+    "integer",
+    "length",
+    "length-percentage",
+    "number",
+    "percentage",
+    "resolution",
+    "string",
+    "time",
+    "url",
+    "transform-function",
+];
 
 #[inline]
 pub(crate) fn is_at_type_function(p: &mut CssParser) -> bool {
@@ -116,7 +117,7 @@ fn parse_syntax_multiplier(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_syntax_type(p: &mut CssParser) -> bool {
-    p.at(T![<]) && p.nth_at_ts(1, SYNTAX_TYPE_NAME_SET)
+    p.at(T![<]) && is_nth_at_identifier(p, 1)
 }
 
 #[inline]
@@ -128,10 +129,34 @@ fn parse_syntax_type(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![<]);
-    p.bump_ts(SYNTAX_TYPE_NAME_SET);
+    parse_any_syntax_type_name(p).ok();
     p.expect(T![>]);
 
     Present(m.complete(p, CSS_SYNTAX_TYPE))
+}
+
+#[inline]
+fn is_at_any_syntax_type_name(p: &mut CssParser) -> bool {
+    p.at(T![ident])
+}
+
+#[inline]
+fn parse_any_syntax_type_name(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_syntax_type_name(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let kind = if is_at_valid_syntax_type_name(p) {
+        CSS_REGULAR_SYNTAX_TYPE_NAME
+    } else {
+        CSS_UNKNOWN_SYNTAX_TYPE_NAME
+    };
+
+    p.bump(T![ident]);
+
+    Present(m.complete(p, kind))
 }
 
 struct SyntaxTypeListParseRecovery;
@@ -176,4 +201,9 @@ impl ParseSeparatedList for SyntaxComponentList {
     fn allow_empty(&self) -> bool {
         false
     }
+}
+
+#[inline]
+fn is_at_valid_syntax_type_name(p: &mut CssParser) -> bool {
+    KNOWN_SYNTAX_TYPE_NAMES.contains(&p.cur_text())
 }

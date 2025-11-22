@@ -11,9 +11,11 @@ use biome_parser::token_set;
 use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
+use crate::syntax::is_at_identifier;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::property::GenericComponentValueList;
+use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
 
@@ -134,7 +136,7 @@ fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_attr_unit(p) {
-        return parse_attr_unit(p);
+        return parse_any_attr_unit(p);
     }
 
     Absent
@@ -142,24 +144,32 @@ fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_unit(p: &mut CssParser) -> bool {
-    p.at(T![%]) || p.at_ts(CSS_DISTANCE_UNIT_SET)
+    p.at(T![%]) || is_nth_at_unit(p, 0) || is_at_identifier(p)
 }
 
 #[inline]
-fn parse_attr_unit(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_attr_unit(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attr_unit(p) {
         return Absent;
     }
 
-    let m = p.start();
-
     if p.at(T![%]) {
+        let m = p.start();
         p.bump(T![%]);
-        return Present(m.complete(p, CSS_PERCENT_SIGN));
+        return Present(m.complete(p, CSS_PERCENTAGE));
     }
 
-    p.bump_ts(CSS_DISTANCE_UNIT_SET);
-    Present(m.complete(p, CSS_DISTANCE_UNIT))
+    let m = p.start();
+
+    let kind = if is_nth_at_unit(p, 0) {
+        CSS_REGULAR_ATTR_UNIT
+    } else {
+        CSS_UNKNOWN_ATTR_UNIT
+    };
+
+    p.bump_remap(T![ident]);
+
+    Present(m.complete(p, kind))
 }
 
 #[inline]

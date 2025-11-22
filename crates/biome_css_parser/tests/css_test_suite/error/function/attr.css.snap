@@ -1,0 +1,134 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+:root {
+	--no-closing-paren: attr(data-count
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..1 ":" [] [],
+                            class: CssPseudoClassIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..6 "root" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@7..27 "--no-closing-paren" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@29..33 "attr" [] [],
+                                        l_paren_token: L_PAREN@33..34 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@34..44 "data-count" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: missing (optional),
+                                        r_paren_token: missing (required),
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@44..46 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..47
+  0: (empty)
+  1: CSS_RULE_LIST@0..46
+    0: CSS_QUALIFIED_RULE@0..46
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..6
+              0: COLON@0..1 ":" [] []
+              1: CSS_PSEUDO_CLASS_IDENTIFIER@1..6
+                0: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "root" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..46
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..44
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..44
+            0: CSS_DECLARATION@7..44
+              0: CSS_GENERIC_PROPERTY@7..44
+                0: CSS_DASHED_IDENTIFIER@7..27
+                  0: IDENT@7..27 "--no-closing-paren" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@27..29 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@29..44
+                  0: CSS_ATTR_FUNCTION@29..44
+                    0: ATTR_KW@29..33 "attr" [] []
+                    1: L_PAREN@33..34 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@34..44
+                      0: CSS_IDENTIFIER@34..44
+                        0: IDENT@34..44 "data-count" [] []
+                    3: (empty)
+                    4: (empty)
+                    5: (empty)
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@44..46 "}" [Newline("\n")] []
+  2: EOF@46..47 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+attr.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `|` but instead found `}`
+  
+    1 │ :root {
+    2 │ 	--no-closing-paren: attr(data-count
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Remove }
+  
+```

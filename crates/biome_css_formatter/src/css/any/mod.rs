@@ -2,6 +2,8 @@
 
 pub(crate) mod at_rule;
 pub(crate) mod at_rule_declarator;
+pub(crate) mod attr_type;
+pub(crate) mod attr_unit;
 pub(crate) mod attribute_matcher_value;
 pub(crate) mod composes_import_source;
 pub(crate) mod compound_selector;
@@ -81,6 +83,9 @@ pub(crate) mod supports_and_combinable_condition;
 pub(crate) mod supports_condition;
 pub(crate) mod supports_in_parens;
 pub(crate) mod supports_or_combinable_condition;
+pub(crate) mod syntax;
+pub(crate) mod syntax_single_component;
+pub(crate) mod syntax_type_name;
 pub(crate) mod unicode_value;
 pub(crate) mod url_modifier;
 pub(crate) mod url_value;

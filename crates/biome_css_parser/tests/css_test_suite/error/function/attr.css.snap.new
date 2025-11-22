@@ -1,0 +1,173 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 179
+expression: snapshot
+---
+## Input
+
+```css
+div {
+	--custom-ident-type: attr(id type(<numberz> | <string>));
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "div" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@5..26 "--custom-ident-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@28..32 "attr" [] [],
+                                        l_paren_token: L_PAREN@32..33 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@33..36 "id" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@36..40 "type" [] [],
+                                            l_paren_token: L_PAREN@40..41 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@41..42 "<" [] [],
+                                                        type_name: CssIdentifier {
+                                                            value_token: IDENT@42..49 "numberz" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@49..51 ">" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@51..53 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@53..54 "<" [] [],
+                                                        type_name: CssIdentifier {
+                                                            value_token: IDENT@54..60 "string" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@60..61 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@61..62 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@62..63 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@63..64 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@64..66 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@66..67 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..67
+  0: (empty)
+  1: CSS_RULE_LIST@0..66
+    0: CSS_QUALIFIED_RULE@0..66
+      0: CSS_SELECTOR_LIST@0..4
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "div" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@4..4
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..66
+        0: L_CURLY@4..5 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@5..64
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..64
+            0: CSS_DECLARATION@5..63
+              0: CSS_GENERIC_PROPERTY@5..63
+                0: CSS_DASHED_IDENTIFIER@5..26
+                  0: IDENT@5..26 "--custom-ident-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@26..28 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..63
+                  0: CSS_ATTR_FUNCTION@28..63
+                    0: ATTR_KW@28..32 "attr" [] []
+                    1: L_PAREN@32..33 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@33..36
+                      0: CSS_IDENTIFIER@33..36
+                        0: IDENT@33..36 "id" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@36..62
+                      0: TYPE_KW@36..40 "type" [] []
+                      1: L_PAREN@40..41 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@41..61
+                        0: CSS_SYNTAX_COMPONENT@41..51
+                          0: CSS_SYNTAX_TYPE@41..51
+                            0: L_ANGLE@41..42 "<" [] []
+                            1: CSS_IDENTIFIER@42..49
+                              0: IDENT@42..49 "numberz" [] []
+                            2: R_ANGLE@49..51 ">" [] [Whitespace(" ")]
+                          1: (empty)
+                        1: PIPE@51..53 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@53..61
+                          0: CSS_SYNTAX_TYPE@53..61
+                            0: L_ANGLE@53..54 "<" [] []
+                            1: CSS_IDENTIFIER@54..60
+                              0: IDENT@54..60 "string" [] []
+                            2: R_ANGLE@60..61 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@61..62 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@62..63 ")" [] []
+              1: (empty)
+            1: SEMICOLON@63..64 ";" [] []
+        2: R_CURLY@64..66 "}" [Newline("\n")] []
+  2: EOF@66..67 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+attr.css:2:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected syntax type name. Epxected one of the following: number, angle, color, custom-ident, image, integer, length, length-percentage, percentage, resolution, string, time, transform-function
+  
+    1 │ div {
+  > 2 │ 	--custom-ident-type: attr(id type(<numberz> | <string>));
+      │ 	                                   ^^^^^^^
+    3 │ }
+    4 │ 
+  
+```

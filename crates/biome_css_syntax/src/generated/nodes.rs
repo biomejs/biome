@@ -1813,39 +1813,6 @@ pub struct CssDeclarationWithSemicolonFields {
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssDistanceUnit {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssDistanceUnit {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssDistanceUnitFields {
-        CssDistanceUnitFields { unit: self.unit() }
-    }
-    pub fn unit(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for CssDistanceUnit {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct CssDistanceUnitFields {
-    pub unit: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDocumentAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4779,41 +4746,6 @@ pub struct CssParenthesizedExpressionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssPercentSign {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssPercentSign {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssPercentSignFields {
-        CssPercentSignFields {
-            percent_token: self.percent_token(),
-        }
-    }
-    pub fn percent_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for CssPercentSign {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct CssPercentSignFields {
-    pub percent_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPercentage {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6393,6 +6325,41 @@ pub struct CssRawStringDeclaratorFields {
     pub raw_string_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssRegularAttrUnit {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssRegularAttrUnit {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssRegularAttrUnitFields {
+        CssRegularAttrUnitFields {
+            unit_token: self.unit_token(),
+        }
+    }
+    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssRegularAttrUnit {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssRegularAttrUnitFields {
+    pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRegularDimension {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6431,6 +6398,41 @@ impl Serialize for CssRegularDimension {
 pub struct CssRegularDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssRegularSyntaxTypeName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssRegularSyntaxTypeName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssRegularSyntaxTypeNameFields {
+        CssRegularSyntaxTypeNameFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssRegularSyntaxTypeName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssRegularSyntaxTypeNameFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRelativeSelector {
@@ -7359,15 +7361,15 @@ impl CssSyntaxType {
     pub fn as_fields(&self) -> CssSyntaxTypeFields {
         CssSyntaxTypeFields {
             l_angle_token: self.l_angle_token(),
-            name: self.name(),
+            type_name: self.type_name(),
             r_angle_token: self.r_angle_token(),
         }
     }
     pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn type_name(&self) -> SyntaxResult<AnyCssSyntaxTypeName> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -7384,7 +7386,7 @@ impl Serialize for CssSyntaxType {
 #[derive(Serialize)]
 pub struct CssSyntaxTypeFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<SyntaxToken>,
+    pub type_name: SyntaxResult<AnyCssSyntaxTypeName>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7708,6 +7710,41 @@ pub struct CssUniversalSelectorFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnknownAttrUnit {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnknownAttrUnit {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnknownAttrUnitFields {
+        CssUnknownAttrUnitFields {
+            unit_token: self.unit_token(),
+        }
+    }
+    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssUnknownAttrUnit {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssUnknownAttrUnitFields {
+    pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownBlockAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7791,6 +7828,41 @@ impl Serialize for CssUnknownDimension {
 pub struct CssUnknownDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnknownSyntaxTypeName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnknownSyntaxTypeName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnknownSyntaxTypeNameFields {
+        CssUnknownSyntaxTypeNameFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssUnknownSyntaxTypeName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssUnknownSyntaxTypeNameFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownValueAtRule {
@@ -9309,26 +9381,19 @@ impl AnyCssAttrType {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttrUnit {
-    CssBogusAttrUnit(CssBogusAttrUnit),
-    CssDistanceUnit(CssDistanceUnit),
-    CssPercentSign(CssPercentSign),
+    CssRegularAttrUnit(CssRegularAttrUnit),
+    CssUnknownAttrUnit(CssUnknownAttrUnit),
 }
 impl AnyCssAttrUnit {
-    pub fn as_css_bogus_attr_unit(&self) -> Option<&CssBogusAttrUnit> {
+    pub fn as_css_regular_attr_unit(&self) -> Option<&CssRegularAttrUnit> {
         match &self {
-            Self::CssBogusAttrUnit(item) => Some(item),
+            Self::CssRegularAttrUnit(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_css_distance_unit(&self) -> Option<&CssDistanceUnit> {
+    pub fn as_css_unknown_attr_unit(&self) -> Option<&CssUnknownAttrUnit> {
         match &self {
-            Self::CssDistanceUnit(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_percent_sign(&self) -> Option<&CssPercentSign> {
-        match &self {
-            Self::CssPercentSign(item) => Some(item),
+            Self::CssUnknownAttrUnit(item) => Some(item),
             _ => None,
         }
     }
@@ -11337,6 +11402,7 @@ impl AnyCssSupportsOrCombinableCondition {
 pub enum AnyCssSyntax {
     CssBogusSyntax(CssBogusSyntax),
     CssString(CssString),
+    CssSyntaxComponent(CssSyntaxComponent),
     CssSyntaxComponentList(CssSyntaxComponentList),
     CssWildcard(CssWildcard),
 }
@@ -11350,6 +11416,12 @@ impl AnyCssSyntax {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_syntax_component(&self) -> Option<&CssSyntaxComponent> {
+        match &self {
+            Self::CssSyntaxComponent(item) => Some(item),
             _ => None,
         }
     }
@@ -11388,6 +11460,25 @@ impl AnyCssSyntaxSingleComponent {
     pub fn as_css_syntax_type(&self) -> Option<&CssSyntaxType> {
         match &self {
             Self::CssSyntaxType(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssSyntaxTypeName {
+    CssRegularSyntaxTypeName(CssRegularSyntaxTypeName),
+    CssUnknownSyntaxTypeName(CssUnknownSyntaxTypeName),
+}
+impl AnyCssSyntaxTypeName {
+    pub fn as_css_regular_syntax_type_name(&self) -> Option<&CssRegularSyntaxTypeName> {
+        match &self {
+            Self::CssRegularSyntaxTypeName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unknown_syntax_type_name(&self) -> Option<&CssUnknownSyntaxTypeName> {
+        match &self {
+            Self::CssUnknownSyntaxTypeName(item) => Some(item),
             _ => None,
         }
     }
@@ -13881,53 +13972,6 @@ impl From<CssDeclarationWithSemicolon> for SyntaxNode {
 }
 impl From<CssDeclarationWithSemicolon> for SyntaxElement {
     fn from(n: CssDeclarationWithSemicolon) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssDistanceUnit {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_DISTANCE_UNIT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_DISTANCE_UNIT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssDistanceUnit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssDistanceUnit")
-                .field("unit", &support::DebugSyntaxResult(self.unit()))
-                .finish()
-        } else {
-            f.debug_struct("CssDistanceUnit").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<CssDistanceUnit> for SyntaxNode {
-    fn from(n: CssDistanceUnit) -> Self {
-        n.syntax
-    }
-}
-impl From<CssDistanceUnit> for SyntaxElement {
-    fn from(n: CssDistanceUnit) -> Self {
         n.syntax.into()
     }
 }
@@ -17511,56 +17555,6 @@ impl From<CssParenthesizedExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssPercentSign {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PERCENT_SIGN as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_PERCENT_SIGN
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssPercentSign {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssPercentSign")
-                .field(
-                    "percent_token",
-                    &support::DebugSyntaxResult(self.percent_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssPercentSign").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<CssPercentSign> for SyntaxNode {
-    fn from(n: CssPercentSign) -> Self {
-        n.syntax
-    }
-}
-impl From<CssPercentSign> for SyntaxElement {
-    fn from(n: CssPercentSign) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssPercentage {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19452,6 +19446,53 @@ impl From<CssRawStringDeclarator> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssRegularAttrUnit {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_REGULAR_ATTR_UNIT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_REGULAR_ATTR_UNIT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssRegularAttrUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRegularAttrUnit")
+                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssRegularAttrUnit").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssRegularAttrUnit> for SyntaxNode {
+    fn from(n: CssRegularAttrUnit) -> Self {
+        n.syntax
+    }
+}
+impl From<CssRegularAttrUnit> for SyntaxElement {
+    fn from(n: CssRegularAttrUnit) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssRegularDimension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19500,6 +19541,53 @@ impl From<CssRegularDimension> for SyntaxNode {
 }
 impl From<CssRegularDimension> for SyntaxElement {
     fn from(n: CssRegularDimension) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssRegularSyntaxTypeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_REGULAR_SYNTAX_TYPE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_REGULAR_SYNTAX_TYPE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssRegularSyntaxTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRegularSyntaxTypeName")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssRegularSyntaxTypeName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssRegularSyntaxTypeName> for SyntaxNode {
+    fn from(n: CssRegularSyntaxTypeName) -> Self {
+        n.syntax
+    }
+}
+impl From<CssRegularSyntaxTypeName> for SyntaxElement {
+    fn from(n: CssRegularSyntaxTypeName) -> Self {
         n.syntax.into()
     }
 }
@@ -20654,7 +20742,7 @@ impl std::fmt::Debug for CssSyntaxType {
                     "l_angle_token",
                     &support::DebugSyntaxResult(self.l_angle_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("type_name", &support::DebugSyntaxResult(self.type_name()))
                 .field(
                     "r_angle_token",
                     &support::DebugSyntaxResult(self.r_angle_token()),
@@ -21085,6 +21173,53 @@ impl From<CssUniversalSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssUnknownAttrUnit {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_ATTR_UNIT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_ATTR_UNIT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownAttrUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnknownAttrUnit")
+                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnknownAttrUnit").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssUnknownAttrUnit> for SyntaxNode {
+    fn from(n: CssUnknownAttrUnit) -> Self {
+        n.syntax
+    }
+}
+impl From<CssUnknownAttrUnit> for SyntaxElement {
+    fn from(n: CssUnknownAttrUnit) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssUnknownBlockAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21182,6 +21317,53 @@ impl From<CssUnknownDimension> for SyntaxNode {
 }
 impl From<CssUnknownDimension> for SyntaxElement {
     fn from(n: CssUnknownDimension) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnknownSyntaxTypeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_SYNTAX_TYPE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_SYNTAX_TYPE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownSyntaxTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnknownSyntaxTypeName")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnknownSyntaxTypeName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssUnknownSyntaxTypeName> for SyntaxNode {
+    fn from(n: CssUnknownSyntaxTypeName) -> Self {
+        n.syntax
+    }
+}
+impl From<CssUnknownSyntaxTypeName> for SyntaxElement {
+    fn from(n: CssUnknownSyntaxTypeName) -> Self {
         n.syntax.into()
     }
 }
@@ -23316,71 +23498,57 @@ impl From<AnyCssAttrType> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusAttrUnit> for AnyCssAttrUnit {
-    fn from(node: CssBogusAttrUnit) -> Self {
-        Self::CssBogusAttrUnit(node)
+impl From<CssRegularAttrUnit> for AnyCssAttrUnit {
+    fn from(node: CssRegularAttrUnit) -> Self {
+        Self::CssRegularAttrUnit(node)
     }
 }
-impl From<CssDistanceUnit> for AnyCssAttrUnit {
-    fn from(node: CssDistanceUnit) -> Self {
-        Self::CssDistanceUnit(node)
-    }
-}
-impl From<CssPercentSign> for AnyCssAttrUnit {
-    fn from(node: CssPercentSign) -> Self {
-        Self::CssPercentSign(node)
+impl From<CssUnknownAttrUnit> for AnyCssAttrUnit {
+    fn from(node: CssUnknownAttrUnit) -> Self {
+        Self::CssUnknownAttrUnit(node)
     }
 }
 impl AstNode for AnyCssAttrUnit {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusAttrUnit::KIND_SET
-        .union(CssDistanceUnit::KIND_SET)
-        .union(CssPercentSign::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssRegularAttrUnit::KIND_SET.union(CssUnknownAttrUnit::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_ATTR_UNIT | CSS_DISTANCE_UNIT | CSS_PERCENT_SIGN
-        )
+        matches!(kind, CSS_REGULAR_ATTR_UNIT | CSS_UNKNOWN_ATTR_UNIT)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_ATTR_UNIT => Self::CssBogusAttrUnit(CssBogusAttrUnit { syntax }),
-            CSS_DISTANCE_UNIT => Self::CssDistanceUnit(CssDistanceUnit { syntax }),
-            CSS_PERCENT_SIGN => Self::CssPercentSign(CssPercentSign { syntax }),
+            CSS_REGULAR_ATTR_UNIT => Self::CssRegularAttrUnit(CssRegularAttrUnit { syntax }),
+            CSS_UNKNOWN_ATTR_UNIT => Self::CssUnknownAttrUnit(CssUnknownAttrUnit { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusAttrUnit(it) => it.syntax(),
-            Self::CssDistanceUnit(it) => it.syntax(),
-            Self::CssPercentSign(it) => it.syntax(),
+            Self::CssRegularAttrUnit(it) => it.syntax(),
+            Self::CssUnknownAttrUnit(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusAttrUnit(it) => it.into_syntax(),
-            Self::CssDistanceUnit(it) => it.into_syntax(),
-            Self::CssPercentSign(it) => it.into_syntax(),
+            Self::CssRegularAttrUnit(it) => it.into_syntax(),
+            Self::CssUnknownAttrUnit(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssAttrUnit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusAttrUnit(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssDistanceUnit(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssPercentSign(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssRegularAttrUnit(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssUnknownAttrUnit(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssAttrUnit> for SyntaxNode {
     fn from(n: AnyCssAttrUnit) -> Self {
         match n {
-            AnyCssAttrUnit::CssBogusAttrUnit(it) => it.into_syntax(),
-            AnyCssAttrUnit::CssDistanceUnit(it) => it.into_syntax(),
-            AnyCssAttrUnit::CssPercentSign(it) => it.into_syntax(),
+            AnyCssAttrUnit::CssRegularAttrUnit(it) => it.into_syntax(),
+            AnyCssAttrUnit::CssUnknownAttrUnit(it) => it.into_syntax(),
         }
     }
 }
@@ -29307,6 +29475,11 @@ impl From<CssString> for AnyCssSyntax {
         Self::CssString(node)
     }
 }
+impl From<CssSyntaxComponent> for AnyCssSyntax {
+    fn from(node: CssSyntaxComponent) -> Self {
+        Self::CssSyntaxComponent(node)
+    }
+}
 impl From<CssSyntaxComponentList> for AnyCssSyntax {
     fn from(node: CssSyntaxComponentList) -> Self {
         Self::CssSyntaxComponentList(node)
@@ -29321,18 +29494,24 @@ impl AstNode for AnyCssSyntax {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSyntax::KIND_SET
         .union(CssString::KIND_SET)
+        .union(CssSyntaxComponent::KIND_SET)
         .union(CssSyntaxComponentList::KIND_SET)
         .union(CssWildcard::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SYNTAX | CSS_STRING | CSS_SYNTAX_COMPONENT_LIST | CSS_WILDCARD
+            CSS_BOGUS_SYNTAX
+                | CSS_STRING
+                | CSS_SYNTAX_COMPONENT
+                | CSS_SYNTAX_COMPONENT_LIST
+                | CSS_WILDCARD
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_SYNTAX => Self::CssBogusSyntax(CssBogusSyntax { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
+            CSS_SYNTAX_COMPONENT => Self::CssSyntaxComponent(CssSyntaxComponent { syntax }),
             CSS_SYNTAX_COMPONENT_LIST => {
                 Self::CssSyntaxComponentList(CssSyntaxComponentList::cast(syntax)?)
             }
@@ -29345,6 +29524,7 @@ impl AstNode for AnyCssSyntax {
         match self {
             Self::CssBogusSyntax(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
+            Self::CssSyntaxComponent(it) => it.syntax(),
             Self::CssSyntaxComponentList(it) => it.syntax(),
             Self::CssWildcard(it) => it.syntax(),
         }
@@ -29353,6 +29533,7 @@ impl AstNode for AnyCssSyntax {
         match self {
             Self::CssBogusSyntax(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
+            Self::CssSyntaxComponent(it) => it.into_syntax(),
             Self::CssSyntaxComponentList(it) => it.into_syntax(),
             Self::CssWildcard(it) => it.into_syntax(),
         }
@@ -29363,6 +29544,7 @@ impl std::fmt::Debug for AnyCssSyntax {
         match self {
             Self::CssBogusSyntax(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSyntaxComponentList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssWildcard(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -29373,6 +29555,7 @@ impl From<AnyCssSyntax> for SyntaxNode {
         match n {
             AnyCssSyntax::CssBogusSyntax(it) => it.into_syntax(),
             AnyCssSyntax::CssString(it) => it.into_syntax(),
+            AnyCssSyntax::CssSyntaxComponent(it) => it.into_syntax(),
             AnyCssSyntax::CssSyntaxComponentList(it) => it.into_syntax(),
             AnyCssSyntax::CssWildcard(it) => it.into_syntax(),
         }
@@ -29456,6 +29639,73 @@ impl From<AnyCssSyntaxSingleComponent> for SyntaxNode {
 }
 impl From<AnyCssSyntaxSingleComponent> for SyntaxElement {
     fn from(n: AnyCssSyntaxSingleComponent) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssRegularSyntaxTypeName> for AnyCssSyntaxTypeName {
+    fn from(node: CssRegularSyntaxTypeName) -> Self {
+        Self::CssRegularSyntaxTypeName(node)
+    }
+}
+impl From<CssUnknownSyntaxTypeName> for AnyCssSyntaxTypeName {
+    fn from(node: CssUnknownSyntaxTypeName) -> Self {
+        Self::CssUnknownSyntaxTypeName(node)
+    }
+}
+impl AstNode for AnyCssSyntaxTypeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssRegularSyntaxTypeName::KIND_SET.union(CssUnknownSyntaxTypeName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_REGULAR_SYNTAX_TYPE_NAME | CSS_UNKNOWN_SYNTAX_TYPE_NAME
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_REGULAR_SYNTAX_TYPE_NAME => {
+                Self::CssRegularSyntaxTypeName(CssRegularSyntaxTypeName { syntax })
+            }
+            CSS_UNKNOWN_SYNTAX_TYPE_NAME => {
+                Self::CssUnknownSyntaxTypeName(CssUnknownSyntaxTypeName { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssRegularSyntaxTypeName(it) => it.syntax(),
+            Self::CssUnknownSyntaxTypeName(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssRegularSyntaxTypeName(it) => it.into_syntax(),
+            Self::CssUnknownSyntaxTypeName(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSyntaxTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssRegularSyntaxTypeName(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssUnknownSyntaxTypeName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssSyntaxTypeName> for SyntaxNode {
+    fn from(n: AnyCssSyntaxTypeName) -> Self {
+        match n {
+            AnyCssSyntaxTypeName::CssRegularSyntaxTypeName(it) => it.into_syntax(),
+            AnyCssSyntaxTypeName::CssUnknownSyntaxTypeName(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssSyntaxTypeName> for SyntaxElement {
+    fn from(n: AnyCssSyntaxTypeName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -30814,6 +31064,11 @@ impl std::fmt::Display for AnyCssSyntaxSingleComponent {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssSyntaxTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssUnicodeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -31080,11 +31335,6 @@ impl std::fmt::Display for CssDeclarationOrRuleBlock {
     }
 }
 impl std::fmt::Display for CssDeclarationWithSemicolon {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssDistanceUnit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -31439,11 +31689,6 @@ impl std::fmt::Display for CssParenthesizedExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssPercentSign {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssPercentage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -31624,7 +31869,17 @@ impl std::fmt::Display for CssRawStringDeclarator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssRegularAttrUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssRegularDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssRegularSyntaxTypeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -31784,12 +32039,22 @@ impl std::fmt::Display for CssUniversalSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssUnknownAttrUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssUnknownBlockAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for CssUnknownDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnknownSyntaxTypeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -32033,62 +32298,6 @@ impl From<CssBogusAtRule> for SyntaxNode {
 }
 impl From<CssBogusAtRule> for SyntaxElement {
     fn from(n: CssBogusAtRule) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusAttrUnit {
-    syntax: SyntaxNode,
-}
-impl CssBogusAttrUnit {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusAttrUnit {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_ATTR_UNIT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_ATTR_UNIT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusAttrUnit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusAttrUnit")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusAttrUnit> for SyntaxNode {
-    fn from(n: CssBogusAttrUnit) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusAttrUnit> for SyntaxElement {
-    fn from(n: CssBogusAttrUnit) -> Self {
         n.syntax.into()
     }
 }
@@ -33716,7 +33925,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrUnit | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,

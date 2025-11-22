@@ -228,7 +228,7 @@ CssRoot {
                                                 items: [
                                                     TO_KW@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                                     L_CURLY@169..170 "{" [] [],
-                                                    IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    COLOR_KW@170..178 "color" [Newline("\n"), Whitespace("\t\t")] [],
                                                     COLON@178..180 ":" [] [Whitespace(" ")],
                                                     IDENT@180..184 "blue" [] [],
                                                     SEMICOLON@184..185 ";" [] [],
@@ -505,7 +505,7 @@ CssRoot {
                   1: CSS_BOGUS@163..185
                     0: TO_KW@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
                     1: L_CURLY@169..170 "{" [] []
-                    2: IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] []
+                    2: COLOR_KW@170..178 "color" [Newline("\n"), Whitespace("\t\t")] []
                     3: COLON@178..180 ":" [] [Whitespace(" ")]
                     4: IDENT@180..184 "blue" [] []
                     5: SEMICOLON@184..185 ";" [] []

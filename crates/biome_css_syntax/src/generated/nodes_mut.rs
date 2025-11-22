@@ -729,14 +729,6 @@ impl CssDeclarationWithSemicolon {
         )
     }
 }
-impl CssDistanceUnit {
-    pub fn with_unit_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl CssDocumentAtRule {
     pub fn with_document_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -1879,14 +1871,6 @@ impl CssParenthesizedExpression {
         )
     }
 }
-impl CssPercentSign {
-    pub fn with_percent_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl CssPercentage {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2565,6 +2549,14 @@ impl CssRawStringDeclarator {
         )
     }
 }
+impl CssRegularAttrUnit {
+    pub fn with_unit_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssRegularDimension {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2576,6 +2568,14 @@ impl CssRegularDimension {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssRegularSyntaxTypeName {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -2930,10 +2930,10 @@ impl CssSyntaxType {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+    pub fn with_type_name(self, element: AnyCssSyntaxTypeName) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
@@ -3055,6 +3055,14 @@ impl CssUniversalSelector {
         )
     }
 }
+impl CssUnknownAttrUnit {
+    pub fn with_unit_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssUnknownBlockAtRule {
     pub fn with_name(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
@@ -3086,6 +3094,14 @@ impl CssUnknownDimension {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssUnknownSyntaxTypeName {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

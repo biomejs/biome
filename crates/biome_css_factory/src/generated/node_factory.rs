@@ -696,12 +696,6 @@ impl CssDeclarationWithSemicolonBuilder {
         ))
     }
 }
-pub fn css_distance_unit(unit_token: SyntaxToken) -> CssDistanceUnit {
-    CssDistanceUnit::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DISTANCE_UNIT,
-        [Some(SyntaxElement::Token(unit_token))],
-    ))
-}
 pub fn css_document_at_rule(
     document_token: SyntaxToken,
     matchers: CssDocumentMatcherList,
@@ -1647,12 +1641,6 @@ impl CssParenthesizedExpressionBuilder {
         ))
     }
 }
-pub fn css_percent_sign(percent_token: SyntaxToken) -> CssPercentSign {
-    CssPercentSign::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PERCENT_SIGN,
-        [Some(SyntaxElement::Token(percent_token))],
-    ))
-}
 pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PERCENTAGE,
@@ -2172,6 +2160,12 @@ pub fn css_raw_string_declarator(raw_string_token: SyntaxToken) -> CssRawStringD
         [Some(SyntaxElement::Token(raw_string_token))],
     ))
 }
+pub fn css_regular_attr_unit(unit_token: SyntaxToken) -> CssRegularAttrUnit {
+    CssRegularAttrUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_ATTR_UNIT,
+        [Some(SyntaxElement::Token(unit_token))],
+    ))
+}
 pub fn css_regular_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2182,6 +2176,12 @@ pub fn css_regular_dimension(
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
         ],
+    ))
+}
+pub fn css_regular_syntax_type_name(name_token: SyntaxToken) -> CssRegularSyntaxTypeName {
+    CssRegularSyntaxTypeName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_SYNTAX_TYPE_NAME,
+        [Some(SyntaxElement::Token(name_token))],
     ))
 }
 pub fn css_relative_selector(selector: AnyCssSelector) -> CssRelativeSelectorBuilder {
@@ -2501,14 +2501,14 @@ pub fn css_syntax_multiplier(multiplier_token: SyntaxToken) -> CssSyntaxMultipli
 }
 pub fn css_syntax_type(
     l_angle_token: SyntaxToken,
-    name_token: SyntaxToken,
+    type_name: AnyCssSyntaxTypeName,
     r_angle_token: SyntaxToken,
 ) -> CssSyntaxType {
     CssSyntaxType::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SYNTAX_TYPE,
         [
             Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(type_name.into_syntax())),
             Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
@@ -2622,6 +2622,12 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_unknown_attr_unit(unit_token: SyntaxToken) -> CssUnknownAttrUnit {
+    CssUnknownAttrUnit::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_ATTR_UNIT,
+        [Some(SyntaxElement::Token(unit_token))],
+    ))
+}
 pub fn css_unknown_block_at_rule(
     name: CssIdentifier,
     components: CssUnknownAtRuleComponentList,
@@ -2646,6 +2652,12 @@ pub fn css_unknown_dimension(
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
         ],
+    ))
+}
+pub fn css_unknown_syntax_type_name(name_token: SyntaxToken) -> CssUnknownSyntaxTypeName {
+    CssUnknownSyntaxTypeName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_SYNTAX_TYPE_NAME,
+        [Some(SyntaxElement::Token(name_token))],
     ))
 }
 pub fn css_unknown_value_at_rule(
@@ -3670,16 +3682,6 @@ where
 {
     CssBogusAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_AT_RULE,
-        slots,
-    ))
-}
-pub fn css_bogus_attr_unit<I>(slots: I) -> CssBogusAttrUnit
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusAttrUnit::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_ATTR_UNIT,
         slots,
     ))
 }

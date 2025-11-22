@@ -63,7 +63,6 @@ CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
-CssBogusAttrUnit = SyntaxElement*
 CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 
@@ -2062,77 +2061,18 @@ CssRawStringDeclarator =
 CssNumberDeclarator =
 	'number'
 
-// https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#distance_units
-CssDistanceUnit =
-	unit: (
-		// local font-relative units
-		'cap'
-		| 'ch'
-		| 'em'
-		| 'ex'
-		| 'ic'
-		| 'lh'
-		// root font-relative units
-		| 'rcap'
-		| 'rch'
-		| 'rem'
-		| 'rex'
-		| 'ric'
-		| 'rlh'
-		// viewport units
-		| 'dvh'
-		| 'dvw'
-		| 'lvh'
-		| 'lvw'
-		| 'svh'
-		| 'svw'
-		| 'vb'
-		| 'vh'
-		| 'vi'
-		| 'vmax'
-		| 'vmin'
-		| 'vw'
-		// container units
-		| 'cqb'
-		| 'cqh'
-		| 'cqi'
-		| 'cqmax'
-		| 'cqmin'
-		| 'cqw'
-		// absolute length units
-		| 'cm'
-		| 'in'
-		| 'mm'
-		| 'pc'
-		| 'pt'
-		| 'px'
-		| 'q'
-		// angle units
-		| 'deg'
-		| 'grad'
-		| 'rad'
-		| 'turn'
-		 // time units
-		| 'ms'
-		| 's'
-		// frequency units
-		| 'hz'
-		| 'khz'
-		// flex units
-		| 'fr'
-		// resolution units
-		| 'dpcm'
-		| 'dpi'
-		| 'dppx'
-	)
-
 CssPercentSign =
 	'%'
 
 AnyCssAttrUnit =
 	CssPercentSign
-	| CssDistanceUnit
-	| CssBogusAttrUnit
+	CssRegularAttrUnit
+	| CssUnknownAttrUnit
+
+CssRegularAttrUnit =
+	unit: 'ident'
+CssUnknownAttrUnit =
+	unit: 'ident'
 
 AnyCssAttrType =
 	CssRawStringDeclarator
@@ -2156,6 +2096,7 @@ CssWildcard =
 AnyCssSyntax =
 	CssWildcard
 	| CssSyntaxComponentList
+	| CssSyntaxComponent
 	| CssString
 	| CssBogusSyntax
 
@@ -2170,24 +2111,18 @@ AnyCssSyntaxSingleComponent =
 	| CssIdentifier
 	| CssBogusSyntaxSingleComponent
 
+AnyCssSyntaxTypeName =
+	CssRegularSyntaxTypeName
+	| CssUnknownSyntaxTypeName
+
+CssRegularSyntaxTypeName =
+	name: 'ident'
+CssUnknownSyntaxTypeName =
+	name: 'ident'
+
 CssSyntaxType =
 	'<'
-	name: (
-		'angle'
-		| 'color'
-		| 'custom-ident'
-		| 'image'
-		| 'integer'
-		| 'length'
-		| 'length-percentage'
-		| 'number'
-		| 'percentage'
-		| 'resolution'
-		| 'string'
-		| 'time'
-		| 'url'
-		| 'transform-function'
-	)
+	type_name: AnyCssSyntaxTypeName
 	'>'
 
 CssSyntaxMultiplier =
