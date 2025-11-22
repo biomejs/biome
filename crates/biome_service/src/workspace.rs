@@ -147,7 +147,10 @@ impl FeaturesSupported {
     /// Adds the features that are enabled in `capabilities` to this result.
     #[inline]
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
-        if capabilities.formatter.format.is_some() {
+        if capabilities.formatter.format.is_some()
+            || capabilities.formatter.format_range.is_some()
+            || capabilities.formatter.format_on_type.is_some()
+        {
             self.insert(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
