@@ -24,6 +24,7 @@ export function getCommand(): string | null {
 		linux: {
 			x64: "@biomejs/cli-linux-x64/biome",
 			arm64: "@biomejs/cli-linux-arm64/biome",
+			loong64: "@biomejs/cli-linux-loong64/biome",
 		},
 	};
 
