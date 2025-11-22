@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/inline/nested_inline_expressions.astro
+---
+# Input
+
+```astro
+<p>
+	<span>Name: {firstName} <strong>{lastName}</strong></span> <span>({username})</span>
+</p>
+
+<div>
+	Result: <b>{a} <em>plus</em> {b}</b> equals <i>{sum}</i>
+</div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+<p>
+	<span
+		>Name: {firstName} <strong>{lastName}</strong></span
+	>
+	<span>({username})</span>
+</p>
+
+<div>
+	Result:
+	<b
+		>{a}
+		<em>plus</em>
+		{b}</b
+	> equals <i>{sum}</i>
+</div>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"firstName" => 21..30
+"lastName" => 41..49
+"username" => 78..86
+"a" => 125..126
+"b" => 147..148
+"sum" => 167..170
