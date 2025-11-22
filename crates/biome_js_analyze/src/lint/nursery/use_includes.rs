@@ -5,8 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
-    AnyJsObjectMember, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_includes::UseIncludesOptions;
@@ -106,9 +105,20 @@ impl Rule for UseIncludes {
                     .as_js_regex_literal_expression()?;
 
                 let (pattern, flags) = regex_literal.decompose().ok()?;
+                let pattern_text = pattern.text();
+                let flags_text = flags.text();
 
-                if is_simple_regex(&pattern, &flags)
-                    && is_receiver_known_to_have_includes(Some(object))
+                let arguments = call_expr.arguments().ok()?;
+                let first_arg_expr = arguments
+                    .args()
+                    .into_iter()
+                    .next()?
+                    .ok()?
+                    .as_any_js_expression()?
+                    .clone();
+
+                if is_simple_regex(pattern_text, flags_text)
+                    && is_receiver_known_to_have_includes(Some(first_arg_expr))
                 {
                     Some(State::RegexTest(RegexTestData {
                         call_expression: call_expr.clone(),
