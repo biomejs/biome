@@ -14,9 +14,8 @@ use biome_rule_options::use_includes::UseIncludesOptions;
 declare_lint_rule! {
     /// Enforce the use of `includes()` over `indexOf()`.
     ///
-    /// Prior to ES2015, `Array#indexOf` and `String#indexOf` comparisons against `-1` were the standard ways to check whether a value exists in an array or string, respectively.
-    /// ES2015 added `String#includes` and ES2016 added `Array#includes`, which are easier to read and write.
-    ///
+    /// When checking if an array or a string includes a value, it is common to use `indexOf()` and check if the result is `-1`.
+    /// However, it is simpler and more readable to use the `includes()` method, which returns a boolean.
     /// This rule reports when an `.indexOf()` call can be replaced with an `.includes()`.
     /// Additionally, this rule reports the tests of simple regular expressions in favor of `String#includes`.
     ///
@@ -29,36 +28,12 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// "foo".indexOf("o") !== -1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
     /// ["a", "b", "c"].indexOf("a") === -1
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// /a/.test("abc")
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const obj = {
-    ///     indexOf: (val) => [1, 2, 3].indexOf(val),
-    ///     includes: (val) => [1, 2, 3].includes(val),
-    /// };
-    /// obj.indexOf(2) > -1;
     /// ```
     /// ### Valid
     ///
     /// ```js
-    /// "foo".includes("o");
-    /// ```
-    ///
-    /// ```js
     /// !["a", "b", "c"].includes("a");
-    /// ```
-    ///
-    /// ```js
-    /// "abc".includes("a");
     /// ```
     ///
     pub UseIncludes {
