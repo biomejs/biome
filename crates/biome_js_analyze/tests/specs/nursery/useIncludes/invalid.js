@@ -1,3 +1,5 @@
+// should generate diagnostics
+
 "foo".indexOf("o") !== -1;
 ["a", "b", "c"].indexOf("a") === -1;
 

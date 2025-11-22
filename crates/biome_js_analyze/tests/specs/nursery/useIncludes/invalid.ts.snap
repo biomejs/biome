@@ -4,7 +4,7 @@ expression: invalid.ts
 ---
 # Input
 ```ts
-/* expect_diagnostic */
+// should generate diagnostics
 const listWithIncludes = {
     items: [1, 2, 3],
     includes(searchElement: number) {
@@ -16,7 +16,6 @@ const listWithIncludes = {
 };
 listWithIncludes.indexOf(2) !== -1;
 
-/* expect_diagnostic */
 const anotherListWithIncludes = {
     items: [1, 2, 3],
     includes(searchElement: number) {
@@ -28,34 +27,33 @@ const anotherListWithIncludes = {
 };
 anotherListWithIncludes.indexOf(4) === -1;
 
-/* expect_diagnostic */
 /a/.test("abc");
 
-/* expect_diagnostic */
 /a/i.test("ABC");
 
 ```
 
 # Diagnostics
 ```
-invalid.ts:26:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:24:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-    25 │ /* expect_diagnostic */
-  > 26 │ /a/.test("abc");
+    22 │ anotherListWithIncludes.indexOf(4) === -1;
+    23 │ 
+  > 24 │ /a/.test("abc");
        │ ^^^^^^^^^^^^^^^
-    27 │ 
-    28 │ /* expect_diagnostic */
+    25 │ 
+    26 │ /a/i.test("ABC");
   
   i Safe fix: Replace with 'includes()'
   
-    24 24 │   
-    25 25 │   /* expect_diagnostic */
-    26    │ - /a/.test("abc");
-       26 │ + "abc".includes("a");
-    27 27 │   
-    28 28 │   /* expect_diagnostic */
+    22 22 │   anotherListWithIncludes.indexOf(4) === -1;
+    23 23 │   
+    24    │ - /a/.test("abc");
+       24 │ + "abc".includes("a");
+    25 25 │   
+    26 26 │   /a/i.test("ABC");
   
 
 ```

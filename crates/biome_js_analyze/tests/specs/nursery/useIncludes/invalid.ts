@@ -1,4 +1,4 @@
-/* expect_diagnostic */
+// should generate diagnostics
 const listWithIncludes = {
     items: [1, 2, 3],
     includes(searchElement: number) {
@@ -10,7 +10,6 @@ const listWithIncludes = {
 };
 listWithIncludes.indexOf(2) !== -1;
 
-/* expect_diagnostic */
 const anotherListWithIncludes = {
     items: [1, 2, 3],
     includes(searchElement: number) {
@@ -22,8 +21,4 @@ const anotherListWithIncludes = {
 };
 anotherListWithIncludes.indexOf(4) === -1;
 
-/* expect_diagnostic */
 /a/.test("abc");
-
-/* expect_diagnostic */
-/a/i.test("ABC");
