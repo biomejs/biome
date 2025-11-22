@@ -434,5 +434,5 @@ fn is_simple_regex(pattern: &str, flags: &str) -> bool {
     // This is a simplified check.
     // For now, we check for characters that are special in regex.
     // This list is not exhaustive but covers many common cases.
-    !pattern.chars().any(|c| ".\\+*?[]^$(){}=!<>|:-".contains(c))
+    !pattern.chars().any(|c| "\"'.\\\+*?[]^$(){}=!<>|:-".contains(c))
 }
