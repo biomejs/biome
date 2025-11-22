@@ -3,7 +3,7 @@ use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -100,13 +100,20 @@ pub struct CliOptions {
 
 impl CliOptions {
     /// Computes the [ConfigurationPathHint] based on the options passed by the user
-    pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
+    pub(crate) fn as_configuration_path_hint(
+        &self,
+        working_directory: &Utf8Path,
+    ) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
             Some(path) => {
                 let path = Utf8PathBuf::from(path);
                 let path = path.strip_prefix("./").unwrap_or(&path);
-                ConfigurationPathHint::FromUser(path.to_path_buf())
+                if path.is_absolute() {
+                    ConfigurationPathHint::FromUser(path.to_path_buf())
+                } else {
+                    ConfigurationPathHint::FromUser(working_directory.join(path))
+                }
             }
         }
     }

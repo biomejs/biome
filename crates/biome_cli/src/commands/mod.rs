@@ -939,8 +939,9 @@ pub(crate) trait CommandRunner: Sized {
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
+        let working_dir = fs.working_directory().unwrap_or_default();
         // Load configuration
-        let configuration_path_hint = cli_options.as_configuration_path_hint();
+        let configuration_path_hint = cli_options.as_configuration_path_hint(working_dir.as_path());
         let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
             validate_configuration_diagnostics(
@@ -961,7 +962,6 @@ pub(crate) trait CommandRunner: Sized {
 
         let execution = self.get_execution(cli_options, console, workspace)?;
 
-        let working_dir = fs.working_directory().unwrap_or_default();
         let root_configuration_dir = configuration_dir_path
             .clone()
             .unwrap_or_else(|| working_dir.clone());
