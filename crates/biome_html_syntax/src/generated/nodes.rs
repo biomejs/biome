@@ -1839,6 +1839,56 @@ pub struct VueVOnShorthandDirectiveFields {
     pub modifiers: VueModifierList,
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVSlotShorthandDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVSlotShorthandDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVSlotShorthandDirectiveFields {
+        VueVSlotShorthandDirectiveFields {
+            hash_token: self.hash_token(),
+            arg: self.arg(),
+            modifiers: self.modifiers(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn arg(&self) -> SyntaxResult<AnyVueDirectiveArgument> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn modifiers(&self) -> VueModifierList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for VueVSlotShorthandDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVSlotShorthandDirectiveFields {
+    pub hash_token: SyntaxResult<SyntaxToken>,
+    pub arg: SyntaxResult<AnyVueDirectiveArgument>,
+    pub modifiers: VueModifierList,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroFrontmatterElement {
     AstroBogusFrontmatter(AstroBogusFrontmatter),
@@ -2083,6 +2133,7 @@ pub enum AnyVueDirective {
     VueDirective(VueDirective),
     VueVBindShorthandDirective(VueVBindShorthandDirective),
     VueVOnShorthandDirective(VueVOnShorthandDirective),
+    VueVSlotShorthandDirective(VueVSlotShorthandDirective),
 }
 impl AnyVueDirective {
     pub fn as_vue_bogus_directive(&self) -> Option<&VueBogusDirective> {
@@ -2106,6 +2157,12 @@ impl AnyVueDirective {
     pub fn as_vue_v_on_shorthand_directive(&self) -> Option<&VueVOnShorthandDirective> {
         match &self {
             Self::VueVOnShorthandDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_slot_shorthand_directive(&self) -> Option<&VueVSlotShorthandDirective> {
+        match &self {
+            Self::VueVSlotShorthandDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -4328,6 +4385,59 @@ impl From<VueVOnShorthandDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for VueVSlotShorthandDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_SLOT_SHORTHAND_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_SLOT_SHORTHAND_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVSlotShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVSlotShorthandDirective")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field("arg", &support::DebugSyntaxResult(self.arg()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVSlotShorthandDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVSlotShorthandDirective> for SyntaxNode {
+    fn from(n: VueVSlotShorthandDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVSlotShorthandDirective> for SyntaxElement {
+    fn from(n: VueVSlotShorthandDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl From<AstroBogusFrontmatter> for AnyAstroFrontmatterElement {
     fn from(node: AstroBogusFrontmatter) -> Self {
         Self::AstroBogusFrontmatter(node)
@@ -4982,12 +5092,18 @@ impl From<VueVOnShorthandDirective> for AnyVueDirective {
         Self::VueVOnShorthandDirective(node)
     }
 }
+impl From<VueVSlotShorthandDirective> for AnyVueDirective {
+    fn from(node: VueVSlotShorthandDirective) -> Self {
+        Self::VueVSlotShorthandDirective(node)
+    }
+}
 impl AstNode for AnyVueDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = VueBogusDirective::KIND_SET
         .union(VueDirective::KIND_SET)
         .union(VueVBindShorthandDirective::KIND_SET)
-        .union(VueVOnShorthandDirective::KIND_SET);
+        .union(VueVOnShorthandDirective::KIND_SET)
+        .union(VueVSlotShorthandDirective::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -4995,6 +5111,7 @@ impl AstNode for AnyVueDirective {
                 | VUE_DIRECTIVE
                 | VUE_V_BIND_SHORTHAND_DIRECTIVE
                 | VUE_V_ON_SHORTHAND_DIRECTIVE
+                | VUE_V_SLOT_SHORTHAND_DIRECTIVE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -5007,6 +5124,9 @@ impl AstNode for AnyVueDirective {
             VUE_V_ON_SHORTHAND_DIRECTIVE => {
                 Self::VueVOnShorthandDirective(VueVOnShorthandDirective { syntax })
             }
+            VUE_V_SLOT_SHORTHAND_DIRECTIVE => {
+                Self::VueVSlotShorthandDirective(VueVSlotShorthandDirective { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -5017,6 +5137,7 @@ impl AstNode for AnyVueDirective {
             Self::VueDirective(it) => it.syntax(),
             Self::VueVBindShorthandDirective(it) => it.syntax(),
             Self::VueVOnShorthandDirective(it) => it.syntax(),
+            Self::VueVSlotShorthandDirective(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -5025,6 +5146,7 @@ impl AstNode for AnyVueDirective {
             Self::VueDirective(it) => it.into_syntax(),
             Self::VueVBindShorthandDirective(it) => it.into_syntax(),
             Self::VueVOnShorthandDirective(it) => it.into_syntax(),
+            Self::VueVSlotShorthandDirective(it) => it.into_syntax(),
         }
     }
 }
@@ -5035,6 +5157,7 @@ impl std::fmt::Debug for AnyVueDirective {
             Self::VueDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::VueVBindShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::VueVOnShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVSlotShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -5045,6 +5168,7 @@ impl From<AnyVueDirective> for SyntaxNode {
             AnyVueDirective::VueDirective(it) => it.into_syntax(),
             AnyVueDirective::VueVBindShorthandDirective(it) => it.into_syntax(),
             AnyVueDirective::VueVOnShorthandDirective(it) => it.into_syntax(),
+            AnyVueDirective::VueVSlotShorthandDirective(it) => it.into_syntax(),
         }
     }
 }
@@ -5371,6 +5495,11 @@ impl std::fmt::Display for VueVBindShorthandDirective {
     }
 }
 impl std::fmt::Display for VueVOnShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVSlotShorthandDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
