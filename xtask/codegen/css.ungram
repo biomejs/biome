@@ -2045,6 +2045,11 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
 
+// https://drafts.csswg.org/css-values-5/#attr-notation
+// attr() = attr( <attr-name> <attr-type>? , <declaration-value>?)
+//
+// <attr-name> = [ <ident-token>? '|' ]? <ident-token>
+// <attr-type> = type( <syntax> ) | raw-string | number | <attr-unit>
 CssAttrFunction =
 	name: 'attr'
 	'('
@@ -2089,14 +2094,37 @@ CssTypeFunction =
 CssWildcard =
 	'*'
 
+// https://drafts.csswg.org/css-values-5/#typedef-syntax
+// <syntax> = '*' | <syntax-component> [ <syntax-combinator> <syntax-component> ]* | <syntax-string>
+// <syntax-component> = <syntax-single-component> <syntax-multiplier>?
+//                    | '<' transform-list '>'
+// <syntax-single-component> = '<' <syntax-type-name> '>' | <ident>
+// <syntax-type-name> = angle | color | custom-ident | image | integer
+//                    | length | length-percentage | number
+//                    | percentage | resolution | string | time
+//                    | url | transform-function
+// <syntax-combinator> = '|'
+// <syntax-multiplier> = [ '#' | '+' ]
+//
+// <syntax-string> = <string>
 AnyCssSyntax =
 	CssWildcard
 	| CssSyntaxComponentList
-	| CssSyntaxComponent
+	| AnyCssSyntaxComponent
 	| CssString
 	| CssBogusSyntax
 
-CssSyntaxComponentList = CssSyntaxComponent ('|' CssSyntaxComponent)*
+CssSyntaxComponentList = AnyCssSyntaxComponent ('|' AnyCssSyntaxComponent)*
+
+AnyCssSyntaxComponent =
+	CssSyntaxComponentWithoutMultiplier
+	| CssSyntaxComponent
+
+// <transform-list> is treated differently from other syntax components
+CssSyntaxComponentWithoutMultiplier =
+	'<'
+	type_name: 'ident'
+	'>'
 
 CssSyntaxComponent =
 	component: AnyCssSyntaxSingleComponent

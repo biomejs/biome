@@ -84,6 +84,7 @@ pub(crate) mod supports_condition;
 pub(crate) mod supports_in_parens;
 pub(crate) mod supports_or_combinable_condition;
 pub(crate) mod syntax;
+pub(crate) mod syntax_component;
 pub(crate) mod syntax_single_component;
 pub(crate) mod syntax_type_name;
 pub(crate) mod unicode_value;

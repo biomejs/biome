@@ -136,19 +136,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "plugin",
         "slot",
         "inline",
-        // Syntax keywords - https://drafts.csswg.org/css-values-5/#typedef-syntax
-        // "angle",
-        // "color",
-        // "custom-ident",
-        // "image",
-        // "integer",
-        // "length",
-        // "length-percentage",
-        // "percentage",
-        // "resolution",
-        // "string",
-        // "time",
-        // "transform-function",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -427,6 +414,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNKNOWN_SYNTAX_TYPE_NAME",
         "CSS_SYNTAX_COMPONENT_LIST",
         "CSS_SYNTAX_COMPONENT",
+        "CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER",
         "CSS_SYNTAX_MULTIPLIER",
         "CSS_WILDCARD",
         "CSS_RAW_STRING_DECLARATOR",

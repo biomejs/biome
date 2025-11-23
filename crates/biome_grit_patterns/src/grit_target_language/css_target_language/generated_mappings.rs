@@ -223,6 +223,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssSupportsNotCondition" => lang::CssSupportsNotCondition::KIND_SET.iter().next(),
         "CssSupportsOrCondition" => lang::CssSupportsOrCondition::KIND_SET.iter().next(),
         "CssSyntaxComponent" => lang::CssSyntaxComponent::KIND_SET.iter().next(),
+        "CssSyntaxComponentWithoutMultiplier" => {
+            lang::CssSyntaxComponentWithoutMultiplier::KIND_SET
+                .iter()
+                .next()
+        }
         "CssSyntaxMultiplier" => lang::CssSyntaxMultiplier::KIND_SET.iter().next(),
         "CssSyntaxType" => lang::CssSyntaxType::KIND_SET.iter().next(),
         "CssTypeFunction" => lang::CssTypeFunction::KIND_SET.iter().next(),

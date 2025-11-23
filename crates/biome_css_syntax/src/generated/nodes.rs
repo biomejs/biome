@@ -7310,6 +7310,51 @@ pub struct CssSyntaxComponentFields {
     pub multiplier: Option<CssSyntaxMultiplier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSyntaxComponentWithoutMultiplier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSyntaxComponentWithoutMultiplier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSyntaxComponentWithoutMultiplierFields {
+        CssSyntaxComponentWithoutMultiplierFields {
+            l_angle_token: self.l_angle_token(),
+            type_name_token: self.type_name_token(),
+            r_angle_token: self.r_angle_token(),
+        }
+    }
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn type_name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssSyntaxComponentWithoutMultiplier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSyntaxComponentWithoutMultiplierFields {
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub type_name_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssSyntaxMultiplier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -11400,13 +11445,19 @@ impl AnyCssSupportsOrCombinableCondition {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSyntax {
+    AnyCssSyntaxComponent(AnyCssSyntaxComponent),
     CssBogusSyntax(CssBogusSyntax),
     CssString(CssString),
-    CssSyntaxComponent(CssSyntaxComponent),
     CssSyntaxComponentList(CssSyntaxComponentList),
     CssWildcard(CssWildcard),
 }
 impl AnyCssSyntax {
+    pub fn as_any_css_syntax_component(&self) -> Option<&AnyCssSyntaxComponent> {
+        match &self {
+            Self::AnyCssSyntaxComponent(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_bogus_syntax(&self) -> Option<&CssBogusSyntax> {
         match &self {
             Self::CssBogusSyntax(item) => Some(item),
@@ -11419,12 +11470,6 @@ impl AnyCssSyntax {
             _ => None,
         }
     }
-    pub fn as_css_syntax_component(&self) -> Option<&CssSyntaxComponent> {
-        match &self {
-            Self::CssSyntaxComponent(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_syntax_component_list(&self) -> Option<&CssSyntaxComponentList> {
         match &self {
             Self::CssSyntaxComponentList(item) => Some(item),
@@ -11434,6 +11479,27 @@ impl AnyCssSyntax {
     pub fn as_css_wildcard(&self) -> Option<&CssWildcard> {
         match &self {
             Self::CssWildcard(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssSyntaxComponent {
+    CssSyntaxComponent(CssSyntaxComponent),
+    CssSyntaxComponentWithoutMultiplier(CssSyntaxComponentWithoutMultiplier),
+}
+impl AnyCssSyntaxComponent {
+    pub fn as_css_syntax_component(&self) -> Option<&CssSyntaxComponent> {
+        match &self {
+            Self::CssSyntaxComponent(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_syntax_component_without_multiplier(
+        &self,
+    ) -> Option<&CssSyntaxComponentWithoutMultiplier> {
+        match &self {
+            Self::CssSyntaxComponentWithoutMultiplier(item) => Some(item),
             _ => None,
         }
     }
@@ -20663,6 +20729,66 @@ impl From<CssSyntaxComponent> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssSyntaxComponentWithoutMultiplier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSyntaxComponentWithoutMultiplier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSyntaxComponentWithoutMultiplier")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "type_name_token",
+                    &support::DebugSyntaxResult(self.type_name_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSyntaxComponentWithoutMultiplier")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSyntaxComponentWithoutMultiplier> for SyntaxNode {
+    fn from(n: CssSyntaxComponentWithoutMultiplier) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSyntaxComponentWithoutMultiplier> for SyntaxElement {
+    fn from(n: CssSyntaxComponentWithoutMultiplier) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssSyntaxMultiplier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29475,11 +29601,6 @@ impl From<CssString> for AnyCssSyntax {
         Self::CssString(node)
     }
 }
-impl From<CssSyntaxComponent> for AnyCssSyntax {
-    fn from(node: CssSyntaxComponent) -> Self {
-        Self::CssSyntaxComponent(node)
-    }
-}
 impl From<CssSyntaxComponentList> for AnyCssSyntax {
     fn from(node: CssSyntaxComponentList) -> Self {
         Self::CssSyntaxComponentList(node)
@@ -29492,31 +29613,32 @@ impl From<CssWildcard> for AnyCssSyntax {
 }
 impl AstNode for AnyCssSyntax {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusSyntax::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssSyntaxComponent::KIND_SET
+        .union(CssBogusSyntax::KIND_SET)
         .union(CssString::KIND_SET)
-        .union(CssSyntaxComponent::KIND_SET)
         .union(CssSyntaxComponentList::KIND_SET)
         .union(CssWildcard::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_SYNTAX
-                | CSS_STRING
-                | CSS_SYNTAX_COMPONENT
-                | CSS_SYNTAX_COMPONENT_LIST
-                | CSS_WILDCARD
-        )
+        match kind {
+            CSS_BOGUS_SYNTAX | CSS_STRING | CSS_SYNTAX_COMPONENT_LIST | CSS_WILDCARD => true,
+            k if AnyCssSyntaxComponent::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_SYNTAX => Self::CssBogusSyntax(CssBogusSyntax { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
-            CSS_SYNTAX_COMPONENT => Self::CssSyntaxComponent(CssSyntaxComponent { syntax }),
             CSS_SYNTAX_COMPONENT_LIST => {
                 Self::CssSyntaxComponentList(CssSyntaxComponentList::cast(syntax)?)
             }
             CSS_WILDCARD => Self::CssWildcard(CssWildcard { syntax }),
-            _ => return None,
+            _ => {
+                if let Some(any_css_syntax_component) = AnyCssSyntaxComponent::cast(syntax) {
+                    return Some(Self::AnyCssSyntaxComponent(any_css_syntax_component));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -29524,27 +29646,27 @@ impl AstNode for AnyCssSyntax {
         match self {
             Self::CssBogusSyntax(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
-            Self::CssSyntaxComponent(it) => it.syntax(),
             Self::CssSyntaxComponentList(it) => it.syntax(),
             Self::CssWildcard(it) => it.syntax(),
+            Self::AnyCssSyntaxComponent(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusSyntax(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
-            Self::CssSyntaxComponent(it) => it.into_syntax(),
             Self::CssSyntaxComponentList(it) => it.into_syntax(),
             Self::CssWildcard(it) => it.into_syntax(),
+            Self::AnyCssSyntaxComponent(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssSyntax {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyCssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogusSyntax(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSyntaxComponentList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssWildcard(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -29553,9 +29675,9 @@ impl std::fmt::Debug for AnyCssSyntax {
 impl From<AnyCssSyntax> for SyntaxNode {
     fn from(n: AnyCssSyntax) -> Self {
         match n {
+            AnyCssSyntax::AnyCssSyntaxComponent(it) => it.into_syntax(),
             AnyCssSyntax::CssBogusSyntax(it) => it.into_syntax(),
             AnyCssSyntax::CssString(it) => it.into_syntax(),
-            AnyCssSyntax::CssSyntaxComponent(it) => it.into_syntax(),
             AnyCssSyntax::CssSyntaxComponentList(it) => it.into_syntax(),
             AnyCssSyntax::CssWildcard(it) => it.into_syntax(),
         }
@@ -29563,6 +29685,73 @@ impl From<AnyCssSyntax> for SyntaxNode {
 }
 impl From<AnyCssSyntax> for SyntaxElement {
     fn from(n: AnyCssSyntax) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssSyntaxComponent> for AnyCssSyntaxComponent {
+    fn from(node: CssSyntaxComponent) -> Self {
+        Self::CssSyntaxComponent(node)
+    }
+}
+impl From<CssSyntaxComponentWithoutMultiplier> for AnyCssSyntaxComponent {
+    fn from(node: CssSyntaxComponentWithoutMultiplier) -> Self {
+        Self::CssSyntaxComponentWithoutMultiplier(node)
+    }
+}
+impl AstNode for AnyCssSyntaxComponent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssSyntaxComponent::KIND_SET.union(CssSyntaxComponentWithoutMultiplier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_SYNTAX_COMPONENT | CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_SYNTAX_COMPONENT => Self::CssSyntaxComponent(CssSyntaxComponent { syntax }),
+            CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER => {
+                Self::CssSyntaxComponentWithoutMultiplier(CssSyntaxComponentWithoutMultiplier {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssSyntaxComponent(it) => it.syntax(),
+            Self::CssSyntaxComponentWithoutMultiplier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssSyntaxComponent(it) => it.into_syntax(),
+            Self::CssSyntaxComponentWithoutMultiplier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSyntaxComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSyntaxComponentWithoutMultiplier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssSyntaxComponent> for SyntaxNode {
+    fn from(n: AnyCssSyntaxComponent) -> Self {
+        match n {
+            AnyCssSyntaxComponent::CssSyntaxComponent(it) => it.into_syntax(),
+            AnyCssSyntaxComponent::CssSyntaxComponentWithoutMultiplier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssSyntaxComponent> for SyntaxElement {
+    fn from(n: AnyCssSyntaxComponent) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -31059,6 +31248,11 @@ impl std::fmt::Display for AnyCssSyntax {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssSyntaxComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssSyntaxSingleComponent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -31985,6 +32179,11 @@ impl std::fmt::Display for CssSupportsOrCondition {
     }
 }
 impl std::fmt::Display for CssSyntaxComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSyntaxComponentWithoutMultiplier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -36441,7 +36640,7 @@ impl Serialize for CssSyntaxComponentList {
 }
 impl AstSeparatedList for CssSyntaxComponentList {
     type Language = Language;
-    type Node = CssSyntaxComponent;
+    type Node = AnyCssSyntaxComponent;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -36456,15 +36655,15 @@ impl Debug for CssSyntaxComponentList {
     }
 }
 impl IntoIterator for CssSyntaxComponentList {
-    type Item = SyntaxResult<CssSyntaxComponent>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssSyntaxComponent>;
+    type Item = SyntaxResult<AnyCssSyntaxComponent>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssSyntaxComponent>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &CssSyntaxComponentList {
-    type Item = SyntaxResult<CssSyntaxComponent>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssSyntaxComponent>;
+    type Item = SyntaxResult<AnyCssSyntaxComponent>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssSyntaxComponent>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

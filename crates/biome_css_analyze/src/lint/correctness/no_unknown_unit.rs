@@ -91,18 +91,6 @@ impl Rule for NoUnknownUnit {
         let node = ctx.query();
 
         match node {
-            AnyCssUnit::AnyCssAttrUnit(unit) => match unit {
-                AnyCssAttrUnit::CssUnknownAttrUnit(unit) => {
-                    let unit_token = unit.unit_token().ok()?;
-                    let unit = unit_token.text_trimmed().to_string();
-
-                    Some(NoUnknownUnitState {
-                        unit,
-                        span: unit_token.text_trimmed_range(),
-                    })
-                }
-                _ => None,
-            },
             AnyCssUnit::AnyCssDimension(dimension) => {
                 match dimension {
                     AnyCssDimension::CssUnknownDimension(dimension) => {
@@ -193,6 +181,18 @@ impl Rule for NoUnknownUnit {
                     _ => None,
                 }
             }
+            AnyCssUnit::AnyCssAttrUnit(unit) => match unit {
+                AnyCssAttrUnit::CssUnknownAttrUnit(unit) => {
+                    let unit_token = unit.unit_token().ok()?;
+                    let unit = unit_token.text_trimmed().to_string();
+
+                    Some(NoUnknownUnitState {
+                        unit,
+                        span: unit_token.text_trimmed_range(),
+                    })
+                }
+                _ => None,
+            },
         }
     }
 

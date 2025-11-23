@@ -5143,6 +5143,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_SYNTAX_COMPONENT, children)
             }
+            CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER, children)
+            }
             CSS_SYNTAX_MULTIPLIER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -6463,7 +6496,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_SYNTAX_COMPONENT_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                CssSyntaxComponent::can_cast,
+                AnyCssSyntaxComponent::can_cast,
                 T ! [|],
                 false,
             ),

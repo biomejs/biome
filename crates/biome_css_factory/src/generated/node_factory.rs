@@ -2493,6 +2493,20 @@ impl CssSyntaxComponentBuilder {
         ))
     }
 }
+pub fn css_syntax_component_without_multiplier(
+    l_angle_token: SyntaxToken,
+    type_name_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> CssSyntaxComponentWithoutMultiplier {
+    CssSyntaxComponentWithoutMultiplier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(type_name_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn css_syntax_multiplier(multiplier_token: SyntaxToken) -> CssSyntaxMultiplier {
     CssSyntaxMultiplier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SYNTAX_MULTIPLIER,
@@ -3580,7 +3594,7 @@ where
 }
 pub fn css_syntax_component_list<I, S>(items: I, separators: S) -> CssSyntaxComponentList
 where
-    I: IntoIterator<Item = CssSyntaxComponent>,
+    I: IntoIterator<Item = AnyCssSyntaxComponent>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

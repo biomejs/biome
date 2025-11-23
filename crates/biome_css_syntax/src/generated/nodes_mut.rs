@@ -2915,6 +2915,26 @@ impl CssSyntaxComponent {
         ))
     }
 }
+impl CssSyntaxComponentWithoutMultiplier {
+    pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_type_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssSyntaxMultiplier {
     pub fn with_multiplier_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

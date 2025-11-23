@@ -35,6 +35,8 @@ const KNOWN_SYNTAX_TYPE_NAMES: [&str; 14] = [
     "transform-function",
 ];
 
+const SYNTAX_KIND_WITHOUT_MULTIPLIER: [&str; 1] = ["transform-list"];
+
 #[inline]
 pub(crate) fn is_at_type_function(p: &mut CssParser) -> bool {
     p.at(T![type]) && p.nth_at(1, T!['('])
@@ -76,8 +78,12 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_syntax_component(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
+
+    if is_at_syntax_type(p) && p.nth(1).to_string() == "transform-list" {
+        panic!("transform-list is not a valid syntax component");
+    }
 
     parse_any_syntax_single_component(p).ok();
     parse_syntax_multiplier(p).ok();
@@ -116,7 +122,7 @@ fn parse_syntax_multiplier(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_syntax_type(p: &mut CssParser) -> bool {
-    p.at(T![<]) // && is_nth_at_identifier(p, 1)
+    p.at(T![<])
 }
 
 #[inline]

@@ -763,6 +763,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssSyntaxComponent::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER => {
+                    let $pattern =
+                        unsafe { $crate::CssSyntaxComponentWithoutMultiplier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_SYNTAX_MULTIPLIER => {
                     let $pattern = unsafe { $crate::CssSyntaxMultiplier::new_unchecked(node) };
                     $body

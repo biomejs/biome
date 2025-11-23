@@ -48,4 +48,6 @@
 	--transform-function: attr(data-transform-function type(<transform-function>));
 
 	--unknown-type: attr(data-unknown-type type(<unknown>));
+
+	a: attr(data-test type(<transform-list>));
 }
