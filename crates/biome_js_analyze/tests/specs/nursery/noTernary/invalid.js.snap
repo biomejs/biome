@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo = isBar ? baz : qux;
+
+function quux() {
+	return foo ? bar() : baz();
+}
+
+
+```
+
+# Diagnostics
+```
+invalid.js:2:13 lint/nursery/noTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected ternary operator.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = isBar ? baz : qux;
+      │             ^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ function quux() {
+  
+  i Ternary operators can lead to unclear code. Use if-else statement instead.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected ternary operator.
+  
+    4 │ function quux() {
+  > 5 │ 	return foo ? bar() : baz();
+      │ 	       ^^^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Ternary operators can lead to unclear code. Use if-else statement instead.
+  
+
+```

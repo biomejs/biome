@@ -1871,10 +1871,20 @@ See https://biomejs.dev/linter/rules/no-duplicate-dependencies
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
 	/**
+	* Disallow JSX prop spreading the same identifier multiple times.
+See https://biomejs.dev/linter/rules/no-duplicated-spread-props 
+	 */
+	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
+	/**
 	* Disallow empty sources.
 See https://biomejs.dev/linter/rules/no-empty-source 
 	 */
 	noEmptySource?: NoEmptySourceConfiguration;
+	/**
+	* Require the use of === or !== for comparison with null.
+See https://biomejs.dev/linter/rules/no-equals-to-null 
+	 */
+	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
@@ -1901,10 +1911,20 @@ See https://biomejs.dev/linter/rules/no-jsx-literals
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Prevent problematic leaked values from being rendered.
+See https://biomejs.dev/linter/rules/no-leaked-render 
+	 */
+	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
+	/**
+	* Disallow creating multiline strings by escaping newlines.
+See https://biomejs.dev/linter/rules/no-multi-str 
+	 */
+	noMultiStr?: NoMultiStrConfiguration;
 	/**
 	* Prevent client components from being async functions.
 See https://biomejs.dev/linter/rules/no-next-async-client-component 
@@ -1930,6 +1950,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
+	* Disallow ternary operators.
+See https://biomejs.dev/linter/rules/no-ternary 
+	 */
+	noTernary?: NoTernaryConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
@@ -3537,9 +3562,15 @@ export type NoDeprecatedImportsConfiguration =
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
+export type NoDuplicatedSpreadPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicatedSpreadPropsOptions;
 export type NoEmptySourceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptySourceOptions;
+export type NoEqualsToNullConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEqualsToNullOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -3555,9 +3586,15 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoLeakedRenderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLeakedRenderOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoMultiStrConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMultiStrOptions;
 export type NoNextAsyncClientComponentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNextAsyncClientComponentOptions;
@@ -3573,6 +3610,9 @@ export type NoShadowConfiguration =
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
+export type NoTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTernaryOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -4914,9 +4954,18 @@ export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithNoDuplicatedSpreadPropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicatedSpreadPropsOptions;
+}
 export interface RuleWithNoEmptySourceOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptySourceOptions;
+}
+export interface RuleWithNoEqualsToNullOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoEqualsToNullOptions;
 }
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
@@ -4939,10 +4988,18 @@ export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
 }
+export interface RuleWithNoLeakedRenderOptions {
+	level: RulePlainConfiguration;
+	options?: NoLeakedRenderOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
+}
+export interface RuleWithNoMultiStrOptions {
+	level: RulePlainConfiguration;
+	options?: NoMultiStrOptions;
 }
 export interface RuleWithNoNextAsyncClientComponentOptions {
 	level: RulePlainConfiguration;
@@ -4965,6 +5022,10 @@ export interface RuleWithNoShadowOptions {
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
+}
+export interface RuleWithNoTernaryOptions {
+	level: RulePlainConfiguration;
+	options?: NoTernaryOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -6209,12 +6270,14 @@ export type UseYieldOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
+export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
 	 */
 	allowComments?: boolean;
 }
+export type NoEqualsToNullOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -6246,12 +6309,15 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
+export type NoTernaryOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -7069,19 +7135,24 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
+	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
