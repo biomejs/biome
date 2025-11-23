@@ -12,7 +12,6 @@ use biome_parser::{Parser, prelude::ParsedSyntax};
 use crate::parser::CssParser;
 use crate::syntax::is_at_identifier;
 use crate::syntax::is_at_string;
-use crate::syntax::is_nth_at_identifier;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::parse_string;
 use crate::syntax::value::parse_error::expected_syntax_component;
@@ -117,7 +116,7 @@ fn parse_syntax_multiplier(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_syntax_type(p: &mut CssParser) -> bool {
-    p.at(T![<]) && is_nth_at_identifier(p, 1)
+    p.at(T![<]) // && is_nth_at_identifier(p, 1)
 }
 
 #[inline]
@@ -137,7 +136,7 @@ fn parse_syntax_type(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_any_syntax_type_name(p: &mut CssParser) -> bool {
-    p.at(T![ident])
+    p.at(T![ident]) || p.cur().is_keyword()
 }
 
 #[inline]
@@ -154,7 +153,7 @@ fn parse_any_syntax_type_name(p: &mut CssParser) -> ParsedSyntax {
         CSS_UNKNOWN_SYNTAX_TYPE_NAME
     };
 
-    p.bump(T![ident]);
+    p.bump_remap(T![ident]);
 
     Present(m.complete(p, kind))
 }

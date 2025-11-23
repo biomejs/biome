@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{CssUrlFunction, CssUrlFunctionFields};
+use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssUrlFunction;

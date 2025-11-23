@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -33,6 +32,8 @@ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x
 a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
 @font-face { color: U+0100-024F; }
 a { unicode-range: U+0100-024F; }
+a { --test: attr(data-test unknown); }
+
 ```
 
 # Diagnostics
@@ -644,6 +645,29 @@ invalid.css:26:46 lint/correctness/noUnknownUnit ━━━━━━━━━━�
        │                                              ^^^
     27 │ @font-face { color: U+0100-024F; }
     28 │ a { unicode-range: U+0100-024F; }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known unit instead, such as:
+  
+  - px
+  - em
+  - rem
+  - etc.
+  
+
+```
+
+```
+invalid.css:29:28 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown unit: unknown
+  
+    27 │ @font-face { color: U+0100-024F; }
+    28 │ a { unicode-range: U+0100-024F; }
+  > 29 │ a { --test: attr(data-test unknown); }
+       │                            ^^^^^^^
+    30 │ 
   
   i See MDN web docs for more details.
   

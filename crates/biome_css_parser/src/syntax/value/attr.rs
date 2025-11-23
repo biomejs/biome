@@ -1,13 +1,11 @@
 use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
-use biome_parser::TokenSet;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::token_set;
 use biome_parser::{Parser, prelude::ParsedSyntax};
 
 use crate::parser::CssParser;
@@ -18,68 +16,6 @@ use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
-
-/// https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Values_and_units/Numeric_data_types#distance_units
-const CSS_DISTANCE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set![
-    // local font-relative units
-    T![cap],
-    T![ch],
-    T![em],
-    T![ex],
-    T![ic],
-    T![lh],
-    // root font-relative units
-    T![rcap],
-    T![rch],
-    T![rem],
-    T![rex],
-    T![ric],
-    T![rlh],
-    // viewport units
-    T![dvh],
-    T![dvw],
-    T![lvh],
-    T![lvw],
-    T![svh],
-    T![svw],
-    T![vb],
-    T![vh],
-    T![vi],
-    T![vmax],
-    T![vmin],
-    T![vw],
-    // container units
-    T![cqb],
-    T![cqh],
-    T![cqi],
-    T![cqmax],
-    T![cqmin],
-    T![cqw],
-    // absolute length units
-    T![cm],
-    T![in],
-    T![mm],
-    T![pc],
-    T![pt],
-    T![px],
-    T![q],
-    // angle units
-    T![deg],
-    T![grad],
-    T![rad],
-    T![turn],
-    // time units
-    T![ms],
-    T![s],
-    T![hz],
-    T![khz],
-    // flex units
-    T![fr],
-    // resolution units
-    T![dpcm],
-    T![dpi],
-    T![dppx],
-];
 
 #[inline]
 pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
@@ -98,9 +34,7 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T!['(']);
 
     AttrNameList.parse_list(p);
-    // todo: bogus for this
     parse_attr_type(p).ok();
-    // todo: bogus for this
     parse_attr_fallback_value(p).ok();
 
     p.expect(T![')']);
@@ -155,8 +89,8 @@ fn parse_any_attr_unit(p: &mut CssParser) -> ParsedSyntax {
 
     if p.at(T![%]) {
         let m = p.start();
-        p.bump(T![%]);
-        return Present(m.complete(p, CSS_PERCENTAGE));
+        p.bump_remap(T![ident]);
+        return Present(m.complete(p, CSS_REGULAR_ATTR_UNIT));
     }
 
     let m = p.start();

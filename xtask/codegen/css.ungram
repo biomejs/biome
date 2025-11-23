@@ -2061,12 +2061,8 @@ CssRawStringDeclarator =
 CssNumberDeclarator =
 	'number'
 
-CssPercentSign =
-	'%'
-
 AnyCssAttrUnit =
-	CssPercentSign
-	CssRegularAttrUnit
+	 CssRegularAttrUnit
 	| CssUnknownAttrUnit
 
 CssRegularAttrUnit =
