@@ -22,7 +22,40 @@ pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
     p.at(T![attr]) && p.nth_at(1, T!['('])
 }
 
-/// Parses an attribute function.
+/// Parses an attr function from the current position of the CSS parser.
+/// For more detailed information on the CSS attr function syntax, refer to the [CSS Values and
+/// Units Module](https://drafts.csswg.org/css-values-5/#typedef-attr-unit)
+///
+/// # Attr Function Syntax Examples
+///
+/// - Basic usage:
+///   ``` css
+///   attr(data-count)
+///   ```
+///   - With type:
+///   ``` css
+///   attr(data-width px)
+///   attr(data-size rem)
+///   attr(data-name raw-string)
+///   attr(id type(<custom-ident>))
+///   attr(data-count type(<number>))
+///   attr(data-size type(<length> | <percentage>))
+///   ```
+///   - With fallback value:
+///   ```css
+///   attr(data-count type(<number>), 0)
+///   attr(data-width px, inherit)
+///   attr(data-something, "default")
+///   ```
+///
+/// # Grammar
+///
+///  ``` txt
+///   attr() = attr( <attr-name> <attr-type>? , <declaration-value>?)
+///
+///   <attr-name> = [ <ident-token>? '|' ]? <ident-token>
+///   <attr-type> = type( <syntax> ) | raw-string | number | <attr-unit>
+/// ```
 #[inline]
 pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attr_function(p) {
@@ -47,6 +80,8 @@ fn is_at_attr_type(p: &mut CssParser) -> bool {
     p.at(T![raw_string]) || p.at(T![number]) || is_at_type_function(p) || is_at_attr_unit(p)
 }
 
+/// Parses an attr type
+/// type( <syntax> ) | raw-string | number | <attr-unit>
 #[inline]
 fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attr_type(p) {

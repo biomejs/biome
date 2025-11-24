@@ -50,4 +50,9 @@
 	--unknown-type: attr(data-unknown-type type(<unknown>));
 
 	a: attr(data-test type(<transform-list>));
+	p: attr(test type(rem));
+	p: attr(test raw-string);
+	p: attr(test number);
+	p: attr(test type(<percentage> | auto));
+	p: attr(test type(red | blue | green));
 }

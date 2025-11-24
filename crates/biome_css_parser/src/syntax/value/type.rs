@@ -42,6 +42,59 @@ pub(crate) fn is_at_type_function(p: &mut CssParser) -> bool {
     p.at(T![type]) && p.nth_at(1, T!['('])
 }
 
+/// Parses a type function from the current position of the CSS parser.
+/// For more detailed information on the CSS type function syntax, refer to the [CSS Values and
+/// Units Module](https://drafts.csswg.org/css-values-5/#typedef-syntax)
+///
+/// # Type Function Syntax Examples
+///
+/// - Single value:
+///   ``` css
+///   type(<color>)
+///   type(auto)
+///   ```
+/// - "|" combinator for multiple types:
+///   ``` css
+///   type(<length> | <percentage>)
+///   ```
+/// - Comma-separated list of values
+///   ```css
+///   type(<color>+)
+///   ```
+/// - Comma-separated list of values
+///   ```css
+///   type(<length>#)
+///   ```
+/// - Multiple keywords
+///   ```css
+///   type(red | blue | green)
+///   ```
+/// - Combination of data type and keyword
+///   ```css
+///   type(<percentage> | auto)
+///   ```
+/// - Universal syntax value
+///   ```css
+///   type(*)
+///   ```
+///
+/// # Grammar
+///
+/// ``` txt
+/// type( <syntax> )
+///
+/// <syntax> = '*' | <syntax-component> [ <syntax-combinator> <syntax-component> ]* | <syntax-string>
+/// <syntax-component> = <syntax-single-component> <syntax-multiplier>?
+///                    | '<' transform-list '>'
+/// <syntax-single-component> = '<' <syntax-type-name> '>' | <ident>
+/// <syntax-type-name> = angle | color | custom-ident | image | integer
+///                    | length | length-percentage | number
+///                    | percentage | resolution | string | time
+///                    | url | transform-function
+/// <syntax-combinator> = '|'
+/// <syntax-multiplier> = [ '#' | '+' ]
+///
+/// <syntax-string> = <string>
 #[inline]
 pub(crate) fn parse_type_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_type_function(p) {
@@ -66,26 +119,51 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
         return Present(m.complete(p, CSS_WILDCARD));
     }
 
-    if is_at_syntax_type(p) {
-        return Present(SyntaxComponentList.parse_list(p));
-    }
-
     if is_at_string(p) {
         return parse_string(p);
+    }
+
+    if is_at_syntax_single_component(p) {
+        return Present(SyntaxComponentList.parse_list(p));
     }
 
     Absent
 }
 
 #[inline]
-fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
+fn is_at_syntax_single_component(p: &mut CssParser) -> bool {
+    is_at_syntax_type(p) || is_at_identifier(p)
+}
 
-    if is_at_syntax_type(p) && p.nth(1).to_string() == "transform-list" {
-        panic!("transform-list is not a valid syntax component");
+#[inline]
+fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
+    let checkpoint = p.checkpoint();
+
+    // handle <transform-list> edge case
+    if is_at_syntax_type(p) {
+        let m = p.start();
+
+        p.bump(T![<]);
+
+        if SYNTAX_KIND_WITHOUT_MULTIPLIER.contains(&p.cur_text()) {
+            p.bump_remap(T![ident]);
+            p.bump(T![>]);
+
+            return Present(m.complete(p, CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER));
+        }
+
+        // no <transform-list> found, fallback to parsing CssSyntaxComponent
+        m.abandon(p);
+        p.rewind(checkpoint);
     }
 
-    parse_any_syntax_single_component(p).ok();
+    let m = p.start();
+
+    if parse_any_syntax_single_component(p).ok().is_none() {
+        m.abandon(p);
+        return Absent;
+    }
+
     parse_syntax_multiplier(p).ok();
 
     Present(m.complete(p, CSS_SYNTAX_COMPONENT))
@@ -184,7 +262,7 @@ impl ParseSeparatedList for SyntaxComponentList {
     const LIST_KIND: Self::Kind = CSS_SYNTAX_COMPONENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_syntax_component(p)
+        parse_any_syntax_component(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

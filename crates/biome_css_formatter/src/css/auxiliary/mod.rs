@@ -106,6 +106,7 @@ pub(crate) mod supports_feature_declaration;
 pub(crate) mod supports_not_condition;
 pub(crate) mod supports_or_condition;
 pub(crate) mod syntax_component;
+pub(crate) mod syntax_component_without_multiplier;
 pub(crate) mod syntax_multiplier;
 pub(crate) mod syntax_type;
 pub(crate) mod type_function;

@@ -5787,17 +5787,42 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsOrCondition {
         )
     }
 }
-impl FormatRule < biome_css_syntax :: CssSyntaxComponentWithMultiplier > for crate :: css :: auxiliary :: syntax_component_with_multiplier :: FormatCssSyntaxComponentWithMultiplier { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssSyntaxComponentWithMultiplier , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssSyntaxComponentWithMultiplier > :: fmt (self , node , f) } }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssSyntaxComponentWithMultiplier {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssSyntaxComponentWithMultiplier , crate :: css :: auxiliary :: syntax_component_with_multiplier :: FormatCssSyntaxComponentWithMultiplier > ;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: syntax_component_with_multiplier :: FormatCssSyntaxComponentWithMultiplier :: default ())
+impl FormatRule<biome_css_syntax::CssSyntaxComponent>
+    for crate::css::auxiliary::syntax_component::FormatCssSyntaxComponent
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSyntaxComponent,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSyntaxComponent>::fmt(self, node, f)
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSyntaxComponentWithMultiplier {
-    type Format = FormatOwnedWithRule < biome_css_syntax :: CssSyntaxComponentWithMultiplier , crate :: css :: auxiliary :: syntax_component_with_multiplier :: FormatCssSyntaxComponentWithMultiplier > ;
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSyntaxComponent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSyntaxComponent,
+        crate::css::auxiliary::syntax_component::FormatCssSyntaxComponent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::syntax_component::FormatCssSyntaxComponent::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSyntaxComponent {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSyntaxComponent,
+        crate::css::auxiliary::syntax_component::FormatCssSyntaxComponent,
+    >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: syntax_component_with_multiplier :: FormatCssSyntaxComponentWithMultiplier :: default ())
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::syntax_component::FormatCssSyntaxComponent::default(),
+        )
     }
 }
 impl FormatRule < biome_css_syntax :: CssSyntaxComponentWithoutMultiplier > for crate :: css :: auxiliary :: syntax_component_without_multiplier :: FormatCssSyntaxComponentWithoutMultiplier { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssSyntaxComponentWithoutMultiplier , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssSyntaxComponentWithoutMultiplier > :: fmt (self , node , f) } }

@@ -50,6 +50,10 @@ a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n  type(
 
 	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
 	), "test");
+
+	a: attr(data-width
+
+type(        <transform-list>   ));
 }
 
 ```
@@ -236,5 +240,7 @@ div {
 		),
 		"test"
 	);
+
+	a: attr(data-width type(<transform-list>));
 }
 ```

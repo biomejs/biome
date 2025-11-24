@@ -1,5 +1,5 @@
 use crate::{FormatCssSyntaxToken, prelude::*};
-use biome_css_syntax::{CssLanguage, CssSyntaxComponent, CssSyntaxComponentList};
+use biome_css_syntax::{AnyCssSyntaxComponent, CssLanguage, CssSyntaxComponentList};
 use biome_formatter::{trivia::FormatToken, write};
 use biome_rowan::AstSeparatedElement;
 
@@ -26,7 +26,7 @@ impl FormatRule<CssSyntaxComponentList> for FormatCssSyntaxComponentList {
 
 struct FormatSyntaxComponentItem {
     last: bool,
-    element: AstSeparatedElement<CssLanguage, CssSyntaxComponent>,
+    element: AstSeparatedElement<CssLanguage, AnyCssSyntaxComponent>,
 }
 
 impl Format<CssFormatContext> for FormatSyntaxComponentItem {

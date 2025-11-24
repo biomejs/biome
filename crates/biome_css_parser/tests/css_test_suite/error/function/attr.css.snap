@@ -6,7 +6,13 @@ expression: snapshot
 
 ```css
 div {
-	--custom-ident-type: attr(id type(<numberz> | <string>));
+	/* a: attr(data-width type(<transform-list>+)); */
+	/* a: attr(data-test )); */
+	/* a: attr(); */
+	/* a: attr(data-count; */
+	/* a: attr(data-count type(<string>); */
+	/* a: attr(data-count type(<string)); */
+	a: attr(data-count type(string>));
 }
 
 ```
@@ -36,73 +42,72 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@5..26 "--custom-ident-type" [Newline("\n"), Whitespace("\t")] [],
-                                },
-                                colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssAttrFunction {
-                                        name_token: ATTR_KW@28..32 "attr" [] [],
-                                        l_paren_token: L_PAREN@32..33 "(" [] [],
-                                        attr_name: CssAttrNameList [
-                                            CssIdentifier {
-                                                value_token: IDENT@33..36 "id" [] [Whitespace(" ")],
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@5..218 "a" [Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-width ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-test  ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(); */"), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@218..220 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    ATTR_KW@220..224 "attr" [] [],
+                                                    L_PAREN@224..225 "(" [] [],
+                                                    CssAttrNameList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@225..236 "data-count" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                    CssBogus {
+                                                        items: [
+                                                            TYPE_KW@236..240 "type" [] [],
+                                                            L_PAREN@240..241 "(" [] [],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssSyntaxComponent {
+                                                                        component: CssIdentifier {
+                                                                            value_token: IDENT@241..247 "string" [] [],
+                                                                        },
+                                                                        multiplier: missing (optional),
+                                                                    },
+                                                                    CssBogusSyntaxSingleComponent {
+                                                                        items: [
+                                                                            R_ANGLE@247..248 ">" [] [],
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            R_PAREN@248..249 ")" [] [],
+                                                        ],
+                                                    },
+                                                    R_PAREN@249..250 ")" [] [],
+                                                ],
                                             },
                                         ],
-                                        attr_type: CssTypeFunction {
-                                            name_token: TYPE_KW@36..40 "type" [] [],
-                                            l_paren_token: L_PAREN@40..41 "(" [] [],
-                                            ty: CssSyntaxComponentList [
-                                                CssSyntaxComponent {
-                                                    component: CssSyntaxType {
-                                                        l_angle_token: L_ANGLE@41..42 "<" [] [],
-                                                        type_name: CssIdentifier {
-                                                            value_token: IDENT@42..49 "numberz" [] [],
-                                                        },
-                                                        r_angle_token: R_ANGLE@49..51 ">" [] [Whitespace(" ")],
-                                                    },
-                                                    multiplier: missing (optional),
-                                                },
-                                                PIPE@51..53 "|" [] [Whitespace(" ")],
-                                                CssSyntaxComponent {
-                                                    component: CssSyntaxType {
-                                                        l_angle_token: L_ANGLE@53..54 "<" [] [],
-                                                        type_name: CssIdentifier {
-                                                            value_token: IDENT@54..60 "string" [] [],
-                                                        },
-                                                        r_angle_token: R_ANGLE@60..61 ">" [] [],
-                                                    },
-                                                    multiplier: missing (optional),
-                                                },
-                                            ],
-                                            r_paren_token: R_PAREN@61..62 ")" [] [],
-                                        },
-                                        fallback_value: missing (optional),
-                                        r_paren_token: R_PAREN@62..63 ")" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@63..64 ";" [] [],
+                        semicolon_token: SEMICOLON@250..251 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@64..66 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@251..253 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@66..67 "" [Newline("\n")] [],
+    eof_token: EOF@253..254 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..67
+0: CSS_ROOT@0..254
   0: (empty)
-  1: CSS_RULE_LIST@0..66
-    0: CSS_QUALIFIED_RULE@0..66
+  1: CSS_RULE_LIST@0..253
+    0: CSS_QUALIFIED_RULE@0..253
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPOUND_SELECTOR@0..4
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -111,62 +116,55 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_OR_RULE_BLOCK@4..66
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..253
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@5..64
-          0: CSS_DECLARATION_WITH_SEMICOLON@5..64
-            0: CSS_DECLARATION@5..63
-              0: CSS_GENERIC_PROPERTY@5..63
-                0: CSS_DASHED_IDENTIFIER@5..26
-                  0: IDENT@5..26 "--custom-ident-type" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@26..28 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..63
-                  0: CSS_ATTR_FUNCTION@28..63
-                    0: ATTR_KW@28..32 "attr" [] []
-                    1: L_PAREN@32..33 "(" [] []
-                    2: CSS_ATTR_NAME_LIST@33..36
-                      0: CSS_IDENTIFIER@33..36
-                        0: IDENT@33..36 "id" [] [Whitespace(" ")]
-                    3: CSS_TYPE_FUNCTION@36..62
-                      0: TYPE_KW@36..40 "type" [] []
-                      1: L_PAREN@40..41 "(" [] []
-                      2: CSS_SYNTAX_COMPONENT_LIST@41..61
-                        0: CSS_SYNTAX_COMPONENT@41..51
-                          0: CSS_SYNTAX_TYPE@41..51
-                            0: L_ANGLE@41..42 "<" [] []
-                            1: CSS_IDENTIFIER@42..49
-                              0: IDENT@42..49 "numberz" [] []
-                            2: R_ANGLE@49..51 ">" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@5..251
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..251
+            0: CSS_DECLARATION@5..250
+              0: CSS_BOGUS_PROPERTY@5..250
+                0: CSS_IDENTIFIER@5..218
+                  0: IDENT@5..218 "a" [Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-width ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-test  ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(); */"), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t"), Comments("/* a: attr(data-count ..."), Newline("\n"), Whitespace("\t")] []
+                1: COLON@218..220 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@220..250
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@220..250
+                    0: ATTR_KW@220..224 "attr" [] []
+                    1: L_PAREN@224..225 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@225..236
+                      0: CSS_IDENTIFIER@225..236
+                        0: IDENT@225..236 "data-count" [] [Whitespace(" ")]
+                    3: CSS_BOGUS@236..249
+                      0: TYPE_KW@236..240 "type" [] []
+                      1: L_PAREN@240..241 "(" [] []
+                      2: CSS_BOGUS@241..248
+                        0: CSS_SYNTAX_COMPONENT@241..247
+                          0: CSS_IDENTIFIER@241..247
+                            0: IDENT@241..247 "string" [] []
                           1: (empty)
-                        1: PIPE@51..53 "|" [] [Whitespace(" ")]
-                        2: CSS_SYNTAX_COMPONENT@53..61
-                          0: CSS_SYNTAX_TYPE@53..61
-                            0: L_ANGLE@53..54 "<" [] []
-                            1: CSS_IDENTIFIER@54..60
-                              0: IDENT@54..60 "string" [] []
-                            2: R_ANGLE@60..61 ">" [] []
-                          1: (empty)
-                      3: R_PAREN@61..62 ")" [] []
-                    4: (empty)
-                    5: R_PAREN@62..63 ")" [] []
+                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@247..248
+                          0: R_ANGLE@247..248 ">" [] []
+                      3: R_PAREN@248..249 ")" [] []
+                    4: R_PAREN@249..250 ")" [] []
               1: (empty)
-            1: SEMICOLON@63..64 ";" [] []
-        2: R_CURLY@64..66 "}" [Newline("\n")] []
-  2: EOF@66..67 "" [Newline("\n")] []
+            1: SEMICOLON@250..251 ";" [] []
+        2: R_CURLY@251..253 "}" [Newline("\n")] []
+  2: EOF@253..254 "" [Newline("\n")] []
 
 ```
 
 ## Diagnostics
 
 ```
-attr.css:2:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+attr.css:8:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected syntax type name. Epxected one of the following: number, angle, color, custom-ident, image, integer, length, length-percentage, percentage, resolution, string, time, transform-function
+  × expected `|` but instead found `>`
   
-    1 │ div {
-  > 2 │ 	--custom-ident-type: attr(id type(<numberz> | <string>));
-      │ 	                                   ^^^^^^^
-    3 │ }
-    4 │ 
+     6 │ 	/* a: attr(data-count type(<string>); */
+     7 │ 	/* a: attr(data-count type(<string)); */
+   > 8 │ 	a: attr(data-count type(string>));
+       │ 	                              ^
+     9 │ }
+    10 │ 
+  
+  i Remove >
   
 ```

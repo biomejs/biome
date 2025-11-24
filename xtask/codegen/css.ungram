@@ -2091,6 +2091,7 @@ CssTypeFunction =
 	type: AnyCssSyntax
 	')'
 
+// TODO: CssUniversalSyntax = '*'
 CssWildcard =
 	'*'
 
