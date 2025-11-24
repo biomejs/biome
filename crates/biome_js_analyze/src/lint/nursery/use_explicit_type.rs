@@ -1139,10 +1139,10 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
     }
 
     // Allow parenthesized expressions - check the inner expression recursively
-    if let AnyJsExpression::JsParenthesizedExpression(paren_expr) = expr {
-        if let Ok(inner_expr) = paren_expr.expression() {
-            return is_allowed_in_untyped_expression(&inner_expr, allow_placeholders);
-        }
+    if let AnyJsExpression::JsParenthesizedExpression(paren_expr) = expr
+        && let Ok(inner_expr) = paren_expr.expression()
+    {
+        return is_allowed_in_untyped_expression(&inner_expr, allow_placeholders);
     }
 
     // Allow new expressions (class instantiation) as they have inferrable types
@@ -1152,31 +1152,31 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
     }
 
     // Allow binary expressions with trivially inferrable operands (e.g., `1 + 1`, `2 * 3`)
-    if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr {
-        if is_trivial_binary_expression(binary_expr, allow_placeholders) {
-            return true;
-        }
+    if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr
+        && is_trivial_binary_expression(binary_expr, allow_placeholders)
+    {
+        return true;
     }
 
     // Allow logical expressions with trivially inferrable operands (e.g., `true && false`, `true || false`)
-    if let AnyJsExpression::JsLogicalExpression(logical_expr) = expr {
-        if is_trivial_logical_expression(logical_expr, allow_placeholders) {
-            return true;
-        }
+    if let AnyJsExpression::JsLogicalExpression(logical_expr) = expr
+        && is_trivial_logical_expression(logical_expr, allow_placeholders)
+    {
+        return true;
     }
 
     // Allow array expressions with trivially inferrable elements (e.g., `[1, 2, 3]`, `['a', 'b']`)
-    if let AnyJsExpression::JsArrayExpression(array_expr) = expr {
-        if is_trivial_array_expression(array_expr, allow_placeholders) {
-            return true;
-        }
+    if let AnyJsExpression::JsArrayExpression(array_expr) = expr
+        && is_trivial_array_expression(array_expr, allow_placeholders)
+    {
+        return true;
     }
 
     // Allow conditional expressions with trivially inferrable branches (e.g., `true ? 'yes' : 'no'`)
-    if let AnyJsExpression::JsConditionalExpression(conditional_expr) = expr {
-        if is_trivial_conditional_expression(conditional_expr, allow_placeholders) {
-            return true;
-        }
+    if let AnyJsExpression::JsConditionalExpression(conditional_expr) = expr
+        && is_trivial_conditional_expression(conditional_expr, allow_placeholders)
+    {
+        return true;
     }
 
     // Allow assignment of some trivial object literals.
