@@ -113,6 +113,22 @@ fn traverse_expression(root: &AnyJsExpression, except_parenthesis: bool) -> Opti
                     stack.push(right);
                 }
             }
+            AnyJsExpression::JsConditionalExpression(expression) => {
+                if let Ok(consequent) = expression.consequent() {
+                    stack.push(consequent);
+                }
+                if let Ok(alternate) = expression.alternate() {
+                    stack.push(alternate);
+                }
+            }
+            AnyJsExpression::JsLogicalExpression(expression) => {
+                if let Ok(left) = expression.left() {
+                    stack.push(left);
+                }
+                if let Ok(right) = expression.right() {
+                    stack.push(right);
+                }
+            }
             _ => {}
         }
     }
