@@ -1151,6 +1151,12 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
         return true;
     }
 
+    // Allow call expressions as they typically have inferrable return types
+    // e.g., `Math.random()`, `someFunction()`, `obj.method()`, `"hello".toUpperCase()`
+    if matches!(expr, AnyJsExpression::JsCallExpression(_)) {
+        return true;
+    }
+
     // Allow binary expressions with trivially inferrable operands (e.g., `1 + 1`, `2 * 3`)
     if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr
         && is_trivial_binary_expression(binary_expr, allow_placeholders)

@@ -265,5 +265,20 @@ const conditional = 5 > 3 ? 'greater' : 'less';
 const nestedConditional = true ? (false ? 'a' : 'b') : 'c';
 const mixedConditional = true ? 1 : 'string';
 
+// Call expressions (function/method calls) with inferrable return types
+const randomNumber = Math.random();
+const floor = Math.floor(4.7);
+const max = Math.max(1, 2, 3);
+const upper = "hello".toUpperCase();
+const lower = "WORLD".toLowerCase();
+const trimmed = "  test  ".trim();
+const mapped = [1, 2, 3].map(x => x * 2);
+const filtered = [1, 2, 3].filter(x => x > 1);
+const keys = Object.keys({a: 1, b: 2});
+const values = Object.values({a: 1, b: 2});
+const now = new Date().getTime();
+const isoString = new Date().toISOString();
+const chainedCall = "hello".toUpperCase().toLowerCase();
+
 
 ```
