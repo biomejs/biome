@@ -213,3 +213,15 @@ const booleanAnd = true && false;
 const booleanOr = true || false;
 const comparison = 5 > 3;
 const complexMath = 1 + 2 * 3 - 4 / 2;
+
+// Comparison expressions (always return boolean)
+const stringComparison = 'test' === 'test';
+const numberComparison = 42 !== 0;
+const strictEquality = 1 === 1;
+const strictInequality = 2 !== 3;
+const equality = 'a' == 'a';
+const inequality = 'b' != 'c';
+const greaterThan = 10 > 5;
+const lessThan = 3 < 7;
+const greaterOrEqual = 5 >= 5;
+const lessOrEqual = 4 <= 10;

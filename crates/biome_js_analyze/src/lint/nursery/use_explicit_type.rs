@@ -1013,6 +1013,8 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
 ///
 /// This returns true for binary expressions where both operands are literals or other
 /// trivially inferrable expressions (e.g., `1 + 1`, `2 * 3`, `"hello" + "world"`).
+/// It also returns true for comparison expressions (e.g., `'test' === 'test'`, `42 !== 0`),
+/// as they always return a boolean type.
 ///
 /// If `allow_placeholders` is false, excludes `null` and `undefined`.
 fn is_trivial_binary_expression(
@@ -1025,6 +1027,12 @@ fn is_trivial_binary_expression(
     let Ok(right) = binary_expr.right() else {
         return false;
     };
+
+    // Comparison operators always return boolean, which is trivially inferrable
+    if binary_expr.is_comparison_operator() {
+        return is_allowed_in_untyped_expression(&left, allow_placeholders)
+            && is_allowed_in_untyped_expression(&right, allow_placeholders);
+    }
 
     // Both operands must be trivially inferrable
     is_allowed_in_untyped_expression(&left, allow_placeholders)
