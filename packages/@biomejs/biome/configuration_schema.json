@@ -269,7 +269,7 @@
 					]
 				},
 				"useButtonType": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforces the usage and validity of the attribute type for the element button",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseButtonTypeConfiguration" },
 						{ "type": "null" }
