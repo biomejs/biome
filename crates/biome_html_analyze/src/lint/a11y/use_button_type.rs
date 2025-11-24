@@ -84,11 +84,11 @@ impl Rule for UseButtonType {
 
         let message = if state.missing_prop {
             (markup! {
-                "Provide an explicit "<Emphasis>"type"</Emphasis>" prop for the "<Emphasis>"button"</Emphasis>" element."
+                "Provide an explicit "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
             }).to_owned()
         } else {
             (markup!{
-                "Provide a valid "<Emphasis>"type"</Emphasis>" prop for the "<Emphasis>"button"</Emphasis>" element."
+                "Provide a valid "<Emphasis>"type"</Emphasis>" attribute for the "<Emphasis>"button"</Emphasis>" element."
             }).to_owned()
         };
 
