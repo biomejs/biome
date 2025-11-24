@@ -5,19 +5,19 @@ use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsArrayElement, AnyJsBinding, AnyJsExpression,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement,
-    AnyTsType, JsArrowFunctionExpression, JsArrayExpression, JsBinaryExpression, JsCallExpression,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
+    JsArrayExpression, JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression,
     JsConditionalExpression, JsConstructorClassMember, JsFileSource, JsFormalParameter,
     JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
     JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
     JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
     JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
     JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
-    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement,
-    TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
-    TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
-    TsMethodSignatureClassMember, TsMethodSignatureTypeMember, static_value::StaticValue,
+    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
+    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
+    TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
+    static_value::StaticValue,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
@@ -1068,15 +1068,12 @@ fn is_trivial_logical_expression(
 /// Spread elements make type inference more complex, so arrays with spreads return false.
 ///
 /// If `allow_placeholders` is false, excludes `null` and `undefined`.
-fn is_trivial_array_expression(
-    array_expr: &JsArrayExpression,
-    allow_placeholders: bool,
-) -> bool {
+fn is_trivial_array_expression(array_expr: &JsArrayExpression, allow_placeholders: bool) -> bool {
     array_expr.elements().iter().all(|element| {
         let Ok(element) = element else {
             return true;
         };
-        
+
         match element {
             AnyJsArrayElement::AnyJsExpression(expr) => {
                 is_allowed_in_untyped_expression(&expr, allow_placeholders)
