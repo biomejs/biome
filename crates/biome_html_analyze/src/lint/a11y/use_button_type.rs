@@ -7,12 +7,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
-    ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// Enforces the usage and validity of the attribute `type` for the element `button`
     ///
     /// ## Examples
     ///
@@ -20,6 +15,9 @@ declare_lint_rule! {
     ///
     /// ```html,expect_diagnostic
     /// <button>Do something</button>
+    /// ```
+    ///
+    /// ```html,expect_diagnostic
     /// <button type="incorrectType">Do something</button>
     /// ```
     ///
@@ -58,9 +56,9 @@ impl Rule for UseButtonType {
             return None;
         }
 
-        let type_attribue = element.find_attribute_by_name("type");
+        let type_attribute = element.find_attribute_by_name("type");
 
-        let Some(attribute) = type_attribue else {
+        let Some(attribute) = type_attribute else {
             return Some(UseButtonTypeState { missing_prop: true });
         };
 
