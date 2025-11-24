@@ -4202,6 +4202,7 @@
 		},
 		"NoReturnAssignOptions": {
 			"type": "object",
+			"properties": { "exceptParenthesis": { "type": ["boolean", "null"] } },
 			"additionalProperties": false
 		},
 		"NoSecretsConfiguration": {
@@ -5208,7 +5209,7 @@
 					]
 				},
 				"noReturnAssign": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-return-assign",
+					"description": "Disallow assignments in return statements.\nSee https://biomejs.dev/linter/rules/no-return-assign",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnAssignConfiguration" },
 						{ "type": "null" }

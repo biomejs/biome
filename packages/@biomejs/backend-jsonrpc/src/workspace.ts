@@ -1941,7 +1941,7 @@ See https://biomejs.dev/linter/rules/no-react-forward-ref
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow assignments in return statements.
 See https://biomejs.dev/linter/rules/no-return-assign 
 	 */
 	noReturnAssign?: NoReturnAssignConfiguration;
@@ -6327,7 +6327,9 @@ export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
-export type NoReturnAssignOptions = {};
+export interface NoReturnAssignOptions {
+	exceptParenthesis?: boolean;
+}
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
