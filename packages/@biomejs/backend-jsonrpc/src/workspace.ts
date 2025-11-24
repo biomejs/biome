@@ -1941,6 +1941,11 @@ See https://biomejs.dev/linter/rules/no-react-forward-ref
 	 */
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-return-assign 
+	 */
+	noReturnAssign?: NoReturnAssignConfiguration;
+	/**
 	* Disallow variable declarations from shadowing variables declared in the outer scope.
 See https://biomejs.dev/linter/rules/no-shadow 
 	 */
@@ -3604,6 +3609,9 @@ export type NoParametersOnlyUsedInRecursionConfiguration =
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
+export type NoReturnAssignConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnAssignOptions;
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
@@ -5015,6 +5023,10 @@ export interface RuleWithNoReactForwardRefOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactForwardRefOptions;
 }
+export interface RuleWithNoReturnAssignOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnAssignOptions;
+}
 export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
@@ -6315,6 +6327,7 @@ export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
+export type NoReturnAssignOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
@@ -7134,6 +7147,7 @@ export type Category =
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
@@ -7149,8 +7163,8 @@ export type Category =
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noShadow"
-	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"

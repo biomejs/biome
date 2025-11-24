@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+function f(a) {
+	return a == 1;
+}
+function f1(a) {
+	a = 1;
+	return a;
+}
+
+function f(a) {
+	return (a == 1);
+}
+
+function f(a, b, c) {
+	return (a == 1, b, c);
+}
+
+function f(a, b, c) {
+	return a == (b == c);
+}
