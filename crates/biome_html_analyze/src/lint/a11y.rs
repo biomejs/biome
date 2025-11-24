@@ -5,4 +5,5 @@
 use biome_analyze::declare_lint_group;
 pub mod no_access_key;
 pub mod no_header_scope;
-declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_header_scope :: NoHeaderScope ,] } }
+pub mod use_button_type;
+declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_header_scope :: NoHeaderScope , self :: use_button_type :: UseButtonType ,] } }
