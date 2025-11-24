@@ -4194,6 +4194,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoScriptUrlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoScriptUrlOptions" }
+			]
+		},
+		"NoScriptUrlOptions": { "type": "object", "additionalProperties": false },
 		"NoSecretsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7542,6 +7549,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoScriptUrlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoScriptUrlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSecretsOptions": {
 			"type": "object",
 			"properties": {
@@ -9716,6 +9732,13 @@
 					"description": "Disallow the use of global eval().\nSee https://biomejs.dev/linter/rules/no-global-eval",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoGlobalEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noScriptUrl": {
+					"description": "Disallow javascript: URLs.\nSee https://biomejs.dev/linter/rules/no-script-url",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
 						{ "type": "null" }
 					]
 				},

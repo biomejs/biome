@@ -2224,6 +2224,11 @@ See https://biomejs.dev/linter/rules/no-global-eval
 	 */
 	noGlobalEval?: NoGlobalEvalConfiguration;
 	/**
+	* Disallow javascript: URLs.
+See https://biomejs.dev/linter/rules/no-script-url 
+	 */
+	noScriptUrl?: NoScriptUrlConfiguration;
+	/**
 	* Disallow usage of sensitive data such as API keys and tokens.
 See https://biomejs.dev/linter/rules/no-secrets 
 	 */
@@ -3763,6 +3768,9 @@ export type NoDangerouslySetInnerHtmlWithChildrenConfiguration =
 export type NoGlobalEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoGlobalEvalOptions;
+export type NoScriptUrlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoScriptUrlOptions;
 export type NoSecretsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSecretsOptions;
@@ -5239,6 +5247,10 @@ export interface RuleWithNoGlobalEvalOptions {
 	level: RulePlainConfiguration;
 	options?: NoGlobalEvalOptions;
 }
+export interface RuleWithNoScriptUrlOptions {
+	level: RulePlainConfiguration;
+	options?: NoScriptUrlOptions;
+}
 export interface RuleWithNoSecretsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSecretsOptions;
@@ -6443,6 +6455,7 @@ export interface NoBlankTargetOptions {
 export type NoDangerouslySetInnerHtmlOptions = {};
 export type NoDangerouslySetInnerHtmlWithChildrenOptions = {};
 export type NoGlobalEvalOptions = {};
+export type NoScriptUrlOptions = {};
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
@@ -7213,6 +7226,7 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
+	| "lint/security/noScriptUrl"
 	| "lint/security/noSecrets"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"

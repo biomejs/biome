@@ -1,11 +1,11 @@
 use crate::react::ReactCreateElementCall;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs.
@@ -123,10 +123,14 @@ impl Rule for NoScriptUrl {
 
                                 // Check if it's a string literal with javascript:
                                 if let Some(string_literal) = value.as_any_js_literal_expression() {
-                                    if let Some(string_value) = string_literal.as_js_string_literal_expression() {
+                                    if let Some(string_value) =
+                                        string_literal.as_js_string_literal_expression()
+                                    {
                                         let text = string_value.inner_string_text().ok()?;
                                         if text.trim().to_lowercase().starts_with("javascript:") {
-                                            return Some(NoScriptUrlState::ReactProp(value.range()));
+                                            return Some(NoScriptUrlState::ReactProp(
+                                                value.range(),
+                                            ));
                                         }
                                     }
                                 }
