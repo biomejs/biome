@@ -242,3 +242,20 @@ const myError = new Error("message");
 const myPromise = new Promise((resolve) => resolve(1));
 const myArray = new Array(10);
 const myRegex = new RegExp("pattern");
+
+// Array expressions with trivially inferrable elements
+const numbers = [1, 2, 3, 4, 5];
+const strings = ['a', 'b', 'c'];
+const booleans = [true, false, true];
+const mixed = [1, 'text', true];
+const nested = [[1, 2], [3, 4]];
+const empty = [];
+const withHoles = [1, , 3];
+
+// Conditional expressions with trivially inferrable branches
+const string = true ? 'yes' : 'no';
+const number = false ? 1 : 0;
+const conditional = 5 > 3 ? 'greater' : 'less';
+const nestedConditional = true ? (false ? 'a' : 'b') : 'c';
+const mixedConditional = true ? 1 : 'string';
+

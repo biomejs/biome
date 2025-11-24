@@ -5,19 +5,19 @@ use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
-    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
-    JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression, JsConstructorClassMember,
-    JsFileSource, JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember,
-    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsObjectExpression, JsParameters,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsSyntaxKind,
-    JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
-    JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
-    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
-    TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
-    static_value::StaticValue,
+    AnyJsArrowFunctionParameters, AnyJsArrayElement, AnyJsBinding, AnyJsExpression,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement,
+    AnyTsType, JsArrowFunctionExpression, JsArrayExpression, JsBinaryExpression, JsCallExpression,
+    JsConditionalExpression, JsConstructorClassMember, JsFileSource, JsFormalParameter,
+    JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
+    JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
+    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement,
+    TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
+    TsMethodSignatureClassMember, TsMethodSignatureTypeMember, static_value::StaticValue,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
@@ -1061,6 +1061,57 @@ fn is_trivial_logical_expression(
         && is_allowed_in_untyped_expression(&right, allow_placeholders)
 }
 
+/// Checks if an array expression has trivially inferrable element types.
+///
+/// This returns true for array literals where all elements are literals or other
+/// trivially inferrable expressions (e.g., `[1, 2, 3]`, `['a', 'b', 'c']`).
+/// Spread elements make type inference more complex, so arrays with spreads return false.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_array_expression(
+    array_expr: &JsArrayExpression,
+    allow_placeholders: bool,
+) -> bool {
+    array_expr.elements().iter().all(|element| {
+        let Ok(element) = element else {
+            return true;
+        };
+        
+        match element {
+            AnyJsArrayElement::AnyJsExpression(expr) => {
+                is_allowed_in_untyped_expression(&expr, allow_placeholders)
+            }
+            // Spread elements make type inference more complex
+            AnyJsArrayElement::JsSpread(_) => false,
+            // Array holes are fine
+            AnyJsArrayElement::JsArrayHole(_) => true,
+        }
+    })
+}
+
+/// Checks if a conditional expression has trivially inferrable branches.
+///
+/// This returns true for ternary expressions where both branches are literals or other
+/// trivially inferrable expressions (e.g., `true ? 'yes' : 'no'`, `x > 5 ? 1 : 0`).
+/// TypeScript can infer a union type from the two branches.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_conditional_expression(
+    conditional_expr: &JsConditionalExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(consequent) = conditional_expr.consequent() else {
+        return false;
+    };
+    let Ok(alternate) = conditional_expr.alternate() else {
+        return false;
+    };
+
+    // Both branches must be trivially inferrable for TypeScript to infer a union type
+    is_allowed_in_untyped_expression(&consequent, allow_placeholders)
+        && is_allowed_in_untyped_expression(&alternate, allow_placeholders)
+}
+
 /// Checks if an expression can be part of an untyped expression or will be checked separately.
 ///
 /// This returns true for constructs that are trivially understood by the reader and the compiler
@@ -1090,6 +1141,13 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
         return true;
     }
 
+    // Allow parenthesized expressions - check the inner expression recursively
+    if let AnyJsExpression::JsParenthesizedExpression(paren_expr) = expr {
+        if let Ok(inner_expr) = paren_expr.expression() {
+            return is_allowed_in_untyped_expression(&inner_expr, allow_placeholders);
+        }
+    }
+
     // Allow new expressions (class instantiation) as they have inferrable types
     // e.g., `const foo = new Foo();`, `const date = new Date();`
     if matches!(expr, AnyJsExpression::JsNewExpression(_)) {
@@ -1106,6 +1164,20 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
     // Allow logical expressions with trivially inferrable operands (e.g., `true && false`, `true || false`)
     if let AnyJsExpression::JsLogicalExpression(logical_expr) = expr {
         if is_trivial_logical_expression(logical_expr, allow_placeholders) {
+            return true;
+        }
+    }
+
+    // Allow array expressions with trivially inferrable elements (e.g., `[1, 2, 3]`, `['a', 'b']`)
+    if let AnyJsExpression::JsArrayExpression(array_expr) = expr {
+        if is_trivial_array_expression(array_expr, allow_placeholders) {
+            return true;
+        }
+    }
+
+    // Allow conditional expressions with trivially inferrable branches (e.g., `true ? 'yes' : 'no'`)
+    if let AnyJsExpression::JsConditionalExpression(conditional_expr) = expr {
+        if is_trivial_conditional_expression(conditional_expr, allow_placeholders) {
             return true;
         }
     }
