@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs.
@@ -49,7 +50,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::Eslint("no-script-url").same()],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Error,
     }
 }
 
@@ -94,12 +95,15 @@ impl Rule for NoScriptUrl {
 
                 // Check if the value contains javascript:
                 let static_value = jsx_attribute.as_static_value()?;
-                if let Some(const_str) = static_value.as_string_constant() {
-                    if const_str.trim().to_lowercase().starts_with("javascript:") {
-                        return Some(NoScriptUrlState::JsxAttribute(
-                            jsx_attribute.initializer()?.range(),
-                        ));
-                    }
+                if let Some(const_str) = static_value.as_string_constant()
+                    && const_str
+                        .trim()
+                        .to_lowercase_cow()
+                        .starts_with("javascript:")
+                {
+                    return Some(NoScriptUrlState::JsxAttribute(
+                        jsx_attribute.initializer()?.range(),
+                    ));
                 }
             }
             AnyJsElementWithHref::JsCallExpression(call_expression) => {
@@ -122,16 +126,17 @@ impl Rule for NoScriptUrl {
                                 let value = property_member.value().ok()?;
 
                                 // Check if it's a string literal with javascript:
-                                if let Some(string_literal) = value.as_any_js_literal_expression() {
-                                    if let Some(string_value) =
+                                if let Some(string_literal) = value.as_any_js_literal_expression()
+                                    && let Some(string_value) =
                                         string_literal.as_js_string_literal_expression()
+                                {
+                                    let text = string_value.inner_string_text().ok()?;
+                                    if text
+                                        .trim()
+                                        .to_lowercase_cow()
+                                        .starts_with("javascript:")
                                     {
-                                        let text = string_value.inner_string_text().ok()?;
-                                        if text.trim().to_lowercase().starts_with("javascript:") {
-                                            return Some(NoScriptUrlState::ReactProp(
-                                                value.range(),
-                                            ));
-                                        }
+                                        return Some(NoScriptUrlState::ReactProp(value.range()));
                                     }
                                 }
                             }
