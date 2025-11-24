@@ -268,3 +268,13 @@ const keys = Object.keys({a: 1, b: 2});
 const values = Object.values({a: 1, b: 2});
 const now = new Date().getTime();
 
+// Function parameters with trivially inferrable default values
+const greetings = (word = 'hello'): string => { return `${word} world`; };
+const add = (a = 0, b = 0): number => a + b;
+const multiply = (x = 1, y = 1): number => x * y;
+const isActive = (active = true): boolean => active;
+const getUser = (name = 'Guest', age = 18): string => `${name} is ${age}`;
+function processValue(value = 42): number { return value * 2; }
+function greet(message = 'Hello'): void { console.log(message); }
+const calculate = (num = 100): number => num + 10;
+

@@ -1253,6 +1253,17 @@ fn parameter_has_not_type(parameter: &JsFormalParameter) -> Option<State> {
             None
         }
     } else {
+        // If parameter has an initializer with a trivially inferrable type, allow it
+        if let Some(initializer) = parameter.initializer() {
+            if let Ok(expr) = initializer.expression() {
+                let expr = expr.omit_parentheses();
+                // For parameters, we're strict about placeholders (null/undefined)
+                if is_allowed_in_untyped_expression(&expr, false) {
+                    return None;
+                }
+            }
+        }
+        
         Some((parameter.range(), ViolationKind::UntypedParameter))
     }
 }
