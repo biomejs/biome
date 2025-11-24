@@ -225,3 +225,20 @@ const greaterThan = 10 > 5;
 const lessThan = 3 < 7;
 const greaterOrEqual = 5 >= 5;
 const lessOrEqual = 4 <= 10;
+
+// Class instantiation (new expressions)
+class Vehicle {}
+const myVehicle = new Vehicle();
+
+class Product {
+	constructor(public value: number) {}
+}
+const myProduct = new Product(42);
+
+const myDate = new Date();
+const myMap = new Map();
+const mySet = new Set();
+const myError = new Error("message");
+const myPromise = new Promise((resolve) => resolve(1));
+const myArray = new Array(10);
+const myRegex = new RegExp("pattern");

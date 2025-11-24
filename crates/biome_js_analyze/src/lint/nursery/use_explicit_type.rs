@@ -1090,6 +1090,12 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
         return true;
     }
 
+    // Allow new expressions (class instantiation) as they have inferrable types
+    // e.g., `const foo = new Foo();`, `const date = new Date();`
+    if matches!(expr, AnyJsExpression::JsNewExpression(_)) {
+        return true;
+    }
+
     // Allow binary expressions with trivially inferrable operands (e.g., `1 + 1`, `2 * 3`)
     if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr {
         if is_trivial_binary_expression(binary_expr, allow_placeholders) {
