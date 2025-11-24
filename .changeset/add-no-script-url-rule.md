@@ -18,4 +18,3 @@ React.createElement('a', { href: 'javascript:void(0)' });
 <a href="#section">Click me</a>
 ```
 
-Contributed by @romano
