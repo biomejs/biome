@@ -13,3 +13,7 @@ function f() {var x=1; return{x}} class Foo {}
 ```block
 function f() {var x=1; return{x}} class Foo {}
 ```
+
+```block
+The content was not fixed because the path `mock.cc` is ignored.
+```
