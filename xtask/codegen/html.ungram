@@ -329,6 +329,7 @@ AnyVueDirective =
 	VueDirective
 	| VueVBindShorthandDirective
 	| VueVOnShorthandDirective
+	| VueVSlotShorthandDirective
 	| VueBogusDirective
 
 // <div v-bind:href="url" />
@@ -356,6 +357,14 @@ VueVBindShorthandDirective =
 //      ^^^^^^^^^^^^^^^^
 VueVOnShorthandDirective =
 	'@'
+	arg: AnyVueDirectiveArgument
+	modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+// <template #foo>
+//           ^^^^
+VueVSlotShorthandDirective =
+	'#'
 	arg: AnyVueDirectiveArgument
 	modifiers: VueModifierList
 	initializer: HtmlAttributeInitializerClause?
