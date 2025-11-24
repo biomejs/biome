@@ -1498,6 +1498,38 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVOnShorthandDirecti
         FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_on_shorthand_directive :: FormatVueVOnShorthandDirective :: default ())
     }
 }
+impl FormatRule<biome_html_syntax::VueVSlotShorthandDirective>
+    for crate::vue::auxiliary::v_slot_shorthand_directive::FormatVueVSlotShorthandDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVSlotShorthandDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVSlotShorthandDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVSlotShorthandDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVSlotShorthandDirective,
+        crate::vue::auxiliary::v_slot_shorthand_directive::FormatVueVSlotShorthandDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: vue :: auxiliary :: v_slot_shorthand_directive :: FormatVueVSlotShorthandDirective :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVSlotShorthandDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVSlotShorthandDirective,
+        crate::vue::auxiliary::v_slot_shorthand_directive::FormatVueVSlotShorthandDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_slot_shorthand_directive :: FormatVueVSlotShorthandDirective :: default ())
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeList {
     type Format<'a> = FormatRefWithRule<
         'a,

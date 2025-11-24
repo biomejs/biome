@@ -141,6 +141,7 @@ impl<'src> HtmlLexer<'src> {
             b'.' => self.consume_byte(T![.]),
             b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
+            b'#' => self.consume_byte(T![#]),
 
             b'\'' | b'"' => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {

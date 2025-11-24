@@ -348,10 +348,12 @@ HtmlRoot {
                                     value_token: HTML_LITERAL@593..602 "template" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
-                                    HtmlAttribute {
-                                        name: HtmlAttributeName {
-                                            value_token: HTML_LITERAL@602..610 "#default" [] [],
+                                    VueVSlotShorthandDirective {
+                                        hash_token: HASH@602..603 "#" [] [],
+                                        arg: VueStaticArgument {
+                                            name_token: HTML_LITERAL@603..610 "default" [] [],
                                         },
+                                        modifiers: VueModifierList [],
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@610..611 "=" [] [],
                                             value: HtmlString {
@@ -407,10 +409,12 @@ HtmlRoot {
                                     value_token: HTML_LITERAL@675..684 "template" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
-                                    HtmlAttribute {
-                                        name: HtmlAttributeName {
-                                            value_token: HTML_LITERAL@684..691 "#footer" [] [],
+                                    VueVSlotShorthandDirective {
+                                        hash_token: HASH@684..685 "#" [] [],
+                                        arg: VueStaticArgument {
+                                            name_token: HTML_LITERAL@685..691 "footer" [] [],
                                         },
+                                        modifiers: VueModifierList [],
                                         initializer: missing (optional),
                                     },
                                 ],
@@ -711,10 +715,12 @@ HtmlRoot {
                 1: HTML_TAG_NAME@593..602
                   0: HTML_LITERAL@593..602 "template" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@602..625
-                  0: HTML_ATTRIBUTE@602..625
-                    0: HTML_ATTRIBUTE_NAME@602..610
-                      0: HTML_LITERAL@602..610 "#default" [] []
-                    1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@610..625
+                  0: VUE_V_SLOT_SHORTHAND_DIRECTIVE@602..625
+                    0: HASH@602..603 "#" [] []
+                    1: VUE_STATIC_ARGUMENT@603..610
+                      0: HTML_LITERAL@603..610 "default" [] []
+                    2: VUE_MODIFIER_LIST@610..610
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@610..625
                       0: EQ@610..611 "=" [] []
                       1: HTML_STRING@611..625
                         0: HTML_STRING_LITERAL@611..625 "\"{ slotProp }\"" [] []
@@ -751,10 +757,12 @@ HtmlRoot {
                 1: HTML_TAG_NAME@675..684
                   0: HTML_LITERAL@675..684 "template" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@684..691
-                  0: HTML_ATTRIBUTE@684..691
-                    0: HTML_ATTRIBUTE_NAME@684..691
-                      0: HTML_LITERAL@684..691 "#footer" [] []
-                    1: (empty)
+                  0: VUE_V_SLOT_SHORTHAND_DIRECTIVE@684..691
+                    0: HASH@684..685 "#" [] []
+                    1: VUE_STATIC_ARGUMENT@685..691
+                      0: HTML_LITERAL@685..691 "footer" [] []
+                    2: VUE_MODIFIER_LIST@691..691
+                    3: (empty)
                 3: R_ANGLE@691..692 ">" [] []
               1: HTML_ELEMENT_LIST@692..738
                 0: HTML_ELEMENT@692..738
