@@ -20,7 +20,7 @@ expression: invalid.html
 ```
 invalid.html:2:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide an explicit type prop for the button element.
+  × Provide an explicit type attribute for the button element.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <button>Do something</button>
@@ -38,7 +38,7 @@ invalid.html:2:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <button>Do something</button>
@@ -57,7 +57,7 @@ invalid.html:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:4:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
     2 │ <button>Do something</button>
     3 │ <button type="incorrectType">Do something</button>
@@ -76,7 +76,7 @@ invalid.html:4:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
     3 │ <button type="incorrectType">Do something</button>
     4 │ <button type>Do something</button>
@@ -95,7 +95,7 @@ invalid.html:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:6:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide an explicit type prop for the button element.
+  × Provide an explicit type attribute for the button element.
   
     4 │ <button type>Do something</button>
     5 │ <button type="">Do something</button>
@@ -114,7 +114,7 @@ invalid.html:6:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
     5 │ <button type="">Do something</button>
     6 │ <button />
@@ -133,7 +133,7 @@ invalid.html:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:8:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
      6 │ <button />
      7 │ <button type="incorrectType" />
@@ -152,7 +152,7 @@ invalid.html:8:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 invalid.html:9:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a valid type prop for the button element.
+  × Provide a valid type attribute for the button element.
   
      7 │ <button type="incorrectType" />
      8 │ <button type />
