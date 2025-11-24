@@ -13,3 +13,7 @@ function f() {return{}}
 ```block
 function f() {return{}}
 ```
+
+```block
+The content was not formatted because the path `mock.cc` is ignored.
+```
