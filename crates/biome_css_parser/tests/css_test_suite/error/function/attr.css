@@ -1,9 +1,9 @@
 div {
-	/* a: attr(data-width type(<transform-list>+)); */
-	/* a: attr(data-test )); */
-	/* a: attr(); */
-	/* a: attr(data-count; */
-	/* a: attr(data-count type(<string>); */
-	/* a: attr(data-count type(<string)); */
+	a: attr(data-width type(<transform-list>+));
+	a: attr(data-test ));
+	a: attr();
+	a: attr(data-count;
+	a: attr(data-count type(<string>);
+	a: attr(data-count type(<string));
 	a: attr(data-count type(string>));
 }

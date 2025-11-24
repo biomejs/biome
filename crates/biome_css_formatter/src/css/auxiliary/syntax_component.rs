@@ -4,6 +4,7 @@ use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssSyntaxComponent;
+
 impl FormatNodeRule<CssSyntaxComponent> for FormatCssSyntaxComponent {
     fn fmt_fields(&self, node: &CssSyntaxComponent, f: &mut CssFormatter) -> FormatResult<()> {
         let CssSyntaxComponentFields {

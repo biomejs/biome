@@ -1,7 +1,6 @@
+use crate::prelude::*;
 use biome_css_syntax::{CssNumberDeclarator, CssNumberDeclaratorFields};
 use biome_formatter::write;
-
-use crate::prelude::*;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssNumberDeclarator;

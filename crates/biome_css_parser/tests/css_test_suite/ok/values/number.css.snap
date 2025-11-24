@@ -71,8 +71,7 @@ a {
 	a: 10;
 	a: 9700;
 	a: 10e100;
-	/* TODO: */
-	/* height: attr(data-size em, .01, 100); */
+	height: attr(data-size em, .01, 100);
 }
 
 ```
@@ -1069,22 +1068,63 @@ CssRoot {
                         },
                         semicolon_token: SEMICOLON@675..676 ";" [] [],
                     },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@676..684 "height" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@684..686 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@686..690 "attr" [] [],
+                                        l_paren_token: L_PAREN@690..691 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@691..701 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@701..703 "em" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@703..705 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@705..708 ".01" [] [],
+                                                },
+                                                CssGenericDelimiter {
+                                                    value: COMMA@708..710 "," [] [Whitespace(" ")],
+                                                },
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@710..713 "100" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@713..714 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@714..715 ";" [] [],
+                    },
                 ],
-                r_curly_token: R_CURLY@676..736 "}" [Newline("\n"), Whitespace("\t"), Comments("/* TODO: */"), Newline("\n"), Whitespace("\t"), Comments("/* height: attr(data- ..."), Newline("\n")] [],
+                r_curly_token: R_CURLY@715..717 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@736..737 "" [Newline("\n")] [],
+    eof_token: EOF@717..718 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..737
+0: CSS_ROOT@0..718
   0: (empty)
-  1: CSS_RULE_LIST@0..736
-    0: CSS_QUALIFIED_RULE@0..736
+  1: CSS_RULE_LIST@0..717
+    0: CSS_QUALIFIED_RULE@0..717
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -1093,9 +1133,9 @@ CssRoot {
             1: CSS_IDENTIFIER@0..2
               0: IDENT@0..2 "a" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@2..2
-      1: CSS_DECLARATION_OR_RULE_BLOCK@2..736
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..717
         0: L_CURLY@2..3 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@3..676
+        1: CSS_DECLARATION_OR_RULE_LIST@3..715
           0: CSS_DECLARATION_WITH_SEMICOLON@3..10
             0: CSS_DECLARATION@3..9
               0: CSS_GENERIC_PROPERTY@3..9
@@ -1723,7 +1763,34 @@ CssRoot {
                     0: CSS_NUMBER_LITERAL@669..675 "10e100" [] []
               1: (empty)
             1: SEMICOLON@675..676 ";" [] []
-        2: R_CURLY@676..736 "}" [Newline("\n"), Whitespace("\t"), Comments("/* TODO: */"), Newline("\n"), Whitespace("\t"), Comments("/* height: attr(data- ..."), Newline("\n")] []
-  2: EOF@736..737 "" [Newline("\n")] []
+          57: CSS_DECLARATION_WITH_SEMICOLON@676..715
+            0: CSS_DECLARATION@676..714
+              0: CSS_GENERIC_PROPERTY@676..714
+                0: CSS_IDENTIFIER@676..684
+                  0: IDENT@676..684 "height" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@684..686 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@686..714
+                  0: CSS_ATTR_FUNCTION@686..714
+                    0: ATTR_KW@686..690 "attr" [] []
+                    1: L_PAREN@690..691 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@691..701
+                      0: CSS_IDENTIFIER@691..701
+                        0: IDENT@691..701 "data-size" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@701..703
+                      0: IDENT@701..703 "em" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@703..713
+                      0: COMMA@703..705 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@705..713
+                        0: CSS_NUMBER@705..708
+                          0: CSS_NUMBER_LITERAL@705..708 ".01" [] []
+                        1: CSS_GENERIC_DELIMITER@708..710
+                          0: COMMA@708..710 "," [] [Whitespace(" ")]
+                        2: CSS_NUMBER@710..713
+                          0: CSS_NUMBER_LITERAL@710..713 "100" [] []
+                    5: R_PAREN@713..714 ")" [] []
+              1: (empty)
+            1: SEMICOLON@714..715 ";" [] []
+        2: R_CURLY@715..717 "}" [Newline("\n")] []
+  2: EOF@717..718 "" [Newline("\n")] []
 
 ```
