@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::{document::Document, *};
 use crate::Watcher;
-use crate::configuration::{LoadedConfiguration, read_config};
+use crate::configuration::{LoadedConfiguration, load_nested_configuration};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
@@ -2226,13 +2226,11 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
 
         for filtered_path in filtered_paths {
-            let config = read_config(
+            let loaded_nested_configuration = load_nested_configuration(
                 self.fs.as_ref(),
+                &project_path,
                 ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
-                false,
             )?;
-            let loaded_nested_configuration =
-                LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
             let LoadedConfiguration {
                 directory_path: nested_directory_path,

@@ -158,7 +158,17 @@ pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = read_config(fs, config_path, true)?;
+    let config = read_config(fs, None, config_path)?;
+    LoadedConfiguration::try_from_payload(config, fs)
+}
+
+#[instrument(level = "debug", skip(fs))]
+pub fn load_nested_configuration(
+    fs: &dyn FsWithResolverProxy,
+    project_path: &Utf8Path,
+    config_path: ConfigurationPathHint,
+) -> Result<LoadedConfiguration, WorkspaceError> {
+    let config = read_config(fs, Some(project_path), config_path)?;
     LoadedConfiguration::try_from_payload(config, fs)
 }
 
@@ -170,6 +180,11 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// Loads the configuration from the file system.
 ///
 /// The configuration file will be read from the `fs`.
+///
+/// No configuration will be read at or above the project_path. If a project path is
+/// provided, we will find any nested configuration file, root or not. If a project
+/// path is NOT provided, we will find only root configuration files, searching up
+/// to the root of the filesystem.
 ///
 /// A [`path_hint`](ConfigurationPathHint) should be provided.
 ///
@@ -188,14 +203,11 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 ///     but return an `Ok(None)`, which means Biome will use the default
 ///     configuration.
 ///
-/// If `seek_root` is `true`, the function will stop at the first
-/// configuration file with `"root": true`. Otherwise, any configuration file
-/// will do.
 #[instrument(level = "debug", skip(fs))]
-pub fn read_config(
+fn read_config(
     fs: &dyn FileSystem,
+    project_path: Option<&Utf8Path>,
     path_hint: ConfigurationPathHint,
-    seek_root: bool,
 ) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match &path_hint {
@@ -223,6 +235,15 @@ pub fn read_config(
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
     let mut deserialized = None;
     let mut predicate = |file_path: &Utf8Path, content: &str| -> ControlFlow<(), bool> {
+        if file_path
+            .parent()
+            .zip(project_path)
+            .is_some_and(|(parent, project)| project.starts_with(parent))
+        {
+            // Do not walk up higher than the project root,
+            // and also do not return the project root config
+            return ControlFlow::Break(());
+        }
         let parser_options = match file_path.extension() {
             Some("json") => JsonParserOptions::default(),
             _ => JsonParserOptions::default()
@@ -235,7 +256,13 @@ pub fn read_config(
         let is_found = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| if seek_root { config.is_root() } else { true });
+            .is_some_and(|config| {
+                if project_path.is_none() {
+                    config.is_root()
+                } else {
+                    true
+                }
+            });
         if is_found {
             deserialized = Some(deserialized_content);
         }
@@ -623,12 +650,15 @@ impl ConfigurationExt for Configuration {
 
 #[cfg(test)]
 mod test {
-    use crate::{WorkspaceError, configuration::load_configuration};
+    use crate::{
+        WorkspaceError,
+        configuration::{load_configuration, load_nested_configuration},
+    };
     use biome_configuration::{
-        BiomeDiagnostic, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
+        BiomeDiagnostic, Configuration, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
     };
     use biome_fs::MemoryFileSystem;
-    use camino::Utf8PathBuf;
+    use camino::{Utf8Path, Utf8PathBuf};
 
     #[test]
     fn should_not_load_a_configuration_yml() {
@@ -693,6 +723,85 @@ mod test {
                 ));
             }
         }
+    }
+
+    #[test]
+    fn nested_should_find_nonroot() {
+        // So we can ignore that whole subdirectory, in other code
+        //
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/nested/biome.json"),
+            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let project_path = Utf8Path::new("/monorepo");
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/monorepo/nested"));
+        let config =
+            load_nested_configuration(&fs, project_path, path_hint).expect("Should have succeeded");
+        assert!(config.configuration.linter.is_some_and(|l| l.is_enabled()));
+    }
+
+    #[test]
+    fn nested_should_find_nested_implicit_root_config() {
+        // So we can ignore that whole subdirectory, in other code
+        //
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/nested/biome.json"),
+            r#"{ "linter": { "enabled": true } }"#.to_string(),
+        );
+        let project_path = Utf8Path::new("/monorepo");
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/monorepo/nested"));
+        let config =
+            load_nested_configuration(&fs, project_path, path_hint).expect("Should have succeeded");
+        assert!(config.configuration.linter.is_some_and(|l| l.is_enabled()));
+    }
+
+    #[test]
+    fn nested_should_find_nested_root_config() {
+        // So we can ignore that whole subdirectory, in other code
+        //
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/nested/biome.json"),
+            r#"{ "root": true, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let project_path = Utf8Path::new("/monorepo");
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/monorepo/nested"));
+        let config =
+            load_nested_configuration(&fs, project_path, path_hint).expect("Should have succeeded");
+        assert!(config.configuration.linter.is_some_and(|l| l.is_enabled()));
+    }
+
+    #[test]
+    fn nested_should_not_find_project_root_config() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/monorepo/nested/somefile.js"),
+            r#"..."#.to_string(),
+        );
+        let project_path = Utf8Path::new("/monorepo");
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/monorepo/nested"));
+        let config =
+            load_nested_configuration(&fs, project_path, path_hint).expect("Should have succeeded");
+        assert_eq!(config.directory_path, None);
+        assert_eq!(config.configuration, Configuration::default());
     }
 }
 
