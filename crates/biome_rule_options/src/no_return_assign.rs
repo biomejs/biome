@@ -11,8 +11,8 @@ pub struct NoReturnAssignOptions {
 impl NoReturnAssignOptions {
     pub const DEFAULT_EXCEPT_PARENTHESIS: bool = false;
 
-    /// Returns [`Self::ignore_null`] if it is set
-    /// Otherwise, returns [`Self::DEFAULT_IGNORE_NULL`].
+    /// Returns [`Self::except_parenthesis`] if it is set
+    /// Otherwise, returns [`Self::DEFAULT_EXCEPT_PARENTHESIS`].
     pub fn except_parenthesis(&self) -> bool {
         self.except_parenthesis
             .unwrap_or(Self::DEFAULT_EXCEPT_PARENTHESIS)
