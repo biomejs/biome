@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVBind {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVBind",
         language: "html",
         recommended: true,

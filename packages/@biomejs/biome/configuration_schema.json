@@ -866,7 +866,7 @@
 					]
 				},
 				"noInvalidUseBeforeDeclaration": {
-					"description": "Disallow the use of variables and function parameters before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
+					"description": "Disallow the use of variables, function parameters, classes, and enums before their declaration.\nSee https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidUseBeforeDeclarationConfiguration" },
 						{ "type": "null" }
@@ -3051,6 +3051,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicatedSpreadPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicatedSpreadPropsOptions" }
+			]
+		},
+		"NoDuplicatedSpreadPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDynamicNamespaceImportAccessConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3141,6 +3151,16 @@
 			]
 		},
 		"NoEnumOptions": { "type": "object", "additionalProperties": false },
+		"NoEqualsToNullConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEqualsToNullOptions" }
+			]
+		},
+		"NoEqualsToNullOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEvolvingTypesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3666,6 +3686,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLeakedRenderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
+			]
+		},
+		"NoLeakedRenderOptions": { "type": "object" },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3736,6 +3763,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMultiStrConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMultiStrOptions" }
+			]
+		},
+		"NoMultiStrOptions": { "type": "object", "additionalProperties": false },
 		"NoNamespaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4334,6 +4368,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSyncScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSyncScriptsOptions" }
+			]
+		},
+		"NoSyncScriptsOptions": { "type": "object", "additionalProperties": false },
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4344,6 +4385,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTernaryConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTernaryOptions" }
+			]
+		},
+		"NoTernaryOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4995,6 +5043,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVIfWithVForConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVIfWithVForOptions" }
+			]
+		},
+		"NoVueVIfWithVForOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5041,10 +5099,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicatedSpreadProps": {
+					"description": "Disallow JSX prop spreading the same identifier multiple times.\nSee https://biomejs.dev/linter/rules/no-duplicated-spread-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicatedSpreadPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptySource": {
 					"description": "Disallow empty sources.\nSee https://biomejs.dev/linter/rules/no-empty-source",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptySourceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEqualsToNull": {
+					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEqualsToNullConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5083,10 +5155,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noLeakedRender": {
+					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMultiStr": {
+					"description": "Disallow creating multiline strings by escaping newlines.\nSee https://biomejs.dev/linter/rules/no-multi-str",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMultiStrConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5115,6 +5201,20 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSyncScripts": {
+					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTernary": {
+					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTernaryConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5185,6 +5285,13 @@
 					"description": "Disallow reserved names to be used as props.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueReservedPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVIfWithVFor": {
+					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5290,6 +5397,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueHyphenatedAttributes": {
+					"description": "Enforce hyphenated (kebab-case) attribute names in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueHyphenatedAttributesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueMultiWordComponentNames": {
 					"description": "Enforce multi-word component names in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
 					"anyOf": [
@@ -5336,6 +5450,13 @@
 					"description": "Enforce valid v-on directives with proper arguments, modifiers, and handlers.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-on",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVOnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVText": {
+					"description": "Enforce valid v-text Vue directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVTextConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -5760,10 +5881,70 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleDomain": {
+			"description": "Rule domains",
+			"oneOf": [
+				{
+					"description": "React library rules",
+					"type": "string",
+					"const": "react"
+				},
+				{ "description": "Testing rules", "type": "string", "const": "test" },
+				{
+					"description": "Solid.js framework rules",
+					"type": "string",
+					"const": "solid"
+				},
+				{
+					"description": "Next.js framework rules",
+					"type": "string",
+					"const": "next"
+				},
+				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"const": "qwik"
+				},
+				{
+					"description": "Vue.js framework rules",
+					"type": "string",
+					"const": "vue"
+				},
+				{
+					"description": "For rules that require querying multiple files inside a project",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"const": "tailwind"
+				}
+			]
+		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Enables only the recommended rules for this domain",
+					"type": "string",
+					"const": "recommended"
+				}
+			]
+		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/definitions/RuleDomain" }
+			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
+			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -6372,6 +6553,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDuplicatedSpreadPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicatedSpreadPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDynamicNamespaceImportAccessOptions": {
 			"type": "object",
 			"properties": {
@@ -6450,6 +6640,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEnumOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEqualsToNullOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEqualsToNullOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -6896,6 +7096,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoLeakedRenderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMagicNumbersOptions": {
 			"type": "object",
 			"properties": {
@@ -6958,6 +7167,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMultiStrOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMultiStrOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -7492,11 +7710,29 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSyncScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSyncScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTemplateCurlyInStringOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTemplateCurlyInStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTernaryOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTernaryOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -8086,6 +8322,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVIfWithVForOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVIfWithVForOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9288,6 +9533,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueHyphenatedAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueHyphenatedAttributesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueMultiWordComponentNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -9347,6 +9602,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVOnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12265,6 +12529,32 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueHyphenatedAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueHyphenatedAttributesOptions" }
+			]
+		},
+		"UseVueHyphenatedAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "List of attribute names to ignore when checking for hyphenated attributes.",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" },
+					"uniqueItems": true
+				},
+				"ignoreTags": {
+					"description": "List of HTML tags to ignore when checking for hyphenated attributes.",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" },
+					"uniqueItems": true
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueMultiWordComponentNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12348,6 +12638,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueValidVTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVTextOptions" }
+			]
+		},
+		"UseVueValidVTextOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

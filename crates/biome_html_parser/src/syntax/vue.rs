@@ -19,9 +19,18 @@ pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    let pos = p.source().position();
     // FIXME: Ideally, the lexer would just lex VUE_IDENT directly
     p.bump_remap_with_context(VUE_IDENT, HtmlLexContext::InsideTagVue);
     if p.at(T![:]) {
+        // is there any trivia after the directive name and before the colon?
+        if let Some(last_trivia) = p.source().trivia_list.last()
+            && pos < last_trivia.text_range().start()
+        {
+            // `v-else :foo="5"` is 2 directives, not `v-else:foo="5"`
+            p.start().complete(p, VUE_MODIFIER_LIST);
+            return Present(m.complete(p, VUE_DIRECTIVE));
+        }
         parse_vue_directive_argument(p).ok();
     }
     VueModifierList.parse_list(p);

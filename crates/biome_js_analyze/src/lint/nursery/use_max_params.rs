@@ -74,7 +74,7 @@ declare_lint_rule! {
         version: "2.2.0",
         name: "useMaxParams",
         language: "js",
-        sources: &[RuleSource::Eslint("max-params").same(), RuleSource::Clippy("too_many_arguments").same()],
+        sources: &[RuleSource::Eslint("max-params").same(), RuleSource::Clippy("too_many_arguments").same(), RuleSource::EslintTypeScript("max-params").same()],
         severity: Severity::Warning,
         recommended: false,
     }

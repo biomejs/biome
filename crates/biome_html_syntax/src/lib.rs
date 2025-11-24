@@ -6,6 +6,7 @@ pub mod element_ext;
 mod file_source;
 mod generated;
 mod script_type;
+mod string_ext;
 mod syntax_node;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};

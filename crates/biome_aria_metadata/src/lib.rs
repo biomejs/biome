@@ -20,27 +20,38 @@ pub const ISO_COUNTRIES: [&str; 233] = [
     "UZ", "VU", "VE", "VN", "WF", "EH", "YE", "ZM", "ZW",
 ];
 
-pub const ISO_LANGUAGES: [&str; 152] = [
+pub const ISO_LANGUAGES: [&str; 150] = [
     "ab", "aa", "af", "sq", "am", "ar", "an", "hy", "as", "ay", "az", "ba", "eu", "bn", "dz", "bh",
-    "bi", "br", "bg", "my", "be", "km", "ca", "zh", "zh-Hans", "zh-Hant", "co", "hr", "cs", "da",
-    "nl", "en", "eo", "et", "fo", "fa", "fj", "fi", "fr", "fy", "gl", "gd", "gv", "ka", "de", "el",
-    "kl", "gn", "gu", "ht", "ha", "he", "iw", "hi", "hu", "is", "io", "id", "in", "ia", "ie", "iu",
-    "ik", "ga", "it", "ja", "jv", "kn", "ks", "kk", "rw", "ky", "rn", "ko", "ku", "lo", "la", "lv",
-    "li", "ln", "lt", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mo", "mn", "na", "ne", "no", "nb",
-    "nn", "oc", "or", "om", "ps", "pl", "pt", "pa", "qu", "rm", "ro", "ru", "sm", "sg", "sa", "sr",
-    "sh", "st", "tn", "sn", "ii", "sd", "si", "ss", "sk", "sl", "so", "es", "su", "sw", "sv", "tl",
-    "tg", "ta", "tt", "te", "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz",
-    "vi", "vo", "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
+    "bi", "br", "bg", "my", "be", "km", "ca", "zh", "co", "hr", "cs", "da", "nl", "en", "eo", "et",
+    "fo", "fa", "fj", "fi", "fr", "fy", "gl", "gd", "gv", "ka", "de", "el", "kl", "gn", "gu", "ht",
+    "ha", "he", "iw", "hi", "hu", "is", "io", "id", "in", "ia", "ie", "iu", "ik", "ga", "it", "ja",
+    "jv", "kn", "ks", "kk", "rw", "ky", "rn", "ko", "ku", "lo", "la", "lv", "li", "ln", "lt", "mk",
+    "mg", "ms", "ml", "mt", "mi", "mr", "mo", "mn", "na", "ne", "no", "nb", "nn", "oc", "or", "om",
+    "ps", "pl", "pt", "pa", "qu", "rm", "ro", "ru", "sm", "sg", "sa", "sr", "sh", "st", "tn", "sn",
+    "ii", "sd", "si", "ss", "sk", "sl", "so", "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te",
+    "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz", "vi", "vo", "wa", "cy",
+    "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
-/// Returns a list of valid ISO countries
+pub const ISO_SCRIPTS: [&str; 28] = [
+    "Arab", "Armn", "Beng", "Cyrl", "Deva", "Ethi", "Grek", "Gujr", "Guru", "Hang", "Hani", "Hans",
+    "Hant", "Hebr", "Hira", "Kana", "Khmr", "Laoo", "Latn", "Mlym", "Mymr", "Orya", "Sinh", "Taml",
+    "Telu", "Thai", "Tibt", "Zyyy",
+];
+
+/// Returns whether the given string is a valid ISO country code
 pub fn is_valid_country(country: &str) -> bool {
     IsoCountries::from_str(country).is_ok()
 }
 
-/// Returns a list of valid ISO languages
+/// Returns whether the given string is a valid ISO language code
 pub fn is_valid_language(language: &str) -> bool {
     IsoLanguages::from_str(language).is_ok()
+}
+
+/// Returns whether the given string is a valid ISO script code
+pub fn is_valid_script(script: &str) -> bool {
+    IsoScripts::from_str(script).is_ok()
 }
 
 /// An array of all available countries
@@ -51,6 +62,11 @@ pub fn countries() -> &'static [&'static str] {
 /// An array of all available languages
 pub fn languages() -> &'static [&'static str] {
     &ISO_LANGUAGES
+}
+
+/// An array of all available scripts
+pub fn scripts() -> &'static [&'static str] {
+    &ISO_SCRIPTS
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

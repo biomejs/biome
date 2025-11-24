@@ -40,17 +40,17 @@ declare_lint_rule! {
     /// - **EC Private Key**: Key blocks that start with `-----BEGIN EC PRIVATE KEY-----`
     /// - **PGP Private Key Block**: Key blocks that start with `-----BEGIN PGP PRIVATE KEY BLOCK-----`
     ///
-    /// ## Entropy Check
+    /// ### Entropy Check
     ///
-    /// In addition to detecting the above patterns, we also employ a **string entropy checker** to catch potential secrets based on their entropy (randomness). The entropy checker is configurable through the `Options`, allowing customization of thresholds for string entropy to fine-tune detection and minimize false positives.
+    /// In addition to detecting the above patterns, we also employ a **string entropy checker** to catch potential secrets based on their entropy (randomness). The entropy checker is configurable through the `entropyThreshold` option (see below), allowing customization of thresholds for string entropy to fine-tune detection and minimize false positives.
     ///
-    /// ## Disclaimer
+    /// ### Disclaimer
     ///
     /// While this rule helps with most common cases, it is not intended to handle all of them.
     /// Therefore, always review your code carefully and consider implementing additional security
     /// measures, such as automated secret scanning in your CI/CD and git pipeline.
     ///
-    /// ## Recommendations
+    /// ### Recommendations
     ///
     /// Some recommended tools for more comprehensive secret detection include:
     /// - [SonarQube](https://www.sonarsource.com/products/sonarqube/downloads/): Clean Code scanning solution with a secret scanner (Community version).
@@ -70,6 +70,39 @@ declare_lint_rule! {
     ///
     /// ```js
     /// const nonSecret = "hello world";
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule supports the following option:
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "entropyThreshold": 41
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `entropyThreshold`
+    ///
+    /// Sets the sensitivity threshold for the high‑entropy detection pass.
+    /// The underlying algorithm computes an adjusted entropy score for string tokens; if the score
+    /// exceeds `entropyThreshold / 10` (e.g. `41` => `4.1`), and the string does not match any known
+    /// safe pattern, it is reported as a potential secret.
+    ///
+    /// Increase the value to reduce false positives (stricter: fewer strings flagged).
+    /// Decrease the value to increase sensitivity (more strings flagged).
+    ///
+    /// > **Default:** `41`
+    ///
+    /// Example raising the threshold (fewer detections):
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "entropyThreshold": 50
+    ///   }
+    /// }
     /// ```
     pub NoSecrets {
         version: "1.9.0",

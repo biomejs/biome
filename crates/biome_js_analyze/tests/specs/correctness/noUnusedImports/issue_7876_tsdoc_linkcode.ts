@@ -1,0 +1,111 @@
+// See https://github.com/biomejs/biome/issues/7876
+
+// some types for the different locations
+import type LinkOnFunction from "mod";
+
+import type LinkOnVariable from "mod";
+import type LinkOnClass from "mod";
+
+import type LinkOnClassField from "mod";
+import type LinkOnClassMethod from "mod";
+import type LinkOnClassConstructor from "mod";
+import type LinkOnClassAccessor from "mod";
+import type LinkOnClassIndexer from "mod";
+
+import type LinkOnInterface from "mod";
+import type LinkOnInterfaceField from "mod";
+import type LinkOnInterfaceMethod from "mod";
+import type LinkOnInterfaceIndexer from "mod";
+
+import type LinkOnEnum from "mod";
+import type LinkOnEnumMember from "mod";
+
+
+/**
+ * {@linkcode LinkOnFunction}
+ */
+function testLinkOnFunction() { }
+
+/**
+ * {@linkcode LinkOnVariable}
+ */
+const testLinkOnVariable = 3;
+
+/**
+ * {@linkcode LinkOnClass}
+ */
+class TestLinkOnClass { }
+
+class TestLinkOnClassField {
+    /**
+     * {@linkcode LinkOnClassField}
+     */
+    field: number;
+}
+
+class TestLinkOnClassMethod {
+    /**
+     * {@linkcode LinkOnClassMethod}
+     */
+    method(): void { }
+}
+
+class TestLinkOnClassConstructor {
+    /**
+     * {@linkcode LinkOnClassConstructor}
+     */
+    constructor() { }
+}
+
+class TestLinkOnClassAccessor {
+    /**
+     * {@linkcode LinkOnClassAccessor}
+     */
+    get accessor(): number { return 0 }
+}
+
+class TestLinkOnClassIndexer {
+    /**
+     * {@linkcode LinkOnClassIndexer}
+     */
+    [index: number]: string;
+}
+
+/**
+ * {@linkcode LinkOnInterface}
+ */
+interface TestLinkOnInterface { }
+
+interface TestLinkOnInterfaceField {
+    /**
+     * {@linkcode LinkOnInterfaceField}
+     */
+    field: string;
+}
+
+interface TestLinkOnInterfaceMethod {
+    /**
+     * {@linkcode LinkOnInterfaceMethod}
+     */
+    method(): string;
+}
+
+interface TestLinkOnInterfaceIndexer {
+    /**
+     * {@linkcode LinkOnInterfaceIndexer}
+     */
+    [index: number]: string;
+}
+
+/**
+ * {@linkcode LinkOnEnum}
+ */
+enum TestLinkOnEnum {
+}
+
+enum TestLinkOnEnumMember {
+    /**
+     * {@linkcode LinkOnEnumMember}
+     */
+    member
+}

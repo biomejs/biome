@@ -91,7 +91,7 @@ pub(crate) fn parse_supports_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     Present(m.complete(p, CSS_SUPPORTS_AT_RULE_DECLARATOR))
 }
 
-struct AnySupportsConditionParseRecovery;
+pub(crate) struct AnySupportsConditionParseRecovery;
 
 impl ParseRecovery for AnySupportsConditionParseRecovery {
     type Kind = CssSyntaxKind;

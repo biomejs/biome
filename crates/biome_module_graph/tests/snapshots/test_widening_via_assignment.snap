@@ -1,0 +1,71 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+let hey = false;
+function f() {
+	hey = true;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => bool: false
+
+Module TypeId(1) => bool: true
+
+Module TypeId(2) => unknown
+
+Module TypeId(3) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Module TypeId(4) => void
+
+Module TypeId(5) => sync Function "f" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(4)
+}
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => bool: false
+
+Full TypeId(1) => bool: true
+
+Full TypeId(2) => unknown
+
+Full TypeId(3) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Full TypeId(4) => void
+
+Full TypeId(5) => sync Function "f" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(4)
+}
+```

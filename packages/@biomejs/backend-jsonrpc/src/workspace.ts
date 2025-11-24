@@ -824,7 +824,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in any]?: any };
+export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -970,6 +970,19 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
+/**
+ * Rule domains
+ */
+export type RuleDomain =
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "qwik"
+	| "vue"
+	| "project"
+	| "tailwind";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
 export type SeverityOrCorrectness = GroupPlainConfiguration | Correctness;
@@ -1569,7 +1582,7 @@ See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule
 	 */
 	noInvalidPositionAtImportRule?: NoInvalidPositionAtImportRuleConfiguration;
 	/**
-	* Disallow the use of variables and function parameters before their declaration.
+	* Disallow the use of variables, function parameters, classes, and enums before their declaration.
 See https://biomejs.dev/linter/rules/no-invalid-use-before-declaration 
 	 */
 	noInvalidUseBeforeDeclaration?: NoInvalidUseBeforeDeclarationConfiguration;
@@ -1858,10 +1871,20 @@ See https://biomejs.dev/linter/rules/no-duplicate-dependencies
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
 	/**
+	* Disallow JSX prop spreading the same identifier multiple times.
+See https://biomejs.dev/linter/rules/no-duplicated-spread-props 
+	 */
+	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
+	/**
 	* Disallow empty sources.
 See https://biomejs.dev/linter/rules/no-empty-source 
 	 */
 	noEmptySource?: NoEmptySourceConfiguration;
+	/**
+	* Require the use of === or !== for comparison with null.
+See https://biomejs.dev/linter/rules/no-equals-to-null 
+	 */
+	noEqualsToNull?: NoEqualsToNullConfiguration;
 	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
@@ -1888,10 +1911,20 @@ See https://biomejs.dev/linter/rules/no-jsx-literals
 	 */
 	noJsxLiterals?: NoJsxLiteralsConfiguration;
 	/**
+	* Prevent problematic leaked values from being rendered.
+See https://biomejs.dev/linter/rules/no-leaked-render 
+	 */
+	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
+	/**
+	* Disallow creating multiline strings by escaping newlines.
+See https://biomejs.dev/linter/rules/no-multi-str 
+	 */
+	noMultiStr?: NoMultiStrConfiguration;
 	/**
 	* Prevent client components from being async functions.
 See https://biomejs.dev/linter/rules/no-next-async-client-component 
@@ -1912,6 +1945,16 @@ See https://biomejs.dev/linter/rules/no-react-forward-ref
 See https://biomejs.dev/linter/rules/no-shadow 
 	 */
 	noShadow?: NoShadowConfiguration;
+	/**
+	* Prevent the usage of synchronous scripts.
+See https://biomejs.dev/linter/rules/no-sync-scripts 
+	 */
+	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
+	* Disallow ternary operators.
+See https://biomejs.dev/linter/rules/no-ternary 
+	 */
+	noTernary?: NoTernaryConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
@@ -1962,6 +2005,11 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-keys
 See https://biomejs.dev/linter/rules/no-vue-reserved-props 
 	 */
 	noVueReservedProps?: NoVueReservedPropsConfiguration;
+	/**
+	* Disallow using v-if and v-for directives on the same element.
+See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
+	 */
+	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2037,6 +2085,11 @@ See https://biomejs.dev/linter/rules/use-vue-define-macros-order
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
+	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
+	 */
+	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
+	/**
 	* Enforce multi-word component names in Vue components.
 See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
 	 */
@@ -2071,6 +2124,11 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-if
 See https://biomejs.dev/linter/rules/use-vue-valid-v-on 
 	 */
 	useVueValidVOn?: UseVueValidVOnConfiguration;
+	/**
+	* Enforce valid v-text Vue directives.
+See https://biomejs.dev/linter/rules/use-vue-valid-v-text 
+	 */
+	useVueValidVText?: UseVueValidVTextConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -3504,9 +3562,15 @@ export type NoDeprecatedImportsConfiguration =
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
+export type NoDuplicatedSpreadPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicatedSpreadPropsOptions;
 export type NoEmptySourceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptySourceOptions;
+export type NoEqualsToNullConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEqualsToNullOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -3522,9 +3586,15 @@ export type NoIncrementDecrementConfiguration =
 export type NoJsxLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLiteralsOptions;
+export type NoLeakedRenderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLeakedRenderOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoMultiStrConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMultiStrOptions;
 export type NoNextAsyncClientComponentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNextAsyncClientComponentOptions;
@@ -3537,6 +3607,12 @@ export type NoReactForwardRefConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSyncScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncScriptsOptions;
+export type NoTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTernaryOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -3567,6 +3643,9 @@ export type NoVueReservedKeysConfiguration =
 export type NoVueReservedPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueReservedPropsOptions;
+export type NoVueVIfWithVForConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVIfWithVForOptions;
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
@@ -3609,6 +3688,9 @@ export type UseUniqueGraphqlOperationNameConfiguration =
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
+export type UseVueHyphenatedAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueHyphenatedAttributesOptions;
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
@@ -3630,6 +3712,9 @@ export type UseVueValidVIfConfiguration =
 export type UseVueValidVOnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVOnOptions;
+export type UseVueValidVTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVTextOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -4869,9 +4954,18 @@ export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithNoDuplicatedSpreadPropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicatedSpreadPropsOptions;
+}
 export interface RuleWithNoEmptySourceOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptySourceOptions;
+}
+export interface RuleWithNoEqualsToNullOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoEqualsToNullOptions;
 }
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
@@ -4894,10 +4988,18 @@ export interface RuleWithNoJsxLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxLiteralsOptions;
 }
+export interface RuleWithNoLeakedRenderOptions {
+	level: RulePlainConfiguration;
+	options?: NoLeakedRenderOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
+}
+export interface RuleWithNoMultiStrOptions {
+	level: RulePlainConfiguration;
+	options?: NoMultiStrOptions;
 }
 export interface RuleWithNoNextAsyncClientComponentOptions {
 	level: RulePlainConfiguration;
@@ -4916,6 +5018,14 @@ export interface RuleWithNoReactForwardRefOptions {
 export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
+}
+export interface RuleWithNoSyncScriptsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSyncScriptsOptions;
+}
+export interface RuleWithNoTernaryOptions {
+	level: RulePlainConfiguration;
+	options?: NoTernaryOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -4959,6 +5069,10 @@ export interface RuleWithNoVueReservedKeysOptions {
 export interface RuleWithNoVueReservedPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueReservedPropsOptions;
+}
+export interface RuleWithNoVueVIfWithVForOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVIfWithVForOptions;
 }
 export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
@@ -5021,6 +5135,11 @@ export interface RuleWithUseVueDefineMacrosOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefineMacrosOrderOptions;
 }
+export interface RuleWithUseVueHyphenatedAttributesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueHyphenatedAttributesOptions;
+}
 export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
@@ -5048,6 +5167,10 @@ export interface RuleWithUseVueValidVIfOptions {
 export interface RuleWithUseVueValidVOnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVOnOptions;
+}
+export interface RuleWithUseVueValidVTextOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVTextOptions;
 }
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
@@ -6147,12 +6270,14 @@ export type UseYieldOptions = {};
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
+export type NoDuplicatedSpreadPropsOptions = {};
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
 	 */
 	allowComments?: boolean;
 }
+export type NoEqualsToNullOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export interface NoImportCyclesOptions {
@@ -6184,11 +6309,15 @@ export interface NoJsxLiteralsOptions {
 	 */
 	noStrings?: boolean;
 }
+export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
+export type NoSyncScriptsOptions = {};
+export type NoTernaryOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -6205,6 +6334,7 @@ export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
 export type NoVueReservedKeysOptions = {};
 export type NoVueReservedPropsOptions = {};
+export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -6259,6 +6389,16 @@ export interface UseVueDefineMacrosOrderOptions {
 	 */
 	order?: string[];
 }
+export interface UseVueHyphenatedAttributesOptions {
+	/**
+	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 */
+	ignore?: string[];
+	/**
+	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 */
+	ignoreTags?: string[];
+}
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
 	 * Component names to ignore (allowed to be single-word).
@@ -6276,6 +6416,7 @@ export interface UseVueValidVOnOptions {
 	 */
 	modifiers?: string[];
 }
+export type UseVueValidVTextOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -6994,18 +7135,24 @@ export type Category =
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noEmptySource"
+	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
+	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noDuplicatedSpreadProps"
+	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
@@ -7018,6 +7165,7 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -7038,6 +7186,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
+	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/nursery/useVueValidVBind"
 	| "lint/nursery/useVueValidVElse"
@@ -7047,6 +7196,7 @@ export type Category =
 	| "lint/nursery/useVueValidVIf"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueValidVOn"
+	| "lint/nursery/useVueValidVText"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
@@ -7896,19 +8046,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "react"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "vue"
-	| "project"
-	| "tailwind";
-export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
