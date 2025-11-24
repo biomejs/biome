@@ -1137,7 +1137,7 @@ export interface A11y {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_UseAriaPropsSupportedByRoleOptions;
 	/**
-	 * Enforces the usage of the attribute type for the element button
+	 * Succinct description of the rule.
 	 */
 	useButtonType?: RuleConfiguration_for_UseButtonTypeOptions;
 	/**
