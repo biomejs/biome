@@ -7,6 +7,7 @@ pub use os::{OsFileSystem, TemporaryFs};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
+use std::ops::ControlFlow;
 use std::panic::RefUnwindSafe;
 use std::path::Path;
 use std::sync::Arc;
@@ -129,28 +130,44 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         search_dir: &Utf8Path,
         search_files: &[&str],
     ) -> Option<AutoSearchResult> {
-        self.auto_search_files_with_predicate(search_dir, search_files, &mut |_, _| true)
+        self.auto_search_files_with_predicate(search_dir, search_files, &mut |_, _| {
+            ControlFlow::Continue(true)
+        })
     }
 
     /// Same as `auto_search_files()`, but runs a predicate on the path and
     /// content of any file that matches `search_files` before deciding if it
     /// really is a match.
+    ///
+    /// A return value of `ControlFlow::Continue(true)` from the predicate indicates
+    /// that the match is real and this function returns Some(AutoSearchResult).
+    ///
+    /// If you return `ControlFlow::Continue(false)` from the predicate, we keep searching.
+    ///
+    /// If you return `ControlFlow::Break(())` from the predicate, it stops searching
+    /// immediately and returns None.
+    ///
     fn auto_search_files_with_predicate(
         &self,
         search_dir: &Utf8Path,
         search_files: &[&str],
-        predicate: &mut dyn FnMut(&Utf8Path, &str) -> bool,
+        predicate: &mut dyn FnMut(&Utf8Path, &str) -> ControlFlow<(), bool>,
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
-        loop {
+        'outer: loop {
             // Iterate all possible file names
-            for file_name in search_files {
+            'inner: for file_name in search_files {
                 let file_path = current_search_dir.join(file_name);
                 match self.read_file_from_path(&file_path) {
                     Ok(content) => {
-                        if !predicate(&file_path, &content) {
-                            break;
+                        match predicate(&file_path, &content) {
+                            ControlFlow::Break(()) => break 'outer,
+                            ControlFlow::Continue(predicate_matched) => {
+                                if !predicate_matched {
+                                    break 'inner;
+                                }
+                            }
                         }
                         if is_searching_in_parent_dir {
                             info!(
@@ -177,7 +194,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 current_search_dir = Utf8PathBuf::from(parent_search_dir);
                 is_searching_in_parent_dir = true;
             } else {
-                break;
+                break 'outer;
             }
         }
 

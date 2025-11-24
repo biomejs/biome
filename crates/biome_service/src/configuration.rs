@@ -36,7 +36,7 @@ use rustc_hash::FxHashSet;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
-use std::ops::Deref;
+use std::ops::{ControlFlow, Deref};
 use std::path::Path;
 use std::str::FromStr;
 use tracing::instrument;
@@ -222,7 +222,7 @@ pub fn read_config(
 
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
     let mut deserialized = None;
-    let mut predicate = |file_path: &Utf8Path, content: &str| -> bool {
+    let mut predicate = |file_path: &Utf8Path, content: &str| -> ControlFlow<(), bool> {
         let parser_options = match file_path.extension() {
             Some("json") => JsonParserOptions::default(),
             _ => JsonParserOptions::default()
@@ -239,7 +239,7 @@ pub fn read_config(
         if is_found {
             deserialized = Some(deserialized_content);
         }
-        is_found
+        ControlFlow::Continue(is_found)
     };
 
     let Some(auto_search_result) = fs.auto_search_files_with_predicate(
