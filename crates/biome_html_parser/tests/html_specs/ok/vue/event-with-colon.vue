@@ -1,0 +1,1 @@
+<Foo @update:modelValue="onUpdate" />
