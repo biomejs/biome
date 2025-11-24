@@ -7,13 +7,14 @@ use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
     AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
-    JsArrowFunctionExpression, JsCallExpression, JsConstructorClassMember, JsFileSource,
-    JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
-    JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
-    JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
-    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
+    JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression, JsConstructorClassMember,
+    JsFileSource, JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember,
+    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression,
+    JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsObjectExpression, JsParameters,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
+    JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsSyntaxKind,
+    JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
+    JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
     TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
     static_value::StaticValue,
@@ -1008,6 +1009,50 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
     ))
 }
 
+/// Checks if a binary expression has trivially inferrable operands.
+///
+/// This returns true for binary expressions where both operands are literals or other
+/// trivially inferrable expressions (e.g., `1 + 1`, `2 * 3`, `"hello" + "world"`).
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_binary_expression(
+    binary_expr: &JsBinaryExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(left) = binary_expr.left() else {
+        return false;
+    };
+    let Ok(right) = binary_expr.right() else {
+        return false;
+    };
+
+    // Both operands must be trivially inferrable
+    is_allowed_in_untyped_expression(&left, allow_placeholders)
+        && is_allowed_in_untyped_expression(&right, allow_placeholders)
+}
+
+/// Checks if a logical expression has trivially inferrable operands.
+///
+/// This returns true for logical expressions where both operands are literals or other
+/// trivially inferrable expressions (e.g., `true && false`, `true || false`).
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_logical_expression(
+    logical_expr: &JsLogicalExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(left) = logical_expr.left() else {
+        return false;
+    };
+    let Ok(right) = logical_expr.right() else {
+        return false;
+    };
+
+    // Both operands must be trivially inferrable
+    is_allowed_in_untyped_expression(&left, allow_placeholders)
+        && is_allowed_in_untyped_expression(&right, allow_placeholders)
+}
+
 /// Checks if an expression can be part of an untyped expression or will be checked separately.
 ///
 /// This returns true for constructs that are trivially understood by the reader and the compiler
@@ -1035,6 +1080,20 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
     ) {
         // We'll check functions separately
         return true;
+    }
+
+    // Allow binary expressions with trivially inferrable operands (e.g., `1 + 1`, `2 * 3`)
+    if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr {
+        if is_trivial_binary_expression(binary_expr, allow_placeholders) {
+            return true;
+        }
+    }
+
+    // Allow logical expressions with trivially inferrable operands (e.g., `true && false`, `true || false`)
+    if let AnyJsExpression::JsLogicalExpression(logical_expr) = expr {
+        if is_trivial_logical_expression(logical_expr, allow_placeholders) {
+            return true;
+        }
     }
 
     // Allow assignment of some trivial object literals.

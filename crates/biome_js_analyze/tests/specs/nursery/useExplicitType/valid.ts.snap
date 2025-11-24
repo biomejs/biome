@@ -206,4 +206,18 @@ namespace Ns {
 	export function func(arg: string): void {}
 }
 
+// Binary expressions with trivially inferrable operands
+const two = 1 + 1;
+const sum = 5 + 10;
+const product = 2 * 3;
+const difference = 10 - 5;
+const quotient = 20 / 4;
+const remainder = 10 % 3;
+const power = 2 ** 3;
+const stringConcat = "hello" + "world";
+const booleanAnd = true && false;
+const booleanOr = true || false;
+const comparison = 5 > 3;
+const complexMath = 1 + 2 * 3 - 4 / 2;
+
 ```
