@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function f(a) {
+	return a = 1;
+}
+
+function f(a) {
+	return (a = 1);
+}
+
+function f(a, b, c) {
+	return (a, b, c = 1);
+}
+
+function f(a, b, c) {
+	return a == (b = c);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in a return statement.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f(a) {
+  > 3 │ 	return a = 1;
+      │ 	^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i The use of assignments in return statements is confusing.
+    Return statements are often considered side-effect free.
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in a return statement.
+  
+    6 │ function f(a) {
+  > 7 │ 	return (a = 1);
+      │ 	^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i The use of assignments in return statements is confusing.
+    Return statements are often considered side-effect free.
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in a return statement.
+  
+    10 │ function f(a, b, c) {
+  > 11 │ 	return (a, b, c = 1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i The use of assignments in return statements is confusing.
+    Return statements are often considered side-effect free.
+  
+
+```
+
+```
+invalid.js:15:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in a return statement.
+  
+    14 │ function f(a, b, c) {
+  > 15 │ 	return a == (b = c);
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i The use of assignments in return statements is confusing.
+    Return statements are often considered side-effect free.
+  
+
+```
