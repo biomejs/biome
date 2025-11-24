@@ -131,11 +131,7 @@ impl Rule for NoScriptUrl {
                                         string_literal.as_js_string_literal_expression()
                                 {
                                     let text = string_value.inner_string_text().ok()?;
-                                    if text
-                                        .trim()
-                                        .to_lowercase_cow()
-                                        .starts_with("javascript:")
-                                    {
+                                    if text.trim().to_lowercase_cow().starts_with("javascript:") {
                                         return Some(NoScriptUrlState::ReactProp(value.range()));
                                     }
                                 }
