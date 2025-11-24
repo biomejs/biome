@@ -26,7 +26,7 @@ React.createElement('a', { href: 'javascript:alert("XSS")' });
 ```
 invalid.jsx:3:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     1 │ // Invalid cases - should trigger the rule
     2 │ 
@@ -45,7 +45,7 @@ invalid.jsx:3:8 lint/security/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.jsx:7:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     5 │ <a href="javascript:alert('XSS')">Link</a>
     6 │ 
@@ -64,7 +64,7 @@ invalid.jsx:7:8 lint/security/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.jsx:11:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
      9 │ <a href=" javascript:void(0)">Link</a>
     10 │ 
@@ -83,7 +83,7 @@ invalid.jsx:11:8 lint/security/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.jsx:13:34 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     11 │ <a href="JAVASCRIPT:void(0)">Link</a>
     12 │ 
@@ -102,7 +102,7 @@ invalid.jsx:13:34 lint/security/noScriptUrl ━━━━━━━━━━━━
 ```
 invalid.jsx:15:34 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     13 │ React.createElement('a', { href: 'javascript:void(0)' });
     14 │ 
