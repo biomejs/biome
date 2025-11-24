@@ -809,6 +809,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNIVERSAL_SYNTAX => {
+                    let $pattern = unsafe { $crate::CssUniversalSyntax::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNKNOWN_ATTR_UNIT => {
                     let $pattern = unsafe { $crate::CssUnknownAttrUnit::new_unchecked(node) };
                     $body
@@ -873,10 +877,6 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR => {
                     let $pattern =
                         unsafe { $crate::CssViewTransitionAtRuleDeclarator::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_WILDCARD => {
-                    let $pattern = unsafe { $crate::CssWildcard::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {

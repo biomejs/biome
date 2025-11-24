@@ -2636,6 +2636,12 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_universal_syntax(star_token: SyntaxToken) -> CssUniversalSyntax {
+    CssUniversalSyntax::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNIVERSAL_SYNTAX,
+        [Some(SyntaxElement::Token(star_token))],
+    ))
+}
 pub fn css_unknown_attr_unit(unit_token: SyntaxToken) -> CssUnknownAttrUnit {
     CssUnknownAttrUnit::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNKNOWN_ATTR_UNIT,
@@ -2822,12 +2828,6 @@ pub fn css_view_transition_at_rule_declarator(
     CssViewTransitionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR,
         [Some(SyntaxElement::Token(view_transition_token))],
-    ))
-}
-pub fn css_wildcard(star_token: SyntaxToken) -> CssWildcard {
-    CssWildcard::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_WILDCARD,
-        [Some(SyntaxElement::Token(star_token))],
     ))
 }
 pub fn tw_apply_at_rule(

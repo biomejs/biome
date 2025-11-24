@@ -2091,8 +2091,7 @@ CssTypeFunction =
 	type: AnyCssSyntax
 	')'
 
-// TODO: CssUniversalSyntax = '*'
-CssWildcard =
+CssUniversalSyntax =
 	'*'
 
 // https://drafts.csswg.org/css-values-5/#typedef-syntax
@@ -2109,7 +2108,7 @@ CssWildcard =
 //
 // <syntax-string> = <string>
 AnyCssSyntax =
-	CssWildcard
+	CssUniversalSyntax
 	| CssSyntaxComponentList
 	| AnyCssSyntaxComponent
 	| CssString

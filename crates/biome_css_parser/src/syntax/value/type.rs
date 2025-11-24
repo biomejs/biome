@@ -116,7 +116,7 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![*]) {
         let m = p.start();
         p.bump(T![*]);
-        return Present(m.complete(p, CSS_WILDCARD));
+        return Present(m.complete(p, CSS_UNIVERSAL_SYNTAX));
     }
 
     if is_at_string(p) {

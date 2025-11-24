@@ -238,6 +238,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssUnicodeRangeWildcard" => lang::CssUnicodeRangeWildcard::KIND_SET.iter().next(),
         "CssUniversalNamespacePrefix" => lang::CssUniversalNamespacePrefix::KIND_SET.iter().next(),
         "CssUniversalSelector" => lang::CssUniversalSelector::KIND_SET.iter().next(),
+        "CssUniversalSyntax" => lang::CssUniversalSyntax::KIND_SET.iter().next(),
         "CssUnknownAttrUnit" => lang::CssUnknownAttrUnit::KIND_SET.iter().next(),
         "CssUnknownBlockAtRule" => lang::CssUnknownBlockAtRule::KIND_SET.iter().next(),
         "CssUnknownDimension" => lang::CssUnknownDimension::KIND_SET.iter().next(),
@@ -263,7 +264,6 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
-        "CssWildcard" => lang::CssWildcard::KIND_SET.iter().next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
         "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),
         "TwCustomVariantAtRule" => lang::TwCustomVariantAtRule::KIND_SET.iter().next(),

@@ -3075,6 +3075,14 @@ impl CssUniversalSelector {
         )
     }
 }
+impl CssUniversalSyntax {
+    pub fn with_star_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssUnknownAttrUnit {
     pub fn with_unit_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -3297,14 +3305,6 @@ impl CssViewTransitionAtRule {
 }
 impl CssViewTransitionAtRuleDeclarator {
     pub fn with_view_transition_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl CssWildcard {
-    pub fn with_star_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),

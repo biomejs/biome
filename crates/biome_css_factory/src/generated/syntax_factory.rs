@@ -5436,6 +5436,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_UNIVERSAL_SELECTOR, children)
             }
+            CSS_UNIVERSAL_SYNTAX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [*]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_UNIVERSAL_SYNTAX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_UNIVERSAL_SYNTAX, children)
+            }
             CSS_UNKNOWN_ATTR_UNIT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -5846,25 +5865,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR, children)
-            }
-            CSS_WILDCARD => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T ! [*]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_WILDCARD.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_WILDCARD, children)
             }
             TW_APPLY_AT_RULE => {
                 let mut elements = (&children).into_iter();

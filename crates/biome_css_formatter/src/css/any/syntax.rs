@@ -12,7 +12,7 @@ impl FormatRule<AnyCssSyntax> for FormatAnyCssSyntax {
             AnyCssSyntax::CssBogusSyntax(node) => node.format().fmt(f),
             AnyCssSyntax::CssString(node) => node.format().fmt(f),
             AnyCssSyntax::CssSyntaxComponentList(node) => node.format().fmt(f),
-            AnyCssSyntax::CssWildcard(node) => node.format().fmt(f),
+            AnyCssSyntax::CssUniversalSyntax(node) => node.format().fmt(f),
         }
     }
 }
