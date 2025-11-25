@@ -5,9 +5,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeofValue, Union,
+    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
+    Union,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 

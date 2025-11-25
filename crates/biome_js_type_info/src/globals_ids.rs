@@ -67,10 +67,13 @@ define_global_type!(CONDITIONAL_CALLBACK_ID, 37, "() => conditional");
 define_global_type!(MAP_CALLBACK_ID, 38, "<U>(item: T) => U");
 define_global_type!(VOID_CALLBACK_ID, 39, "() => void");
 define_global_type!(FETCH_ID, 40, "fetch");
+define_global_type!(INSTANCEOF_REGEXP_ID, 41, "instanceof RegExp");
+define_global_type!(REGEXP_ID, 42, "RegExp");
+define_global_type!(REGEXP_EXEC_ID, 43, "RegExp.exec");
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
-pub const NUM_PREDEFINED_TYPES: usize = 41;
+pub const NUM_PREDEFINED_TYPES: usize = 44;
 
 // Resolved type ID constants (TypeId wrapped with GlobalLevel)
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
@@ -108,3 +111,6 @@ pub const GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID: ResolvedTypeId =
 pub const GLOBAL_T_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, T_ID);
 pub const GLOBAL_U_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, U_ID);
 pub const GLOBAL_FETCH_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, FETCH_ID);
+pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
+pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);

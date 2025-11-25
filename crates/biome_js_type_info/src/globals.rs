@@ -88,6 +88,9 @@ pub fn global_type_name(id: TypeId) -> Option<&'static str> {
         MAP_CALLBACK_ID => Some(MAP_CALLBACK_ID_NAME),
         VOID_CALLBACK_ID => Some(VOID_CALLBACK_ID_NAME),
         FETCH_ID => Some(FETCH_ID_NAME),
+        INSTANCEOF_REGEXP_ID => Some(INSTANCEOF_REGEXP_ID_NAME),
+        REGEXP_ID => Some(REGEXP_ID_NAME),
+        REGEXP_EXEC_ID => Some(REGEXP_EXEC_ID_NAME),
         _ => None,
     }
 }
@@ -378,6 +381,30 @@ impl Default for GlobalsResolver {
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             }),
         );
+        builder.set_type_data(
+            INSTANCEOF_REGEXP_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID)),
+        );
+        builder.set_type_data(
+            REGEXP_ID,
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::new_static(REGEXP_ID_NAME)),
+                type_parameters: Box::default(),
+                extends: None,
+                implements: [].into(),
+                members: Box::new([method("exec", REGEXP_EXEC_ID)]),
+            })),
+        );
+        builder.set_type_data(
+            REGEXP_EXEC_ID,
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::new_static(REGEXP_EXEC_ID_NAME)),
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
+            }),
+        );
 
         // Build and return
         builder.build()
@@ -456,6 +483,8 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
+        }  else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_REGEXP_ID)
         } else if !qualifier.type_only
             && let Some(ident) = qualifier.path.identifier()
         {
