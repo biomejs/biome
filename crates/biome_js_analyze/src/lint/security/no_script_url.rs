@@ -47,7 +47,7 @@ declare_lint_rule! {
     pub NoScriptUrl {
         version: "next",
         name: "noScriptUrl",
-        language: "jsx",
+        language: "js",
         sources: &[RuleSource::Eslint("no-script-url").same()],
         recommended: false,
         severity: Severity::Error,
