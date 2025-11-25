@@ -17,6 +17,11 @@ use crate::{
     TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
+use super::globals_builder::GlobalsResolverBuilder;
+
+// Re-export all type ID constants from globals_ids
+pub use super::globals_ids::*;
+
 pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
 pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_LEVEL);
 
@@ -32,90 +37,6 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
         })
         .collect()
 });
-
-pub const UNKNOWN_ID: TypeId = TypeId::new(0);
-pub const UNDEFINED_ID: TypeId = TypeId::new(1);
-pub const VOID_ID: TypeId = TypeId::new(2);
-pub const CONDITIONAL_ID: TypeId = TypeId::new(3);
-pub const NUMBER_ID: TypeId = TypeId::new(4);
-pub const STRING_ID: TypeId = TypeId::new(5);
-pub const INSTANCEOF_ARRAY_T_ID: TypeId = TypeId::new(6);
-pub const INSTANCEOF_ARRAY_U_ID: TypeId = TypeId::new(7);
-pub const ARRAY_ID: TypeId = TypeId::new(8);
-pub const ARRAY_FILTER_ID: TypeId = TypeId::new(9);
-pub const ARRAY_FOREACH_ID: TypeId = TypeId::new(10);
-pub const ARRAY_MAP_ID: TypeId = TypeId::new(11);
-pub const GLOBAL_ID: TypeId = TypeId::new(12);
-pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(13);
-pub const PROMISE_ID: TypeId = TypeId::new(14);
-pub const PROMISE_CONSTRUCTOR_ID: TypeId = TypeId::new(15);
-pub const PROMISE_CATCH_ID: TypeId = TypeId::new(16);
-pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(17);
-pub const PROMISE_THEN_ID: TypeId = TypeId::new(18);
-pub const PROMISE_ALL_ID: TypeId = TypeId::new(19);
-pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(20);
-pub const PROMISE_ANY_ID: TypeId = TypeId::new(21);
-pub const PROMISE_RACE_ID: TypeId = TypeId::new(22);
-pub const PROMISE_REJECT_ID: TypeId = TypeId::new(23);
-pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(24);
-pub const PROMISE_TRY_ID: TypeId = TypeId::new(25);
-pub const INSTANCEOF_REGEXP_ID: TypeId = TypeId::new(26);
-pub const REGEXP_ID: TypeId = TypeId::new(27);
-pub const REGEXP_EXEC_ID: TypeId = TypeId::new(28);
-pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(29);
-pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(30);
-pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(31);
-pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(32);
-pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(33);
-pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(34);
-pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(35);
-pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(36);
-pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(37);
-pub const T_ID: TypeId = TypeId::new(38);
-pub const U_ID: TypeId = TypeId::new(39);
-pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(40);
-pub const MAP_CALLBACK_ID: TypeId = TypeId::new(41);
-pub const VOID_CALLBACK_ID: TypeId = TypeId::new(42);
-pub const FETCH_ID: TypeId = TypeId::new(43);
-pub const NUM_PREDEFINED_TYPES: usize = 44; // Must be one more than the highest `TypeId` above.
-
-pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
-pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
-pub const GLOBAL_VOID_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, VOID_ID);
-pub const GLOBAL_CONDITIONAL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, CONDITIONAL_ID);
-pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
-pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
-pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
-pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
-pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);
-pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
-pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
-pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_ID);
-pub const GLOBAL_PROMISE_CONSTRUCTOR_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_CONSTRUCTOR_ID);
-pub const GLOBAL_BIGINT_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, BIGINT_STRING_LITERAL_ID);
-pub const GLOBAL_BOOLEAN_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, BOOLEAN_STRING_LITERAL_ID);
-pub const GLOBAL_FUNCTION_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, FUNCTION_STRING_LITERAL_ID);
-pub const GLOBAL_NUMBER_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_STRING_LITERAL_ID);
-pub const GLOBAL_OBJECT_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, OBJECT_STRING_LITERAL_ID);
-pub const GLOBAL_STRING_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, STRING_STRING_LITERAL_ID);
-pub const GLOBAL_SYMBOL_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_STRING_LITERAL_ID);
-pub const GLOBAL_UNDEFINED_STRING_LITERAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_STRING_LITERAL_ID);
-pub const GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, TYPEOF_OPERATOR_RETURN_UNION_ID);
-pub const GLOBAL_T_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, T_ID);
-pub const GLOBAL_U_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, U_ID);
-pub const GLOBAL_FETCH_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, FETCH_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> &'static str {
@@ -177,7 +98,7 @@ pub fn global_type_name(id: TypeId) -> &'static str {
 /// been shadowed by local declarations, so it should generally only be used
 /// after all other resolvers have failed.
 pub struct GlobalsResolver {
-    types: TypeStore,
+    pub(crate) types: TypeStore,
 }
 
 impl Default for GlobalsResolver {
@@ -238,18 +159,72 @@ impl Default for GlobalsResolver {
             TypeData::from(Literal::String(Text::new_static(value).into()))
         };
 
-        let types = vec![
-            TypeData::Unknown,
-            TypeData::Undefined,
-            TypeData::VoidKeyword,
-            TypeData::Conditional,
-            TypeData::Number,
-            TypeData::String,
+        let mut builder = GlobalsResolverBuilder::new();
+
+        // Reserve all type IDs and ensure IDs match the constants defined above
+        assert_eq!(builder.reserve_id(), UNKNOWN_ID);
+        assert_eq!(builder.reserve_id(), UNDEFINED_ID);
+        assert_eq!(builder.reserve_id(), VOID_ID);
+        assert_eq!(builder.reserve_id(), CONDITIONAL_ID);
+        assert_eq!(builder.reserve_id(), NUMBER_ID);
+        assert_eq!(builder.reserve_id(), STRING_ID);
+        assert_eq!(builder.reserve_id(), INSTANCEOF_ARRAY_T_ID);
+        assert_eq!(builder.reserve_id(), INSTANCEOF_ARRAY_U_ID);
+        assert_eq!(builder.reserve_id(), ARRAY_ID);
+        assert_eq!(builder.reserve_id(), ARRAY_FILTER_ID);
+        assert_eq!(builder.reserve_id(), ARRAY_FOREACH_ID);
+        assert_eq!(builder.reserve_id(), ARRAY_MAP_ID);
+        assert_eq!(builder.reserve_id(), GLOBAL_ID);
+        assert_eq!(builder.reserve_id(), INSTANCEOF_PROMISE_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_CONSTRUCTOR_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_CATCH_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_FINALLY_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_THEN_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_ALL_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_ALL_SETTLED_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_ANY_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_RACE_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_REJECT_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_RESOLVE_ID);
+        assert_eq!(builder.reserve_id(), PROMISE_TRY_ID);
+        assert_eq!(builder.reserve_id(), BIGINT_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), BOOLEAN_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), FUNCTION_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), NUMBER_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), OBJECT_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), STRING_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), SYMBOL_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), UNDEFINED_STRING_LITERAL_ID);
+        assert_eq!(builder.reserve_id(), TYPEOF_OPERATOR_RETURN_UNION_ID);
+        assert_eq!(builder.reserve_id(), T_ID);
+        assert_eq!(builder.reserve_id(), U_ID);
+        assert_eq!(builder.reserve_id(), CONDITIONAL_CALLBACK_ID);
+        assert_eq!(builder.reserve_id(), MAP_CALLBACK_ID);
+        assert_eq!(builder.reserve_id(), VOID_CALLBACK_ID);
+        assert_eq!(builder.reserve_id(), FETCH_ID);
+
+        // Fill in all types
+        builder.set_type(UNKNOWN_ID, TypeData::Unknown);
+        builder.set_type(UNDEFINED_ID, TypeData::Undefined);
+        builder.set_type(VOID_ID, TypeData::VoidKeyword);
+        builder.set_type(CONDITIONAL_ID, TypeData::Conditional);
+        builder.set_type(NUMBER_ID, TypeData::Number);
+        builder.set_type(STRING_ID, TypeData::String);
+        builder.set_type(
+            INSTANCEOF_ARRAY_T_ID,
             TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID)),
+        );
+        builder.set_type(
+            INSTANCEOF_ARRAY_U_ID,
             TypeData::instance_of(TypeInstance {
                 ty: TypeReference::from(GLOBAL_ARRAY_ID),
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             }),
+        );
+
+        builder.set_type(
+            ARRAY_ID,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static("Array")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
@@ -265,26 +240,45 @@ impl Default for GlobalsResolver {
                     },
                 ]),
             })),
+        );
+
+        builder.set_type(
+            ARRAY_FILTER_ID,
             array_method_definition(
                 ARRAY_FILTER_ID,
                 CONDITIONAL_CALLBACK_ID,
                 INSTANCEOF_ARRAY_T_ID,
                 Default::default(),
             ),
+        );
+        builder.set_type(
+            ARRAY_FOREACH_ID,
             array_method_definition(
                 ARRAY_FOREACH_ID,
                 VOID_CALLBACK_ID,
                 VOID_ID,
                 Default::default(),
             ),
+        );
+        builder.set_type(
+            ARRAY_MAP_ID,
             array_method_definition(
                 ARRAY_MAP_ID,
                 MAP_CALLBACK_ID,
                 INSTANCEOF_ARRAY_U_ID,
                 [GLOBAL_U_ID.into()].into(),
             ),
-            TypeData::Global,
+        );
+
+        builder.set_type(GLOBAL_ID, TypeData::Global);
+        builder.set_type(
+            INSTANCEOF_PROMISE_ID,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
+        );
+
+        // Promise class
+        builder.set_type(
+            PROMISE_ID,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static("Promise")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
@@ -307,6 +301,10 @@ impl Default for GlobalsResolver {
                     static_method("try", PROMISE_TRY_ID),
                 ]),
             })),
+        );
+
+        builder.set_type(
+            PROMISE_CONSTRUCTOR_ID,
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -320,33 +318,44 @@ impl Default for GlobalsResolver {
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
+        );
+        builder.set_type(
+            PROMISE_CATCH_ID,
             promise_method_definition(PROMISE_CATCH_ID),
+        );
+        builder.set_type(
+            PROMISE_FINALLY_ID,
             promise_method_definition(PROMISE_FINALLY_ID),
-            promise_method_definition(PROMISE_THEN_ID),
-            promise_method_definition(PROMISE_ALL_ID),
+        );
+        builder.set_type(PROMISE_THEN_ID, promise_method_definition(PROMISE_THEN_ID));
+        builder.set_type(PROMISE_ALL_ID, promise_method_definition(PROMISE_ALL_ID));
+        builder.set_type(
+            PROMISE_ALL_SETTLED_ID,
             promise_method_definition(PROMISE_ALL_SETTLED_ID),
-            promise_method_definition(PROMISE_ANY_ID),
-            promise_method_definition(PROMISE_RACE_ID),
+        );
+        builder.set_type(PROMISE_ANY_ID, promise_method_definition(PROMISE_ANY_ID));
+        builder.set_type(PROMISE_RACE_ID, promise_method_definition(PROMISE_RACE_ID));
+        builder.set_type(
+            PROMISE_REJECT_ID,
             promise_method_definition(PROMISE_REJECT_ID),
+        );
+        builder.set_type(
+            PROMISE_RESOLVE_ID,
             promise_method_definition(PROMISE_RESOLVE_ID),
-            promise_method_definition(PROMISE_TRY_ID),
-            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID)),
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("RegExp")),
-                type_parameters: Box::default(),
-                extends: None,
-                implements: [].into(),
-                members: Box::new([method("exec", REGEXP_EXEC_ID)]),
-            })),
-            regexp_method_definition(REGEXP_EXEC_ID),
-            string_literal("bigint"),
-            string_literal("boolean"),
-            string_literal("function"),
-            string_literal("number"),
-            string_literal("object"),
-            string_literal("string"),
-            string_literal("symbol"),
-            string_literal("undefined"),
+        );
+        builder.set_type(PROMISE_TRY_ID, promise_method_definition(PROMISE_TRY_ID));
+
+        // String literals for typeof operator
+        builder.set_type(BIGINT_STRING_LITERAL_ID, string_literal("bigint"));
+        builder.set_type(BOOLEAN_STRING_LITERAL_ID, string_literal("boolean"));
+        builder.set_type(FUNCTION_STRING_LITERAL_ID, string_literal("function"));
+        builder.set_type(NUMBER_STRING_LITERAL_ID, string_literal("number"));
+        builder.set_type(OBJECT_STRING_LITERAL_ID, string_literal("object"));
+        builder.set_type(STRING_STRING_LITERAL_ID, string_literal("string"));
+        builder.set_type(SYMBOL_STRING_LITERAL_ID, string_literal("symbol"));
+        builder.set_type(UNDEFINED_STRING_LITERAL_ID, string_literal("undefined"));
+        builder.set_type(
+            TYPEOF_OPERATOR_RETURN_UNION_ID,
             TypeData::Union(Box::new(Union(Box::new([
                 GLOBAL_BIGINT_STRING_LITERAL_ID.into(),
                 GLOBAL_BOOLEAN_STRING_LITERAL_ID.into(),
@@ -357,16 +366,29 @@ impl Default for GlobalsResolver {
                 GLOBAL_SYMBOL_STRING_LITERAL_ID.into(),
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ])))),
+        );
+
+        // Generic type parameters
+        builder.set_type(
+            T_ID,
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("T"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
             }),
+        );
+        builder.set_type(
+            U_ID,
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("U"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
             }),
+        );
+
+        // Callback functions
+        builder.set_type(
+            CONDITIONAL_CALLBACK_ID,
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -374,6 +396,9 @@ impl Default for GlobalsResolver {
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
             }),
+        );
+        builder.set_type(
+            MAP_CALLBACK_ID,
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -387,6 +412,9 @@ impl Default for GlobalsResolver {
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_U_ID.into()),
             }),
+        );
+        builder.set_type(
+            VOID_CALLBACK_ID,
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -394,6 +422,11 @@ impl Default for GlobalsResolver {
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
+        );
+
+        // Fetch function
+        builder.set_type(
+            FETCH_ID,
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -401,12 +434,10 @@ impl Default for GlobalsResolver {
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             }),
-        ];
+        );
 
-        let types: Vec<_> = types.into_iter().map(Arc::new).collect();
-        Self {
-            types: TypeStore::from_types(types),
-        }
+        // Build and return
+        builder.build()
     }
 }
 
