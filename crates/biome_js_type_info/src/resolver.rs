@@ -5,9 +5,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
-    Union,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
@@ -34,8 +34,12 @@ pub struct ResolvedTypeId(ResolverId, TypeId);
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.0.level() == TypeResolverLevel::Global {
-            if self.1.index() < NUM_PREDEFINED_TYPES {
-                f.write_str(global_type_name(self.1))
+            // Try to get name from GLOBAL_RESOLVER first
+            if let Some(name) = global_type_name(self.1) {
+                f.write_str(name)
+            } else if self.1.index() < NUM_PREDEFINED_TYPES {
+                // Fallback for predefined types without names
+                f.write_fmt(format_args!("Global TypeId({})", self.1.index()))
             } else {
                 let id = self.1.index() - NUM_PREDEFINED_TYPES;
                 f.write_fmt(format_args!("Global TypeId({id})"))

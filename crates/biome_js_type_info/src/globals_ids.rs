@@ -1,57 +1,72 @@
 //! Type ID constants for global types.
 //!
-//! These constants define the indices for predefined global types in the type store.
-//! The specific index values matter because they determine the order of types in the
-//! GlobalsResolver's TypeStore.
-//!
-//! TODO(tidefield): Auto-generate this file from TypeScript .d.ts files.
+//! TODO(tidefield): Implement a codegen for this file from TypeScript .d.ts files.
 
-use crate::{ResolvedTypeId, TypeId, TypeResolverLevel};
+// use crate::define_global_type;
+use crate::{ResolvedTypeId, TypeId};
 
 use super::globals::GLOBAL_LEVEL;
 
-// Type ID constants
-pub const UNKNOWN_ID: TypeId = TypeId::new(0);
-pub const UNDEFINED_ID: TypeId = TypeId::new(1);
-pub const VOID_ID: TypeId = TypeId::new(2);
-pub const CONDITIONAL_ID: TypeId = TypeId::new(3);
-pub const NUMBER_ID: TypeId = TypeId::new(4);
-pub const STRING_ID: TypeId = TypeId::new(5);
-pub const INSTANCEOF_ARRAY_T_ID: TypeId = TypeId::new(6);
-pub const INSTANCEOF_ARRAY_U_ID: TypeId = TypeId::new(7);
-pub const ARRAY_ID: TypeId = TypeId::new(8);
-pub const ARRAY_FILTER_ID: TypeId = TypeId::new(9);
-pub const ARRAY_FOREACH_ID: TypeId = TypeId::new(10);
-pub const ARRAY_MAP_ID: TypeId = TypeId::new(11);
-pub const GLOBAL_ID: TypeId = TypeId::new(12);
-pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(13);
-pub const PROMISE_ID: TypeId = TypeId::new(14);
-pub const PROMISE_CONSTRUCTOR_ID: TypeId = TypeId::new(15);
-pub const PROMISE_CATCH_ID: TypeId = TypeId::new(16);
-pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(17);
-pub const PROMISE_THEN_ID: TypeId = TypeId::new(18);
-pub const PROMISE_ALL_ID: TypeId = TypeId::new(19);
-pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(20);
-pub const PROMISE_ANY_ID: TypeId = TypeId::new(21);
-pub const PROMISE_RACE_ID: TypeId = TypeId::new(22);
-pub const PROMISE_REJECT_ID: TypeId = TypeId::new(23);
-pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(24);
-pub const PROMISE_TRY_ID: TypeId = TypeId::new(25);
-pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(26);
-pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(27);
-pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(28);
-pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(29);
-pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(30);
-pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(31);
-pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(32);
-pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(33);
-pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(34);
-pub const T_ID: TypeId = TypeId::new(35);
-pub const U_ID: TypeId = TypeId::new(36);
-pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(37);
-pub const MAP_CALLBACK_ID: TypeId = TypeId::new(38);
-pub const VOID_CALLBACK_ID: TypeId = TypeId::new(39);
-pub const FETCH_ID: TypeId = TypeId::new(40);
+// FIXME(tidefield): Get rid of the macro when implementing the codegen to improve compile time
+// Right now, I'm preserving the names so that the snapshot tests don't break the snapshot tests
+// to make sure I'm not breaking anything.
+#[macro_export]
+macro_rules! define_global_type {
+    ($name:ident, $index:expr, $name_str:expr) => {
+        pub const $name: TypeId = TypeId::new($index);
+        paste::paste! {
+            pub const [<$name _NAME>]: &str = $name_str;
+        }
+    };
+}
+// define_global_type!(ARRAY_ID, 8, "Array");         // Creates ARRAY_ID and ARRAY_ID_NAME
+
+// Type ID constants with their names defined together
+define_global_type!(UNKNOWN_ID, 0, "unknown");
+define_global_type!(UNDEFINED_ID, 1, "undefined");
+define_global_type!(VOID_ID, 2, "void");
+define_global_type!(CONDITIONAL_ID, 3, "conditional");
+define_global_type!(NUMBER_ID, 4, "number");
+define_global_type!(STRING_ID, 5, "string");
+define_global_type!(INSTANCEOF_ARRAY_T_ID, 6, "instanceof Array<T>");
+define_global_type!(INSTANCEOF_ARRAY_U_ID, 7, "instanceof Array<U>");
+define_global_type!(ARRAY_ID, 8, "Array");
+define_global_type!(ARRAY_FILTER_ID, 9, "Array.prototype.filter");
+define_global_type!(ARRAY_FOREACH_ID, 10, "Array.prototype.forEach");
+define_global_type!(ARRAY_MAP_ID, 11, "Array.prototype.map");
+define_global_type!(GLOBAL_ID, 12, "globalThis");
+define_global_type!(INSTANCEOF_PROMISE_ID, 13, "instanceof Promise");
+define_global_type!(PROMISE_ID, 14, "Promise");
+define_global_type!(PROMISE_CONSTRUCTOR_ID, 15, "Promise.constructor");
+define_global_type!(PROMISE_CATCH_ID, 16, "Promise.prototype.catch");
+define_global_type!(PROMISE_FINALLY_ID, 17, "Promise.prototype.finally");
+define_global_type!(PROMISE_THEN_ID, 18, "Promise.prototype.then");
+define_global_type!(PROMISE_ALL_ID, 19, "Promise.all");
+define_global_type!(PROMISE_ALL_SETTLED_ID, 20, "Promise.allSettled");
+define_global_type!(PROMISE_ANY_ID, 21, "Promise.any");
+define_global_type!(PROMISE_RACE_ID, 22, "Promise.race");
+define_global_type!(PROMISE_REJECT_ID, 23, "Promise.reject");
+define_global_type!(PROMISE_RESOLVE_ID, 24, "Promise.resolve");
+define_global_type!(PROMISE_TRY_ID, 25, "Promise.try");
+define_global_type!(BIGINT_STRING_LITERAL_ID, 26, "\"bigint\"");
+define_global_type!(BOOLEAN_STRING_LITERAL_ID, 27, "\"boolean\"");
+define_global_type!(FUNCTION_STRING_LITERAL_ID, 28, "\"function\"");
+define_global_type!(NUMBER_STRING_LITERAL_ID, 29, "\"number\"");
+define_global_type!(OBJECT_STRING_LITERAL_ID, 30, "\"object\"");
+define_global_type!(STRING_STRING_LITERAL_ID, 31, "\"string\"");
+define_global_type!(SYMBOL_STRING_LITERAL_ID, 32, "\"symbol\"");
+define_global_type!(UNDEFINED_STRING_LITERAL_ID, 33, "\"undefined\"");
+define_global_type!(
+    TYPEOF_OPERATOR_RETURN_UNION_ID,
+    34,
+    "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" | \"string\" | \"symbol\" | \"undefined\""
+);
+define_global_type!(T_ID, 35, "T");
+define_global_type!(U_ID, 36, "U");
+define_global_type!(CONDITIONAL_CALLBACK_ID, 37, "() => conditional");
+define_global_type!(MAP_CALLBACK_ID, 38, "<U>(item: T) => U");
+define_global_type!(VOID_CALLBACK_ID, 39, "() => void");
+define_global_type!(FETCH_ID, 40, "fetch");
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
@@ -61,8 +76,7 @@ pub const NUM_PREDEFINED_TYPES: usize = 41;
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
 pub const GLOBAL_VOID_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, VOID_ID);
-pub const GLOBAL_CONDITIONAL_ID: ResolvedTypeId =
-    ResolvedTypeId::new(GLOBAL_LEVEL, CONDITIONAL_ID);
+pub const GLOBAL_CONDITIONAL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, CONDITIONAL_ID);
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
 pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
