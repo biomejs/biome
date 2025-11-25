@@ -483,7 +483,7 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
-        }  else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
+        } else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_REGEXP_ID)
         } else if !qualifier.type_only
             && let Some(ident) = qualifier.path.identifier()
