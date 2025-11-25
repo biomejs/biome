@@ -4252,7 +4252,6 @@
 		},
 		"NoReturnAssignOptions": {
 			"type": "object",
-			"properties": { "exceptParenthesis": { "type": ["boolean", "null"] } },
 			"additionalProperties": false
 		},
 		"NoScriptUrlConfiguration": {

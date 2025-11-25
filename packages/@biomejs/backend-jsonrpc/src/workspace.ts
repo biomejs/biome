@@ -6469,9 +6469,7 @@ export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
-export interface NoReturnAssignOptions {
-	exceptParenthesis?: boolean;
-}
+export type NoReturnAssignOptions = {};
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
