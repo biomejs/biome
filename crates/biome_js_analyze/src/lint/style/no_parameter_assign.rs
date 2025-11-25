@@ -148,10 +148,30 @@ impl Rule for NoParameterAssign {
 
                         match left.as_any_js_assignment()? {
                             AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
-                                assignment.object().ok()
+                                if assignment
+                                    .object()
+                                    .ok()?
+                                    .get_callee_object_name()?
+                                    .token_text_trimmed()
+                                    == binding.name_token().ok()?.token_text_trimmed()
+                                {
+                                    return assignment.object().ok();
+                                }
+
+                                None
                             }
                             AnyJsAssignment::JsStaticMemberAssignment(assignment) => {
-                                assignment.object().ok()
+                                if assignment
+                                    .object()
+                                    .ok()?
+                                    .get_callee_object_name()?
+                                    .token_text_trimmed()
+                                    == binding.name_token().ok()?.token_text_trimmed()
+                                {
+                                    return assignment.object().ok();
+                                }
+
+                                None
                             }
                             _ => None,
                         }
