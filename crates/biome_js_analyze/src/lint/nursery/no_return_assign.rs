@@ -109,7 +109,6 @@ fn traverse_expression(root: &AnyJsExpression) -> Vec<TextRange> {
             let is_expression = AnyJsExpression::can_cast(node.kind());
 
             if !is_expression {
-                std::println!("{:?}", node.kind());
                 iter.skip_subtree();
             }
         }
