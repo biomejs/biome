@@ -451,6 +451,7 @@ impl Scanner {
                 handleable_paths.push(path);
             }
         }
+
         let _ = self
             .watcher_tx
             .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
@@ -465,7 +466,7 @@ impl Scanner {
             }
         }));
 
-        let result = workspace.update_project_config_files(ctx.project_key, &configs);
+        let result = workspace.update_project_config_files(ctx.project_key, &mut configs);
         match result {
             Ok(diagnostics) => {
                 for diagnostic in diagnostics {

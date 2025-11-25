@@ -62,7 +62,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     fn update_project_config_files(
         &self,
         project_key: ProjectKey,
-        files: &[BiomePath],
+        files: &mut Vec<BiomePath>,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Informs the workspace of the list of ignore files.

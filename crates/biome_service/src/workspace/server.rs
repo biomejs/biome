@@ -2216,7 +2216,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     fn update_project_config_files(
         &self,
         project_key: ProjectKey,
-        paths: &[BiomePath],
+        paths: &mut Vec<BiomePath>,
     ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
         let project_path = self
             .projects
@@ -2225,97 +2225,118 @@ impl WorkspaceScannerBridge for WorkspaceServer {
 
         let mut returned_diagnostics = Vec::new();
 
-        let filtered_paths = paths
-            .iter()
-            // We remove the root configuration file from the list of paths
-            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
-            .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
+        // Ensure we nested roots before any sub-projects thereof.
+        paths.sort_by(|a, b| a.as_path().cmp(b.as_path()));
 
-        for filtered_path in filtered_paths {
-            let loaded_nested_configuration = load_nested_configuration(
-                self.fs.as_ref(),
-                &project_path,
-                ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
-            )?;
+        let mut nested_roots = Vec::new();
 
-            let LoadedConfiguration {
-                directory_path: nested_directory_path,
-                configuration: nested_configuration,
-                diagnostics,
-                ..
-            } = loaded_nested_configuration;
-            let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
-            returned_diagnostics.extend(
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new),
-            );
+        *paths = std::mem::take(paths).into_iter().try_fold(
+            Vec::new(),
+            |mut filtered_paths, config_path| -> Result<Vec<BiomePath>, WorkspaceError> {
+                // We remove the root configuration file from the list of paths
+                // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
+                if project_path == config_path.parent().unwrap() {
+                    return Ok(filtered_paths);
+                }
+                if nested_roots
+                    .iter()
+                    .any(|root| config_path.starts_with(root))
+                {
+                    // This path is already covered by a nested root we found earlier.
+                    return Ok(filtered_paths);
+                }
 
-            if has_errors {
-                continue;
-            }
+                let loaded_nested_configuration = load_nested_configuration(
+                    self.fs.as_ref(),
+                    &project_path,
+                    ConfigurationPathHint::FromWorkspace(config_path.as_path().to_path_buf()),
+                )?;
 
-            // Explicit nested roots are ok, but implicit ones are probably a mistake.
-            if nested_configuration.root.is_none() {
-                returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
-                    BiomeDiagnostic::root_in_root(
-                        filtered_path.to_string(),
-                        Some(project_path.to_string()),
-                    ),
-                ));
-                continue;
-            }
+                let LoadedConfiguration {
+                    directory_path: nested_directory_path,
+                    configuration: nested_configuration,
+                    diagnostics,
+                    ..
+                } = loaded_nested_configuration;
+                let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
+                returned_diagnostics.extend(
+                    diagnostics
+                        .into_iter()
+                        .map(biome_diagnostics::serde::Diagnostic::new),
+                );
 
-            let nested_configuration = if nested_configuration.is_root() {
-                // We only find an explicit root from load_nested_configuration if it's a nested root.
-                // e.g.
-                //
-                // - project_path/
-                //     - biome.json (root: true implied)
-                //     - nested/
-                //         - biome.json (root: true)
-                //         - app.js
-                //
-                // We should completely ignore the nested/ directory when scanning
-                // project_path. Among other things, this allows us to have an e2e test suite.
-                let mut ignorer = Configuration::default();
-                ignorer.root = Some(Bool(false));
-                ignorer.nested_root = true;
-                ignorer.files = Some(FilesConfiguration {
-                    max_size: None,
-                    ignore_unknown: Some(Bool(true)),
-                    includes: Some(vec![
-                        NormalizedGlob::from_str("!!**/*").expect("force ignore to parse"),
-                    ]),
-                    experimental_scanner_ignores: None,
-                });
-                ignorer
-            } else if nested_configuration.extends_root() {
-                let root_settings = self
-                    .projects
-                    .get_root_settings(project_key)
-                    .ok_or_else(WorkspaceError::no_project)?;
-                let mut root_configuration = root_settings
-                    .source()
-                    .ok_or_else(WorkspaceError::no_project)?;
+                if has_errors {
+                    return Ok(filtered_paths);
+                }
 
-                root_configuration.merge_with(nested_configuration);
-                // We need to be careful that our merge doesn't leave
-                // `root: true` from the root config.
-                root_configuration.root = Some(Bool(false));
-                root_configuration
-            } else {
-                nested_configuration
-            };
+                // Explicit nested roots are ok, but implicit ones are probably a mistake.
+                if nested_configuration.is_root() && nested_configuration.root.is_none() {
+                    nested_roots.extend(nested_directory_path);
+                    returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                        BiomeDiagnostic::root_in_root(
+                            config_path.to_string(),
+                            Some(project_path.to_string()),
+                        ),
+                    ));
+                    return Ok(filtered_paths);
+                }
 
-            let result = self.update_settings(UpdateSettingsParams {
-                project_key,
-                workspace_directory: nested_directory_path.map(BiomePath::from),
-                configuration: nested_configuration,
-            })?;
+                let nested_configuration = if nested_configuration.is_root() {
+                    // We only find an explicit root from load_nested_configuration if it's a nested root.
+                    // e.g.
+                    //
+                    // - project_path/
+                    //     - biome.json (root: true implied)
+                    //     - nested/
+                    //         - biome.json (root: true)
+                    //         - app.js
+                    //
+                    // We should completely ignore the nested/ directory when scanning
+                    // project_path. Among other things, this allows us to have an e2e test suite.
+                    //
+                    nested_roots.extend(nested_directory_path.clone());
 
-            returned_diagnostics.extend(result.diagnostics)
-        }
+                    let mut ignorer = Configuration::default();
+                    ignorer.root = Some(Bool(false));
+                    ignorer.nested_root = true;
+                    ignorer.files = Some(FilesConfiguration {
+                        max_size: None,
+                        ignore_unknown: Some(Bool(true)),
+                        includes: Some(vec![
+                            NormalizedGlob::from_str("!!**/*").expect("force ignore to parse"),
+                        ]),
+                        experimental_scanner_ignores: None,
+                    });
+                    ignorer
+                } else if nested_configuration.extends_root() {
+                    let root_settings = self
+                        .projects
+                        .get_root_settings(project_key)
+                        .ok_or_else(WorkspaceError::no_project)?;
+                    let mut root_configuration = root_settings
+                        .source()
+                        .ok_or_else(WorkspaceError::no_project)?;
+
+                    root_configuration.merge_with(nested_configuration);
+                    // We need to be careful that our merge doesn't leave
+                    // `root: true` from the root config.
+                    root_configuration.root = Some(Bool(false));
+                    root_configuration
+                } else {
+                    nested_configuration
+                };
+
+                let result = self.update_settings(UpdateSettingsParams {
+                    project_key,
+                    workspace_directory: nested_directory_path.map(BiomePath::from),
+                    configuration: nested_configuration,
+                })?;
+
+                returned_diagnostics.extend(result.diagnostics);
+                filtered_paths.push(config_path);
+                Ok(filtered_paths)
+            },
+        )?;
 
         Ok(returned_diagnostics)
     }
