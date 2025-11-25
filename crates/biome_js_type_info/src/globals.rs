@@ -406,7 +406,6 @@ impl Default for GlobalsResolver {
             }),
         );
 
-        // Build and return
         builder.build()
     }
 }

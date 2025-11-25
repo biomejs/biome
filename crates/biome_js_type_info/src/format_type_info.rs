@@ -591,17 +591,6 @@ impl Format<FormatTypeContext> for TypeReference {
                 if level == TypeResolverLevel::Global {
                     if let Some(name) = global_type_name(id) {
                         write!(f, [token(name)])
-                    } else if resolved.index() < NUM_PREDEFINED_TYPES {
-                        // Fallback for predefined types without names
-                        let id = TypeId::new(id.index() - NUM_PREDEFINED_TYPES);
-                        write!(
-                            f,
-                            [&format_args![
-                                token("Global"),
-                                space(),
-                                text(&std::format!("{id:?}"), TextSize::default()),
-                            ]]
-                        )
                     } else {
                         // Start counting from `NUM_PREDEFINED_TYPES` so
                         // snapshots remain stable even if we add new predefined
