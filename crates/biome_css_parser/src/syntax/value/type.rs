@@ -159,7 +159,7 @@ fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if parse_any_syntax_single_component(p).ok().is_none() {
+    if parse_any_syntax_single_component(p).is_absent() {
         m.abandon(p);
         return Absent;
     }
