@@ -1,8 +1,12 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsReturnStatement};
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_js_syntax::{
+    AnyJsExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsReturnStatement,
+};
+use biome_rowan::{AstNode, TextRange, WalkEvent, declare_node_union};
 use biome_rule_options::no_return_assign::NoReturnAssignOptions;
 
 use crate::services::semantic::Semantic;
@@ -55,7 +59,7 @@ declare_node_union! {
 
 impl Rule for NoReturnAssign {
     type Query = Semantic<AnyReturn>;
-    type State = TextRange;
+    type State = Vec<TextRange>;
     type Signals = Option<Self::State>;
     type Options = NoReturnAssignOptions;
 
@@ -70,75 +74,56 @@ impl Rule for NoReturnAssign {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
+        let detail = match ctx.query() {
+            AnyReturn::JsArrowFunctionExpression(_) => markup! {
+                <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+            },
+            AnyReturn::JsReturnStatement(_) => markup! {
+                <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+            },
+        };
+        let diagnostic =
             RuleDiagnostic::new(
                 rule_category!(),
-                state,
-                match ctx.query() {
-                    AnyReturn::JsArrowFunctionExpression(_) =>
-                        markup! {
-                            <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-                        },
-                    AnyReturn::JsReturnStatement(_) =>
-                        markup! {
-                            <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-                        },
-                }
-            )
-            .note(markup! {
+                ctx.query().range(),
+                detail
+            ).note(markup! {
                 "Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
-            }),
-        )
+            });
+
+        let span_iter = state.iter();
+        Some(span_iter.fold(diagnostic, |diag, span| {
+            diag.detail(
+                span,
+                markup! {
+                    "Assignment here"
+                },
+            )
+        }))
     }
 }
 
-fn traverse_expression(root: &AnyJsExpression) -> Option<TextRange> {
-    let mut stack = vec![root.clone()];
-    while let Some(current_node) = stack.pop() {
-        match current_node {
-            AnyJsExpression::JsAssignmentExpression(_) => return Some(current_node.range()),
-            AnyJsExpression::JsParenthesizedExpression(expression) => {
-                if let Ok(expression) = expression.expression() {
-                    stack.push(expression);
-                }
+fn traverse_expression(root: &AnyJsExpression) -> Option<Vec<TextRange>> {
+    let mut signal = Vec::new();
+    let mut iter = root.syntax().preorder();
+
+    while let Some(event) = iter.next() {
+        if let WalkEvent::Enter(node) = event {
+            if JsAssignmentExpression::can_cast(node.kind()) {
+                signal.push(node.text_range());
+                iter.skip_subtree();
+                continue;
             }
-            AnyJsExpression::JsBinaryExpression(expression) => {
-                if let Ok(left) = expression.left() {
-                    stack.push(left);
-                }
-                if let Ok(right) = expression.right() {
-                    stack.push(right);
-                }
+
+            let is_expression = AnyJsExpression::can_cast(node.kind());
+
+            if !is_expression {
+                iter.skip_subtree();
             }
-            AnyJsExpression::JsSequenceExpression(expression) => {
-                if let Ok(left) = expression.left() {
-                    stack.push(left);
-                }
-                if let Ok(right) = expression.right() {
-                    stack.push(right);
-                }
-            }
-            AnyJsExpression::JsConditionalExpression(expression) => {
-                if let Ok(test) = expression.test() {
-                    stack.push(test);
-                }
-                if let Ok(consequent) = expression.consequent() {
-                    stack.push(consequent);
-                }
-                if let Ok(alternate) = expression.alternate() {
-                    stack.push(alternate);
-                }
-            }
-            AnyJsExpression::JsLogicalExpression(expression) => {
-                if let Ok(left) = expression.left() {
-                    stack.push(left);
-                }
-                if let Ok(right) = expression.right() {
-                    stack.push(right);
-                }
-            }
-            _ => {}
         }
+    }
+    if !signal.is_empty() {
+        return Some(signal);
     }
     None
 }
