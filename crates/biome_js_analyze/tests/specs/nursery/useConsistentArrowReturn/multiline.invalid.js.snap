@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 151
 expression: multiline.invalid.js
 ---
 # Input
@@ -32,6 +31,31 @@ const nested = () =>
     arg1,
     arg2
   )
+
+const withInlineComment = (l) =>
+  l
+    /* keep this comment */
+    .split('\n')
+
+const withLineComment = (arr) =>
+  arr
+    // this comment is important
+    .filter(x => x > 0)
+
+const withCommentInObject = () =>
+  ({
+    // important note
+    prop1: 'value1',
+    prop2: 'value2'
+  })
+
+const withCommentInArray = () =>
+  [
+    // first element
+    1,
+    2,
+    3
+  ]
 
 ```
 
@@ -236,6 +260,7 @@ multiline.invalid.js:23:16 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
   > 27 │   )
        │   ^
     28 │ 
+    29 │ const withInlineComment = (l) =>
   
   i Safe fix: Add braces to the arrow function body.
   
@@ -250,6 +275,33 @@ multiline.invalid.js:23:16 lint/nursery/useConsistentArrowReturn  FIXABLE  ━�
        28 │ + ··);
        29 │ + }
     28 30 │   
+    29 31 │   const withInlineComment = (l) =>
+  
+
+```
+
+```
+multiline.invalid.js:37:13 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+    35 │   arr
+    36 │     // this comment is important
+  > 37 │     .filter(x => x > 0)
+       │             ^^^^^^^^^^
+    38 │ 
+    39 │ const withCommentInObject = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    35 35 │     arr
+    36 36 │       // this comment is important
+    37    │ - ····.filter(x·=>·x·>·0)
+       37 │ + ····.filter(x·=>·{
+       38 │ + → return·x·>·0;
+       39 │ + })
+    38 40 │   
+    39 41 │   const withCommentInObject = () =>
   
 
 ```

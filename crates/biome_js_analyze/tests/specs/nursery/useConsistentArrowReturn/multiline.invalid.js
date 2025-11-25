@@ -25,3 +25,28 @@ const nested = () =>
     arg1,
     arg2
   )
+
+const withInlineComment = (l) =>
+  l
+    /* keep this comment */
+    .split('\n')
+
+const withLineComment = (arr) =>
+  arr
+    // this comment is important
+    .filter(x => x > 0)
+
+const withCommentInObject = () =>
+  ({
+    // important note
+    prop1: 'value1',
+    prop2: 'value2'
+  })
+
+const withCommentInArray = () =>
+  [
+    // first element
+    1,
+    2,
+    3
+  ]
