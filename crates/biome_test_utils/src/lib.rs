@@ -438,12 +438,22 @@ pub fn write_analyzer_snapshot(
     diagnostics: &[String],
     code_fixes: &[String],
     markdown_language: &str,
+    parser_diagnostics: usize,
 ) {
     writeln!(snapshot, "# Input").unwrap();
     writeln!(snapshot, "```{markdown_language}").unwrap();
     writeln!(snapshot, "{input_code}").unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();
+
+    if parser_diagnostics > 0 {
+        writeln!(
+            snapshot,
+            "_Note: The parser emitted {parser_diagnostics} diagnostics which are not shown here._"
+        )
+        .unwrap();
+        writeln!(snapshot).unwrap();
+    }
 
     if !diagnostics.is_empty() {
         writeln!(snapshot, "# Diagnostics").unwrap();
