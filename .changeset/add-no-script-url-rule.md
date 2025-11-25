@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 Added the rule [`noScriptUrl`](https://biomejs.dev/linter/rules/no-script-url/).
