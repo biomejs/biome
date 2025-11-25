@@ -147,7 +147,7 @@ fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
 
         if SYNTAX_KIND_WITHOUT_MULTIPLIER.contains(&p.cur_text()) {
             p.bump_remap(T![ident]);
-            p.bump(T![>]);
+            p.expect(T![>]);
 
             return Present(m.complete(p, CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER));
         }
