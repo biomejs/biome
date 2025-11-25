@@ -117,10 +117,10 @@ impl Rule for NoScriptUrl {
                     if let Some(props) = props {
                         let members = props.members();
                         for member in members {
-                            let member = member.ok()?;
-                            let property_member = member.as_js_property_object_member()?;
-                            let property_name = property_member.name().ok()?;
-                            let name = property_name.as_js_literal_member_name()?;
+                            let Ok(member) = member else { continue };
+                            let Some(property_member) = member.as_js_property_object_member() else { continue };
+                            let Ok(property_name) = property_member.name() else { continue };
+                            let Some(name) = property_name.as_js_literal_member_name() else { continue };
 
                             if name.syntax().text_trimmed() == "href" {
                                 let value = property_member.value().ok()?;
