@@ -59,51 +59,44 @@ declare_node_union! {
 
 impl Rule for NoReturnAssign {
     type Query = Semantic<AnyReturn>;
-    type State = Vec<TextRange>;
-    type Signals = Option<Self::State>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>;
     type Options = NoReturnAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        match ctx.query() {
-            AnyReturn::JsReturnStatement(query) => traverse_expression(&query.argument()?),
-
-            AnyReturn::JsArrowFunctionExpression(query) => {
-                traverse_expression(query.body().ok()?.as_any_js_expression()?)
-            }
-        }
+        run_options(ctx).unwrap_or(Vec::new())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let detail = match ctx.query() {
-            AnyReturn::JsArrowFunctionExpression(_) => markup! {
-                <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-            },
-            AnyReturn::JsReturnStatement(_) => markup! {
-                <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
-            },
-        };
-        let diagnostic =
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
-                detail
+                state,
+                match ctx.query() {
+                    AnyReturn::JsArrowFunctionExpression(_) => markup! {
+                        <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+                    },
+                    AnyReturn::JsReturnStatement(_) => markup! {
+                        <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+                    },
+                }
             ).note(markup! {
                 "Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
-            });
-
-        let span_iter = state.iter();
-        Some(span_iter.fold(diagnostic, |diag, span| {
-            diag.detail(
-                span,
-                markup! {
-                    "Assignment here"
-                },
-            )
-        }))
+            }))
     }
 }
 
-fn traverse_expression(root: &AnyJsExpression) -> Option<Vec<TextRange>> {
+fn run_options(ctx: &RuleContext<NoReturnAssign>) -> Option<Vec<TextRange>> {
+    match ctx.query() {
+        AnyReturn::JsReturnStatement(query) => Some(traverse_expression(&query.argument()?)),
+
+        AnyReturn::JsArrowFunctionExpression(query) => Some(traverse_expression(
+            query.body().ok()?.as_any_js_expression()?,
+        )),
+    }
+}
+
+fn traverse_expression(root: &AnyJsExpression) -> Vec<TextRange> {
     let mut signal = Vec::new();
     let mut iter = root.syntax().preorder();
 
@@ -111,19 +104,15 @@ fn traverse_expression(root: &AnyJsExpression) -> Option<Vec<TextRange>> {
         if let WalkEvent::Enter(node) = event {
             if JsAssignmentExpression::can_cast(node.kind()) {
                 signal.push(node.text_range());
-                iter.skip_subtree();
-                continue;
             }
 
             let is_expression = AnyJsExpression::can_cast(node.kind());
 
             if !is_expression {
+                std::println!("{:?}", node.kind());
                 iter.skip_subtree();
             }
         }
     }
-    if !signal.is_empty() {
-        return Some(signal);
-    }
-    None
+    signal
 }
