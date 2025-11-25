@@ -122,13 +122,11 @@ fn parse_any_attr_unit(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    let m = p.start();
     if p.at(T![%]) {
-        let m = p.start();
         p.bump_remap(T![ident]);
         return Present(m.complete(p, CSS_REGULAR_ATTR_UNIT));
     }
-
-    let m = p.start();
 
     let kind = if is_nth_at_unit(p, 0) {
         CSS_REGULAR_ATTR_UNIT
