@@ -2077,7 +2077,7 @@ CssUnknownAttrUnit =
 
 AnyCssAttrType =
 	CssRawStringDeclarator
-	|CssTypeFunction
+	| CssTypeFunction
 	| CssNumberDeclarator
 	| AnyCssAttrUnit
 
