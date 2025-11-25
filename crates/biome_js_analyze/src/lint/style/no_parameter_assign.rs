@@ -21,9 +21,6 @@ declare_lint_rule! {
     /// as modifying parameters will also mutate the `arguments` object.
     /// It is often unintended and indicative of a programmer error.
     ///
-    /// In contrast to the _ESLint_ rule, this rule cannot be configured to report
-    /// assignments to a property of a parameter.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
