@@ -46,6 +46,7 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
 // Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> Option<&'static str> {
     use crate::globals_ids::*;
+    // TODO(tidefield): Enforce exhaustiveness in this list
     match id {
         UNKNOWN_ID => Some(UNKNOWN_ID_NAME),
         UNDEFINED_ID => Some(UNDEFINED_ID_NAME),
