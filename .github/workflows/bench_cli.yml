@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Get PR SHA
         id: sha
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           result-encoding: string
           script: |
@@ -29,7 +29,7 @@ jobs:
             return response.data.head.sha;
 
       - name: Checkout PR Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           ref: ${{ steps.sha.outputs.result }}
 
@@ -50,7 +50,7 @@ jobs:
           cp target/release/biome benchmark/target/biome_pr
 
       - name: Checkout Main Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           clean: false
           ref: main
@@ -61,17 +61,17 @@ jobs:
           cp target/release/biome benchmark/target/biome_main
 
       - name: Checkout webpack
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: webpack/webpack
           path: benchmark/target/webpack
       - name: Checkout prettier
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: prettier/prettier
           path: benchmark/target/prettier
       - name: Checkout eslint
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: eslint/eslint
           path: benchmark/target/eslint
@@ -96,7 +96,7 @@ jobs:
       - name: Write a new comment
         # Check if the event is not triggered by a fork
         if: github.event.pull_request.head.repo.full_name == github.repository
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         continue-on-error: true
         with:
           issue-number: ${{ github.event.issue.number }}

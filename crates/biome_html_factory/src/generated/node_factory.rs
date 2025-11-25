@@ -727,6 +727,42 @@ impl VueVOnShorthandDirectiveBuilder {
         ))
     }
 }
+pub fn vue_v_slot_shorthand_directive(
+    hash_token: SyntaxToken,
+    arg: AnyVueDirectiveArgument,
+    modifiers: VueModifierList,
+) -> VueVSlotShorthandDirectiveBuilder {
+    VueVSlotShorthandDirectiveBuilder {
+        hash_token,
+        arg,
+        modifiers,
+        initializer: None,
+    }
+}
+pub struct VueVSlotShorthandDirectiveBuilder {
+    hash_token: SyntaxToken,
+    arg: AnyVueDirectiveArgument,
+    modifiers: VueModifierList,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl VueVSlotShorthandDirectiveBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> VueVSlotShorthandDirective {
+        VueVSlotShorthandDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_SLOT_SHORTHAND_DIRECTIVE,
+            [
+                Some(SyntaxElement::Token(self.hash_token)),
+                Some(SyntaxElement::Node(self.arg.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,

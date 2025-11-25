@@ -24,6 +24,7 @@ Math.min(0, globalThis.Math.max(100, x));
 
 foo(Math.min(0, Math.max(100, x)));
 
+Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
 ```
 
 # Diagnostics
@@ -328,6 +329,7 @@ invalid.js:19:5 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
   > 19 │ foo(Math.min(0, Math.max(100, x)));
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ 
+    21 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
   
   i It always evaluates to 0.
   
@@ -336,6 +338,7 @@ invalid.js:19:5 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
   > 19 │ foo(Math.min(0, Math.max(100, x)));
        │              ^
     20 │ 
+    21 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
   
   i Unsafe fix: Swap 0 with 100.
   
@@ -344,6 +347,34 @@ invalid.js:19:5 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
     19    │ - foo(Math.min(0,·Math.max(100,·x)));
        19 │ + foo(Math.min(100,·Math.max(0,·x)));
     20 20 │   
+    21 21 │   Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+  
+
+```
+
+```
+invalid.js:21:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Math.min/Math.max combination leads to a constant result.
+  
+    19 │ foo(Math.min(0, Math.max(100, x)));
+    20 │ 
+  > 21 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i It always evaluates to 0x10000000000000000.
+  
+    19 │ foo(Math.min(0, Math.max(100, x)));
+    20 │ 
+  > 21 │ Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));
+       │          ^^^^^^^^^^^^^^^^^^^
+  
+  i Unsafe fix: Swap 0x10000000000000000 with 0x20000000000000000.
+  
+    19 19 │   foo(Math.min(0, Math.max(100, x)));
+    20 20 │   
+    21    │ - Math.min(0x10000000000000000,·Math.max(0x20000000000000000,·x));
+       21 │ + Math.min(0x20000000000000000,·Math.max(0x10000000000000000,·x));
   
 
 ```

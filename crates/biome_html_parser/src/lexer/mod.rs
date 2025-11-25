@@ -35,6 +35,7 @@ enum IdentifierContext {
     Doctype,
     Svelte,
     Vue,
+    VueDirectiveArgument,
 }
 
 impl IdentifierContext {
@@ -140,12 +141,16 @@ impl<'src> HtmlLexer<'src> {
             b'.' => self.consume_byte(T![.]),
             b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
+            b'#' => self.consume_byte(T![#]),
 
             b'\'' | b'"' => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 self.consume_tag_name(current)
+            }
+            _ if (self.current_kind == T![@] && is_attribute_name_byte_vue(current)) => {
+                self.consume_identifier(current, IdentifierContext::VueDirectiveArgument)
             }
             _ if (self.current_kind != T![<] && is_attribute_name_byte_vue(current)) => {
                 self.consume_identifier(current, IdentifierContext::Vue)
@@ -466,6 +471,18 @@ impl<'src> HtmlLexer<'src> {
                 }
                 IdentifierContext::Vue => {
                     if is_attribute_name_byte_vue(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
+                IdentifierContext::VueDirectiveArgument => {
+                    if is_attribute_name_byte_vue(byte) || byte == b':' {
                         if len < BUFFER_SIZE {
                             buffer[len] = byte;
                             len += 1;

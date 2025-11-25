@@ -26,13 +26,13 @@ jobs:
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
 
@@ -52,7 +52,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           clean: false
           ref: main
@@ -81,7 +81,7 @@ jobs:
 
       - name: Find Previous Comment
         if: github.event_name == 'pull_request'
-        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: previous-comment
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}
@@ -89,7 +89,7 @@ jobs:
 
       - name: Update existing comment
         if: github.event_name == 'pull_request' && steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         continue-on-error: true
         with:
           comment-id: ${{ steps.previous-comment.outputs.comment-id }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Write a new comment
         if: github.event_name == 'pull_request' && !steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         continue-on-error: true
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}

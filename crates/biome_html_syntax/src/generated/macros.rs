@@ -178,6 +178,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::VueVOnShorthandDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_V_SLOT_SHORTHAND_DIRECTIVE => {
+                    let $pattern =
+                        unsafe { $crate::VueVSlotShorthandDirective::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
                     let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body

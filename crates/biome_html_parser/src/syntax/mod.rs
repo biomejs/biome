@@ -12,6 +12,7 @@ use crate::syntax::svelte::{
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
+    parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
@@ -369,6 +370,11 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_on_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        T![#] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
+            p,
+            parse_vue_v_slot_shorthand_directive,
+            |p, m| disabled_vue(p, m.range(p)),
+        ),
         T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
@@ -398,8 +404,14 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
-    p.at_ts(token_set![HTML_LITERAL, T!["{{"], T!['{'], T![:], T![@]])
-        || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
+    p.at_ts(token_set![
+        HTML_LITERAL,
+        T!["{{"],
+        T!['{'],
+        T![:],
+        T![@],
+        T![#],
+    ]) || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
 }
 
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {

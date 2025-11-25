@@ -3051,6 +3051,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicatedSpreadPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicatedSpreadPropsOptions" }
+			]
+		},
+		"NoDuplicatedSpreadPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDynamicNamespaceImportAccessConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3141,6 +3151,16 @@
 			]
 		},
 		"NoEnumOptions": { "type": "object", "additionalProperties": false },
+		"NoEqualsToNullConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEqualsToNullOptions" }
+			]
+		},
+		"NoEqualsToNullOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEvolvingTypesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3666,6 +3686,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLeakedRenderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLeakedRenderOptions" }
+			]
+		},
+		"NoLeakedRenderOptions": { "type": "object" },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3736,6 +3763,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMultiStrConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMultiStrOptions" }
+			]
+		},
+		"NoMultiStrOptions": { "type": "object", "additionalProperties": false },
 		"NoNamespaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4351,6 +4385,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTernaryConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTernaryOptions" }
+			]
+		},
+		"NoTernaryOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5058,10 +5099,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicatedSpreadProps": {
+					"description": "Disallow JSX prop spreading the same identifier multiple times.\nSee https://biomejs.dev/linter/rules/no-duplicated-spread-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicatedSpreadPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptySource": {
 					"description": "Disallow empty sources.\nSee https://biomejs.dev/linter/rules/no-empty-source",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptySourceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEqualsToNull": {
+					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEqualsToNullConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5100,10 +5155,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noLeakedRender": {
+					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMultiStr": {
+					"description": "Disallow creating multiline strings by escaping newlines.\nSee https://biomejs.dev/linter/rules/no-multi-str",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMultiStrConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5139,6 +5208,13 @@
 					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTernary": {
+					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTernaryConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6477,6 +6553,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDuplicatedSpreadPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicatedSpreadPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDynamicNamespaceImportAccessOptions": {
 			"type": "object",
 			"properties": {
@@ -6555,6 +6640,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEnumOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEqualsToNullOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEqualsToNullOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -7001,6 +7096,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoLeakedRenderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMagicNumbersOptions": {
 			"type": "object",
 			"properties": {
@@ -7063,6 +7167,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMultiStrOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMultiStrOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -7611,6 +7724,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTemplateCurlyInStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTernaryOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTernaryOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

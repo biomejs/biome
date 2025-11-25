@@ -39,17 +39,17 @@ pub const ISO_SCRIPTS: [&str; 28] = [
     "Telu", "Thai", "Tibt", "Zyyy",
 ];
 
-/// Returns a list of valid ISO countries
+/// Returns whether the given string is a valid ISO country code
 pub fn is_valid_country(country: &str) -> bool {
     IsoCountries::from_str(country).is_ok()
 }
 
-/// Returns a list of valid ISO languages
+/// Returns whether the given string is a valid ISO language code
 pub fn is_valid_language(language: &str) -> bool {
     IsoLanguages::from_str(language).is_ok()
 }
 
-/// Returns whether the given script code is a valid ISO script
+/// Returns whether the given string is a valid ISO script code
 pub fn is_valid_script(script: &str) -> bool {
     IsoScripts::from_str(script).is_ok()
 }

@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo =
+	"Line 1\n\
+Line 2";
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/noMultiStr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Escaping newlines to create multiline strings is disallowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo =
+  > 3 │ 	"Line 1\n\
+      │ 	^^^^^^^^^^
+  > 4 │ Line 2";
+      │ ^^^^^^^
+    5 │ 
+  
+
+```
