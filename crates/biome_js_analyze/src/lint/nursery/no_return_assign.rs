@@ -70,11 +70,6 @@ impl Rule for NoReturnAssign {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
