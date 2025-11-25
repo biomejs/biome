@@ -9,7 +9,7 @@ use biome_console::markup;
 use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Severity, Visit, category,
+    PrintDiagnostic, Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -643,7 +643,7 @@ impl Diagnostic for PluginErrors {
         fmt.write_markup(markup!("Error(s) during loading of plugins:\n"))?;
 
         for diagnostic in &self.diagnostics {
-            diagnostic.message(fmt)?;
+            fmt.write_markup(markup! {{PrintDiagnostic::simple(diagnostic)}"\n"})?;
         }
 
         Ok(())
