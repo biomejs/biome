@@ -14,3 +14,10 @@ function f(a, b, c) {
 function f(a, b, c) {
 	return a == (b = c);
 }
+function f(a, b, c) {
+	return a ? b = 1 : c;
+}
+function f(a, b) {
+	return a && (b = 1);
+}
+
