@@ -20,75 +20,124 @@ function f(a, b, c) {
 function f(a, b, c) {
 	return a == (b = c);
 }
+function f(a, b, c) {
+	return a ? b = 1 : c;
+}
+function f(a, b) {
+	return a && (b = 1);
+}
+
 
 ```
 
 # Diagnostics
 ```
-invalid.js:3:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The assignment should not be in a return statement.
+  × Arrow function should not return assignment.
   
     1 │ /* should generate diagnostics */
     2 │ function f(a) {
   > 3 │ 	return a = 1;
-      │ 	^^^^^^^^^^^^^
+      │ 	       ^^^^^
     4 │ }
     5 │ 
   
-  i The use of assignments in return statements is confusing.
-    Return statements are often considered side-effect free.
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
   
 
 ```
 
 ```
-invalid.js:7:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The assignment should not be in a return statement.
+  × Arrow function should not return assignment.
   
     6 │ function f(a) {
   > 7 │ 	return (a = 1);
-      │ 	^^^^^^^^^^^^^^^
+      │ 	        ^^^^^
     8 │ }
     9 │ 
   
-  i The use of assignments in return statements is confusing.
-    Return statements are often considered side-effect free.
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
   
 
 ```
 
 ```
-invalid.js:11:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The assignment should not be in a return statement.
+  × Arrow function should not return assignment.
   
     10 │ function f(a, b, c) {
   > 11 │ 	return (a, b, c = 1);
-       │ 	^^^^^^^^^^^^^^^^^^^^^
+       │ 	              ^^^^^
     12 │ }
     13 │ 
   
-  i The use of assignments in return statements is confusing.
-    Return statements are often considered side-effect free.
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
   
 
 ```
 
 ```
-invalid.js:15:2 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The assignment should not be in a return statement.
+  × Arrow function should not return assignment.
   
     14 │ function f(a, b, c) {
   > 15 │ 	return a == (b = c);
-       │ 	^^^^^^^^^^^^^^^^^^^^
+       │ 	             ^^^^^
     16 │ }
-    17 │ 
+    17 │ function f(a, b, c) {
   
-  i The use of assignments in return statements is confusing.
-    Return statements are often considered side-effect free.
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:18:13 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Arrow function should not return assignment.
+  
+    16 │ }
+    17 │ function f(a, b, c) {
+  > 18 │ 	return a ? b = 1 : c;
+       │ 	           ^^^^^
+    19 │ }
+    20 │ function f(a, b) {
+  
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Arrow function should not return assignment.
+  
+    19 │ }
+    20 │ function f(a, b) {
+  > 21 │ 	return a && (b = 1);
+       │ 	             ^^^^^
+    22 │ }
+    23 │ 
+  
+  i noReturnAssign: Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
   
 
 ```

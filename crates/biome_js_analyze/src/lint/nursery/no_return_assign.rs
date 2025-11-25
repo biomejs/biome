@@ -1,11 +1,11 @@
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsReturnStatement};
-use biome_rowan::AstNode;
+use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsReturnStatement};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_return_assign::NoReturnAssignOptions;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow assignments in return statements.
@@ -49,50 +49,60 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyReturn = JsReturnStatement | JsArrowFunctionExpression
+}
+
 impl Rule for NoReturnAssign {
-    type Query = Ast<JsReturnStatement>;
-    type State = ();
+    type Query = Semantic<AnyReturn>;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoReturnAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let query = ctx.query();
-        let except_parenthesis = ctx.options().except_parenthesis();
+        match ctx.query() {
+            AnyReturn::JsReturnStatement(query) => traverse_expression(&query.argument()?),
 
-        traverse_expression(&query.argument()?, except_parenthesis)?.then_some(())
+            AnyReturn::JsArrowFunctionExpression(query) => {
+                traverse_expression(query.body().ok()?.as_any_js_expression()?)
+            }
+        }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let node = ctx.query();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
-                markup! {
-                "The "<Emphasis>"assignment"</Emphasis>" should not be in a "<Emphasis>"return statement"</Emphasis>"."
-                },
+                state,
+                match ctx.query() {
+                    AnyReturn::JsReturnStatement(_) =>
+                        markup! {
+                            <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+                        },
+                    AnyReturn::JsArrowFunctionExpression(_) =>
+                        markup! {
+                            <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
+                        },
+                }
             )
             .note(markup! {
-            "The use of assignments in return statements is confusing.\nReturn statements are often considered side-effect free."
+                "noReturnAssign: Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
             }),
         )
     }
 }
 
-fn traverse_expression(root: &AnyJsExpression, except_parenthesis: bool) -> Option<bool> {
+fn traverse_expression(root: &AnyJsExpression) -> Option<TextRange> {
     let mut stack = vec![root.clone()];
     while let Some(current_node) = stack.pop() {
         match current_node {
-            AnyJsExpression::JsAssignmentExpression(_) => return Some(true),
+            AnyJsExpression::JsAssignmentExpression(_) => return Some(current_node.range()),
             AnyJsExpression::JsParenthesizedExpression(expression) => {
-                if except_parenthesis {
-                    continue;
-                }
-
                 if let Ok(expression) = expression.expression() {
                     stack.push(expression);
                 }
@@ -114,6 +124,9 @@ fn traverse_expression(root: &AnyJsExpression, except_parenthesis: bool) -> Opti
                 }
             }
             AnyJsExpression::JsConditionalExpression(expression) => {
+                if let Ok(test) = expression.test() {
+                    stack.push(test);
+                }
                 if let Ok(consequent) = expression.consequent() {
                     stack.push(consequent);
                 }
@@ -132,5 +145,5 @@ fn traverse_expression(root: &AnyJsExpression, except_parenthesis: bool) -> Opti
             _ => {}
         }
     }
-    Some(false)
+    None
 }
