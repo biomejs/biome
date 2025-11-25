@@ -5,6 +5,9 @@ expression: invalid.js
 # Input
 ```js
 /* should generate diagnostics */
+
+const f = (a) => a = 1;
+
 function f(a) {
 	return a = 1;
 }
@@ -20,9 +23,6 @@ function f(a, b, c) {
 function f(a, b, c) {
 	return a == (b = c);
 }
-function f(a, b, c) {
-	return a ? b = 1 : c;
-}
 function f(a, b) {
 	return a && (b = 1);
 }
@@ -35,20 +35,162 @@ function f(a, b, c) {
 	return (a = 1, b = 2, c = 3);
 }
 
+function f(a) {
+	return [a = 1];
+}
+
+async function f(a) {
+	return await (a = 1);
+}
+
+function f(a) {
+	return 5 + (a = 1);
+}
+
+function f(a) {
+	return (a = 1) + 5;
+}
+
+function f(a) {
+	return foo(a = 1);
+}
+
+function f(a) {
+	return class { [a = 1] = 2 };
+}
+
+function f(a, b) {
+	return b[a = 1];
+}
+
+function f(a) {
+	return (a = 1) ? true : false;
+}
+
+function f(a) {
+	return true ? a = 1 : false;
+}
+
+function f(a, b) {
+	return true ? false : a = 1;
+}
+
+function f(a, b) {
+	return (a = 1) in b;
+}
+
+function f(a, Class) {
+	return (a = 1) instanceof Class;
+}
+
+function f(a, b) {
+	return (a = 1) || b;
+}
+
+function f(a, b) {
+	return a || (b = 1);
+}
+
+function f(a, b) {
+	return (a = 1) ?? b;
+}
+
+function f(a, b) {
+	return a ?? (b = 1);
+}
+
+function f(a) {
+	return new Foo(a = 1);
+}
+
+function f(a) {
+	return { foo: a = 1 };
+}
+
+function f(a) {
+	return { [a = 1]: 2 };
+}
+
+function f(a) {
+	return { [a = 1]: 2 };
+}
+
+function f(a) {
+	return a++;
+}
+
+function f(a) {
+	return a--;
+}
+
+function f(a) {
+	return ++a;
+}
+
+function f(a) {
+	return --a;
+}
+
+function f(a) {
+	return `result: ${a = 1}`;
+}
+
+function f(a) {
+	return !(a = 1);
+}
+
+function f(a) {
+	return typeof (a = 1);
+}
+
+function f(a) {
+	return void (a = 1);
+}
+
+function f(a) {
+	return -(a = 1);
+}
+
+function* f(a) {
+	return yield (a = 1);
+}
+
+function f(a) {
+	return <div prop={a = 1} />;
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Function should not return assignment.
+  × Arrow function should not return assignment.
   
     1 │ /* should generate diagnostics */
-    2 │ function f(a) {
-  > 3 │ 	return a = 1;
+    2 │ 
+  > 3 │ const f = (a) => a = 1;
+      │                  ^^^^^
+    4 │ 
+    5 │ function f(a) {
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    5 │ function f(a) {
+  > 6 │ 	return a = 1;
       │ 	       ^^^^^
-    4 │ }
-    5 │ 
+    7 │ }
+    8 │ 
   
   i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
@@ -58,15 +200,15 @@ invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Function should not return assignment.
   
-    6 │ function f(a) {
-  > 7 │ 	return (a = 1);
-      │ 	        ^^^^^
-    8 │ }
-    9 │ 
+     9 │ function f(a) {
+  > 10 │ 	return (a = 1);
+       │ 	        ^^^^^
+    11 │ }
+    12 │ 
   
   i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
@@ -76,15 +218,15 @@ invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Function should not return assignment.
   
-    10 │ function f(a, b, c) {
-  > 11 │ 	return (a, b, c = 1);
+    13 │ function f(a, b, c) {
+  > 14 │ 	return (a, b, c = 1);
        │ 	              ^^^^^
-    12 │ }
-    13 │ 
+    15 │ }
+    16 │ 
   
   i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
@@ -94,32 +236,13 @@ invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Function should not return assignment.
   
-    14 │ function f(a, b, c) {
-  > 15 │ 	return a == (b = c);
+    17 │ function f(a, b, c) {
+  > 18 │ 	return a == (b = c);
        │ 	             ^^^^^
-    16 │ }
-    17 │ function f(a, b, c) {
-  
-  i Return statements are often considered side-effect free.
-    You likely want to do a comparison `==`
-    Otherwise move the assignment outside of the return statement
-  
-
-```
-
-```
-invalid.js:18:13 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Function should not return assignment.
-  
-    16 │ }
-    17 │ function f(a, b, c) {
-  > 18 │ 	return a ? b = 1 : c;
-       │ 	           ^^^^^
     19 │ }
     20 │ function f(a, b) {
   
@@ -231,6 +354,330 @@ invalid.js:29:24 lint/nursery/noReturnAssign ━━━━━━━━━━━�
        │ 	                      ^^^^^
     30 │ }
     31 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:37:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    36 │ async function f(a) {
+  > 37 │ 	return await (a = 1);
+       │ 	              ^^^^^
+    38 │ }
+    39 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:41:14 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    40 │ function f(a) {
+  > 41 │ 	return 5 + (a = 1);
+       │ 	            ^^^^^
+    42 │ }
+    43 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:45:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    44 │ function f(a) {
+  > 45 │ 	return (a = 1) + 5;
+       │ 	        ^^^^^
+    46 │ }
+    47 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:57:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    56 │ function f(a, b) {
+  > 57 │ 	return b[a = 1];
+       │ 	         ^^^^^
+    58 │ }
+    59 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:61:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    60 │ function f(a) {
+  > 61 │ 	return (a = 1) ? true : false;
+       │ 	        ^^^^^
+    62 │ }
+    63 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:65:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    64 │ function f(a) {
+  > 65 │ 	return true ? a = 1 : false;
+       │ 	              ^^^^^
+    66 │ }
+    67 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:69:24 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    68 │ function f(a, b) {
+  > 69 │ 	return true ? false : a = 1;
+       │ 	                      ^^^^^
+    70 │ }
+    71 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:73:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    72 │ function f(a, b) {
+  > 73 │ 	return (a = 1) in b;
+       │ 	        ^^^^^
+    74 │ }
+    75 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:77:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    76 │ function f(a, Class) {
+  > 77 │ 	return (a = 1) instanceof Class;
+       │ 	        ^^^^^
+    78 │ }
+    79 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:81:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    80 │ function f(a, b) {
+  > 81 │ 	return (a = 1) || b;
+       │ 	        ^^^^^
+    82 │ }
+    83 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:85:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    84 │ function f(a, b) {
+  > 85 │ 	return a || (b = 1);
+       │ 	             ^^^^^
+    86 │ }
+    87 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:89:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    88 │ function f(a, b) {
+  > 89 │ 	return (a = 1) ?? b;
+       │ 	        ^^^^^
+    90 │ }
+    91 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:93:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    92 │ function f(a, b) {
+  > 93 │ 	return a ?? (b = 1);
+       │ 	             ^^^^^
+    94 │ }
+    95 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:133:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    132 │ function f(a) {
+  > 133 │ 	return !(a = 1);
+        │ 	         ^^^^^
+    134 │ }
+    135 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:137:17 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    136 │ function f(a) {
+  > 137 │ 	return typeof (a = 1);
+        │ 	               ^^^^^
+    138 │ }
+    139 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:141:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    140 │ function f(a) {
+  > 141 │ 	return void (a = 1);
+        │ 	             ^^^^^
+    142 │ }
+    143 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:145:11 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    144 │ function f(a) {
+  > 145 │ 	return -(a = 1);
+        │ 	         ^^^^^
+    146 │ }
+    147 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.js:153:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    152 │ function f(a) {
+  > 153 │ 	return <div prop={a = 1} />;
+        │ 	       ^^^^^^^^^^^^^^^^^^^^
+    154 │ }
+    155 │ 
   
   i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`

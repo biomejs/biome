@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function f(a) {
+	return (a = 1) as number;
+}
+
+function f(a) {
+	return (a = 1)!;
+}
+
+function f(a) {
+	return (a = 1) satisfies number;
+}
+
+function f(a) {
+	return <number>(a = 1);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f(a) {
+  > 3 │ 	return (a = 1) as number;
+      │ 	        ^^^^^
+    4 │ }
+    5 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.ts:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    6 │ function f(a) {
+  > 7 │ 	return (a = 1)!;
+      │ 	        ^^^^^
+    8 │ }
+    9 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.ts:11:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    10 │ function f(a) {
+  > 11 │ 	return (a = 1) satisfies number;
+       │ 	        ^^^^^
+    12 │ }
+    13 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```
+
+```
+invalid.ts:15:18 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Function should not return assignment.
+  
+    14 │ function f(a) {
+  > 15 │ 	return <number>(a = 1);
+       │ 	                ^^^^^
+    16 │ }
+    17 │ 
+  
+  i Return statements are often considered side-effect free.
+    You likely want to do a comparison `==`
+    Otherwise move the assignment outside of the return statement
+  
+
+```

@@ -64,7 +64,7 @@ impl Rule for NoReturnAssign {
     type Options = NoReturnAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        run_options(ctx).unwrap_or(Vec::new())
+        run_options(ctx).unwrap_or_default()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
