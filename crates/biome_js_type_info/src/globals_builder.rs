@@ -6,30 +6,7 @@ use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeId, TypeStore};
 
 use super::globals::GlobalsResolver;
 
-/// Builder for constructing a GlobalsResolver with support for forward references.
-///
-/// This builder allows types to reference each other through TypeIds without
-/// requiring the types to be defined in a specific order. This decouples how we
-/// define types from how we use them in the type inference phase (aka TypeStore's type lookup).
-///
-/// # Example
-///
-/// ```ignore
-/// let mut builder = GlobalsResolverBuilder::new();
-///
-/// // Reserve IDs
-/// let array_id = builder.reserve_id();
-/// let filter_id = builder.reserve_id();
-///
-/// // Fill in types (Note that we can use the reserved IDs in any order)
-/// builder.set_type(filter_id, TypeData::from(Function { ... }));
-/// builder.set_type(array_id, TypeData::Class(Box::new(Class {
-///     members: Box::new([method("filter", filter_id)]),
-/// })));
-///
-/// // Build
-/// let resolver = builder.build();
-/// ```
+/// Builder for constructing a GlobalsResolver
 pub struct GlobalsResolverBuilder {
     /// Types being built. None = reserved but not yet filled.
     types: Vec<Option<TypeData>>,
@@ -43,10 +20,6 @@ impl GlobalsResolverBuilder {
     }
 
     /// Fill a previously reserved type slot with actual type data.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the TypeId is out of bounds or if the slot was already filled.
     pub fn set_type_data(&mut self, id: TypeId, data: TypeData) {
         let index = id.index();
         assert!(

@@ -34,7 +34,6 @@ pub struct ResolvedTypeId(ResolverId, TypeId);
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.0.level() == TypeResolverLevel::Global {
-            // Try to get name from GLOBAL_RESOLVER first
             if let Some(name) = global_type_name(self.1) {
                 f.write_str(name)
             } else if self.1.index() < NUM_PREDEFINED_TYPES {

@@ -114,15 +114,14 @@ impl Default for GlobalsResolver {
         };
 
         let array_method_definition =
-            |name: &'static str,
-             _id: TypeId,
+            |id: TypeId,
              param_type_id: TypeId,
              return_type_id: TypeId,
              type_parameters: Box<[TypeReference]>| {
                 TypeData::from(Function {
                     is_async: false,
                     type_parameters,
-                    name: Some(Text::new_static(name)),
+                    name: Some(Text::new_static(global_type_name(id).unwrap_or("unknown"))),
                     parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                         bindings: Default::default(),
                         is_optional: false,
@@ -136,11 +135,11 @@ impl Default for GlobalsResolver {
                 })
             };
 
-        let promise_method_definition = |name: &'static str, _id: TypeId| {
+        let promise_method_definition = |id: TypeId| {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::new_static(name)),
+                name: Some(Text::new_static(global_type_name(id).unwrap_or("unknown"))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             })
@@ -152,12 +151,17 @@ impl Default for GlobalsResolver {
 
         let mut builder = GlobalsResolverBuilder::with_capacity(NUM_PREDEFINED_TYPES);
 
+        // Primitive types
         builder.set_type_data(UNKNOWN_ID, TypeData::Unknown);
         builder.set_type_data(UNDEFINED_ID, TypeData::Undefined);
         builder.set_type_data(VOID_ID, TypeData::VoidKeyword);
         builder.set_type_data(CONDITIONAL_ID, TypeData::Conditional);
         builder.set_type_data(NUMBER_ID, TypeData::Number);
         builder.set_type_data(STRING_ID, TypeData::String);
+
+        // TODO(tidefield): Use biome parser to parse Typescript .d.ts files
+        // and generate the following `TypeData`s as much as possible
+
         builder.set_type_data(
             INSTANCEOF_ARRAY_T_ID,
             TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID)),
@@ -169,7 +173,6 @@ impl Default for GlobalsResolver {
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             }),
         );
-
         builder.set_type_data(
             ARRAY_ID,
             TypeData::Class(Box::new(Class {
@@ -188,11 +191,9 @@ impl Default for GlobalsResolver {
                 ]),
             })),
         );
-
         builder.set_type_data(
             ARRAY_FILTER_ID,
             array_method_definition(
-                ARRAY_FILTER_ID_NAME,
                 ARRAY_FILTER_ID,
                 CONDITIONAL_CALLBACK_ID,
                 INSTANCEOF_ARRAY_T_ID,
@@ -202,7 +203,6 @@ impl Default for GlobalsResolver {
         builder.set_type_data(
             ARRAY_FOREACH_ID,
             array_method_definition(
-                ARRAY_FOREACH_ID_NAME,
                 ARRAY_FOREACH_ID,
                 VOID_CALLBACK_ID,
                 VOID_ID,
@@ -212,20 +212,17 @@ impl Default for GlobalsResolver {
         builder.set_type_data(
             ARRAY_MAP_ID,
             array_method_definition(
-                ARRAY_MAP_ID_NAME,
                 ARRAY_MAP_ID,
                 MAP_CALLBACK_ID,
                 INSTANCEOF_ARRAY_U_ID,
                 [GLOBAL_U_ID.into()].into(),
             ),
         );
-
         builder.set_type_data(GLOBAL_ID, TypeData::Global);
         builder.set_type_data(
             INSTANCEOF_PROMISE_ID,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
         );
-
         // Promise class
         builder.set_type_data(
             PROMISE_ID,
@@ -271,45 +268,29 @@ impl Default for GlobalsResolver {
         );
         builder.set_type_data(
             PROMISE_CATCH_ID,
-            promise_method_definition(PROMISE_CATCH_ID_NAME, PROMISE_CATCH_ID),
+            promise_method_definition(PROMISE_CATCH_ID),
         );
         builder.set_type_data(
             PROMISE_FINALLY_ID,
-            promise_method_definition(PROMISE_FINALLY_ID_NAME, PROMISE_FINALLY_ID),
+            promise_method_definition(PROMISE_FINALLY_ID),
         );
-        builder.set_type_data(
-            PROMISE_THEN_ID,
-            promise_method_definition(PROMISE_THEN_ID_NAME, PROMISE_THEN_ID),
-        );
-        builder.set_type_data(
-            PROMISE_ALL_ID,
-            promise_method_definition(PROMISE_ALL_ID_NAME, PROMISE_ALL_ID),
-        );
+        builder.set_type_data(PROMISE_THEN_ID, promise_method_definition(PROMISE_THEN_ID));
+        builder.set_type_data(PROMISE_ALL_ID, promise_method_definition(PROMISE_ALL_ID));
         builder.set_type_data(
             PROMISE_ALL_SETTLED_ID,
-            promise_method_definition(PROMISE_ALL_SETTLED_ID_NAME, PROMISE_ALL_SETTLED_ID),
+            promise_method_definition(PROMISE_ALL_SETTLED_ID),
         );
-        builder.set_type_data(
-            PROMISE_ANY_ID,
-            promise_method_definition(PROMISE_ANY_ID_NAME, PROMISE_ANY_ID),
-        );
-        builder.set_type_data(
-            PROMISE_RACE_ID,
-            promise_method_definition(PROMISE_RACE_ID_NAME, PROMISE_RACE_ID),
-        );
+        builder.set_type_data(PROMISE_ANY_ID, promise_method_definition(PROMISE_ANY_ID));
+        builder.set_type_data(PROMISE_RACE_ID, promise_method_definition(PROMISE_RACE_ID));
         builder.set_type_data(
             PROMISE_REJECT_ID,
-            promise_method_definition(PROMISE_REJECT_ID_NAME, PROMISE_REJECT_ID),
+            promise_method_definition(PROMISE_REJECT_ID),
         );
         builder.set_type_data(
             PROMISE_RESOLVE_ID,
-            promise_method_definition(PROMISE_RESOLVE_ID_NAME, PROMISE_RESOLVE_ID),
+            promise_method_definition(PROMISE_RESOLVE_ID),
         );
-        builder.set_type_data(
-            PROMISE_TRY_ID,
-            promise_method_definition(PROMISE_TRY_ID_NAME, PROMISE_TRY_ID),
-        );
-
+        builder.set_type_data(PROMISE_TRY_ID, promise_method_definition(PROMISE_TRY_ID));
         // String literals for typeof operator
         builder.set_type_data(BIGINT_STRING_LITERAL_ID, string_literal("bigint"));
         builder.set_type_data(BOOLEAN_STRING_LITERAL_ID, string_literal("boolean"));
@@ -332,7 +313,6 @@ impl Default for GlobalsResolver {
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ])))),
         );
-
         // Generic type parameters
         builder.set_type_data(
             T_ID,
@@ -350,7 +330,6 @@ impl Default for GlobalsResolver {
                 default: TypeReference::unknown(),
             }),
         );
-
         // Callback functions
         builder.set_type_data(
             CONDITIONAL_CALLBACK_ID,
@@ -388,7 +367,6 @@ impl Default for GlobalsResolver {
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
         );
-
         // Fetch function
         builder.set_type_data(
             FETCH_ID,
