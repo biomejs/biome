@@ -935,6 +935,92 @@ impl CssFunction {
         )
     }
 }
+impl CssFunctionAtRule {
+    pub fn with_declarator(self, element: CssFunctionAtRuleDeclarator) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_function_name(self, element: CssDashedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_parameters(self, element: CssFunctionParameterList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_returns(self, element: Option<CssReturnsStatement>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            5usize..=5usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssFunctionAtRuleDeclarator {
+    pub fn with_function_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssFunctionParameter {
+    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_type_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_default_value(self, element: Option<CssFunctionParameterDefaultValue>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
+impl CssFunctionParameterDefaultValue {
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: CssGenericComponentValueList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssGenericDelimiter {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2590,6 +2676,20 @@ impl CssRelativeSelector {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssReturnsStatement {
+    pub fn with_returns_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_type_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }

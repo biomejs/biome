@@ -866,6 +866,104 @@ pub fn css_function(
         ],
     ))
 }
+pub fn css_function_at_rule(
+    declarator: CssFunctionAtRuleDeclarator,
+    function_name: CssDashedIdentifier,
+    l_paren_token: SyntaxToken,
+    parameters: CssFunctionParameterList,
+    r_paren_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+) -> CssFunctionAtRuleBuilder {
+    CssFunctionAtRuleBuilder {
+        declarator,
+        function_name,
+        l_paren_token,
+        parameters,
+        r_paren_token,
+        block,
+        returns: None,
+    }
+}
+pub struct CssFunctionAtRuleBuilder {
+    declarator: CssFunctionAtRuleDeclarator,
+    function_name: CssDashedIdentifier,
+    l_paren_token: SyntaxToken,
+    parameters: CssFunctionParameterList,
+    r_paren_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+    returns: Option<CssReturnsStatement>,
+}
+impl CssFunctionAtRuleBuilder {
+    pub fn with_returns(mut self, returns: CssReturnsStatement) -> Self {
+        self.returns = Some(returns);
+        self
+    }
+    pub fn build(self) -> CssFunctionAtRule {
+        CssFunctionAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_FUNCTION_AT_RULE,
+            [
+                Some(SyntaxElement::Node(self.declarator.into_syntax())),
+                Some(SyntaxElement::Node(self.function_name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.parameters.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                self.returns
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_function_at_rule_declarator(function_token: SyntaxToken) -> CssFunctionAtRuleDeclarator {
+    CssFunctionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_AT_RULE_DECLARATOR,
+        [Some(SyntaxElement::Token(function_token))],
+    ))
+}
+pub fn css_function_parameter(
+    name: CssDashedIdentifier,
+    type_token: SyntaxToken,
+) -> CssFunctionParameterBuilder {
+    CssFunctionParameterBuilder {
+        name,
+        type_token,
+        default_value: None,
+    }
+}
+pub struct CssFunctionParameterBuilder {
+    name: CssDashedIdentifier,
+    type_token: SyntaxToken,
+    default_value: Option<CssFunctionParameterDefaultValue>,
+}
+impl CssFunctionParameterBuilder {
+    pub fn with_default_value(mut self, default_value: CssFunctionParameterDefaultValue) -> Self {
+        self.default_value = Some(default_value);
+        self
+    }
+    pub fn build(self) -> CssFunctionParameter {
+        CssFunctionParameter::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_FUNCTION_PARAMETER,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.type_token)),
+                self.default_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_function_parameter_default_value(
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+) -> CssFunctionParameterDefaultValue {
+    CssFunctionParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_PARAMETER_DEFAULT_VALUE,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
     CssGenericDelimiter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_GENERIC_DELIMITER,
@@ -2210,6 +2308,18 @@ impl CssRelativeSelectorBuilder {
         ))
     }
 }
+pub fn css_returns_statement(
+    returns_token: SyntaxToken,
+    type_token: SyntaxToken,
+) -> CssReturnsStatement {
+    CssReturnsStatement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RETURNS_STATEMENT,
+        [
+            Some(SyntaxElement::Token(returns_token)),
+            Some(SyntaxElement::Token(type_token)),
+        ],
+    ))
+}
 pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRootBuilder {
     CssRootBuilder {
         rules,
@@ -3317,6 +3427,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_function_parameter_list<I, S>(items: I, separators: S) -> CssFunctionParameterList
+where
+    I: IntoIterator<Item = CssFunctionParameter>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssFunctionParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_PARAMETER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList

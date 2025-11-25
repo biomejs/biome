@@ -2353,6 +2353,191 @@ pub struct CssFunctionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFunctionAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFunctionAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFunctionAtRuleFields {
+        CssFunctionAtRuleFields {
+            declarator: self.declarator(),
+            function_name: self.function_name(),
+            l_paren_token: self.l_paren_token(),
+            parameters: self.parameters(),
+            r_paren_token: self.r_paren_token(),
+            returns: self.returns(),
+            block: self.block(),
+        }
+    }
+    pub fn declarator(&self) -> SyntaxResult<CssFunctionAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn function_name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn parameters(&self) -> CssFunctionParameterList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+    pub fn returns(&self) -> Option<CssReturnsStatement> {
+        support::node(&self.syntax, 5usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+        support::required_node(&self.syntax, 6usize)
+    }
+}
+impl Serialize for CssFunctionAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFunctionAtRuleFields {
+    pub declarator: SyntaxResult<CssFunctionAtRuleDeclarator>,
+    pub function_name: SyntaxResult<CssDashedIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub parameters: CssFunctionParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub returns: Option<CssReturnsStatement>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFunctionAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFunctionAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFunctionAtRuleDeclaratorFields {
+        CssFunctionAtRuleDeclaratorFields {
+            function_token: self.function_token(),
+        }
+    }
+    pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssFunctionAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFunctionAtRuleDeclaratorFields {
+    pub function_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFunctionParameter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFunctionParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFunctionParameterFields {
+        CssFunctionParameterFields {
+            name: self.name(),
+            type_token: self.type_token(),
+            default_value: self.default_value(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn type_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn default_value(&self) -> Option<CssFunctionParameterDefaultValue> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssFunctionParameter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFunctionParameterFields {
+    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub type_token: SyntaxResult<SyntaxToken>,
+    pub default_value: Option<CssFunctionParameterDefaultValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFunctionParameterDefaultValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFunctionParameterDefaultValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFunctionParameterDefaultValueFields {
+        CssFunctionParameterDefaultValueFields {
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> CssGenericComponentValueList {
+        support::list(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssFunctionParameterDefaultValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssFunctionParameterDefaultValueFields {
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: CssGenericComponentValueList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssGenericDelimiter {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6475,6 +6660,46 @@ pub struct CssRelativeSelectorFields {
     pub selector: SyntaxResult<AnyCssSelector>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssReturnsStatement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssReturnsStatement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssReturnsStatementFields {
+        CssReturnsStatementFields {
+            returns_token: self.returns_token(),
+            type_token: self.type_token(),
+        }
+    }
+    pub fn returns_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn type_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssReturnsStatement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssReturnsStatementFields {
+    pub returns_token: SyntaxResult<SyntaxToken>,
+    pub type_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -9098,6 +9323,7 @@ pub enum AnyCssAtRule {
     CssFontFaceAtRule(CssFontFaceAtRule),
     CssFontFeatureValuesAtRule(CssFontFeatureValuesAtRule),
     CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule),
+    CssFunctionAtRule(CssFunctionAtRule),
     CssImportAtRule(CssImportAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssLayerAtRule(CssLayerAtRule),
@@ -9176,6 +9402,12 @@ impl AnyCssAtRule {
     pub fn as_css_font_palette_values_at_rule(&self) -> Option<&CssFontPaletteValuesAtRule> {
         match &self {
             Self::CssFontPaletteValuesAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_function_at_rule(&self) -> Option<&CssFunctionAtRule> {
+        match &self {
+            Self::CssFunctionAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -14782,6 +15014,221 @@ impl From<CssFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssFunctionAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFunctionAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFunctionAtRule")
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .field(
+                    "function_name",
+                    &support::DebugSyntaxResult(self.function_name()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameters", &self.parameters())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("returns", &support::DebugOptionalElement(self.returns()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssFunctionAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFunctionAtRule> for SyntaxNode {
+    fn from(n: CssFunctionAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFunctionAtRule> for SyntaxElement {
+    fn from(n: CssFunctionAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFunctionAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFunctionAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFunctionAtRuleDeclarator")
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssFunctionAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFunctionAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssFunctionAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFunctionAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssFunctionAtRuleDeclarator) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFunctionParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFunctionParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFunctionParameter")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("type_token", &support::DebugSyntaxResult(self.type_token()))
+                .field(
+                    "default_value",
+                    &support::DebugOptionalElement(self.default_value()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssFunctionParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFunctionParameter> for SyntaxNode {
+    fn from(n: CssFunctionParameter) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFunctionParameter> for SyntaxElement {
+    fn from(n: CssFunctionParameter) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFunctionParameterDefaultValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION_PARAMETER_DEFAULT_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION_PARAMETER_DEFAULT_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFunctionParameterDefaultValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFunctionParameterDefaultValue")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &self.value())
+                .finish()
+        } else {
+            f.debug_struct("CssFunctionParameterDefaultValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssFunctionParameterDefaultValue> for SyntaxNode {
+    fn from(n: CssFunctionParameterDefaultValue) -> Self {
+        n.syntax
+    }
+}
+impl From<CssFunctionParameterDefaultValue> for SyntaxElement {
+    fn from(n: CssFunctionParameterDefaultValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssGenericDelimiter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19786,6 +20233,57 @@ impl From<CssRelativeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssReturnsStatement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_RETURNS_STATEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_RETURNS_STATEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssReturnsStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssReturnsStatement")
+                .field(
+                    "returns_token",
+                    &support::DebugSyntaxResult(self.returns_token()),
+                )
+                .field("type_token", &support::DebugSyntaxResult(self.type_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssReturnsStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssReturnsStatement> for SyntaxNode {
+    fn from(n: CssReturnsStatement) -> Self {
+        n.syntax
+    }
+}
+impl From<CssReturnsStatement> for SyntaxElement {
+    fn from(n: CssReturnsStatement) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23030,6 +23528,11 @@ impl From<CssFontPaletteValuesAtRule> for AnyCssAtRule {
         Self::CssFontPaletteValuesAtRule(node)
     }
 }
+impl From<CssFunctionAtRule> for AnyCssAtRule {
+    fn from(node: CssFunctionAtRule) -> Self {
+        Self::CssFunctionAtRule(node)
+    }
+}
 impl From<CssImportAtRule> for AnyCssAtRule {
     fn from(node: CssImportAtRule) -> Self {
         Self::CssImportAtRule(node)
@@ -23166,6 +23669,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssFontFaceAtRule::KIND_SET)
         .union(CssFontFeatureValuesAtRule::KIND_SET)
         .union(CssFontPaletteValuesAtRule::KIND_SET)
+        .union(CssFunctionAtRule::KIND_SET)
         .union(CssImportAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
@@ -23203,6 +23707,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_FONT_FACE_AT_RULE
                 | CSS_FONT_FEATURE_VALUES_AT_RULE
                 | CSS_FONT_PALETTE_VALUES_AT_RULE
+                | CSS_FUNCTION_AT_RULE
                 | CSS_IMPORT_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
                 | CSS_LAYER_AT_RULE
@@ -23249,6 +23754,7 @@ impl AstNode for AnyCssAtRule {
             CSS_FONT_PALETTE_VALUES_AT_RULE => {
                 Self::CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule { syntax })
             }
+            CSS_FUNCTION_AT_RULE => Self::CssFunctionAtRule(CssFunctionAtRule { syntax }),
             CSS_IMPORT_AT_RULE => Self::CssImportAtRule(CssImportAtRule { syntax }),
             CSS_KEYFRAMES_AT_RULE => Self::CssKeyframesAtRule(CssKeyframesAtRule { syntax }),
             CSS_LAYER_AT_RULE => Self::CssLayerAtRule(CssLayerAtRule { syntax }),
@@ -23299,6 +23805,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssFontFaceAtRule(it) => it.syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.syntax(),
             Self::CssFontPaletteValuesAtRule(it) => it.syntax(),
+            Self::CssFunctionAtRule(it) => it.syntax(),
             Self::CssImportAtRule(it) => it.syntax(),
             Self::CssKeyframesAtRule(it) => it.syntax(),
             Self::CssLayerAtRule(it) => it.syntax(),
@@ -23337,6 +23844,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssFontFaceAtRule(it) => it.into_syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
             Self::CssFontPaletteValuesAtRule(it) => it.into_syntax(),
+            Self::CssFunctionAtRule(it) => it.into_syntax(),
             Self::CssImportAtRule(it) => it.into_syntax(),
             Self::CssKeyframesAtRule(it) => it.into_syntax(),
             Self::CssLayerAtRule(it) => it.into_syntax(),
@@ -23377,6 +23885,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontPaletteValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssFunctionAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssImportAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -23417,6 +23926,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssFunctionAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssImportAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssLayerAtRule(it) => it.into_syntax(),
@@ -31855,6 +32365,26 @@ impl std::fmt::Display for CssFunction {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssFunctionAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFunctionAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFunctionParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFunctionParameterDefaultValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssGenericDelimiter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -32336,6 +32866,11 @@ impl std::fmt::Display for CssRegularSyntaxTypeName {
     }
 }
 impl std::fmt::Display for CssRelativeSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssReturnsStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -35507,6 +36042,88 @@ impl IntoIterator for &CssFontFeatureValuesItemList {
 impl IntoIterator for CssFontFeatureValuesItemList {
     type Item = AnyCssFontFeatureValuesItem;
     type IntoIter = AstNodeListIterator<Language, AnyCssFontFeatureValuesItem>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssFunctionParameterList {
+    syntax_list: SyntaxList,
+}
+impl CssFunctionParameterList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssFunctionParameterList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION_PARAMETER_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION_PARAMETER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssFunctionParameterList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssFunctionParameterList {
+    type Language = Language;
+    type Node = CssFunctionParameter;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssFunctionParameterList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssFunctionParameterList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssFunctionParameterList {
+    type Item = SyntaxResult<CssFunctionParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssFunctionParameter>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssFunctionParameterList {
+    type Item = SyntaxResult<CssFunctionParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssFunctionParameter>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

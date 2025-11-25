@@ -663,6 +663,7 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	| CssFunctionAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -746,6 +747,9 @@ CssPositionTryAtRuleDeclarator =
 
 CssViewTransitionAtRuleDeclarator =
 	'view-transition'
+
+CssFunctionAtRuleDeclarator =
+	'function'
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -1749,6 +1753,33 @@ CssPositionTryAtRule =
 CssViewTransitionAtRule =
 	declarator: CssViewTransitionAtRuleDeclarator
 	block: AnyCssDeclarationBlock
+
+// https://drafts.csswg.org/css-mixins-1/#function-rule
+// @function <function-token> <function-parameter>#? ) [ returns <css-type> ]? { <declaration-list> }
+CssFunctionAtRule =
+	declarator: CssFunctionAtRuleDeclarator
+	function_name: CssDashedIdentifier
+	'('
+	parameters: CssFunctionParameterList
+	')'
+	returns: CssReturnsStatement?
+	block: AnyCssDeclarationBlock
+
+CssFunctionParameterList = CssFunctionParameter (',' CssFunctionParameter)*
+
+CssFunctionParameter =
+	name: CssDashedIdentifier
+	type:  'todo'
+	default_value: CssFunctionParameterDefaultValue?
+
+CssFunctionParameterDefaultValue =
+	':'
+	value: CssGenericComponentValueList
+
+CssReturnsStatement =
+	'returns'
+	type: 'todo'
+
 
 ///////////////
 // AUXILIARY

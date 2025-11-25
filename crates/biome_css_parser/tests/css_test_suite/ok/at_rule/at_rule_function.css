@@ -1,0 +1,3 @@
+@function --test-fn(--arg todo, --arg2 todo: "test") {
+  result: 1;
+}

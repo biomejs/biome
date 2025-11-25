@@ -1685,6 +1685,145 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_FUNCTION, children)
             }
+            CSS_FUNCTION_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssFunctionAtRuleDeclarator::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssDashedIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssFunctionParameterList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssReturnsStatement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyCssDeclarationBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION_AT_RULE, children)
+            }
+            CSS_FUNCTION_AT_RULE_DECLARATOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![function]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION_AT_RULE_DECLARATOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION_AT_RULE_DECLARATOR, children)
+            }
+            CSS_FUNCTION_PARAMETER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssDashedIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![todo]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssFunctionParameterDefaultValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION_PARAMETER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION_PARAMETER, children)
+            }
+            CSS_FUNCTION_PARAMETER_DEFAULT_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssGenericComponentValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION_PARAMETER_DEFAULT_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION_PARAMETER_DEFAULT_VALUE, children)
+            }
             CSS_GENERIC_DELIMITER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -4578,6 +4717,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_RELATIVE_SELECTOR, children)
             }
+            CSS_RETURNS_STATEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![returns]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![todo]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_RETURNS_STATEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_RETURNS_STATEMENT, children)
+            }
             CSS_ROOT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -6435,6 +6600,13 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssFontFeatureValuesItem::can_cast)
             }
+            CSS_FUNCTION_PARAMETER_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssFunctionParameter::can_cast,
+                T ! [,],
+                false,
+            ),
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssGenericComponentValue::can_cast)
             }
