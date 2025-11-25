@@ -116,6 +116,12 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
 
+    /// An unconfigurable flag for ignoring nested projects
+    #[serde(default)]
+    #[serde(skip)]
+    #[bpaf(hide, hide_usage, pure(Default::default()))]
+    pub nested_root: bool,
+
     /// The configuration of the VCS integration
     #[bpaf(external(vcs_configuration), optional, hide_usage)]
     #[serde(skip_serializing_if = "Option::is_none")]

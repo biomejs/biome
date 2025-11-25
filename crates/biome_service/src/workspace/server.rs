@@ -1,4 +1,5 @@
 use std::panic::RefUnwindSafe;
+use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -21,7 +22,9 @@ use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
-use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+use biome_configuration::{
+    BiomeDiagnostic, Configuration, ConfigurationPathHint, FilesConfiguration,
+};
 use biome_css_syntax::CssVariant;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
@@ -31,6 +34,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
+use biome_glob::NormalizedGlob;
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
@@ -1000,6 +1004,8 @@ impl Workspace for WorkspaceServer {
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }
+        } else if configuration.nested_root {
+            Settings::default()
         } else {
             self.projects
                 .get_root_settings(project_key)
@@ -2249,7 +2255,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 continue;
             }
 
-            if nested_configuration.is_root() {
+            // Explicit nested roots are ok, but implicit ones are probably a mistake.
+            if nested_configuration.root.is_none() {
                 returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                     BiomeDiagnostic::root_in_root(
                         filtered_path.to_string(),
@@ -2259,7 +2266,31 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 continue;
             }
 
-            let nested_configuration = if nested_configuration.extends_root() {
+            let nested_configuration = if nested_configuration.is_root() {
+                // We only find an explicit root from load_nested_configuration if it's a nested root.
+                // e.g.
+                //
+                // - project_path/
+                //     - biome.json (root: true implied)
+                //     - nested/
+                //         - biome.json (root: true)
+                //         - app.js
+                //
+                // We should completely ignore the nested/ directory when scanning
+                // project_path. Among other things, this allows us to have an e2e test suite.
+                let mut ignorer = Configuration::default();
+                ignorer.root = Some(Bool(false));
+                ignorer.nested_root = true;
+                ignorer.files = Some(FilesConfiguration {
+                    max_size: None,
+                    ignore_unknown: Some(Bool(true)),
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("!!**/*").expect("force ignore to parse"),
+                    ]),
+                    experimental_scanner_ignores: None,
+                });
+                ignorer
+            } else if nested_configuration.extends_root() {
                 let root_settings = self
                     .projects
                     .get_root_settings(project_key)
