@@ -2,6 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed all log output being discarded (the kind from `--log-level=info` etc.)
-
-This was a bug introduced in #7531.
+Fixed a bug where logs were discarded (the kind from `--log-level=info` etc.). This is a regression introduced after an internal refactor that wasn't adequately tested. 
