@@ -191,6 +191,53 @@ pub(crate) async fn did_change(
     Ok(())
 }
 
+/// Handler for `textDocument/didSave` LSP notification
+#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str())), err)]
+pub(crate) async fn did_save(
+    session: &Session,
+    params: lsp_types::DidSaveTextDocumentParams,
+) -> Result<(), LspError> {
+    let url = params.text_document.uri;
+    let path = session.file_path(&url)?;
+    let Some(doc) = session.document(&url) else {
+        debug!("Document wasn't open: {}", url.as_str());
+        return Ok(());
+    };
+
+    // Trigger reindexing from disk to sync with saved content
+    session.workspace.close_file(CloseFileParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+    })?;
+
+    // Reopen will load from disk
+    session.workspace.open_file(OpenFileParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+        content: FileContent::FromServer,
+        document_file_source: None,
+        persist_node_cache: true,
+    })?;
+
+    // Sync the Document object with the content reloaded from disk
+    let fresh_content = session.workspace.get_file_content(GetFileContentParams {
+        project_key: doc.project_key,
+        path,
+    })?;
+
+    session.insert_document(
+        url.clone(),
+        Document::new(doc.project_key, doc.version, &fresh_content)
+    );
+
+    // Update diagnostics with fresh content
+    if let Err(err) = session.update_diagnostics(url).await {
+        error!("Failed to update diagnostics after save: {}", err);
+    }
+
+    Ok(())
+}
+
 /// Handler for `textDocument/didClose` LSP notification
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) async fn did_close(
