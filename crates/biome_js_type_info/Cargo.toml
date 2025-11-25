@@ -22,8 +22,8 @@ biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 camino                    = { workspace = true }
 hashbrown                 = { workspace = true }
-rustc-hash                = { workspace = true }
 paste                     = "1.0"
+rustc-hash                = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { workspace = true }
