@@ -80,18 +80,18 @@ impl Rule for NoReturnAssign {
                 rule_category!(),
                 state,
                 match ctx.query() {
-                    AnyReturn::JsReturnStatement(_) =>
+                    AnyReturn::JsArrowFunctionExpression(_) =>
                         markup! {
                             <Emphasis>"Arrow function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
                         },
-                    AnyReturn::JsArrowFunctionExpression(_) =>
+                    AnyReturn::JsReturnStatement(_) =>
                         markup! {
                             <Emphasis>"Function"</Emphasis>" should not return "<Emphasis>"assignment"</Emphasis>"."
                         },
                 }
             )
             .note(markup! {
-                "noReturnAssign: Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
+                "Return statements are often considered side-effect free.\nYou likely want to do a comparison `==`\nOtherwise move the assignment outside of the return statement"
             }),
         )
     }

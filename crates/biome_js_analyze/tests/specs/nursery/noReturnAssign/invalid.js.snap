@@ -34,7 +34,7 @@ function f(a, b) {
 ```
 invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     1 │ /* should generate diagnostics */
     2 │ function f(a) {
@@ -43,7 +43,7 @@ invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
@@ -53,7 +53,7 @@ invalid.js:3:9 lint/nursery/noReturnAssign ━━━━━━━━━━━━�
 ```
 invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     6 │ function f(a) {
   > 7 │ 	return (a = 1);
@@ -61,7 +61,7 @@ invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
     8 │ }
     9 │ 
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
@@ -71,7 +71,7 @@ invalid.js:7:10 lint/nursery/noReturnAssign ━━━━━━━━━━━━
 ```
 invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     10 │ function f(a, b, c) {
   > 11 │ 	return (a, b, c = 1);
@@ -79,7 +79,7 @@ invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     12 │ }
     13 │ 
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
@@ -89,7 +89,7 @@ invalid.js:11:16 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:15:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     14 │ function f(a, b, c) {
   > 15 │ 	return a == (b = c);
@@ -97,7 +97,7 @@ invalid.js:15:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     16 │ }
     17 │ function f(a, b, c) {
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
@@ -107,7 +107,7 @@ invalid.js:15:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:18:13 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     16 │ }
     17 │ function f(a, b, c) {
@@ -116,7 +116,7 @@ invalid.js:18:13 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     19 │ }
     20 │ function f(a, b) {
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
@@ -126,7 +126,7 @@ invalid.js:18:13 lint/nursery/noReturnAssign ━━━━━━━━━━━�
 ```
 invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Arrow function should not return assignment.
+  × Function should not return assignment.
   
     19 │ }
     20 │ function f(a, b) {
@@ -135,7 +135,7 @@ invalid.js:21:15 lint/nursery/noReturnAssign ━━━━━━━━━━━�
     22 │ }
     23 │ 
   
-  i noReturnAssign: Return statements are often considered side-effect free.
+  i Return statements are often considered side-effect free.
     You likely want to do a comparison `==`
     Otherwise move the assignment outside of the return statement
   
