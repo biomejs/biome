@@ -6327,9 +6327,7 @@ export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
 export type NoReactForwardRefOptions = {};
-export interface NoReturnAssignOptions {
-	exceptParenthesis?: boolean;
-}
+export type NoReturnAssignOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
