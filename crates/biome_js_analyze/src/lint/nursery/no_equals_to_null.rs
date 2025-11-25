@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// foo !== null;
     /// ```
     pub NoEqualsToNull {
-        version: "2.3.8",
+        version: "next",
         name: "noEqualsToNull",
         language: "js",
         sources: &[RuleSource::Eslint("no-eq-null").same()],

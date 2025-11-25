@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
 
     pub NoLeakedRender{
-        version: "2.3.8",
+        version: "next",
         name: "noLeakedRender",
         language: "jsx",
         domains: &[RuleDomain::React],

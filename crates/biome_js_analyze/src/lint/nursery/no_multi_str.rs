@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// Line 2`;
     /// ```
     pub NoMultiStr {
-        version: "2.3.8",
+        version: "next",
         name: "noMultiStr",
         language: "js",
         recommended: false,
