@@ -23,7 +23,7 @@ use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
-    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    /// Whether the parent element that encapsulates this element list is whitespace sensitive.
     is_element_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,

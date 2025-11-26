@@ -31,7 +31,7 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SyntaxKindSet<L: Language>([u128; 4], PhantomData<L>);
+pub struct SyntaxKindSet<L: Language>([u128; 5], PhantomData<L>);
 
 impl<L> SyntaxKindSet<L>
 where
@@ -50,7 +50,7 @@ where
     /// ```compile_fail
     /// # use biome_rowan::{SyntaxKindSet, RawSyntaxKind, raw_language::RawLanguage};
     /// const EXAMPLE: SyntaxKindSet<RawLanguage> =
-    ///     SyntaxKindSet::<RawLanguage>::from_raw(RawSyntaxKind(512));
+    ///     SyntaxKindSet::<RawLanguage>::from_raw(RawSyntaxKind(640));
     /// # println!("{EXAMPLE:?}"); // The constant must be used to be evaluated
     /// ```
     pub const fn from_raw(kind: RawSyntaxKind) -> Self {
@@ -60,7 +60,7 @@ where
         let shift = kind % u128::BITS as u16;
         let mask = 1 << shift;
 
-        let mut bits = [0; 4];
+        let mut bits = [0; 5];
         bits[index] = mask;
 
         Self(bits, PhantomData)
@@ -74,6 +74,7 @@ where
                 self.0[1] | other.0[1],
                 self.0[2] | other.0[2],
                 self.0[3] | other.0[3],
+                self.0[4] | other.0[4],
             ],
             PhantomData,
         )

@@ -2,8 +2,9 @@ mod tests;
 
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL,
-    NEWLINE, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL,
+    HTML_STRING_LITERAL, KEY_KW, NEWLINE, RENDER_KW, SVELTE_IDENT, TOMBSTONE, UNICODE_BOM,
+    WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -256,22 +257,17 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    // TODO: keep this function, and enhance svelte_expression until we don't need it anymore
     /// Consumes tokens within a single text expression ('{...}') while tracking nested
     /// brackets until the matching closing bracket is found.
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
         let mut brackets_stack = 0;
-        if self.prev_byte() == Some(b'{') {
-            brackets_stack += 1;
-        }
         while let Some(current) = self.current_byte() {
             match current {
-                b',' if brackets_stack == 0 => break,
                 b'}' => {
-                    brackets_stack -= 1;
                     if brackets_stack == 0 {
                         break;
                     } else {
+                        brackets_stack -= 1;
                         self.advance(1);
                     }
                 }
@@ -427,10 +423,25 @@ impl<'src> HtmlLexer<'src> {
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
-            buffer if context.is_svelte() => match buffer {
-                b"debug" if self.current_kind == T!["{@"] => DEBUG_KW,
-                _ => SVELTE_IDENT,
-            },
+            buffer if context.is_svelte() => {
+                if self.current_kind == T!["{@"] {
+                    match buffer {
+                        b"debug" => DEBUG_KW,
+                        b"attach" => ATTACH_KW,
+                        b"const" => CONST_KW,
+                        b"render" => RENDER_KW,
+                        b"html" => HTML_KW,
+                        _ => SVELTE_IDENT,
+                    }
+                } else if self.current_kind == T!["{#"] || self.current_kind == T!["{/"] {
+                    match buffer {
+                        b"key" => KEY_KW,
+                        _ => SVELTE_IDENT,
+                    }
+                } else {
+                    SVELTE_IDENT
+                }
+            }
             _ => HTML_LITERAL,
         }
     }
@@ -1022,6 +1033,7 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
         }
     }
 }
+
 struct QuotesSeen {
     single: u16,
     double: u16,
@@ -1056,8 +1068,13 @@ impl QuotesSeen {
             return; // Don't track quotes inside comments
         }
 
-        // Check for comment entry
-        if self.prev_byte == Some(b'/') && (byte == b'/' || byte == b'*') {
+        // Check for comment entry - but only if we're not inside quotes
+        if self.prev_byte == Some(b'/')
+            && (byte == b'/' || byte == b'*')
+            && self.single == 0
+            && self.double == 0
+            && self.template == 0
+        {
             self.inside_comment = true;
             self.prev_byte = Some(byte);
             return;
