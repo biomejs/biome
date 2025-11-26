@@ -1,0 +1,3 @@
+{
+  "requiredScripts": ["test", "build", "lint"]
+}
