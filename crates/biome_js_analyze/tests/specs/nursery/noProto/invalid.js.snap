@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+obj.__proto__ = a;
+obj["__proto__"] = b;
+const c = obj.__proto__;
+const d = obj["__proto__"];
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of __proto__.
+  
+  > 1 │ obj.__proto__ = a;
+      │ ^^^^^^^^^^^^^
+    2 │ obj["__proto__"] = b;
+    3 │ const c = obj.__proto__;
+  
+  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  
+  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of __proto__.
+  
+    1 │ obj.__proto__ = a;
+  > 2 │ obj["__proto__"] = b;
+      │ ^^^^^^^^^^^^^^^^
+    3 │ const c = obj.__proto__;
+    4 │ const d = obj["__proto__"];
+  
+  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  
+  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of __proto__.
+  
+    1 │ obj.__proto__ = a;
+    2 │ obj["__proto__"] = b;
+  > 3 │ const c = obj.__proto__;
+      │           ^^^^^^^^^^^^^
+    4 │ const d = obj["__proto__"];
+    5 │ 
+  
+  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  
+  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of __proto__.
+  
+    2 │ obj["__proto__"] = b;
+    3 │ const c = obj.__proto__;
+  > 4 │ const d = obj["__proto__"];
+      │           ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  
+  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  
+
+```
