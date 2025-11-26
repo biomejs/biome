@@ -56,6 +56,13 @@ foo = (n, acc) => {
     return foo(n - 1, acc);
 };
 
+// Separate declaration and assignment with arrow function
+let bar;
+bar = (x, unused) => {
+    if (x === 0) return 0;
+    return bar(x - 1, unused);
+};
+
 // Logical AND operator
 function fnAnd(n, acc) {
     if (n === 0) return 0;

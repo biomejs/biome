@@ -1,0 +1,69 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{@html '<div>'
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteHtmlBlock {
+            sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
+            html_token: HTML_KW@2..6 "html" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@6..15 " '<div>'\n" [] [],
+            },
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@15..15 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..15
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..15
+    0: SVELTE_HTML_BLOCK@0..15
+      0: SV_CURLY_AT@0..2 "{@" [] []
+      1: HTML_KW@2..6 "html" [] []
+      2: HTML_TEXT_EXPRESSION@6..15
+        0: HTML_LITERAL@6..15 " '<div>'\n" [] []
+      3: (empty)
+  4: EOF@15..15 "" [] []
+
+```
+
+## Diagnostics
+
+```
+html.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ {@html '<div>'
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ {@html '<div>'
+  > 2 │ 
+      │ 
+  
+```

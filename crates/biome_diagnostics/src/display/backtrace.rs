@@ -93,11 +93,11 @@ impl<'de> serde::Deserialize<'de> for Backtrace {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Backtrace {
-    fn schema_name() -> String {
-        String::from("Backtrace")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Backtrace")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<SerializedFrame>>::json_schema(generator)
     }
 }

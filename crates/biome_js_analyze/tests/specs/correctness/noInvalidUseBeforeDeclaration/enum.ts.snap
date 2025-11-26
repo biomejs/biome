@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: enum.ts
+---
+# Input
+```ts
+
+function f() {
+	const enum1Member = E1.A;
+}
+enum E1 { A }
+
+```

@@ -78,7 +78,6 @@ pub struct JsonFormatOptions {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum TrailingCommas {
     #[default]
     /// The formatter will remove the trailing commas.
@@ -105,6 +104,21 @@ impl fmt::Display for TrailingCommas {
             Self::None => std::write!(f, "None"),
             Self::All => std::write!(f, "All"),
         }
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for TrailingCommas {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("JsonTrailingCommas")
+    }
+
+    fn json_schema(_generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["none", "all"],
+            "description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files."
+        })
     }
 }
 

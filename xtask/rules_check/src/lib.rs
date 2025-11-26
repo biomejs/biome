@@ -268,6 +268,7 @@ impl DiagnosticWriter {
 fn assert_lint(
     group: &'static str,
     rule: &'static str,
+    rule_language: &'static str,
     test: &CodeBlock,
     code: &str,
     config: Option<Configuration>,
@@ -281,11 +282,20 @@ fn assert_lint(
     // what was emitted matches the expectations set for this code block.
     let mut diagnostics = DiagnosticWriter::default();
 
-    match test.document_file_source() {
+    let document_file_source = if rule_language == "html" {
+        // HACK: Force HTML analysis for rules that come from the HTML analyzer
+        DocumentFileSource::Html(
+            biome_html_syntax::HtmlFileSource::try_from_extension(&test.tag)
+                .unwrap_or_else(|_| biome_html_syntax::HtmlFileSource::html()),
+        )
+    } else {
+        test.document_file_source()
+    };
+    match document_file_source {
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
             let (code, file_source) = match file_source.as_embedding_kind() {
-                EmbeddingKind::Astro => (
+                EmbeddingKind::Astro { .. } => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
                 ),
@@ -745,7 +755,7 @@ fn parse_documentation(
 ) -> anyhow::Result<()> {
     let parser = Parser::new(rule_metadata.docs);
 
-    let mut test_runner = TestRunner::new(group, rule_metadata.name);
+    let mut test_runner = TestRunner::new(group, rule_metadata.name, rule_metadata.language);
 
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
@@ -827,6 +837,7 @@ struct PendingTest {
 struct TestRunner {
     group: &'static str,
     rule_name: &'static str,
+    rule_language: &'static str,
 
     /// Code block tests for the current documentation section.
     /// Tests are deferred and run as a batch when the section ends.
@@ -840,10 +851,11 @@ struct TestRunner {
 }
 
 impl TestRunner {
-    pub fn new(group: &'static str, rule_name: &'static str) -> Self {
+    pub fn new(group: &'static str, rule_name: &'static str, rule_language: &'static str) -> Self {
         Self {
             group,
             rule_name,
+            rule_language,
             pending_tests: Vec::new(),
             file_system: HashMap::new(),
         }
@@ -860,6 +872,7 @@ impl TestRunner {
             assert_lint(
                 self.group,
                 self.rule_name,
+                self.rule_language,
                 &test.test,
                 &test.block,
                 test.options_snapshot,

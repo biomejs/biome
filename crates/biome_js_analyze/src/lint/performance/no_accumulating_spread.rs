@@ -43,12 +43,7 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => Object.assign(acc, val), []);
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
+    /// a.reduce((acc, val) => {return Object.assign([], acc, val);}, []);
     /// ```
     ///
     /// ### Valid
@@ -56,6 +51,16 @@ declare_lint_rule! {
     /// ```js
     /// var a = ['a', 'b', 'c'];
     /// a.reduce((acc, val) => {acc.push(val); return acc}, []);
+    /// ```
+    ///
+    /// ```js
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => Object.assign(acc, val), []);
+    /// ```
+    ///
+    /// ```js
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
     /// ```
     ///
     pub NoAccumulatingSpread {
@@ -200,9 +205,21 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
 
     let call_expression = node.parent::<JsCallExpression>()?;
     let arguments = call_expression.arguments().ok()?;
-    let reference = arguments
-        .args()
-        .first()?
+
+    let mut arg_iter = arguments.args().iter();
+
+    let first = arg_iter.next()?.ok()?;
+    let first = first.as_any_js_expression()?;
+
+    if first.as_js_object_expression().is_none()
+        && first.as_js_array_expression().is_none()
+        && first.as_js_new_expression().is_none()
+    {
+        return None;
+    }
+
+    let reference = arg_iter
+        .next()?
         .ok()?
         .as_any_js_expression()?
         .as_js_identifier_expression()?

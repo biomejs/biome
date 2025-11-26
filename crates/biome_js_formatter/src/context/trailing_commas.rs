@@ -57,7 +57,6 @@ impl Format<JsFormatContext> for FormatTrailingCommas {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum TrailingCommas {
     /// Trailing commas wherever possible (including function parameters and calls).
     #[default]
@@ -101,5 +100,20 @@ impl fmt::Display for TrailingCommas {
             Self::All => std::write!(f, "All"),
             Self::None => std::write!(f, "None"),
         }
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for TrailingCommas {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("JsTrailingCommas")
+    }
+
+    fn json_schema(_generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["all", "es5", "none"],
+            "description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files."
+        })
     }
 }

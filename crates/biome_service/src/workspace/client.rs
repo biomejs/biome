@@ -3,10 +3,10 @@ use super::{
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
+    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -146,39 +146,6 @@ where
         self.request("biome/is_path_ignored", params)
     }
 
-    fn get_syntax_tree(
-        &self,
-        params: GetSyntaxTreeParams,
-    ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
-        self.request("biome/get_syntax_tree", params)
-    }
-
-    fn get_control_flow_graph(
-        &self,
-        params: GetControlFlowGraphParams,
-    ) -> Result<String, WorkspaceError> {
-        self.request("biome/get_control_flow_graph", params)
-    }
-
-    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
-        self.request("biome/get_formatter_ir", params)
-    }
-
-    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
-        self.request("biome/get_type_info", params)
-    }
-
-    fn get_registered_types(
-        &self,
-        params: GetRegisteredTypesParams,
-    ) -> Result<String, WorkspaceError> {
-        self.request("biome/get_registered_types", params)
-    }
-
-    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
-        self.request("biome/get_semantic_model", params)
-    }
-
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
         self.request("biome/get_file_content", params)
     }
@@ -203,6 +170,13 @@ where
 
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         self.request("biome/pull_actions", params)
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.request("biome/pull_diagnostics_and_actions", params)
     }
 
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
@@ -252,12 +226,37 @@ where
         self.request("biome/drop_pattern", params)
     }
 
-    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
-        self.request("biome/rage", params)
+    fn get_syntax_tree(
+        &self,
+        params: GetSyntaxTreeParams,
+    ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+        self.request("biome/get_syntax_tree", params)
     }
 
-    fn server_info(&self) -> Option<&ServerInfo> {
-        self.server_info.as_ref()
+    fn get_control_flow_graph(
+        &self,
+        params: GetControlFlowGraphParams,
+    ) -> Result<String, WorkspaceError> {
+        self.request("biome/get_control_flow_graph", params)
+    }
+
+    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
+        self.request("biome/get_formatter_ir", params)
+    }
+
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
+        self.request("biome/get_type_info", params)
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        self.request("biome/get_registered_types", params)
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        self.request("biome/get_semantic_model", params)
     }
 
     fn get_module_graph(
@@ -265,5 +264,13 @@ where
         params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
         self.request("biome/get_module_graph", params)
+    }
+
+    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
+        self.request("biome/rage", params)
+    }
+
+    fn server_info(&self) -> Option<&ServerInfo> {
+        self.server_info.as_ref()
     }
 }

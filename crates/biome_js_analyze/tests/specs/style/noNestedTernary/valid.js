@@ -1,12 +1,18 @@
 /* should not generate diagnostics */
-const thing = foo ? bar : foobar;
+const thing1 = foo ? bar : foobar;
 
-let thing;
+let thing2;
 
 if (foo) {
-  thing = bar;
+  thing2 = bar;
 } else if (baz === qux) {
-  thing = quxx;
+  thing2 = quxx;
 } else {
-  thing = foobar;
+  thing2 = foobar;
 }
+
+const thing3 = (foo ? bar : baz);
+
+const thing4 = foo ? (bar) : (baz);
+
+const thing5 = ((foo ? bar : baz));

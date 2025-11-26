@@ -1,0 +1,93 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#key }
+	something
+{/key}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteKeyBlock {
+            opening_block: SvelteKeyOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                key_token: KEY_KW@2..5 "key" [] [],
+                expression: missing (required),
+                r_curly_token: missing (required),
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@5..6 " " [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@6..7 "}" [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@7..18 "something" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_block: SvelteKeyClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@18..21 "{/" [Newline("\n")] [],
+                key_token: KEY_KW@21..24 "key" [] [],
+                r_curly_token: R_CURLY@24..25 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..26
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..25
+    0: SVELTE_KEY_BLOCK@0..25
+      0: SVELTE_KEY_OPENING_BLOCK@0..5
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: KEY_KW@2..5 "key" [] []
+        2: (empty)
+        3: (empty)
+      1: HTML_ELEMENT_LIST@5..18
+        0: HTML_CONTENT@5..6
+          0: HTML_LITERAL@5..6 " " [] []
+        1: HTML_CONTENT@6..7
+          0: HTML_LITERAL@6..7 "}" [] []
+        2: HTML_CONTENT@7..18
+          0: HTML_LITERAL@7..18 "something" [Newline("\n"), Whitespace("\t")] []
+      2: SVELTE_KEY_CLOSING_BLOCK@18..25
+        0: SV_CURLY_SLASH@18..21 "{/" [Newline("\n")] []
+        1: KEY_KW@21..24 "key" [] []
+        2: R_CURLY@24..25 "}" [] []
+  4: EOF@25..26 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+key_missing_expression.svelte:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, instead none was found.
+  
+  > 1 │ {#key }
+      │      ^
+    2 │ 	something
+    3 │ {/key}
+  
+```

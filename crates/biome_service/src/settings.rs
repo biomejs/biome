@@ -1400,6 +1400,11 @@ impl OverrideSettings {
                         biome_graphql_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_html_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
 
                 if let Some(actions) = pattern.assist.actions.as_ref() {
@@ -1421,6 +1426,11 @@ impl OverrideSettings {
                     push_to_analyzer_assist(
                         actions,
                         biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_assist(
+                        actions,
+                        biome_html_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
                 }

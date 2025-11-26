@@ -25,7 +25,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Warm up wasm-pack cache
         id: cache-restore
@@ -65,9 +65,9 @@ jobs:
         run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: 20.19.5
+          node-version: 24.11.1
           cache: pnpm
 
       - name: Update package.json
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Dispatch event on push
         if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
@@ -96,7 +96,7 @@ jobs:
       # For testing only, the payload is mocked
       - name: Dispatch event on workflow dispatch
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}

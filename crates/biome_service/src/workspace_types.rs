@@ -4,11 +4,7 @@ use std::collections::VecDeque;
 
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use rustc_hash::FxHashSet;
-use schemars::{
-    JsonSchema,
-    r#gen::{SchemaGenerator, SchemaSettings},
-    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
-};
+use schemars::{JsonSchema, Schema, SchemaGenerator, generate::SchemaSettings};
 use serde_json::Value;
 
 use crate::{WorkspaceError, workspace::*};
@@ -24,19 +20,19 @@ pub struct ModuleQueue<'a> {
     /// Set of type names that have already been emitted
     visited: FxHashSet<&'a str>,
     /// Queue of type names and definitions that need to be generated
-    queue: VecDeque<(&'a str, &'a SchemaObject)>,
+    queue: VecDeque<(&'a str, &'a Value)>,
 }
 
 impl<'a> ModuleQueue<'a> {
     /// Add a type definition to the queue if it hasn't been emitted already
-    fn push_back(&mut self, item: (&'a str, &'a SchemaObject)) {
+    fn push_back(&mut self, item: (&'a str, &'a Value)) {
         if self.visited.insert(item.0) {
             self.queue.push_back(item);
         }
     }
 
     /// Pull a type name and definition from the queue
-    fn pop_front(&mut self) -> Option<(&'a str, &'a SchemaObject)> {
+    fn pop_front(&mut self) -> Option<(&'a str, &'a Value)> {
         self.queue.pop_front()
     }
 
@@ -45,75 +41,144 @@ impl<'a> ModuleQueue<'a> {
     }
 }
 
-/// Generate a [TsType] node from the `instance_type` of a [SchemaObject]
+/// Rename complex type names with simpler ones.
+///
+/// Complex names are generated from generic types.
+fn rename_type(name: &str) -> Option<String> {
+    if let Some(stripped) = name.strip_prefix("RuleWithOptions_for_") {
+        Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleWithFixOptions_for_") {
+        Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleAssistWithOptions_for_") {
+        Some(format!("RuleAssistWith{stripped}"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleFixConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleAssistConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else {
+        name.strip_prefix("SeverityOrGroup_for_")
+            .map(|stripped| format!("SeverityOr{stripped}"))
+    }
+}
+
+/// Generate a [TsType] node from the `type` field of a schema
 fn instance_type<'a>(
     queue: &mut ModuleQueue<'a>,
-    root_schema: &'a RootSchema,
-    schema: &'a SchemaObject,
-    ty: InstanceType,
+    root_schema: &'a Schema,
+    schema: &'a Value,
+    ty: &str,
 ) -> AnyTsType {
     match ty {
         // If the instance type is an object, generate a TS object type with the corresponding properties
-        InstanceType::Object => {
-            let object = schema.object.as_deref().unwrap();
-            let properties = object
-                .properties
-                .iter()
-                .map(|(property, schema)| {
-                    let (ts_type, optional, description) = schema_type(queue, root_schema, schema);
-                    assert!(!optional, "optional nested types are not supported");
-
-                    let mut property = make::ident(property);
-                    if let Some(description) = description {
-                        let comment = format!("/**\n\t* {description} \n\t */");
-                        let trivia = vec![
-                            (TriviaPieceKind::Newline, "\n"),
-                            (TriviaPieceKind::MultiLineComment, comment.as_str()),
-                            (TriviaPieceKind::Newline, "\n"),
-                        ];
-                        property = property.with_leading_trivia(trivia);
-                    }
-
-                    AnyTsTypeMember::from(
-                        make::ts_property_signature_type_member(AnyJsObjectMemberName::from(
-                            make::js_literal_member_name(property),
-                        ))
-                        .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ts_type))
-                        .build(),
-                    )
+        "object" => {
+            // Get the list of required properties from the schema
+            let required_properties = schema
+                .get("required")
+                .and_then(|v| v.as_array())
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| v.as_str())
+                        .collect::<std::collections::HashSet<_>>()
                 })
-                .collect::<Vec<_>>();
+                .unwrap_or_default();
 
-            let properties_type = (!properties.is_empty()).then(|| {
-                make::ts_object_type(
-                    make::token(T!['{']),
-                    make::ts_type_member_list(properties),
-                    make::token(T!['}']),
-                )
-                .into()
+            let properties_obj =
+                schema
+                    .get("properties")
+                    .and_then(|v| v.as_object())
+                    .map(|props| {
+                        props
+                            .iter()
+                            .map(|(property, prop_schema)| {
+                                // prop_schema is already a &Value, which is the same as &Schema in v1.0
+                                let (ts_type, field_optional, description) =
+                                    schema_type(queue, root_schema, prop_schema);
+
+                                // In OpenAPI 3.0, a field is optional if it's NOT in the required array
+                                // OR if the field schema itself marks it as optional (has default, etc.)
+                                let optional = !required_properties.contains(property.as_str())
+                                    || field_optional;
+
+                                // If the field is optional, strip null from the type since `field?: T`
+                                // already implies the field can be omitted (undefined)
+                                let ts_type = if optional {
+                                    strip_null_from_union(ts_type)
+                                } else {
+                                    ts_type
+                                };
+
+                                let mut property_ident = make::ident(property);
+                                if let Some(description) = description {
+                                    let comment = format!("/**\n\t* {description} \n\t */");
+                                    let trivia = vec![
+                                        (TriviaPieceKind::Newline, "\n"),
+                                        (TriviaPieceKind::MultiLineComment, comment.as_str()),
+                                        (TriviaPieceKind::Newline, "\n"),
+                                    ];
+                                    property_ident = property_ident.with_leading_trivia(trivia);
+                                }
+
+                                let mut builder = make::ts_property_signature_type_member(
+                                    AnyJsObjectMemberName::from(make::js_literal_member_name(
+                                        property_ident,
+                                    )),
+                                )
+                                .with_type_annotation(make::ts_type_annotation(
+                                    make::token(T![:]),
+                                    ts_type,
+                                ));
+
+                                if optional {
+                                    builder = builder.with_optional_token(make::token(T![?]));
+                                }
+
+                                AnyTsTypeMember::from(builder.build())
+                            })
+                            .collect::<Vec<_>>()
+                    });
+
+            let properties_type = properties_obj.and_then(|properties| {
+                (!properties.is_empty()).then(|| {
+                    make::ts_object_type(
+                        make::token(T!['{']),
+                        make::ts_type_member_list(properties),
+                        make::token(T!['}']),
+                    )
+                    .into()
+                })
             });
 
             // Don't use `additionalProperties: false` here.
-            let additional_properties =
-                object
-                    .additional_properties
-                    .as_deref()
-                    .and_then(|schema| match schema {
-                        Schema::Bool(false) => None,
-                        _ => Some(schema),
-                    });
+            let additional_properties = schema.get("additionalProperties").and_then(|v| {
+                if v.as_bool() == Some(false) {
+                    None
+                } else {
+                    Some(v)
+                }
+            });
 
             // If `additionalProperties` is not empty, add a mapped or record type.
-            let additional_properties_type = additional_properties.map(|schema| {
+            let additional_properties_type = additional_properties.map(|add_props| {
                 // If `propertyNames` is not empty, use it as the key type.
-                let key_type = object.property_names.as_deref().map(|schema| {
-                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                let key_type = schema.get("propertyNames").map(|v| {
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, v);
                     assert!(!optional, "optional nested types are not supported");
                     ts_type
                 });
 
                 let value_type = {
-                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, add_props);
                     assert!(!optional, "optional nested types are not supported");
                     ts_type
                 };
@@ -169,49 +234,85 @@ fn instance_type<'a>(
                 .flatten()
                 .collect::<Vec<_>>();
 
-            let separators = (0..result.len().saturating_sub(1)).map(|_| make::token(T![&]));
-
-            make::ts_intersection_type(make::ts_intersection_type_element_list(result, separators))
+            if result.is_empty() {
+                // Empty object with no properties and no additionalProperties
+                // Generate an empty object type: {}
+                make::ts_object_type(
+                    make::token(T!['{']),
+                    make::ts_type_member_list([]),
+                    make::token(T!['}']),
+                )
+                .into()
+            } else if result.len() == 1 {
+                // Single type, no need for intersection
+                result.into_iter().next().unwrap()
+            } else {
+                // Multiple types, create intersection
+                let separators = (0..result.len().saturating_sub(1)).map(|_| make::token(T![&]));
+                make::ts_intersection_type(make::ts_intersection_type_element_list(
+                    result, separators,
+                ))
                 .build()
                 .into()
+            }
         }
         // If the instance type is an array, generate a TS array type with the corresponding item type
-        InstanceType::Array => {
-            let array = schema.array.as_deref().unwrap();
-            let items = array.items.as_ref().unwrap();
-            match items {
-                SingleOrVec::Single(schema) => {
-                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
-                    assert!(!optional, "optional nested types are not supported");
+        "array" => {
+            // OpenAPI 3.1/JSON Schema 2020-12 uses prefixItems for tuples
+            let prefix_items = schema.get("prefixItems").and_then(|v| v.as_array());
 
-                    AnyTsType::from(make::ts_array_type(
-                        ts_type,
-                        make::token(T!['[']),
-                        make::token(T![']']),
-                    ))
-                }
-                SingleOrVec::Vec(items) => AnyTsType::from(make::ts_tuple_type(
+            if let Some(items_array) = prefix_items {
+                // Tuple type with prefixItems
+                AnyTsType::from(make::ts_tuple_type(
                     make::token(T!['[']),
                     make::ts_tuple_type_element_list(
-                        items.iter().map(|schema| {
-                            let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                        items_array.iter().map(|item| {
+                            let (ts_type, optional, _) = schema_type(queue, root_schema, item);
                             assert!(!optional, "optional nested types are not supported");
                             AnyTsTupleTypeElement::AnyTsType(ts_type)
                         }),
-                        items.iter().map(|_| make::token(T![,])),
+                        items_array.iter().map(|_| make::token(T![,])),
                     ),
                     make::token(T![']']),
-                )),
+                ))
+            } else {
+                // Fall back to items
+                let items = schema.get("items");
+                match items {
+                    Some(Value::Object(_)) => {
+                        let (ts_type, optional, _) =
+                            schema_type(queue, root_schema, items.unwrap());
+                        assert!(!optional, "optional nested types are not supported");
+
+                        AnyTsType::from(make::ts_array_type(
+                            ts_type,
+                            make::token(T!['[']),
+                            make::token(T![']']),
+                        ))
+                    }
+                    Some(Value::Array(items_array)) => AnyTsType::from(make::ts_tuple_type(
+                        make::token(T!['[']),
+                        make::ts_tuple_type_element_list(
+                            items_array.iter().map(|item| {
+                                let (ts_type, optional, _) = schema_type(queue, root_schema, item);
+                                assert!(!optional, "optional nested types are not supported");
+                                AnyTsTupleTypeElement::AnyTsType(ts_type)
+                            }),
+                            items_array.iter().map(|_| make::token(T![,])),
+                        ),
+                        make::token(T![']']),
+                    )),
+                    _ => AnyTsType::from(make::ts_any_type(make::token(T![any]))),
+                }
             }
         }
 
         // Map native types to the corresponding TS type
-        InstanceType::Null => AnyTsType::from(make::ts_null_literal_type(make::token(T![null]))),
-        InstanceType::Boolean => AnyTsType::from(make::ts_boolean_type(make::token(T![boolean]))),
-        InstanceType::String => AnyTsType::from(make::ts_string_type(make::token(T![string]))),
-        InstanceType::Number | InstanceType::Integer => {
-            AnyTsType::from(make::ts_number_type(make::token(T![number])))
-        }
+        "null" => AnyTsType::from(make::ts_null_literal_type(make::token(T![null]))),
+        "boolean" => AnyTsType::from(make::ts_boolean_type(make::token(T![boolean]))),
+        "string" => AnyTsType::from(make::ts_string_type(make::token(T![string]))),
+        "number" | "integer" => AnyTsType::from(make::ts_number_type(make::token(T![number]))),
+        _ => AnyTsType::from(make::ts_any_type(make::token(T![any]))),
     }
 }
 
@@ -255,89 +356,139 @@ fn make_union_type(items: impl IntoIterator<Item = AnyTsType>) -> AnyTsType {
     )
 }
 
-/// Generate a [TsType] node from a [SchemaObject], returning the generated
+/// Strip null from a union type. If the type is `T | null`, returns `T`.
+/// If the type is not a union or doesn't contain null, returns the type unchanged.
+fn strip_null_from_union(ts_type: AnyTsType) -> AnyTsType {
+    match &ts_type {
+        AnyTsType::TsUnionType(union_type) => {
+            let non_null_types: Vec<_> = union_type
+                .types()
+                .iter()
+                .filter_map(|ty| ty.ok())
+                .filter(|ty| !matches!(ty, AnyTsType::TsNullLiteralType(_)))
+                .collect();
+
+            if non_null_types.is_empty() {
+                // All types were null, return null
+                ts_type
+            } else if non_null_types.len() == 1 {
+                // Only one non-null type, return it directly
+                non_null_types.into_iter().next().unwrap()
+            } else {
+                // Multiple non-null types, create a new union
+                make_union_type(non_null_types)
+            }
+        }
+        _ => ts_type,
+    }
+}
+
+/// Generate a [TsType] node from a [Schema], returning the generated
 /// TypeScript type along with a boolean flag indicating whether the type is
 /// considered "optional" in the schema
 fn schema_object_type<'a>(
     queue: &mut ModuleQueue<'a>,
-    root_schema: &'a RootSchema,
-    schema: &'a SchemaObject,
-) -> (AnyTsType, bool, Option<&'a String>) {
-    // Start by detecting enum types by inspecting the `enum_values` field, i
-    // the field is set return a union type generated from the literal enum values
+    root_schema: &'a Schema,
+    schema: &'a Value,
+) -> (AnyTsType, bool, Option<String>) {
+    // Start by detecting enum types by inspecting the `enum` field
     let description = schema
-        .metadata
-        .as_ref()
-        .and_then(|s| s.description.as_ref());
+        .get("description")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string());
+
     let ts_type = schema
-        .enum_values
-        .as_deref()
+        .get("enum")
+        .and_then(|v| v.as_array())
         .map(|enum_values| make_union_type(enum_values.iter().map(value_type)))
-        // If the type isn't an enum, inspect its `instance_type` field, if the
-        // field is set return a type annotation for the corresponding type
+        // Handle JSON Schema "const" for single constant values
         .or_else(|| {
-            Some(match schema.instance_type.as_ref()? {
-                SingleOrVec::Single(ty) => instance_type(queue, root_schema, schema, **ty),
-                SingleOrVec::Vec(types) => make_union_type(
+            let const_value = schema.get("const")?;
+            Some(value_type(const_value))
+        })
+        // If the type isn't an enum or const, inspect its `type` field
+        .or_else(|| {
+            let type_value = schema.get("type")?;
+            match type_value {
+                Value::String(ty) => Some(instance_type(queue, root_schema, schema, ty.as_str())),
+                Value::Array(types) => Some(make_union_type(
                     types
                         .iter()
-                        .map(|ty| instance_type(queue, root_schema, schema, *ty)),
-                ),
-            })
-        })
-        // Otherwise inspect the `reference` field of the schema, if its set return
-        // a TS reference type and add the corresponding type to the queue
-        .or_else(|| {
-            let reference = schema.reference.as_deref()?;
-            let key = reference.trim_start_matches("#/components/schemas/");
-            match root_schema.definitions.get(key) {
-                Some(Schema::Bool(_)) => unimplemented!(),
-                Some(Schema::Object(schema)) => queue.push_back((key, schema)),
-                None => panic!("definition for type {key:?} not found"),
+                        .filter_map(|v| v.as_str())
+                        .map(|ty| instance_type(queue, root_schema, schema, ty)),
+                )),
+                _ => None,
             }
+        })
+        // Otherwise inspect the `$ref` field of the schema
+        .or_else(|| {
+            let reference = schema.get("$ref")?.as_str()?;
 
+            // Handle multiple $ref formats:
+            // - JSON Schema Draft 2020-12: #/$defs/Key
+            // - JSON Schema Draft-07: #/definitions/Key
+            // - OpenAPI 3.0: #/components/schemas/Key
+            let (key, def_schema) = if let Some(key) = reference.strip_prefix("#/$defs/") {
+                let def = root_schema.get("$defs")?.as_object()?.get(key)?;
+                (key, def)
+            } else if let Some(key) = reference.strip_prefix("#/definitions/") {
+                let def = root_schema.get("definitions")?.as_object()?.get(key)?;
+                (key, def)
+            } else if let Some(key) = reference.strip_prefix("#/components/schemas/") {
+                let def = root_schema
+                    .get("components")?
+                    .as_object()?
+                    .get("schemas")?
+                    .as_object()?
+                    .get(key)?;
+                (key, def)
+            } else {
+                return None;
+            };
+
+            queue.push_back((key, def_schema));
+
+            // Apply type name renaming for the reference
+            let renamed_key = rename_type(key).unwrap_or_else(|| key.to_string());
             Some(AnyTsType::from(
                 make::ts_reference_type(AnyTsName::from(make::js_reference_identifier(
-                    make::ident(key),
+                    make::ident(&renamed_key),
                 )))
                 .build(),
             ))
         })
-        // Finally try to inspect the subschemas for this type
+        // Finally try to inspect subschemas (allOf, anyOf, oneOf)
         .or_else(|| {
-            let subschemas = schema.subschemas.as_deref()?;
-            // First try to inspect the `all_of` list of subschemas, if it's
-            // set generate an intersection type from it
-            subschemas
-                .all_of
-                .as_deref()
-                .map(|all_of| {
-                    AnyTsType::from(
-                        make::ts_intersection_type(make::ts_intersection_type_element_list(
-                            all_of.iter().map(|ty| {
-                                let (ts_type, optional, _) = schema_type(queue, root_schema, ty);
-                                assert!(!optional, "optional nested types are not supported");
-                                ts_type
-                            }),
-                            (0..all_of.len().saturating_sub(1)).map(|_| make::token(T![&])),
-                        ))
-                        .build(),
-                    )
-                })
-                // Otherwise try to inspect the `any_of` list of subschemas, and
-                // generate the corresponding union type for it
-                .or_else(|| {
-                    let any_of = subschemas
-                        .any_of
-                        .as_deref()
-                        .or(subschemas.one_of.as_deref())?;
+            // First try allOf
+            if let Some(all_of) = schema.get("allOf").and_then(|v| v.as_array()) {
+                return Some(AnyTsType::from(
+                    make::ts_intersection_type(make::ts_intersection_type_element_list(
+                        all_of.iter().map(|ty| {
+                            let (ts_type, optional, _) = schema_type(queue, root_schema, ty);
+                            assert!(!optional, "optional nested types are not supported");
+                            ts_type
+                        }),
+                        (0..all_of.len().saturating_sub(1)).map(|_| make::token(T![&])),
+                    ))
+                    .build(),
+                ));
+            }
 
-                    Some(make_union_type(any_of.iter().map(|ty| {
-                        let (ts_type, optional, _) = schema_type(queue, root_schema, ty);
-                        assert!(!optional, "optional nested types are not supported");
-                        ts_type
-                    })))
-                })
+            // Then try anyOf or oneOf
+            let union_schemas = schema
+                .get("anyOf")
+                .or_else(|| schema.get("oneOf"))
+                .and_then(|v| v.as_array())?;
+
+            Some(make_union_type(union_schemas.iter().map(|ty| {
+                let (ts_type, optional, _) = schema_type(queue, root_schema, ty);
+                assert!(
+                    !optional,
+                    "optional nested types are not supported. Schema: {}",
+                    serde_json::to_string_pretty(ty).unwrap_or_else(|_| format!("{:?}", ty))
+                );
+                ts_type
+            })))
         })
         .unwrap_or_else(|| {
             // this is temporary workaround to fix the `options` field, which is not used at the moment
@@ -346,13 +497,23 @@ fn schema_object_type<'a>(
 
     // Types are considered "optional" in the serialization protocol if they
     // have the `nullable` OpenAPI extension property, or if they have a default value
-    let is_nullable = matches!(schema.extensions.get("nullable"), Some(Value::Bool(true)));
-    let has_defaults = schema
-        .metadata
-        .as_ref()
-        .is_some_and(|metadata| metadata.default.is_some());
+    // However, if this schema is just representing a null type (enum: [null]), don't mark it as optional
+    // since it will be used in a union context
+    let is_null_only = schema
+        .get("enum")
+        .and_then(|v| v.as_array())
+        .is_some_and(|arr| arr.len() == 1 && arr[0].is_null());
 
-    (ts_type, is_nullable || has_defaults, description)
+    let is_nullable = schema
+        .get("nullable")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
+
+    let has_defaults = schema.get("default").is_some();
+
+    let is_optional = (is_nullable || has_defaults) && !is_null_only;
+
+    (ts_type, is_optional, description)
 }
 
 /// Generate a [TsType] node from a [Schema], returning the generated type
@@ -360,41 +521,42 @@ fn schema_object_type<'a>(
 /// "optional" in the schema
 fn schema_type<'a>(
     queue: &mut ModuleQueue<'a>,
-    root_schema: &'a RootSchema,
-    schema: &'a Schema,
-) -> (AnyTsType, bool, Option<&'a String>) {
-    match schema {
-        // Types defined as `true` in the schema always pass validation,
-        // map them to the `any` type
-        Schema::Bool(true) => (
-            AnyTsType::from(make::ts_any_type(make::token(T![any]))),
-            true,
-            None,
-        ),
-        // Types defined as `false` in the schema never pass validation,
-        // map them to the `never` type
-        Schema::Bool(false) => (
-            AnyTsType::from(make::ts_never_type(make::token(T![never]))),
-            false,
-            None,
-        ),
-        Schema::Object(schema_object) => schema_object_type(queue, root_schema, schema_object),
+    root_schema: &'a Schema,
+    schema: &'a Value,
+) -> (AnyTsType, bool, Option<String>) {
+    // Check if schema is a boolean value
+    if let Some(bool_val) = schema.as_bool() {
+        return if bool_val {
+            // Types defined as `true` in the schema always pass validation,
+            // map them to the `any` type
+            (
+                AnyTsType::from(make::ts_any_type(make::token(T![any]))),
+                true,
+                None,
+            )
+        } else {
+            // Types defined as `false` in the schema never pass validation,
+            // map them to the `never` type
+            (
+                AnyTsType::from(make::ts_never_type(make::token(T![never]))),
+                false,
+                None,
+            )
+        };
     }
+
+    // Otherwise treat as a schema object
+    schema_object_type(queue, root_schema, schema)
 }
 
 /// Generate and emit all the types defined in `root_schema` into the `module`
 pub fn generate_type<'a>(
-    module: &mut Vec<(AnyJsDeclaration, Option<&'a String>)>,
+    module: &mut Vec<(AnyJsDeclaration, Option<String>)>,
     queue: &mut ModuleQueue<'a>,
-    root_schema: &'a RootSchema,
+    root_schema: &'a Schema,
 ) -> AnyTsType {
     // Read the root type of the schema and push it to the queue
-    let root_name = root_schema
-        .schema
-        .metadata
-        .as_deref()
-        .and_then(|metadata| metadata.title.as_deref())
-        .unwrap();
+    let root_name = root_schema.get("title").and_then(|v| v.as_str()).unwrap();
 
     match root_name {
         "Null" => return AnyTsType::TsVoidType(make::ts_void_type(make::token(T![void]))),
@@ -405,64 +567,109 @@ pub fn generate_type<'a>(
         _ => {}
     }
 
-    queue.push_back((root_name, &root_schema.schema));
+    // Push the root type to the queue for processing
+    queue.push_back((root_name, root_schema.as_value()));
 
     while let Some((name, schema)) = queue.pop_front() {
+        // Apply type name renaming for complex generic types
+        let name = rename_type(name).unwrap_or_else(|| name.to_string());
+        let name = name.as_str();
+
+        // Skip generating type aliases for TypeScript reserved primitive type names
+        // These would create invalid definitions like "export type string = string"
+        if matches!(
+            name,
+            "null" | "string" | "boolean" | "number" | "any" | "void" | "never" | "unknown"
+        ) {
+            continue;
+        }
+
         // Detect if the type being emitted is an object, emit it as an
         // interface definition if that's the case
-        let is_interface = schema.object.as_deref().is_some_and(|object| {
-            object
-                .additional_properties
-                .as_deref()
-                .is_none_or(|additional_properties| {
-                    matches!(additional_properties, Schema::Bool(false))
-                })
-        }) && schema.instance_type.as_ref().is_none_or(|instance_type| {
-            if let SingleOrVec::Single(instance_type) = instance_type {
-                matches!(**instance_type, InstanceType::Object)
-            } else {
-                false
-            }
-        });
+        let has_properties = schema
+            .get("properties")
+            .and_then(|v| v.as_object())
+            .is_some_and(|props| !props.is_empty());
+        let additional_props_is_false = schema
+            .get("additionalProperties")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let type_is_object = schema
+            .get("type")
+            .and_then(|v| v.as_str())
+            .is_none_or(|t| t == "object");
+
+        // Generate an interface if:
+        // 1. It's an object type with properties (most common case)
+        // 2. OR it's an empty object with additionalProperties: false
+        let is_interface = type_is_object
+            && (has_properties
+                || (additional_props_is_false && schema.get("properties").is_none()));
 
         if is_interface {
             let mut members = Vec::new();
 
+            // Get the list of required properties from the schema
+            let required_properties = schema
+                .get("required")
+                .and_then(|v| v.as_array())
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| v.as_str())
+                        .collect::<std::collections::HashSet<_>>()
+                })
+                .unwrap_or_default();
+
             // Create a property signature member in the interface for each
             // property of the corresponding schema object
-            let object = schema.object.as_deref().unwrap();
-            for (property_str, schema) in &object.properties {
-                let (ts_type, optional, description) = schema_type(queue, root_schema, schema);
+            if let Some(properties) = schema.get("properties").and_then(|v| v.as_object()) {
+                for (property_str, prop_value) in properties {
+                    let (ts_type, field_optional, description) =
+                        schema_type(queue, root_schema, prop_value);
 
-                let mut property = make::ident(property_str);
-                if let Some(description) = description {
-                    let comment = format!("/**\n\t* {description} \n\t */");
-                    let trivia = vec![
-                        (TriviaPieceKind::Newline, "\n"),
-                        (TriviaPieceKind::MultiLineComment, comment.as_str()),
-                        (TriviaPieceKind::Newline, "\n"),
-                    ];
-                    property = property.with_leading_trivia(trivia);
+                    // In OpenAPI 3.0, a field is optional if it's NOT in the required array
+                    // OR if the field schema itself marks it as optional (has default, etc.)
+                    let optional =
+                        !required_properties.contains(property_str.as_str()) || field_optional;
+
+                    // If the field is optional, strip null from the type since `field?: T`
+                    // already implies the field can be omitted (undefined)
+                    let ts_type = if optional {
+                        strip_null_from_union(ts_type)
+                    } else {
+                        ts_type
+                    };
+
+                    let mut property = make::ident(property_str);
+                    if let Some(ref description) = description {
+                        let comment = format!("/**\n\t* {description} \n\t */");
+                        let trivia = vec![
+                            (TriviaPieceKind::Newline, "\n"),
+                            (TriviaPieceKind::MultiLineComment, comment.as_str()),
+                            (TriviaPieceKind::Newline, "\n"),
+                        ];
+                        property = property.with_leading_trivia(trivia);
+                    }
+
+                    let type_annotation = make::ts_type_annotation(make::token(T![:]), ts_type);
+
+                    let mut builder = make::ts_property_signature_type_member(
+                        AnyJsObjectMemberName::from(make::js_literal_member_name(property)),
+                    )
+                    .with_type_annotation(type_annotation);
+
+                    if optional {
+                        builder = builder.with_optional_token(make::token(T![?]));
+                    }
+
+                    members.push(AnyTsTypeMember::from(builder.build()));
                 }
-
-                let type_annotation = make::ts_type_annotation(make::token(T![:]), ts_type);
-
-                let mut builder = make::ts_property_signature_type_member(
-                    AnyJsObjectMemberName::from(make::js_literal_member_name(property)),
-                )
-                .with_type_annotation(type_annotation);
-
-                if optional {
-                    builder = builder.with_optional_token(make::token(T![?]));
-                }
-
-                members.push(AnyTsTypeMember::from(builder.build()));
             }
 
             let description = schema
-                .metadata
-                .as_ref()
-                .and_then(|s| s.description.as_ref());
+                .get("description")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
             let current_module = AnyJsDeclaration::from(
                 make::ts_interface_declaration(
                     make::token(T![interface]),
@@ -493,9 +700,11 @@ pub fn generate_type<'a>(
         }
     }
 
+    // Apply type name renaming for the root type reference
+    let renamed_root = rename_type(root_name).unwrap_or_else(|| root_name.to_string());
     AnyTsType::TsReferenceType(
         make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
-            make::js_reference_identifier(make::ident(root_name)),
+            make::js_reference_identifier(make::ident(&renamed_root)),
         ))
         .build(),
     )
@@ -506,9 +715,9 @@ pub struct WorkspaceMethod {
     /// Name of the method
     pub name: &'static str,
     /// Schema for the parameters object of the method
-    pub params: RootSchema,
+    pub params: Schema,
     /// Schema for the result object of the method
-    pub result: RootSchema,
+    pub result: Schema,
 }
 
 impl WorkspaceMethod {
@@ -518,8 +727,8 @@ impl WorkspaceMethod {
         P: JsonSchema,
         R: JsonSchema,
     {
-        let params = SchemaGenerator::from(SchemaSettings::openapi3()).root_schema_for::<P>();
-        let result = SchemaGenerator::from(SchemaSettings::openapi3()).root_schema_for::<R>();
+        let params = SchemaGenerator::from(SchemaSettings::draft2019_09()).root_schema_for::<P>();
+        let result = SchemaGenerator::from(SchemaSettings::draft2019_09()).root_schema_for::<R>();
         Self {
             name,
             params,
@@ -548,7 +757,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 29] {
+pub fn methods() -> [WorkspaceMethod; 30] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -571,6 +780,7 @@ pub fn methods() -> [WorkspaceMethod; 29] {
         workspace_method!(get_module_graph),
         workspace_method!(pull_diagnostics),
         workspace_method!(pull_actions),
+        workspace_method!(pull_diagnostics_and_actions),
         workspace_method!(format_file),
         workspace_method!(format_range),
         workspace_method!(format_on_type),

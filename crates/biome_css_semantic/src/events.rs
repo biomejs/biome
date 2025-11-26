@@ -190,7 +190,7 @@ impl SemanticEventExtractor {
     /// @property --my-other-property {}
     /// ```
     fn process_at_property(&mut self, node: CssPropertyAtRule) {
-        let Ok(property_name) = node.name() else {
+        let Ok(property_name) = node.declarator().and_then(|d| d.name()) else {
             return;
         };
         let Some(decls) = node
