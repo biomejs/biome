@@ -46,6 +46,17 @@ fn infer_type_of_regex() {
 }
 
 #[test]
+fn infer_type_of_regex_with_flags() {
+    const CODE: &str = r#"/ab+c/gi"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_regex_with_flags");
+}
+
+#[test]
 fn infer_type_of_typeof_expression() {
     const CODE: &str = r#"typeof foo"#;
 
