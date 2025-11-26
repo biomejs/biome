@@ -2,19 +2,19 @@
 
 // Valid cases - should not trigger the rule
 
-<a href="https://example.com">Link</a>
+<a href="https://example.com">Link</a>;
 
-<a href="/path/to/page">Link</a>
+<a href="/path/to/page">Link</a>;
 
-<a href="#section">Link</a>
+<a href="#section">Link</a>;
 
-<a href="">Link</a>
+<a href="">Link</a>;
 
-<a href={someVar}>Link</a>
+<a href={someVar}>Link</a>;
 
-<a href={`https://example.com/${id}`}>Link</a>
+<a href={`https://example.com/${id}`}>Link</a>;
 
-<button onClick={() => {}}>Button</button>
+<button onClick={() => {}}>Button</button>;
 
 React.createElement('a', { href: 'https://example.com' });
 

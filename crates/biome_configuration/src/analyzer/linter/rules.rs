@@ -1044,7 +1044,7 @@ impl RuleName {
             Self::NoRestrictedGlobals => RuleGroup::Style,
             Self::NoRestrictedImports => RuleGroup::Style,
             Self::NoRestrictedTypes => RuleGroup::Style,
-            Self::NoScriptUrl => RuleGroup::Security,
+            Self::NoScriptUrl => RuleGroup::Nursery,
             Self::NoSecrets => RuleGroup::Security,
             Self::NoSelfAssign => RuleGroup::Correctness,
             Self::NoSelfCompare => RuleGroup::Suspicious,
