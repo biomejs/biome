@@ -157,3 +157,5 @@ export default component$(() => {
   );
 });
 ```
+
+_Note: The parser emitted 11 diagnostics which are not shown here._

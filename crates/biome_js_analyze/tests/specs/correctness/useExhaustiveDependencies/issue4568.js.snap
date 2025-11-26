@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue4568.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -13,6 +12,8 @@ xpor function ueCanvasn(
   useEffect( => {on late Point},[c
 
 ```
+
+_Note: The parser emitted 10 diagnostics which are not shown here._
 
 # Diagnostics
 ```

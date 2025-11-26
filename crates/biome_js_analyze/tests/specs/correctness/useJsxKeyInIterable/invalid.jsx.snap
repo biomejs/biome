@@ -133,6 +133,8 @@ export default component$(() => {
 
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.jsx:3:2 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
