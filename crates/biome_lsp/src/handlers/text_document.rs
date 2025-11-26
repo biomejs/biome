@@ -227,7 +227,7 @@ pub(crate) async fn did_save(
 
     session.insert_document(
         url.clone(),
-        Document::new(doc.project_key, doc.version, &fresh_content)
+        Document::new(doc.project_key, doc.version, &fresh_content),
     );
 
     // Update diagnostics with fresh content
