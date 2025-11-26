@@ -7,6 +7,8 @@ expression: invalid.json
 export default function f() {};
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -27,6 +29,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```cjs
 export default class C {};
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -49,6 +53,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 export default function () {};
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -69,6 +75,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```cjs
 export default class {};
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -91,6 +99,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 export default X;
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -111,6 +121,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```cjs
 export default { f() {} };
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -133,6 +145,8 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 export { X as default };
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,6 +167,8 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 ```cjs
 export { X as 'default' };
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -175,10 +191,14 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 export { default } from './module';
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Input
 ```cjs
 export { X as default } from './module';
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -200,6 +220,8 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 ```cjs
 export { X as 'default' } from './module';
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```

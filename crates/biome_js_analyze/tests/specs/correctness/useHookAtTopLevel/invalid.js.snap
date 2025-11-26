@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -199,6 +198,8 @@ function useRecursiveHookB() {
 }
 
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._
 
 # Diagnostics
 ```

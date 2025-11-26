@@ -22,3 +22,5 @@ expression: valid.js
 <input aria-activedescendant={someID} tabIndex={-1} />;
 
 ```
+
+_Note: The parser emitted 59 diagnostics which are not shown here._
