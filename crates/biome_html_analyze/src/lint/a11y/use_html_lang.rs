@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement};
-use biome_rowan::AstNode;
+use biome_html_syntax::AnyHtmlElement;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 
 declare_lint_rule! {
@@ -14,42 +14,18 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
+    /// ```html,expect_diagnostic
     /// <html></html>
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <html lang={""}></html>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <html lang={null}></html>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <html lang={undefined}></html>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <html lang={true}></html>
+    /// ```html,expect_diagnostic
+    /// <html lang=""></html>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx
+    /// ```html
     /// <html lang="en"></html>
-    /// ```
-    ///
-    /// ```jsx
-    /// <html lang={language}></html>
-    /// ```
-    ///
-    /// ```jsx
-    /// <html {...props}></html>
-    /// ```
-    ///
-    /// ```jsx
-    /// <html lang={""} {...props}></html>
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -57,9 +33,9 @@ declare_lint_rule! {
     /// - [WCAG 3.1.1](https://www.w3.org/WAI/WCAG21/Understanding/language-of-page)
     ///
     pub UseHtmlLang {
-        version: "1.0.0",
+        version: "next",
         name: "useHtmlLang",
-        language: "jsx",
+        language: "html",
         sources: &[RuleSource::EslintJsxA11y("html-has-lang").same()],
         recommended: true,
         severity: Severity::Error,
@@ -67,30 +43,28 @@ declare_lint_rule! {
 }
 
 impl Rule for UseHtmlLang {
-    type Query = Ast<AnyJsxElement>;
+    type Query = Ast<AnyHtmlElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = UseHtmlLangOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let name = element.name().ok()?.name_value_token().ok()?;
 
-        if name.text_trimmed() == "html" {
-            if let Some(lang_attribute) = element.find_attribute_by_name("lang") {
-                if !lang_attribute
-                    .as_static_value()
-                    .is_none_or(|attribute| attribute.is_not_string_constant(""))
-                    && !element.has_trailing_spread_prop(&lang_attribute)
-                {
-                    return Some(element.syntax().text_trimmed_range());
-                }
-            } else if !element.has_spread_prop() {
-                return Some(element.syntax().text_trimmed_range());
-            }
+        if !is_html_element(element) {
+            return None;
         }
 
-        None
+        if let Some(lang_attribute) = element.find_attribute_by_name("lang")
+            && let Some(initializer) = lang_attribute.initializer()
+            && let Ok(value) = initializer.value()
+            && let Some(value) = value.string_value()
+            && !value.trim_ascii().is_empty()
+        {
+            return None;
+        }
+
+        Some(element.syntax().text_trimmed_range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -107,4 +81,10 @@ impl Rule for UseHtmlLang {
             }
         ))
     }
+}
+
+fn is_html_element(element: &AnyHtmlElement) -> bool {
+    element
+        .name()
+        .is_some_and(|token_text| token_text.eq_ignore_ascii_case("html"))
 }

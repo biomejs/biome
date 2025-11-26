@@ -56,6 +56,23 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+file.astro:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+     8 │ ---
+     9 │ 
+  > 10 │ <html><head><title>Astro</title></head><body></body></html>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <style>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```block
 file.astro:13:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
@@ -80,5 +97,5 @@ file.astro:13:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 1 error.
+Found 2 errors.
 ```
