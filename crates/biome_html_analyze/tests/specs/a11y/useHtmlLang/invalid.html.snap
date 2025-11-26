@@ -24,7 +24,7 @@ invalid.html:2:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     3 │ <html></html>
     4 │ <html lang></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -41,7 +41,7 @@ invalid.html:3:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     4 │ <html lang></html>
     5 │ <html lang=""></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -58,7 +58,7 @@ invalid.html:4:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     5 │ <html lang=""></html>
     6 │ 
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -74,7 +74,7 @@ invalid.html:5:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```

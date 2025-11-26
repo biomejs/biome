@@ -73,7 +73,7 @@ file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     15 │ 
     16 │ <style>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
