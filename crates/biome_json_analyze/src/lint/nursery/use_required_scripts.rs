@@ -137,7 +137,7 @@ impl Rule for UseRequiredScripts {
         };
 
         Some(
-            RuleDiagnostic::new(rule_category!(), _ctx.query().range(), message).note(markup! {
+            RuleDiagnostic::new(rule_category!(), ctx.query().range(), message).note(markup! {
                 "Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
             }),
         )
