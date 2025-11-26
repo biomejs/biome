@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
 Add support for the typed `attr` function. Addresses issue #6183.
