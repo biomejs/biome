@@ -535,6 +535,12 @@ fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSy
         return Present(member_marker.complete(p, JS_EMPTY_CLASS_MEMBER));
     }
 
+    // Glimmer templates in class bodies
+    if p.at(GLIMMER_TEMPLATE) {
+        p.bump(GLIMMER_TEMPLATE);
+        return Present(member_marker.complete(p, JS_GLIMMER_TEMPLATE));
+    }
+
     let mut modifiers = parse_class_member_modifiers(p, false);
 
     if is_at_static_initialization_block_class_member(p) {

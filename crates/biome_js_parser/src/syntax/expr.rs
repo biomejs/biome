@@ -1249,7 +1249,8 @@ pub(crate) fn is_nth_at_expression(p: &mut JsParser, n: usize) -> bool {
         | JS_NUMBER_LITERAL
         | JS_BIGINT_LITERAL
         | JS_STRING_LITERAL
-        | NULL_KW => true,
+        | NULL_KW
+        | GLIMMER_TEMPLATE => true,
         t => t.is_contextual_keyword() || t.is_future_reserved_keyword(),
     }
 }
@@ -1391,6 +1392,9 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
         // test ts ts_type_assertion
         // let a = <number>b;
         T![<] if Jsx.is_supported(p) => return parse_jsx_tag_expression(p),
+
+        // Glimmer templates in .gjs/.gts files
+        GLIMMER_TEMPLATE => return parse_glimmer_template(p),
 
         // test_err js primary_expr_invalid_recovery
         // let a = \; foo();
@@ -2167,4 +2171,15 @@ fn parse_import_call_expression(
     p.expect(T![')']);
     args.complete(p, JS_CALL_ARGUMENTS);
     marker.complete(p, JS_IMPORT_CALL_EXPRESSION)
+}
+
+/// Parses a Glimmer template block `<template>...</template>` in .gjs/.gts files
+pub(crate) fn parse_glimmer_template(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(GLIMMER_TEMPLATE) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GLIMMER_TEMPLATE);
+    Present(m.complete(p, JS_GLIMMER_TEMPLATE))
 }

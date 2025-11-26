@@ -113,6 +113,11 @@ impl HtmlParseOptions {
         self
     }
 
+    pub fn with_double_glimmer_expression(mut self) -> Self {
+        self.text_expression = Some(TextExpressionKind::DoubleGlimmer);
+        self
+    }
+
     pub fn with_frontmatter(mut self) -> Self {
         self.frontmatter = true;
         self
@@ -153,6 +158,9 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();
+            }
+            HtmlVariant::Glimmer => {
+                options = options.with_double_glimmer_expression();
             }
         }
 

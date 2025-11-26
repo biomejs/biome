@@ -8,6 +8,7 @@ impl FormatRule<AnyHtmlContent> for FormatAnyHtmlContent {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyHtmlContent, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnyHtmlContent::AnyGlimmerExpression(node) => node.format().fmt(f),
             AnyHtmlContent::AnyHtmlTextExpression(node) => node.format().fmt(f),
             AnyHtmlContent::HtmlContent(node) => node.format().fmt(f),
             AnyHtmlContent::HtmlEmbeddedContent(node) => node.format().fmt(f),

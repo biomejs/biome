@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test self-closing template tag
+// Glimmer templates must have explicit closing tags, not self-closing
+const x = <template />;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..111 "const" [Comments("// Test self-closing  ..."), Newline("\n"), Comments("// Glimmer templates  ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@111..113 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@113..115 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@115..129 "<template />;\n" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@129..129 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..129
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..129
+    0: JS_VARIABLE_STATEMENT@0..129
+      0: JS_VARIABLE_DECLARATION@0..129
+        0: (empty)
+        1: CONST_KW@0..111 "const" [Comments("// Test self-closing  ..."), Newline("\n"), Comments("// Glimmer templates  ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@111..129
+          0: JS_VARIABLE_DECLARATOR@111..129
+            0: JS_IDENTIFIER_BINDING@111..113
+              0: IDENT@111..113 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@113..129
+              0: EQ@113..115 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@115..129
+                0: GLIMMER_TEMPLATE@115..129 "<template />;\n" [] []
+      1: (empty)
+  4: EOF@129..129 "" [] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_template_self_closing.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed `<template>` tag
+  
+    1 │ // Test self-closing template tag
+    2 │ // Glimmer templates must have explicit closing tags, not self-closing
+  > 3 │ const x = <template />;
+      │           ^^^^^^^^^^^^
+    4 │ 
+  
+  i Add a closing `</template>` tag
+  
+```

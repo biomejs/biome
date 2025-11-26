@@ -20,6 +20,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpression {
             AnyJsExpression::JsComputedMemberExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsConditionalExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsFunctionExpression(node) => node.format().fmt(f),
+            AnyJsExpression::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsExpression::JsIdentifierExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsImportCallExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsImportMetaExpression(node) => node.format().fmt(f),

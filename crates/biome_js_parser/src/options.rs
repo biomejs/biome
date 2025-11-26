@@ -1,3 +1,5 @@
+use biome_js_syntax::JsFileSource;
+
 /// Options to pass to the JavaScript parser
 #[derive(Debug, Clone, Copy, Default)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -44,5 +46,30 @@ impl JsParserOptions {
     /// ```
     pub fn should_parse_parameter_decorators(&self) -> bool {
         self.parse_class_parameter_decorators
+    }
+}
+
+impl From<&JsFileSource> for JsParserOptions {
+    /// Derive parser options from the file source type.
+    ///
+    /// This allows parser configuration to be automatically determined based on
+    /// file characteristics (language, variant, embedding kind, etc.) rather than
+    /// requiring explicit option passing.
+    ///
+    /// Currently returns default options for all file types, but provides a
+    /// centralized place to configure file-type-specific parsing behavior in the future.
+    /// For example, Glimmer template parsing (.gjs/.gts files) is handled at the
+    /// lexer level by checking the embedding kind.
+    fn from(_file_source: &JsFileSource) -> Self {
+        // File-type-specific options could be configured here based on:
+        // - _file_source.language() - JavaScript vs TypeScript
+        // - _file_source.variant() - Standard vs JSX
+        // - _file_source.module_kind() - Script vs Module
+        // - _file_source.as_embedding_kind() - Astro, Vue, Svelte, Glimmer, etc.
+        //
+        // For now, Glimmer-specific behavior (template lexing) is handled in the lexer
+        // by checking _file_source.as_embedding_kind().is_glimmer()
+
+        Self::default()
     }
 }

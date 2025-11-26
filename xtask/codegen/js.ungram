@@ -120,6 +120,7 @@ AnyJsStatement =
 	| TsExternalModuleDeclaration
 	| TsGlobalDeclaration
 	| TsImportEqualsDeclaration
+	| JsGlimmerTemplate
 	| JsMetavariable
 
 JsBlockStatement =
@@ -332,6 +333,8 @@ AnyJsExpression =
 	| TsInstantiationExpression
 	// JSX
 	| JsxTagExpression
+	// Glimmer
+	| JsGlimmerTemplate
 	// Grit
 	| JsMetavariable
 
@@ -660,6 +663,7 @@ AnyJsClassMember =
 	| TsSetterSignatureClassMember
 	| TsIndexSignatureClassMember
 	| JsEmptyClassMember
+	| JsGlimmerTemplate
 	| JsBogusMember
 	| JsMetavariable
 
@@ -882,6 +886,15 @@ AnyTsIndexSignatureModifier =
 TsIndexSignatureModifierList = AnyTsIndexSignatureModifier*
 
 JsEmptyClassMember = ';'
+
+///////////////
+// GLIMMER TEMPLATES
+///////////////
+
+// <template>...</template>
+// Represents a Glimmer template block in .gjs/.gts files
+JsGlimmerTemplate =
+	template_token: 'GLIMMER_TEMPLATE'
 
 ///////////////
 // ASSIGNMENT TARGETS

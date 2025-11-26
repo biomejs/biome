@@ -100,6 +100,901 @@ pub struct AstroFrontmatterElementFields {
     pub r_fence_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerBlockHelper {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerBlockHelper {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerBlockHelperFields {
+        GlimmerBlockHelperFields {
+            opening: self.opening(),
+            children: self.children(),
+            closing: self.closing(),
+        }
+    }
+    pub fn opening(&self) -> SyntaxResult<GlimmerBlockHelperOpening> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn closing(&self) -> SyntaxResult<GlimmerBlockHelperClosing> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GlimmerBlockHelper {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerBlockHelperFields {
+    pub opening: SyntaxResult<GlimmerBlockHelperOpening>,
+    pub children: HtmlElementList,
+    pub closing: SyntaxResult<GlimmerBlockHelperClosing>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerBlockHelperClosing {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerBlockHelperClosing {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerBlockHelperClosingFields {
+        GlimmerBlockHelperClosingFields {
+            l_curly2_token_token: self.l_curly2_token_token(),
+            slash_token_token: self.slash_token_token(),
+            helper: self.helper(),
+            r_curly2_token_token: self.r_curly2_token_token(),
+        }
+    }
+    pub fn l_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn slash_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn helper(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerBlockHelperClosing {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerBlockHelperClosingFields {
+    pub l_curly2_token_token: SyntaxResult<SyntaxToken>,
+    pub slash_token_token: SyntaxResult<SyntaxToken>,
+    pub helper: SyntaxResult<GlimmerPath>,
+    pub r_curly2_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerBlockHelperOpening {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerBlockHelperOpening {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerBlockHelperOpeningFields {
+        GlimmerBlockHelperOpeningFields {
+            l_curly2_token_token: self.l_curly2_token_token(),
+            hash_token_token: self.hash_token_token(),
+            helper: self.helper(),
+            arguments: self.arguments(),
+            block_params: self.block_params(),
+            r_curly2_token_token: self.r_curly2_token_token(),
+        }
+    }
+    pub fn l_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn hash_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn helper(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn arguments(&self) -> GlimmerArgumentList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn block_params(&self) -> Option<GlimmerBlockParams> {
+        support::node(&self.syntax, 4usize)
+    }
+    pub fn r_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+}
+impl Serialize for GlimmerBlockHelperOpening {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerBlockHelperOpeningFields {
+    pub l_curly2_token_token: SyntaxResult<SyntaxToken>,
+    pub hash_token_token: SyntaxResult<SyntaxToken>,
+    pub helper: SyntaxResult<GlimmerPath>,
+    pub arguments: GlimmerArgumentList,
+    pub block_params: Option<GlimmerBlockParams>,
+    pub r_curly2_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerBlockParam {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerBlockParam {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerBlockParamFields {
+        GlimmerBlockParamFields {
+            name_token_token: self.name_token_token(),
+        }
+    }
+    pub fn name_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerBlockParam {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerBlockParamFields {
+    pub name_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerBlockParams {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerBlockParams {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerBlockParamsFields {
+        GlimmerBlockParamsFields {
+            as_token_token: self.as_token_token(),
+            l_pipe_token_token: self.l_pipe_token_token(),
+            params: self.params(),
+            r_pipe_token_token: self.r_pipe_token_token(),
+        }
+    }
+    pub fn as_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_pipe_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn params(&self) -> GlimmerBlockParamList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_pipe_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerBlockParams {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerBlockParamsFields {
+    pub as_token_token: SyntaxResult<SyntaxToken>,
+    pub l_pipe_token_token: SyntaxResult<SyntaxToken>,
+    pub params: GlimmerBlockParamList,
+    pub r_pipe_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerElementModifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerElementModifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerElementModifierFields {
+        GlimmerElementModifierFields {
+            l_curly2_token_token: self.l_curly2_token_token(),
+            path: self.path(),
+            arguments: self.arguments(),
+            r_curly2_token_token: self.r_curly2_token_token(),
+        }
+    }
+    pub fn l_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn path(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> GlimmerArgumentList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerElementModifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerElementModifierFields {
+    pub l_curly2_token_token: SyntaxResult<SyntaxToken>,
+    pub path: SyntaxResult<GlimmerPath>,
+    pub arguments: GlimmerArgumentList,
+    pub r_curly2_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerLiteral {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerLiteral {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerLiteralFields {
+        GlimmerLiteralFields {
+            value_token_token: self.value_token_token(),
+        }
+    }
+    pub fn value_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerLiteral {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerLiteralFields {
+    pub value_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerMustacheComment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerMustacheComment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerMustacheCommentFields {
+        GlimmerMustacheCommentFields {
+            comment_token_token: self.comment_token_token(),
+        }
+    }
+    pub fn comment_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerMustacheComment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerMustacheCommentFields {
+    pub comment_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerMustacheExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerMustacheExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerMustacheExpressionFields {
+        GlimmerMustacheExpressionFields {
+            l_curly2_token_token: self.l_curly2_token_token(),
+            path: self.path(),
+            arguments: self.arguments(),
+            r_curly2_token_token: self.r_curly2_token_token(),
+        }
+    }
+    pub fn l_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn path(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> GlimmerArgumentList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_curly2_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerMustacheExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerMustacheExpressionFields {
+    pub l_curly2_token_token: SyntaxResult<SyntaxToken>,
+    pub path: SyntaxResult<GlimmerPath>,
+    pub arguments: GlimmerArgumentList,
+    pub r_curly2_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerNamedArgument {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerNamedArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerNamedArgumentFields {
+        GlimmerNamedArgumentFields {
+            name_token_token: self.name_token_token(),
+            eq_token_token: self.eq_token_token(),
+            value: self.value(),
+        }
+    }
+    pub fn name_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn eq_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyGlimmerArgumentValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GlimmerNamedArgument {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerNamedArgumentFields {
+    pub name_token_token: SyntaxResult<SyntaxToken>,
+    pub eq_token_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyGlimmerArgumentValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerNamedBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerNamedBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerNamedBlockFields {
+        GlimmerNamedBlockFields {
+            opening: self.opening(),
+            children: self.children(),
+            closing: self.closing(),
+        }
+    }
+    pub fn opening(&self) -> SyntaxResult<GlimmerNamedBlockOpening> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn closing(&self) -> SyntaxResult<GlimmerNamedBlockClosing> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GlimmerNamedBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerNamedBlockFields {
+    pub opening: SyntaxResult<GlimmerNamedBlockOpening>,
+    pub children: HtmlElementList,
+    pub closing: SyntaxResult<GlimmerNamedBlockClosing>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerNamedBlockClosing {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerNamedBlockClosing {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerNamedBlockClosingFields {
+        GlimmerNamedBlockClosingFields {
+            l_angle_token_token: self.l_angle_token_token(),
+            slash_token_token: self.slash_token_token(),
+            colon_token_token: self.colon_token_token(),
+            name_token_token: self.name_token_token(),
+            r_angle_token_token: self.r_angle_token_token(),
+        }
+    }
+    pub fn l_angle_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn slash_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn colon_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn name_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn r_angle_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for GlimmerNamedBlockClosing {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerNamedBlockClosingFields {
+    pub l_angle_token_token: SyntaxResult<SyntaxToken>,
+    pub slash_token_token: SyntaxResult<SyntaxToken>,
+    pub colon_token_token: SyntaxResult<SyntaxToken>,
+    pub name_token_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerNamedBlockOpening {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerNamedBlockOpening {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerNamedBlockOpeningFields {
+        GlimmerNamedBlockOpeningFields {
+            l_angle_token_token: self.l_angle_token_token(),
+            colon_token_token: self.colon_token_token(),
+            name_token_token: self.name_token_token(),
+            attributes: self.attributes(),
+            r_angle_token_token: self.r_angle_token_token(),
+        }
+    }
+    pub fn l_angle_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn colon_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn attributes(&self) -> HtmlAttributeList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_angle_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for GlimmerNamedBlockOpening {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerNamedBlockOpeningFields {
+    pub l_angle_token_token: SyntaxResult<SyntaxToken>,
+    pub colon_token_token: SyntaxResult<SyntaxToken>,
+    pub name_token_token: SyntaxResult<SyntaxToken>,
+    pub attributes: HtmlAttributeList,
+    pub r_angle_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerPath {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerPath {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerPathFields {
+        GlimmerPathFields {
+            at_token_token: self.at_token_token(),
+            segments: self.segments(),
+        }
+    }
+    pub fn at_token_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn segments(&self) -> GlimmerPathSegmentList {
+        support::list(&self.syntax, 1usize)
+    }
+}
+impl Serialize for GlimmerPath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerPathFields {
+    pub at_token_token: Option<SyntaxToken>,
+    pub segments: GlimmerPathSegmentList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerPathSegment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerPathSegment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerPathSegmentFields {
+        GlimmerPathSegmentFields {
+            value_token_token: self.value_token_token(),
+        }
+    }
+    pub fn value_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerPathSegment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerPathSegmentFields {
+    pub value_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerPositionalArgument {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerPositionalArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerPositionalArgumentFields {
+        GlimmerPositionalArgumentFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<AnyGlimmerArgumentValue> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerPositionalArgument {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerPositionalArgumentFields {
+    pub value: SyntaxResult<AnyGlimmerArgumentValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerSplattribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerSplattribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerSplattributeFields {
+        GlimmerSplattributeFields {
+            dotdotdot_token_token: self.dotdotdot_token_token(),
+            attributes_token_token: self.attributes_token_token(),
+        }
+    }
+    pub fn dotdotdot_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn attributes_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for GlimmerSplattribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerSplattributeFields {
+    pub dotdotdot_token_token: SyntaxResult<SyntaxToken>,
+    pub attributes_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerStringLiteral {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerStringLiteral {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerStringLiteralFields {
+        GlimmerStringLiteralFields {
+            value_token_token: self.value_token_token(),
+        }
+    }
+    pub fn value_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GlimmerStringLiteral {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerStringLiteralFields {
+    pub value_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerSubexpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerSubexpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerSubexpressionFields {
+        GlimmerSubexpressionFields {
+            l_paren_token_token: self.l_paren_token_token(),
+            path: self.path(),
+            arguments: self.arguments(),
+            r_paren_token_token: self.r_paren_token_token(),
+        }
+    }
+    pub fn l_paren_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn path(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> GlimmerArgumentList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerSubexpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerSubexpressionFields {
+    pub l_paren_token_token: SyntaxResult<SyntaxToken>,
+    pub path: SyntaxResult<GlimmerPath>,
+    pub arguments: GlimmerArgumentList,
+    pub r_paren_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GlimmerTripleStashExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GlimmerTripleStashExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GlimmerTripleStashExpressionFields {
+        GlimmerTripleStashExpressionFields {
+            l_curly3_token_token: self.l_curly3_token_token(),
+            path: self.path(),
+            arguments: self.arguments(),
+            r_curly3_token_token: self.r_curly3_token_token(),
+        }
+    }
+    pub fn l_curly3_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn path(&self) -> SyntaxResult<GlimmerPath> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> GlimmerArgumentList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_curly3_token_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for GlimmerTripleStashExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GlimmerTripleStashExpressionFields {
+    pub l_curly3_token_token: SyntaxResult<SyntaxToken>,
+    pub path: SyntaxResult<GlimmerPath>,
+    pub arguments: GlimmerArgumentList,
+    pub r_curly3_token_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -954,13 +1849,126 @@ impl AnyAstroFrontmatterElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyGlimmerArgument {
+    GlimmerNamedArgument(GlimmerNamedArgument),
+    GlimmerPositionalArgument(GlimmerPositionalArgument),
+}
+impl AnyGlimmerArgument {
+    pub fn as_glimmer_named_argument(&self) -> Option<&GlimmerNamedArgument> {
+        match &self {
+            Self::GlimmerNamedArgument(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_positional_argument(&self) -> Option<&GlimmerPositionalArgument> {
+        match &self {
+            Self::GlimmerPositionalArgument(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyGlimmerArgumentValue {
+    GlimmerLiteral(GlimmerLiteral),
+    GlimmerPath(GlimmerPath),
+    GlimmerStringLiteral(GlimmerStringLiteral),
+    GlimmerSubexpression(GlimmerSubexpression),
+}
+impl AnyGlimmerArgumentValue {
+    pub fn as_glimmer_literal(&self) -> Option<&GlimmerLiteral> {
+        match &self {
+            Self::GlimmerLiteral(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_path(&self) -> Option<&GlimmerPath> {
+        match &self {
+            Self::GlimmerPath(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_string_literal(&self) -> Option<&GlimmerStringLiteral> {
+        match &self {
+            Self::GlimmerStringLiteral(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_subexpression(&self) -> Option<&GlimmerSubexpression> {
+        match &self {
+            Self::GlimmerSubexpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyGlimmerExpression {
+    GlimmerBlockHelper(GlimmerBlockHelper),
+    GlimmerBogusExpression(GlimmerBogusExpression),
+    GlimmerMustacheComment(GlimmerMustacheComment),
+    GlimmerMustacheExpression(GlimmerMustacheExpression),
+    GlimmerNamedBlock(GlimmerNamedBlock),
+    GlimmerTripleStashExpression(GlimmerTripleStashExpression),
+}
+impl AnyGlimmerExpression {
+    pub fn as_glimmer_block_helper(&self) -> Option<&GlimmerBlockHelper> {
+        match &self {
+            Self::GlimmerBlockHelper(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_bogus_expression(&self) -> Option<&GlimmerBogusExpression> {
+        match &self {
+            Self::GlimmerBogusExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_mustache_comment(&self) -> Option<&GlimmerMustacheComment> {
+        match &self {
+            Self::GlimmerMustacheComment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_mustache_expression(&self) -> Option<&GlimmerMustacheExpression> {
+        match &self {
+            Self::GlimmerMustacheExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_named_block(&self) -> Option<&GlimmerNamedBlock> {
+        match &self {
+            Self::GlimmerNamedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_triple_stash_expression(&self) -> Option<&GlimmerTripleStashExpression> {
+        match &self {
+            Self::GlimmerTripleStashExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    GlimmerElementModifier(GlimmerElementModifier),
+    GlimmerSplattribute(GlimmerSplattribute),
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
     HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlAttribute {
+    pub fn as_glimmer_element_modifier(&self) -> Option<&GlimmerElementModifier> {
+        match &self {
+            Self::GlimmerElementModifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_splattribute(&self) -> Option<&GlimmerSplattribute> {
+        match &self {
+            Self::GlimmerSplattribute(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
         match &self {
             Self::HtmlAttribute(item) => Some(item),
@@ -1007,11 +2015,18 @@ impl AnyHtmlAttributeInitializer {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlContent {
+    AnyGlimmerExpression(AnyGlimmerExpression),
     AnyHtmlTextExpression(AnyHtmlTextExpression),
     HtmlContent(HtmlContent),
     HtmlEmbeddedContent(HtmlEmbeddedContent),
 }
 impl AnyHtmlContent {
+    pub fn as_any_glimmer_expression(&self) -> Option<&AnyGlimmerExpression> {
+        match &self {
+            Self::AnyGlimmerExpression(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_html_text_expression(&self) -> Option<&AnyHtmlTextExpression> {
         match &self {
             Self::AnyHtmlTextExpression(item) => Some(item),
@@ -1034,6 +2049,8 @@ impl AnyHtmlContent {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
     AnyHtmlContent(AnyHtmlContent),
+    GlimmerMustacheComment(GlimmerMustacheComment),
+    GlimmerTripleStashExpression(GlimmerTripleStashExpression),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlElement(HtmlElement),
@@ -1043,6 +2060,18 @@ impl AnyHtmlElement {
     pub fn as_any_html_content(&self) -> Option<&AnyHtmlContent> {
         match &self {
             Self::AnyHtmlContent(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_mustache_comment(&self) -> Option<&GlimmerMustacheComment> {
+        match &self {
+            Self::GlimmerMustacheComment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_glimmer_triple_stash_expression(&self) -> Option<&GlimmerTripleStashExpression> {
+        match &self {
+            Self::GlimmerTripleStashExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -1225,6 +2254,1096 @@ impl From<AstroFrontmatterElement> for SyntaxNode {
 }
 impl From<AstroFrontmatterElement> for SyntaxElement {
     fn from(n: AstroFrontmatterElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerBlockHelper {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_HELPER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_HELPER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBlockHelper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerBlockHelper")
+                .field("opening", &support::DebugSyntaxResult(self.opening()))
+                .field("children", &self.children())
+                .field("closing", &support::DebugSyntaxResult(self.closing()))
+                .finish()
+        } else {
+            f.debug_struct("GlimmerBlockHelper").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerBlockHelper> for SyntaxNode {
+    fn from(n: GlimmerBlockHelper) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBlockHelper> for SyntaxElement {
+    fn from(n: GlimmerBlockHelper) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerBlockHelperClosing {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_HELPER_CLOSING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_HELPER_CLOSING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBlockHelperClosing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerBlockHelperClosing")
+                .field(
+                    "l_curly2_token_token",
+                    &support::DebugSyntaxResult(self.l_curly2_token_token()),
+                )
+                .field(
+                    "slash_token_token",
+                    &support::DebugSyntaxResult(self.slash_token_token()),
+                )
+                .field("helper", &support::DebugSyntaxResult(self.helper()))
+                .field(
+                    "r_curly2_token_token",
+                    &support::DebugSyntaxResult(self.r_curly2_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerBlockHelperClosing").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerBlockHelperClosing> for SyntaxNode {
+    fn from(n: GlimmerBlockHelperClosing) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBlockHelperClosing> for SyntaxElement {
+    fn from(n: GlimmerBlockHelperClosing) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerBlockHelperOpening {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_HELPER_OPENING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_HELPER_OPENING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBlockHelperOpening {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerBlockHelperOpening")
+                .field(
+                    "l_curly2_token_token",
+                    &support::DebugSyntaxResult(self.l_curly2_token_token()),
+                )
+                .field(
+                    "hash_token_token",
+                    &support::DebugSyntaxResult(self.hash_token_token()),
+                )
+                .field("helper", &support::DebugSyntaxResult(self.helper()))
+                .field("arguments", &self.arguments())
+                .field(
+                    "block_params",
+                    &support::DebugOptionalElement(self.block_params()),
+                )
+                .field(
+                    "r_curly2_token_token",
+                    &support::DebugSyntaxResult(self.r_curly2_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerBlockHelperOpening").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerBlockHelperOpening> for SyntaxNode {
+    fn from(n: GlimmerBlockHelperOpening) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBlockHelperOpening> for SyntaxElement {
+    fn from(n: GlimmerBlockHelperOpening) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerBlockParam {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_PARAM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_PARAM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBlockParam {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerBlockParam")
+                .field(
+                    "name_token_token",
+                    &support::DebugSyntaxResult(self.name_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerBlockParam").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerBlockParam> for SyntaxNode {
+    fn from(n: GlimmerBlockParam) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBlockParam> for SyntaxElement {
+    fn from(n: GlimmerBlockParam) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerBlockParams {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_PARAMS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_PARAMS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBlockParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerBlockParams")
+                .field(
+                    "as_token_token",
+                    &support::DebugSyntaxResult(self.as_token_token()),
+                )
+                .field(
+                    "l_pipe_token_token",
+                    &support::DebugSyntaxResult(self.l_pipe_token_token()),
+                )
+                .field("params", &self.params())
+                .field(
+                    "r_pipe_token_token",
+                    &support::DebugSyntaxResult(self.r_pipe_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerBlockParams").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerBlockParams> for SyntaxNode {
+    fn from(n: GlimmerBlockParams) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBlockParams> for SyntaxElement {
+    fn from(n: GlimmerBlockParams) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerElementModifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_ELEMENT_MODIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_ELEMENT_MODIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerElementModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerElementModifier")
+                .field(
+                    "l_curly2_token_token",
+                    &support::DebugSyntaxResult(self.l_curly2_token_token()),
+                )
+                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_curly2_token_token",
+                    &support::DebugSyntaxResult(self.r_curly2_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerElementModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerElementModifier> for SyntaxNode {
+    fn from(n: GlimmerElementModifier) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerElementModifier> for SyntaxElement {
+    fn from(n: GlimmerElementModifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerLiteral {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_LITERAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_LITERAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerLiteral")
+                .field(
+                    "value_token_token",
+                    &support::DebugSyntaxResult(self.value_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerLiteral").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerLiteral> for SyntaxNode {
+    fn from(n: GlimmerLiteral) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerLiteral> for SyntaxElement {
+    fn from(n: GlimmerLiteral) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerMustacheComment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_MUSTACHE_COMMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_MUSTACHE_COMMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerMustacheComment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerMustacheComment")
+                .field(
+                    "comment_token_token",
+                    &support::DebugSyntaxResult(self.comment_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerMustacheComment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerMustacheComment> for SyntaxNode {
+    fn from(n: GlimmerMustacheComment) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerMustacheComment> for SyntaxElement {
+    fn from(n: GlimmerMustacheComment) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerMustacheExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_MUSTACHE_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_MUSTACHE_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerMustacheExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerMustacheExpression")
+                .field(
+                    "l_curly2_token_token",
+                    &support::DebugSyntaxResult(self.l_curly2_token_token()),
+                )
+                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_curly2_token_token",
+                    &support::DebugSyntaxResult(self.r_curly2_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerMustacheExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerMustacheExpression> for SyntaxNode {
+    fn from(n: GlimmerMustacheExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerMustacheExpression> for SyntaxElement {
+    fn from(n: GlimmerMustacheExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerNamedArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_NAMED_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_NAMED_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerNamedArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerNamedArgument")
+                .field(
+                    "name_token_token",
+                    &support::DebugSyntaxResult(self.name_token_token()),
+                )
+                .field(
+                    "eq_token_token",
+                    &support::DebugSyntaxResult(self.eq_token_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GlimmerNamedArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerNamedArgument> for SyntaxNode {
+    fn from(n: GlimmerNamedArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerNamedArgument> for SyntaxElement {
+    fn from(n: GlimmerNamedArgument) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerNamedBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_NAMED_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_NAMED_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerNamedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerNamedBlock")
+                .field("opening", &support::DebugSyntaxResult(self.opening()))
+                .field("children", &self.children())
+                .field("closing", &support::DebugSyntaxResult(self.closing()))
+                .finish()
+        } else {
+            f.debug_struct("GlimmerNamedBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerNamedBlock> for SyntaxNode {
+    fn from(n: GlimmerNamedBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerNamedBlock> for SyntaxElement {
+    fn from(n: GlimmerNamedBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerNamedBlockClosing {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_NAMED_BLOCK_CLOSING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_NAMED_BLOCK_CLOSING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerNamedBlockClosing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerNamedBlockClosing")
+                .field(
+                    "l_angle_token_token",
+                    &support::DebugSyntaxResult(self.l_angle_token_token()),
+                )
+                .field(
+                    "slash_token_token",
+                    &support::DebugSyntaxResult(self.slash_token_token()),
+                )
+                .field(
+                    "colon_token_token",
+                    &support::DebugSyntaxResult(self.colon_token_token()),
+                )
+                .field(
+                    "name_token_token",
+                    &support::DebugSyntaxResult(self.name_token_token()),
+                )
+                .field(
+                    "r_angle_token_token",
+                    &support::DebugSyntaxResult(self.r_angle_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerNamedBlockClosing").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerNamedBlockClosing> for SyntaxNode {
+    fn from(n: GlimmerNamedBlockClosing) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerNamedBlockClosing> for SyntaxElement {
+    fn from(n: GlimmerNamedBlockClosing) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerNamedBlockOpening {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_NAMED_BLOCK_OPENING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_NAMED_BLOCK_OPENING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerNamedBlockOpening {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerNamedBlockOpening")
+                .field(
+                    "l_angle_token_token",
+                    &support::DebugSyntaxResult(self.l_angle_token_token()),
+                )
+                .field(
+                    "colon_token_token",
+                    &support::DebugSyntaxResult(self.colon_token_token()),
+                )
+                .field(
+                    "name_token_token",
+                    &support::DebugSyntaxResult(self.name_token_token()),
+                )
+                .field("attributes", &self.attributes())
+                .field(
+                    "r_angle_token_token",
+                    &support::DebugSyntaxResult(self.r_angle_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerNamedBlockOpening").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerNamedBlockOpening> for SyntaxNode {
+    fn from(n: GlimmerNamedBlockOpening) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerNamedBlockOpening> for SyntaxElement {
+    fn from(n: GlimmerNamedBlockOpening) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerPath {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerPath")
+                .field(
+                    "at_token_token",
+                    &support::DebugOptionalElement(self.at_token_token()),
+                )
+                .field("segments", &self.segments())
+                .finish()
+        } else {
+            f.debug_struct("GlimmerPath").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerPath> for SyntaxNode {
+    fn from(n: GlimmerPath) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerPath> for SyntaxElement {
+    fn from(n: GlimmerPath) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerPathSegment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH_SEGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH_SEGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerPathSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerPathSegment")
+                .field(
+                    "value_token_token",
+                    &support::DebugSyntaxResult(self.value_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerPathSegment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerPathSegment> for SyntaxNode {
+    fn from(n: GlimmerPathSegment) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerPathSegment> for SyntaxElement {
+    fn from(n: GlimmerPathSegment) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerPositionalArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_POSITIONAL_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_POSITIONAL_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerPositionalArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerPositionalArgument")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GlimmerPositionalArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerPositionalArgument> for SyntaxNode {
+    fn from(n: GlimmerPositionalArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerPositionalArgument> for SyntaxElement {
+    fn from(n: GlimmerPositionalArgument) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerSplattribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_SPLATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_SPLATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerSplattribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerSplattribute")
+                .field(
+                    "dotdotdot_token_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token_token()),
+                )
+                .field(
+                    "attributes_token_token",
+                    &support::DebugSyntaxResult(self.attributes_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerSplattribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerSplattribute> for SyntaxNode {
+    fn from(n: GlimmerSplattribute) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerSplattribute> for SyntaxElement {
+    fn from(n: GlimmerSplattribute) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerStringLiteral {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_STRING_LITERAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_STRING_LITERAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerStringLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerStringLiteral")
+                .field(
+                    "value_token_token",
+                    &support::DebugSyntaxResult(self.value_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerStringLiteral").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerStringLiteral> for SyntaxNode {
+    fn from(n: GlimmerStringLiteral) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerStringLiteral> for SyntaxElement {
+    fn from(n: GlimmerStringLiteral) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerSubexpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_SUBEXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_SUBEXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerSubexpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerSubexpression")
+                .field(
+                    "l_paren_token_token",
+                    &support::DebugSyntaxResult(self.l_paren_token_token()),
+                )
+                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_paren_token_token",
+                    &support::DebugSyntaxResult(self.r_paren_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerSubexpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerSubexpression> for SyntaxNode {
+    fn from(n: GlimmerSubexpression) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerSubexpression> for SyntaxElement {
+    fn from(n: GlimmerSubexpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for GlimmerTripleStashExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_TRIPLE_STASH_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_TRIPLE_STASH_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerTripleStashExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GlimmerTripleStashExpression")
+                .field(
+                    "l_curly3_token_token",
+                    &support::DebugSyntaxResult(self.l_curly3_token_token()),
+                )
+                .field("path", &support::DebugSyntaxResult(self.path()))
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_curly3_token_token",
+                    &support::DebugSyntaxResult(self.r_curly3_token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GlimmerTripleStashExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GlimmerTripleStashExpression> for SyntaxNode {
+    fn from(n: GlimmerTripleStashExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerTripleStashExpression> for SyntaxElement {
+    fn from(n: GlimmerTripleStashExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -2333,6 +4452,283 @@ impl From<AnyAstroFrontmatterElement> for SyntaxElement {
         node.into()
     }
 }
+impl From<GlimmerNamedArgument> for AnyGlimmerArgument {
+    fn from(node: GlimmerNamedArgument) -> Self {
+        Self::GlimmerNamedArgument(node)
+    }
+}
+impl From<GlimmerPositionalArgument> for AnyGlimmerArgument {
+    fn from(node: GlimmerPositionalArgument) -> Self {
+        Self::GlimmerPositionalArgument(node)
+    }
+}
+impl AstNode for AnyGlimmerArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GlimmerNamedArgument::KIND_SET.union(GlimmerPositionalArgument::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, GLIMMER_NAMED_ARGUMENT | GLIMMER_POSITIONAL_ARGUMENT)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GLIMMER_NAMED_ARGUMENT => Self::GlimmerNamedArgument(GlimmerNamedArgument { syntax }),
+            GLIMMER_POSITIONAL_ARGUMENT => {
+                Self::GlimmerPositionalArgument(GlimmerPositionalArgument { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::GlimmerNamedArgument(it) => &it.syntax,
+            Self::GlimmerPositionalArgument(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::GlimmerNamedArgument(it) => it.syntax,
+            Self::GlimmerPositionalArgument(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGlimmerArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::GlimmerNamedArgument(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerPositionalArgument(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGlimmerArgument> for SyntaxNode {
+    fn from(n: AnyGlimmerArgument) -> Self {
+        match n {
+            AnyGlimmerArgument::GlimmerNamedArgument(it) => it.into(),
+            AnyGlimmerArgument::GlimmerPositionalArgument(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGlimmerArgument> for SyntaxElement {
+    fn from(n: AnyGlimmerArgument) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<GlimmerLiteral> for AnyGlimmerArgumentValue {
+    fn from(node: GlimmerLiteral) -> Self {
+        Self::GlimmerLiteral(node)
+    }
+}
+impl From<GlimmerPath> for AnyGlimmerArgumentValue {
+    fn from(node: GlimmerPath) -> Self {
+        Self::GlimmerPath(node)
+    }
+}
+impl From<GlimmerStringLiteral> for AnyGlimmerArgumentValue {
+    fn from(node: GlimmerStringLiteral) -> Self {
+        Self::GlimmerStringLiteral(node)
+    }
+}
+impl From<GlimmerSubexpression> for AnyGlimmerArgumentValue {
+    fn from(node: GlimmerSubexpression) -> Self {
+        Self::GlimmerSubexpression(node)
+    }
+}
+impl AstNode for AnyGlimmerArgumentValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = GlimmerLiteral::KIND_SET
+        .union(GlimmerPath::KIND_SET)
+        .union(GlimmerStringLiteral::KIND_SET)
+        .union(GlimmerSubexpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            GLIMMER_LITERAL | GLIMMER_PATH | GLIMMER_STRING_LITERAL | GLIMMER_SUBEXPRESSION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GLIMMER_LITERAL => Self::GlimmerLiteral(GlimmerLiteral { syntax }),
+            GLIMMER_PATH => Self::GlimmerPath(GlimmerPath { syntax }),
+            GLIMMER_STRING_LITERAL => Self::GlimmerStringLiteral(GlimmerStringLiteral { syntax }),
+            GLIMMER_SUBEXPRESSION => Self::GlimmerSubexpression(GlimmerSubexpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::GlimmerLiteral(it) => &it.syntax,
+            Self::GlimmerPath(it) => &it.syntax,
+            Self::GlimmerStringLiteral(it) => &it.syntax,
+            Self::GlimmerSubexpression(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::GlimmerLiteral(it) => it.syntax,
+            Self::GlimmerPath(it) => it.syntax,
+            Self::GlimmerStringLiteral(it) => it.syntax,
+            Self::GlimmerSubexpression(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGlimmerArgumentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::GlimmerLiteral(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerPath(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerStringLiteral(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerSubexpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGlimmerArgumentValue> for SyntaxNode {
+    fn from(n: AnyGlimmerArgumentValue) -> Self {
+        match n {
+            AnyGlimmerArgumentValue::GlimmerLiteral(it) => it.into(),
+            AnyGlimmerArgumentValue::GlimmerPath(it) => it.into(),
+            AnyGlimmerArgumentValue::GlimmerStringLiteral(it) => it.into(),
+            AnyGlimmerArgumentValue::GlimmerSubexpression(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGlimmerArgumentValue> for SyntaxElement {
+    fn from(n: AnyGlimmerArgumentValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<GlimmerBlockHelper> for AnyGlimmerExpression {
+    fn from(node: GlimmerBlockHelper) -> Self {
+        Self::GlimmerBlockHelper(node)
+    }
+}
+impl From<GlimmerBogusExpression> for AnyGlimmerExpression {
+    fn from(node: GlimmerBogusExpression) -> Self {
+        Self::GlimmerBogusExpression(node)
+    }
+}
+impl From<GlimmerMustacheComment> for AnyGlimmerExpression {
+    fn from(node: GlimmerMustacheComment) -> Self {
+        Self::GlimmerMustacheComment(node)
+    }
+}
+impl From<GlimmerMustacheExpression> for AnyGlimmerExpression {
+    fn from(node: GlimmerMustacheExpression) -> Self {
+        Self::GlimmerMustacheExpression(node)
+    }
+}
+impl From<GlimmerNamedBlock> for AnyGlimmerExpression {
+    fn from(node: GlimmerNamedBlock) -> Self {
+        Self::GlimmerNamedBlock(node)
+    }
+}
+impl From<GlimmerTripleStashExpression> for AnyGlimmerExpression {
+    fn from(node: GlimmerTripleStashExpression) -> Self {
+        Self::GlimmerTripleStashExpression(node)
+    }
+}
+impl AstNode for AnyGlimmerExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = GlimmerBlockHelper::KIND_SET
+        .union(GlimmerBogusExpression::KIND_SET)
+        .union(GlimmerMustacheComment::KIND_SET)
+        .union(GlimmerMustacheExpression::KIND_SET)
+        .union(GlimmerNamedBlock::KIND_SET)
+        .union(GlimmerTripleStashExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            GLIMMER_BLOCK_HELPER
+                | GLIMMER_BOGUS_EXPRESSION
+                | GLIMMER_MUSTACHE_COMMENT
+                | GLIMMER_MUSTACHE_EXPRESSION
+                | GLIMMER_NAMED_BLOCK
+                | GLIMMER_TRIPLE_STASH_EXPRESSION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GLIMMER_BLOCK_HELPER => Self::GlimmerBlockHelper(GlimmerBlockHelper { syntax }),
+            GLIMMER_BOGUS_EXPRESSION => {
+                Self::GlimmerBogusExpression(GlimmerBogusExpression { syntax })
+            }
+            GLIMMER_MUSTACHE_COMMENT => {
+                Self::GlimmerMustacheComment(GlimmerMustacheComment { syntax })
+            }
+            GLIMMER_MUSTACHE_EXPRESSION => {
+                Self::GlimmerMustacheExpression(GlimmerMustacheExpression { syntax })
+            }
+            GLIMMER_NAMED_BLOCK => Self::GlimmerNamedBlock(GlimmerNamedBlock { syntax }),
+            GLIMMER_TRIPLE_STASH_EXPRESSION => {
+                Self::GlimmerTripleStashExpression(GlimmerTripleStashExpression { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::GlimmerBlockHelper(it) => &it.syntax,
+            Self::GlimmerBogusExpression(it) => &it.syntax,
+            Self::GlimmerMustacheComment(it) => &it.syntax,
+            Self::GlimmerMustacheExpression(it) => &it.syntax,
+            Self::GlimmerNamedBlock(it) => &it.syntax,
+            Self::GlimmerTripleStashExpression(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::GlimmerBlockHelper(it) => it.syntax,
+            Self::GlimmerBogusExpression(it) => it.syntax,
+            Self::GlimmerMustacheComment(it) => it.syntax,
+            Self::GlimmerMustacheExpression(it) => it.syntax,
+            Self::GlimmerNamedBlock(it) => it.syntax,
+            Self::GlimmerTripleStashExpression(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGlimmerExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::GlimmerBlockHelper(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerBogusExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerMustacheComment(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerMustacheExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerNamedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerTripleStashExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGlimmerExpression> for SyntaxNode {
+    fn from(n: AnyGlimmerExpression) -> Self {
+        match n {
+            AnyGlimmerExpression::GlimmerBlockHelper(it) => it.into(),
+            AnyGlimmerExpression::GlimmerBogusExpression(it) => it.into(),
+            AnyGlimmerExpression::GlimmerMustacheComment(it) => it.into(),
+            AnyGlimmerExpression::GlimmerMustacheExpression(it) => it.into(),
+            AnyGlimmerExpression::GlimmerNamedBlock(it) => it.into(),
+            AnyGlimmerExpression::GlimmerTripleStashExpression(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGlimmerExpression> for SyntaxElement {
+    fn from(n: AnyGlimmerExpression) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<GlimmerElementModifier> for AnyHtmlAttribute {
+    fn from(node: GlimmerElementModifier) -> Self {
+        Self::GlimmerElementModifier(node)
+    }
+}
+impl From<GlimmerSplattribute> for AnyHtmlAttribute {
+    fn from(node: GlimmerSplattribute) -> Self {
+        Self::GlimmerSplattribute(node)
+    }
+}
 impl From<HtmlAttribute> for AnyHtmlAttribute {
     fn from(node: HtmlAttribute) -> Self {
         Self::HtmlAttribute(node)
@@ -2355,14 +4751,18 @@ impl From<HtmlSingleTextExpression> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = HtmlAttribute::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = GlimmerElementModifier::KIND_SET
+        .union(GlimmerSplattribute::KIND_SET)
+        .union(HtmlAttribute::KIND_SET)
         .union(HtmlBogusAttribute::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            HTML_ATTRIBUTE
+            GLIMMER_ELEMENT_MODIFIER
+                | GLIMMER_SPLATTRIBUTE
+                | HTML_ATTRIBUTE
                 | HTML_BOGUS_ATTRIBUTE
                 | HTML_DOUBLE_TEXT_EXPRESSION
                 | HTML_SINGLE_TEXT_EXPRESSION
@@ -2370,6 +4770,10 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GLIMMER_ELEMENT_MODIFIER => {
+                Self::GlimmerElementModifier(GlimmerElementModifier { syntax })
+            }
+            GLIMMER_SPLATTRIBUTE => Self::GlimmerSplattribute(GlimmerSplattribute { syntax }),
             HTML_ATTRIBUTE => Self::HtmlAttribute(HtmlAttribute { syntax }),
             HTML_BOGUS_ATTRIBUTE => Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax }),
             HTML_DOUBLE_TEXT_EXPRESSION => {
@@ -2384,6 +4788,8 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GlimmerElementModifier(it) => &it.syntax,
+            Self::GlimmerSplattribute(it) => &it.syntax,
             Self::HtmlAttribute(it) => &it.syntax,
             Self::HtmlBogusAttribute(it) => &it.syntax,
             Self::HtmlDoubleTextExpression(it) => &it.syntax,
@@ -2392,6 +4798,8 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GlimmerElementModifier(it) => it.syntax,
+            Self::GlimmerSplattribute(it) => it.syntax,
             Self::HtmlAttribute(it) => it.syntax,
             Self::HtmlBogusAttribute(it) => it.syntax,
             Self::HtmlDoubleTextExpression(it) => it.syntax,
@@ -2402,6 +4810,8 @@ impl AstNode for AnyHtmlAttribute {
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::GlimmerElementModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerSplattribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -2412,6 +4822,8 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::GlimmerElementModifier(it) => it.into(),
+            AnyHtmlAttribute::GlimmerSplattribute(it) => it.into(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into(),
@@ -2499,12 +4911,14 @@ impl From<HtmlEmbeddedContent> for AnyHtmlContent {
 }
 impl AstNode for AnyHtmlContent {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyHtmlTextExpression::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyGlimmerExpression::KIND_SET
+        .union(AnyHtmlTextExpression::KIND_SET)
         .union(HtmlContent::KIND_SET)
         .union(HtmlEmbeddedContent::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             HTML_CONTENT | HTML_EMBEDDED_CONTENT => true,
+            k if AnyGlimmerExpression::can_cast(k) => true,
             k if AnyHtmlTextExpression::can_cast(k) => true,
             _ => false,
         }
@@ -2514,6 +4928,12 @@ impl AstNode for AnyHtmlContent {
             HTML_CONTENT => Self::HtmlContent(HtmlContent { syntax }),
             HTML_EMBEDDED_CONTENT => Self::HtmlEmbeddedContent(HtmlEmbeddedContent { syntax }),
             _ => {
+                let syntax = match AnyGlimmerExpression::try_cast(syntax) {
+                    Ok(any_glimmer_expression) => {
+                        return Some(Self::AnyGlimmerExpression(any_glimmer_expression));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_html_text_expression) = AnyHtmlTextExpression::cast(syntax) {
                     return Some(Self::AnyHtmlTextExpression(any_html_text_expression));
                 }
@@ -2526,6 +4946,7 @@ impl AstNode for AnyHtmlContent {
         match self {
             Self::HtmlContent(it) => &it.syntax,
             Self::HtmlEmbeddedContent(it) => &it.syntax,
+            Self::AnyGlimmerExpression(it) => it.syntax(),
             Self::AnyHtmlTextExpression(it) => it.syntax(),
         }
     }
@@ -2533,6 +4954,7 @@ impl AstNode for AnyHtmlContent {
         match self {
             Self::HtmlContent(it) => it.syntax,
             Self::HtmlEmbeddedContent(it) => it.syntax,
+            Self::AnyGlimmerExpression(it) => it.into_syntax(),
             Self::AnyHtmlTextExpression(it) => it.into_syntax(),
         }
     }
@@ -2540,6 +4962,7 @@ impl AstNode for AnyHtmlContent {
 impl std::fmt::Debug for AnyHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyGlimmerExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyHtmlTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlEmbeddedContent(it) => std::fmt::Debug::fmt(it, f),
@@ -2549,6 +4972,7 @@ impl std::fmt::Debug for AnyHtmlContent {
 impl From<AnyHtmlContent> for SyntaxNode {
     fn from(n: AnyHtmlContent) -> Self {
         match n {
+            AnyHtmlContent::AnyGlimmerExpression(it) => it.into(),
             AnyHtmlContent::AnyHtmlTextExpression(it) => it.into(),
             AnyHtmlContent::HtmlContent(it) => it.into(),
             AnyHtmlContent::HtmlEmbeddedContent(it) => it.into(),
@@ -2559,6 +4983,16 @@ impl From<AnyHtmlContent> for SyntaxElement {
     fn from(n: AnyHtmlContent) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<GlimmerMustacheComment> for AnyHtmlElement {
+    fn from(node: GlimmerMustacheComment) -> Self {
+        Self::GlimmerMustacheComment(node)
+    }
+}
+impl From<GlimmerTripleStashExpression> for AnyHtmlElement {
+    fn from(node: GlimmerTripleStashExpression) -> Self {
+        Self::GlimmerTripleStashExpression(node)
     }
 }
 impl From<HtmlBogusElement> for AnyHtmlElement {
@@ -2584,21 +5018,32 @@ impl From<HtmlSelfClosingElement> for AnyHtmlElement {
 impl AstNode for AnyHtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyHtmlContent::KIND_SET
+        .union(GlimmerMustacheComment::KIND_SET)
+        .union(GlimmerTripleStashExpression::KIND_SET)
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlElement::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_ELEMENT | HTML_CDATA_SECTION | HTML_ELEMENT | HTML_SELF_CLOSING_ELEMENT => {
-                true
-            }
+            GLIMMER_MUSTACHE_COMMENT
+            | GLIMMER_TRIPLE_STASH_EXPRESSION
+            | HTML_BOGUS_ELEMENT
+            | HTML_CDATA_SECTION
+            | HTML_ELEMENT
+            | HTML_SELF_CLOSING_ELEMENT => true,
             k if AnyHtmlContent::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GLIMMER_MUSTACHE_COMMENT => {
+                Self::GlimmerMustacheComment(GlimmerMustacheComment { syntax })
+            }
+            GLIMMER_TRIPLE_STASH_EXPRESSION => {
+                Self::GlimmerTripleStashExpression(GlimmerTripleStashExpression { syntax })
+            }
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
@@ -2616,6 +5061,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GlimmerMustacheComment(it) => &it.syntax,
+            Self::GlimmerTripleStashExpression(it) => &it.syntax,
             Self::HtmlBogusElement(it) => &it.syntax,
             Self::HtmlCdataSection(it) => &it.syntax,
             Self::HtmlElement(it) => &it.syntax,
@@ -2625,6 +5072,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GlimmerMustacheComment(it) => it.syntax,
+            Self::GlimmerTripleStashExpression(it) => it.syntax,
             Self::HtmlBogusElement(it) => it.syntax,
             Self::HtmlCdataSection(it) => it.syntax,
             Self::HtmlElement(it) => it.syntax,
@@ -2637,6 +5086,8 @@ impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyHtmlContent(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerMustacheComment(it) => std::fmt::Debug::fmt(it, f),
+            Self::GlimmerTripleStashExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
@@ -2648,6 +5099,8 @@ impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> Self {
         match n {
             AnyHtmlElement::AnyHtmlContent(it) => it.into(),
+            AnyHtmlElement::GlimmerMustacheComment(it) => it.into(),
+            AnyHtmlElement::GlimmerTripleStashExpression(it) => it.into(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into(),
             AnyHtmlElement::HtmlElement(it) => it.into(),
@@ -2819,6 +5272,21 @@ impl std::fmt::Display for AnyAstroFrontmatterElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyGlimmerArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyGlimmerArgumentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyGlimmerExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2855,6 +5323,106 @@ impl std::fmt::Display for AstroEmbeddedContent {
     }
 }
 impl std::fmt::Display for AstroFrontmatterElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerBlockHelper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerBlockHelperClosing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerBlockHelperOpening {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerBlockParam {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerBlockParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerElementModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerMustacheComment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerMustacheExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerNamedArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerNamedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerNamedBlockClosing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerNamedBlockOpening {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerPathSegment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerPositionalArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerSplattribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerStringLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerSubexpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GlimmerTripleStashExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3007,6 +5575,62 @@ impl From<AstroBogusFrontmatter> for SyntaxNode {
 }
 impl From<AstroBogusFrontmatter> for SyntaxElement {
     fn from(n: AstroBogusFrontmatter) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct GlimmerBogusExpression {
+    syntax: SyntaxNode,
+}
+impl GlimmerBogusExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GlimmerBogusExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BOGUS_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BOGUS_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GlimmerBogusExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GlimmerBogusExpression")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GlimmerBogusExpression> for SyntaxNode {
+    fn from(n: GlimmerBogusExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<GlimmerBogusExpression> for SyntaxElement {
+    fn from(n: GlimmerBogusExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -3290,7 +5914,253 @@ impl From<SvelteBogusBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock }
+biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | GlimmerBogusExpression | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock }
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GlimmerArgumentList {
+    syntax_list: SyntaxList,
+}
+impl GlimmerArgumentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GlimmerArgumentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_ARGUMENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_ARGUMENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GlimmerArgumentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for GlimmerArgumentList {
+    type Language = Language;
+    type Node = AnyGlimmerArgument;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GlimmerArgumentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GlimmerArgumentList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &GlimmerArgumentList {
+    type Item = AnyGlimmerArgument;
+    type IntoIter = AstNodeListIterator<Language, AnyGlimmerArgument>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for GlimmerArgumentList {
+    type Item = AnyGlimmerArgument;
+    type IntoIter = AstNodeListIterator<Language, AnyGlimmerArgument>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GlimmerBlockParamList {
+    syntax_list: SyntaxList,
+}
+impl GlimmerBlockParamList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GlimmerBlockParamList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_BLOCK_PARAM_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_BLOCK_PARAM_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GlimmerBlockParamList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for GlimmerBlockParamList {
+    type Language = Language;
+    type Node = GlimmerBlockParam;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GlimmerBlockParamList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GlimmerBlockParamList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &GlimmerBlockParamList {
+    type Item = GlimmerBlockParam;
+    type IntoIter = AstNodeListIterator<Language, GlimmerBlockParam>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for GlimmerBlockParamList {
+    type Item = GlimmerBlockParam;
+    type IntoIter = AstNodeListIterator<Language, GlimmerBlockParam>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct GlimmerPathSegmentList {
+    syntax_list: SyntaxList,
+}
+impl GlimmerPathSegmentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for GlimmerPathSegmentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GLIMMER_PATH_SEGMENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GLIMMER_PATH_SEGMENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for GlimmerPathSegmentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for GlimmerPathSegmentList {
+    type Language = Language;
+    type Node = GlimmerPathSegment;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for GlimmerPathSegmentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GlimmerPathSegmentList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for GlimmerPathSegmentList {
+    type Item = SyntaxResult<GlimmerPathSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GlimmerPathSegment>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &GlimmerPathSegmentList {
+    type Item = SyntaxResult<GlimmerPathSegment>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, GlimmerPathSegment>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,

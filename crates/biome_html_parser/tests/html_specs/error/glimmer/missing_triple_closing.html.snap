@@ -1,0 +1,289 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div>
+  {{{unsafe content
+  <span>Next element</span>
+</div>
+
+<div>
+  {{{unsafe content}}}
+  <span>Valid</span>
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@1..4 "div" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@4..5 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlBogusElement {
+                        items: [
+                            L_TRIPLE_CURLY@5..11 "{{{" [Newline("\n"), Whitespace("  ")] [],
+                            GlimmerPath {
+                                at_token_token: missing (optional),
+                                segments: GlimmerPathSegmentList [
+                                    GlimmerPathSegment {
+                                        value_token_token: IDENT@11..18 "unsafe" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            GlimmerArgumentList [
+                                GlimmerPositionalArgument {
+                                    value: GlimmerPath {
+                                        at_token_token: missing (optional),
+                                        segments: GlimmerPathSegmentList [
+                                            GlimmerPathSegment {
+                                                value_token_token: IDENT@18..25 "content" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            ERROR_TOKEN@25..29 "<" [Newline("\n"), Whitespace("  ")] [],
+                            HTML_LITERAL@29..46 "span>Next element" [] [],
+                        ],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@46..47 "<" [] [],
+                        SLASH@47..48 "/" [] [],
+                        HtmlTagName {
+                            value_token: HTML_LITERAL@48..52 "span" [] [],
+                        },
+                        R_ANGLE@52..53 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@53..55 "<" [Newline("\n")] [],
+                    slash_token: SLASH@55..56 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@56..59 "div" [] [],
+                    },
+                    r_angle_token: R_ANGLE@59..60 ">" [] [],
+                },
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@60..63 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@63..66 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@66..67 ">" [] [],
+            },
+            children: HtmlElementList [
+                GlimmerTripleStashExpression {
+                    l_curly3_token_token: L_TRIPLE_CURLY@67..73 "{{{" [Newline("\n"), Whitespace("  ")] [],
+                    path: GlimmerPath {
+                        at_token_token: missing (optional),
+                        segments: GlimmerPathSegmentList [
+                            GlimmerPathSegment {
+                                value_token_token: IDENT@73..80 "unsafe" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    arguments: GlimmerArgumentList [
+                        GlimmerPositionalArgument {
+                            value: GlimmerPath {
+                                at_token_token: missing (optional),
+                                segments: GlimmerPathSegmentList [
+                                    GlimmerPathSegment {
+                                        value_token_token: IDENT@80..87 "content" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                    r_curly3_token_token: R_TRIPLE_CURLY@87..90 "}}}" [] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@90..94 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@94..98 "span" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@98..99 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@99..104 "Valid" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@104..105 "<" [] [],
+                        slash_token: SLASH@105..106 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@106..110 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@110..111 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@111..113 "<" [Newline("\n")] [],
+                slash_token: SLASH@113..114 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@114..117 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@117..118 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@118..119 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..119
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..118
+    0: HTML_BOGUS_ELEMENT@0..60
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..46
+        0: HTML_BOGUS_ELEMENT@5..46
+          0: L_TRIPLE_CURLY@5..11 "{{{" [Newline("\n"), Whitespace("  ")] []
+          1: GLIMMER_PATH@11..18
+            0: (empty)
+            1: GLIMMER_PATH_SEGMENT_LIST@11..18
+              0: GLIMMER_PATH_SEGMENT@11..18
+                0: IDENT@11..18 "unsafe" [] [Whitespace(" ")]
+          2: GLIMMER_ARGUMENT_LIST@18..25
+            0: GLIMMER_POSITIONAL_ARGUMENT@18..25
+              0: GLIMMER_PATH@18..25
+                0: (empty)
+                1: GLIMMER_PATH_SEGMENT_LIST@18..25
+                  0: GLIMMER_PATH_SEGMENT@18..25
+                    0: IDENT@18..25 "content" [] []
+          3: ERROR_TOKEN@25..29 "<" [Newline("\n"), Whitespace("  ")] []
+          4: HTML_LITERAL@29..46 "span>Next element" [] []
+      2: HTML_BOGUS_ELEMENT@46..53
+        0: L_ANGLE@46..47 "<" [] []
+        1: SLASH@47..48 "/" [] []
+        2: HTML_TAG_NAME@48..52
+          0: HTML_LITERAL@48..52 "span" [] []
+        3: R_ANGLE@52..53 ">" [] []
+      3: HTML_ELEMENT_LIST@53..53
+      4: HTML_CLOSING_ELEMENT@53..60
+        0: L_ANGLE@53..55 "<" [Newline("\n")] []
+        1: SLASH@55..56 "/" [] []
+        2: HTML_TAG_NAME@56..59
+          0: HTML_LITERAL@56..59 "div" [] []
+        3: R_ANGLE@59..60 ">" [] []
+    1: HTML_ELEMENT@60..118
+      0: HTML_OPENING_ELEMENT@60..67
+        0: L_ANGLE@60..63 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@63..66
+          0: HTML_LITERAL@63..66 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@66..66
+        3: R_ANGLE@66..67 ">" [] []
+      1: HTML_ELEMENT_LIST@67..111
+        0: GLIMMER_TRIPLE_STASH_EXPRESSION@67..90
+          0: L_TRIPLE_CURLY@67..73 "{{{" [Newline("\n"), Whitespace("  ")] []
+          1: GLIMMER_PATH@73..80
+            0: (empty)
+            1: GLIMMER_PATH_SEGMENT_LIST@73..80
+              0: GLIMMER_PATH_SEGMENT@73..80
+                0: IDENT@73..80 "unsafe" [] [Whitespace(" ")]
+          2: GLIMMER_ARGUMENT_LIST@80..87
+            0: GLIMMER_POSITIONAL_ARGUMENT@80..87
+              0: GLIMMER_PATH@80..87
+                0: (empty)
+                1: GLIMMER_PATH_SEGMENT_LIST@80..87
+                  0: GLIMMER_PATH_SEGMENT@80..87
+                    0: IDENT@80..87 "content" [] []
+          3: R_TRIPLE_CURLY@87..90 "}}}" [] []
+        1: HTML_ELEMENT@90..111
+          0: HTML_OPENING_ELEMENT@90..99
+            0: L_ANGLE@90..94 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@94..98
+              0: HTML_LITERAL@94..98 "span" [] []
+            2: HTML_ATTRIBUTE_LIST@98..98
+            3: R_ANGLE@98..99 ">" [] []
+          1: HTML_ELEMENT_LIST@99..104
+            0: HTML_CONTENT@99..104
+              0: HTML_LITERAL@99..104 "Valid" [] []
+          2: HTML_CLOSING_ELEMENT@104..111
+            0: L_ANGLE@104..105 "<" [] []
+            1: SLASH@105..106 "/" [] []
+            2: HTML_TAG_NAME@106..110
+              0: HTML_LITERAL@106..110 "span" [] []
+            3: R_ANGLE@110..111 ">" [] []
+      2: HTML_CLOSING_ELEMENT@111..118
+        0: L_ANGLE@111..113 "<" [Newline("\n")] []
+        1: SLASH@113..114 "/" [] []
+        2: HTML_TAG_NAME@114..117
+          0: HTML_LITERAL@114..117 "div" [] []
+        3: R_ANGLE@117..118 ">" [] []
+  4: EOF@118..119 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_triple_closing.html:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `<`
+  
+    1 │ <div>
+    2 │   {{{unsafe content
+  > 3 │   <span>Next element</span>
+      │   ^
+    4 │ </div>
+    5 │ 
+  
+missing_triple_closing.html:3:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</span>'.
+  
+    1 │ <div>
+    2 │   {{{unsafe content
+  > 3 │   <span>Next element</span>
+      │                     ^^^^^^^
+    4 │ </div>
+    5 │ 
+  
+  i Expected a matching closing tag here.
+  
+    1 │ <div>
+    2 │   {{{unsafe content
+  > 3 │   <span>Next element</span>
+      │                     ^^^^^^^
+    4 │ </div>
+    5 │ 
+  
+```

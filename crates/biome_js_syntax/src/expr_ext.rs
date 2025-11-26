@@ -913,7 +913,8 @@ impl AnyJsExpression {
             | Self::JsFunctionExpression(_)
             | Self::JsIdentifierExpression(_)
             | Self::JsObjectExpression(_)
-            | Self::JsxTagExpression(_) => OperatorPrecedence::Primary,
+            | Self::JsxTagExpression(_)
+            | Self::JsGlimmerTemplate(_) => OperatorPrecedence::Primary,
 
             Self::JsTemplateExpression(template) => {
                 if template.tag().is_some() {

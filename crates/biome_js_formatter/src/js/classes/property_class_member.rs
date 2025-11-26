@@ -134,6 +134,7 @@ fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
         | AnyJsClassMember::TsGetterSignatureClassMember(_)
         | AnyJsClassMember::TsSetterSignatureClassMember(_)
         | AnyJsClassMember::JsSetterClassMember(_)
+        | AnyJsClassMember::JsGlimmerTemplate(_)
         | AnyJsClassMember::JsMetavariable(_) => false,
 
         // Computed members may be misinterpreted as array accessors/array types
@@ -170,6 +171,7 @@ fn has_modifiers(member: &AnyJsClassMember) -> bool {
             constructor.modifiers().is_empty()
         }
         AnyJsClassMember::JsEmptyClassMember(_) => true,
+        AnyJsClassMember::JsGlimmerTemplate(_) => true,
         AnyJsClassMember::JsGetterClassMember(getter) => getter.modifiers().is_empty(),
         AnyJsClassMember::JsMethodClassMember(method) => method.modifiers().is_empty(),
         AnyJsClassMember::JsPropertyClassMember(property) => property.modifiers().is_empty(),

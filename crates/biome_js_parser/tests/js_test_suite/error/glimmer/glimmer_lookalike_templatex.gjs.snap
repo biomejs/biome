@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Test that <templatex> (identifier after "template") is properly rejected
+// This tests lexer backtracking - should restore position and report clear error
+const x = <templatex>content</templatex>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..164 "const" [Comments("// Test that <templat ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@164..166 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@166..168 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: JsBogusExpression {
+                                    items: [
+                                        L_ANGLE@168..169 "<" [] [],
+                                        TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@169..178 "templatex" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                        R_ANGLE@178..179 ">" [] [],
+                                        JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@179..186 "content" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                operator_token: L_ANGLE@186..187 "<" [] [],
+                                right: JsRegexLiteralExpression {
+                                    value_token: JS_REGEX_LITERAL@187..199 "/templatex>;" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@199..200 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..200
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..199
+    0: JS_VARIABLE_STATEMENT@0..199
+      0: JS_VARIABLE_DECLARATION@0..199
+        0: (empty)
+        1: CONST_KW@0..164 "const" [Comments("// Test that <templat ..."), Newline("\n"), Comments("// This tests lexer b ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@164..199
+          0: JS_VARIABLE_DECLARATOR@164..199
+            0: JS_IDENTIFIER_BINDING@164..166
+              0: IDENT@164..166 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@166..199
+              0: EQ@166..168 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@168..199
+                0: JS_BOGUS_EXPRESSION@168..186
+                  0: L_ANGLE@168..169 "<" [] []
+                  1: TS_REFERENCE_TYPE@169..178
+                    0: JS_REFERENCE_IDENTIFIER@169..178
+                      0: IDENT@169..178 "templatex" [] []
+                    1: (empty)
+                  2: R_ANGLE@178..179 ">" [] []
+                  3: JS_IDENTIFIER_EXPRESSION@179..186
+                    0: JS_REFERENCE_IDENTIFIER@179..186
+                      0: IDENT@179..186 "content" [] []
+                1: L_ANGLE@186..187 "<" [] []
+                2: JS_REGEX_LITERAL_EXPRESSION@187..199
+                  0: JS_REGEX_LITERAL@187..199 "/templatex>;" [] []
+      1: (empty)
+  4: EOF@199..200 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+glimmer_lookalike_templatex.gjs:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // Test that <templatex> (identifier after "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <templatex>content</templatex>;
+      │           ^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i TypeScript only syntax
+  
+glimmer_lookalike_templatex.gjs:3:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    1 │ // Test that <templatex> (identifier after "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <templatex>content</templatex>;
+      │                                          
+    4 │ 
+  
+  i ...but the line ends here
+  
+    1 │ // Test that <templatex> (identifier after "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <templatex>content</templatex>;
+      │                                          
+    4 │ 
+  
+  i a regex literal starts there...
+  
+    1 │ // Test that <templatex> (identifier after "template") is properly rejected
+    2 │ // This tests lexer backtracking - should restore position and report clear error
+  > 3 │ const x = <templatex>content</templatex>;
+      │                              ^
+    4 │ 
+  
+```

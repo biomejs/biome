@@ -34,7 +34,7 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::parse;
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
@@ -817,7 +817,7 @@ impl Features {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
-                EmbeddingKind::None => self.js.capabilities(),
+                EmbeddingKind::Glimmer | EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
@@ -867,7 +867,6 @@ pub(crate) fn parse_lang_from_script_opening_tag(
     parse(
         script_opening_tag,
         JsFileSource::jsx(),
-        JsParserOptions::default(),
     )
     .try_tree()
     .and_then(|tree| {

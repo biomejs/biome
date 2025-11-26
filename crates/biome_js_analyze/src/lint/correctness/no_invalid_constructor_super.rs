@@ -226,6 +226,7 @@ fn is_valid_constructor(expression: AnyJsExpression) -> Option<bool> {
         | AnyJsExpression::JsBinaryExpression(_)
         | AnyJsExpression::JsBogusExpression(_)
         | AnyJsExpression::JsMetavariable(_)
+        | AnyJsExpression::JsGlimmerTemplate(_)
         | AnyJsExpression::JsInstanceofExpression(_)
         | AnyJsExpression::JsObjectExpression(_)
         | AnyJsExpression::JsPostUpdateExpression(_)

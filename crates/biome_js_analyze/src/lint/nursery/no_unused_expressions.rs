@@ -259,6 +259,7 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         | AnyJsExpression::JsComputedMemberExpression(_)
         | AnyJsExpression::JsConditionalExpression(_)
         | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsGlimmerTemplate(_)
         | AnyJsExpression::JsIdentifierExpression(_)
         | AnyJsExpression::JsImportMetaExpression(_)
         | AnyJsExpression::JsInExpression(_)

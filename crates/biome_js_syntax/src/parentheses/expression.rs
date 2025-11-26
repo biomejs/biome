@@ -63,6 +63,7 @@ impl NeedsParentheses for AnyJsExpression {
             Self::JsBogusExpression(_) => false,
             Self::JsYieldExpression(expr) => expr.needs_parentheses(),
             Self::JsxTagExpression(expr) => expr.needs_parentheses(),
+            Self::JsGlimmerTemplate(_) => false,
             Self::JsNewTargetExpression(expr) => expr.needs_parentheses(),
             Self::TsAsExpression(expr) => expr.needs_parentheses(),
             Self::TsSatisfiesExpression(expr) => expr.needs_parentheses(),

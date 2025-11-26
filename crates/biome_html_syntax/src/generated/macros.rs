@@ -24,6 +24,91 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER => {
+                    let $pattern = unsafe { $crate::GlimmerBlockHelper::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_CLOSING => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerBlockHelperClosing::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_HELPER_OPENING => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerBlockHelperOpening::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAM => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParam::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAMS => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParams::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_ELEMENT_MODIFIER => {
+                    let $pattern = unsafe { $crate::GlimmerElementModifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_LITERAL => {
+                    let $pattern = unsafe { $crate::GlimmerLiteral::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_COMMENT => {
+                    let $pattern = unsafe { $crate::GlimmerMustacheComment::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_MUSTACHE_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerMustacheExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_ARGUMENT => {
+                    let $pattern = unsafe { $crate::GlimmerNamedArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_CLOSING => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlockClosing::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_NAMED_BLOCK_OPENING => {
+                    let $pattern = unsafe { $crate::GlimmerNamedBlockOpening::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH => {
+                    let $pattern = unsafe { $crate::GlimmerPath::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT => {
+                    let $pattern = unsafe { $crate::GlimmerPathSegment::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_POSITIONAL_ARGUMENT => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerPositionalArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_SPLATTRIBUTE => {
+                    let $pattern = unsafe { $crate::GlimmerSplattribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_STRING_LITERAL => {
+                    let $pattern = unsafe { $crate::GlimmerStringLiteral::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_SUBEXPRESSION => {
+                    let $pattern = unsafe { $crate::GlimmerSubexpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_TRIPLE_STASH_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::GlimmerTripleStashExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::HtmlAttribute::new_unchecked(node) };
                     $body
@@ -105,6 +190,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::GLIMMER_BOGUS_EXPRESSION => {
+                    let $pattern = unsafe { $crate::GlimmerBogusExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
                     let $pattern = unsafe { $crate::HtmlBogus::new_unchecked(node) };
                     $body
@@ -123,6 +212,18 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteBogusBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_ARGUMENT_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerArgumentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_BLOCK_PARAM_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerBlockParamList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::GLIMMER_PATH_SEGMENT_LIST => {
+                    let $pattern = unsafe { $crate::GlimmerPathSegmentList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

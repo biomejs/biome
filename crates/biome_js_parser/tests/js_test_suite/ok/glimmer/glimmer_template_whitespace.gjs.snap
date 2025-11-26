@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+// Template with whitespace after 'template' keyword
+// This tests the edge case where there's whitespace before the '>'
+const WithSpace = <template >Hello World</template>;
+
+// Template with tab
+const WithTab = <template	>Hello Tab</template>;
+
+// Template with newline
+const WithNewline = <template
+>Hello Newline</template>;
+
+// Multiple spaces
+const MultipleSpaces = <template    >Hello Spaces</template>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..127 "const" [Comments("// Template with whit ..."), Newline("\n"), Comments("// This tests the edg ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@127..137 "WithSpace" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@137..139 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@139..172 "<template >Hello World</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@172..173 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@173..202 "const" [Newline("\n"), Newline("\n"), Comments("// Template with tab"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@202..210 "WithTab" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@210..212 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@212..243 "<template\t>Hello Tab</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@243..244 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@244..277 "const" [Newline("\n"), Newline("\n"), Comments("// Template with newline"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@277..289 "WithNewline" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@289..291 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@291..326 "<template\n>Hello Newline</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@326..327 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@327..354 "const" [Newline("\n"), Newline("\n"), Comments("// Multiple spaces"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@354..369 "MultipleSpaces" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@369..371 "=" [] [Whitespace(" ")],
+                            expression: JsGlimmerTemplate {
+                                template_token_token: GLIMMER_TEMPLATE@371..408 "<template    >Hello Spaces</template>" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@408..409 ";" [] [],
+        },
+    ],
+    eof_token: EOF@409..410 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..410
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..409
+    0: JS_VARIABLE_STATEMENT@0..173
+      0: JS_VARIABLE_DECLARATION@0..172
+        0: (empty)
+        1: CONST_KW@0..127 "const" [Comments("// Template with whit ..."), Newline("\n"), Comments("// This tests the edg ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@127..172
+          0: JS_VARIABLE_DECLARATOR@127..172
+            0: JS_IDENTIFIER_BINDING@127..137
+              0: IDENT@127..137 "WithSpace" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@137..172
+              0: EQ@137..139 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@139..172
+                0: GLIMMER_TEMPLATE@139..172 "<template >Hello World</template>" [] []
+      1: SEMICOLON@172..173 ";" [] []
+    1: JS_VARIABLE_STATEMENT@173..244
+      0: JS_VARIABLE_DECLARATION@173..243
+        0: (empty)
+        1: CONST_KW@173..202 "const" [Newline("\n"), Newline("\n"), Comments("// Template with tab"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@202..243
+          0: JS_VARIABLE_DECLARATOR@202..243
+            0: JS_IDENTIFIER_BINDING@202..210
+              0: IDENT@202..210 "WithTab" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@210..243
+              0: EQ@210..212 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@212..243
+                0: GLIMMER_TEMPLATE@212..243 "<template\t>Hello Tab</template>" [] []
+      1: SEMICOLON@243..244 ";" [] []
+    2: JS_VARIABLE_STATEMENT@244..327
+      0: JS_VARIABLE_DECLARATION@244..326
+        0: (empty)
+        1: CONST_KW@244..277 "const" [Newline("\n"), Newline("\n"), Comments("// Template with newline"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@277..326
+          0: JS_VARIABLE_DECLARATOR@277..326
+            0: JS_IDENTIFIER_BINDING@277..289
+              0: IDENT@277..289 "WithNewline" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@289..326
+              0: EQ@289..291 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@291..326
+                0: GLIMMER_TEMPLATE@291..326 "<template\n>Hello Newline</template>" [] []
+      1: SEMICOLON@326..327 ";" [] []
+    3: JS_VARIABLE_STATEMENT@327..409
+      0: JS_VARIABLE_DECLARATION@327..408
+        0: (empty)
+        1: CONST_KW@327..354 "const" [Newline("\n"), Newline("\n"), Comments("// Multiple spaces"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@354..408
+          0: JS_VARIABLE_DECLARATOR@354..408
+            0: JS_IDENTIFIER_BINDING@354..369
+              0: IDENT@354..369 "MultipleSpaces" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@369..408
+              0: EQ@369..371 "=" [] [Whitespace(" ")]
+              1: JS_GLIMMER_TEMPLATE@371..408
+                0: GLIMMER_TEMPLATE@371..408 "<template    >Hello Spaces</template>" [] []
+      1: SEMICOLON@408..409 ";" [] []
+  4: EOF@409..410 "" [Newline("\n")] []
+
+```

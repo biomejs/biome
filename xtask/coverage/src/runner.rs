@@ -5,7 +5,7 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor::Buffer;
-use biome_js_parser::{JsParserOptions, Parse, parse};
+use biome_js_parser::{JsParserOptions, Parse, parse_with_options};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_rowan::SyntaxKind;
 use std::fmt::Debug;
@@ -85,7 +85,7 @@ pub(crate) struct TestCaseFile {
 
 impl TestCaseFile {
     pub(crate) fn parse(&self) -> Parse<AnyJsRoot> {
-        parse(&self.code, self.source_type, self.options)
+        parse_with_options(&self.code, self.source_type, self.options)
     }
 
     pub(crate) fn name(&self) -> &str {
