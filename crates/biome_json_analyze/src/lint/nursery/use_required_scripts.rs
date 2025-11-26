@@ -122,7 +122,7 @@ impl Rule for UseRequiredScripts {
         }
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let missing_count = state.len();
         let missing_list = state.join(", ");
 
