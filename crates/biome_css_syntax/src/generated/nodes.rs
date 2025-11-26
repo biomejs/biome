@@ -9392,6 +9392,25 @@ impl AnyCssAtRuleDeclarator {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAttrName {
+    CssBogusAttrName(CssBogusAttrName),
+    CssIdentifier(CssIdentifier),
+}
+impl AnyCssAttrName {
+    pub fn as_css_bogus_attr_name(&self) -> Option<&CssBogusAttrName> {
+        match &self {
+            Self::CssBogusAttrName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttrType {
     AnyCssAttrUnit(AnyCssAttrUnit),
     CssNumberDeclarator(CssNumberDeclarator),
@@ -23537,6 +23556,66 @@ impl From<AnyCssAtRuleDeclarator> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusAttrName> for AnyCssAttrName {
+    fn from(node: CssBogusAttrName) -> Self {
+        Self::CssBogusAttrName(node)
+    }
+}
+impl From<CssIdentifier> for AnyCssAttrName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl AstNode for AnyCssAttrName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusAttrName::KIND_SET.union(CssIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_ATTR_NAME => Self::CssBogusAttrName(CssBogusAttrName { syntax }),
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusAttrName(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusAttrName(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAttrName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusAttrName(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAttrName> for SyntaxNode {
+    fn from(n: AnyCssAttrName) -> Self {
+        match n {
+            AnyCssAttrName::CssBogusAttrName(it) => it.into_syntax(),
+            AnyCssAttrName::CssIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAttrName> for SyntaxElement {
+    fn from(n: AnyCssAttrName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssNumberDeclarator> for AnyCssAttrType {
     fn from(node: CssNumberDeclarator) -> Self {
         Self::CssNumberDeclarator(node)
@@ -30840,6 +30919,11 @@ impl std::fmt::Display for AnyCssAtRuleDeclarator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssAttrName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssAttrType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -32503,6 +32587,62 @@ impl From<CssBogusAtRule> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssBogusAttrName {
+    syntax: SyntaxNode,
+}
+impl CssBogusAttrName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusAttrName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_ATTR_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_ATTR_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusAttrName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusAttrName")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusAttrName> for SyntaxNode {
+    fn from(n: CssBogusAttrName) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBogusAttrName> for SyntaxElement {
+    fn from(n: CssBogusAttrName) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusBlock {
     syntax: SyntaxNode,
 }
@@ -34126,7 +34266,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,
@@ -34181,7 +34321,7 @@ impl Serialize for CssAttrNameList {
 }
 impl AstSeparatedList for CssAttrNameList {
     type Language = Language;
-    type Node = CssIdentifier;
+    type Node = AnyCssAttrName;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -34196,15 +34336,15 @@ impl Debug for CssAttrNameList {
     }
 }
 impl IntoIterator for CssAttrNameList {
-    type Item = SyntaxResult<CssIdentifier>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    type Item = SyntaxResult<AnyCssAttrName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssAttrName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &CssAttrNameList {
-    type Item = SyntaxResult<CssIdentifier>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    type Item = SyntaxResult<AnyCssAttrName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssAttrName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

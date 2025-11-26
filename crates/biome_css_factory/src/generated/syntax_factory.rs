@@ -16,6 +16,7 @@ impl SyntaxFactory for CssSyntaxFactory {
         match kind {
             CSS_BOGUS
             | CSS_BOGUS_AT_RULE
+            | CSS_BOGUS_ATTR_NAME
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_CUSTOM_IDENTIFIER
             | CSS_BOGUS_DECLARATION_ITEM
@@ -6352,7 +6353,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_ATTR_NAME_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                CssIdentifier::can_cast,
+                AnyCssAttrName::can_cast,
                 T ! [|],
                 false,
             ),

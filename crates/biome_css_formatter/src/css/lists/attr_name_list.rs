@@ -13,16 +13,17 @@ impl FormatRule<CssAttrNameList> for FormatCssAttrNameList {
     fn fmt(&self, node: &CssAttrNameList, f: &mut CssFormatter) -> FormatResult<()> {
         let last_index = node.len().saturating_sub(1);
 
-        f.join_with(space())
-            .entries(
-                node.elements()
-                    .enumerate()
-                    .map(|(index, item)| FormatAttrNameItem {
-                        last: index == last_index,
-                        element: item,
-                    }),
-            )
-            .finish()
+        todo!()
+        // f.join_with(space())
+        //     .entries(
+        //         node.elements()
+        //             .enumerate()
+        //             .map(|(index, item)| FormatAttrNameItem {
+        //                 last: index == last_index,
+        //                 element: item,
+        //             }),
+        //     )
+        //     .finish()
     }
 }
 

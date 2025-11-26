@@ -10,4 +10,9 @@ div {
 	a: attr(data-count type(<string>##));
 	a: attr(data-count type(<string>++));
 	a: attr(data-count type(<>));
+	a: attr(data-a | #bogus! | data-b | &unknown& );
+	a: attr(data-a | | data-b);
+	a: attr(data-test type(<number> | #bogus! | <string>));
+	a: attr(data-test type(<number> | | <string>));
+	a: attr(href type(foo | bar |));
 }

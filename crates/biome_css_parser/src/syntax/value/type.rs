@@ -14,9 +14,14 @@ use crate::syntax::is_at_identifier;
 use crate::syntax::is_at_string;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::parse_string;
+use crate::syntax::value::parse_error::expected_any_syntax;
 use crate::syntax::value::parse_error::expected_syntax_component;
+use crate::syntax::value::parse_error::expected_syntax_type_name;
 
 const SYNTAX_MULTIPLIER_SET: TokenSet<CssSyntaxKind> = token_set![T![#], T![+]];
+
+/// A few type names are tokenized as keywords instead of identifiers
+const SYNTAX_TYPE_NAME_KW_SET: TokenSet<CssSyntaxKind> = token_set![T![number], T![url]];
 
 const KNOWN_SYNTAX_TYPE_NAMES: [&str; 14] = [
     "angle",
@@ -31,11 +36,9 @@ const KNOWN_SYNTAX_TYPE_NAMES: [&str; 14] = [
     "resolution",
     "string",
     "time",
-    "url",
     "transform-function",
+    "url",
 ];
-
-const SYNTAX_KIND_WITHOUT_MULTIPLIER: [&str; 1] = ["transform-list"];
 
 #[inline]
 pub(crate) fn is_at_type_function(p: &mut CssParser) -> bool {
@@ -105,7 +108,11 @@ pub(crate) fn parse_type_function(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![type]);
     p.bump(T!['(']);
-    parse_any_syntax(p).ok();
+
+    if parse_any_syntax(p).is_absent() {
+        p.error(expected_any_syntax(p, p.cur_range()));
+    }
+
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_TYPE_FUNCTION))
@@ -145,7 +152,7 @@ fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
 
         p.bump(T![<]);
 
-        if SYNTAX_KIND_WITHOUT_MULTIPLIER.contains(&p.cur_text()) {
+        if p.cur_text() == "transform-list" {
             p.bump_remap(T![ident]);
             p.expect(T![>]);
 
@@ -212,7 +219,11 @@ fn parse_syntax_type(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![<]);
-    parse_any_syntax_type_name(p).ok();
+
+    if parse_any_syntax_type_name(p).is_absent() {
+        p.error(expected_syntax_type_name(p, p.cur_range()));
+    }
+
     p.expect(T![>]);
 
     Present(m.complete(p, CSS_SYNTAX_TYPE))
@@ -220,7 +231,7 @@ fn parse_syntax_type(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_any_syntax_type_name(p: &mut CssParser) -> bool {
-    p.at(T![ident]) || p.cur().is_keyword()
+    p.at(T![ident]) || p.at_ts(SYNTAX_TYPE_NAME_KW_SET)
 }
 
 #[inline]
@@ -250,7 +261,7 @@ impl ParseRecovery for SyntaxTypeListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SYNTAX_SINGLE_COMPONENT;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![,]) || p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+        p.at(T![|]) || p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
     }
 }
 
@@ -288,5 +299,19 @@ impl ParseSeparatedList for SyntaxComponentList {
 
 #[inline]
 fn is_at_valid_syntax_type_name(p: &mut CssParser) -> bool {
-    KNOWN_SYNTAX_TYPE_NAMES.contains(&p.cur_text())
+    KNOWN_SYNTAX_TYPE_NAMES.binary_search(&p.cur_text()).is_ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Assert that the list of known syntax type names is sorted
+    /// so that we can search it using binary search.
+    #[test]
+    fn is_known_syntax_type_names_in_order() {
+        for items in KNOWN_SYNTAX_TYPE_NAMES.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+    }
 }

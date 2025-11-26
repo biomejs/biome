@@ -65,6 +65,7 @@ CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
 CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
+CssBogusAttrName = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -2064,7 +2065,11 @@ CssAttrFunction =
 // [ <ident-token>? '|' ]? <ident-token>
 // attr(data-test | data-test-2 | data-test-3)
 //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssAttrNameList = (CssIdentifier ('|' CssIdentifier)*)
+CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
+
+AnyCssAttrName =
+	CssIdentifier
+	| CssBogusAttrName
 
 // Literal value that can be used as a type in the attr() function.
 // attr(data-test raw-string)

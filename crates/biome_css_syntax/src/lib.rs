@@ -134,6 +134,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssSyntaxSingleComponent::can_cast(*kind) => {
                 CSS_BOGUS_SYNTAX_SINGLE_COMPONENT
             }
+            kind if AnyCssAttrName::can_cast(*kind) => CSS_BOGUS_ATTR_NAME,
 
             _ => CSS_BOGUS,
         }

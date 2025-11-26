@@ -3106,7 +3106,7 @@ pub fn tw_variant_at_rule(
 }
 pub fn css_attr_name_list<I, S>(items: I, separators: S) -> CssAttrNameList
 where
-    I: IntoIterator<Item = CssIdentifier>,
+    I: IntoIterator<Item = AnyCssAttrName>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -3696,6 +3696,16 @@ where
 {
     CssBogusAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_AT_RULE,
+        slots,
+    ))
+}
+pub fn css_bogus_attr_name<I>(slots: I) -> CssBogusAttrName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusAttrName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_ATTR_NAME,
         slots,
     ))
 }

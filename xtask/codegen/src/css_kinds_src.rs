@@ -601,6 +601,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_ATTR_UNIT",
         "CSS_BOGUS_SYNTAX",
         "CSS_BOGUS_SYNTAX_SINGLE_COMPONENT",
+        "CSS_BOGUS_ATTR_NAME",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

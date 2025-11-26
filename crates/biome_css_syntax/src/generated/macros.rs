@@ -943,6 +943,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_ATTR_NAME => {
+                    let $pattern = unsafe { $crate::CssBogusAttrName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::CssBogusBlock::new_unchecked(node) };
                     $body

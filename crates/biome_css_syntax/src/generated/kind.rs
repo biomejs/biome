@@ -568,6 +568,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_ATTR_UNIT,
     CSS_BOGUS_SYNTAX,
     CSS_BOGUS_SYNTAX_SINGLE_COMPONENT,
+    CSS_BOGUS_ATTR_NAME,
     CSS_METAVARIABLE,
     #[doc(hidden)]
     __LAST,

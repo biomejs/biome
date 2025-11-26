@@ -163,7 +163,7 @@ struct AttrNameListParseRecovery;
 impl ParseRecovery for AttrNameListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_ATTR_NAME;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // 1. At a new attr name
