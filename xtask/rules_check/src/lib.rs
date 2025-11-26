@@ -379,11 +379,11 @@ fn assert_lint(
                 });
             }
         }
-        DocumentFileSource::Css(..) => {
+        DocumentFileSource::Css(source_type) => {
             let parse_options = CssParserOptions::default()
                 .allow_css_modules()
                 .allow_tailwind_directives();
-            let parse = biome_css_parser::parse_css(code, parse_options);
+            let parse = biome_css_parser::parse_css(code, source_type, parse_options);
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {

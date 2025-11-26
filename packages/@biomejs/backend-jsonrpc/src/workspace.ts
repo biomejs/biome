@@ -277,6 +277,10 @@ export interface JsConfiguration {
 	 */
 	assist?: JsAssistConfiguration;
 	/**
+	 * Enables support for embedding snippets.
+	 */
+	experimentalEmbeddedSnippetsEnabled?: Bool;
+	/**
 	 * Formatting options
 	 */
 	formatter?: JsFormatterConfiguration;
@@ -9608,6 +9612,10 @@ export interface JsonFileSource {
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
+	/**
+	 * Used to mark if the CSS is embedded inside some particular files. This affects the parsing. For example, if inside a styled`` literal, a top-level declaration is allowed.
+	 */
+	embeddingKind: EmbeddingKind2;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -9638,6 +9646,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
+export type EmbeddingKind2 = "None" | "Styled";
 /**
 	* The style of CSS contained in the file.
 

@@ -291,6 +291,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     nodes: &[
         "CSS_ROOT",
+        "CSS_INLINE_ROOT",
         "CSS_RULE_LIST",
         "CSS_QUALIFIED_RULE",
         "CSS_NESTED_QUALIFIED_RULE",
