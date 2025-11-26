@@ -5204,6 +5204,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noScriptUrl": {
+					"description": "Disallow javascript: URLs in HTML.\nSee https://biomejs.dev/linter/rules/no-script-url",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noShadow": {
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
 					"anyOf": [

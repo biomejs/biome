@@ -75,11 +75,7 @@ impl Rule for NoScriptUrl {
             && let Ok(token) = html_string.value_token()
         {
             let inner = inner_string_text(&token);
-            if inner
-                .trim()
-                .to_lowercase_cow()
-                .starts_with("javascript:")
-            {
+            if inner.trim().to_lowercase_cow().starts_with("javascript:") {
                 return Some(initializer.range());
             }
         }
