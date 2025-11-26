@@ -157,7 +157,7 @@ fn is_iframe_element(element: &AnyHtmlElement, file_extension: &str) -> bool {
         if is_html_file {
             token_text.eq_ignore_ascii_case("iframe")
         } else {
-            token_text.text() == "iframe"
+            token_text == "iframe"
         }
     })
 }
