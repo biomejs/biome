@@ -3998,6 +3998,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoProtoConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoProtoOptions" }
+			]
+		},
+		"NoProtoOptions": { "type": "object", "additionalProperties": false },
 		"NoPrototypeBuiltinsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5187,6 +5194,13 @@
 					"description": "Disallow function parameters that are only used in recursive calls.\nSee https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoParametersOnlyUsedInRecursionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noProto": {
+					"description": "Disallow the use of the __proto__ property.\nSee https://biomejs.dev/linter/rules/no-proto",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoProtoConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7387,6 +7401,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoProcessGlobalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoProtoOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoProtoOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
