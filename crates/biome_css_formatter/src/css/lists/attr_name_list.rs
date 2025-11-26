@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use crate::{FormatCssSyntaxToken, prelude::*};
-use biome_css_syntax::{CssAttrNameList, CssIdentifier, CssLanguage};
+use biome_css_syntax::{AnyCssAttrName, CssAttrNameList, CssLanguage};
 use biome_formatter::{trivia::FormatToken, write};
 use biome_rowan::AstSeparatedElement;
 
@@ -13,23 +13,22 @@ impl FormatRule<CssAttrNameList> for FormatCssAttrNameList {
     fn fmt(&self, node: &CssAttrNameList, f: &mut CssFormatter) -> FormatResult<()> {
         let last_index = node.len().saturating_sub(1);
 
-        todo!()
-        // f.join_with(space())
-        //     .entries(
-        //         node.elements()
-        //             .enumerate()
-        //             .map(|(index, item)| FormatAttrNameItem {
-        //                 last: index == last_index,
-        //                 element: item,
-        //             }),
-        //     )
-        //     .finish()
+        f.join_with(space())
+            .entries(
+                node.elements()
+                    .enumerate()
+                    .map(|(index, item)| FormatAttrNameItem {
+                        last: index == last_index,
+                        element: item,
+                    }),
+            )
+            .finish()
     }
 }
 
 struct FormatAttrNameItem {
     last: bool,
-    element: AstSeparatedElement<CssLanguage, CssIdentifier>,
+    element: AstSeparatedElement<CssLanguage, AnyCssAttrName>,
 }
 
 impl Format<CssFormatContext> for FormatAttrNameItem {

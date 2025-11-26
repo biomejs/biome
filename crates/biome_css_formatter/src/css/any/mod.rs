@@ -2,6 +2,7 @@
 
 pub(crate) mod at_rule;
 pub(crate) mod at_rule_declarator;
+pub(crate) mod attr_name;
 pub(crate) mod attr_type;
 pub(crate) mod attr_unit;
 pub(crate) mod attribute_matcher_value;

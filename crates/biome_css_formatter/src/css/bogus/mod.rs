@@ -3,6 +3,7 @@
 #[expect(clippy::module_inception)]
 pub(crate) mod bogus;
 pub(crate) mod bogus_at_rule;
+pub(crate) mod bogus_attr_name;
 pub(crate) mod bogus_block;
 pub(crate) mod bogus_custom_identifier;
 pub(crate) mod bogus_declaration_item;
