@@ -247,6 +247,7 @@ define_categories! {
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
     "lint/security/noDangerouslySetInnerHtmlWithChildren": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children",
     "lint/security/noGlobalEval": "https://biomejs.dev/linter/rules/no-global-eval",
+    "lint/security/noScriptUrl": "https://biomejs.dev/linter/rules/no-script-url",
     "lint/nursery/noScriptUrl": "https://biomejs.dev/linter/rules/no-script-url",
     "lint/security/noSecrets": "https://biomejs.dev/linter/rules/no-secrets",
     "lint/style/noCommonJs": "https://biomejs.dev/linter/rules/no-common-js",

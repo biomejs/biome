@@ -67,20 +67,20 @@ impl Rule for NoScriptUrl {
         }
 
         let attrs = element.attributes();
-        let Some(attr) = attrs.find_by_name("href") else { return None };
-        let Some(initializer) = attr.initializer() else { return None };
-        let Ok(value) = initializer.value() else { return None };
+        let attr = attrs.find_by_name("href")?;
+        let initializer = attr.initializer()?;
+        let value = initializer.value().ok()?;
 
-        if let AnyHtmlAttributeInitializer::HtmlString(html_string) = value {
-            if let Ok(token) = html_string.value_token() {
-                let inner = inner_string_text(&token);
-                if inner
-                    .trim()
-                    .to_lowercase_cow()
-                    .starts_with("javascript:")
-                {
-                    return Some(initializer.range());
-                }
+        if let AnyHtmlAttributeInitializer::HtmlString(html_string) = value
+            && let Ok(token) = html_string.value_token()
+        {
+            let inner = inner_string_text(&token);
+            if inner
+                .trim()
+                .to_lowercase_cow()
+                .starts_with("javascript:")
+            {
+                return Some(initializer.range());
             }
         }
 
