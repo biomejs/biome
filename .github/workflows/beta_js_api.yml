@@ -42,8 +42,14 @@ jobs:
         with:
           node-version: 24.11.1
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version 0.2.105
+
+      - name: Install wasm-tools
+        run: cargo install wasm-tools
 
       - name: Cache pnpm modules
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0

@@ -13,7 +13,7 @@ permissions:
 env:
   BIOME_WEBSITE_REPO: biomejs/website
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
-  WASM_PACK_CACHE_KEY: wasm-pack-cache
+  WASM_CACHE_KEY: wasm-cache
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,38 +27,45 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - name: Warm up wasm-pack cache
+      - name: Warm up wasm cache
         id: cache-restore
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ./target
             ./packages/@biomejs/wasm-web
-          key: ${{ env.WASM_PACK_CACHE_KEY }}
+          key: ${{ env.WASM_CACHE_KEY }}
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm
+        run: just build-wasm-web
 
       # https://github.com/actions/cache/issues/342
-      - name: Clear old wasm-pack cache
+      - name: Clear old wasm cache
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         run: |
           gh extension install actions/gh-actions-cache
-          gh actions-cache delete ${{ env.WASM_PACK_CACHE_KEY }} --confirm
+          gh actions-cache delete ${{ env.WASM_CACHE_KEY }} --confirm
         env:
           GH_TOKEN: ${{ github.token }}
         continue-on-error: true
 
-      - name: Save new wasm-pack cache
+      - name: Save new wasm cache
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ./target
             ./packages/@biomejs/wasm-web
-          key: ${{ env.WASM_PACK_CACHE_KEY }}
+          key: ${{ env.WASM_CACHE_KEY }}
 
       - name: Install pnpm
         # workaround for the issue https://github.com/actions/setup-node/issues/1222

@@ -158,20 +158,27 @@ jobs:
       matrix:
         include:
           - target: wasm-bundler
-            wasm-pack-target: bundler
+            just-recipe: build-wasm-bundler
           - target: wasm-nodejs
-            wasm-pack-target: nodejs
+            just-recipe: build-wasm-node
           - target: wasm-web
-            wasm-pack-target: web
+            just-recipe: build-wasm-web
     steps:
       - name: Checkout repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          bins: wasm-bindgen-cli@0.2.105, wasm-opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build WASM module ${{ matrix.target }}
-        run: wasm-pack build --out-dir ../../packages/@biomejs/${{ matrix.target }} --target ${{ matrix.wasm-pack-target }} --release --scope biomejs crates/biome_wasm
+        run: just ${{ matrix.just-recipe }}
 
       - name: Upload WASM artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
