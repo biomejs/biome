@@ -13,8 +13,8 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();

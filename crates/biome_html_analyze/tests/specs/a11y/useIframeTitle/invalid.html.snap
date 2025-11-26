@@ -9,6 +9,7 @@ expression: invalid.html
 <iframe></iframe>
 <iframe title></iframe>
 <iframe title=""></iframe>
+<IFRAME></IFRAME>
 
 ```
 
@@ -56,7 +57,7 @@ invalid.html:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
   > 4 │ <iframe title></iframe>
       │ ^^^^^^^^^^^^^^^^^^^^^^^
     5 │ <iframe title=""></iframe>
-    6 │ 
+    6 │ <IFRAME></IFRAME>
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.
   
@@ -72,7 +73,24 @@ invalid.html:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     4 │ <iframe title></iframe>
   > 5 │ <iframe title=""></iframe>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
+    6 │ <IFRAME></IFRAME>
+    7 │ 
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.html:6:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    4 │ <iframe title></iframe>
+    5 │ <iframe title=""></iframe>
+  > 6 │ <IFRAME></IFRAME>
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ 
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.
   

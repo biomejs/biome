@@ -10,6 +10,12 @@ use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 declare_lint_rule! {
     /// Enforces the usage of the attribute `title` for the element `iframe`.
     ///
+    /// :::note
+    /// In `.html` files, this rule matches `iframe` elements case-insensitively (e.g., `<IFRAME>`, `<IFrame>`).
+    ///
+    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase `<iframe>` is checked. PascalCase variants like `<Iframe>` are assumed to be custom components and are ignored.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -22,10 +28,66 @@ declare_lint_rule! {
     /// <iframe title=""></iframe>
     /// ```
     ///
+    /// ```html,expect_diagnostic
+    /// <IFRAME></IFRAME>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <iframe></iframe>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <iframe title=""></iframe>
+    /// ```
+    ///
+    /// ```svelte,expect_diagnostic
+    /// <iframe></iframe>
+    /// ```
+    ///
+    /// ```svelte,expect_diagnostic
+    /// <iframe title=""></iframe>
+    /// ```
+    ///
+    /// ```astro,expect_diagnostic
+    /// <iframe></iframe>
+    /// ```
+    ///
+    /// ```astro,expect_diagnostic
+    /// <iframe title=""></iframe>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
-    /// <iframe title="This is a unique title"></iframe>
+    /// <iframe title="title"></iframe>
+    /// ```
+    ///
+    /// ```html
+    /// <Iframe title="title"></Iframe>
+    /// ```
+    ///
+    /// ```vue
+    /// <iframe title="title"></iframe>
+    /// ```
+    ///
+    /// ```vue
+    /// <Iframe />
+    /// ```
+    ///
+    /// ```svelte
+    /// <iframe title="title"></iframe>
+    /// ```
+    ///
+    /// ```svelte
+    /// <Iframe />
+    /// ```
+    ///
+    /// ```astro
+    /// <iframe title="title"></iframe>
+    /// ```
+    ///
+    /// ```astro
+    /// <Iframe />
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -51,8 +113,9 @@ impl Rule for UseIframeTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let file_extension = ctx.file_path().extension()?;
 
-        if !is_iframe_element(element) {
+        if !is_iframe_element(element, file_extension) {
             return None;
         }
 
@@ -84,8 +147,17 @@ impl Rule for UseIframeTitle {
     }
 }
 
-fn is_iframe_element(element: &AnyHtmlElement) -> bool {
-    element
-        .name()
-        .is_some_and(|token_text| token_text.eq_ignore_ascii_case("iframe"))
+/// Checks if the element is an iframe element.
+///
+/// - In `.html` files, matching is case-insensitive.
+/// - In component-based frameworks, only lowercase `iframe` is matched to avoid flagging custom components like `<Iframe>`.
+fn is_iframe_element(element: &AnyHtmlElement, file_extension: &str) -> bool {
+    element.name().is_some_and(|token_text| {
+        let is_html_file = file_extension == "html";
+        if is_html_file {
+            token_text.eq_ignore_ascii_case("iframe")
+        } else {
+            token_text.text() == "iframe"
+        }
+    })
 }
