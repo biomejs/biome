@@ -97,6 +97,7 @@ impl AnyJsClassMember {
                 .name()
                 .map(|name| Some(AnyJsClassMemberName::from(name))),
             Self::JsEmptyClassMember(_) => Ok(None),
+            Self::JsGlimmerTemplate(_) => Ok(None),
             Self::JsGetterClassMember(getter) => getter.name().map(Some),
             Self::JsMethodClassMember(method) => method.name().map(Some),
             Self::JsPropertyClassMember(property) => property.name().map(Some),

@@ -337,7 +337,7 @@ mod test {
     #[test]
     fn test_is_react_hook_call() {
         {
-            let r = biome_js_parser::parse(
+            let r = biome_js_parser::parse_with_options(
                 r#"useRef();"#,
                 JsFileSource::js_module(),
                 JsParserOptions::default(),
@@ -352,7 +352,7 @@ mod test {
         }
 
         {
-            let r = biome_js_parser::parse(
+            let r = biome_js_parser::parse_with_options(
                 r#"userCredentials();"#,
                 JsFileSource::js_module(),
                 JsParserOptions::default(),
@@ -370,7 +370,7 @@ mod test {
 
     #[test]
     pub fn ok_react_stable_captures() {
-        let r = biome_js_parser::parse(
+        let r = biome_js_parser::parse_with_options(
             r#"
                 import { useRef } from "react";
                 const ref = useRef();
@@ -400,7 +400,7 @@ mod test {
 
     #[test]
     pub fn ok_react_stable_captures_with_default_import() {
-        let r = biome_js_parser::parse(
+        let r = biome_js_parser::parse_with_options(
             r#"
                 import * as React from "react";
                 const ref = React.useRef();

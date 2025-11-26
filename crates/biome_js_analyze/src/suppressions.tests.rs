@@ -2,7 +2,7 @@ use super::*;
 use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, parse_with_options};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_package::{Dependencies, PackageJson};
 use std::slice;
@@ -12,7 +12,7 @@ use std::slice;
 fn quick_test() {
     const SOURCE: &str = r#"f({ prop: () => {} })"#;
 
-    let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
+    let parsed = parse_with_options(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
@@ -70,7 +70,7 @@ fn quick_test_suppression() {
             }
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -152,7 +152,7 @@ fn suppression() {
             }
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -221,7 +221,7 @@ fn suppression_syntax() {
             a == b;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -264,7 +264,7 @@ let foo = 2;
 let bar = 33;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -315,7 +315,7 @@ let bar = 33;
 debugger;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -361,7 +361,7 @@ let bar = 33;
 debugger;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -409,7 +409,7 @@ let bar = 33;
 debugger;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -458,7 +458,7 @@ let foo = 2;
 let bar = 33;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -505,7 +505,7 @@ let foo = 2;
 let bar = 33;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -550,7 +550,7 @@ let foo = 2;
 let bar = 33;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -598,7 +598,7 @@ let foo = 2;
 let bar = 33;
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -645,7 +645,7 @@ let c;
 // biome-ignore-end lint/style/useConst: single rule
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -695,7 +695,7 @@ debugger;
 
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -748,7 +748,7 @@ let d;
 
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -794,7 +794,7 @@ const foo0 = function (bar: string) {
   bar = 'baz';
 };";
 
-    let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+    let parsed = parse_with_options(SOURCE, JsFileSource::ts(), JsParserOptions::default());
 
     let enabled_rules = vec![
         RuleFilter::Rule("complexity", "useArrowFunction"),
@@ -840,7 +840,7 @@ a == b;
 
         ";
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -884,7 +884,7 @@ var foo = {
 }
         "#;
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -926,7 +926,7 @@ fn suppression_issue_5562() {
 // biome-ignore lint/suspicious/noConsole: foo
 console.log("should be suppressed");"#;
 
-    let parsed = parse(
+    let parsed = parse_with_options(
         SOURCE,
         JsFileSource::js_module(),
         JsParserOptions::default(),

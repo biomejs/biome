@@ -93,6 +93,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
             AnyJsExpression::JsFunctionExpression(node) => {
                 FormatJsFunctionExpression::default().fmt_node(node, f)
             }
+            AnyJsExpression::JsGlimmerTemplate(node) => node.format().fmt(f),
             AnyJsExpression::JsMetavariable(node) => FormatJsMetavariable.fmt_node(node, f),
             AnyJsExpression::JsIdentifierExpression(node) => {
                 FormatJsIdentifierExpression.fmt_node(node, f)

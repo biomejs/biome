@@ -12,7 +12,7 @@ use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsFileSource};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
@@ -176,7 +176,7 @@ pub fn get_added_paths<'a>(
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
                 let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
-                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                    biome_js_parser::parse(&content, file_source);
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),
