@@ -95,6 +95,7 @@ pub use crate::{
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
+use crate::settings::SettingsWithEditor;
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
 
@@ -116,6 +117,9 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -181,7 +185,7 @@ impl FeaturesSupported {
     #[inline]
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &Settings,
+        settings: &SettingsWithEditor,
         path: &Utf8Path,
         capabilities: &Capabilities,
     ) -> Self {
@@ -221,7 +225,8 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+        if let Some(experimental_full_html_support) =
+            settings.as_ref().experimental_full_html_support
             && experimental_full_html_support.value()
         {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
@@ -771,6 +776,9 @@ pub struct OpenFileParams {
     /// the file is opened through the LSP Proxy.
     #[serde(default)]
     pub persist_node_cache: bool,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -899,6 +907,9 @@ pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -948,6 +959,8 @@ pub struct PullDiagnosticsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -975,6 +988,8 @@ pub struct PullActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -991,6 +1006,8 @@ pub struct PullDiagnosticsAndActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1023,6 +1040,8 @@ pub struct CodeAction {
 pub struct FormatFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1032,6 +1051,8 @@ pub struct FormatRangeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub range: TextRange,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1041,6 +1062,8 @@ pub struct FormatOnTypeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub offset: TextSize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
@@ -1074,6 +1097,8 @@ pub struct FixFileParams {
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1675,6 +1700,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             path: self.path.clone(),
             version,
             content,
+            inline_config: None,
         })
     }
 
@@ -1700,6 +1726,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             enabled_rules: vec![],
             pull_code_actions,
+            inline_config: None,
         })
     }
 
@@ -1721,6 +1748,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             suppression_reason,
             enabled_rules,
             categories,
+            inline_config: None,
         })
     }
 
@@ -1728,6 +1756,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         self.workspace.format_file(FormatFileParams {
             project_key: self.project_key,
             path: self.path.clone(),
+            inline_config: None,
         })
     }
 
@@ -1743,6 +1772,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             range,
+            inline_config: None,
         })
     }
 
@@ -1751,6 +1781,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             offset,
+            inline_config: None,
         })
     }
 
@@ -1773,6 +1804,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             rule_categories,
             suppression_reason,
             enabled_rules: vec![],
+            inline_config: None,
         })
     }
 

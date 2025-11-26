@@ -38,6 +38,7 @@ fn commonjs_file_rejects_import_statement() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -91,6 +92,7 @@ fn store_embedded_nodes_with_current_ranges() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -152,6 +154,7 @@ fn format_html_with_scripts_and_css() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -159,6 +162,7 @@ fn format_html_with_scripts_and_css() {
         .format_file(FormatFileParams {
             path: Utf8PathBuf::from("/project/file.html").into(),
             project_key,
+            inline_config: None,
         })
         .unwrap();
 
@@ -258,6 +262,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -268,6 +273,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -291,6 +297,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.js"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -370,6 +377,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -380,6 +388,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -403,6 +412,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.jsx"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
