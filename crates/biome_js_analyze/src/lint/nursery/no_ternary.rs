@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTernary {
-        version: "next",
+        version: "2.3.8",
         name: "noTernary",
         language: "js",
         recommended: false,

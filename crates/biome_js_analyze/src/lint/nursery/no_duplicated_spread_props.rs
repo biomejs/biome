@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicatedSpreadProps {
-        version: "next",
+        version: "2.3.8",
         name: "noDuplicatedSpreadProps",
         language: "js",
         recommended: false,
