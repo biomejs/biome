@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMethod.js
+---
+# Input
+```js
+import { get } from '@ember/object';
+import Component from '@glimmer/component';
+
+export default class MyComponent extends Component {
+  someMethod() {
+    return get(this, 'anotherProperty');
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalidMethod.js:6:12 lint/nursery/noEmberGet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use get() to access properties.
+  
+    4 │ export default class MyComponent extends Component {
+    5 │   someMethod() {
+  > 6 │     return get(this, 'anotherProperty');
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   }
+    8 │ }
+  
+  i Use native property access instead (e.g., this.property or obj.property).
+  
+
+```

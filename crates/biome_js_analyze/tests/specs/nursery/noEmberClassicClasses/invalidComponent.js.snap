@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComponent.js
+---
+# Input
+```js
+import Component from '@ember/component';
+
+export default Component.extend({
+  tagName: 'div',
+  classNames: ['my-component']
+});
+
+```
+
+# Diagnostics
+```
+invalidComponent.js:3:16 lint/nursery/noEmberClassicClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use classic Ember classes with .extend().
+  
+    1 │ import Component from '@ember/component';
+    2 │ 
+  > 3 │ export default Component.extend({
+      │                ^^^^^^^^^^^^^^^^^^
+  > 4 │   tagName: 'div',
+  > 5 │   classNames: ['my-component']
+  > 6 │ });
+      │ ^^
+    7 │ 
+  
+  i Use native JavaScript class syntax instead.
+  
+  i See: https://guides.emberjs.com/release/upgrading/current-edition/native-classes/
+  
+
+```

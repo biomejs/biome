@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMember.js
+---
+# Input
+```js
+import { getWithDefault } from '@ember/object';
+
+const obj = { name: 'test' };
+const result = obj.getWithDefault('name', 'default');
+
+```
+
+# Diagnostics
+```
+invalidMember.js:4:16 lint/nursery/noEmberGetWithDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use the deprecated getWithDefault() method.
+  
+    3 │ const obj = { name: 'test' };
+  > 4 │ const result = obj.getWithDefault('name', 'default');
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The getWithDefault() method was deprecated in Ember 3.x and removed in Ember 4.0.
+  
+  i Use optional chaining (?.) or nullish coalescing (??) instead.
+  
+
+```

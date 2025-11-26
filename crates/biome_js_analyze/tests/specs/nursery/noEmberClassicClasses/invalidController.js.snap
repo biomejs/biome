@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidController.js
+---
+# Input
+```js
+import Controller from '@ember/controller';
+
+export default Controller.extend({
+  queryParams: ['page'],
+  page: 1
+});
+
+```
+
+# Diagnostics
+```
+invalidController.js:3:16 lint/nursery/noEmberClassicClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use classic Ember classes with .extend().
+  
+    1 │ import Controller from '@ember/controller';
+    2 │ 
+  > 3 │ export default Controller.extend({
+      │                ^^^^^^^^^^^^^^^^^^^
+  > 4 │   queryParams: ['page'],
+  > 5 │   page: 1
+  > 6 │ });
+      │ ^^
+    7 │ 
+  
+  i Use native JavaScript class syntax instead.
+  
+  i See: https://guides.emberjs.com/release/upgrading/current-edition/native-classes/
+  
+
+```

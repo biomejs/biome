@@ -1,0 +1,81 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+import { Counter } from '@/components/counter'
+import PageLayout from '@/components/page-layout.astro'
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+<PageLayout>
+	<main class="flex h-screen w-screen flex-col items-center justify-center">
+		<Counter client:load>
+
+
+			<span>--</span>
+		</Counter>
+	</main>
+</PageLayout>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..530 "import { Counter } from '@/components/counter'\nimport PageLayout from '@/components/page-layout.astro'\n\n// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build\n// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.\n---\n<PageLayout>\n\t<main class=\"flex h-screen w-screen flex-col items-center justify-center\">\n\t\t<Counter client:load>\n\n\n\t\t\t<span>--</span>\n\t\t</Counter>\n\t</main>\n</PageLayout>\n" [Newline("\n")] [],
+        },
+        r_fence_token: missing (required),
+    },
+    directive: missing (optional),
+    html: HtmlElementList [],
+    eof_token: EOF@530..530 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..530
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..530
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..530
+      0: HTML_LITERAL@3..530 "import { Counter } from '@/components/counter'\nimport PageLayout from '@/components/page-layout.astro'\n\n// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build\n// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.\n---\n<PageLayout>\n\t<main class=\"flex h-screen w-screen flex-col items-center justify-center\">\n\t\t<Counter client:load>\n\n\n\t\t\t<span>--</span>\n\t\t</Counter>\n\t</main>\n</PageLayout>\n" [Newline("\n")] []
+    2: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@530..530
+  4: EOF@530..530 "" [] []
+
+```
+
+## Diagnostics
+
+```
+issue_7837.astro:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `---` but instead the file ends
+  
+    15 │ 	</main>
+    16 │ </PageLayout>
+  > 17 │ 
+       │ 
+  
+  i the file ends here
+  
+    15 │ 	</main>
+    16 │ </PageLayout>
+  > 17 │ 
+       │ 
+  
+```

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLegacy.js
+---
+# Input
+```js
+import TextField from 'ember-legacy-built-in-components';
+
+export default TextField.extend({
+  placeholder: 'Enter text'
+});
+
+```
+
+# Diagnostics
+```
+invalidLegacy.js:1:1 lint/nursery/noEmberOldShims ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from deprecated Ember shim modules.
+  
+  > 1 │ import TextField from 'ember-legacy-built-in-components';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export default TextField.extend({
+  
+  i Use modern Ember module imports instead.
+  
+  i See: https://github.com/ember-cli/ember-rfc176-data
+  
+
+```

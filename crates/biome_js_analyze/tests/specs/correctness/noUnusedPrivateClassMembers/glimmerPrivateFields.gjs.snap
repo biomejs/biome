@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerPrivateFields.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - private fields used in template */
+export default class MyComponent {
+  #privateCount = 0;
+  #privateName = "test";
+  #privateData = { value: 42 };
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

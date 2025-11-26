@@ -356,5 +356,3 @@ new RegExp('+', 'g');
 ```cjs
 RegExp('+', 'g');
 ```
-
-

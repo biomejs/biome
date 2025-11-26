@@ -1,0 +1,5 @@
+{
+  "files": {
+    "includes": ["*.gjs", "*.gts"]
+  }
+}

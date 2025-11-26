@@ -123,9 +123,13 @@ fn parse(
         cache,
     );
 
+    // Store the original source text so semantic analysis can scan templates
+    let original_source_text = Some(std::sync::Arc::new(text.to_string()));
+
     ParseResult {
         any_parse: parse.into(),
         language: Some(JsFileSource::astro().into()),
+        original_source_text,
     }
 }
 

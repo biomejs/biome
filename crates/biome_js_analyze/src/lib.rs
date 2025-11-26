@@ -48,6 +48,9 @@ pub struct JsAnalyzerServices {
     module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
+    /// Original untransformed source text for embedded languages (Glimmer, Vue, Svelte, Astro).
+    /// This is used by the semantic model builder to scan templates.
+    original_source_text: Option<Arc<String>>,
 }
 
 impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -62,7 +65,18 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_graph,
             project_layout,
             source_type,
+            original_source_text: None,
         }
+    }
+}
+
+impl JsAnalyzerServices {
+    /// Set the original untransformed source text for embedded languages.
+    /// This is used by the semantic model builder to scan templates in languages
+    /// like Glimmer, Vue, Svelte, and Astro.
+    pub fn with_original_source_text(mut self, source_text: Option<Arc<String>>) -> Self {
+        self.original_source_text = source_text;
+        self
     }
 }
 
@@ -119,6 +133,7 @@ where
         module_graph,
         project_layout,
         source_type,
+        original_source_text,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -170,6 +185,12 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
+
+    // Insert original source text for embedded languages (Glimmer, Vue, Svelte, Astro)
+    if let Some(original_text) = original_source_text {
+        use crate::services::semantic::OriginalSourceText;
+        services.insert_service(OriginalSourceText::new(Arc::unwrap_or_clone(original_text)));
+    }
 
     (
         analyzer.run(AnalyzerContext {

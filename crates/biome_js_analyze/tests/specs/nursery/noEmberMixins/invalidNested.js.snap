@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNested.js
+---
+# Input
+```js
+// Nested path with mixins - should trigger
+import UtilityMixin from '../../mixins/utilities/validation';
+
+```
+
+# Diagnostics
+```
+invalidNested.js:2:1 lint/nursery/noEmberMixins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from /mixins/ directories.
+  
+    1 │ // Nested path with mixins - should trigger
+  > 2 │ import UtilityMixin from '../../mixins/utilities/validation';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Mixins are deprecated in modern Ember. Use composition patterns, utility functions, or decorators instead.
+  
+  i See the Ember Octane migration guide: https://guides.emberjs.com/release/upgrading/current-edition/
+  
+
+```

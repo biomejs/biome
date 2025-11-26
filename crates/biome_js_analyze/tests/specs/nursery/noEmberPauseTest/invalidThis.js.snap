@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidThis.js
+---
+# Input
+```js
+import { setupTest } from 'ember-qunit';
+import { module, test } from 'qunit';
+
+module('Example', function (hooks) {
+  setupTest(hooks);
+
+  test('it works', async function () {
+    await this.pauseTest();
+  });
+});
+
+```
+
+# Diagnostics
+```
+invalidThis.js:8:11 lint/nursery/noEmberPauseTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use pauseTest in tests.
+  
+     7 │   test('it works', async function () {
+   > 8 │     await this.pauseTest();
+       │           ^^^^^^^^^^^^^^^^
+     9 │   });
+    10 │ });
+  
+  i pauseTest is a debugging utility that pauses test execution and should not be committed to the codebase.
+  
+  i Remove the pauseTest() call before committing your code.
+  
+
+```

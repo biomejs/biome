@@ -26,5 +26,3 @@ MyObject.map(one, two, tree).flat();
 ```cjs
 MyObject.map().flat(1, 'test')
 ```
-
-

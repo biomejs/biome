@@ -1680,6 +1680,54 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
+	 * Disallow the accesskey attribute on HTML elements and components.
+	 */
+	noEmberAccesskeyAttribute?: RuleConfiguration_for_NoEmberAccesskeyAttributeOptions;
+	/**
+	 * Disallow the autofocus attribute on HTML elements and components.
+	 */
+	noEmberAutofocus?: RuleConfiguration_for_NoEmberAutofocusOptions;
+	/**
+	 * Disallow usage of classic Ember classes created with .extend().
+	 */
+	noEmberClassicClasses?: RuleConfiguration_for_NoEmberClassicClassesOptions;
+	/**
+	 * Disallow usage of get() to access properties.
+	 */
+	noEmberGet?: RuleConfiguration_for_NoEmberGetOptions;
+	/**
+	 * Disallow usage of the deprecated getWithDefault() method.
+	 */
+	noEmberGetWithDefault?: RuleConfiguration_for_NoEmberGetWithDefaultOptions;
+	/**
+	 * Disallow usage of global $ or jQuery objects.
+	 */
+	noEmberGlobalJquery?: RuleConfiguration_for_NoEmberGlobalJqueryOptions;
+	/**
+	 * Disallow inline style attributes in Glimmer templates.
+	 */
+	noEmberInlineStyles?: RuleConfiguration_for_NoEmberInlineStylesOptions;
+	/**
+	 * Disallow importing files from /mixins/ directories.
+	 */
+	noEmberMixins?: RuleConfiguration_for_NoEmberMixinsOptions;
+	/**
+	 * Disallow importing from deprecated Ember shim modules.
+	 */
+	noEmberOldShims?: RuleConfiguration_for_NoEmberOldShimsOptions;
+	/**
+	 * Disallow usage of pauseTest in tests.
+	 */
+	noEmberPauseTest?: RuleConfiguration_for_NoEmberPauseTestOptions;
+	/**
+	 * Disallow positive tabindex values in Glimmer templates.
+	 */
+	noEmberPositiveTabindex?: RuleConfiguration_for_NoEmberPositiveTabindexOptions;
+	/**
+	 * Require dependencies for computed properties.
+	 */
+	noEmberRequireComputedPropertyDependencies?: RuleConfiguration_for_NoEmberRequireComputedPropertyDependenciesOptions;
+	/**
 	 * Disallow empty sources.
 	 */
 	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
@@ -3084,6 +3132,42 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmberAccesskeyAttributeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberAccesskeyAttributeOptions;
+export type RuleConfiguration_for_NoEmberAutofocusOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberAutofocusOptions;
+export type RuleConfiguration_for_NoEmberClassicClassesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberClassicClassesOptions;
+export type RuleConfiguration_for_NoEmberGetOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGetOptions;
+export type RuleConfiguration_for_NoEmberGetWithDefaultOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGetWithDefaultOptions;
+export type RuleConfiguration_for_NoEmberGlobalJqueryOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberGlobalJqueryOptions;
+export type RuleConfiguration_for_NoEmberInlineStylesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberInlineStylesOptions;
+export type RuleConfiguration_for_NoEmberMixinsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberMixinsOptions;
+export type RuleConfiguration_for_NoEmberOldShimsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberOldShimsOptions;
+export type RuleConfiguration_for_NoEmberPauseTestOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberPauseTestOptions;
+export type RuleConfiguration_for_NoEmberPositiveTabindexOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberPositiveTabindexOptions;
+export type RuleConfiguration_for_NoEmberRequireComputedPropertyDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmberRequireComputedPropertyDependenciesOptions;
 export type RuleConfiguration_for_NoEmptySourceOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoEmptySourceOptions;
@@ -5531,6 +5615,126 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 * Rule's options
 	 */
 	options: NoDuplicateDependenciesOptions;
+}
+export interface RuleWithOptions_for_NoEmberAccesskeyAttributeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberAccesskeyAttributeOptions;
+}
+export interface RuleWithOptions_for_NoEmberAutofocusOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberAutofocusOptions;
+}
+export interface RuleWithOptions_for_NoEmberClassicClassesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberClassicClassesOptions;
+}
+export interface RuleWithOptions_for_NoEmberGetOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGetOptions;
+}
+export interface RuleWithOptions_for_NoEmberGetWithDefaultOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGetWithDefaultOptions;
+}
+export interface RuleWithOptions_for_NoEmberGlobalJqueryOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberGlobalJqueryOptions;
+}
+export interface RuleWithOptions_for_NoEmberInlineStylesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberInlineStylesOptions;
+}
+export interface RuleWithOptions_for_NoEmberMixinsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberMixinsOptions;
+}
+export interface RuleWithOptions_for_NoEmberOldShimsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberOldShimsOptions;
+}
+export interface RuleWithOptions_for_NoEmberPauseTestOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberPauseTestOptions;
+}
+export interface RuleWithOptions_for_NoEmberPositiveTabindexOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberPositiveTabindexOptions;
+}
+export interface RuleWithOptions_for_NoEmberRequireComputedPropertyDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmberRequireComputedPropertyDependenciesOptions;
 }
 export interface RuleWithOptions_for_NoEmptySourceOptions {
 	/**
@@ -8325,6 +8529,18 @@ export interface UseYieldOptions {}
 export interface NoContinueOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
+export interface NoEmberAccesskeyAttributeOptions {}
+export interface NoEmberAutofocusOptions {}
+export interface NoEmberClassicClassesOptions {}
+export interface NoEmberGetOptions {}
+export interface NoEmberGetWithDefaultOptions {}
+export interface NoEmberGlobalJqueryOptions {}
+export interface NoEmberInlineStylesOptions {}
+export interface NoEmberMixinsOptions {}
+export interface NoEmberOldShimsOptions {}
+export interface NoEmberPauseTestOptions {}
+export interface NoEmberPositiveTabindexOptions {}
+export interface NoEmberRequireComputedPropertyDependenciesOptions {}
 export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningful
@@ -9138,6 +9354,19 @@ export type Category =
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noEmberAccesskeyAttribute"
+	| "lint/nursery/noEmberActionsHash"
+	| "lint/nursery/noEmberAutofocus"
+	| "lint/nursery/noEmberClassicClasses"
+	| "lint/nursery/noEmberGet"
+	| "lint/nursery/noEmberGetWithDefault"
+	| "lint/nursery/noEmberGlobalJquery"
+	| "lint/nursery/noEmberInlineStyles"
+	| "lint/nursery/noEmberMixins"
+	| "lint/nursery/noEmberOldShims"
+	| "lint/nursery/noEmberPauseTest"
+	| "lint/nursery/noEmberPositiveTabindex"
+	| "lint/nursery/noEmberRequireComputedPropertyDependencies"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
@@ -9619,7 +9848,7 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "Glimmer" | "None";
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -9654,7 +9883,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Glimmer";
 export type GritVariant = "Standard";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {

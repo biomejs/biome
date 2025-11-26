@@ -10,7 +10,7 @@ use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, Module
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
-use biome_service::file_handlers::VueFileHandler;
+use biome_service::file_handlers::{GlimmerFileHandler, VueFileHandler};
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -19,13 +19,14 @@ use biome_test_utils::{
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
+use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
-tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,gjs,gts}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue,gjs,gts}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue,gjs,gts}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -110,6 +111,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 CheckActionType::Lint,
                 JsParserOptions::default(),
                 &[],
+                None,
             );
         }
     } else {
@@ -125,15 +127,27 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         } else {
             source_type
         };
-        let input_code = if source_type.as_embedding_kind().is_vue() {
-            VueFileHandler::input(&input_code)
-        } else {
-            input_code.as_str()
-        };
+
+        // Transform embedded language files before parsing
+        let (transformed_code, original_source): (Cow<str>, _) =
+            if source_type.as_embedding_kind().is_vue() {
+                (
+                    VueFileHandler::input(&input_code).into(),
+                    Some(input_code.to_string()),
+                )
+            } else if source_type.as_embedding_kind().is_glimmer() {
+                (
+                    GlimmerFileHandler::extract_js_content(&input_code).into(),
+                    Some(input_code.to_string()),
+                )
+            } else {
+                (Cow::Borrowed(input_code.as_str()), None)
+            };
+        let input_code = transformed_code.as_ref();
 
         analyze_and_snap(
             &mut snapshot,
-            input_code,
+            &input_code,
             source_type,
             filter,
             file_name,
@@ -141,6 +155,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             CheckActionType::Lint,
             JsParserOptions::default(),
             &[],
+            original_source,
         );
     };
 
@@ -163,6 +178,7 @@ pub(crate) fn analyze_and_snap(
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
     plugins: AnalyzerPluginSlice,
+    original_source: Option<String>,
 ) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
@@ -212,7 +228,12 @@ pub(crate) fn analyze_and_snap(
         Default::default()
     };
 
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let mut services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+
+    // For embedded language files, provide the original source text so template scanning works
+    if let Some(original) = original_source {
+        services = services.with_original_source_text(Some(Arc::new(original)));
+    }
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -384,6 +405,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         CheckActionType::Suppression,
         JsParserOptions::default(),
         &[],
+        None,
     );
 
     insta::with_settings!({
@@ -459,6 +481,7 @@ pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str
         CheckActionType::Suppression,
         JsParserOptions::default(),
         &[],
+        None,
     );
 
     insta::with_settings!({
@@ -509,6 +532,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         CheckActionType::Lint,
         JsParserOptions::default(),
         &[Arc::new(Box::new(plugin))],
+        None,
     );
 
     insta::with_settings!({

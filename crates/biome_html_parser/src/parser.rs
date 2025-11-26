@@ -100,6 +100,7 @@ impl<'src> Parser for HtmlParser<'src> {
 pub struct HtmlParseOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
+    pub(crate) glimmer: bool,
 }
 
 impl HtmlParseOptions {
@@ -115,6 +116,11 @@ impl HtmlParseOptions {
 
     pub fn with_frontmatter(mut self) -> Self {
         self.frontmatter = true;
+        self
+    }
+
+    pub fn with_glimmer(mut self) -> Self {
+        self.glimmer = true;
         self
     }
 
@@ -153,6 +159,11 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();
+            }
+            HtmlVariant::Glimmer => {
+                // Glimmer uses double curlies: {{expression}}
+                // and has Glimmer-specific features (block helpers, splattributes)
+                options = options.with_double_text_expression().with_glimmer();
             }
         }
 

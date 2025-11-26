@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidJQuery.js
+---
+# Input
+```js
+// Using global jQuery should trigger the rule
+jQuery('.selector').addClass('active');
+
+function anotherFunction() {
+  jQuery('#element').remove();
+}
+
+```
+
+# Diagnostics
+```
+invalidJQuery.js:2:1 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global jQuery.
+  
+    1 │ // Using global jQuery should trigger the rule
+  > 2 │ jQuery('.selector').addClass('active');
+      │ ^^^^^^
+    3 │ 
+    4 │ function anotherFunction() {
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```
+
+```
+invalidJQuery.js:5:3 lint/nursery/noEmberGlobalJquery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use global jQuery.
+  
+    4 │ function anotherFunction() {
+  > 5 │   jQuery('#element').remove();
+      │   ^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Import jQuery explicitly instead of relying on the global reference.
+  
+  i Using explicit imports makes dependencies clearer and helps with bundling and tree-shaking.
+  
+
+```

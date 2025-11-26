@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: glimmerProperties.gjs
+---
+# Input
+```js
+/* should not generate diagnostics - properties used in template */
+export default class MyComponent {
+  title = "Hello";
+  count = 0;
+  isActive = true;
+
+  __BIOME_GLIMMER_TEMPLATE_0__
+}
+
+```

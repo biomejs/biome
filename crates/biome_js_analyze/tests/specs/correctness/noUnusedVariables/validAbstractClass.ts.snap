@@ -38,5 +38,3 @@ class B extends A {
 console.log(new B(1));
 
 ```
-
-

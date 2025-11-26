@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: regressionRegularJs.js
+---
+# Input
+```js
+/* Regression test: ensure regular JS files still work correctly */
+class MyClass {
+  #used = 1;
+  #unused = 2;
+
+  getUsed() {
+    return this.#used;
+  }
+}
+
+```
+
+# Diagnostics
+```
+regressionRegularJs.js:4:3 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    2 │ class MyClass {
+    3 │   #used = 1;
+  > 4 │   #unused = 2;
+      │   ^^^^^^^
+    5 │ 
+    6 │   getUsed() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     2 2 │   class MyClass {
+     3 3 │     #used = 1;
+     4   │ - ··#unused·=·2;
+     5 4 │   
+     6 5 │     getUsed() {
+  
+
+```

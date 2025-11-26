@@ -17,5 +17,3 @@ function Button() {}
 console.log(<Button att={value}/>);
 
 ```
-
-

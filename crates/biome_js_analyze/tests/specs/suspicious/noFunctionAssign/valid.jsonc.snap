@@ -31,5 +31,3 @@ var foo12 = function () { }; foo12 = bar;
 ```cjs
 var foo13 = function () { foo13 = bar; };
 ```
-
-

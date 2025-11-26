@@ -47,6 +47,11 @@ impl SemanticModelBuilder {
         }
     }
 
+    /// Get a reference to the root AST node
+    pub fn root(&self) -> &AnyJsRoot {
+        &self.root
+    }
+
     #[inline]
     pub fn push_node(&mut self, node: &JsSyntaxNode) {
         use JsSyntaxKind::*;
@@ -330,6 +335,48 @@ impl SemanticModelBuilder {
                 let binding = &mut self.bindings[binding_id.index()];
                 binding.export_by_start.push(range.start());
             }
+        }
+    }
+
+    /// Find a binding by its name (e.g., for finding imported components)
+    /// This is useful for adding synthetic references from template usage
+    pub fn find_binding_by_name(&self, name: &str) -> Option<BindingId> {
+        // Search through all bindings to find one with the given name
+        for (binding_id, binding_data) in self.bindings.iter().enumerate() {
+            // Get the syntax node for this binding
+            if let Some(node) = self.binding_node_by_start.get(&binding_data.range.start()) {
+                // Check if the node's text matches the name
+                let node_text = node.text_trimmed().to_string();
+                if node_text == name {
+                    return Some(BindingId::new(binding_id));
+                }
+            }
+        }
+        None
+    }
+
+    /// Add a synthetic reference to a binding
+    /// This is used to record template usage (e.g., <Button /> in Glimmer templates)
+    /// so that rules like noUnusedImports see template references
+    pub fn add_synthetic_reference(&mut self, binding_id: BindingId, range: TextRange) {
+        let binding = &mut self.bindings[binding_id.index()];
+        let binding_range_start = binding.range.start();
+
+        // Add a Read reference (template usage is always a read)
+        binding.references.push(SemanticModelReference {
+            range_start: range.start(),
+            ty: SemanticModelReferenceType::Read { hoisted: false },
+        });
+
+        // Get the binding's declaration node from binding_node_by_start
+        // Synthetic references don't have their own syntax nodes, so we point to the binding
+        if let Some(binding_node) = self.binding_node_by_start.get(&binding_range_start) {
+            let binding_node = binding_node.clone();
+
+            // Add the binding node to binding_node_by_start so reference.syntax() works
+            // This maps the synthetic reference's range to the original binding (import) node
+            self.binding_node_by_start
+                .insert(range.start(), binding_node);
         }
     }
 
