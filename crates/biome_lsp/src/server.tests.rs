@@ -31,10 +31,10 @@ use tower_lsp_server::jsonrpc::{self, Request, Response};
 use tower_lsp_server::lsp_types::{
     self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    DocumentFormattingParams, FormattingOptions, InitializeParams, InitializeResult,
-    InitializedParams, Position, PublishDiagnosticsParams, Range, TextDocumentContentChangeEvent,
-    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, VersionedTextDocumentIdentifier,
-    WorkDoneProgressParams, WorkspaceFolder,
+    DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,
+    InitializeResult, InitializedParams, Position, PublishDiagnosticsParams, Range,
+    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
+    VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
 };
 
 use crate::WorkspaceSettings;
@@ -366,6 +366,17 @@ impl Server {
                 text_document: TextDocumentIdentifier {
                     uri: uri!("document.js"),
                 },
+            },
+        )
+        .await
+    }
+
+    async fn save_document(&mut self, uri: Uri) -> Result<()> {
+        self.notify(
+            "textDocument/didSave",
+            DidSaveTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri },
+                text: None,
             },
         )
         .await
@@ -4134,6 +4145,96 @@ async fn should_not_return_error_on_code_actions_for_grit_files() -> Result<()> 
 }
 
 // #endregion
+
+#[tokio::test]
+async fn did_save_syncs_content_from_disk() -> Result<()> {
+    // ARRANGE: Set up file system with initial content
+    const INITIAL_CONTENT: &str = "const a = 1;";
+    const DISK_CONTENT: &str = "const b = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    let file_path = to_utf8_file_path_buf(uri!("document.js"));
+
+    // Insert initial content into the file system
+    fs.insert(file_path.clone(), INITIAL_CONTENT);
+
+    // Set up LSP server with the memory file system
+    let factory = ServerFactory::new_with_fs(fs.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Open project
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // Open the document with initial content
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(INITIAL_CONTENT),
+                },
+            },
+        )
+        .await?;
+
+    // Verify initial content
+    let content_before: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            },
+        )
+        .await?
+        .context("get file content error")?;
+    assert_eq!(content_before, INITIAL_CONTENT);
+
+    // ACT: Update the file content in the memory file system and trigger didSave
+    fs.insert(file_path, DISK_CONTENT);
+    server.save_document(uri!("document.js")).await?;
+
+    // ASSERT: Verify the document content was synced from "disk" (memory file system)
+    let content_after: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            },
+        )
+        .await?
+        .context("get file content error")?;
+    assert_eq!(content_after, DISK_CONTENT);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
 
 // #region TEST UTILS
 
