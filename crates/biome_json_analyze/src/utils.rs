@@ -1,6 +1,6 @@
 use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
-use std::path::Path;
+use camino::Utf8Path;
 
 /// Finds the first ancestor [JsonMember], and returns [true] if it's name matches the given input
 pub(crate) fn matches_parent_object(node: &JsonMember, name: &str) -> bool {
@@ -14,7 +14,7 @@ pub(crate) fn matches_parent_object(node: &JsonMember, name: &str) -> bool {
 }
 
 /// Returns `true` if the given path has a filename of `package.json`.
-pub(crate) fn is_package_json(path: &Path) -> bool {
+pub(crate) fn is_package_json(path: &Utf8Path) -> bool {
     match path.file_name() {
         Some(name) => name == "package.json",
         None => false,

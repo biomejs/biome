@@ -23,12 +23,12 @@ biome_rowan        = { workspace = true }
 biome_rule_options = { workspace = true }
 biome_string_case  = { workspace = true }
 biome_suppression  = { workspace = true }
+camino             = { workspace = true }
 rustc-hash         = { workspace = true }
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
-camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
