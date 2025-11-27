@@ -4,6 +4,8 @@ use biome_json_syntax::JsonRoot;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_required_scripts::UseRequiredScriptsOptions;
 
+use crate::utils::is_package_json;
+
 declare_lint_rule! {
     /// Enforce the presence of required scripts in package.json.
     ///
@@ -56,8 +58,6 @@ declare_lint_rule! {
     }
 }
 
-const PACKAGE_JSON: &str = "package.json";
-
 impl Rule for UseRequiredScripts {
     type Query = Ast<JsonRoot>;
     type State = Vec<String>;
@@ -69,7 +69,7 @@ impl Rule for UseRequiredScripts {
         let path = ctx.file_path();
         let options = ctx.options();
 
-        if !path.ends_with(PACKAGE_JSON) {
+        if !is_package_json(path) {
             return None;
         }
         if options.required_scripts.is_empty() {
@@ -79,18 +79,15 @@ impl Rule for UseRequiredScripts {
         let value = query.value().ok()?;
         let object_value = value.as_json_object_value()?;
 
-        let scripts_member = object_value
-            .json_member_list()
-            .iter()
-            .flatten()
-            .find(|member| {
-                if let Ok(name) = member.name()
-                    && let Ok(text) = name.inner_string_text()
-                {
-                    return text.text() == "scripts";
-                }
-                false
-            })?;
+        let scripts_member =
+            object_value
+                .json_member_list()
+                .iter()
+                .flatten()
+                .find_map(|member| {
+                    (member.name().ok()?.inner_string_text().ok()?.text() == "scripts")
+                        .then_some(member)
+                })?;
 
         let scripts_value = scripts_member.value().ok()?;
         let scripts_object = scripts_value.as_json_object_value()?;
@@ -136,7 +133,7 @@ impl Rule for UseRequiredScripts {
 
         Some(
             RuleDiagnostic::new(rule_category!(), ctx.query().range(), message).note(markup! {
-                "Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
+                "Consistent scripts across packages ensure that each can be ran reliably from the root of our project. Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
             }),
         )
     }
