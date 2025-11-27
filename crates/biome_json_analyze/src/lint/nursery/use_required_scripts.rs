@@ -1,10 +1,18 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_json_syntax::JsonRoot;
+use biome_json_syntax::{JsonRoot, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_required_scripts::UseRequiredScriptsOptions;
 
 use crate::utils::is_package_json;
+
+/// State containing the missing scripts and the range to highlight
+pub struct UseRequiredScriptsState {
+    /// The list of missing script names
+    pub missing_scripts: Vec<String>,
+    /// The range to highlight in the diagnostic (scripts object or root object)
+    pub range: TextRange,
+}
 
 declare_lint_rule! {
     /// Enforce the presence of required scripts in package.json.
@@ -60,7 +68,7 @@ declare_lint_rule! {
 
 impl Rule for UseRequiredScripts {
     type Query = Ast<JsonRoot>;
-    type State = Vec<String>;
+    type State = UseRequiredScriptsState;
     type Signals = Option<Self::State>;
     type Options = UseRequiredScriptsOptions;
 
@@ -87,7 +95,16 @@ impl Rule for UseRequiredScripts {
                 .find_map(|member| {
                     (member.name().ok()?.inner_string_text().ok()?.text() == "scripts")
                         .then_some(member)
-                })?;
+                });
+
+        // If there's no scripts section, all required scripts are missing
+        // Point to the root object in this case
+        let Some(scripts_member) = scripts_member else {
+            return Some(UseRequiredScriptsState {
+                missing_scripts: options.required_scripts.clone(),
+                range: object_value.range(),
+            });
+        };
 
         let scripts_value = scripts_member.value().ok()?;
         let scripts_object = scripts_value.as_json_object_value()?;
@@ -113,13 +130,17 @@ impl Rule for UseRequiredScripts {
         if missing_scripts.is_empty() {
             None
         } else {
-            Some(missing_scripts)
+            // Point to the scripts member when scripts exist but some are missing
+            Some(UseRequiredScriptsState {
+                missing_scripts,
+                range: scripts_member.range(),
+            })
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let missing_count = state.len();
-        let missing_list = state.join(", ");
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let missing_count = state.missing_scripts.len();
+        let missing_list = state.missing_scripts.join(", ");
 
         let message = if missing_count == 1 {
             markup! {
@@ -132,7 +153,7 @@ impl Rule for UseRequiredScripts {
         };
 
         Some(
-            RuleDiagnostic::new(rule_category!(), ctx.query().range(), message).note(markup! {
+            RuleDiagnostic::new(rule_category!(), state.range, message).note(markup! {
                 "Consistent scripts across packages ensure that each can be ran reliably from the root of our project. Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
             }),
         )
