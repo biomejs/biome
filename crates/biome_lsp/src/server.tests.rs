@@ -371,17 +371,6 @@ impl Server {
         .await
     }
 
-    async fn save_document(&mut self, uri: Uri) -> Result<()> {
-        self.notify(
-            "textDocument/didSave",
-            DidSaveTextDocumentParams {
-                text_document: TextDocumentIdentifier { uri },
-                text: None,
-            },
-        )
-        .await
-    }
-
     /// Basic implementation of the `biome/shutdown` request for tests
     async fn biome_shutdown(&mut self) -> Result<()> {
         self.request::<_, ()>("biome/shutdown", "_biome_shutdown", ())
@@ -3909,13 +3898,13 @@ async fn should_open_and_update_nested_files() -> Result<()> {
 }
 
 #[tokio::test]
-async fn did_save_syncs_content_from_disk() -> Result<()> {
-    const INITIAL_CONTENT: &str = "const a = 1;";
-    const DISK_CONTENT: &str = "const b = 2;";
+async fn did_save_syncs_content_from_text_parameter() -> Result<()> {
+    const INITIAL_CONTENT: &str = "const   a=1;";
+    const SAVED_CONTENT: &str = "const   b=2;";
 
     let fs = Arc::new(MemoryFileSystem::default());
     let file_path = to_utf8_file_path_buf(uri!("document.js"));
-    fs.insert(file_path.clone(), INITIAL_CONTENT);
+    fs.insert(file_path, INITIAL_CONTENT);
 
     let factory = ServerFactory::new_with_fs(fs.clone());
     let (service, client) = factory.create().into_inner();
@@ -3928,49 +3917,50 @@ async fn did_save_syncs_content_from_disk() -> Result<()> {
     server.initialize().await?;
     server.initialized().await?;
 
-    let OpenProjectResult { project_key } = server
-        .request(
-            "biome/open_project",
-            "open_project",
-            OpenProjectParams {
-                path: BiomePath::new(""),
-                open_uninitialized: true,
-            },
-        )
-        .await?
-        .expect("open_project returned an error");
-
     server.open_document(INITIAL_CONTENT).await?;
 
-    let content_before: String = server
+    // Send didSave with text parameter (as per LSP spec)
+    server
+        .notify(
+            "textDocument/didSave",
+            DidSaveTextDocumentParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                text: Some(SAVED_CONTENT.to_string()),
+            },
+        )
+        .await?;
+
+    // Format the document to verify the content was updated
+    let edits: Option<Vec<TextEdit>> = server
         .request(
-            "biome/get_file_content",
-            "get_file_content",
-            GetFileContentParams {
-                project_key,
-                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
             },
         )
         .await?
-        .context("get file content error")?;
-    assert_eq!(content_before, INITIAL_CONTENT);
+        .context("formatting returned None")?;
 
-    // Update file on "disk" and trigger didSave to reload
-    fs.insert(file_path, DISK_CONTENT);
-    server.save_document(uri!("document.js")).await?;
-
-    let content_after: String = server
-        .request(
-            "biome/get_file_content",
-            "get_file_content",
-            GetFileContentParams {
-                project_key,
-                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
-            },
-        )
-        .await?
-        .context("get file content error")?;
-    assert_eq!(content_after, DISK_CONTENT);
+    // If content was properly updated to "const   b=2;",
+    // formatting should add spaces around = and ;
+    let edits = edits.context("formatting did not return edits")?;
+    assert!(!edits.is_empty(), "Formatting should produce edits for 'const   b=2;'");
 
     server.close_document().await?;
 

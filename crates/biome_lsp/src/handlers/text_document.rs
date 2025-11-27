@@ -198,41 +198,31 @@ pub(crate) async fn did_save(
     params: lsp_types::DidSaveTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
-    let path = session.file_path(&url)?;
-    let Some(doc) = session.document(&url) else {
-        debug!("Document wasn't open: {}", url.as_str());
-        return Ok(());
-    };
 
-    // Trigger reindexing from disk to sync with saved content
-    session.workspace.close_file(CloseFileParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    // If text is provided in the notification (as per LSP spec), update the file
+    if let Some(text) = params.text {
+        let path = session.file_path(&url)?;
+        let Some(doc) = session.document(&url) else {
+            debug!("Document wasn't open: {}", url.as_str());
+            return Ok(());
+        };
 
-    // Reopen will load from disk
-    session.workspace.open_file(OpenFileParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        content: FileContent::FromServer,
-        document_file_source: None,
-        persist_node_cache: true,
-    })?;
+        session.workspace.change_file(ChangeFileParams {
+            project_key: doc.project_key,
+            path,
+            content: text.clone(),
+            version: doc.version,
+        })?;
 
-    // Sync the Document object with the content reloaded from disk
-    let fresh_content = session.workspace.get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path,
-    })?;
+        session.insert_document(
+            url.clone(),
+            Document::new(doc.project_key, doc.version, &text),
+        );
 
-    session.insert_document(
-        url.clone(),
-        Document::new(doc.project_key, doc.version, &fresh_content),
-    );
-
-    // Update diagnostics with fresh content
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics after save: {}", err);
+        // Update diagnostics with fresh content
+        if let Err(err) = session.update_diagnostics(url).await {
+            error!("Failed to update diagnostics after save: {}", err);
+        }
     }
 
     Ok(())
