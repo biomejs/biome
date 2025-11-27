@@ -39,8 +39,7 @@ impl GlobalsResolverBuilder {
         let types: Vec<Arc<TypeData>> = self
             .types
             .into_iter()
-            .map(|opt| Arc::new(
-                opt.unwrap_or(TypeData::Unknown)))
+            .map(|opt| Arc::new(opt.unwrap_or(TypeData::Unknown)))
             .collect();
 
         GlobalsResolver {
