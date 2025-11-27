@@ -3960,7 +3960,10 @@ async fn did_save_syncs_content_from_text_parameter() -> Result<()> {
     // If content was properly updated to "const   b=2;",
     // formatting should add spaces around = and ;
     let edits = edits.context("formatting did not return edits")?;
-    assert!(!edits.is_empty(), "Formatting should produce edits for 'const   b=2;'");
+    assert!(
+        !edits.is_empty(),
+        "Formatting should produce edits for 'const   b=2;'"
+    );
 
     server.close_document().await?;
 
