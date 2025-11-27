@@ -79,7 +79,7 @@
 			"type": "object",
 			"properties": {
 				"noAccessKey": {
-					"description": "Enforce that the accessKey attribute is not used on any HTML element.\nSee https://biomejs.dev/linter/rules/no-access-key",
+					"description": "Enforce that the accesskey attribute is not used on any HTML element.\nSee https://biomejs.dev/linter/rules/no-access-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAccessKeyConfiguration" },
 						{ "type": "null" }
@@ -238,7 +238,7 @@
 					]
 				},
 				"useButtonType": {
-					"description": "Enforces the usage of the attribute type for the element button.\nSee https://biomejs.dev/linter/rules/use-button-type",
+					"description": "Enforces the usage and validity of the attribute type for the element button.\nSee https://biomejs.dev/linter/rules/use-button-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseButtonTypeConfiguration" },
 						{ "type": "null" }
@@ -5886,6 +5886,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedInterfaceMembersOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -9874,6 +9882,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
@@ -11835,6 +11850,11 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
+				"extensionMappings": {
+					"description": "A map of file extensions to their suggested replacements.\nFor example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
+					"type": ["object", "null"],
+					"additionalProperties": { "type": "string" }
+				},
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what\nextension the source file has in your project.",
 					"type": ["boolean", "null"]
@@ -12317,6 +12337,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedInterfaceMembersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedInterfaceMembersOptions" }
+			]
+		},
+		"UseSortedInterfaceMembersOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {

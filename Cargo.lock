@@ -1232,6 +1232,7 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -1561,6 +1562,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
+ "bpaf",
  "camino",
  "crossbeam",
  "either",
@@ -1736,6 +1738,21 @@ version = "0.0.1"
 dependencies = [
  "biome_rowan",
  "biome_yaml_syntax",
+]
+
+[[package]]
+name = "biome_yaml_formatter"
+version = "0.1.0"
+dependencies = [
+ "biome_deserialize",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_rowan",
+ "biome_suppression",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
+ "schemars",
+ "serde",
 ]
 
 [[package]]

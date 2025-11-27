@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: jsxFactoryPreact.js
+---
+# Input
+```js
+import { h, Fragment } from 'preact';
+
+function App() {
+  return (
+    <>
+      <div>Hello World</div>
+    </>
+  );
+}
+
+
+```

@@ -498,7 +498,7 @@ impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
         }
 
         if let Some(jsx_runtime) = javascript.jsx_runtime {
-            language_setting.environment = jsx_runtime.into();
+            language_setting.environment.jsx_runtime = Some(jsx_runtime);
         }
 
         if let Some(globals) = javascript.globals {

@@ -219,7 +219,7 @@ define_categories! {
     "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
-    "lint/nursery/useSpread": "https://biomejs.dev/linter/rules/no-spread",
+    "lint/nursery/useSpread": "https://biomejs.dev/linter/rules/use-spread",
     "lint/nursery/useUniqueGraphqlOperationName": "https://biomejs.dev/linter/rules/use-unique-graphql-operation-name",
     "lint/nursery/useVueDefineMacrosOrder": "https://biomejs.dev/linter/rules/use-vue-define-macros-order",
     "lint/nursery/useVueHyphenatedAttributes": "https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
@@ -422,6 +422,7 @@ define_categories! {
     "lint/suspicious/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     // end lint rules
     // start assist actions
+    "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",

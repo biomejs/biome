@@ -911,6 +911,11 @@ See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
+	* Sort interface members by key.
+See https://biomejs.dev/assist/actions/use-sorted-interface-members 
+	 */
+	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
+	/**
 	* Sort the keys of a JSON object in natural order.
 See https://biomejs.dev/assist/actions/use-sorted-keys 
 	 */
@@ -1077,6 +1082,9 @@ export type OrganizeImportsConfiguration =
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedInterfaceMembersConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedInterfaceMembersOptions;
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
@@ -1089,7 +1097,7 @@ export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
  */
 export interface A11y {
 	/**
-	* Enforce that the accessKey attribute is not used on any HTML element.
+	* Enforce that the accesskey attribute is not used on any HTML element.
 See https://biomejs.dev/linter/rules/no-access-key 
 	 */
 	noAccessKey?: NoAccessKeyConfiguration;
@@ -1198,7 +1206,7 @@ See https://biomejs.dev/linter/rules/use-aria-props-supported-by-role
 	 */
 	useAriaPropsSupportedByRole?: UseAriaPropsSupportedByRoleConfiguration;
 	/**
-	* Enforces the usage of the attribute type for the element button.
+	* Enforces the usage and validity of the attribute type for the element button.
 See https://biomejs.dev/linter/rules/use-button-type 
 	 */
 	useButtonType?: UseButtonTypeConfiguration;
@@ -3111,6 +3119,10 @@ export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
 }
+export interface RuleAssistWithUseSortedInterfaceMembersOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedInterfaceMembersOptions;
+}
 export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
@@ -4291,6 +4303,7 @@ export interface OrganizeImportsOptions {
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
 	sortOrder?: SortOrder;
 }
@@ -6265,6 +6278,11 @@ export type UseHookAtTopLevelOptions = {};
 export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
+	* A map of file extensions to their suggested replacements.
+For example, `{"ts": "js"}` would suggest `.js` extensions for TypeScript imports. 
+	 */
+	extensionMappings?: Record<string, string>;
+	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
 extension the source file has in your project. 
 	 */
@@ -7412,6 +7430,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"

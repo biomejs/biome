@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -31,7 +30,7 @@ invalid.jsx:2:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     3 │     <html></html>
     4 │     <html lang=""></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -48,7 +47,7 @@ invalid.jsx:3:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     4 │     <html lang=""></html>
     5 │     <html lang={""}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -65,7 +64,7 @@ invalid.jsx:4:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     5 │     <html lang={""}></html>
     6 │     <html lang={``}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -82,7 +81,7 @@ invalid.jsx:5:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     6 │     <html lang={``}></html>
     7 │     <html lang={true}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -99,7 +98,7 @@ invalid.jsx:6:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     7 │     <html lang={true}></html>
     8 │     <html lang={false}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -116,7 +115,7 @@ invalid.jsx:7:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     8 │     <html lang={false}></html>
     9 │     <html lang={undefined}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -133,7 +132,7 @@ invalid.jsx:8:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
      9 │     <html lang={undefined}></html>
     10 │     <html lang={null}></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -150,7 +149,7 @@ invalid.jsx:9:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     10 │     <html lang={null}></html>
     11 │     <html {...props} lang=""></html>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -167,7 +166,7 @@ invalid.jsx:10:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     11 │     <html {...props} lang=""></html>
     12 │ </>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```
@@ -183,7 +182,7 @@ invalid.jsx:11:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ </>
   
-  i Setting a lang attribute on HTML document elements configures the languageused by screen readers when no user default is specified.
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
 
 ```

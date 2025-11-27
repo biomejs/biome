@@ -471,8 +471,8 @@ impl Deserializable for Schema {
                                         .with_range(range)
                                         .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
-                                        {KeyValuePair("Expected", markup!({VERSION}))}
-                                        {KeyValuePair("Found", markup!({config_version_str}))}
+                                        {KeyValuePair::new("Expected", markup!({VERSION}))}
+                                        {KeyValuePair::new("Found", markup!({config_version_str}))}
                                     ))
                                         .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
                                 )

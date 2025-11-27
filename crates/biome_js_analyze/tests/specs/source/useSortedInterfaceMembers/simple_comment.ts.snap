@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: simple_comment.ts
+---
+# Input
+```ts
+interface _UnsortedCommentedInterface {
+	// Comment for b
+	b: string;
+	a: number;
+}
+
+```
+
+# Diagnostics
+```
+simple_comment.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _UnsortedCommentedInterface {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	// Comment for b
+  > 3 │ 	b: string;
+  > 4 │ 	a: number;
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _UnsortedCommentedInterface {
+    2   │ - → //·Comment·for·b
+    3   │ - → b:·string;
+    4   │ - → a:·number;
+      2 │ + → a:·number;
+      3 │ + → //·Comment·for·b
+      4 │ + → b:·string;
+    5 5 │   }
+    6 6 │   
+  
+
+```

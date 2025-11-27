@@ -62,6 +62,23 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+file.svelte:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    12 │ </script>
+    13 │ 
+  > 14 │ <html><head><title>Svelte</title></head><body></body></html>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ <style>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```block
 file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
@@ -86,5 +103,5 @@ file.svelte:17:20 lint/a11y/useGenericFontNames ━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.
-Found 1 error.
+Found 2 errors.
 ```
