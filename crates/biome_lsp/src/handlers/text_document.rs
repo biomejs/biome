@@ -189,6 +189,43 @@ pub(crate) async fn did_change(
     Ok(())
 }
 
+/// Handler for `textDocument/didSave` LSP notification
+#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str())), err)]
+pub(crate) async fn did_save(
+    session: &Session,
+    params: lsp_types::DidSaveTextDocumentParams,
+) -> Result<(), LspError> {
+    let url = params.text_document.uri;
+
+    // If text is provided in the notification (as per LSP spec), update the file
+    if let Some(text) = params.text {
+        let path = session.file_path(&url)?;
+        let Some(doc) = session.document(&url) else {
+            debug!("Document wasn't open: {}", url.as_str());
+            return Ok(());
+        };
+
+        session.workspace.change_file(ChangeFileParams {
+            project_key: doc.project_key,
+            path,
+            content: text.clone(),
+            version: doc.version,
+        })?;
+
+        session.insert_document(
+            url.clone(),
+            Document::new(doc.project_key, doc.version, &text),
+        );
+
+        // Update diagnostics with fresh content
+        if let Err(err) = session.update_diagnostics(url).await {
+            error!("Failed to update diagnostics after save: {}", err);
+        }
+    }
+
+    Ok(())
+}
+
 /// Handler for `textDocument/didClose` LSP notification
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) async fn did_close(
