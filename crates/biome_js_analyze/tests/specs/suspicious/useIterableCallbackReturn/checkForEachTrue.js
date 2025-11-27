@@ -14,3 +14,16 @@
         return el;
     }
 });
+
+// Valid: forEach with no return value
+[1, 2, 3].forEach(function(el) {
+    console.log(el);
+});
+
+// Valid: forEach with empty return
+[1, 2, 3].forEach(function(el) {
+    if (el > 10) {
+        return;
+    }
+    console.log(el);
+});

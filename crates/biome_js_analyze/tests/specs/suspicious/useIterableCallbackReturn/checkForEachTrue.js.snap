@@ -1,0 +1,109 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: checkForEachTrue.js
+---
+# Input
+```js
+// When checkForEach is true, forEach callbacks that return values should be reported
+
+// Invalid: forEach with explicit return
+[1, 2, 3].forEach(function(el) {
+    return el * 2;
+});
+
+// Invalid: forEach with arrow function implicit return
+[1, 2, 3].forEach((el) => el * 2);
+
+// Invalid: forEach with conditional return
+[1, 2, 3].forEach(function(el) {
+    if (el > 1) {
+        return el;
+    }
+});
+
+// Valid: forEach with no return value
+[1, 2, 3].forEach(function(el) {
+    console.log(el);
+});
+
+// Valid: forEach with empty return
+[1, 2, 3].forEach(function(el) {
+    if (el > 10) {
+        return;
+    }
+    console.log(el);
+});
+```
+
+# Diagnostics
+```
+checkForEachTrue.js:4:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    3 │ // Invalid: forEach with explicit return
+  > 4 │ [1, 2, 3].forEach(function(el) {
+      │           ^^^^^^^
+    5 │     return el * 2;
+    6 │ });
+  
+  i Either remove this return or remove the returned value.
+  
+    3 │ // Invalid: forEach with explicit return
+  > 4 │ [1, 2, 3].forEach(function(el) {
+      │                                 
+  > 5 │     return el * 2;
+      │     ^^^^^^^
+    6 │ });
+    7 │ 
+  
+
+```
+
+```
+checkForEachTrue.js:9:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+     8 │ // Invalid: forEach with arrow function implicit return
+   > 9 │ [1, 2, 3].forEach((el) => el * 2);
+       │           ^^^^^^^
+    10 │ 
+    11 │ // Invalid: forEach with conditional return
+  
+  i Either remove this return or remove the returned value.
+  
+     8 │ // Invalid: forEach with arrow function implicit return
+   > 9 │ [1, 2, 3].forEach((el) => el * 2);
+       │                           ^^^^^^
+    10 │ 
+    11 │ // Invalid: forEach with conditional return
+  
+
+```
+
+```
+checkForEachTrue.js:12:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    11 │ // Invalid: forEach with conditional return
+  > 12 │ [1, 2, 3].forEach(function(el) {
+       │           ^^^^^^^
+    13 │     if (el > 1) {
+    14 │         return el;
+  
+  i Either remove this return or remove the returned value.
+  
+    11 │ // Invalid: forEach with conditional return
+    12 │ [1, 2, 3].forEach(function(el) {
+  > 13 │     if (el > 1) {
+       │                  
+  > 14 │         return el;
+       │         ^^^^^^^
+    15 │     }
+    16 │ });
+  
+
+```
