@@ -133,32 +133,31 @@ CssRoot {
                                         if_token: IF_KW@25..27 "if" [] [],
                                         l_paren_token: L_PAREN@27..28 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@28..33 "style" [] [],
-                                                        l_paren_token: L_PAREN@33..34 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@34..39 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@39..41 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@41..44 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@28..33 "style" [] [],
+                                                    l_paren_token: L_PAREN@33..34 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@34..39 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@39..41 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@41..44 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@44..46 ")" [] [Whitespace(" ")],
+                                                        important: missing (optional),
                                                     },
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@46..51 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@44..46 ")" [] [Whitespace(" ")],
+                                                },
+                                                colon_token: missing (required),
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@46..51 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                         ],
@@ -253,33 +252,31 @@ CssRoot {
                                         if_token: IF_KW@126..128 "if" [] [],
                                         l_paren_token: L_PAREN@128..129 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@129..134 "style" [] [],
-                                                        l_paren_token: L_PAREN@134..135 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@135..140 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@140..142 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@142..145 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@129..134 "style" [] [],
+                                                    l_paren_token: L_PAREN@134..135 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@135..140 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@140..142 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@142..145 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: missing (required),
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@145..147 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@147..152 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: missing (required),
+                                                },
+                                                colon_token: COLON@145..147 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@147..152 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                         ],
@@ -325,33 +322,31 @@ CssRoot {
                                         if_token: IF_KW@189..191 "if" [] [],
                                         l_paren_token: L_PAREN@191..192 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssBogusIfTest {
-                                                        items: [
-                                                            STYLE_KW@192..197 "style" [] [],
-                                                            L_PAREN@197..198 "(" [] [],
-                                                            CssBogus {
-                                                                items: [
-                                                                    NOT_KW@198..202 "not" [] [Whitespace(" ")],
-                                                                    CssBogus {
-                                                                        items: [
-                                                                            IDENT@202..204 "a" [] [Whitespace(" ")],
-                                                                            IDENT@204..210 "valid" [] [Whitespace(" ")],
-                                                                            IDENT@210..215 "query" [] [],
-                                                                        ],
-                                                                    },
-                                                                ],
-                                                            },
-                                                            R_PAREN@215..216 ")" [] [],
-                                                        ],
-                                                    },
-                                                    COLON@216..218 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@218..223 "black" [] [],
+                                            CssIfBranch {
+                                                condition: CssBogusIfTest {
+                                                    items: [
+                                                        STYLE_KW@192..197 "style" [] [],
+                                                        L_PAREN@197..198 "(" [] [],
+                                                        CssBogus {
+                                                            items: [
+                                                                NOT_KW@198..202 "not" [] [Whitespace(" ")],
+                                                                CssBogus {
+                                                                    items: [
+                                                                        IDENT@202..204 "a" [] [Whitespace(" ")],
+                                                                        IDENT@204..210 "valid" [] [Whitespace(" ")],
+                                                                        IDENT@210..215 "query" [] [],
+                                                                    ],
+                                                                },
+                                                            ],
                                                         },
+                                                        R_PAREN@215..216 ")" [] [],
                                                     ],
+                                                },
+                                                colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@218..223 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                         ],
@@ -626,33 +621,31 @@ CssRoot {
                                         if_token: IF_KW@415..418 "if" [] [Whitespace(" ")],
                                         l_paren_token: missing (required),
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@418..423 "style" [] [],
-                                                        l_paren_token: L_PAREN@423..424 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@424..429 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@429..431 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@431..434 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@418..423 "style" [] [],
+                                                    l_paren_token: L_PAREN@423..424 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@424..429 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@429..431 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@431..434 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@434..435 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@435..437 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@437..442 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@434..435 ")" [] [],
+                                                },
+                                                colon_token: COLON@435..437 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@437..442 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@442..443 ";" [] [],
@@ -768,24 +761,23 @@ CssRoot {
                                         if_token: IF_KW@557..559 "if" [] [],
                                         l_paren_token: L_PAREN@559..560 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfMediaTest {
-                                                        media_token: MEDIA_KW@560..565 "media" [] [],
-                                                        l_paren_token: L_PAREN@565..566 "(" [] [],
-                                                        test: CssQueryFeaturePlain {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@566..571 "print" [] [],
-                                                            },
-                                                            colon_token: COLON@571..573 ":" [] [Whitespace(" ")],
-                                                            value: CssIdentifier {
-                                                                value_token: IDENT@573..578 "black" [] [],
-                                                            },
+                                            CssIfBranch {
+                                                condition: CssIfMediaTest {
+                                                    media_token: MEDIA_KW@560..565 "media" [] [],
+                                                    l_paren_token: L_PAREN@565..566 "(" [] [],
+                                                    test: CssQueryFeaturePlain {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@566..571 "print" [] [],
                                                         },
-                                                        r_paren_token: missing (required),
+                                                        colon_token: COLON@571..573 ":" [] [Whitespace(" ")],
+                                                        value: CssIdentifier {
+                                                            value_token: IDENT@573..578 "black" [] [],
+                                                        },
                                                     },
-                                                    CssGenericComponentValueList [],
-                                                ],
+                                                    r_paren_token: missing (required),
+                                                },
+                                                colon_token: missing (required),
+                                                value: CssGenericComponentValueList [],
                                             },
                                             SEMICOLON@578..579 ";" [] [],
                                         ],
@@ -831,37 +823,35 @@ CssRoot {
                                         if_token: IF_KW@616..618 "if" [] [],
                                         l_paren_token: L_PAREN@618..619 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfTestBooleanAndExpr {
-                                                        left: CssIfStyleTest {
-                                                            style_token: STYLE_KW@619..624 "style" [] [],
-                                                            l_paren_token: L_PAREN@624..625 "(" [] [],
-                                                            test: CssDeclaration {
-                                                                property: CssGenericProperty {
-                                                                    name: CssDashedIdentifier {
-                                                                        value_token: IDENT@625..630 "--foo" [] [],
-                                                                    },
-                                                                    colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@632..635 "bar" [] [],
-                                                                        },
-                                                                    ],
+                                            CssIfBranch {
+                                                condition: CssIfTestBooleanAndExpr {
+                                                    left: CssIfStyleTest {
+                                                        style_token: STYLE_KW@619..624 "style" [] [],
+                                                        l_paren_token: L_PAREN@624..625 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@625..630 "--foo" [] [],
                                                                 },
-                                                                important: missing (optional),
+                                                                colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@632..635 "bar" [] [],
+                                                                    },
+                                                                ],
                                                             },
-                                                            r_paren_token: R_PAREN@635..637 ")" [] [Whitespace(" ")],
+                                                            important: missing (optional),
                                                         },
-                                                        and_token: AND_KW@637..640 "and" [] [],
-                                                        right: missing (required),
+                                                        r_paren_token: R_PAREN@635..637 ")" [] [Whitespace(" ")],
                                                     },
-                                                    COLON@640..642 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@642..647 "black" [] [],
-                                                        },
-                                                    ],
+                                                    and_token: AND_KW@637..640 "and" [] [],
+                                                    right: missing (required),
+                                                },
+                                                colon_token: COLON@640..642 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@642..647 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@647..648 ";" [] [],
@@ -908,37 +898,35 @@ CssRoot {
                                         if_token: IF_KW@684..686 "if" [] [],
                                         l_paren_token: L_PAREN@686..687 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfTestBooleanOrExpr {
-                                                        left: CssIfStyleTest {
-                                                            style_token: STYLE_KW@687..692 "style" [] [],
-                                                            l_paren_token: L_PAREN@692..693 "(" [] [],
-                                                            test: CssDeclaration {
-                                                                property: CssGenericProperty {
-                                                                    name: CssDashedIdentifier {
-                                                                        value_token: IDENT@693..698 "--foo" [] [],
-                                                                    },
-                                                                    colon_token: COLON@698..700 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@700..703 "bar" [] [],
-                                                                        },
-                                                                    ],
+                                            CssIfBranch {
+                                                condition: CssIfTestBooleanOrExpr {
+                                                    left: CssIfStyleTest {
+                                                        style_token: STYLE_KW@687..692 "style" [] [],
+                                                        l_paren_token: L_PAREN@692..693 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@693..698 "--foo" [] [],
                                                                 },
-                                                                important: missing (optional),
+                                                                colon_token: COLON@698..700 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@700..703 "bar" [] [],
+                                                                    },
+                                                                ],
                                                             },
-                                                            r_paren_token: R_PAREN@703..705 ")" [] [Whitespace(" ")],
+                                                            important: missing (optional),
                                                         },
-                                                        or_token: OR_KW@705..707 "or" [] [],
-                                                        right: missing (required),
+                                                        r_paren_token: R_PAREN@703..705 ")" [] [Whitespace(" ")],
                                                     },
-                                                    COLON@707..709 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@709..714 "black" [] [],
-                                                        },
-                                                    ],
+                                                    or_token: OR_KW@705..707 "or" [] [],
+                                                    right: missing (required),
+                                                },
+                                                colon_token: COLON@707..709 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@709..714 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@714..715 ";" [] [],
@@ -985,33 +973,31 @@ CssRoot {
                                         if_token: IF_KW@745..747 "if" [] [],
                                         l_paren_token: L_PAREN@747..748 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@748..753 "style" [] [],
-                                                        l_paren_token: L_PAREN@753..754 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@754..759 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@759..761 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@761..764 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@748..753 "style" [] [],
+                                                    l_paren_token: L_PAREN@753..754 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@754..759 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@759..761 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@761..764 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@764..765 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@765..767 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@767..772 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@764..765 ")" [] [],
+                                                },
+                                                colon_token: COLON@765..767 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@767..772 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@772..774 ";" [] [Whitespace(" ")],
@@ -1066,33 +1052,31 @@ CssRoot {
                                         if_token: IF_KW@824..826 "if" [] [],
                                         l_paren_token: L_PAREN@826..827 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@827..832 "style" [] [],
-                                                        l_paren_token: L_PAREN@832..833 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@833..838 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@838..840 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@840..843 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@827..832 "style" [] [],
+                                                    l_paren_token: L_PAREN@832..833 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@833..838 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@838..840 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@840..843 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@843..844 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@844..846 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@846..851 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@843..844 ")" [] [],
+                                                },
+                                                colon_token: COLON@844..846 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@846..851 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@851..852 ";" [] [],
@@ -1280,19 +1264,17 @@ CssRoot {
                                         if_token: IF_KW@1010..1012 "if" [] [],
                                         l_paren_token: L_PAREN@1012..1013 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfTestBooleanExprInParens {
-                                                        l_paren_token: L_PAREN@1013..1014 "(" [] [],
-                                                        expression: missing (required),
-                                                        r_paren_token: missing (required),
+                                            CssIfBranch {
+                                                condition: CssIfTestBooleanExprInParens {
+                                                    l_paren_token: L_PAREN@1013..1014 "(" [] [],
+                                                    expression: missing (required),
+                                                    r_paren_token: missing (required),
+                                                },
+                                                colon_token: COLON@1014..1016 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1016..1021 "black" [] [],
                                                     },
-                                                    COLON@1014..1016 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1016..1021 "black" [] [],
-                                                        },
-                                                    ],
                                                 ],
                                             },
                                             SEMICOLON@1021..1022 ";" [] [],
@@ -1475,43 +1457,40 @@ CssRoot {
                                         if_token: IF_KW@1142..1144 "if" [] [],
                                         l_paren_token: L_PAREN@1144..1145 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@1145..1150 "style" [] [],
-                                                        l_paren_token: L_PAREN@1150..1151 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@1151..1156 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@1156..1158 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@1158..1161 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@1145..1150 "style" [] [],
+                                                    l_paren_token: L_PAREN@1150..1151 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@1151..1156 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@1156..1158 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@1158..1161 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@1161..1162 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@1162..1164 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1164..1169 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@1161..1162 ")" [] [],
+                                                },
+                                                colon_token: COLON@1162..1164 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1164..1169 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@1169..1171 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssElseKeyword {
-                                                        else_token: ELSE_KW@1171..1175 "else" [] [],
-                                                    },
-                                                    CssGenericComponentValueList [],
-                                                ],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@1171..1175 "else" [] [],
+                                                },
+                                                colon_token: missing (required),
+                                                value: CssGenericComponentValueList [],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@1175..1176 ")" [] [],
@@ -1740,33 +1719,31 @@ CssRoot {
                                         if_token: IF_KW@1361..1363 "if" [] [],
                                         l_paren_token: L_PAREN@1363..1364 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@1364..1369 "style" [] [],
-                                                        l_paren_token: L_PAREN@1369..1370 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@1370..1375 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@1375..1377 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@1377..1380 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@1364..1369 "style" [] [],
+                                                    l_paren_token: L_PAREN@1369..1370 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@1370..1375 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@1375..1377 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@1377..1380 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@1380..1381 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@1381..1383 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1383..1388 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@1380..1381 ")" [] [],
+                                                },
+                                                colon_token: COLON@1381..1383 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1383..1388 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@1388..1390 ";" [] [Whitespace(" ")],
@@ -1777,17 +1754,15 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1396..1398 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssElseKeyword {
-                                                        else_token: ELSE_KW@1398..1402 "else" [] [],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@1398..1402 "else" [] [],
+                                                },
+                                                colon_token: COLON@1402..1404 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1404..1409 "white" [] [],
                                                     },
-                                                    COLON@1402..1404 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1404..1409 "white" [] [],
-                                                        },
-                                                    ],
                                                 ],
                                             },
                                         ],
@@ -1811,33 +1786,31 @@ CssRoot {
                                         if_token: IF_KW@1416..1418 "if" [] [],
                                         l_paren_token: L_PAREN@1418..1419 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssIfStyleTest {
-                                                        style_token: STYLE_KW@1419..1424 "style" [] [],
-                                                        l_paren_token: L_PAREN@1424..1425 "(" [] [],
-                                                        test: CssDeclaration {
-                                                            property: CssGenericProperty {
-                                                                name: CssDashedIdentifier {
-                                                                    value_token: IDENT@1425..1430 "--foo" [] [],
-                                                                },
-                                                                colon_token: COLON@1430..1432 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@1432..1435 "bar" [] [],
-                                                                    },
-                                                                ],
+                                            CssIfBranch {
+                                                condition: CssIfStyleTest {
+                                                    style_token: STYLE_KW@1419..1424 "style" [] [],
+                                                    l_paren_token: L_PAREN@1424..1425 "(" [] [],
+                                                    test: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssDashedIdentifier {
+                                                                value_token: IDENT@1425..1430 "--foo" [] [],
                                                             },
-                                                            important: missing (optional),
+                                                            colon_token: COLON@1430..1432 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@1432..1435 "bar" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@1435..1436 ")" [] [],
+                                                        important: missing (optional),
                                                     },
-                                                    COLON@1436..1438 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1438..1443 "black" [] [],
-                                                        },
-                                                    ],
+                                                    r_paren_token: R_PAREN@1435..1436 ")" [] [],
+                                                },
+                                                colon_token: COLON@1436..1438 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1438..1443 "black" [] [],
+                                                    },
                                                 ],
                                             },
                                             SEMICOLON@1443..1445 ";" [] [Whitespace(" ")],
@@ -1849,17 +1822,15 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1448..1450 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
-                                                items: [
-                                                    CssElseKeyword {
-                                                        else_token: ELSE_KW@1450..1454 "else" [] [],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@1450..1454 "else" [] [],
+                                                },
+                                                colon_token: COLON@1454..1456 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1456..1461 "white" [] [],
                                                     },
-                                                    COLON@1454..1456 ":" [] [Whitespace(" ")],
-                                                    CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1456..1461 "white" [] [],
-                                                        },
-                                                    ],
                                                 ],
                                             },
                                         ],
@@ -1910,7 +1881,7 @@ CssRoot {
                     0: IF_KW@25..27 "if" [] []
                     1: L_PAREN@27..28 "(" [] []
                     2: CSS_IF_BRANCH_LIST@28..51
-                      0: CSS_BOGUS_IF_BRANCH@28..51
+                      0: CSS_IF_BRANCH@28..51
                         0: CSS_IF_STYLE_TEST@28..46
                           0: STYLE_KW@28..33 "style" [] []
                           1: L_PAREN@33..34 "(" [] []
@@ -1924,7 +1895,8 @@ CssRoot {
                                   0: IDENT@41..44 "bar" [] []
                             1: (empty)
                           3: R_PAREN@44..46 ")" [] [Whitespace(" ")]
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@46..51
+                        1: (empty)
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@46..51
                           0: CSS_IDENTIFIER@46..51
                             0: IDENT@46..51 "black" [] []
                     3: R_PAREN@51..52 ")" [] []
@@ -1986,7 +1958,7 @@ CssRoot {
                     0: IF_KW@126..128 "if" [] []
                     1: L_PAREN@128..129 "(" [] []
                     2: CSS_IF_BRANCH_LIST@129..152
-                      0: CSS_BOGUS_IF_BRANCH@129..152
+                      0: CSS_IF_BRANCH@129..152
                         0: CSS_IF_STYLE_TEST@129..145
                           0: STYLE_KW@129..134 "style" [] []
                           1: L_PAREN@134..135 "(" [] []
@@ -2032,7 +2004,7 @@ CssRoot {
                     0: IF_KW@189..191 "if" [] []
                     1: L_PAREN@191..192 "(" [] []
                     2: CSS_IF_BRANCH_LIST@192..223
-                      0: CSS_BOGUS_IF_BRANCH@192..223
+                      0: CSS_IF_BRANCH@192..223
                         0: CSS_BOGUS_IF_TEST@192..216
                           0: STYLE_KW@192..197 "style" [] []
                           1: L_PAREN@197..198 "(" [] []
@@ -2198,7 +2170,7 @@ CssRoot {
                     0: IF_KW@415..418 "if" [] [Whitespace(" ")]
                     1: (empty)
                     2: CSS_IF_BRANCH_LIST@418..443
-                      0: CSS_BOGUS_IF_BRANCH@418..442
+                      0: CSS_IF_BRANCH@418..442
                         0: CSS_IF_STYLE_TEST@418..435
                           0: STYLE_KW@418..423 "style" [] []
                           1: L_PAREN@423..424 "(" [] []
@@ -2285,7 +2257,7 @@ CssRoot {
                     0: IF_KW@557..559 "if" [] []
                     1: L_PAREN@559..560 "(" [] []
                     2: CSS_IF_BRANCH_LIST@560..579
-                      0: CSS_BOGUS_IF_BRANCH@560..578
+                      0: CSS_IF_BRANCH@560..578
                         0: CSS_IF_MEDIA_TEST@560..578
                           0: MEDIA_KW@560..565 "media" [] []
                           1: L_PAREN@565..566 "(" [] []
@@ -2296,7 +2268,8 @@ CssRoot {
                             2: CSS_IDENTIFIER@573..578
                               0: IDENT@573..578 "black" [] []
                           3: (empty)
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@578..578
+                        1: (empty)
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@578..578
                       1: SEMICOLON@578..579 ";" [] []
                     3: R_PAREN@579..580 ")" [] []
               1: (empty)
@@ -2326,7 +2299,7 @@ CssRoot {
                     0: IF_KW@616..618 "if" [] []
                     1: L_PAREN@618..619 "(" [] []
                     2: CSS_IF_BRANCH_LIST@619..648
-                      0: CSS_BOGUS_IF_BRANCH@619..647
+                      0: CSS_IF_BRANCH@619..647
                         0: CSS_IF_TEST_BOOLEAN_AND_EXPR@619..640
                           0: CSS_IF_STYLE_TEST@619..637
                             0: STYLE_KW@619..624 "style" [] []
@@ -2376,7 +2349,7 @@ CssRoot {
                     0: IF_KW@684..686 "if" [] []
                     1: L_PAREN@686..687 "(" [] []
                     2: CSS_IF_BRANCH_LIST@687..715
-                      0: CSS_BOGUS_IF_BRANCH@687..714
+                      0: CSS_IF_BRANCH@687..714
                         0: CSS_IF_TEST_BOOLEAN_OR_EXPR@687..707
                           0: CSS_IF_STYLE_TEST@687..705
                             0: STYLE_KW@687..692 "style" [] []
@@ -2426,7 +2399,7 @@ CssRoot {
                     0: IF_KW@745..747 "if" [] []
                     1: L_PAREN@747..748 "(" [] []
                     2: CSS_IF_BRANCH_LIST@748..787
-                      0: CSS_BOGUS_IF_BRANCH@748..772
+                      0: CSS_IF_BRANCH@748..772
                         0: CSS_IF_STYLE_TEST@748..765
                           0: STYLE_KW@748..753 "style" [] []
                           1: L_PAREN@753..754 "(" [] []
@@ -2478,7 +2451,7 @@ CssRoot {
                     0: IF_KW@824..826 "if" [] []
                     1: L_PAREN@826..827 "(" [] []
                     2: CSS_IF_BRANCH_LIST@827..853
-                      0: CSS_BOGUS_IF_BRANCH@827..851
+                      0: CSS_IF_BRANCH@827..851
                         0: CSS_IF_STYLE_TEST@827..844
                           0: STYLE_KW@827..832 "style" [] []
                           1: L_PAREN@832..833 "(" [] []
@@ -2611,7 +2584,7 @@ CssRoot {
                     0: IF_KW@1010..1012 "if" [] []
                     1: L_PAREN@1012..1013 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1013..1022
-                      0: CSS_BOGUS_IF_BRANCH@1013..1021
+                      0: CSS_IF_BRANCH@1013..1021
                         0: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@1013..1014
                           0: L_PAREN@1013..1014 "(" [] []
                           1: (empty)
@@ -2727,7 +2700,7 @@ CssRoot {
                     0: IF_KW@1142..1144 "if" [] []
                     1: L_PAREN@1144..1145 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1145..1175
-                      0: CSS_BOGUS_IF_BRANCH@1145..1169
+                      0: CSS_IF_BRANCH@1145..1169
                         0: CSS_IF_STYLE_TEST@1145..1162
                           0: STYLE_KW@1145..1150 "style" [] []
                           1: L_PAREN@1150..1151 "(" [] []
@@ -2746,10 +2719,11 @@ CssRoot {
                           0: CSS_IDENTIFIER@1164..1169
                             0: IDENT@1164..1169 "black" [] []
                       1: SEMICOLON@1169..1171 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1171..1175
+                      2: CSS_IF_BRANCH@1171..1175
                         0: CSS_ELSE_KEYWORD@1171..1175
                           0: ELSE_KW@1171..1175 "else" [] []
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@1175..1175
+                        1: (empty)
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1175..1175
                     3: R_PAREN@1175..1176 ")" [] []
               1: (empty)
             1: SEMICOLON@1176..1177 ";" [] []
@@ -2890,7 +2864,7 @@ CssRoot {
                     0: IF_KW@1361..1363 "if" [] []
                     1: L_PAREN@1363..1364 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1364..1409
-                      0: CSS_BOGUS_IF_BRANCH@1364..1388
+                      0: CSS_IF_BRANCH@1364..1388
                         0: CSS_IF_STYLE_TEST@1364..1381
                           0: STYLE_KW@1364..1369 "style" [] []
                           1: L_PAREN@1369..1370 "(" [] []
@@ -2913,7 +2887,7 @@ CssRoot {
                         0: BANG@1390..1391 "!" [] []
                         1: IDENT@1391..1396 "bogus" [] []
                       3: SEMICOLON@1396..1398 ";" [] [Whitespace(" ")]
-                      4: CSS_BOGUS_IF_BRANCH@1398..1409
+                      4: CSS_IF_BRANCH@1398..1409
                         0: CSS_ELSE_KEYWORD@1398..1402
                           0: ELSE_KW@1398..1402 "else" [] []
                         1: COLON@1402..1404 ":" [] [Whitespace(" ")]
@@ -2934,7 +2908,7 @@ CssRoot {
                     0: IF_KW@1416..1418 "if" [] []
                     1: L_PAREN@1418..1419 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1419..1461
-                      0: CSS_BOGUS_IF_BRANCH@1419..1443
+                      0: CSS_IF_BRANCH@1419..1443
                         0: CSS_IF_STYLE_TEST@1419..1436
                           0: STYLE_KW@1419..1424 "style" [] []
                           1: L_PAREN@1424..1425 "(" [] []
@@ -2958,7 +2932,7 @@ CssRoot {
                         1: ERROR_TOKEN@1446..1447 "?" [] []
                         2: ERROR_TOKEN@1447..1448 "?" [] []
                       3: SEMICOLON@1448..1450 ";" [] [Whitespace(" ")]
-                      4: CSS_BOGUS_IF_BRANCH@1450..1461
+                      4: CSS_IF_BRANCH@1450..1461
                         0: CSS_ELSE_KEYWORD@1450..1454
                           0: ELSE_KW@1450..1454 "else" [] []
                         1: COLON@1454..1456 ":" [] [Whitespace(" ")]

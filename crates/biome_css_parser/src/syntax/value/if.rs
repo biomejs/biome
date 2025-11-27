@@ -421,13 +421,27 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    parse_any_if_condition(p).ok();
+    parse_any_if_condition(p)
+        .or_recover(p, &AnyIfTestParseRecovery, expected_if_branch)
+        .ok();
 
     p.expect(T![:]);
 
     GenericComponentValueList.parse_list(p);
 
-    Present(m.complete(p, CSS_BOGUS_IF_BRANCH))
+    Present(m.complete(p, CSS_IF_BRANCH))
+}
+
+struct AnyIfTestParseRecovery;
+
+impl ParseRecovery for AnyIfTestParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')']) || p.has_preceding_line_break()
+    }
 }
 
 struct AnyIfTestBooleanExprChainParseRecovery;
