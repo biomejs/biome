@@ -7240,7 +7240,6 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/security/noScriptUrl"
 	| "lint/nursery/noScriptUrl"
 	| "lint/security/noSecrets"
 	| "lint/style/noCommonJs"
