@@ -2234,11 +2234,6 @@ See https://biomejs.dev/linter/rules/no-global-eval
 	 */
 	noGlobalEval?: NoGlobalEvalConfiguration;
 	/**
-	* Disallow javascript: URLs.
-See https://biomejs.dev/linter/rules/no-script-url 
-	 */
-	noScriptUrl?: NoScriptUrlConfiguration;
-	/**
 	* Disallow usage of sensitive data such as API keys and tokens.
 See https://biomejs.dev/linter/rules/no-secrets 
 	 */

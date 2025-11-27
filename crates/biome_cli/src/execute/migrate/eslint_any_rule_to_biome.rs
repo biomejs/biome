@@ -10,7 +10,11 @@ pub(crate) fn migrate_eslint_any_rule(
 ) -> bool {
     match eslint_name {
         "@eslint-react/dom-no-script-url" => {
-            let group = rules.security.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_script_url
@@ -1870,7 +1874,11 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "no-script-url" => {
-            let group = rules.security.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_script_url
@@ -2342,7 +2350,11 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "qwik/jsx-no-script-url" => {
-            let group = rules.security.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_script_url
@@ -2562,7 +2574,11 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "react/jsx-no-script-url" => {
-            let group = rules.security.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_script_url
@@ -2694,7 +2710,11 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "solid/jsx-no-script-url" => {
-            let group = rules.security.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_script_url

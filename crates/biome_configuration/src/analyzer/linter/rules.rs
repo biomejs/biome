@@ -1047,7 +1047,7 @@ impl RuleName {
             Self::NoRestrictedGlobals => RuleGroup::Style,
             Self::NoRestrictedImports => RuleGroup::Style,
             Self::NoRestrictedTypes => RuleGroup::Style,
-            Self::NoScriptUrl => RuleGroup::Security,
+            Self::NoScriptUrl => RuleGroup::Nursery,
             Self::NoSecrets => RuleGroup::Security,
             Self::NoSelfAssign => RuleGroup::Correctness,
             Self::NoSelfCompare => RuleGroup::Suspicious,
@@ -4867,6 +4867,7 @@ impl Nursery {
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -6100,7 +6101,7 @@ impl From<GroupPlainConfiguration> for Performance {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Security { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow target=\"_blank\" attribute without rel=\"noopener\".\nSee https://biomejs.dev/linter/rules/no-blank-target"] # [serde (skip_serializing_if = "Option::is_none")] pub no_blank_target : Option < RuleFixConfiguration < biome_rule_options :: no_blank_target :: NoBlankTargetOptions >> , # [doc = "Prevent the usage of dangerous JSX props.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html"] # [serde (skip_serializing_if = "Option::is_none")] pub no_dangerously_set_inner_html : Option < RuleConfiguration < biome_rule_options :: no_dangerously_set_inner_html :: NoDangerouslySetInnerHtmlOptions >> , # [doc = "Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children"] # [serde (skip_serializing_if = "Option::is_none")] pub no_dangerously_set_inner_html_with_children : Option < RuleConfiguration < biome_rule_options :: no_dangerously_set_inner_html_with_children :: NoDangerouslySetInnerHtmlWithChildrenOptions >> , # [doc = "Disallow the use of global eval().\nSee https://biomejs.dev/linter/rules/no-global-eval"] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_eval : Option < RuleConfiguration < biome_rule_options :: no_global_eval :: NoGlobalEvalOptions >> , # [doc = "Disallow javascript: URLs.\nSee https://biomejs.dev/linter/rules/no-script-url"] # [serde (skip_serializing_if = "Option::is_none")] pub no_script_url : Option < RuleConfiguration < biome_rule_options :: no_script_url :: NoScriptUrlOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens.\nSee https://biomejs.dev/linter/rules/no-secrets"] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> }
+pub struct Security { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow target=\"_blank\" attribute without rel=\"noopener\".\nSee https://biomejs.dev/linter/rules/no-blank-target"] # [serde (skip_serializing_if = "Option::is_none")] pub no_blank_target : Option < RuleFixConfiguration < biome_rule_options :: no_blank_target :: NoBlankTargetOptions >> , # [doc = "Prevent the usage of dangerous JSX props.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html"] # [serde (skip_serializing_if = "Option::is_none")] pub no_dangerously_set_inner_html : Option < RuleConfiguration < biome_rule_options :: no_dangerously_set_inner_html :: NoDangerouslySetInnerHtmlOptions >> , # [doc = "Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children"] # [serde (skip_serializing_if = "Option::is_none")] pub no_dangerously_set_inner_html_with_children : Option < RuleConfiguration < biome_rule_options :: no_dangerously_set_inner_html_with_children :: NoDangerouslySetInnerHtmlWithChildrenOptions >> , # [doc = "Disallow the use of global eval().\nSee https://biomejs.dev/linter/rules/no-global-eval"] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_eval : Option < RuleConfiguration < biome_rule_options :: no_global_eval :: NoGlobalEvalOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens.\nSee https://biomejs.dev/linter/rules/no-secrets"] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> }
 impl Security {
     const GROUP_NAME: &'static str = "security";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -6108,7 +6109,6 @@ impl Security {
         "noDangerouslySetInnerHtml",
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
-        "noScriptUrl",
         "noSecrets",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -6121,7 +6121,6 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
     ];
 }
 impl RuleGroupExt for Security {
@@ -6153,15 +6152,10 @@ impl RuleGroupExt for Security {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.no_script_url.as_ref()
-            && rule.is_enabled()
-        {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
-        }
         if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
         index_set
     }
@@ -6187,15 +6181,10 @@ impl RuleGroupExt for Security {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.no_script_url.as_ref()
-            && rule.is_disabled()
-        {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
-        }
         if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
         index_set
     }
@@ -6243,10 +6232,6 @@ impl RuleGroupExt for Security {
                 .no_global_eval
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noScriptUrl" => self
-                .no_script_url
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noSecrets" => self
                 .no_secrets
                 .as_ref()
@@ -6263,7 +6248,6 @@ impl From<GroupPlainConfiguration> for Security {
             no_dangerously_set_inner_html: Some(value.into()),
             no_dangerously_set_inner_html_with_children: Some(value.into()),
             no_global_eval: Some(value.into()),
-            no_script_url: Some(value.into()),
             no_secrets: Some(value.into()),
         }
     }

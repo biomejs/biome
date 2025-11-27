@@ -9765,13 +9765,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noScriptUrl": {
-					"description": "Disallow javascript: URLs.\nSee https://biomejs.dev/linter/rules/no-script-url",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.\nSee https://biomejs.dev/linter/rules/no-secrets",
 					"anyOf": [

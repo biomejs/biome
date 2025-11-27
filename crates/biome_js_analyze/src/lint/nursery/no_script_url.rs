@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
-use biome_string_case::StrOnlyExtension;
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs.
