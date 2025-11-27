@@ -3,7 +3,6 @@ use biome_console::markup;
 use biome_json_syntax::JsonRoot;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_required_scripts::UseRequiredScriptsOptions;
-use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
     /// Enforce the presence of required scripts in package.json.
@@ -11,11 +10,25 @@ declare_lint_rule! {
     /// This rule ensures that specified scripts are defined in the `scripts` section of a `package.json` file.
     /// It's particularly useful in monorepo environments where consistency across workspaces is important.
     ///
+    /// ## Options
+    ///
+    /// ### `requiredScripts`
+    ///
+    /// An array of script names that must be present in the `scripts` section of `package.json`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "requiredScripts": ["test", "build"]
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```json
+    /// ```json,expect_diagnostic,use_options
     /// {
     ///     "scripts": {
     ///         "test": "vitest"
@@ -23,29 +36,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// With options `{ "requiredScripts": ["test", "build"] }`, this is invalid because `build` is missing.
-    ///
     /// ### Valid
     ///
-    /// ```json
+    /// ```json,use_options
     /// {
     ///     "scripts": {
     ///         "test": "vitest",
     ///         "build": "tsc"
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// With options `{ "requiredScripts": ["test", "build"] }`, this is valid because all required scripts are present.
-    ///
-    /// ## Options
-    ///
-    /// The rule accepts an array of script names that must be present:
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "requiredScripts": ["test", "build", "lint"]
     ///     }
     /// }
     /// ```
@@ -86,10 +83,10 @@ impl Rule for UseRequiredScripts {
             .iter()
             .flatten()
             .find(|member| {
-                if let Ok(name) = member.name() {
-                    if let Ok(text) = name.inner_string_text() {
-                        return text.text() == "scripts";
-                    }
+                if let Ok(name) = member.name()
+                    && let Ok(text) = name.inner_string_text()
+                {
+                    return text.text() == "scripts";
                 }
                 false
             })?;
@@ -97,7 +94,7 @@ impl Rule for UseRequiredScripts {
         let scripts_value = scripts_member.value().ok()?;
         let scripts_object = scripts_value.as_json_object_value()?;
 
-        let existing_scripts: FxHashSet<String> = scripts_object
+        let existing_scripts: Vec<String> = scripts_object
             .json_member_list()
             .iter()
             .flatten()
@@ -111,7 +108,7 @@ impl Rule for UseRequiredScripts {
         let missing_scripts: Vec<String> = options
             .required_scripts
             .iter()
-            .filter(|script| !existing_scripts.contains(*script))
+            .filter(|script| !existing_scripts.iter().any(|s| s == *script))
             .cloned()
             .collect();
 
