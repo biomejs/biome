@@ -1,0 +1,248 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@custom-variant foobar (.foo, .bar);
+
+@custom-variant cell (th:has(&), td:has(&));
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@16..23 "foobar" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@23..24 "(" [] [],
+                    selector: CssSelectorList [
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@24..25 "." [] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@25..28 "foo" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        COMMA@28..30 "," [] [Whitespace(" ")],
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@30..31 "." [] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@31..34 "bar" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@34..35 ")" [] [],
+                    semicolon_token: SEMICOLON@35..36 ";" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..39 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@39..54 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@54..59 "cell" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@59..60 "(" [] [],
+                    selector: CssSelectorList [
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
+                                ident: CssIdentifier {
+                                    value_token: IDENT@60..62 "th" [] [],
+                                },
+                            },
+                            sub_selectors: CssSubSelectorList [
+                                CssPseudoClassSelector {
+                                    colon_token: COLON@62..63 ":" [] [],
+                                    class: CssPseudoClassFunctionRelativeSelectorList {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@63..66 "has" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@66..67 "(" [] [],
+                                        relative_selectors: CssRelativeSelectorList [
+                                            CssRelativeSelector {
+                                                combinator: missing (optional),
+                                                selector: CssCompoundSelector {
+                                                    nesting_selectors: CssNestedSelectorList [
+                                                        CssNestedSelector {
+                                                            amp_token: AMP@67..68 "&" [] [],
+                                                        },
+                                                    ],
+                                                    simple_selector: missing (optional),
+                                                    sub_selectors: CssSubSelectorList [],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@68..69 ")" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        COMMA@69..71 "," [] [Whitespace(" ")],
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
+                                ident: CssIdentifier {
+                                    value_token: IDENT@71..73 "td" [] [],
+                                },
+                            },
+                            sub_selectors: CssSubSelectorList [
+                                CssPseudoClassSelector {
+                                    colon_token: COLON@73..74 ":" [] [],
+                                    class: CssPseudoClassFunctionRelativeSelectorList {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@74..77 "has" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@77..78 "(" [] [],
+                                        relative_selectors: CssRelativeSelectorList [
+                                            CssRelativeSelector {
+                                                combinator: missing (optional),
+                                                selector: CssCompoundSelector {
+                                                    nesting_selectors: CssNestedSelectorList [
+                                                        CssNestedSelector {
+                                                            amp_token: AMP@78..79 "&" [] [],
+                                                        },
+                                                    ],
+                                                    simple_selector: missing (optional),
+                                                    sub_selectors: CssSubSelectorList [],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@79..80 ")" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@80..81 ")" [] [],
+                    semicolon_token: SEMICOLON@81..82 ";" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@82..83 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..83
+  0: (empty)
+  1: CSS_RULE_LIST@0..82
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..36
+        0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@16..23
+          0: IDENT@16..23 "foobar" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@23..36
+          0: L_PAREN@23..24 "(" [] []
+          1: CSS_SELECTOR_LIST@24..34
+            0: CSS_COMPOUND_SELECTOR@24..28
+              0: CSS_NESTED_SELECTOR_LIST@24..24
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@24..28
+                0: CSS_CLASS_SELECTOR@24..28
+                  0: DOT@24..25 "." [] []
+                  1: CSS_CUSTOM_IDENTIFIER@25..28
+                    0: IDENT@25..28 "foo" [] []
+            1: COMMA@28..30 "," [] [Whitespace(" ")]
+            2: CSS_COMPOUND_SELECTOR@30..34
+              0: CSS_NESTED_SELECTOR_LIST@30..30
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@30..34
+                0: CSS_CLASS_SELECTOR@30..34
+                  0: DOT@30..31 "." [] []
+                  1: CSS_CUSTOM_IDENTIFIER@31..34
+                    0: IDENT@31..34 "bar" [] []
+          2: R_PAREN@34..35 ")" [] []
+          3: SEMICOLON@35..36 ";" [] []
+    1: CSS_AT_RULE@36..82
+      0: AT@36..39 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@39..82
+        0: CUSTOM_VARIANT_KW@39..54 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@54..59
+          0: IDENT@54..59 "cell" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@59..82
+          0: L_PAREN@59..60 "(" [] []
+          1: CSS_SELECTOR_LIST@60..80
+            0: CSS_COMPOUND_SELECTOR@60..69
+              0: CSS_NESTED_SELECTOR_LIST@60..60
+              1: CSS_TYPE_SELECTOR@60..62
+                0: (empty)
+                1: CSS_IDENTIFIER@60..62
+                  0: IDENT@60..62 "th" [] []
+              2: CSS_SUB_SELECTOR_LIST@62..69
+                0: CSS_PSEUDO_CLASS_SELECTOR@62..69
+                  0: COLON@62..63 ":" [] []
+                  1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@63..69
+                    0: CSS_IDENTIFIER@63..66
+                      0: IDENT@63..66 "has" [] []
+                    1: L_PAREN@66..67 "(" [] []
+                    2: CSS_RELATIVE_SELECTOR_LIST@67..68
+                      0: CSS_RELATIVE_SELECTOR@67..68
+                        0: (empty)
+                        1: CSS_COMPOUND_SELECTOR@67..68
+                          0: CSS_NESTED_SELECTOR_LIST@67..68
+                            0: CSS_NESTED_SELECTOR@67..68
+                              0: AMP@67..68 "&" [] []
+                          1: (empty)
+                          2: CSS_SUB_SELECTOR_LIST@68..68
+                    3: R_PAREN@68..69 ")" [] []
+            1: COMMA@69..71 "," [] [Whitespace(" ")]
+            2: CSS_COMPOUND_SELECTOR@71..80
+              0: CSS_NESTED_SELECTOR_LIST@71..71
+              1: CSS_TYPE_SELECTOR@71..73
+                0: (empty)
+                1: CSS_IDENTIFIER@71..73
+                  0: IDENT@71..73 "td" [] []
+              2: CSS_SUB_SELECTOR_LIST@73..80
+                0: CSS_PSEUDO_CLASS_SELECTOR@73..80
+                  0: COLON@73..74 ":" [] []
+                  1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@74..80
+                    0: CSS_IDENTIFIER@74..77
+                      0: IDENT@74..77 "has" [] []
+                    1: L_PAREN@77..78 "(" [] []
+                    2: CSS_RELATIVE_SELECTOR_LIST@78..79
+                      0: CSS_RELATIVE_SELECTOR@78..79
+                        0: (empty)
+                        1: CSS_COMPOUND_SELECTOR@78..79
+                          0: CSS_NESTED_SELECTOR_LIST@78..79
+                            0: CSS_NESTED_SELECTOR@78..79
+                              0: AMP@78..79 "&" [] []
+                          1: (empty)
+                          2: CSS_SUB_SELECTOR_LIST@79..79
+                    3: R_PAREN@79..80 ")" [] []
+          2: R_PAREN@80..81 ")" [] []
+          3: SEMICOLON@81..82 ";" [] []
+  2: EOF@82..83 "" [Newline("\n")] []
+
+```

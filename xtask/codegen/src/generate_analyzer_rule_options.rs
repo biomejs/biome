@@ -3,7 +3,7 @@ use biome_string_case::Case;
 use proc_macro2::{Ident, Span};
 use quote::quote;
 use std::path::PathBuf;
-use xtask::*;
+use xtask_glue::*;
 
 /// The path to the analyzer rule options directory.
 pub fn get_analyzer_rule_options_path() -> PathBuf {

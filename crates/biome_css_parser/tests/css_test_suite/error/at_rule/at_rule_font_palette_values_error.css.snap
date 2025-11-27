@@ -30,7 +30,11 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
+                    CssBogus {
+                        items: [
+                            FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
+                        ],
+                    },
                     CssDeclarationBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
@@ -43,10 +47,14 @@ CssRoot {
             at_token: AT@26..28 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -61,10 +69,14 @@ CssRoot {
             at_token: AT@57..59 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -79,10 +91,14 @@ CssRoot {
             at_token: AT@92..94 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            IDENT@114..129 "undashed-ident" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    IDENT@114..129 "undashed-ident" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -97,10 +113,14 @@ CssRoot {
             at_token: AT@132..134 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -115,10 +135,14 @@ CssRoot {
             at_token: AT@165..167 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            INITIAL_KW@187..195 "initial" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    INITIAL_KW@187..195 "initial" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -133,10 +157,14 @@ CssRoot {
             at_token: AT@198..200 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            UNSET_KW@220..226 "unset" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    UNSET_KW@220..226 "unset" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -151,10 +179,14 @@ CssRoot {
             at_token: AT@229..231 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            REVERT_KW@251..258 "revert" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    REVERT_KW@251..258 "revert" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -169,10 +201,14 @@ CssRoot {
             at_token: AT@261..263 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")],
+                            FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -187,10 +223,14 @@ CssRoot {
             at_token: AT@299..301 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            IDENT@321..326 "ident" [] [],
+                            FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    IDENT@321..326 "ident" [] [],
+                                ],
+                            },
                         ],
                     },
                     CssBogusBlock {
@@ -203,10 +243,14 @@ CssRoot {
             at_token: AT@326..328 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            SEMICOLON@348..349 ";" [] [],
+                            FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    SEMICOLON@348..349 ";" [] [],
+                                ],
+                            },
                         ],
                     },
                     CssBogusBlock {
@@ -229,7 +273,8 @@ CssRoot {
     0: CSS_AT_RULE@0..26
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..26
-        0: FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")]
+        0: CSS_BOGUS@1..22
+          0: FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")]
         1: CSS_DECLARATION_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
@@ -237,97 +282,107 @@ CssRoot {
     1: CSS_AT_RULE@26..57
       0: AT@26..28 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@28..57
-        0: FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@48..53
-          0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@53..57
+        0: CSS_BOGUS@28..53
+          0: FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@48..53
+            0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@53..57
           0: L_CURLY@53..56 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@56..56
           2: R_CURLY@56..57 "}" [] []
     2: CSS_AT_RULE@57..92
       0: AT@57..59 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@59..92
-        0: FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@79..88
-          0: CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@88..92
+        0: CSS_BOGUS@59..88
+          0: FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@79..88
+            0: CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@88..92
           0: L_CURLY@88..91 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@91..91
           2: R_CURLY@91..92 "}" [] []
     3: CSS_AT_RULE@92..132
       0: AT@92..94 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@94..132
-        0: FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@114..129
-          0: IDENT@114..129 "undashed-ident" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@129..132
+        0: CSS_BOGUS@94..129
+          0: FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@114..129
+            0: IDENT@114..129 "undashed-ident" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@129..132
           0: L_CURLY@129..131 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@131..131
           2: R_CURLY@131..132 "}" [] []
     4: CSS_AT_RULE@132..165
       0: AT@132..134 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@134..165
-        0: FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@154..162
-          0: INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@162..165
+        0: CSS_BOGUS@134..162
+          0: FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@154..162
+            0: INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@162..165
           0: L_CURLY@162..164 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@164..164
           2: R_CURLY@164..165 "}" [] []
     5: CSS_AT_RULE@165..198
       0: AT@165..167 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@167..198
-        0: FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@187..195
-          0: INITIAL_KW@187..195 "initial" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@195..198
+        0: CSS_BOGUS@167..195
+          0: FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@187..195
+            0: INITIAL_KW@187..195 "initial" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@195..198
           0: L_CURLY@195..197 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@197..197
           2: R_CURLY@197..198 "}" [] []
     6: CSS_AT_RULE@198..229
       0: AT@198..200 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@200..229
-        0: FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@220..226
-          0: UNSET_KW@220..226 "unset" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@226..229
+        0: CSS_BOGUS@200..226
+          0: FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@220..226
+            0: UNSET_KW@220..226 "unset" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@226..229
           0: L_CURLY@226..228 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@228..228
           2: R_CURLY@228..229 "}" [] []
     7: CSS_AT_RULE@229..261
       0: AT@229..231 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@231..261
-        0: FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@251..258
-          0: REVERT_KW@251..258 "revert" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@258..261
+        0: CSS_BOGUS@231..258
+          0: FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@251..258
+            0: REVERT_KW@251..258 "revert" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@258..261
           0: L_CURLY@258..260 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@260..260
           2: R_CURLY@260..261 "}" [] []
     8: CSS_AT_RULE@261..299
       0: AT@261..263 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@263..299
-        0: FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@283..296
-          0: REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@296..299
+        0: CSS_BOGUS@263..296
+          0: FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@283..296
+            0: REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@296..299
           0: L_CURLY@296..298 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@298..298
           2: R_CURLY@298..299 "}" [] []
     9: CSS_AT_RULE@299..326
       0: AT@299..301 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@301..326
-        0: FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@321..326
-          0: IDENT@321..326 "ident" [] []
-        2: CSS_BOGUS_BLOCK@326..326
+        0: CSS_BOGUS@301..326
+          0: FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@321..326
+            0: IDENT@321..326 "ident" [] []
+        1: CSS_BOGUS_BLOCK@326..326
     10: CSS_AT_RULE@326..349
       0: AT@326..328 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@328..349
-        0: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@348..349
-          0: SEMICOLON@348..349 ";" [] []
-        2: CSS_BOGUS_BLOCK@349..349
+        0: CSS_BOGUS@328..349
+          0: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
+          1: CSS_BOGUS@348..349
+            0: SEMICOLON@348..349 ";" [] []
+        1: CSS_BOGUS_BLOCK@349..349
   2: EOF@349..350 "" [Newline("\n")] []
 
 ```

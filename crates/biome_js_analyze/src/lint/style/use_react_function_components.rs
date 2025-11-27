@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_syntax::AnyJsExpression;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_react_function_components::UseReactFunctionComponentsOptions;
 
@@ -49,7 +50,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         domains: &[RuleDomain::React],
-        sources: &[RuleSource::ReactPreferFunctionComponent("react-prefer-function-component").same()],
+        sources: &[RuleSource::EslintReactPreferFunctionComponent("react-prefer-function-component").same()],
     }
 }
 
@@ -114,6 +115,22 @@ fn has_component_did_catch(node: &AnyPotentialReactComponentDeclaration) -> bool
                     .is_some_and(|name| name.text() == "componentDidCatch")
             })
         }
+        JsVariableDeclarator(variable_declarator) => variable_declarator
+            .initializer()
+            .and_then(|initializer| initializer.expression().ok())
+            .is_some_and(|expression| {
+                if let AnyJsExpression::JsClassExpression(class_expression) = &expression {
+                    return class_expression.members().iter().any(|member| {
+                        member
+                            .name()
+                            .ok()
+                            .flatten()
+                            .and_then(|name| name.name())
+                            .is_some_and(|name| name.text() == "componentDidCatch")
+                    });
+                }
+                false
+            }),
         _ => false,
     }
 }

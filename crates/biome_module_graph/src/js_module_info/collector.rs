@@ -3,9 +3,10 @@ use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsImportClause, JsForVariableDeclaration, JsFormalParameter, JsIdentifierBinding,
-    JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration,
-    TsIdentifierBinding, TsTypeParameter, TsTypeParameterName, inner_string_text,
+    AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
+    JsIdentifierBinding, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter, TsTypeParameterName,
+    inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
@@ -573,34 +574,58 @@ impl JsModuleInfoCollector {
         for index in 0..self.bindings.len() {
             let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
-                let name = binding.name.clone();
                 let scope_id = scope_id_for_range(scope_by_range, binding.range);
-                let ty = self.infer_type(&node.clone(), &name, scope_id);
+                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id);
                 self.bindings[index].ty = ty;
             }
         }
     }
 
+    fn has_writable_reference(&self, binding: &JsBindingData) -> bool {
+        binding
+            .references
+            .iter()
+            .any(|reference| reference.is_write())
+    }
+
+    fn get_writable_references(&self, binding: &JsBindingData) -> Vec<JsBindingReference> {
+        binding
+            .references
+            .iter()
+            .filter(|reference| reference.is_write())
+            .cloned()
+            .collect()
+    }
+
     fn infer_type(
         &mut self,
         node: &JsSyntaxNode,
-        binding_name: &Text,
+        binding: JsBindingData,
         scope_id: ScopeId,
     ) -> TypeReference {
+        let binding_name = &binding.name.clone();
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
-                return if let Some(typed_bindings) = decl
+                let ty = if let Some(typed_bindings) = decl
                     .as_js_variable_declaration()
                     .and_then(|decl| self.variable_declarations.get(decl.syntax()))
                 {
-                    typed_bindings
+                    let ty = typed_bindings
                         .iter()
                         .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
-                        .unwrap_or_default()
+                        .unwrap_or_default();
+
+                    if self.has_writable_reference(&binding) {
+                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
+                    } else {
+                        ty
+                    }
                 } else {
                     let data = TypeData::from_any_js_declaration(self, scope_id, &decl);
                     self.reference_to_owned_data(data)
                 };
+
+                return ty;
             } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor) {
                 let data =
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
@@ -638,6 +663,37 @@ impl JsModuleInfoCollector {
         }
 
         TypeReference::unknown()
+    }
+
+    /// Widen the type of binding from its writable references.
+    fn widen_binding_from_writable_references(
+        &mut self,
+        scope_id: ScopeId,
+        binding: &JsBindingData,
+        ty: &TypeReference,
+    ) -> TypeReference {
+        let references = self.get_writable_references(binding);
+        let mut ty = ty.clone();
+        for reference in references {
+            let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
+                continue;
+            };
+            for ancestor in node.ancestors().skip(1) {
+                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
+                    && let Ok(right) = assignment.right()
+                {
+                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                    let assigned_type = self.reference_to_owned_data(data);
+                    ty = ResolvedTypeId::new(
+                        self.level(),
+                        self.union_with(ty.clone(), assigned_type),
+                    )
+                    .into();
+                }
+            }
+        }
+
+        ty
     }
 
     /// After the first pass of the collector, import references have been

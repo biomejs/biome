@@ -169,7 +169,6 @@ where
             }
 
             #syntax_kind_impl
-
         }
 
         /// Utility macro for creating a SyntaxKind through simple macro syntax

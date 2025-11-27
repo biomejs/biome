@@ -12,7 +12,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
-use xtask::project_root;
+use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/Typescript/tests/baselines/reference";
 const BASE_PATH: &str = "xtask/coverage/Typescript";

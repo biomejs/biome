@@ -17,7 +17,7 @@ pub(crate) fn disabled_svelte_prop(p: &HtmlParser, range: TextRange) -> ParseDia
     p.err_builder("This looks like Svelte syntax, but this is not a Svelte file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".svelte"</Emphasis>" file extension."))
 }
 
-pub(crate) fn expected_text_expression(
+pub(crate) fn expected_closing_text_expression(
     p: &HtmlParser,
     curr_range: TextRange,
     opening_range: TextRange,
@@ -32,8 +32,16 @@ pub(crate) fn expected_text_expression(
     )
 }
 
+pub(crate) fn expected_text_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("expression", range, p).into_diagnostic(p)
+}
+
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["element", "text"], range).into_diagnostic(p)
+}
+
+pub(crate) fn expected_child_or_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(&["element", "text", "closing block"], range).into_diagnostic(p)
 }
 
 pub(crate) fn expected_closed_fence(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
@@ -94,5 +102,13 @@ pub(crate) fn closing_tag_should_not_have_attributes(
 }
 
 pub(crate) fn expected_svelte_closing_block(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Expected an identifier.", range)
+    p.err_builder("Expected a closing block, instead found none.", range)
+}
+
+pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
+}
+
+pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("vue directive argument", range, p).into_diagnostic(p)
 }

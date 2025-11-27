@@ -788,23 +788,50 @@ impl Format<FormatTypeContext> for Interface {
 
 impl Format<FormatTypeContext> for Literal {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        write!(f, [&format_args![token("value:"), space()]])?;
         match self {
-            Self::BigInt(bigint_text) => write!(f, [text(bigint_text, TextSize::default())]),
+            Self::BigInt(bigint_text) => write!(
+                f,
+                [
+                    token("bigint:"),
+                    space(),
+                    text(bigint_text, TextSize::default())
+                ]
+            ),
             Self::Boolean(lit) => write!(
                 f,
-                [text(
-                    lit.as_bool().to_string().as_str(),
-                    TextSize::default()
-                )]
+                [
+                    token("bool:"),
+                    space(),
+                    text(lit.as_bool().to_string().as_str(), TextSize::default())
+                ]
             ),
             Self::Number(lit) => {
-                write!(f, [text(lit.as_str(), TextSize::default())])
+                write!(
+                    f,
+                    [
+                        token("number:"),
+                        space(),
+                        text(lit.as_str(), TextSize::default())
+                    ]
+                )
             }
             Self::Object(obj) => write!(f, [&obj]),
-            Self::RegExp(regexp_text) => write!(f, [text(regexp_text, TextSize::default())]),
-            Self::String(lit) => write!(f, [text(lit.as_str(), TextSize::default())]),
-            Self::Template(template_text) => write!(f, [text(template_text, TextSize::default())]),
+            Self::RegExp(regex) => write!(
+                f,
+                [token("regex:"), space(), text(regex, TextSize::default())]
+            ),
+            Self::String(lit) => write!(
+                f,
+                [
+                    token("string:"),
+                    space(),
+                    text(lit.as_str(), TextSize::default())
+                ]
+            ),
+            Self::Template(tmpl) => write!(
+                f,
+                [token("string:"), space(), text(tmpl, TextSize::default())]
+            ),
         }
     }
 }

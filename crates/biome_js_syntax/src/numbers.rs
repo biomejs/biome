@@ -37,9 +37,13 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
     if radix == 10 {
         f64::from_str(&raw).ok()
     } else {
-        i64::from_str_radix(&raw, radix as u32)
-            .map(|num| num as f64)
-            .ok()
+        let mut value = 0.0f64;
+        let base = radix as f64;
+        for c in raw.chars() {
+            let digit = c.to_digit(radix as u32)? as f64;
+            value = value * base + digit;
+        }
+        Some(value)
     }
 }
 
@@ -76,6 +80,13 @@ mod tests {
         assert_float("0x0", 0.0);
         assert_float("0xABC", 2748.0);
         assert_float("0XABC", 2748.0);
+        // 2^53 + 1
+        assert_float("0x20000000000001", 9_007_199_254_740_992.0);
+        // 2^1024 (Overflow)
+        assert_float(
+            "0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            f64::INFINITY,
+        );
     }
 
     #[test]

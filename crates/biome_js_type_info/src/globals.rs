@@ -1,6 +1,6 @@
 //! Hardcoded global definitions.
 
-// FIXME: Implement inference from type definitions.
+// FIXME: Implement inference from type definitions: https://github.com/biomejs/biome/issues/5977
 
 use std::{
     borrow::Cow,
@@ -59,22 +59,25 @@ pub const PROMISE_RACE_ID: TypeId = TypeId::new(22);
 pub const PROMISE_REJECT_ID: TypeId = TypeId::new(23);
 pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(24);
 pub const PROMISE_TRY_ID: TypeId = TypeId::new(25);
-pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(26);
-pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(27);
-pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(28);
-pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(29);
-pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(30);
-pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(31);
-pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(32);
-pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(33);
-pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(34);
-pub const T_ID: TypeId = TypeId::new(35);
-pub const U_ID: TypeId = TypeId::new(36);
-pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(37);
-pub const MAP_CALLBACK_ID: TypeId = TypeId::new(38);
-pub const VOID_CALLBACK_ID: TypeId = TypeId::new(39);
-pub const FETCH_ID: TypeId = TypeId::new(40);
-pub const NUM_PREDEFINED_TYPES: usize = 41; // Must be one more than the highest `TypeId` above.
+pub const INSTANCEOF_REGEXP_ID: TypeId = TypeId::new(26);
+pub const REGEXP_ID: TypeId = TypeId::new(27);
+pub const REGEXP_EXEC_ID: TypeId = TypeId::new(28);
+pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(29);
+pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(30);
+pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(31);
+pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(32);
+pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(33);
+pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(34);
+pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(35);
+pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(36);
+pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(37);
+pub const T_ID: TypeId = TypeId::new(38);
+pub const U_ID: TypeId = TypeId::new(39);
+pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(40);
+pub const MAP_CALLBACK_ID: TypeId = TypeId::new(41);
+pub const VOID_CALLBACK_ID: TypeId = TypeId::new(42);
+pub const FETCH_ID: TypeId = TypeId::new(43);
+pub const NUM_PREDEFINED_TYPES: usize = 44; // Must be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -83,6 +86,9 @@ pub const GLOBAL_CONDITIONAL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEV
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
 pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
+pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
+pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);
 pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
 pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
@@ -140,24 +146,27 @@ pub fn global_type_name(id: TypeId) -> &'static str {
         23 => "Promise.reject",
         24 => "Promise.resolve",
         25 => "Promise.try",
-        26 => "\"bigint\"",
-        27 => "\"boolean\"",
-        28 => "\"function\"",
-        29 => "\"number\"",
-        30 => "\"object\"",
-        31 => "\"string\"",
-        32 => "\"symbol\"",
-        33 => "\"undefined\"",
-        34 => {
+        26 => "instanceof RegExp",
+        27 => "RegExp",
+        28 => "RegExp.exec",
+        29 => "\"bigint\"",
+        30 => "\"boolean\"",
+        31 => "\"function\"",
+        32 => "\"number\"",
+        33 => "\"object\"",
+        34 => "\"string\"",
+        35 => "\"symbol\"",
+        36 => "\"undefined\"",
+        37 => {
             "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" \
                 | \"string\" | \"symbol\" | \"undefined\""
         }
-        35 => "T",
-        36 => "U",
-        37 => "() => conditional",
-        38 => "<U>(item: T) => U",
-        39 => "() => void",
-        40 => "fetch",
+        38 => "T",
+        39 => "U",
+        40 => "() => conditional",
+        41 => "<U>(item: T) => U",
+        42 => "() => void",
+        43 => "fetch",
         _ => "inferred type",
     }
 }
@@ -212,6 +221,16 @@ impl Default for GlobalsResolver {
                 name: Some(Text::new_static(global_type_name(id))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+            })
+        };
+
+        let regexp_method_definition = |id: TypeId| {
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::new_static(global_type_name(id))),
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
             })
         };
 
@@ -311,6 +330,15 @@ impl Default for GlobalsResolver {
             promise_method_definition(PROMISE_REJECT_ID),
             promise_method_definition(PROMISE_RESOLVE_ID),
             promise_method_definition(PROMISE_TRY_ID),
+            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID)),
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::new_static("RegExp")),
+                type_parameters: Box::default(),
+                extends: None,
+                implements: [].into(),
+                members: Box::new([method("exec", REGEXP_EXEC_ID)]),
+            })),
+            regexp_method_definition(REGEXP_EXEC_ID),
             string_literal("bigint"),
             string_literal("boolean"),
             string_literal("function"),
@@ -454,6 +482,8 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
+        } else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_REGEXP_ID)
         } else if !qualifier.type_only
             && let Some(ident) = qualifier.path.identifier()
         {

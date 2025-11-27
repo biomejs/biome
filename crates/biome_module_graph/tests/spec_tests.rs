@@ -2129,6 +2129,76 @@ fn test_resolve_swr_types() {
     assert!(mutate_result_ty.is_promise_instance());
 }
 
+#[test]
+fn test_widening_via_assignment() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "index.ts".into(),
+        r#"
+let hey = false;
+function f() {
+    hey = true;
+}"#,
+    );
+
+    let added_paths = [BiomePath::new("index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
+
+    snapshot.assert_snapshot("test_widening_via_assignment");
+}
+
+#[test]
+fn test_widening_via_assignment_multiple_values() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "index.ts".into(),
+        r#"
+let hey = undefined;
+function f() {
+    hey = "some string";
+}
+function g() {
+    hey = 123;
+}
+"#,
+    );
+
+    let added_paths = [BiomePath::new("index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
+
+    snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
+}
+
 fn find_files_recursively_in_directory(
     directory: &Utf8Path,
     predicate: impl Fn(&Utf8Path) -> bool,

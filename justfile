@@ -27,12 +27,16 @@ gen-all:
 
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
-  cargo codegen-schema
+  just gen-schema
   just gen-types
 
+# Generates TypeScript types
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
 
+# Generates the JSON Schema of the configuration
+gen-schema:
+  cargo codegen-schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -101,6 +105,16 @@ new-css-lintrule rulename:
 # Creates a new graphql lint rule with the given name. Name has to be camel case.
 new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new html lint rule with the given name. Name has to be camel case.
+new-html-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new html lint rule with the given name, but targets vue. Name has to be camel case.
+new-html-vue-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
   just gen-analyzer
 
 # Promotes a rule from the nursery group to a new group

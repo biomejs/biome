@@ -738,7 +738,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: true,
+                watch: scan_kind.is_project(),
                 force,
                 scan_kind,
                 verbose: false,

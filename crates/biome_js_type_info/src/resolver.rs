@@ -722,6 +722,14 @@ pub trait TypeResolver {
         ]))))))
     }
 
+    /// Register a new type that is a union between `current_type` and `ty`
+    fn union_with(&mut self, current_type: TypeReference, ty: TypeReference) -> TypeId {
+        self.register_type(Cow::Owned(TypeData::Union(Box::new(Union(Box::new([
+            current_type,
+            ty,
+        ]))))))
+    }
+
     // #endregion
 }
 

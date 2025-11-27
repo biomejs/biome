@@ -94,6 +94,7 @@ impl CodeBlock {
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {
+        // Always use the JS-first resolution path (experimental full HTML support disabled)
         DocumentFileSource::from_extension(&self.tag, false)
     }
 

@@ -158,5 +158,5 @@ Module TypeId(21) => Module(0) TypeId(23)
 
 Module TypeId(22) => Module(0) TypeId(11)
 
-Module TypeId(23) => value: foo
+Module TypeId(23) => string: foo
 ```

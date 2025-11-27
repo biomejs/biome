@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+
+foo.apply(null, args);
+foo.apply(null, [1, 2, 3]);
+foo.apply(undefined, args);
+obj.foo.apply(obj, args);
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i apply() is used to call a function with arguments provided as an array.
+  
+    1 │ // should generate diagnostics
+    2 │ 
+  > 3 │ foo.apply(null, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │ foo.apply(null, [1, 2, 3]);
+    5 │ foo.apply(undefined, args);
+  
+  i Unsafe fix: Use the spread operator.
+  
+    1 1 │   // should generate diagnostics
+    2 2 │   
+    3   │ - foo.apply(null,·args);
+      3 │ + foo(...args);
+    4 4 │   foo.apply(null, [1, 2, 3]);
+    5 5 │   foo.apply(undefined, args);
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i apply() is used to call a function with arguments provided as an array.
+  
+    3 │ foo.apply(null, args);
+  > 4 │ foo.apply(null, [1, 2, 3]);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ foo.apply(undefined, args);
+    6 │ obj.foo.apply(obj, args);
+  
+  i Unsafe fix: Use the spread operator.
+  
+    2 2 │   
+    3 3 │   foo.apply(null, args);
+    4   │ - foo.apply(null,·[1,·2,·3]);
+      4 │ + foo(...[1,·2,·3]);
+    5 5 │   foo.apply(undefined, args);
+    6 6 │   obj.foo.apply(obj, args);
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i apply() is used to call a function with arguments provided as an array.
+  
+    3 │ foo.apply(null, args);
+    4 │ foo.apply(null, [1, 2, 3]);
+  > 5 │ foo.apply(undefined, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ obj.foo.apply(obj, args);
+    7 │ 
+  
+  i Unsafe fix: Use the spread operator.
+  
+    3 3 │   foo.apply(null, args);
+    4 4 │   foo.apply(null, [1, 2, 3]);
+    5   │ - foo.apply(undefined,·args);
+      5 │ + foo(...args);
+    6 6 │   obj.foo.apply(obj, args);
+    7 7 │   
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i apply() is used to call a function with arguments provided as an array.
+  
+    4 │ foo.apply(null, [1, 2, 3]);
+    5 │ foo.apply(undefined, args);
+  > 6 │ obj.foo.apply(obj, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Unsafe fix: Use the spread operator.
+  
+    4 4 │   foo.apply(null, [1, 2, 3]);
+    5 5 │   foo.apply(undefined, args);
+    6   │ - obj.foo.apply(obj,·args);
+      6 │ + obj.foo(...args);
+    7 7 │   
+  
+
+```

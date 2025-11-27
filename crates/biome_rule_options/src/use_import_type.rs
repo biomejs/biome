@@ -22,7 +22,6 @@ pub struct UseImportTypeOptions {
     serde::Deserialize,
     serde::Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum Style {
     /// Use the best fitting style according to the situation
@@ -32,4 +31,19 @@ pub enum Style {
     InlineType,
     /// Always separate types in a dedicated `import type`
     SeparatedType,
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Style {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("UseImportTypeStyle")
+    }
+
+    fn json_schema(_generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["auto", "inlineType", "separatedType"],
+            "description": "The style to apply when importing types."
+        })
+    }
 }

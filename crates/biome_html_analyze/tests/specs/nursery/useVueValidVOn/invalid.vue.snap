@@ -1,0 +1,370 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<template>
+  <!-- Missing event name: long-form without an argument -->
+  <div v-on></div>
+
+  <!-- Missing event name with value -->
+  <div v-on="foo"></div>
+
+  <!-- Missing handler on long-form -->
+  <div v-on:click></div>
+
+  <!-- Missing handler on shorthand -->
+  <div @click></div>
+
+  <!-- Invalid single modifier on long-form -->
+  <div v-on:click.bogus="foo"></div>
+
+  <!-- Invalid modifier on shorthand -->
+  <span @click.badModifier="foo"></span>
+
+  <!-- Mixed valid and invalid modifiers: 'stop' is valid, 'wrong' is not -->
+  <p @click.stop.wrong="foo"></p>
+
+  <!-- Dynamic argument is present but modifier is invalid -->
+  <p v-on:[event].notAValidModifier="foo"></p>
+
+  <!-- Multiple invalid modifiers -->
+  <button @submit.invalidModifier.anotherBad="handler"></button>
+
+  <!-- Component with invalid modifier -->
+  <MyComponent @click.weird="someHandler"></MyComponent>
+
+  <!-- Missing handler with valid modifiers -->
+  <div @keyup.enter></div>
+</template>
+```
+
+# Diagnostics
+```
+invalid.vue:5:8 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-on directive is missing an event name.
+  
+    3 │ <template>
+    4 │   <!-- Missing event name: long-form without an argument -->
+  > 5 │   <div v-on></div>
+      │        ^^^^
+    6 │ 
+    7 │   <!-- Missing event name with value -->
+  
+  i Provide an event name after the colon, e.g. v-on:click="handler".
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-on directive is missing an event name.
+  
+     7 │   <!-- Missing event name with value -->
+   > 8 │   <div v-on="foo"></div>
+       │        ^^^^^^^^^^
+     9 │ 
+    10 │   <!-- Missing handler on long-form -->
+  
+  i Provide an event name after the colon, e.g. v-on:click="handler".
+  
+
+```
+
+```
+invalid.vue:11:8 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-on directive for this event is missing a handler expression.
+  
+    10 │   <!-- Missing handler on long-form -->
+  > 11 │   <div v-on:click></div>
+       │        ^^^^^^^^^^
+    12 │ 
+    13 │   <!-- Missing handler on shorthand -->
+  
+  i Add a handler, e.g. v-on:click="onClick".
+  
+
+```
+
+```
+invalid.vue:14:8 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-on directive for this event is missing a handler expression.
+  
+    13 │   <!-- Missing handler on shorthand -->
+  > 14 │   <div @click></div>
+       │        ^^^^^^
+    15 │ 
+    16 │   <!-- Invalid single modifier on long-form -->
+  
+  i Add a handler, e.g. v-on:click="onClick".
+  
+
+```
+
+```
+invalid.vue:17:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    16 │   <!-- Invalid single modifier on long-form -->
+  > 17 │   <div v-on:click.bogus="foo"></div>
+       │                  ^^^^^^
+    18 │ 
+    19 │   <!-- Invalid modifier on shorthand -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:20:15 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    19 │   <!-- Invalid modifier on shorthand -->
+  > 20 │   <span @click.badModifier="foo"></span>
+       │               ^^^^^^^^^^^^
+    21 │ 
+    22 │   <!-- Mixed valid and invalid modifiers: 'stop' is valid, 'wrong' is not -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:23:17 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    22 │   <!-- Mixed valid and invalid modifiers: 'stop' is valid, 'wrong' is not -->
+  > 23 │   <p @click.stop.wrong="foo"></p>
+       │                 ^^^^^^
+    24 │ 
+    25 │   <!-- Dynamic argument is present but modifier is invalid -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:26:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    25 │   <!-- Dynamic argument is present but modifier is invalid -->
+  > 26 │   <p v-on:[event].notAValidModifier="foo"></p>
+       │                  ^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │   <!-- Multiple invalid modifiers -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:29:18 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    28 │   <!-- Multiple invalid modifiers -->
+  > 29 │   <button @submit.invalidModifier.anotherBad="handler"></button>
+       │                  ^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │   <!-- Component with invalid modifier -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:32:22 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invalid v-on modifier.
+  
+    31 │   <!-- Component with invalid modifier -->
+  > 32 │   <MyComponent @click.weird="someHandler"></MyComponent>
+       │                      ^^^^^^
+    33 │ 
+    34 │   <!-- Missing handler with valid modifiers -->
+  
+  i Remove or correct the invalid modifier.
+  
+  i Allowed modifiers:
+  
+  - stop
+  - prevent
+  - capture
+  - self
+  - ctrl
+  - shift
+  - alt
+  - meta
+  - native
+  - once
+  - left
+  - right
+  - middle
+  - passive
+  - esc
+  - tab
+  - enter
+  - space
+  - up
+  - down
+  - delete
+  - exact
+  
+
+```
+
+```
+invalid.vue:35:8 lint/nursery/useVueValidVOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-on directive for this event is missing a handler expression.
+  
+    34 │   <!-- Missing handler with valid modifiers -->
+  > 35 │   <div @keyup.enter></div>
+       │        ^^^^^^^^^^^^
+    36 │ </template>
+  
+  i Add a handler, e.g. v-on:click="onClick".
+  
+
+```

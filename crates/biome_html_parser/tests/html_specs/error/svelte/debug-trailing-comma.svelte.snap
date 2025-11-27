@@ -26,9 +26,11 @@ HtmlRoot {
                     svelte_ident_token: SVELTE_IDENT@8..17 "something" [] [],
                 },
                 COMMA@17..18 "," [] [],
-                missing element,
+                SvelteName {
+                    svelte_ident_token: SVELTE_IDENT@18..19 "}" [] [],
+                },
             ],
-            r_curly_token: R_CURLY@18..19 "}" [] [],
+            r_curly_token: missing (required),
         },
     ],
     eof_token: EOF@19..20 "" [Newline("\n")] [],
@@ -46,12 +48,13 @@ HtmlRoot {
     0: SVELTE_DEBUG_BLOCK@0..19
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: DEBUG_KW@2..8 "debug" [] [Whitespace(" ")]
-      2: SVELTE_BINDING_LIST@8..18
+      2: SVELTE_BINDING_LIST@8..19
         0: SVELTE_NAME@8..17
           0: SVELTE_IDENT@8..17 "something" [] []
         1: COMMA@17..18 "," [] []
-        2: (empty)
-      3: R_CURLY@18..19 "}" [] []
+        2: SVELTE_NAME@18..19
+          0: SVELTE_IDENT@18..19 "}" [] []
+      3: (empty)
   4: EOF@19..20 "" [Newline("\n")] []
 
 ```
@@ -59,12 +62,18 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-debug-trailing-comma.svelte:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+debug-trailing-comma.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier.
+  × expected `}` but instead the file ends
   
-  > 1 │ {@debug something,}
-      │                   ^
-    2 │ 
+    1 │ {@debug something,}
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ {@debug something,}
+  > 2 │ 
+      │ 
   
 ```
