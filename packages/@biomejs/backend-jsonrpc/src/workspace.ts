@@ -2070,6 +2070,11 @@ See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope
 	 */
 	useQwikValidLexicalScope?: UseQwikValidLexicalScopeConfiguration;
 	/**
+	* Enforce the presence of required scripts in package.json.
+See https://biomejs.dev/linter/rules/use-required-scripts 
+	 */
+	useRequiredScripts?: UseRequiredScriptsConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -3684,6 +3689,9 @@ export type UseQwikMethodUsageConfiguration =
 export type UseQwikValidLexicalScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikValidLexicalScopeOptions;
+export type UseRequiredScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseRequiredScriptsOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5128,6 +5136,10 @@ export interface RuleWithUseQwikValidLexicalScopeOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikValidLexicalScopeOptions;
 }
+export interface RuleWithUseRequiredScriptsOptions {
+	level: RulePlainConfiguration;
+	options?: UseRequiredScriptsOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6384,6 +6396,12 @@ export interface UseMaxParamsOptions {
 }
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
+export interface UseRequiredScriptsOptions {
+	/**
+	 * List of script names that must be present in package.json
+	 */
+	requiredScripts?: string[];
+}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7196,6 +7214,7 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
