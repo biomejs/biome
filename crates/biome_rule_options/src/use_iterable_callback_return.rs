@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseIterableCallbackReturnOptions {
-    /// When set to `false`, rule will skip reporting `forEach` callbacks that return a value.
+    /// When `true`, the rule reports `forEach` callbacks that return a value.
+    /// When `false` or unset, such callbacks are ignored (default behaviour).
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub check_for_each: Option<bool>,
 }
