@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// Object.setPrototypeOf(obj, b);
     /// ```
     pub NoProto {
-        version: "next",
+        version: "2.3.8",
         name: "noProto",
         language: "js",
         recommended: true,
