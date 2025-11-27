@@ -153,6 +153,7 @@ pub mod no_precision_loss;
 pub mod no_private_imports;
 pub mod no_process_env;
 pub mod no_process_global;
+pub mod no_proto;
 pub mod no_prototype_builtins;
 pub mod no_quickfix_biome;
 pub mod no_qwik_use_visible_task;

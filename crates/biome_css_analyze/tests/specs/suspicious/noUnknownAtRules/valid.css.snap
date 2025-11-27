@@ -130,3 +130,5 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
 
 
 ```
+
+_Note: The parser emitted 11 diagnostics which are not shown here._

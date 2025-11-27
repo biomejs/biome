@@ -218,7 +218,7 @@ grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.25"
-indexmap             = { version = "2.12.0" }
+indexmap             = { version = "2.12.1" }
 insta                = "1.43.2"
 jiff                 = "0.2.16"
 libc                 = "0.2.177"

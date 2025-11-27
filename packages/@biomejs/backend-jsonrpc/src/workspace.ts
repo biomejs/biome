@@ -1936,6 +1936,11 @@ See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
+	* Disallow the use of the __proto__ property.
+See https://biomejs.dev/linter/rules/no-proto 
+	 */
+	noProto?: NoProtoConfiguration;
+	/**
 	* Replaces usages of forwardRef with passing ref as a prop.
 See https://biomejs.dev/linter/rules/no-react-forward-ref 
 	 */
@@ -3611,6 +3616,9 @@ export type NoNextAsyncClientComponentConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
+export type NoProtoConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProtoOptions;
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
@@ -5023,6 +5031,10 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
 }
+export interface RuleWithNoProtoOptions {
+	level: RulePlainConfiguration;
+	options?: NoProtoOptions;
+}
 export interface RuleWithNoReactForwardRefOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6331,6 +6343,7 @@ export type NoMisusedPromisesOptions = {};
 export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
+export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
@@ -7166,6 +7179,7 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noDuplicatedSpreadProps"

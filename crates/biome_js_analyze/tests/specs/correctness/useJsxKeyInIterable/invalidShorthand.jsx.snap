@@ -64,6 +64,8 @@ React.Children.map(c => React.cloneElement(c));
 
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalidShorthand.jsx:3:2 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

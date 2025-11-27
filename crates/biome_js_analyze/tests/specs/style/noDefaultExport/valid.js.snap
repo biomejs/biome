@@ -12,3 +12,5 @@ export class C {};
 export { CONSTANT as DUPLICATE_CONSTANT };
 export { default as X } from "mod";
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

@@ -21,3 +21,5 @@ import React, {Fragment} from "react";
 </React.Fragment>
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

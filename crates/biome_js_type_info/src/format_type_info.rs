@@ -818,7 +818,14 @@ impl Format<FormatTypeContext> for Literal {
             Self::Object(obj) => write!(f, [&obj]),
             Self::RegExp(regex) => write!(
                 f,
-                [token("regex:"), space(), text(regex, TextSize::default())]
+                [
+                    token("regex:"),
+                    space(),
+                    token("/"),
+                    text(&regex.pattern, TextSize::default()),
+                    token("/"),
+                    text(&regex.flags, TextSize::default())
+                ]
             ),
             Self::String(lit) => write!(
                 f,
