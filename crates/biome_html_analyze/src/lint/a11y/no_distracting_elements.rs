@@ -3,8 +3,8 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlElement;
-use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_distracting_elements::NoDistractingElementsOptions;
 
 use crate::HtmlRuleAction;
@@ -49,13 +49,9 @@ declare_lint_rule! {
     }
 }
 
-pub struct NoDistractingElementsState {
-    name: String,
-}
-
 impl Rule for NoDistractingElements {
     type Query = Ast<AnyHtmlElement>;
-    type State = NoDistractingElementsState;
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = NoDistractingElementsOptions;
 
@@ -63,19 +59,17 @@ impl Rule for NoDistractingElements {
         let element = ctx.query();
         let element_name = element.name()?;
         if is_marquee_or_blink_element(element_name.text()) {
-            return Some(NoDistractingElementsState {
-                name: element_name.text().to_string(),
-            });
+            return Some(element_name);
         }
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, name: &Self::State) -> Option<RuleDiagnostic> {
         let element = ctx.query();
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             element.range(),
-            markup! {"Don't use the '"{state.name}"' element."}.to_owned(),
+            markup! {"Don't use the '"{name.text()}"' element."}.to_owned(),
         )
         .note(markup! {
             "Visually distracting elements can cause accessibility issues and should be avoided."
@@ -84,7 +78,7 @@ impl Rule for NoDistractingElements {
         Some(diagnostic)
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
+    fn action(ctx: &RuleContext<Self>, name: &Self::State) -> Option<HtmlRuleAction> {
         let element = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(element.clone());
@@ -92,7 +86,7 @@ impl Rule for NoDistractingElements {
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove the '"{state.name}"' element." }.to_owned(),
+            markup! { "Remove the '"{name.text()}"' element." }.to_owned(),
             mutation,
         ))
     }
