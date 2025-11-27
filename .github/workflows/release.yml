@@ -237,20 +237,12 @@ jobs:
           path: ./dist/biome-*
           if-no-files-found: error
 
+
   build-wasm:
     name: Build WASM
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
     if: needs.version.outputs.cli-version
-    strategy:
-      matrix:
-        include:
-          - target: wasm-bundler
-            wasm-pack-target: bundler
-          - target: wasm-nodejs
-            wasm-pack-target: nodejs
-          - target: wasm-web
-            wasm-pack-target: web
     steps:
       - name: Checkout repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -258,15 +250,21 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - name: Build WASM module ${{ matrix.target }}
-        run: wasm-pack build --out-dir ../../packages/@biomejs/${{ matrix.target }} --target ${{ matrix.wasm-pack-target }} --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for bundlers
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for node.js
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for the web
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
 
       - name: Upload WASM artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: wasm-${{ matrix.target }}
+          name: wasm-*
           path: |
-            ./packages/@biomejs/${{ matrix.target }}
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
           if-no-files-found: error
 
   build-js-api:

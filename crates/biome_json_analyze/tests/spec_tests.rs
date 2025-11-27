@@ -147,10 +147,16 @@ pub(crate) fn analyze_and_snap(
     action_type: CheckActionType,
     parser_options: JsonParserOptions,
 ) {
+    let mut diagnostics = Vec::new();
     let parsed = parse_json(input_code, parser_options);
+    if !parsed.diagnostics().is_empty() {
+        for diag in parsed.diagnostics() {
+            let formatted = diagnostic_to_string(file_name, input_code, diag.clone().into());
+            diagnostics.push(formatted);
+        }
+    }
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
 
@@ -192,6 +198,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         language.as_str(),
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);

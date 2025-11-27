@@ -22,13 +22,13 @@ use biome_js_syntax::{
     TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
+use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
     GLOBAL_UNDEFINED_ID,
 };
-use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
+use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
@@ -614,7 +614,7 @@ impl TypeData {
                 Literal::Number(NumberLiteral::new(text_from_token(expr.value_token())?))
             }
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
-                Literal::RegExp(text_from_token(expr.value_token())?)
+                Literal::RegExp(split_regex_literal(expr.value_token())?)
             }
             AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
                 StringLiteral::from(Text::from(expr.inner_string_text().ok()?)),
@@ -2534,6 +2534,28 @@ fn return_type_from_annotation(
     annotation
         .and_then(|annotation| annotation.ty().ok())
         .and_then(|ty| ReturnType::from_any_ts_return_type(resolver, scope_id, &ty))
+}
+
+#[inline]
+fn split_regex_literal(token: SyntaxResult<JsSyntaxToken>) -> Option<RegexpLiteral> {
+    let literal = token.ok()?.token_text_trimmed();
+    let open_index: usize = literal.find('/')? + 1;
+    let close_index: usize = literal.rfind('/')?;
+    if open_index == close_index {
+        return None;
+    }
+
+    let literal_len = usize::from(literal.len());
+
+    Some(RegexpLiteral {
+        pattern: literal
+            .clone()
+            .slice(TextRange::try_from((open_index, close_index)).ok()?)
+            .into(),
+        flags: literal
+            .slice(TextRange::try_from((close_index + 1, literal_len)).ok()?)
+            .into(),
+    })
 }
 
 #[inline]

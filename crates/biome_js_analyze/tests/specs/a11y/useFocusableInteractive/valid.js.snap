@@ -24,3 +24,5 @@ expression: valid.js
 </div>;
 
 ```
+
+_Note: The parser emitted 23 diagnostics which are not shown here._
