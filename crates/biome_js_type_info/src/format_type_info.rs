@@ -590,7 +590,7 @@ impl Format<FormatTypeContext> for TypeReference {
                 let id = resolved.id();
                 if level == TypeResolverLevel::Global {
                     // GlobalsResolverBuilder makes sure the type store is fully filled.
-                    // Every global TypeId whose index less than NUM_PREDEFINED_TYPES
+                    // Every global TypeId whose index is less than NUM_PREDEFINED_TYPES
                     // must have a name returned by global_type_name().
                     // GLOBAL_TYPE_MEMBERS ensures this invariant.
                     if let Some(name) = global_type_name(id) {
