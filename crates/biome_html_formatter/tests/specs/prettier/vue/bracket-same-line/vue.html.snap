@@ -1,0 +1,127 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/bracket-same-line/vue.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<template>
+  <div id="js-app">
+<div :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</div>
+<div :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"></div>
+<span :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+<img :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"/>
+<div class="a">
+text
+</div>
+<span  class="a">
+text
+</span>
+<img class="a"/>
+  </div>
+</template>
+
+<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">new Vue({el: '#js-app'})</script>
+<style  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">.a {color: #f00}</style>
+</body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -36,13 +36,9 @@
+ 
+     <script
+       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+-    >
+-      new Vue({el: '#js-app'})
+-    </script>
++    >new Vue({el: '#js-app'})</script>
+     <style
+       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+-    >
+-      .a {color: #f00}
+-    </style>
++    >.a {color: #f00}</style>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <template>
+      <div id="js-app">
+        <div
+          :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+        >
+          text
+        </div>
+        <div
+          :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+        ></div>
+        <span
+          :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+        >
+          text
+        </span>
+        <span
+          :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+        ></span>
+        <img
+          :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+        />
+        <div class="a">text</div>
+        <span class="a"> text </span>
+        <img class="a" />
+      </div>
+    </template>
+
+    <script
+      long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    >new Vue({el: '#js-app'})</script>
+    <style
+      long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    >.a {color: #f00}</style>
+  </body>
+</html>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   13:           :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+   18:           :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+   21:           :click="long_long_long_long_long_long_long_long_long_long_long_long_long_long_value"
+   26:           :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   29:           :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   38:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   41:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+```

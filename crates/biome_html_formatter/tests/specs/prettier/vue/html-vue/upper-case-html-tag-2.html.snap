@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/html-vue/upper-case-html-tag-2.html
+---
+# Input
+
+```html
+<!DOCTYPE html><HTML>
+  <body>
+    <div v-if="foo ===    'foo'">
+
+</div>
+    <script>
+new Vue({el: '#app'})
+    </script>
+  </body>
+</HTML>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <body>
+-    <div v-if="foo === 'foo'"></div>
++    <div v-if="foo ===    'foo'"></div>
+     <script>
+-      new Vue({ el: "#app" });
++new Vue({el: '#app'})
+     </script>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <div v-if="foo ===    'foo'"></div>
+    <script>
+new Vue({el: '#app'})
+    </script>
+  </body>
+</html>
+```
+
+# Errors
+```
+upper-case-html-tag-2.html:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
+  
+    1 │ <!DOCTYPE html><HTML>
+    2 │   <body>
+  > 3 │     <div v-if="foo ===    'foo'">
+      │          ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ </div>
+  
+  i Remove it or enable the parsing using the html.parser.vue option.
+  
+
+```
