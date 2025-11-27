@@ -4,7 +4,8 @@ use std::{
 };
 
 use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
+    Buffer, Format, FormatElement, FormatOptions, FormatResult, TextWidth, format_args, prelude::*,
+    write,
 };
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
@@ -66,6 +67,7 @@ impl Format<HtmlFormatContext> for HtmlWord {
         f.write_element(FormatElement::LocatedTokenText {
             source_position: self.source_position,
             slice: self.text.clone(),
+            text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
         })
     }
 }

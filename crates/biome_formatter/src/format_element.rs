@@ -4,13 +4,15 @@ pub mod tag;
 use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
-use crate::{TagKind, TextSize};
+use crate::{IndentWidth, TagKind, TextSize};
 use biome_rowan::TokenText;
 #[cfg(target_pointer_width = "64")]
 use biome_rowan::static_assert;
 use std::hash::{Hash, Hasher};
+use std::num::NonZeroU32;
 use std::ops::Deref;
 use std::rc::Rc;
+use unicode_width::UnicodeWidthChar;
 
 /// Language agnostic IR for formatting source code.
 ///
@@ -37,6 +39,7 @@ pub enum FormatElement {
         text: Box<str>,
         /// The start position of the text in the unformatted source code
         source_position: TextSize,
+        text_width: TextWidth,
     },
 
     /// A token for a text that is taken as is from the source code (input text and formatted representation are identical).
@@ -46,6 +49,7 @@ pub enum FormatElement {
         source_position: TextSize,
         /// The token text
         slice: TokenText,
+        text_width: TextWidth,
     },
 
     /// Prevents that line suffixes move past this boundary. Forces the printer to print any pending
@@ -238,8 +242,8 @@ impl FormatElements for FormatElement {
             Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
             Self::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
 
-            Self::Text { text, .. } => text.contains('\n'),
-            Self::LocatedTokenText { slice, .. } => slice.contains('\n'),
+            Self::Text { text_width, .. } => text_width.is_multiline(),
+            Self::LocatedTokenText { text_width, .. } => text_width.is_multiline(),
             Self::Interned(interned) => interned.will_break(),
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
@@ -370,6 +374,66 @@ pub trait FormatElements {
     fn end_tag(&self, kind: TagKind) -> Option<&Tag>;
 }
 
+/// New-type wrapper for a single-line text unicode width.
+/// Mainly to prevent access to the inner value.
+///
+/// ## Representation
+///
+/// Represents the width by adding 1 to the actual width so that the width can be represented by a [`NonZeroU32`],
+/// allowing [`TextWidth`] or [`Option<Width>`] fit in 4 bytes rather than 8.
+///
+/// This means that 2^32 can not be precisely represented and instead has the same value as 2^32-1.
+/// This imprecision shouldn't matter in practice because either text are longer than any configured line width
+/// and thus, the text should break.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct Width(NonZeroU32);
+
+impl Width {
+    pub(crate) const fn new(width: u32) -> Self {
+        Width(NonZeroU32::MIN.saturating_add(width))
+    }
+
+    pub const fn value(self) -> u32 {
+        self.0.get() - 1
+    }
+}
+
+/// The pre-computed unicode width of a text if it is a single-line text or a marker
+/// that it is a multiline text if it contains a line feed.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum TextWidth {
+    Width(Width),
+    Multiline,
+}
+
+impl TextWidth {
+    pub fn from_text(text: &str, indent_width: IndentWidth) -> TextWidth {
+        let mut width = 0u32;
+
+        for c in text.chars() {
+            let char_width = match c {
+                '\t' => indent_width.value() as u32,
+                '\n' => return TextWidth::Multiline,
+                c => c.width().unwrap_or(0) as u32,
+            };
+            width += char_width;
+        }
+
+        Self::Width(Width::new(width))
+    }
+
+    pub const fn width(self) -> Option<Width> {
+        match self {
+            TextWidth::Width(width) => Some(width),
+            TextWidth::Multiline => None,
+        }
+    }
+
+    pub(crate) const fn is_multiline(self) -> bool {
+        matches!(self, TextWidth::Multiline)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -407,4 +471,4 @@ static_assert!(std::mem::size_of::<crate::format_element::Tag>() == 16usize);
 
 #[cfg(not(debug_assertions))]
 #[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::FormatElement>() == 24usize);
+static_assert!(std::mem::size_of::<crate::FormatElement>() == 32usize);
