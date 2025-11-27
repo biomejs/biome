@@ -2,7 +2,6 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlElement;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
@@ -45,7 +44,6 @@ declare_lint_rule! {
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same()],
         recommended: true,
-        severity: Severity::Error,
     }
 }
 
