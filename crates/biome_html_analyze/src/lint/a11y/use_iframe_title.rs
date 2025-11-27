@@ -28,66 +28,10 @@ declare_lint_rule! {
     /// <iframe title=""></iframe>
     /// ```
     ///
-    /// ```html,expect_diagnostic
-    /// <IFRAME></IFRAME>
-    /// ```
-    ///
-    /// ```vue,expect_diagnostic
-    /// <iframe></iframe>
-    /// ```
-    ///
-    /// ```vue,expect_diagnostic
-    /// <iframe title=""></iframe>
-    /// ```
-    ///
-    /// ```svelte,expect_diagnostic
-    /// <iframe></iframe>
-    /// ```
-    ///
-    /// ```svelte,expect_diagnostic
-    /// <iframe title=""></iframe>
-    /// ```
-    ///
-    /// ```astro,expect_diagnostic
-    /// <iframe></iframe>
-    /// ```
-    ///
-    /// ```astro,expect_diagnostic
-    /// <iframe title=""></iframe>
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```html
     /// <iframe title="title"></iframe>
-    /// ```
-    ///
-    /// ```html
-    /// <Iframe title="title"></Iframe>
-    /// ```
-    ///
-    /// ```vue
-    /// <iframe title="title"></iframe>
-    /// ```
-    ///
-    /// ```vue
-    /// <Iframe />
-    /// ```
-    ///
-    /// ```svelte
-    /// <iframe title="title"></iframe>
-    /// ```
-    ///
-    /// ```svelte
-    /// <Iframe />
-    /// ```
-    ///
-    /// ```astro
-    /// <iframe title="title"></iframe>
-    /// ```
-    ///
-    /// ```astro
-    /// <Iframe />
     /// ```
     ///
     /// ## Accessibility guidelines
