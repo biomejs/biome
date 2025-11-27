@@ -22,6 +22,7 @@ use biome_rowan::Text;
 use crate::{
     ModuleId, Resolvable, ResolvedTypeId, ResolverId, TypeResolver,
     globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
+    literal::RegexpLiteral,
     type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
 };
 
@@ -647,7 +648,7 @@ pub enum Literal {
     Boolean(BooleanLiteral),
     Number(NumberLiteral),
     Object(ObjectLiteral),
-    RegExp(Text),
+    RegExp(RegexpLiteral),
     String(StringLiteral),
     Template(Text), // TODO: Custom impl of PartialEq for template literals
 }

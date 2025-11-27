@@ -15,6 +15,8 @@ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom
 
 ```
 
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.css:1:27 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

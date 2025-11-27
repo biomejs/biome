@@ -1,5 +1,167 @@
 # @biomejs/biome
 
+## 2.3.8
+
+### Patch Changes
+
+- [#8188](https://github.com/biomejs/biome/pull/8188) [`4ca088c`](https://github.com/biomejs/biome/commit/4ca088c7648f37724dad07ae4e6f805e7a51ac79) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7390](https://github.com/biomejs/biome/issues/7390), where Biome couldn't apply the correct configuration passed via `--config-path`.
+
+  If you have multiple **root** configuration files, running any command with `--config-path` will now apply the chosen configuration file.
+
+- [#8171](https://github.com/biomejs/biome/pull/8171) [`79adaea`](https://github.com/biomejs/biome/commit/79adaea7d5bc382bd0a4cdcc34e59a8cb3fb6a55) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Added the new rule [`noLeakedRender`](https://biomejs.dev/linter/rules/no-leaked-render). This rule helps prevent potential leaks when rendering components that use binary expressions or ternaries.
+
+  For example, the following code triggers the rule because the component would render `0`:
+
+  ```jsx
+  const Component = () => {
+    const count = 0;
+    return <div>{count && <span>Count: {count}</span>}</div>;
+  };
+  ```
+
+- [#8116](https://github.com/biomejs/biome/pull/8116) [`b537918`](https://github.com/biomejs/biome/commit/b53791835ea98edf8fe4b4288240bd38abb19f2f) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noDuplicatedSpreadProps`](https://biomejs.dev/linter/rules/no-duplicated-spread-props/). Disallow JSX prop spreading the same identifier multiple times.
+
+  **Invalid:**
+
+  ```jsx
+  <div {...props} something="else" {...props} />
+  ```
+
+- [#8256](https://github.com/biomejs/biome/pull/8256) [`f1e4696`](https://github.com/biomejs/biome/commit/f1e4696bf8f018fc23656cd7b96fda32ca46677a) Thanks [@cormacrelf](https://github.com/cormacrelf)! - Fixed a bug where logs were discarded (the kind from `--log-level=info` etc.). This is a regression introduced after an internal refactor that wasn't adequately tested.
+
+- [#8226](https://github.com/biomejs/biome/pull/8226) [`3f19b52`](https://github.com/biomejs/biome/commit/3f19b520c65f4fc53e61ca7cef341deadec5f518) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8222](https://github.com/biomejs/biome/issues/8222): The HTML parser, with Vue directives enabled, can now parse `v-slot` shorthand syntax, e.g. `<template #foo>`.
+
+- [#8007](https://github.com/biomejs/biome/pull/8007) [`182ecdc`](https://github.com/biomejs/biome/commit/182ecdc2736a54073fe79b4d3e1eaf793b73afa6) Thanks [@brandonmcconnell](https://github.com/brandonmcconnell)! - Added support for dollar-sign-prefixed filenames in the [`useFilenamingConvention`](https://biomejs.dev/linter/rules/use-filenaming-convention/) rule.
+
+  Biome now allows filenames starting with the dollar-sign (e.g. `$postId.tsx`) by default to support naming conventions used by frameworks such as [TanStack Start](https://tanstack.com/start/latest/docs/framework/react/guide/routing#file-based-routing) for file-based-routing.
+
+- [#8218](https://github.com/biomejs/biome/pull/8218) [`91484d1`](https://github.com/biomejs/biome/commit/91484d1d53096a554f288c81105f71c7ea8df945) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Added the [`noMultiStr`](https://biomejs.dev/linter/rules/no-multi-str) rule, which disallows creating multiline strings by escaping newlines.
+
+  **Invalid:**
+
+  ```js
+  const foo =
+    "Line 1\n\
+  Line 2";
+  ```
+
+  **Valid:**
+
+  ```js
+  const foo = "Line 1\nLine 2";
+  const bar = `Line 1
+  Line 2`;
+  ```
+
+- [#8225](https://github.com/biomejs/biome/pull/8225) [`98ca2ae`](https://github.com/biomejs/biome/commit/98ca2ae9f3b9b25a14d63b243223583aba6e4907) Thanks [@ongyuxing](https://github.com/ongyuxing)! - Fixed [#7806](https://github.com/biomejs/biome/issues/7806): Prefer breaking after the assignment operator for conditional types with generic parameters to match Prettier.
+
+  ```diff
+  -type True = unknown extends Type<
+  -  "many",
+  -  "generic",
+  -  "parameters",
+  -  "one",
+  -  "two",
+  -  "three"
+  ->
+  -  ? true
+  -  : false;
+  +type True =
+  +  unknown extends Type<"many", "generic", "parameters", "one", "two", "three">
+  +    ? true
+  +    : false;
+  ```
+
+- [#6765](https://github.com/biomejs/biome/pull/6765) [`23f7855`](https://github.com/biomejs/biome/commit/23f78551167e5415da17b5cca8eb2a34e64e0aac) Thanks [@emilyinure](https://github.com/emilyinure)! - Fixed [#6569](https://github.com/biomejs/biome/issues/6569): Allow files to export from themselves with `noImportCycles`.
+
+  This means the following is now allowed:
+
+  ```js
+  // example.js
+  export function example() {
+    return 1;
+  }
+
+  // Re-exports all named exports from the current module under a single namespace
+  // and then imports the namespace from the current module.
+  // Allows for encapsulating functions/variables into a namespace instead
+  // of using a static class.
+  export * as Example from "./example.js";
+
+  import { Example } from "./example.js";
+  ```
+
+- [#8214](https://github.com/biomejs/biome/pull/8214) [`68c052e`](https://github.com/biomejs/biome/commit/68c052efa29892470d4590bffefb20448685f2d9) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Added the [`noEqualsToNull`](https://biomejs.dev/linter/rules/no-equals-to-null) rule, which enforces the use of `===` and `!==` for comparison with `null` instead of `==` or `!=`.
+
+  **Invalid:**
+
+  ```js
+  foo == null;
+  foo != null;
+  ```
+
+  **Valid:**
+
+  ```js
+  foo === null;
+  foo !== null;
+  ```
+
+- [#8219](https://github.com/biomejs/biome/pull/8219) [`793bb9a`](https://github.com/biomejs/biome/commit/793bb9adf179117f6cd7796140f1da2098a4eab5) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8190](https://github.com/biomejs/biome/issues/8190): The HTML parser will now parse Vue event handlers that contain `:` correctly, e.g. `@update:modelValue="onUpdate"`.
+
+- [#8259](https://github.com/biomejs/biome/pull/8259) [`4a9139b`](https://github.com/biomejs/biome/commit/4a9139bbe393d7f8acc226281c7a92d0cc5887ee) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#8254](https://github.com/biomejs/biome/issues/8254): The `noParameterAssign` rule with `propertyAssignment: "deny"` was incorrectly reporting an error when a function parameter was used on the right-hand side of an assignment to a local variable's property.
+
+  The rule should only flag assignments that modify the parameter binding or its properties (L-value), not the use of its value.
+
+  **Valid:**
+
+  ```js
+  (input) => {
+    const local = { property: 0 };
+    local.property = input;
+  };
+  ```
+
+- [#8201](https://github.com/biomejs/biome/pull/8201) [`cd2edd7`](https://github.com/biomejs/biome/commit/cd2edd75d9532171c599073fc91de5a15578e84d) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noTernary`](https://biomejs.dev/linter/rules/no-ternary/). Disallow ternary operators.
+
+  **Invalid:**
+
+  ```js
+  const foo = isBar ? baz : qux;
+  ```
+
+- [#8172](https://github.com/biomejs/biome/pull/8172) [`de98933`](https://github.com/biomejs/biome/commit/de98933f77091358e70d23e51aa5a2a084953722) Thanks [@JeremyMoeglich](https://github.com/JeremyMoeglich)! - Fixed [#8145](https://github.com/biomejs/biome/issues/8145): handling of large hex literals, which previously caused both false positives and false negatives.
+
+  This affects [`noPrecisionLoss`](https://biomejs.dev/linter/rules/no-precision-loss/) and [`noConstantMathMinMaxClamp`](https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp/).
+
+- [#8210](https://github.com/biomejs/biome/pull/8210) [`7b44e9e`](https://github.com/biomejs/biome/commit/7b44e9eec8200fdde096ebdfac493b2e48fd707e) Thanks [@Netail](https://github.com/Netail)! - Corrected rule source reference. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#8213](https://github.com/biomejs/biome/pull/8213) [`e430555`](https://github.com/biomejs/biome/commit/e43055515212a81fc3ef0477fb0ce505555ad0af) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Fixed #8209: Recognized formatting capability when either range or on-type formatting is supported, not only full-file formatting. This ensures editors and the language server correctly detect formatting support in files like JSONC.
+
+- [#8202](https://github.com/biomejs/biome/pull/8202) [`6f49d95`](https://github.com/biomejs/biome/commit/6f49d95f3f3330c12012064a0c6facc306f9f8bf) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#8079](https://github.com/biomejs/biome/issues/8079): Properly handle `name` and `value` metavariables for `JsxAttribute` GritQL queries.
+
+  The following `biome search` command no longer throws an error:
+
+  ```
+  biome search 'JsxAttribute($name, $value) as $attr where { $name <: "style" }'
+  ```
+
+- [#8276](https://github.com/biomejs/biome/pull/8276) [`f7e836f`](https://github.com/biomejs/biome/commit/f7e836fa2b5859c712bb891dc7fbb2fcf28e19a3) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Added the [`noProto`](https://biomejs.dev/linter/rules/no-proto/) rule, which disallows the use of the `__proto__` property for getting or setting the prototype of an object.
+
+  **Invalid**:
+
+  ```js
+  obj.__proto__ = a;
+  const b = obj.__proto__;
+  ```
+
+  **Valid**:
+
+  ```js
+  const a = Object.getPrototypeOf(obj);
+  Object.setPrototypeOf(obj, b);
+  ```
+
 ## 2.3.7
 
 ### Patch Changes

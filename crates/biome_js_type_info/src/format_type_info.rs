@@ -589,8 +589,12 @@ impl Format<FormatTypeContext> for TypeReference {
                 let level = resolved.level();
                 let id = resolved.id();
                 if level == TypeResolverLevel::Global {
-                    if resolved.index() < NUM_PREDEFINED_TYPES {
-                        write!(f, [token(global_type_name(id))])
+                    // GlobalsResolverBuilder makes sure the type store is fully filled.
+                    // Every global TypeId whose index is less than NUM_PREDEFINED_TYPES
+                    // must have a name returned by global_type_name().
+                    // GLOBAL_TYPE_MEMBERS ensures this invariant.
+                    if let Some(name) = global_type_name(id) {
+                        write!(f, [token(name)])
                     } else {
                         // Start counting from `NUM_PREDEFINED_TYPES` so
                         // snapshots remain stable even if we add new predefined
@@ -818,7 +822,14 @@ impl Format<FormatTypeContext> for Literal {
             Self::Object(obj) => write!(f, [&obj]),
             Self::RegExp(regex) => write!(
                 f,
-                [token("regex:"), space(), text(regex, TextSize::default())]
+                [
+                    token("regex:"),
+                    space(),
+                    token("/"),
+                    text(&regex.pattern, TextSize::default()),
+                    token("/"),
+                    text(&regex.flags, TextSize::default())
+                ]
             ),
             Self::String(lit) => write!(
                 f,
