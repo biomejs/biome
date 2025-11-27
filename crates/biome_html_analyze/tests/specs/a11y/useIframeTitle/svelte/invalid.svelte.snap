@@ -15,7 +15,7 @@ expression: invalid.svelte
 ```
 invalid.svelte:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe />
@@ -31,7 +31,7 @@ invalid.svelte:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━
 ```
 invalid.svelte:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe />
@@ -48,7 +48,7 @@ invalid.svelte:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━
 ```
 invalid.svelte:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     2 │ <iframe />
     3 │ <iframe></iframe>

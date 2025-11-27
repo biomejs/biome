@@ -17,7 +17,7 @@ expression: invalid.html
 ```
 invalid.html:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe />
@@ -33,7 +33,7 @@ invalid.html:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
 ```
 invalid.html:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe />
@@ -50,7 +50,7 @@ invalid.html:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
 ```
 invalid.html:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     2 │ <iframe />
     3 │ <iframe></iframe>
@@ -67,7 +67,7 @@ invalid.html:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
 ```
 invalid.html:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     3 │ <iframe></iframe>
     4 │ <iframe title></iframe>
@@ -84,7 +84,7 @@ invalid.html:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
 ```
 invalid.html:6:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     4 │ <iframe title></iframe>
     5 │ <iframe title=""></iframe>
