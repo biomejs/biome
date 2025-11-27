@@ -455,6 +455,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -466,6 +467,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
+            inline_config: None,
         })
         .unwrap();
 
