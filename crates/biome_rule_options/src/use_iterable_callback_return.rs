@@ -10,7 +10,7 @@ pub struct UseIterableCallbackReturnOptions {
 }
 
 impl UseIterableCallbackReturnOptions {
-    pub const DEFAULT_CHECK_FOR_EACH: bool = true;
+    pub const DEFAULT_CHECK_FOR_EACH: bool = false;
 
     /// Returns [`Self::check_for_each`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_CHECK_FOR_EACH`].

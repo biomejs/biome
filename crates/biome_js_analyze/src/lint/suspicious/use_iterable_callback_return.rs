@@ -85,17 +85,30 @@ declare_lint_rule! {
     ///
     /// ### `checkForEach`
     ///
-    /// Default: `true`
+    /// Default: `false`
     ///
-    /// When set to `false`, rule will skip reporting `forEach` callbacks that return a value.
+    /// When set to `true` (non-default), the rule will also check `forEach` callbacks that return a value.
+    /// By default (false), `forEach` callbacks are not checked as returning values from them is a common pattern.
     ///
-    /// ```json,options
+    /// ### Examples
+    ///
+    /// When `checkForEach` is set to `true`, the following will trigger a diagnostic:
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// [1, 2, 3].forEach((el) => {
+    ///     return el * 2;
+    /// });
+    /// ```
+    ///
+    /// ```json,use_options
     /// {
     ///     "options": {
     ///         "checkForEach": true
     ///     }
     /// }
     /// ```
+    ///
+    /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
     ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
