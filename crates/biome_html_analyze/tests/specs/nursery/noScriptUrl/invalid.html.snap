@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: invalid.html
 ---
 # Input
@@ -21,7 +20,7 @@ expression: invalid.html
 ```
 invalid.html:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     1 │ <!-- Invalid cases - should trigger the rule -->
     2 │ 
@@ -40,7 +39,7 @@ invalid.html:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.html:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     3 │ <a href="javascript:void(0)">Link</a>
     4 │ 
@@ -59,7 +58,7 @@ invalid.html:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.html:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
     5 │ <a href="javascript:alert('XSS')">Link</a>
     6 │ 
@@ -78,7 +77,7 @@ invalid.html:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 ```
 invalid.html:9:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid using javascript: URLs, as they can be a security risk.
+  × Avoid using javascript: URLs, as they can be a security risk.
   
      7 │ <a href=" javascript:void(0)">Link</a>
      8 │ 

@@ -5,6 +5,8 @@ use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlOpeningElement, inner_string_text};
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::StrOnlyExtension;
+use biome_diagnostics::Severity;
+use biome_rule_options::no_script_url::NoScriptUrlOptions;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs in HTML.
@@ -45,7 +47,8 @@ declare_lint_rule! {
             RuleSource::EslintSolid("jsx-no-script-url").same(),
             RuleSource::EslintReactXyz("dom-no-script-url").same(),
         ],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -53,7 +56,7 @@ impl Rule for NoScriptUrl {
     type Query = Ast<HtmlOpeningElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoScriptUrlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let element = ctx.query();

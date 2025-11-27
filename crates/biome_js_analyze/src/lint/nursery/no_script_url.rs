@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_string_case::StrOnlyExtension;
+use biome_rule_options::no_script_url::NoScriptUrlOptions;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs.
@@ -56,7 +57,7 @@ declare_lint_rule! {
             RuleSource::EslintSolid("jsx-no-script-url").same(),
             RuleSource::EslintReactXyz("dom-no-script-url").same(),
         ],
-        recommended: false,
+        recommended: true,
         severity: Severity::Error,
     }
 }
@@ -82,7 +83,7 @@ impl Rule for NoScriptUrl {
     type Query = Semantic<AnyJsElementWithHref>;
     type State = NoScriptUrlState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoScriptUrlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
