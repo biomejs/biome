@@ -81,3 +81,8 @@
 .empty-if {
 	color: if();
 }
+
+.if-branch-list-recovery {
+	a: if(style(--foo: bar): black; !bogus; else: white);
+	a: if(style(--foo: bar): black; ???; else: white);
+}

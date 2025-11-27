@@ -2,12 +2,14 @@ use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::Parser;
+use biome_parser::TokenSet;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::{CompletedMarker, ParsedSyntax};
+use biome_parser::token_set;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::container::error::expected_any_container_style_query;
@@ -25,6 +27,8 @@ use crate::syntax::parse_declaration;
 use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
+
+const RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')'], T!['}'], EOF];
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if])
@@ -218,6 +222,11 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_if_test(p: &mut CssParser) -> bool {
+    is_at_if_supports_test(p) || is_at_if_style_test(p) || is_at_if_media_test(p)
+}
+
+#[inline]
 fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
     if is_at_if_supports_test(p) {
         return parse_if_supports_test(p);
@@ -232,6 +241,11 @@ fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
     }
 
     Absent
+}
+
+#[inline]
+fn is_at_if_test_boolean_expr_group(p: &mut CssParser) -> bool {
+    p.at(T!['(']) || is_at_if_test(p)
 }
 
 #[inline]
@@ -372,6 +386,11 @@ fn parse_any_if_test_boolean_expr(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_any_if_condition(p: &mut CssParser) -> bool {
+    p.at(T![else]) || is_at_if_test_boolean_expr_group(p) || is_at_if_test_boolean_not_expr(p)
+}
+
+#[inline]
 fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![else]) {
         let m = p.start();
@@ -384,17 +403,31 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_if_condition(p) {
+        if !p.at_ts(RECOVERY_TOKEN_SET) {
+            let m = p.start();
+
+            while !p.at_ts(RECOVERY_TOKEN_SET) {
+                p.bump_any();
+            }
+
+            let bogus = m.complete(p, CSS_BOGUS_IF_BRANCH);
+            p.error(expected_if_branch(p, bogus.range(p)));
+
+            return Present(bogus);
+        }
+        return Absent;
+    }
+
     let m = p.start();
 
-    parse_any_if_condition(p)
-        .or_recover(p, &AnyIfTestParseRecovery, expected_if_branch)
-        .ok();
+    parse_any_if_condition(p).ok();
 
     p.expect(T![:]);
 
     GenericComponentValueList.parse_list(p);
 
-    Present(m.complete(p, CSS_IF_BRANCH))
+    Present(m.complete(p, CSS_BOGUS_IF_BRANCH))
 }
 
 struct AnyIfTestBooleanExprChainParseRecovery;
@@ -412,18 +445,6 @@ impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     }
 }
 
-struct AnyIfTestParseRecovery;
-
-impl ParseRecovery for AnyIfTestParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.has_preceding_line_break()
-    }
-}
-
 struct IfBranchListParseRecovery;
 
 impl ParseRecovery for IfBranchListParseRecovery {
@@ -433,7 +454,7 @@ impl ParseRecovery for IfBranchListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || p.at(T![')']) || p.has_preceding_line_break()
+        p.at_ts(RECOVERY_TOKEN_SET)
     }
 }
 

@@ -130,6 +130,8 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssFontFeatureValuesBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssUnicodeValue::can_cast(*kind) => CSS_BOGUS_UNICODE_RANGE_VALUE,
             kind if AnyCssSupportsCondition::can_cast(*kind) => CSS_BOGUS_SUPPORTS_CONDITION,
+            kind if AnyCssIfBranch::can_cast(*kind) => CSS_BOGUS_IF_BRANCH,
+            kind if AnyCssIfTest::can_cast(*kind) => CSS_BOGUS_IF_TEST,
 
             _ => CSS_BOGUS,
         }
