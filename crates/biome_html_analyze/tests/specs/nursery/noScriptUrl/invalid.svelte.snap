@@ -1,0 +1,69 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```html
+<!-- Svelte invalid cases - should trigger the rule -->
+
+<a href="javascript:void(0)">Void</a>
+<a href=" javascript:confirm('XSS') ">Confirm</a>
+<a href="JAVASCRIPT:doSomething()">Uppercase</a>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    1 │ <!-- Svelte invalid cases - should trigger the rule -->
+    2 │ 
+  > 3 │ <a href="javascript:void(0)">Void</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    4 │ <a href=" javascript:confirm('XSS') ">Confirm</a>
+    5 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.svelte:4:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ <a href="javascript:void(0)">Void</a>
+  > 4 │ <a href=" javascript:confirm('XSS') ">Confirm</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    6 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.svelte:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ <a href="javascript:void(0)">Void</a>
+    4 │ <a href=" javascript:confirm('XSS') ">Confirm</a>
+  > 5 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
