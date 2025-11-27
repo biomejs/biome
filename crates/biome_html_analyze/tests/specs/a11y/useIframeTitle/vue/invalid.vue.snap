@@ -15,7 +15,7 @@ expression: invalid.vue
 ```
 invalid.vue:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a title attribute when using iframe elements.
+  i Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe />
@@ -31,7 +31,7 @@ invalid.vue:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.vue:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a title attribute when using iframe elements.
+  i Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe />
@@ -48,7 +48,7 @@ invalid.vue:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.vue:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Provide a title attribute when using iframe elements.
+  i Provide a title attribute when using iframe elements.
   
     2 │ <iframe />
     3 │ <iframe></iframe>
