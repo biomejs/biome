@@ -29,7 +29,6 @@ pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
 
 pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
-    // use crate::globals_ids::*;
     (0..NUM_PREDEFINED_TYPES)
         .map(TypeId::new)
         .map(|id| {

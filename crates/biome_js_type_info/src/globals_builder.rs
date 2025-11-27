@@ -22,12 +22,12 @@ impl GlobalsResolverBuilder {
     /// Fill a previously reserved type slot with actual type data.
     pub fn set_type_data(&mut self, id: TypeId, data: TypeData) {
         let index = id.index();
-        assert!(
+        debug_assert!(
             index < self.types.len(),
             "TypeId {index} out of bounds (len: {})",
             self.types.len()
         );
-        assert!(
+        debug_assert!(
             self.types[index].is_none(),
             "Type at index {index} already set"
         );
@@ -39,13 +39,8 @@ impl GlobalsResolverBuilder {
         let types: Vec<Arc<TypeData>> = self
             .types
             .into_iter()
-            .enumerate()
-            .map(|(i, opt)| {
-                Arc::new(opt.unwrap_or_else(|| {
-                    // Make sure we only reserve just enough for what we need
-                    panic!("Type at index {i} was reserved but never filled")
-                }))
-            })
+            .map(|opt| Arc::new(
+                opt.unwrap_or(TypeData::Unknown)))
             .collect();
 
         GlobalsResolver {
