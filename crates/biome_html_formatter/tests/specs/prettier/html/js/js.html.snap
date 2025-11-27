@@ -23,6 +23,10 @@ info: html/js/js.html
 <script type="text/babel">
             const    someJS    =   'this should be formatted'
 </script>
+<script type="text/jsx">
+            const    someJS    =   'this should be formatted'
+</script>
+
 <script type="module">
       import lib from './lib.js';
   
@@ -37,13 +41,18 @@ info: html/js/js.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,12 +14,10 @@
+@@ -14,16 +14,14 @@
    alert(message);
  </script>
  <script type="text/babel">
 -  const someJS = "this should be formatted";
 +            const    someJS    =   'this should be formatted'
  </script>
+ <script type="text/jsx">
+-  const someJS = "this should be formatted";
++            const    someJS    =   'this should be formatted'
+ </script>
+ 
  <script type="module">
 -  import lib from "./lib.js";
 -
@@ -78,6 +87,10 @@ info: html/js/js.html
 <script type="text/babel">
             const    someJS    =   'this should be formatted'
 </script>
+<script type="text/jsx">
+            const    someJS    =   'this should be formatted'
+</script>
+
 <script type="module">
       import lib from './lib.js';
   

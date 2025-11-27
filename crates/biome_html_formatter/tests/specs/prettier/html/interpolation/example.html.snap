@@ -15,10 +15,10 @@ x => {
 
 
 
-}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
-
-
-    some_variable
+}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{  
+    
+    
+    some_variable 
 
 
 
@@ -27,7 +27,7 @@ x => {
                     preserve
 
                     invalid
-
+                    
                     interpolation
 
 }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
@@ -59,10 +59,10 @@ x => {
 +
 +
 +
-+}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
-+
-+
-+    some_variable
++}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{  
++    
++    
++    some_variable 
 +
 +
 +
@@ -71,7 +71,7 @@ x => {
 +                    preserve
 +
 +                    invalid
-+
++                    
 +                    interpolation
 +
 +}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
@@ -90,10 +90,10 @@ x => {
 
 
 
-}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
-
-
-    some_variable
+}} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{  
+    
+    
+    some_variable 
 
 
 
@@ -102,7 +102,7 @@ x => {
                     preserve
 
                     invalid
-
+                    
                     interpolation
 
 }} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
@@ -122,9 +122,9 @@ example.html:1:114 parse ━━━━━━━━━━━━━━━━━━�
         ...
    > 9 │ 
   > 10 │ 
-  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
+  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{··
        │ ^^
-    12 │ 
+    12 │     
   
   i Remove it or enable the parsing using the html.parser.interpolation option.
   
@@ -132,9 +132,9 @@ example.html:11:72 parse ━━━━━━━━━━━━━━━━━━�
 
   × Text expressions aren't supported.
   
-  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{
-       │                                                                        ^^
-  > 12 │ 
+  > 11 │ }} Magni consectetur in et molestias neque esse voluptatibus voluptas. {{··
+       │                                                                        ^^^^
+  > 12 │     
         ...
   > 17 │ 
   > 18 │ }} Eum quia nihil nulla esse. Dolorem asperiores vero est error {{
