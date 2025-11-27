@@ -10,7 +10,7 @@ use biome_service::workspace::{
 use camino::Utf8PathBuf;
 use std::sync::Arc;
 use tower_lsp_server::{UriExt, lsp_types};
-use tracing::{debug, error, field, info};
+use tracing::{debug, error, field, info, trace};
 
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(
@@ -164,16 +164,14 @@ pub(crate) async fn did_change(
         project_key: doc.project_key,
         path: path.clone(),
     })?;
-    debug!("old document: {:?}", old_text);
-    debug!("content changes: {:?}", params.content_changes);
+
+    trace!("content changes: {:?}", params.content_changes);
 
     let text = apply_document_changes(
         session.position_encoding(),
         old_text,
         params.content_changes,
     );
-
-    debug!("new document: {:?}", text);
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 
