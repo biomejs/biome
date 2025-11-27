@@ -444,17 +444,23 @@ When choosing `minor` or `major`, make sure your PR targets the `next` branch in
 
 The description of the changeset should follow the these guidelines:
 
-- Our changesets should be about _user-facing_ changes. Internal changes don't
-  need changesets.
-- Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
-- Use the present tense when describing Biome behavior, e.g. "Biome now supports ...".
+- Our changesets should be about **user-facing changes**. Internal changes don't
+  need changesets. For example, if you refactored some code, but the user-facing
+  behavior didn't change, you don't need a changeset.
+- **Be concise and clear.** Changesets are not documentation, and they are not test cases.
+  They should give a **quick overview** of what changed, allowing the reader to dig deeper if they want to. A good changeset is usually between 1 and 3 sentences long. **Longer changesets indicate to the user that they should pay more attention to the change, at least if it concerns a feature that is relevant to them.** Consider the impact of your change on the user when writing the changeset. The key is to provide just enough information for the user to understand the change without overwhelming them with details.
+  - For a *new* lint rule, show an example of an invalid case in an inline code snippet for simple things or a code block for more complex examples. If it _really_ helps demonstrate the rule, you can also show a valid case.
+  - For a *change in an existing rule*, clearly demonstrate what is now considered invalid that wasn't before, or vice versa. If it helps communicate the change greatly, show both invalid and valid cases.
+  - For a *formatter change*, show an example of the formatting change using a `diff` code block.
+  - For parser changes, a brief inline example of what can now be parsed that couldn't before (or vice versa) is usually sufficient. If formatting on multiple lines improves clarity, use a code block.
+- **Use past tense when describing what you did**, e.g. "Added new feature", "Fixed edge case".
+- **Use the present tense when describing Biome behavior**, e.g. "Biome now supports ...".
 - If you fixed a bug, please start with a link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444): ...".
-- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
+- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated at the time of writing, it will once the PR is merged).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
-- Whenever applicable, add a code block to show your new changes. For example, for a new rule you should show an invalid case, while for the formatter you should show how the new formatting changes, and so on.
 - End every sentence with a full stop (`.`).
 
-If in doubt, take a look at existing or past changesets.
+If in doubt, take a look at existing changesets, or the most recent entries in `CHANGELOG.md`, and use your best judgement.
 
 ### Documentation
 
