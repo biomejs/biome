@@ -394,6 +394,10 @@ impl<'a> Printer<'a> {
     }
 
     fn push_marker(&mut self, marker: SourceMarker) {
+        if self.options.source_map_generation().is_disabled() {
+            return;
+        }
+
         if let Some(last) = self.state.source_markers.last() {
             if last != &marker {
                 self.state.source_markers.push(marker)
