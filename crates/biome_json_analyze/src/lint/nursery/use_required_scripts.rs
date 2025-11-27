@@ -10,11 +10,9 @@ declare_lint_rule! {
     /// This rule ensures that specified scripts are defined in the `scripts` section of a `package.json` file.
     /// It's particularly useful in monorepo environments where consistency across workspaces is important.
     ///
-    /// ## Options
+    /// ## Examples
     ///
-    /// ### `requiredScripts`
-    ///
-    /// An array of script names that must be present in the `scripts` section of `package.json`.
+    /// ### Invalid
     ///
     /// ```json,options
     /// {
@@ -23,10 +21,6 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
     ///
     /// ```json,expect_diagnostic,use_options
     /// {
@@ -46,6 +40,13 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `requiredScripts`
+    ///
+    /// An array of script names that must be present in the `scripts` section of `package.json`.
+    /// Default: `[]` (no scripts required)
     ///
     pub UseRequiredScripts {
         version: "next",
