@@ -28,16 +28,6 @@ const Component3 = () => {
 
 const Component4 = () => {
 	return (
-		<NoErrorWithAttribute
-			error={firstBool && secondBool}
-			coerceError={!!(firstBool && secondBool)}
-			orderId={isChecked ? orderId : undefined}
-		/>
-	);
-};
-
-const Component5 = () => {
-	return (
 		<Nested>
 			<SecondNested>{userId ? 1 : null} </SecondNested>
 		</Nested>
