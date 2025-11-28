@@ -57,7 +57,7 @@ const MyComponent3 = () => {
 };
 
 const MyComponent4 = ({ count, title }) => {
-	return <div>{count && title}</div>;
+	return <div>{(((((count))))) && ((title))}</div>;
 };
 
 const MyComponent5 = ({ data }) => {
@@ -65,5 +65,5 @@ const MyComponent5 = ({ data }) => {
 };
 
 const MyComponent6 = ({ value }) => {
-	return <div>{value && <Item />}</div>;
+	return <div>{(((((data)))) && (((((data.value))))))}</div>;
 };
