@@ -9620,6 +9620,7 @@ impl AnyCssIfTestBooleanAndCombinableExpr {
 pub enum AnyCssIfTestBooleanExpr {
     AnyCssIfTestBooleanAndCombinableExpr(AnyCssIfTestBooleanAndCombinableExpr),
     AnyCssIfTestBooleanOrCombinableExpr(AnyCssIfTestBooleanOrCombinableExpr),
+    CssBogusIfTestBooleanExpr(CssBogusIfTestBooleanExpr),
     CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr),
 }
 impl AnyCssIfTestBooleanExpr {
@@ -9636,6 +9637,12 @@ impl AnyCssIfTestBooleanExpr {
     ) -> Option<&AnyCssIfTestBooleanOrCombinableExpr> {
         match &self {
             Self::AnyCssIfTestBooleanOrCombinableExpr(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_if_test_boolean_expr(&self) -> Option<&CssBogusIfTestBooleanExpr> {
+        match &self {
+            Self::CssBogusIfTestBooleanExpr(item) => Some(item),
             _ => None,
         }
     }
@@ -24506,6 +24513,11 @@ impl From<AnyCssIfTestBooleanAndCombinableExpr> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusIfTestBooleanExpr> for AnyCssIfTestBooleanExpr {
+    fn from(node: CssBogusIfTestBooleanExpr) -> Self {
+        Self::CssBogusIfTestBooleanExpr(node)
+    }
+}
 impl From<CssIfTestBooleanNotExpr> for AnyCssIfTestBooleanExpr {
     fn from(node: CssIfTestBooleanNotExpr) -> Self {
         Self::CssIfTestBooleanNotExpr(node)
@@ -24515,10 +24527,11 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssIfTestBooleanAndCombinableExpr::KIND_SET
         .union(AnyCssIfTestBooleanOrCombinableExpr::KIND_SET)
+        .union(CssBogusIfTestBooleanExpr::KIND_SET)
         .union(CssIfTestBooleanNotExpr::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
+            CSS_BOGUS_IF_TEST_BOOLEAN_EXPR | CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
             k if AnyCssIfTestBooleanAndCombinableExpr::can_cast(k) => true,
             k if AnyCssIfTestBooleanOrCombinableExpr::can_cast(k) => true,
             _ => false,
@@ -24526,6 +24539,9 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_IF_TEST_BOOLEAN_EXPR => {
+                Self::CssBogusIfTestBooleanExpr(CssBogusIfTestBooleanExpr { syntax })
+            }
             CSS_IF_TEST_BOOLEAN_NOT_EXPR => {
                 Self::CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr { syntax })
             }
@@ -24552,6 +24568,7 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssBogusIfTestBooleanExpr(it) => it.syntax(),
             Self::CssIfTestBooleanNotExpr(it) => it.syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.syntax(),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.syntax(),
@@ -24559,6 +24576,7 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssBogusIfTestBooleanExpr(it) => it.into_syntax(),
             Self::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
@@ -24570,6 +24588,7 @@ impl std::fmt::Debug for AnyCssIfTestBooleanExpr {
         match self {
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogusIfTestBooleanExpr(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfTestBooleanNotExpr(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -24579,6 +24598,7 @@ impl From<AnyCssIfTestBooleanExpr> for SyntaxNode {
         match n {
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExpr::CssBogusIfTestBooleanExpr(it) => it.into_syntax(),
             AnyCssIfTestBooleanExpr::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
         }
     }
@@ -30936,6 +30956,62 @@ impl From<CssBogusIfTest> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssBogusIfTestBooleanExpr {
+    syntax: SyntaxNode,
+}
+impl CssBogusIfTestBooleanExpr {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusIfTestBooleanExpr {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_IF_TEST_BOOLEAN_EXPR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusIfTestBooleanExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusIfTestBooleanExpr")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusIfTestBooleanExpr> for SyntaxNode {
+    fn from(n: CssBogusIfTestBooleanExpr) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBogusIfTestBooleanExpr> for SyntaxElement {
+    fn from(n: CssBogusIfTestBooleanExpr) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusKeyframesItem {
     syntax: SyntaxNode,
 }
@@ -31999,7 +32075,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssBracketedValueList {
     syntax_list: SyntaxList,

@@ -25,10 +25,12 @@ use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_declaration;
 use crate::syntax::property::GenericComponentValueList;
+use crate::syntax::property::is_at_generic_component_value;
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 
-const RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')'], T!['}'], EOF];
+const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![;], T![')'], T!['}'], EOF];
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if])
@@ -403,11 +405,17 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
+    // The DeclarationOrRuleList parser that this function call will be parsed in higher up
+    // the node tree uses  speculative parsing and the semicolon character to determine when
+    // parsing is complete or when to recover from a parsing error. This comes in conflict with
+    // error recovery parsing for if branches since this parser also uses the semicolon as a recovery
+    // point. To get around this, we handle our own manual recovery here by consuming all unexpected
+    // tokens into the CssBogusIfBranch node until we are able to recover.
     if !is_at_any_if_condition(p) {
-        if !p.at_ts(RECOVERY_TOKEN_SET) {
+        if !p.at_ts(IF_BRANCH_RECOVERY_TOKEN_SET) {
             let m = p.start();
 
-            while !p.at_ts(RECOVERY_TOKEN_SET) {
+            while !p.at_ts(IF_BRANCH_RECOVERY_TOKEN_SET) {
                 p.bump_any();
             }
 
@@ -416,14 +424,13 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
 
             return Present(bogus);
         }
+
         return Absent;
     }
 
     let m = p.start();
 
-    parse_any_if_condition(p)
-        .or_recover(p, &AnyIfTestParseRecovery, expected_if_branch)
-        .ok();
+    parse_any_if_condition(p).ok();
 
     p.expect(T![:]);
 
@@ -432,27 +439,16 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_IF_BRANCH))
 }
 
-struct AnyIfTestParseRecovery;
-
-impl ParseRecovery for AnyIfTestParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.has_preceding_line_break()
-    }
-}
-
 struct AnyIfTestBooleanExprChainParseRecovery;
 
 impl ParseRecovery for AnyIfTestBooleanExprChainParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_TEST_BOOLEAN_EXPR;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_if_test_boolean_not_expr(p)
+        p.at(T![')'])
+            || is_at_if_test_boolean_not_expr(p)
             || is_at_if_test_boolean_and_expr(p)
             || is_at_if_test_boolean_or_expr(p)
             || p.has_preceding_line_break()
@@ -468,7 +464,7 @@ impl ParseRecovery for IfBranchListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_IF_BRANCH;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(RECOVERY_TOKEN_SET)
+        p.at_ts(IF_BRANCH_RECOVERY_TOKEN_SET)
     }
 }
 

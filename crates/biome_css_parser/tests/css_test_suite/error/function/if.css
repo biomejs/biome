@@ -86,3 +86,7 @@
 	a: if(style(--foo: bar): black; !bogus; else: white);
 	a: if(style(--foo: bar): black; ???; else: white);
 }
+
+.todo {
+	background: if(style(--foo: bar) and (!bogus): red;);
+}
