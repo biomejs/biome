@@ -29,7 +29,7 @@ package.json:3:3 lint/nursery/useRequiredScripts ━━━━━━━━━━�
     6 │ }
     7 │ 
   
-  i Consistent scripts across packages ensure that each can be ran reliably from the root of our project. Add the missing script to your package.json.
+  i Consistent scripts across packages ensure that each can be run reliably from the root of our project. Add the missing script to your package.json.
   
 
 ```

@@ -89,14 +89,7 @@ impl Rule for UseRequiredScripts {
         let value = query.value().ok()?;
         let object_value = value.as_json_object_value()?;
 
-        let scripts_member = object_value
-            .json_member_list()
-            .iter()
-            .flatten()
-            .find_map(|member| {
-                (member.name().ok()?.inner_string_text().ok()?.text() == "scripts")
-                    .then_some(member)
-            });
+        let scripts_member = object_value.find_member("scripts");
 
         // If there's no scripts section, all required scripts are missing
         // Point to the root object in this case
