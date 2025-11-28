@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Add support for the typed `attr` function. Addresses issue #6183.
+Added support for the typed `attr` function. Addresses issue #6183.
 
 **Example**
 
