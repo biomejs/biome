@@ -5390,6 +5390,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useRequiredScripts": {
+					"description": "Enforce the presence of required scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRequiredScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -9274,6 +9281,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseRequiredScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRequiredScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"properties": {
@@ -12191,6 +12207,24 @@
 			]
 		},
 		"UseRegexpExecOptions": { "type": "object", "additionalProperties": false },
+		"UseRequiredScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRequiredScriptsOptions" }
+			]
+		},
+		"UseRequiredScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"requiredScripts": {
+					"description": "List of script names that must be present in package.json",
+					"type": "array",
+					"default": [],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSelfClosingElementsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
