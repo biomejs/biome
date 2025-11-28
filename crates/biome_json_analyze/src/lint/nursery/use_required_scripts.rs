@@ -20,6 +20,8 @@ declare_lint_rule! {
     /// This rule ensures that specified scripts are defined in the `scripts` section of a `package.json` file.
     /// It's particularly useful in monorepo environments where consistency across workspaces is important.
     ///
+    /// Without required scripts configured, this rule doesn't do anything.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -87,15 +89,14 @@ impl Rule for UseRequiredScripts {
         let value = query.value().ok()?;
         let object_value = value.as_json_object_value()?;
 
-        let scripts_member =
-            object_value
-                .json_member_list()
-                .iter()
-                .flatten()
-                .find_map(|member| {
-                    (member.name().ok()?.inner_string_text().ok()?.text() == "scripts")
-                        .then_some(member)
-                });
+        let scripts_member = object_value
+            .json_member_list()
+            .iter()
+            .flatten()
+            .find_map(|member| {
+                (member.name().ok()?.inner_string_text().ok()?.text() == "scripts")
+                    .then_some(member)
+            });
 
         // If there's no scripts section, all required scripts are missing
         // Point to the root object in this case
