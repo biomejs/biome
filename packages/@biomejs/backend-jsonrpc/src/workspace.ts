@@ -7124,31 +7124,32 @@ export interface NoUnknownAtRulesOptions {
 	 */
 	ignore?: string[];
 }
-export interface NoUnsafeDeclarationMergingOptions {}
-export interface NoUnsafeNegationOptions {}
-export interface NoUselessEscapeInStringOptions {}
-export interface NoUselessRegexBackrefsOptions {}
-export interface NoVarOptions {}
-export interface NoWithOptions {}
-export interface UseAdjacentOverloadSignaturesOptions {}
-export interface UseAwaitOptions {}
-export interface UseBiomeIgnoreFolderOptions {}
-export interface UseDefaultSwitchClauseLastOptions {}
-export interface UseErrorMessageOptions {}
-export interface UseGetterReturnOptions {}
-export interface UseGoogleFontDisplayOptions {}
-export interface UseGuardForInOptions {}
-export interface UseIsArrayOptions {}
+export type NoUnsafeDeclarationMergingOptions = {};
+export type NoUnsafeNegationOptions = {};
+export type NoUselessEscapeInStringOptions = {};
+export type NoUselessRegexBackrefsOptions = {};
+export type NoVarOptions = {};
+export type NoWithOptions = {};
+export type UseAdjacentOverloadSignaturesOptions = {};
+export type UseAwaitOptions = {};
+export type UseBiomeIgnoreFolderOptions = {};
+export type UseDefaultSwitchClauseLastOptions = {};
+export type UseErrorMessageOptions = {};
+export type UseGetterReturnOptions = {};
+export type UseGoogleFontDisplayOptions = {};
+export type UseGuardForInOptions = {};
+export type UseIsArrayOptions = {};
 export interface UseIterableCallbackReturnOptions {
 	/**
-	 * When set to `false`, rule will skip reporting `forEach` callbacks that return a value.
+	* When `true`, the rule reports `forEach` callbacks that return a value.
+When `false` or unset, such callbacks are ignored (default behaviour). 
 	 */
 	checkForEach?: boolean;
 }
-export interface UseNamespaceKeywordOptions {}
-export interface UseNumberToFixedDigitsArgumentOptions {}
-export interface UseStaticResponseMethodsOptions {}
-export interface UseStrictModeOptions {}
+export type UseNamespaceKeywordOptions = {};
+export type UseNumberToFixedDigitsArgumentOptions = {};
+export type UseStaticResponseMethodsOptions = {};
+export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
 /**
