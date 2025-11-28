@@ -7,9 +7,9 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_grit_patterns::GritTargetLanguage;
-use biome_service::configuration::LoadedConfiguration;
 use biome_service::workspace::ParsePatternParams;
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
@@ -26,19 +26,20 @@ impl CommandRunner for SearchCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        mut loaded_configuration: Configuration,
+        _loaded_directory: Option<Utf8PathBuf>,
+        _loaded_file: Option<Utf8PathBuf>,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let LoadedConfiguration {
-            mut configuration, ..
-        } = loaded_configuration;
-        configuration
+        loaded_configuration
             .files
             .merge_with(self.files_configuration.clone());
-        configuration.vcs.merge_with(self.vcs_configuration.clone());
+        loaded_configuration
+            .vcs
+            .merge_with(self.vcs_configuration.clone());
 
-        Ok(configuration)
+        Ok(loaded_configuration)
     }
 
     fn get_files_to_process(
