@@ -16,7 +16,7 @@ For example, with the Zed editor, you would have the following configuration, wh
       "settings": {
         "inline_config": {
           "formatter": {
-            "quoteStyle": "space",
+            "indentStyle": "space",
             "indentWidth":  4
           }
         }
