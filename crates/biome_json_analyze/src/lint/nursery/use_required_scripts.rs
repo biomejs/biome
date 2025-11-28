@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json,expect_diagnostic,use_options
+    /// ```json,use_options
     /// {
     ///     "scripts": {
     ///         "test": "vitest"
