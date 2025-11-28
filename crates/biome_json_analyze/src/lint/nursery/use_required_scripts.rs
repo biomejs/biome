@@ -155,7 +155,7 @@ impl Rule for UseRequiredScripts {
 
         Some(
             RuleDiagnostic::new(rule_category!(), state.range, message).note(markup! {
-                "Consistent scripts across packages ensure that each can be ran reliably from the root of our project. Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
+                "Consistent scripts across packages ensure that each can be run reliably from the root of our project. Add the missing script"{{if missing_count > 1 { "s" } else { "" }}}" to your package.json."
             }),
         )
     }
