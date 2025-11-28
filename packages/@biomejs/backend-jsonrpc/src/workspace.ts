@@ -2070,10 +2070,10 @@ See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope
 	 */
 	useQwikValidLexicalScope?: UseQwikValidLexicalScopeConfiguration;
 	/**
-	* Enforce the presence of required scripts in package.json.
-See https://biomejs.dev/linter/rules/use-required-scripts 
+	* Enforce RegExp#exec over String#match if no global flag is provided.
+See https://biomejs.dev/linter/rules/use-regexp-exec 
 	 */
-	useRequiredScripts?: UseRequiredScriptsConfiguration;
+	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
@@ -3689,9 +3689,9 @@ export type UseQwikMethodUsageConfiguration =
 export type UseQwikValidLexicalScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikValidLexicalScopeOptions;
-export type UseRequiredScriptsConfiguration =
+export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
-	| RuleWithUseRequiredScriptsOptions;
+	| RuleWithUseRegexpExecOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5136,9 +5136,9 @@ export interface RuleWithUseQwikValidLexicalScopeOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikValidLexicalScopeOptions;
 }
-export interface RuleWithUseRequiredScriptsOptions {
+export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
-	options?: UseRequiredScriptsOptions;
+	options?: UseRegexpExecOptions;
 }
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
@@ -6396,12 +6396,7 @@ export interface UseMaxParamsOptions {
 }
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
-export interface UseRequiredScriptsOptions {
-	/**
-	 * List of script names that must be present in package.json
-	 */
-	requiredScripts?: string[];
-}
+export type UseRegexpExecOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7214,7 +7209,7 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
-	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
