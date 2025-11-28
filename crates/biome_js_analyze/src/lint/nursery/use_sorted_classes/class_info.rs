@@ -38,8 +38,9 @@ enum UtilityMatch {
 impl From<(&str, &str)> for UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
     fn from((target, utility_text): (&str, &str)) -> Self {
-        // Support negative value utilities (e.g., `-ml-2` should match `ml-`).
-        // Strip the leading `-` if present for matching purposes.
+        // Support negative value utilities (e.g., `-ml-2` should match `ml-` or `-ml-`).
+        // Strip the leading `-` from both target and utility for matching purposes.
+        let target = target.strip_prefix('-').unwrap_or(target);
         let utility_text = utility_text.strip_prefix('-').unwrap_or(utility_text);
 
         // If the target ends with `$`, then it's an exact target.
@@ -139,6 +140,28 @@ mod utility_match_tests {
         );
         assert_eq!(
             UtilityMatch::from(("inset-", "-inset-2")),
+            UtilityMatch::Partial
+        );
+    }
+
+    #[test]
+    fn test_negative_target_utilities() {
+        // Test that targets with leading `-` also work (for custom utilities defined with `-` prefix)
+        // Exact match with negative target
+        assert_eq!(
+            UtilityMatch::from(("-test$", "-test")),
+            UtilityMatch::Exact
+        );
+        assert_eq!(UtilityMatch::from(("-test$", "test")), UtilityMatch::Exact);
+        // Partial match with negative target
+        assert_eq!(
+            UtilityMatch::from(("-ml-", "-ml-2")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(UtilityMatch::from(("-ml-", "ml-2")), UtilityMatch::Partial);
+        // Both negative target and utility
+        assert_eq!(
+            UtilityMatch::from(("-custom-", "-custom-value")),
             UtilityMatch::Partial
         );
     }
