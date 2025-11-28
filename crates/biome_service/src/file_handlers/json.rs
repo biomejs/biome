@@ -530,7 +530,7 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_source: None,
+        configuration_source: params.settings.full_source(),
     };
     let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, |signal| {
         process_lint.process_signal(signal)
@@ -605,7 +605,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_source: None,
+        configuration_source: workspace.full_source(),
     };
     analyze(&tree, filter, &analyzer_options, services, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {

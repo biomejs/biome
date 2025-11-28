@@ -735,7 +735,7 @@ pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
     pub workspace_directory: Option<BiomePath>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub extended_configurations: Vec<(BiomePath, Configuration)>,
 }
 
