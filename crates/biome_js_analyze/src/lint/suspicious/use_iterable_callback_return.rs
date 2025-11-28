@@ -58,8 +58,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// [].forEach(() => {
-    ///     return 1; // Should not return a value
+    /// [].filter(() => {
+    ///     // Missing required return value
     /// });
     /// ```
     ///
