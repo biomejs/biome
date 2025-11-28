@@ -67,11 +67,11 @@ const MyComponent4 = ({ count, title }) => {
 };
 
 const MyComponent5 = ({ data }) => {
-	return <div>{data && data.value}</div>;
-};
+	return <div>{(((((data)))) && (((((data.value))))))}</div>;
+}
 
 const MyComponent6 = ({ value }) => {
-	return <div>{(((((data)))) && (((((data.value))))))}</div>;
+	return <div>{(((value))) && <Item />}</div>;
 };
 
 ```
@@ -322,15 +322,15 @@ invalid.jsx:60:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:64:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:68:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    63 │ const MyComponent5 = ({ data }) => {
-  > 64 │ 	return <div>{data && data.value}</div>;
-       │ 	             ^^^^^^^^^^^^^^^^^^
-    65 │ };
-    66 │ 
+    67 │ const MyComponent6 = ({ value }) => {
+  > 68 │ 	return <div>{(((value))) && <Item />}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ };
+    70 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   

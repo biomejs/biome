@@ -61,9 +61,9 @@ const MyComponent4 = ({ count, title }) => {
 };
 
 const MyComponent5 = ({ data }) => {
-	return <div>{data && data.value}</div>;
-};
+	return <div>{(((((data)))) && (((((data.value))))))}</div>;
+}
 
 const MyComponent6 = ({ value }) => {
-	return <div>{(((((data)))) && (((((data.value))))))}</div>;
+	return <div>{(((value))) && <Item />}</div>;
 };
