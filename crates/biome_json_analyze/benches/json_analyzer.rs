@@ -3,6 +3,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
+use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonFileSource;
 use biome_test_utils::BenchCase;
@@ -58,12 +59,18 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             AnalyzerConfiguration::default()
                                 .with_jsx_runtime(JsxRuntime::default()),
                         );
+
                         b.iter(|| {
+                            let json_services = JsonAnalyzeServices {
+                                file_source,
+                                configuration_source: None,
+                            };
+
                             biome_json_analyze::analyze(
                                 &parse.tree(),
                                 filter,
                                 &options,
-                                file_source,
+                                json_services,
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions());

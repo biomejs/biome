@@ -44,7 +44,7 @@ fn correctly_lookups_environment_settings() {
     };
     let mut settings = Settings::default();
     settings
-        .merge_with_configuration(configuration, None)
+        .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
     let environment = JsLanguage::resolve_environment(&settings);
 
@@ -66,7 +66,7 @@ fn correctly_computes_analyzer_options() {
     };
     let mut settings = Settings::default();
     settings
-        .merge_with_configuration(configuration, None)
+        .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
     let environment = JsLanguage::resolve_environment(&settings);
     let language = JsLanguage::lookup_settings(&settings.languages);
@@ -119,7 +119,7 @@ fn merge_override_linter_group_rule() {
     let mut settings = Settings::default();
 
     settings
-        .merge_with_configuration(configuration, None)
+        .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
 
     let disabled_rules = settings
@@ -148,7 +148,7 @@ fn merge_override_files_max_size_rule() {
     let mut settings = Settings::default();
 
     settings
-        .merge_with_configuration(configuration, None)
+        .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
 
     assert_eq!(

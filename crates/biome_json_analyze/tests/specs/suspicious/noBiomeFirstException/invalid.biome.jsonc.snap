@@ -30,7 +30,7 @@ invalid.biome.jsonc:5:4 lint/suspicious/noBiomeFirstException  FIXABLE  ━━�
   
   i Having a pattern that starts with `!` as first item will cause Biome to match no files.
   
-  i Safe fix: Add the patter ** at the beginning of the list.
+  i Safe fix: Add the pattern ** at the beginning of the list.
   
     3  3 │   	"files": {
     4  4 │   		"includes": [

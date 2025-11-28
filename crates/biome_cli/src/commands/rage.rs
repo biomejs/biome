@@ -216,11 +216,16 @@ impl Display for RageConfiguration<'_> {
                         diagnostics,
                         directory_path,
                         file_path,
+                        extended_configurations,
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
-                        .merge_with_configuration(configuration.clone(), None)
+                        .merge_with_configuration(
+                            configuration.clone(),
+                            None,
+                            extended_configurations,
+                        )
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {

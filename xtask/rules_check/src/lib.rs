@@ -22,6 +22,7 @@ use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
+use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
@@ -370,8 +371,11 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<JsonLanguage>(config)?;
-
-                biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
+                let json_services = JsonAnalyzeServices {
+                    file_source,
+                    configuration_source: None,
+                };
+                biome_json_analyze::analyze(&root, filter, &options, json_services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {

@@ -414,6 +414,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
                 ..Default::default()
             },
             workspace_directory: None,
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -472,6 +473,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -539,6 +541,7 @@ language css;
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -602,6 +605,7 @@ fn plugins_may_use_invalid_span() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -719,6 +723,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 

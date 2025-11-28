@@ -955,14 +955,26 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.file_path,
             loaded_configuration.diagnostics.len(),
         );
-        let configuration_dir_path = loaded_configuration.directory_path.clone();
+        let LoadedConfiguration {
+            extended_configurations,
+            configuration,
+            diagnostics: _,
+            directory_path,
+            file_path,
+        } = loaded_configuration;
 
         // Merge the FS configuration with the CLI arguments
-        let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
+        let configuration = self.merge_configuration(
+            configuration,
+            directory_path.clone(),
+            file_path,
+            fs,
+            console,
+        )?;
 
         let execution = self.get_execution(cli_options, console, workspace)?;
 
-        let root_configuration_dir = configuration_dir_path
+        let root_configuration_dir = directory_path
             .clone()
             .unwrap_or_else(|| working_dir.clone());
         // Using `--config-path`, users can point to a (root) config file that
@@ -1003,6 +1015,10 @@ pub(crate) trait CommandRunner: Sized {
             project_key: open_project_result.project_key,
             workspace_directory: Some(BiomePath::new(project_dir)),
             configuration,
+            extended_configurations: extended_configurations
+                .into_iter()
+                .map(|(path, config)| (BiomePath::from(path), config))
+                .collect(),
         })?;
         if self.should_validate_configuration_diagnostics() {
             print_diagnostics_from_workspace_result(
@@ -1080,7 +1096,9 @@ pub(crate) trait CommandRunner: Sized {
     /// The CLI arguments take precedence over the option configured in the configuration file.
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        loaded_configuration: Configuration,
+        loaded_directory: Option<Utf8PathBuf>,
+        loaded_file: Option<Utf8PathBuf>,
         fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError>;

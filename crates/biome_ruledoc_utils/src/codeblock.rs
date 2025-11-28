@@ -76,7 +76,7 @@ impl CodeBlock {
                 );
             };
 
-            settings.merge_with_configuration(config, None)?;
+            settings.merge_with_configuration(config, None, vec![])?;
         }
 
         let language_settings = &L::lookup_settings(&settings.languages).linter;

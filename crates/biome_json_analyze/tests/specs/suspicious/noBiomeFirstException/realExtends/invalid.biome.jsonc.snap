@@ -1,0 +1,46 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.biome.jsonc
+---
+# Input
+```jsonc
+// should generate diagnostics
+{
+	"extends": ["./_ignore_catch_all.json"],
+	"files": {
+		"includes": [
+			"**",
+			"!dist/**"
+		]
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.biome.jsonc:6:4 lint/suspicious/noBiomeFirstException  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome detected that at least one of your extended packages starts with **.
+  
+    4 │ 	"files": {
+    5 │ 		"includes": [
+  > 6 │ 			"**",
+      │ 			^^^^
+    7 │ 			"!dist/**"
+    8 │ 		]
+  
+  i When an extended package uses a catch-all, adding an additional catch-all could lead to possible issues.
+  
+  i Safe fix: Remove ** from your list.
+  
+     4  4 │   	"files": {
+     5  5 │   		"includes": [
+     6    │ - → → → "**",
+     7    │ - → → → "!dist/**"
+        6 │ + → → → "!dist/**"
+     8  7 │   		]
+     9  8 │   	}
+  
+
+```

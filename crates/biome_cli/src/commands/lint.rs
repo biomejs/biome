@@ -12,8 +12,8 @@ use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
-use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
@@ -45,17 +45,14 @@ impl CommandRunner for LintCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        mut loaded_configuration: Configuration,
+        _loaded_directory: Option<Utf8PathBuf>,
+        _loaded_file: Option<Utf8PathBuf>,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let LoadedConfiguration {
-            configuration: mut fs_configuration,
-            ..
-        } = loaded_configuration;
-
-        fs_configuration.merge_with(Configuration {
-            linter: if fs_configuration
+        loaded_configuration.merge_with(Configuration {
+            linter: if loaded_configuration
                 .linter
                 .as_ref()
                 .is_some_and(LinterConfiguration::is_enabled)
@@ -73,7 +70,9 @@ impl CommandRunner for LintCommandPayload {
             ..Default::default()
         });
 
-        let css = fs_configuration.css.get_or_insert_with(Default::default);
+        let css = loaded_configuration
+            .css
+            .get_or_insert_with(Default::default);
         if self.css_linter.is_some() {
             css.linter.merge_with(self.css_linter.clone());
         }
@@ -82,18 +81,20 @@ impl CommandRunner for LintCommandPayload {
         }
 
         if self.graphql_linter.is_some() {
-            let graphql = fs_configuration
+            let graphql = loaded_configuration
                 .graphql
                 .get_or_insert_with(Default::default);
             graphql.linter.merge_with(self.graphql_linter.clone());
         }
         if self.javascript_linter.is_some() {
-            let javascript = fs_configuration
+            let javascript = loaded_configuration
                 .javascript
                 .get_or_insert_with(Default::default);
             javascript.linter.merge_with(self.javascript_linter.clone());
         }
-        let json = fs_configuration.json.get_or_insert_with(Default::default);
+        let json = loaded_configuration
+            .json
+            .get_or_insert_with(Default::default);
         if self.json_linter.is_some() {
             json.linter.merge_with(self.json_linter.clone());
         }
@@ -101,7 +102,7 @@ impl CommandRunner for LintCommandPayload {
             json.parser.merge_with(self.json_parser.clone());
         }
 
-        Ok(fs_configuration)
+        Ok(loaded_configuration)
     }
 
     fn get_files_to_process(
