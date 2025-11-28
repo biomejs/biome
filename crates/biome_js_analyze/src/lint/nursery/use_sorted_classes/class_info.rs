@@ -148,16 +148,10 @@ mod utility_match_tests {
     fn test_negative_target_utilities() {
         // Test that targets with leading `-` also work (for custom utilities defined with `-` prefix)
         // Exact match with negative target
-        assert_eq!(
-            UtilityMatch::from(("-test$", "-test")),
-            UtilityMatch::Exact
-        );
+        assert_eq!(UtilityMatch::from(("-test$", "-test")), UtilityMatch::Exact);
         assert_eq!(UtilityMatch::from(("-test$", "test")), UtilityMatch::Exact);
         // Partial match with negative target
-        assert_eq!(
-            UtilityMatch::from(("-ml-", "-ml-2")),
-            UtilityMatch::Partial
-        );
+        assert_eq!(UtilityMatch::from(("-ml-", "-ml-2")), UtilityMatch::Partial);
         assert_eq!(UtilityMatch::from(("-ml-", "ml-2")), UtilityMatch::Partial);
         // Both negative target and utility
         assert_eq!(
