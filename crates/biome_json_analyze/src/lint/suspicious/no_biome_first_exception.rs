@@ -47,7 +47,7 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// ```json5,ignore
+    /// ```jsonc,ignore
     /// // biome.json
     /// {
     ///     "extends": ["./base.json"]
@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json5,ignore
+    /// ```jsonc,ignore
     /// // base.json
     /// {
     ///     "files": {
