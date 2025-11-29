@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<iframe />
+<iframe></iframe>
+<iframe title=""></iframe>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <iframe />
+      │ ^^^^^^^^^^
+    3 │ <iframe></iframe>
+    4 │ <iframe title=""></iframe>
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.svelte:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <iframe />
+  > 3 │ <iframe></iframe>
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ <iframe title=""></iframe>
+    5 │ 
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.svelte:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    2 │ <iframe />
+    3 │ <iframe></iframe>
+  > 4 │ <iframe title=""></iframe>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
