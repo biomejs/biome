@@ -91,6 +91,9 @@ pub enum BiomeCommand {
         /// Prints the linter options applied
         #[bpaf(long("linter"), switch)]
         bool,
+        /// Prints the files options applied
+        #[bpaf(long("files"), switch)]
+        bool,
     ),
     /// Starts the Biome daemon server process.
     #[bpaf(command)]
