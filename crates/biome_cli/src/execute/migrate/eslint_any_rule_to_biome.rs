@@ -628,16 +628,24 @@ pub(crate) fn migrate_eslint_any_rule(
             // Enable all 4 nullish coalescing rules as they collectively implement
             // the full behavior of TypeScript ESLint's prefer-nullish-coalescing rule
 
-            let rule = group.use_nullish_coalescing.get_or_insert(Default::default());
+            let rule = group
+                .use_nullish_coalescing
+                .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
 
-            let rule = group.use_nullish_coalescing_assignment.get_or_insert(Default::default());
+            let rule = group
+                .use_nullish_coalescing_assignment
+                .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
 
-            let rule = group.use_nullish_coalescing_in_ternary.get_or_insert(Default::default());
+            let rule = group
+                .use_nullish_coalescing_in_ternary
+                .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
 
-            let rule = group.use_if_as_nullish_coalescing_assignment.get_or_insert(Default::default());
+            let rule = group
+                .use_if_as_nullish_coalescing_assignment
+                .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "@typescript-eslint/prefer-optional-chain" => {

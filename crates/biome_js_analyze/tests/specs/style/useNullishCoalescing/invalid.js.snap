@@ -4,259 +4,565 @@ expression: invalid.js
 ---
 # Input
 ```js
-// Basic || that should be ??
-const value = x || 'default';
+// Safe defaults - should report
 
-// Multiple || operators
-const value2 = a || b || c;
+// Object literals
+const config = options || {};
+const settings = prefs || { theme: 'dark' };
 
-// Assignment context
+// Array literals
+const items = list || [];
+const values = data || [1, 2, 3];
+
+// Non-empty string literals
+const name = input || 'Anonymous';
+const message = text || "default message";
+
+// Template literals with content
+const greeting = name || `Hello ${user}`;
+
+// Function expressions
+const handler = callback || function() {};
+const process = fn || (() => {});
+
+// Class expressions
+const Component = CustomClass || class {};
+
+// new expressions
+const instance = existing || new Map();
+const date = d || new Date();
+
+// Member access (suggests object expected)
+const value = config || defaults.value;
+const item = cache || storage.getItem('key');
+
+// Nested safe defaults
+const nested = a || (b || {});
+
+// In various contexts
 let result;
-result = foo || 'fallback';
+result = foo || {};
 
-// Inside function
 function test(param) {
-  return param || 0;
+  return param || [];
 }
 
-// Arrow function
-const fn = (x) => x || [];
+const fn = (x) => x || 'default';
 
-// Object property
 const obj = {
-  prop: value || 'default'
+  prop: value || {}
 };
 
-// Array element
-const arr = [x || y];
+const arr = [x || []];
 
-// Nested in expression
-const computed = (x || 5) * 2;
+const computed = (x || 'fallback').length;
 
 ```
 
 # Diagnostics
 ```
-invalid.js:2:17 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:24 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    1 │ // Basic || that should be ??
-  > 2 │ const value = x || 'default';
-      │                 ^^
-    3 │ 
-    4 │ // Multiple || operators
-  
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
-  
-  i Safe fix: Use ?? instead.
-  
-     1  1 │   // Basic || that should be ??
-     2    │ - const·value·=·x·||·'default';
-        2 │ + const·value·=·x·??·'default';
-     3  3 │   
-     4  4 │   // Multiple || operators
-  
-
-```
-
-```
-invalid.js:5:18 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    4 │ // Multiple || operators
-  > 5 │ const value2 = a || b || c;
-      │                  ^^
+    3 │ // Object literals
+  > 4 │ const config = options || {};
+      │                        ^^
+    5 │ const settings = prefs || { theme: 'dark' };
     6 │ 
-    7 │ // Assignment context
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-     3  3 │   
-     4  4 │   // Multiple || operators
-     5    │ - const·value2·=·a·||·b·||·c;
-        5 │ + const·value2·=·a·??·b·||·c;
+     2  2 │   
+     3  3 │   // Object literals
+     4    │ - const·config·=·options·||·{};
+        4 │ + const·config·=·options·??·{};
+     5  5 │   const settings = prefs || { theme: 'dark' };
      6  6 │   
-     7  7 │   // Assignment context
   
 
 ```
 
 ```
-invalid.js:5:23 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:24 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    4 │ // Multiple || operators
-  > 5 │ const value2 = a || b || c;
-      │                       ^^
+    3 │ // Object literals
+    4 │ const config = options || {};
+  > 5 │ const settings = prefs || { theme: 'dark' };
+      │                        ^^
     6 │ 
-    7 │ // Assignment context
+    7 │ // Array literals
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-     3  3 │   
-     4  4 │   // Multiple || operators
-     5    │ - const·value2·=·a·||·b·||·c;
-        5 │ + const·value2·=·a·||·b·??·c;
+     3  3 │   // Object literals
+     4  4 │   const config = options || {};
+     5    │ - const·settings·=·prefs·||·{·theme:·'dark'·};
+        5 │ + const·settings·=·prefs·??·{·theme:·'dark'·};
      6  6 │   
-     7  7 │   // Assignment context
+     7  7 │   // Array literals
   
 
 ```
 
 ```
-invalid.js:9:14 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:20 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-     7 │ // Assignment context
-     8 │ let result;
-   > 9 │ result = foo || 'fallback';
-       │              ^^
+     7 │ // Array literals
+   > 8 │ const items = list || [];
+       │                    ^^
+     9 │ const values = data || [1, 2, 3];
     10 │ 
-    11 │ // Inside function
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-     7  7 │   // Assignment context
-     8  8 │   let result;
-     9    │ - result·=·foo·||·'fallback';
-        9 │ + result·=·foo·??·'fallback';
+     6  6 │   
+     7  7 │   // Array literals
+     8    │ - const·items·=·list·||·[];
+        8 │ + const·items·=·list·??·[];
+     9  9 │   const values = data || [1, 2, 3];
     10 10 │   
-    11 11 │   // Inside function
   
 
 ```
 
 ```
-invalid.js:13:16 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:21 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    11 │ // Inside function
-    12 │ function test(param) {
-  > 13 │   return param || 0;
-       │                ^^
-    14 │ }
-    15 │ 
-  
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
-  
-  i Safe fix: Use ?? instead.
-  
-    11 11 │   // Inside function
-    12 12 │   function test(param) {
-    13    │ - ··return·param·||·0;
-       13 │ + ··return·param·??·0;
-    14 14 │   }
-    15 15 │   
-  
-
-```
-
-```
-invalid.js:17:21 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    16 │ // Arrow function
-  > 17 │ const fn = (x) => x || [];
+     7 │ // Array literals
+     8 │ const items = list || [];
+   > 9 │ const values = data || [1, 2, 3];
        │                     ^^
-    18 │ 
-    19 │ // Object property
+    10 │ 
+    11 │ // Non-empty string literals
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-    15 15 │   
-    16 16 │   // Arrow function
-    17    │ - const·fn·=·(x)·=>·x·||·[];
-       17 │ + const·fn·=·(x)·=>·x·??·[];
-    18 18 │   
-    19 19 │   // Object property
+     7  7 │   // Array literals
+     8  8 │   const items = list || [];
+     9    │ - const·values·=·data·||·[1,·2,·3];
+        9 │ + const·values·=·data·??·[1,·2,·3];
+    10 10 │   
+    11 11 │   // Non-empty string literals
   
 
 ```
 
 ```
-invalid.js:21:15 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:20 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    19 │ // Object property
-    20 │ const obj = {
-  > 21 │   prop: value || 'default'
+    11 │ // Non-empty string literals
+  > 12 │ const name = input || 'Anonymous';
+       │                    ^^
+    13 │ const message = text || "default message";
+    14 │ 
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    10 10 │   
+    11 11 │   // Non-empty string literals
+    12    │ - const·name·=·input·||·'Anonymous';
+       12 │ + const·name·=·input·??·'Anonymous';
+    13 13 │   const message = text || "default message";
+    14 14 │   
+  
+
+```
+
+```
+invalid.js:13:22 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    11 │ // Non-empty string literals
+    12 │ const name = input || 'Anonymous';
+  > 13 │ const message = text || "default message";
+       │                      ^^
+    14 │ 
+    15 │ // Template literals with content
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    11 11 │   // Non-empty string literals
+    12 12 │   const name = input || 'Anonymous';
+    13    │ - const·message·=·text·||·"default·message";
+       13 │ + const·message·=·text·??·"default·message";
+    14 14 │   
+    15 15 │   // Template literals with content
+  
+
+```
+
+```
+invalid.js:16:23 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    15 │ // Template literals with content
+  > 16 │ const greeting = name || `Hello ${user}`;
+       │                       ^^
+    17 │ 
+    18 │ // Function expressions
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    14 14 │   
+    15 15 │   // Template literals with content
+    16    │ - const·greeting·=·name·||·`Hello·${user}`;
+       16 │ + const·greeting·=·name·??·`Hello·${user}`;
+    17 17 │   
+    18 18 │   // Function expressions
+  
+
+```
+
+```
+invalid.js:19:26 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    18 │ // Function expressions
+  > 19 │ const handler = callback || function() {};
+       │                          ^^
+    20 │ const process = fn || (() => {});
+    21 │ 
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    17 17 │   
+    18 18 │   // Function expressions
+    19    │ - const·handler·=·callback·||·function()·{};
+       19 │ + const·handler·=·callback·??·function()·{};
+    20 20 │   const process = fn || (() => {});
+    21 21 │   
+  
+
+```
+
+```
+invalid.js:20:20 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    18 │ // Function expressions
+    19 │ const handler = callback || function() {};
+  > 20 │ const process = fn || (() => {});
+       │                    ^^
+    21 │ 
+    22 │ // Class expressions
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    18 18 │   // Function expressions
+    19 19 │   const handler = callback || function() {};
+    20    │ - const·process·=·fn·||·(()·=>·{});
+       20 │ + const·process·=·fn·??·(()·=>·{});
+    21 21 │   
+    22 22 │   // Class expressions
+  
+
+```
+
+```
+invalid.js:23:31 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    22 │ // Class expressions
+  > 23 │ const Component = CustomClass || class {};
+       │                               ^^
+    24 │ 
+    25 │ // new expressions
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    21 21 │   
+    22 22 │   // Class expressions
+    23    │ - const·Component·=·CustomClass·||·class·{};
+       23 │ + const·Component·=·CustomClass·??·class·{};
+    24 24 │   
+    25 25 │   // new expressions
+  
+
+```
+
+```
+invalid.js:26:27 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    25 │ // new expressions
+  > 26 │ const instance = existing || new Map();
+       │                           ^^
+    27 │ const date = d || new Date();
+    28 │ 
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    24 24 │   
+    25 25 │   // new expressions
+    26    │ - const·instance·=·existing·||·new·Map();
+       26 │ + const·instance·=·existing·??·new·Map();
+    27 27 │   const date = d || new Date();
+    28 28 │   
+  
+
+```
+
+```
+invalid.js:27:16 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    25 │ // new expressions
+    26 │ const instance = existing || new Map();
+  > 27 │ const date = d || new Date();
+       │                ^^
+    28 │ 
+    29 │ // Member access (suggests object expected)
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    25 25 │   // new expressions
+    26 26 │   const instance = existing || new Map();
+    27    │ - const·date·=·d·||·new·Date();
+       27 │ + const·date·=·d·??·new·Date();
+    28 28 │   
+    29 29 │   // Member access (suggests object expected)
+  
+
+```
+
+```
+invalid.js:30:22 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    29 │ // Member access (suggests object expected)
+  > 30 │ const value = config || defaults.value;
+       │                      ^^
+    31 │ const item = cache || storage.getItem('key');
+    32 │ 
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    28 28 │   
+    29 29 │   // Member access (suggests object expected)
+    30    │ - const·value·=·config·||·defaults.value;
+       30 │ + const·value·=·config·??·defaults.value;
+    31 31 │   const item = cache || storage.getItem('key');
+    32 32 │   
+  
+
+```
+
+```
+invalid.js:34:24 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    33 │ // Nested safe defaults
+  > 34 │ const nested = a || (b || {});
+       │                        ^^
+    35 │ 
+    36 │ // In various contexts
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    32 32 │   
+    33 33 │   // Nested safe defaults
+    34    │ - const·nested·=·a·||·(b·||·{});
+       34 │ + const·nested·=·a·||·(b·??·{});
+    35 35 │   
+    36 36 │   // In various contexts
+  
+
+```
+
+```
+invalid.js:38:14 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    36 │ // In various contexts
+    37 │ let result;
+  > 38 │ result = foo || {};
+       │              ^^
+    39 │ 
+    40 │ function test(param) {
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    36 36 │   // In various contexts
+    37 37 │   let result;
+    38    │ - result·=·foo·||·{};
+       38 │ + result·=·foo·??·{};
+    39 39 │   
+    40 40 │   function test(param) {
+  
+
+```
+
+```
+invalid.js:41:16 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    40 │ function test(param) {
+  > 41 │   return param || [];
+       │                ^^
+    42 │ }
+    43 │ 
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    39 39 │   
+    40 40 │   function test(param) {
+    41    │ - ··return·param·||·[];
+       41 │ + ··return·param·??·[];
+    42 42 │   }
+    43 43 │   
+  
+
+```
+
+```
+invalid.js:44:21 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    42 │ }
+    43 │ 
+  > 44 │ const fn = (x) => x || 'default';
+       │                     ^^
+    45 │ 
+    46 │ const obj = {
+  
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
+  
+  i Safe fix: Use ?? instead.
+  
+    42 42 │   }
+    43 43 │   
+    44    │ - const·fn·=·(x)·=>·x·||·'default';
+       44 │ + const·fn·=·(x)·=>·x·??·'default';
+    45 45 │   
+    46 46 │   const obj = {
+  
+
+```
+
+```
+invalid.js:47:15 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over || for default values.
+  
+    46 │ const obj = {
+  > 47 │   prop: value || {}
        │               ^^
-    22 │ };
-    23 │ 
+    48 │ };
+    49 │ 
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-    19 19 │   // Object property
-    20 20 │   const obj = {
-    21    │ - ··prop:·value·||·'default'
-       21 │ + ··prop:·value·??·'default'
-    22 22 │   };
-    23 23 │   
+    45 45 │   
+    46 46 │   const obj = {
+    47    │ - ··prop:·value·||·{}
+       47 │ + ··prop:·value·??·{}
+    48 48 │   };
+    49 49 │   
   
 
 ```
 
 ```
-invalid.js:25:16 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:50:16 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    24 │ // Array element
-  > 25 │ const arr = [x || y];
+    48 │ };
+    49 │ 
+  > 50 │ const arr = [x || []];
        │                ^^
-    26 │ 
-    27 │ // Nested in expression
+    51 │ 
+    52 │ const computed = (x || 'fallback').length;
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-    23 23 │   
-    24 24 │   // Array element
-    25    │ - const·arr·=·[x·||·y];
-       25 │ + const·arr·=·[x·??·y];
-    26 26 │   
-    27 27 │   // Nested in expression
+    48 48 │   };
+    49 49 │   
+    50    │ - const·arr·=·[x·||·[]];
+       50 │ + const·arr·=·[x·??·[]];
+    51 51 │   
+    52 52 │   const computed = (x || 'fallback').length;
   
 
 ```
 
 ```
-invalid.js:28:21 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:21 lint/style/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use ?? instead of ||.
+  i Prefer ?? over || for default values.
   
-    27 │ // Nested in expression
-  > 28 │ const computed = (x || 5) * 2;
+    50 │ const arr = [x || []];
+    51 │ 
+  > 52 │ const computed = (x || 'fallback').length;
        │                     ^^
-    29 │ 
+    53 │ 
   
-  i The || operator checks for all falsy values (null, undefined, 0, '', false), while ?? only checks for null and undefined.
+  i Using ?? ensures that only null and undefined trigger the fallback, preserving intentional falsy values like 0 or empty strings.
   
   i Safe fix: Use ?? instead.
   
-    26 26 │   
-    27 27 │   // Nested in expression
-    28    │ - const·computed·=·(x·||·5)·*·2;
-       28 │ + const·computed·=·(x·??·5)·*·2;
-    29 29 │   
+    50 50 │   const arr = [x || []];
+    51 51 │   
+    52    │ - const·computed·=·(x·||·'fallback').length;
+       52 │ + const·computed·=·(x·??·'fallback').length;
+    53 53 │   
   
 
 ```

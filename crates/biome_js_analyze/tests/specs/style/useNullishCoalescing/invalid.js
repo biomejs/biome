@@ -1,28 +1,52 @@
-// Basic || that should be ??
-const value = x || 'default';
+// Safe defaults - should report
 
-// Multiple || operators
-const value2 = a || b || c;
+// Object literals
+const config = options || {};
+const settings = prefs || { theme: 'dark' };
 
-// Assignment context
+// Array literals
+const items = list || [];
+const values = data || [1, 2, 3];
+
+// Non-empty string literals
+const name = input || 'Anonymous';
+const message = text || "default message";
+
+// Template literals with content
+const greeting = name || `Hello ${user}`;
+
+// Function expressions
+const handler = callback || function() {};
+const process = fn || (() => {});
+
+// Class expressions
+const Component = CustomClass || class {};
+
+// new expressions
+const instance = existing || new Map();
+const date = d || new Date();
+
+// Member access (suggests object expected)
+const value = config || defaults.value;
+const item = cache || storage.getItem('key');
+
+// Nested safe defaults
+const nested = a || (b || {});
+
+// In various contexts
 let result;
-result = foo || 'fallback';
+result = foo || {};
 
-// Inside function
 function test(param) {
-  return param || 0;
+  return param || [];
 }
 
-// Arrow function
-const fn = (x) => x || [];
+const fn = (x) => x || 'default';
 
-// Object property
 const obj = {
-  prop: value || 'default'
+  prop: value || {}
 };
 
-// Array element
-const arr = [x || y];
+const arr = [x || []];
 
-// Nested in expression
-const computed = (x || 5) * 2;
+const computed = (x || 'fallback').length;
