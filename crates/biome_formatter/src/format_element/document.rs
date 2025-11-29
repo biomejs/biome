@@ -6,7 +6,8 @@ use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration,
+    TransformSourceMap,
 };
 use crate::{format, write};
 use biome_rowan::TextSize;
@@ -266,6 +267,7 @@ impl FormatOptions for IrFormatOptions {
             print_width: self.line_width().into(),
             line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
+            source_map_generation: SourceMapGeneration::default(),
         }
     }
 }

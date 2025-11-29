@@ -74,6 +74,7 @@ pub use buffer::{
 pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
+pub use printer::SourceMapGeneration;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
 use std::str::FromStr;
@@ -1021,8 +1022,16 @@ where
         Ok(printed)
     }
 
-    pub fn print_with_indent(&self, indent: u16) -> PrintResult<Printed> {
-        let print_options = self.context.options().as_print_options();
+    pub fn print_with_indent(
+        &self,
+        indent: u16,
+        source_map: SourceMapGeneration,
+    ) -> PrintResult<Printed> {
+        let print_options = self
+            .context
+            .options()
+            .as_print_options()
+            .with_source_map_generation(source_map);
         let printed = Printer::new(print_options).print_with_indent(&self.document, indent)?;
 
         let printed = match self.context.source_map() {
@@ -2045,7 +2054,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
     };
 
     let formatted = format_node(root, language, false)?;
-    let mut printed = formatted.print_with_indent(initial_indent)?;
+    let mut printed = formatted.print_with_indent(initial_indent, SourceMapGeneration::Enabled)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();
 
