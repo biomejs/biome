@@ -106,7 +106,7 @@ impl Rule for NoLeakedRender {
         let query = ctx.query();
         let model = ctx.model();
 
-        if !is_inside_jsx_expression(query.syntax()).unwrap_or(false) {
+        if !is_inside_jsx_expression(query.syntax()).unwrap_or_default() {
             return None;
         }
 
