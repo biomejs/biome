@@ -374,6 +374,9 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
+            } else if filename.ends_with(".gs") {
+                // TODO(jpoehnelt): Google Apps Script is a subset of JavaScript,
+                // so we should remove and provide relevant globals.
             }
         }
 
