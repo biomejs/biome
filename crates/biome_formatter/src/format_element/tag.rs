@@ -73,6 +73,10 @@ pub enum Tag {
     /// These tags must be removed during the second pass.
     StartEmbedded(TextRange),
     EndEmbedded,
+
+    /// Entry inside of a [FormatElement::BestFitting]
+    StartBestFittingEntry,
+    EndBestFittingEntry,
 }
 
 impl Tag {
@@ -92,6 +96,7 @@ impl Tag {
                 | Self::StartVerbatim(_)
                 | Self::StartLabelled(_)
                 | Self::StartEmbedded(_)
+                | Self::StartBestFittingEntry
         )
     }
 
@@ -116,6 +121,7 @@ impl Tag {
             StartVerbatim(_) | EndVerbatim => TagKind::Verbatim,
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
             StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
+            StartBestFittingEntry | EndBestFittingEntry => TagKind::BestFittingEntry,
         }
     }
 }
@@ -138,6 +144,7 @@ pub enum TagKind {
     Verbatim,
     Labelled,
     Embedded,
+    BestFittingEntry,
 }
 
 #[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
