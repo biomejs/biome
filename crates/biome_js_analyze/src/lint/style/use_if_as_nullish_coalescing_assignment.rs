@@ -7,28 +7,28 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsExpression, AnyJsStatement, JsAssignmentExpression,
-    JsAssignmentOperator, JsBinaryOperator, JsIfStatement, JsLogicalOperator, JsUnaryOperator,
+    JsAssignmentOperator, JsBinaryOperator, JsIfStatement, JsLogicalOperator,
 };
 use biome_rowan::{AstNode, AstNodeList};
 
 declare_lint_rule! {
     /// Enforce using the nullish coalescing assignment operator (`??=`) instead of if statements for default value assignment.
     ///
-    /// If statements that check for nullish values and assign a default can be simplified
-    /// using the nullish coalescing assignment operator (`??=`).
+    /// If statements that explicitly check for nullish values (`null` or `undefined`) and assign a default
+    /// can be simplified using the nullish coalescing assignment operator (`??=`).
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// if (!foo) {
+    /// if (foo == null) {
     ///   foo = makeFoo();
     /// }
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// if (foo == null) {
+    /// if (foo === null || foo === undefined) {
     ///   foo = makeFoo();
     /// }
     /// ```
@@ -37,6 +37,13 @@ declare_lint_rule! {
     ///
     /// ```js
     /// foo ??= makeFoo();
+    /// ```
+    ///
+    /// ```js
+    /// // if (!foo) is NOT converted because it also checks for 0, '', and false
+    /// if (!foo) {
+    ///   foo = makeFoo();
+    /// }
     /// ```
     ///
     /// ```js
@@ -72,10 +79,11 @@ pub struct RuleState {
 ///
 /// ## Examples
 /// ```js
-/// if (!foo) { foo = bar; }           // Matches
 /// if (foo == null) { foo = bar; }    // Matches
-/// if (!foo) { foo = bar; } else {}   // Doesn't match (has else)
-/// if (!foo) { foo += bar; }          // Doesn't match (wrong operator)
+/// if (foo === null || foo === undefined) { foo = bar; }  // Matches
+/// if (!foo) { foo = bar; }           // Doesn't match (checks all falsy)
+/// if (foo == null) { foo = bar; } else {}   // Doesn't match (has else)
+/// if (foo == null) { foo += bar; }   // Doesn't match (wrong operator)
 /// ```
 fn check_if_pattern(if_stmt: &JsIfStatement) -> Option<(AnyJsExpression, JsAssignmentExpression)> {
     // Must not have else clause
@@ -145,28 +153,25 @@ fn extract_assignment(stmt: &AnyJsStatement) -> Option<JsAssignmentExpression> {
 /// Checks if a condition is a nullish check for the given assignment target
 ///
 /// Returns the checked expression if one of these patterns matches:
-/// - `!variable`
 /// - `variable == null` (loose equality)
 /// - `variable === null || variable === undefined` (strict equality)
+///
+/// Note: `!variable` is intentionally NOT supported because it checks for all
+/// falsy values (0, '', false, null, undefined, NaN), not just nullish values.
+/// Converting `if (!foo) { foo = x; }` to `foo ??= x;` would change behavior
+/// when `foo` is `0`, `''`, or `false`.
 fn is_nullish_check_for(
     condition: &AnyJsExpression,
     target: &AnyJsAssignmentPattern,
 ) -> Option<AnyJsExpression> {
-    // Pattern 1: !variable
-    if let Some(checked) = is_negation_check(condition)
-        && expressions_match(&checked, target)
-    {
-        return Some(checked);
-    }
-
-    // Pattern 2: variable == null (loose equality)
+    // Pattern 1: variable == null (loose equality)
     if let Some(checked) = is_loose_null_check(condition)
         && expressions_match(&checked, target)
     {
         return Some(checked);
     }
 
-    // Pattern 3: variable === null || variable === undefined (strict equality)
+    // Pattern 2: variable === null || variable === undefined (strict equality)
     if let Some(checked) = is_strict_nullish_check(condition)
         && expressions_match(&checked, target)
     {
@@ -174,18 +179,6 @@ fn is_nullish_check_for(
     }
 
     None
-}
-
-/// Checks for pattern: `!variable`
-fn is_negation_check(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
-    let unary = expr.as_js_unary_expression()?;
-    let op = unary.operator().ok()?;
-
-    if !matches!(op, JsUnaryOperator::LogicalNot) {
-        return None;
-    }
-
-    unary.argument().ok()
 }
 
 /// Checks for pattern: `variable == null`

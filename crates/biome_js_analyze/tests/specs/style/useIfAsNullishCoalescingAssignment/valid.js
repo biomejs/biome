@@ -53,3 +53,41 @@ if (!foo && bar) {
 if (!foo.bar) {
   foo.baz = value;
 }
+
+// ============================================
+// !variable patterns are NOT converted because they check all falsy values
+// (0, '', false, null, undefined, NaN), not just nullish values.
+// ============================================
+
+// Simple negation check
+if (!foo) {
+  foo = makeFoo();
+}
+
+// Object property
+if (!obj.prop) {
+  obj.prop = getValue();
+}
+
+// Nested property
+if (!user.settings.theme) {
+  user.settings.theme = 'light';
+}
+
+// Array element
+if (!arr[0]) {
+  arr[0] = fallback;
+}
+
+// Computed property
+if (!obj[key]) {
+  obj[key] = defaultValue;
+}
+
+// Without braces (single statement)
+if (!config) config = {};
+
+// Complex expressions in assignment
+if (!cache.data) {
+  cache.data = fetchData();
+}

@@ -4,12 +4,7 @@ expression: invalid.js
 ---
 # Input
 ```js
-// Pattern 1: Simple negation check
-if (!foo) {
-  foo = makeFoo();
-}
-
-// Pattern 2: Explicit strict checks
+// Pattern 1: Explicit strict checks
 if (foo === null || foo === undefined) {
   foo = makeFoo();
 }
@@ -18,40 +13,12 @@ if (foo === undefined || foo === null) {
   foo = makeFoo();
 }
 
-// Pattern 3: Loose equality check
+// Pattern 2: Loose equality check
 if (foo == null) {
   foo = makeFoo();
 }
 
-// Pattern 4: Object property
-if (!obj.prop) {
-  obj.prop = getValue();
-}
-
-// Pattern 5: Nested property
-if (!user.settings.theme) {
-  user.settings.theme = 'light';
-}
-
-// Pattern 6: Array element
-if (!arr[0]) {
-  arr[0] = fallback;
-}
-
-// Pattern 7: Computed property
-if (!obj[key]) {
-  obj[key] = defaultValue;
-}
-
-// Pattern 8: Without braces (single statement)
-if (!config) config = {};
-
-// Pattern 9: Complex expressions in assignment
-if (!cache.data) {
-  cache.data = fetchData();
-}
-
-// Pattern 10: Multiline check
+// Pattern 3: Multiline check
 if (
   result === null ||
   result === undefined
@@ -67,56 +34,57 @@ invalid.js:2:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━
 
   i Use ??= instead of if statement for default value assignment.
   
-    1 │ // Pattern 1: Simple negation check
-  > 2 │ if (!foo) {
-      │ ^^^^^^^^^^^
+    1 │ // Pattern 1: Explicit strict checks
+  > 2 │ if (foo === null || foo === undefined) {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 3 │   foo = makeFoo();
   > 4 │ }
       │ ^
     5 │ 
-    6 │ // Pattern 2: Explicit strict checks
+    6 │ if (foo === undefined || foo === null) {
   
   i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
   
   i Safe fix: Replace if statement with ??= assignment.
   
-     1  1 │   // Pattern 1: Simple negation check
-     2    │ - if·(!foo)·{
+     1  1 │   // Pattern 1: Explicit strict checks
+     2    │ - if·(foo·===·null·||·foo·===·undefined)·{
      3    │ - ··foo·=·makeFoo();
      4    │ - }
         2 │ + foo·??=makeFoo();
      5  3 │   
-     6  4 │   // Pattern 2: Explicit strict checks
+     6  4 │   if (foo === undefined || foo === null) {
   
 
 ```
 
 ```
-invalid.js:7:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of if statement for default value assignment.
   
-     6 │ // Pattern 2: Explicit strict checks
-   > 7 │ if (foo === null || foo === undefined) {
+     4 │ }
+     5 │ 
+   > 6 │ if (foo === undefined || foo === null) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   > 8 │   foo = makeFoo();
-   > 9 │ }
+   > 7 │   foo = makeFoo();
+   > 8 │ }
        │ ^
-    10 │ 
-    11 │ if (foo === undefined || foo === null) {
+     9 │ 
+    10 │ // Pattern 2: Loose equality check
   
   i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
   
   i Safe fix: Replace if statement with ??= assignment.
   
+     4  4 │   }
      5  5 │   
-     6  6 │   // Pattern 2: Explicit strict checks
-     7    │ - if·(foo·===·null·||·foo·===·undefined)·{
-     8    │ - ··foo·=·makeFoo();
-     9    │ - }
-        7 │ + foo·??=makeFoo();
-    10  8 │   
-    11  9 │   if (foo === undefined || foo === null) {
+     6    │ - if·(foo·===·undefined·||·foo·===·null)·{
+     7    │ - ··foo·=·makeFoo();
+     8    │ - }
+        6 │ + foo·??=makeFoo();
+     9  7 │   
+    10  8 │   // Pattern 2: Loose equality check
   
 
 ```
@@ -126,28 +94,27 @@ invalid.js:11:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━�
 
   i Use ??= instead of if statement for default value assignment.
   
-     9 │ }
-    10 │ 
-  > 11 │ if (foo === undefined || foo === null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ // Pattern 2: Loose equality check
+  > 11 │ if (foo == null) {
+       │ ^^^^^^^^^^^^^^^^^^
   > 12 │   foo = makeFoo();
   > 13 │ }
        │ ^
     14 │ 
-    15 │ // Pattern 3: Loose equality check
+    15 │ // Pattern 3: Multiline check
   
   i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
   
   i Safe fix: Replace if statement with ??= assignment.
   
-     9  9 │   }
-    10 10 │   
-    11    │ - if·(foo·===·undefined·||·foo·===·null)·{
+     9  9 │   
+    10 10 │   // Pattern 2: Loose equality check
+    11    │ - if·(foo·==·null)·{
     12    │ - ··foo·=·makeFoo();
     13    │ - }
        11 │ + foo·??=makeFoo();
     14 12 │   
-    15 13 │   // Pattern 3: Loose equality check
+    15 13 │   // Pattern 3: Multiline check
   
 
 ```
@@ -157,236 +124,31 @@ invalid.js:16:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━�
 
   i Use ??= instead of if statement for default value assignment.
   
-    15 │ // Pattern 3: Loose equality check
-  > 16 │ if (foo == null) {
-       │ ^^^^^^^^^^^^^^^^^^
-  > 17 │   foo = makeFoo();
-  > 18 │ }
+    15 │ // Pattern 3: Multiline check
+  > 16 │ if (
+       │ ^^^^
+  > 17 │   result === null ||
+  > 18 │   result === undefined
+  > 19 │ ) {
+  > 20 │   result = computeResult();
+  > 21 │ }
        │ ^
-    19 │ 
-    20 │ // Pattern 4: Object property
+    22 │ 
   
   i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
   
   i Safe fix: Replace if statement with ??= assignment.
   
     14 14 │   
-    15 15 │   // Pattern 3: Loose equality check
-    16    │ - if·(foo·==·null)·{
-    17    │ - ··foo·=·makeFoo();
-    18    │ - }
-       16 │ + foo·??=makeFoo();
-    19 17 │   
-    20 18 │   // Pattern 4: Object property
-  
-
-```
-
-```
-invalid.js:21:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    20 │ // Pattern 4: Object property
-  > 21 │ if (!obj.prop) {
-       │ ^^^^^^^^^^^^^^^^
-  > 22 │   obj.prop = getValue();
-  > 23 │ }
-       │ ^
-    24 │ 
-    25 │ // Pattern 5: Nested property
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    19 19 │   
-    20 20 │   // Pattern 4: Object property
-    21    │ - if·(!obj.prop)·{
-    22    │ - ··obj.prop·=·getValue();
-    23    │ - }
-       21 │ + obj.prop·??=getValue();
-    24 22 │   
-    25 23 │   // Pattern 5: Nested property
-  
-
-```
-
-```
-invalid.js:26:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    25 │ // Pattern 5: Nested property
-  > 26 │ if (!user.settings.theme) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 27 │   user.settings.theme = 'light';
-  > 28 │ }
-       │ ^
-    29 │ 
-    30 │ // Pattern 6: Array element
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    24 24 │   
-    25 25 │   // Pattern 5: Nested property
-    26    │ - if·(!user.settings.theme)·{
-    27    │ - ··user.settings.theme·=·'light';
-    28    │ - }
-       26 │ + user.settings.theme·??='light';
-    29 27 │   
-    30 28 │   // Pattern 6: Array element
-  
-
-```
-
-```
-invalid.js:31:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    30 │ // Pattern 6: Array element
-  > 31 │ if (!arr[0]) {
-       │ ^^^^^^^^^^^^^^
-  > 32 │   arr[0] = fallback;
-  > 33 │ }
-       │ ^
-    34 │ 
-    35 │ // Pattern 7: Computed property
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    29 29 │   
-    30 30 │   // Pattern 6: Array element
-    31    │ - if·(!arr[0])·{
-    32    │ - ··arr[0]·=·fallback;
-    33    │ - }
-       31 │ + arr[0]·??=fallback;
-    34 32 │   
-    35 33 │   // Pattern 7: Computed property
-  
-
-```
-
-```
-invalid.js:36:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    35 │ // Pattern 7: Computed property
-  > 36 │ if (!obj[key]) {
-       │ ^^^^^^^^^^^^^^^^
-  > 37 │   obj[key] = defaultValue;
-  > 38 │ }
-       │ ^
-    39 │ 
-    40 │ // Pattern 8: Without braces (single statement)
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    34 34 │   
-    35 35 │   // Pattern 7: Computed property
-    36    │ - if·(!obj[key])·{
-    37    │ - ··obj[key]·=·defaultValue;
-    38    │ - }
-       36 │ + obj[key]·??=defaultValue;
-    39 37 │   
-    40 38 │   // Pattern 8: Without braces (single statement)
-  
-
-```
-
-```
-invalid.js:41:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    40 │ // Pattern 8: Without braces (single statement)
-  > 41 │ if (!config) config = {};
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ 
-    43 │ // Pattern 9: Complex expressions in assignment
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    39 39 │   
-    40 40 │   // Pattern 8: Without braces (single statement)
-    41    │ - if·(!config)·config·=·{};
-       41 │ + config·??={};
-    42 42 │   
-    43 43 │   // Pattern 9: Complex expressions in assignment
-  
-
-```
-
-```
-invalid.js:44:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    43 │ // Pattern 9: Complex expressions in assignment
-  > 44 │ if (!cache.data) {
-       │ ^^^^^^^^^^^^^^^^^^
-  > 45 │   cache.data = fetchData();
-  > 46 │ }
-       │ ^
-    47 │ 
-    48 │ // Pattern 10: Multiline check
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    42 42 │   
-    43 43 │   // Pattern 9: Complex expressions in assignment
-    44    │ - if·(!cache.data)·{
-    45    │ - ··cache.data·=·fetchData();
-    46    │ - }
-       44 │ + cache.data·??=fetchData();
-    47 45 │   
-    48 46 │   // Pattern 10: Multiline check
-  
-
-```
-
-```
-invalid.js:49:1 lint/style/useIfAsNullishCoalescingAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of if statement for default value assignment.
-  
-    48 │ // Pattern 10: Multiline check
-  > 49 │ if (
-       │ ^^^^
-  > 50 │   result === null ||
-  > 51 │   result === undefined
-  > 52 │ ) {
-  > 53 │   result = computeResult();
-  > 54 │ }
-       │ ^
-    55 │ 
-  
-  i If statements checking for null or undefined can be simplified using the nullish coalescing assignment operator.
-  
-  i Safe fix: Replace if statement with ??= assignment.
-  
-    47 47 │   
-    48 48 │   // Pattern 10: Multiline check
-    49    │ - if·(
-    50    │ - ··result·===·null·||
-    51    │ - ··result·===·undefined
-    52    │ - )·{
-    53    │ - ··result·=·computeResult();
-    54    │ - }
-       49 │ + result·??=computeResult();
-    55 50 │   
+    15 15 │   // Pattern 3: Multiline check
+    16    │ - if·(
+    17    │ - ··result·===·null·||
+    18    │ - ··result·===·undefined
+    19    │ - )·{
+    20    │ - ··result·=·computeResult();
+    21    │ - }
+       16 │ + result·??=computeResult();
+    22 17 │   
   
 
 ```
