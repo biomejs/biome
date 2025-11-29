@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/iframe-allow.html
+---
+# Input
+
+```html
+<iframe allow></iframe>
+<iframe allow=""></iframe>
+<iframe allow="   "></iframe>
+<iframe allow=" ; "></iframe>
+<iframe allow=" ;   ;   ; "></iframe>
+<iframe allow="   camera"></iframe>
+<iframe allow="payment;    usb; serial"></iframe>
+<iframe allow="   camera;; microphone;;;"></iframe>
+<iframe allow="    camera; ;    ;  accelerometer;"></iframe>
+<iframe allow="camera https://very-long-subdomain.very-long-domain-name.example.com https://another-very-long-subdomain.another-very-long-domain.example.org; microphone https://extremely-long-subdomain-name.extremely-long-domain-name.example.net"></iframe>
+<iframe allow="camera https://sub-domain.example.com:8080/path?query=value#fragment; microphone 'self'"></iframe>
+<iframe allow="camera https://subdomain1.example.com https://subdomain2.example.com https://subdomain3.example.com https://subdomain4.example.com https://subdomain5.example.com"></iframe>
+<iframe allow="layout-animations 'none'; unoptimized-images 'none'; oversized-images 'none'; sync-script 'none'; sync-xhr 'none'; unsized-media 'none';"></iframe>
+
+<!-- Not iframe-->
+<a allow="
+        camera 'self';
+ambient-light-sensor 'self'
+"></a>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<iframe allow></iframe>
+<iframe allow=""></iframe>
+<iframe allow=""></iframe>
+<iframe allow=""></iframe>
+<iframe allow=""></iframe>
+<iframe allow="camera"></iframe>
+<iframe allow="payment; usb; serial"></iframe>
+<iframe allow="camera; microphone"></iframe>
+<iframe allow="camera; accelerometer"></iframe>
+<iframe
+	allow="
+		camera https://very-long-subdomain.very-long-domain-name.example.com https://another-very-long-subdomain.another-very-long-domain.example.org;
+		microphone https://extremely-long-subdomain-name.extremely-long-domain-name.example.net;
+	"
+></iframe>
+<iframe
+	allow="
+		camera https://sub-domain.example.com:8080/path?query=value#fragment;
+		microphone 'self';
+	"
+></iframe>
+<iframe
+	allow="
+		camera https://subdomain1.example.com https://subdomain2.example.com https://subdomain3.example.com https://subdomain4.example.com https://subdomain5.example.com;
+	"
+></iframe>
+<iframe
+	allow="
+		layout-animations 'none';
+		unoptimized-images 'none';
+		oversized-images 'none';
+		sync-script 'none';
+		sync-xhr 'none';
+		unsized-media 'none';
+	"
+></iframe>
+
+<!-- Not iframe-->
+<a
+	allow="
+        camera 'self';
+ambient-light-sensor 'self'
+"
+></a>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12: 		camera https://very-long-subdomain.very-long-domain-name.example.com https://another-very-long-subdomain.another-very-long-domain.example.org;
+   13: 		microphone https://extremely-long-subdomain-name.extremely-long-domain-name.example.net;
+   24: 		camera https://subdomain1.example.com https://subdomain2.example.com https://subdomain3.example.com https://subdomain4.example.com https://subdomain5.example.com;
+```
