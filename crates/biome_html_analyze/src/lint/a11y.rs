@@ -8,4 +8,5 @@ pub mod no_distracting_elements;
 pub mod no_header_scope;
 pub mod use_button_type;
 pub mod use_html_lang;
-declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_distracting_elements :: NoDistractingElements , self :: no_header_scope :: NoHeaderScope , self :: use_button_type :: UseButtonType , self :: use_html_lang :: UseHtmlLang ,] } }
+pub mod use_valid_aria_role;
+declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_distracting_elements :: NoDistractingElements , self :: no_header_scope :: NoHeaderScope , self :: use_button_type :: UseButtonType , self :: use_html_lang :: UseHtmlLang , self :: use_valid_aria_role :: UseValidAriaRole ,] } }
