@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// Default: `[]` (no scripts required)
     ///
     pub UseRequiredScripts {
-        version: "next",
+        version: "2.3.9",
         name: "useRequiredScripts",
         language: "json",
         recommended: false,

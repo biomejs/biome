@@ -1,5 +1,48 @@
 # @biomejs/biome
 
+## 2.3.9
+
+### Patch Changes
+
+- [#8034](https://github.com/biomejs/biome/pull/8034) [`e7e0f6c`](https://github.com/biomejs/biome/commit/e7e0f6c14df92d83d08f86b1e57fc82b4df775b7) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useRegexpExec`](https://biomejs.dev/linter/rules/use-regexp-exec/). Enforce `RegExp#exec` over `String#match` if no global flag is provided.
+
+- [#8281](https://github.com/biomejs/biome/pull/8281) [`30b046f`](https://github.com/biomejs/biome/commit/30b046faca464404aaeecfe1ed0e8a94b0e25990) Thanks [@tylersayshi](https://github.com/tylersayshi)! - Added the rule [`useRequiredScripts`](https://biomejs.dev/linter/rules/use-required-scripts/), which enforces presence of configurable entries in the `scripts` section of `package.json` files.
+
+- [#8302](https://github.com/biomejs/biome/pull/8302) [`d1d5014`](https://github.com/biomejs/biome/commit/d1d50140f23c9c3ce4f48d9d2b97822234aad798) Thanks [@mlafeldt](https://github.com/mlafeldt)! - Fixed [#8109](https://github.com/biomejs/biome/issues/8109): return statements in Astro frontmatter no longer trigger "Illegal return statement" errors when using `experimentalFullSupportEnabled`.
+
+- [#8296](https://github.com/biomejs/biome/pull/8296) [`9d3ef10`](https://github.com/biomejs/biome/commit/9d3ef10d007e637c43b2f5e97758767da5f03d32) Thanks [@dyc3](https://github.com/dyc3)! - `biome rage` now shows if you have experimental HTML full support enabled.
+
+- [#8281](https://github.com/biomejs/biome/pull/8281) [`30b046f`](https://github.com/biomejs/biome/commit/30b046faca464404aaeecfe1ed0e8a94b0e25990) Thanks [@tylersayshi](https://github.com/tylersayshi)! - Fixed [`noDuplicateDependencies`](https://biomejs.dev/linter/rules/no-duplicate-dependencies/) incorrectly triggering on files like `_package.json`.
+
+- [#8297](https://github.com/biomejs/biome/pull/8297) [`efa694c`](https://github.com/biomejs/biome/commit/efa694c019cbdbac5328b76bb70c464ad9befbf8) Thanks [@Yonom](https://github.com/Yonom)! - Added support for negative value utilities in [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/). Negative value utilities such as `-ml-2` or `-top-4` are now recognized and sorted correctly alongside their positive counterparts.
+
+  ```jsx
+  // Now detected as unsorted:
+  <div class="-ml-2 p-4 -mt-1" />
+  // Suggested fix:
+  <div class="-mt-1 -ml-2 p-4" />
+  ```
+
+- [#8249](https://github.com/biomejs/biome/pull/8249) [`893e36c`](https://github.com/biomejs/biome/commit/893e36c7c39d210ccedfe040bb414945262b5d92) Thanks [@cormacrelf](https://github.com/cormacrelf)! - Addressed [#7538](https://github.com/biomejs/biome/issues/7538). Reduced the
+  volume of logging from the LSP server.
+
+  Use `biome clean` to remove large logs.
+
+- [#8303](https://github.com/biomejs/biome/pull/8303) [`db2c65b`](https://github.com/biomejs/biome/commit/db2c65b7eaf057eda12434e98acf5430fe77b165) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#8300](https://github.com/biomejs/biome/issues/8300): [`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) now detects JSDoc tags on object properties.
+
+  ```js
+  import type LinkOnObjectProperty from "mod";
+
+  const testLinkOnObjectProperty = {
+  	/**
+  	 * {@link LinkOnObjectProperty}
+  	 */
+  	property: 0,
+  };
+  ```
+
+- [#8260](https://github.com/biomejs/biome/pull/8260) [`a226b28`](https://github.com/biomejs/biome/commit/a226b2862daa6e8d130bf3bfd88f6693412607e6) Thanks [@ho991217](https://github.com/ho991217)! - Fixed [biome-vscode#817](https://github.com/biomejs/biome-vscode/issues/817): Biome now updates documents when the `textDocument/didSave` notification is received.
+
 ## 2.3.8
 
 ### Patch Changes
