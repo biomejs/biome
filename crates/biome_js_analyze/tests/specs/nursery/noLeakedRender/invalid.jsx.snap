@@ -62,31 +62,17 @@ const MyComponent3 = () => {
 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
 };
 
-const MyComponent4 = () => {
-	return <Something checked={v ? false : isChecked} />;
-};
-
-const MyComponent5 = () => {
-	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
-};
-
-const isOpen1 = 0;
-const Component7 = () => {
-	return <Popover open={isOpen1 && items.length > 0} />;
-};
-
-const Component8 = ({ count, title }) => {
+const MyComponent4 = ({ count, title }) => {
 	return <div>{(((((count))))) && ((title))}</div>;
 };
 
-const Component9 = ({ data }) => {
+const MyComponent5 = ({ data }) => {
 	return <div>{(((((data)))) && (((((data.value))))))}</div>;
-};
+}
 
-const Component = ({ value }) => {
+const MyComponent6 = ({ value }) => {
 	return <div>{(((value))) && <Item />}</div>;
 };
-
 
 ```
 
@@ -318,52 +304,16 @@ invalid.jsx:56:15 lint/nursery/noLeakedRender ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:60:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:60:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    59 │ const MyComponent4 = () => {
-  > 60 │ 	return <Something checked={v ? false : isChecked} />;
-       │ 	                           ^^^^^^^^^^^^^^^^^^^^^
+    59 │ const MyComponent4 = ({ count, title }) => {
+  > 60 │ 	return <div>{(((((count))))) && ((title))}</div>;
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     61 │ };
     62 │ 
   
-  i This happens when you use ternary operators in JSX with alternate values that could be variables.
-  
-  i Replace with a safe alternate value like an empty string , null or another JSX element.
-  
-
-```
-
-```
-invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    63 │ const MyComponent5 = () => {
-  > 64 │ 	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
-       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    65 │ };
-    66 │ 
-  
-  i This happens when you use ternary operators in JSX with alternate values that could be variables.
-  
-  i Replace with a safe alternate value like an empty string , null or another JSX element.
-  
-
-```
-
-```
-invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    63 │ const MyComponent5 = () => {
-  > 64 │ 	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
-       │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^
-    65 │ };
-    66 │ 
-  
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
@@ -372,70 +322,15 @@ invalid.jsx:64:29 lint/nursery/noLeakedRender ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:69:24 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:68:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    67 │ const isOpen1 = 0;
-    68 │ const Component7 = () => {
-  > 69 │ 	return <Popover open={isOpen1 && items.length > 0} />;
-       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    70 │ };
-    71 │ 
-  
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
-  
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
-  
-
-```
-
-```
-invalid.jsx:73:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    72 │ const Component8 = ({ count, title }) => {
-  > 73 │ 	return <div>{(((((count))))) && ((title))}</div>;
-       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    74 │ };
-    75 │ 
-  
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
-  
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
-  
-
-```
-
-```
-invalid.jsx:77:16 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    76 │ const Component9 = ({ data }) => {
-  > 77 │ 	return <div>{(((((data)))) && (((((data.value))))))}</div>;
-       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    78 │ };
-    79 │ 
-  
-  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
-  
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
-  
-
-```
-
-```
-invalid.jsx:81:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Potential leaked value that might cause unintended rendering.
-  
-    80 │ const Component = ({ value }) => {
-  > 81 │ 	return <div>{(((value))) && <Item />}</div>;
+    67 │ const MyComponent6 = ({ value }) => {
+  > 68 │ 	return <div>{(((value))) && <Item />}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^
-    82 │ };
-    83 │ 
+    69 │ };
+    70 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
