@@ -21,7 +21,7 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -137,7 +137,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        settings.format_options::<L>(&input_file.into(), &document_file_source)
+        let handle = SettingsHandle::new(&settings, None);
+        handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 

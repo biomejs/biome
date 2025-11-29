@@ -79,6 +79,7 @@ pub(crate) fn code_actions(
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        inline_config: session.inline_config(),
     })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -163,6 +164,7 @@ pub(crate) fn code_actions(
             .map(AnalyzerSelector::from)
             .collect(),
         categories: categories.build(),
+        inline_config: session.inline_config(),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -316,6 +318,7 @@ fn fix_all(
             .with_linter()
             .with_assist()
             .build(),
+        inline_config: session.inline_config(),
     })?;
     let should_format = file_features.supports_format();
 
@@ -354,6 +357,7 @@ fn fix_all(
         enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: categories.build(),
+        inline_config: session.inline_config(),
     })?;
     let output = if file_features.supports_full_html_support() {
         fixed.code

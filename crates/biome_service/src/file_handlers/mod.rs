@@ -9,7 +9,7 @@ use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::settings::Settings;
+use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
@@ -458,7 +458,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -494,9 +494,15 @@ pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
 
-type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes =
-    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
+type Parse =
+    fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes = fn(
+    &AnyParse,
+    &BiomePath,
+    &DocumentFileSource,
+    &SettingsWithEditor,
+    &mut NodeCache,
+) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -507,8 +513,12 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
     fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
@@ -533,7 +543,7 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -550,7 +560,7 @@ pub(crate) struct LintParams<'a> {
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -591,7 +601,10 @@ impl<'a> ProcessLint<'a> {
             // - if a single rule is run.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
                 || !params.only.is_empty(),
-            rules: params.settings.as_linter_rules(params.path.as_path()),
+            rules: params
+                .settings
+                .as_ref()
+                .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.diagnostic_offset,
         }
@@ -894,7 +907,7 @@ impl ProcessDiagnosticsAndActions {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -936,20 +949,24 @@ pub struct AnalyzerCapabilities {
     pub(crate) pull_diagnostics_and_actions: Option<PullDiagnosticsAndActions>,
 }
 
-type Format =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<Printed, WorkspaceError>;
+type Format = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -957,7 +974,7 @@ type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -980,14 +997,14 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
-type Enabled = fn(&Utf8Path, &Settings) -> bool;
+type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
     &GritQuery,
-    &Settings,
+    &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1147,7 +1164,7 @@ pub(crate) fn search(
     _file_source: &DocumentFileSource,
     parse: AnyParse,
     query: &GritQuery,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile::new(path.as_path(), parse))

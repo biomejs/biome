@@ -44,8 +44,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
 use std::ops::Deref;
-use std::sync::Arc;
-use tracing::instrument;
+use std::sync::{Arc, RwLock};
 
 /// Settings active in a project.
 ///
@@ -324,6 +323,130 @@ impl Settings {
         } else {
             !feature_includes_files.is_file_included(path)
         }
+    }
+}
+
+pub type SettingsWithEditor<'a> = SettingsHandle<'a, Option<Configuration>>;
+
+/// Handle object holding a temporary lock on the workspace settings until
+/// the deferred language-specific options resolution is called
+#[derive(Debug)]
+pub struct SettingsHandle<'a, E> {
+    inner: RwLock<&'a Settings>,
+
+    /// Additional per-request state injected by the editor
+    editor: E,
+}
+
+impl<'a, E> SettingsHandle<'a, E> {
+    pub fn new(settings: &'a Settings, editor: E) -> Self {
+        let inner = RwLock::new(settings);
+        Self { inner, editor }
+    }
+}
+
+impl<'a, E> AsRef<Settings> for SettingsHandle<'a, E> {
+    fn as_ref(&self) -> &Settings {
+        &self.inner.read().unwrap()
+    }
+}
+
+impl<'a> SettingsHandle<'a, Option<Configuration>> {
+    fn as_merged_settings(&self) -> Settings {
+        self.editor
+            .as_ref()
+            .map(|editor| {
+                let mut settings = self.inner.read().unwrap().clone();
+                let workspace_directory = self
+                    .as_ref()
+                    .source
+                    .as_ref()
+                    .and_then(|source| source.1.clone());
+                // TODO handle error
+                let _ = settings.merge_with_configuration(editor.clone(), workspace_directory);
+
+                settings
+            })
+            .unwrap_or(self.as_ref().clone())
+    }
+    /// Resolve the formatting options for the given language
+    pub fn format_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::FormatOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        let formatter = &settings.formatter;
+        let overrides = &settings.override_settings;
+        let language_settings = &L::lookup_settings(&settings.languages).formatter;
+        L::resolve_format_options(formatter, overrides, language_settings, path, file_source)
+    }
+
+    pub fn parse_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::ParserOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        let overrides = &settings.override_settings;
+        let language_settings = &L::lookup_settings(&settings.languages).parser;
+
+        L::resolve_parse_options(overrides, language_settings, path, file_source)
+    }
+
+    pub fn analyzer_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+        suppression_reason: Option<&str>,
+    ) -> AnalyzerOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        let linter_settings = &L::lookup_settings(&settings.languages).linter;
+        let environment = L::resolve_environment(&settings);
+        L::resolve_analyzer_options(
+            &settings,
+            linter_settings,
+            environment,
+            path,
+            file_source,
+            suppression_reason,
+        )
+    }
+
+    /// Whether the linter is enabled for this file path
+    pub fn linter_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        L::linter_enabled_for_file_path(&settings, path)
+    }
+
+    /// Whether the formatter is enabled for this file path
+    pub fn formatter_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        L::formatter_enabled_for_file_path(&settings, path)
+    }
+
+    /// Whether the assist is enabled for this file path
+    pub fn assist_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.as_merged_settings();
+        L::assist_enabled_for_file_path(&settings, path)
     }
 }
 
@@ -1079,81 +1202,6 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
 }
 
 impl Settings {
-    /// Resolve the formatting context for the given language
-    #[instrument(level = "debug", skip(self, file_source))]
-    pub fn format_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> L::FormatOptions
-    where
-        L: ServiceLanguage,
-    {
-        let formatter = &self.formatter;
-        let overrides = &self.override_settings;
-        let editor_settings = &L::lookup_settings(&self.languages).formatter;
-        L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
-    }
-
-    pub fn parse_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> L::ParserOptions
-    where
-        L: ServiceLanguage,
-    {
-        let overrides = &self.override_settings;
-        let editor_settings = &L::lookup_settings(&self.languages).parser;
-        L::resolve_parse_options(overrides, editor_settings, path, file_source)
-    }
-
-    pub fn analyzer_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
-    ) -> AnalyzerOptions
-    where
-        L: ServiceLanguage,
-    {
-        let linter_settings = &L::lookup_settings(&self.languages).linter;
-
-        let environment = L::resolve_environment(self);
-        L::resolve_analyzer_options(
-            self,
-            linter_settings,
-            environment,
-            path,
-            file_source,
-            suppression_reason,
-        )
-    }
-
-    /// Whether the linter is enabled for this file path
-    pub fn linter_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
-    where
-        L: ServiceLanguage,
-    {
-        L::linter_enabled_for_file_path(self, path)
-    }
-
-    /// Whether the formatter is enabled for this file path
-    pub fn formatter_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
-    where
-        L: ServiceLanguage,
-    {
-        L::formatter_enabled_for_file_path(self, path)
-    }
-
-    /// Whether the assist is enabled for this file path
-    pub fn assist_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
-    where
-        L: ServiceLanguage,
-    {
-        L::assist_enabled_for_file_path(self, path)
-    }
-
     /// Whether the formatter should format with parsing errors, for this file path
     pub fn format_with_errors_enabled_for_this_file_path(&self, path: &Utf8Path) -> bool {
         self.override_settings

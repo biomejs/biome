@@ -5,7 +5,9 @@ use super::{
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
+use crate::settings::{
+    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+};
 use crate::workspace::{CodeAction, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
@@ -356,19 +358,19 @@ impl ExtensionHandler for HtmlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -376,7 +378,7 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
@@ -392,7 +394,7 @@ fn parse_embedded_nodes(
     root: &AnyParse,
     biome_path: &BiomePath,
     file_source: &DocumentFileSource,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseEmbedResult {
     let mut nodes = Vec::new();
@@ -448,7 +450,7 @@ pub(crate) fn parse_astro_embedded_script(
     element: AstroEmbeddedContent,
     cache: &mut NodeCache,
     path: &BiomePath,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let content = element.content_token()?;
     let file_source =
@@ -479,7 +481,7 @@ pub(crate) fn parse_embedded_script(
     cache: &mut NodeCache,
     path: &BiomePath,
     html_file_source: &DocumentFileSource,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
@@ -548,7 +550,7 @@ pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<CssLanguage>, DocumentFileSource)> {
     if element.is_style_tag() {
         // This is probably an error
@@ -591,7 +593,7 @@ pub(crate) fn parse_embedded_json(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsonLanguage>, DocumentFileSource)> {
     // This is probably an error
     if element.children().len() > 1 {
@@ -634,7 +636,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
 
@@ -650,7 +652,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
@@ -667,7 +669,7 @@ fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     embedded_nodes: Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -747,7 +749,7 @@ fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -806,7 +808,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -844,14 +846,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut tree: HtmlRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
