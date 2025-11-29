@@ -58,8 +58,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// [].forEach(() => {
-    ///     return 1; // Should not return a value
+    /// [].filter(() => {
+    ///     // Missing required return value
     /// });
     /// ```
     ///
@@ -80,6 +80,36 @@ declare_lint_rule! {
     /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `checkForEach`
+    ///
+    /// Default: `false`
+    ///
+    /// When set to `true` (non-default), the rule will also check `forEach` callbacks that return a value.
+    /// By default (false), `forEach` callbacks are not checked as returning values from them is a common pattern.
+    ///
+    /// ### Examples
+    ///
+    /// When `checkForEach` is set to `true`, the following will trigger a diagnostic:
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// [1, 2, 3].forEach((el) => {
+    ///     return el * 2;
+    /// });
+    /// ```
+    ///
+    /// ```json,use_options
+    /// {
+    ///     "options": {
+    ///         "checkForEach": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
+    ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
         name: "useIterableCallbackReturn",
@@ -127,6 +157,10 @@ impl Rule for UseIterableCallbackReturn {
             .ok()
             .and_then(|member| member.as_js_name().cloned())
             .and_then(|name| name.value_token().ok())?;
+
+        if !ctx.options().check_for_each() && member_name.text_trimmed() == "forEach" {
+            return None;
+        }
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 
