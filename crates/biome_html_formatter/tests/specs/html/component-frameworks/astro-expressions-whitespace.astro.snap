@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: component-frameworks/astro-expressions-whitespace.astro
+---
+# Input
+
+```astro
+<div>
+	<p>I'm just <span>testing</span> something</p>
+	<p>{name} ({username})</p>
+	<p>Hello {firstName} {lastName}!</p>
+	<p>{a} + {b} = {sum}</p>
+</div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+<div>
+	<p>
+		I'm just <span>testing</span> something
+	</p>
+	<p>{name}({username})</p>
+	<p>Hello {firstName} {lastName}!</p>
+	<p>{a}+ {b}= {sum}</p>
+</div>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"name" => 64..68
+"username" => 71..79
+"firstName" => 97..106
+"lastName" => 109..117
+"a" => 129..130
+"b" => 134..135
+"sum" => 139..142
