@@ -30,6 +30,15 @@
 	<div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
 	<div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
 	<div class="group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400" />
+	{/* negative value utilities */}
+	{/* SHOULD emit diagnostics (negative values like -ml-2 should be detected) */}
+	<div class="-ml-2 p-4 -mt-1" />
+	<div class="-mr-4 m-2 -mb-3" />
+	<div class="text-center -mx-2 bg-blue-500 -my-4" />
+	<div class="-top-2 absolute -left-4 right-0" />
+	<div class="-space-x-2 flex -space-y-4 items-center" />
+	<div class="hover:-ml-2 p-4 focus:-mt-1" />
+	<div class="sm:-mx-4 lg:-my-2 md:p-2" />
 </>;
 
 // functions
