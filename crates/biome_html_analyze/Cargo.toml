@@ -12,6 +12,7 @@ version              = "0.5.7"
 
 [dependencies]
 biome_analyze            = { workspace = true }
+biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
