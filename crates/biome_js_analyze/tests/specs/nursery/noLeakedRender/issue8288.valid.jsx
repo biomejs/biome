@@ -1,0 +1,35 @@
+/* should not generate diagnostics */
+function getValue() {
+	return Math.random() > 0.5;
+}
+
+export default function MyComponent() {
+	return <button onClick={getValue() ? getValue : undefined} />;
+}
+
+const Component1 = () => {
+	return isPending ? loader : userResults;
+};
+
+const Component2 = () => {
+	return someRandomId && !someRandomBooleanValue ? <ContentHere /> : <NotFound />;
+};
+
+// Ignore Attribute
+const Component3 = () => {
+	return (
+		<NoErrorWithAttribute
+			error={firstBool && secondBool}
+			coerceError={!!(firstBool && secondBool)}
+			orderId={isChecked ? orderId : undefined}
+		/>
+	);
+};
+
+const Component4 = () => {
+	return (
+		<Nested>
+			<SecondNested>{userId ? 1 : null} </SecondNested>
+		</Nested>
+	);
+};

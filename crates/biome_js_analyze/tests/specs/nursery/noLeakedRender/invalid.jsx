@@ -56,28 +56,14 @@ const MyComponent3 = () => {
 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
 };
 
-const MyComponent4 = () => {
-	return <Something checked={v ? false : isChecked} />;
-};
-
-const MyComponent5 = () => {
-	return <Something checked={cond && isIndeterminate ? false : isChecked} />;
-};
-
-const isOpen1 = 0;
-const Component7 = () => {
-	return <Popover open={isOpen1 && items.length > 0} />;
-};
-
-const Component8 = ({ count, title }) => {
+const MyComponent4 = ({ count, title }) => {
 	return <div>{(((((count))))) && ((title))}</div>;
 };
 
-const Component9 = ({ data }) => {
+const MyComponent5 = ({ data }) => {
 	return <div>{(((((data)))) && (((((data.value))))))}</div>;
-};
+}
 
-const Component = ({ value }) => {
+const MyComponent6 = ({ value }) => {
 	return <div>{(((value))) && <Item />}</div>;
 };
-
