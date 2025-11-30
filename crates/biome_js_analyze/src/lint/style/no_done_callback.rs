@@ -88,7 +88,7 @@ impl Rule for NoDoneCallback {
             "beforeAll",
             "beforeEach",
         ]
-        .contains(&callee.to_trimmed_string().as_str())
+        .contains(&callee.to_trimmed_text().as_ref())
         {
             0
         } else if ["it", "test"].contains(&callee_object_name.text_trimmed()) {
