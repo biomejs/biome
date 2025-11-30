@@ -6,7 +6,7 @@ use crate::file_handlers::{
     ParserCapabilities, javascript,
 };
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{DocumentFileSource, DocumentServices, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
@@ -138,6 +138,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source.into()),
+        services: DocumentServices::none(),
     }
 }
 

@@ -13,7 +13,8 @@ use crate::settings::{
     Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
-    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    CodeAction, DocumentFileSource, DocumentServices, FixFileResult, GetSyntaxTreeResult,
+    PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
@@ -432,9 +433,11 @@ fn parse(
         .apply_override_css_parser_options(biome_path, &mut options);
 
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
+    let services = DocumentServices::new_css(&parse.tree());
     ParseResult {
         any_parse: parse.into(),
         language: None,
+        services,
     }
 }
 

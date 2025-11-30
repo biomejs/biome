@@ -10,7 +10,7 @@ use crate::file_handlers::FixAllParams;
 use crate::settings::{
     OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{DocumentFileSource, PullDiagnosticsAndActionsResult};
+use crate::workspace::{DocumentFileSource, DocumentServices, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -547,6 +547,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: None,
+        services: DocumentServices::none(),
     }
 }
 
