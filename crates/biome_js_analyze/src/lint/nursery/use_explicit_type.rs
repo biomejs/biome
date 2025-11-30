@@ -1000,8 +1000,9 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
 ///
 /// This returns true for binary expressions where both operands are literals or other
 /// trivially inferrable expressions (e.g., `1 + 1`, `2 * 3`, `"hello" + "world"`).
-/// It also returns true for comparison expressions (e.g., `'test' === 'test'`, `42 !== 0`),
-/// as they always return a boolean type.
+/// It also returns true for comparison expressions (e.g., `'test' === 'test'`, `42 !== 0`,
+/// `process.env.NODE_ENV === 'test'`), as they always return a boolean type regardless
+/// of the operand types.
 ///
 /// If `allow_placeholders` is false, excludes `null` and `undefined`.
 fn is_trivial_binary_expression(
@@ -1016,9 +1017,9 @@ fn is_trivial_binary_expression(
     };
 
     // Comparison operators always return boolean, which is trivially inferrable
+    // regardless of the operand types (e.g., `process.env.NODE_ENV === 'test'`)
     if binary_expr.is_comparison_operator() {
-        return is_allowed_in_untyped_expression(&left, allow_placeholders)
-            && is_allowed_in_untyped_expression(&right, allow_placeholders);
+        return true;
     }
 
     // Both operands must be trivially inferrable

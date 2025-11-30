@@ -226,6 +226,15 @@ const lessThan = 3 < 7;
 const greaterOrEqual = 5 >= 5;
 const lessOrEqual = 4 <= 10;
 
+// Comparison expressions with property access (always return boolean)
+const isTest = process.env.NODE_ENV === 'test';
+const isProduction = process.env.NODE_ENV !== 'test';
+const hasValue = obj.property === 'expected';
+const isEnabled = config.features.enabled === true;
+const matchesLength = someArray.length > 0;
+const isEmptyString = str.length === 0;
+const checkNested = deeply.nested.property === 'value';
+
 // Class instantiation (new expressions)
 class Vehicle {}
 const myVehicle = new Vehicle();
