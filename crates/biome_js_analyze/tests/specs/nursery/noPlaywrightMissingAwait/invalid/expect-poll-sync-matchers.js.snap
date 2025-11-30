@@ -4,6 +4,7 @@ expression: expect-poll-sync-matchers.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // expect.poll with synchronous matchers should still require await
 test('toBe matcher', async () => {
     expect.poll(() => getValue()).toBe(42);
@@ -25,106 +26,82 @@ test('toStrictEqual matcher', async () => {
 
 # Diagnostics
 ```
-expect-poll-sync-matchers.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+expect-poll-sync-matchers.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
 
   i expect.poll must be awaited or returned.
   
-    1 │ // expect.poll with synchronous matchers should still require await
-    2 │ test('toBe matcher', async () => {
-  > 3 │     expect.poll(() => getValue()).toBe(42);
+    2 │ // expect.poll with synchronous matchers should still require await
+    3 │ test('toBe matcher', async () => {
+  > 4 │     expect.poll(() => getValue()).toBe(42);
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ });
-    5 │ 
+    5 │ });
+    6 │ 
   
-  i Add await before the expect call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     1  1 │   // expect.poll with synchronous matchers should still require await
-     2  2 │   test('toBe matcher', async () => {
-     3    │ - ····expect.poll(()·=>·getValue()).toBe(42);
-        3 │ + ····await
-        4 │ + ····expect.poll(()·=>·getValue()).toBe(42);
-     4  5 │   });
-     5  6 │   
-  
+    4 │ ····await·expect.poll(()·=>·getValue()).toBe(42);
+      │     ++++++                                       
 
 ```
 
 ```
-expect-poll-sync-matchers.js:7:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+expect-poll-sync-matchers.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
 
   i expect.poll must be awaited or returned.
   
-    6 │ test('toEqual matcher', async () => {
-  > 7 │     expect.poll(() => getObject()).toEqual({ foo: 'bar' });
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ });
-    9 │ 
+     7 │ test('toEqual matcher', async () => {
+   > 8 │     expect.poll(() => getObject()).toEqual({ foo: 'bar' });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
   
-  i Add await before the expect call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     5  5 │   
-     6  6 │   test('toEqual matcher', async () => {
-     7    │ - ····expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
-        7 │ + ····await
-        8 │ + ····expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
-     8  9 │   });
-     9 10 │   
-  
+    8 │ ····await·expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
+      │     ++++++                                                       
 
 ```
 
 ```
-expect-poll-sync-matchers.js:11:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+expect-poll-sync-matchers.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   i expect.poll must be awaited or returned.
   
-    10 │ test('toMatch matcher', async () => {
-  > 11 │     expect.poll(() => getString()).toMatch(/pattern/);
+    11 │ test('toMatch matcher', async () => {
+  > 12 │     expect.poll(() => getString()).toMatch(/pattern/);
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ });
-    13 │ 
+    13 │ });
+    14 │ 
   
-  i Add await before the expect call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     9  9 │   
-    10 10 │   test('toMatch matcher', async () => {
-    11    │ - ····expect.poll(()·=>·getString()).toMatch(/pattern/);
-       11 │ + ····await
-       12 │ + ····expect.poll(()·=>·getString()).toMatch(/pattern/);
-    12 13 │   });
-    13 14 │   
-  
+    12 │ ····await·expect.poll(()·=>·getString()).toMatch(/pattern/);
+       │     ++++++                                                  
 
 ```
 
 ```
-expect-poll-sync-matchers.js:15:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+expect-poll-sync-matchers.js:16:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   i expect.poll must be awaited or returned.
   
-    14 │ test('toStrictEqual matcher', async () => {
-  > 15 │     expect.poll(() => getData()).toStrictEqual({ a: 1 });
+    15 │ test('toStrictEqual matcher', async () => {
+  > 16 │     expect.poll(() => getData()).toStrictEqual({ a: 1 });
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ });
-    17 │ 
+    17 │ });
+    18 │ 
   
-  i Add await before the expect call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-    13 13 │   
-    14 14 │   test('toStrictEqual matcher', async () => {
-    15    │ - ····expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
-       15 │ + ····await
-       16 │ + ····expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
-    16 17 │   });
-    17 18 │   
-  
+    16 │ ····await·expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
+       │     ++++++                                                     
 
 ```

@@ -4,6 +4,7 @@ expression: in-test.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test('wait', async ({ page }) => {
     await page.click('button');
     await page.waitForTimeout(1000);
@@ -14,16 +15,16 @@ test('wait', async ({ page }) => {
 
 # Diagnostics
 ```
-in-test.js:3:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+in-test.js:4:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForTimeout().
   
-    1 │ test('wait', async ({ page }) => {
-    2 │     await page.click('button');
-  > 3 │     await page.waitForTimeout(1000);
+    2 │ test('wait', async ({ page }) => {
+    3 │     await page.click('button');
+  > 4 │     await page.waitForTimeout(1000);
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ });
-    5 │ 
+    5 │ });
+    6 │ 
   
   i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
   

@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test nested expect calls and chaining
 test('nested not operator', async ({ page }) => {
     expect(page).not.toBeVisible();

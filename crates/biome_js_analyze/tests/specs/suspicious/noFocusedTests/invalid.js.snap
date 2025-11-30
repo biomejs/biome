@@ -35,6 +35,10 @@ describe.only.each([["a"], ["b"]])("%s", (a) => {});
 it.only.each([["a"], ["b"]])("%s", (a) => {});
 test.only.each([["a"], ["b"]])("%s", (a) => {});
 
+// Playwright patterns: test.describe.only
+test.describe.only("bar", () => {});
+test.describe.only.each([["a"], ["b"]])("%s", (a) => {});
+
 ```
 
 # Diagnostics
@@ -554,6 +558,7 @@ invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   > 30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
        │      ^^^^
     31 │ 
+    32 │ // Playwright patterns: test.describe.only
   
   i The 'only' method is often used for debugging or during implementation.
   
@@ -563,5 +568,49 @@ invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   
     30 │ test.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
        │     -----                                       
+
+```
+
+```
+invalid.js:33:15 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    32 │ // Playwright patterns: test.describe.only
+  > 33 │ test.describe.only("bar", () => {});
+       │               ^^^^
+    34 │ test.describe.only.each([["a"], ["b"]])("%s", (a) => {});
+    35 │ 
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    33 │ test.describe.only("bar",·()·=>·{});
+       │              -----                  
+
+```
+
+```
+invalid.js:34:15 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    32 │ // Playwright patterns: test.describe.only
+    33 │ test.describe.only("bar", () => {});
+  > 34 │ test.describe.only.each([["a"], ["b"]])("%s", (a) => {});
+       │               ^^^^
+    35 │ 
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    34 │ test.describe.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
+       │              -----                                       
 
 ```

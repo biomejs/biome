@@ -4,6 +4,7 @@ expression: expect-async-matcher.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test('example', async ({ page }) => {
     expect(page.locator('body')).toBeVisible();
 });
@@ -13,26 +14,22 @@ test('example', async ({ page }) => {
 
 # Diagnostics
 ```
-expect-async-matcher.js:2:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+expect-async-matcher.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Async matcher toBeVisible must be awaited or returned.
   
-    1 │ test('example', async ({ page }) => {
-  > 2 │     expect(page.locator('body')).toBeVisible();
+    1 │ /* should generate diagnostics */
+    2 │ test('example', async ({ page }) => {
+  > 3 │     expect(page.locator('body')).toBeVisible();
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ });
-    4 │ 
+    4 │ });
+    5 │ 
   
   i Add await before the expect call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-    1 1 │   test('example', async ({ page }) => {
-    2   │ - ····expect(page.locator('body')).toBeVisible();
-      2 │ + ····await
-      3 │ + ····expect(page.locator('body')).toBeVisible();
-    3 4 │   });
-    4 5 │   
-  
+    3 │ ····await·expect(page.locator('body')).toBeVisible();
+      │     ++++++                                           
 
 ```

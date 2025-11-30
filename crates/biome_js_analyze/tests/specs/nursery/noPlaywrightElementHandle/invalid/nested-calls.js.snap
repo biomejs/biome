@@ -4,6 +4,7 @@ expression: nested-calls.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test nested element handle calls
 const button1 = await (await page.$("button"));
 
@@ -18,15 +19,16 @@ handle = await page.$("input");
 
 # Diagnostics
 ```
-nested-calls.js:2:30 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:3:30 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
-    1 │ // Test nested element handle calls
-  > 2 │ const button1 = await (await page.$("button"));
+    1 │ /* should generate diagnostics */
+    2 │ // Test nested element handle calls
+  > 3 │ const button1 = await (await page.$("button"));
       │                              ^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ const button2 = await page.$("#foo");
+    4 │ 
+    5 │ const button2 = await page.$("#foo");
   
   i Element handles like page.$() are discouraged.
   
@@ -38,16 +40,16 @@ nested-calls.js:2:30 lint/nursery/noPlaywrightElementHandle ━━━━━━�
 ```
 
 ```
-nested-calls.js:4:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:5:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
-    2 │ const button1 = await (await page.$("button"));
-    3 │ 
-  > 4 │ const button2 = await page.$("#foo");
+    3 │ const button1 = await (await page.$("button"));
+    4 │ 
+  > 5 │ const button2 = await page.$("#foo");
       │                       ^^^^^^^^^^^^^^
-    5 │ 
-    6 │ await (await page.$$("div"));
+    6 │ 
+    7 │ await (await page.$$("div"));
   
   i Element handles like page.$() are discouraged.
   
@@ -59,16 +61,16 @@ nested-calls.js:4:23 lint/nursery/noPlaywrightElementHandle ━━━━━━�
 ```
 
 ```
-nested-calls.js:6:14 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:7:14 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
-    4 │ const button2 = await page.$("#foo");
-    5 │ 
-  > 6 │ await (await page.$$("div"));
+    5 │ const button2 = await page.$("#foo");
+    6 │ 
+  > 7 │ await (await page.$$("div"));
       │              ^^^^^^^^^^^^^^
-    7 │ 
-    8 │ let handle;
+    8 │ 
+    9 │ let handle;
   
   i Element handles like page.$$() are discouraged.
   
@@ -80,14 +82,14 @@ nested-calls.js:6:14 lint/nursery/noPlaywrightElementHandle ━━━━━━�
 ```
 
 ```
-nested-calls.js:9:16 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-calls.js:10:16 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
-     8 │ let handle;
-   > 9 │ handle = await page.$("input");
+     9 │ let handle;
+  > 10 │ handle = await page.$("input");
        │                ^^^^^^^^^^^^^^^
-    10 │ 
+    11 │ 
   
   i Element handles like page.$() are discouraged.
   

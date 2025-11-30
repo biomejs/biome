@@ -1,4 +1,4 @@
-// should not generate diagnostics
+/* should not generate diagnostics */
 // Valid: awaited bracket notation
 test('awaited bracket notation for test.step', async ({ page }) => {
     await test["step"]('do something', async () => {

@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: page-frame.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.frame('iframe');
 await page.frames();
 await page.url();
@@ -14,36 +14,15 @@ await page.url();
 
 # Diagnostics
 ```
-page-frame.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Unnecessary await expression.
-  
-  > 1 │ await page.frame('iframe');
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ await page.frames();
-    3 │ await page.url();
-  
-  i This method does not return a Promise.
-  
-  i Remove the await keyword.
-  
-  i Safe fix: Remove unnecessary await
-  
-    1 │ await·page.frame('iframe');
-      │ ------                     
-
-```
-
-```
 page-frame.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary await expression.
   
-    1 │ await page.frame('iframe');
-  > 2 │ await page.frames();
-      │ ^^^^^^^^^^^^^^^^^^^
-    3 │ await page.url();
-    4 │ 
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.frame('iframe');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ await page.frames();
+    4 │ await page.url();
   
   i This method does not return a Promise.
   
@@ -51,8 +30,8 @@ page-frame.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━�
   
   i Safe fix: Remove unnecessary await
   
-    2 │ await·page.frames();
-      │ ------              
+    2 │ await·page.frame('iframe');
+      │ ------                     
 
 ```
 
@@ -61,11 +40,12 @@ page-frame.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━�
 
   i Unnecessary await expression.
   
-    1 │ await page.frame('iframe');
-    2 │ await page.frames();
-  > 3 │ await page.url();
-      │ ^^^^^^^^^^^^^^^^
-    4 │ 
+    1 │ /* should generate diagnostics */
+    2 │ await page.frame('iframe');
+  > 3 │ await page.frames();
+      │ ^^^^^^^^^^^^^^^^^^^
+    4 │ await page.url();
+    5 │ 
   
   i This method does not return a Promise.
   
@@ -73,7 +53,29 @@ page-frame.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━�
   
   i Safe fix: Remove unnecessary await
   
-    3 │ await·page.url();
+    3 │ await·page.frames();
+      │ ------              
+
+```
+
+```
+page-frame.js:4:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    2 │ await page.frame('iframe');
+    3 │ await page.frames();
+  > 4 │ await page.url();
+      │ ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i This method does not return a Promise.
+  
+  i Remove the await keyword.
+  
+  i Safe fix: Remove unnecessary await
+  
+    4 │ await·page.url();
       │ ------           
 
 ```

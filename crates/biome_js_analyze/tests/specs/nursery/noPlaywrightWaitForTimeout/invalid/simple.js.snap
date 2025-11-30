@@ -4,6 +4,7 @@ expression: simple.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.waitForTimeout(5000);
 
 
@@ -11,13 +12,14 @@ await page.waitForTimeout(5000);
 
 # Diagnostics
 ```
-simple.js:1:7 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+simple.js:2:7 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForTimeout().
   
-  > 1 │ await page.waitForTimeout(5000);
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.waitForTimeout(5000);
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
   

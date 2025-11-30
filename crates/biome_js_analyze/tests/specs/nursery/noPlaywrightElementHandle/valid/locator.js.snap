@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: locator.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 const button = page.locator('button');
 await button.click();
 

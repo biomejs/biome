@@ -4,6 +4,7 @@ expression: select-option-force.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test selectOption with force option (it has different signature with first options argument)
 await page.locator("select").selectOption({ label: "Blue" }, { force: true });
 
@@ -15,15 +16,16 @@ await page.locator("select").selectOption(["option1", "option2"], { force: true 
 
 # Diagnostics
 ```
-select-option-force.js:2:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+select-option-force.js:3:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of { force: true } option.
   
-    1 │ // Test selectOption with force option (it has different signature with first options argument)
-  > 2 │ await page.locator("select").selectOption({ label: "Blue" }, { force: true });
+    1 │ /* should generate diagnostics */
+    2 │ // Test selectOption with force option (it has different signature with first options argument)
+  > 3 │ await page.locator("select").selectOption({ label: "Blue" }, { force: true });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ await page.locator("select").selectOption("value", { force: true });
+    4 │ 
+    5 │ await page.locator("select").selectOption("value", { force: true });
   
   i The force option bypasses actionability checks and can lead to unreliable tests.
   
@@ -33,16 +35,16 @@ select-option-force.js:2:7 lint/nursery/noPlaywrightForceOption ━━━━━�
 ```
 
 ```
-select-option-force.js:4:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+select-option-force.js:5:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of { force: true } option.
   
-    2 │ await page.locator("select").selectOption({ label: "Blue" }, { force: true });
-    3 │ 
-  > 4 │ await page.locator("select").selectOption("value", { force: true });
+    3 │ await page.locator("select").selectOption({ label: "Blue" }, { force: true });
+    4 │ 
+  > 5 │ await page.locator("select").selectOption("value", { force: true });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ await page.locator("select").selectOption(["option1", "option2"], { force: true });
+    6 │ 
+    7 │ await page.locator("select").selectOption(["option1", "option2"], { force: true });
   
   i The force option bypasses actionability checks and can lead to unreliable tests.
   
@@ -52,15 +54,15 @@ select-option-force.js:4:7 lint/nursery/noPlaywrightForceOption ━━━━━�
 ```
 
 ```
-select-option-force.js:6:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+select-option-force.js:7:7 lint/nursery/noPlaywrightForceOption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of { force: true } option.
   
-    4 │ await page.locator("select").selectOption("value", { force: true });
-    5 │ 
-  > 6 │ await page.locator("select").selectOption(["option1", "option2"], { force: true });
+    5 │ await page.locator("select").selectOption("value", { force: true });
+    6 │ 
+  > 7 │ await page.locator("select").selectOption(["option1", "option2"], { force: true });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
+    8 │ 
   
   i The force option bypasses actionability checks and can lead to unreliable tests.
   

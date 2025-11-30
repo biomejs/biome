@@ -4,6 +4,7 @@ expression: has-params.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test.describe('suite', (done) => {
     test('one', async ({ page }) => {});
 });
@@ -14,16 +15,17 @@ test.describe('suite', (done) => {
 
 # Diagnostics
 ```
-has-params.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+has-params.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback should not have parameters.
   
-  > 1 │ test.describe('suite', (done) => {
+    1 │ /* should generate diagnostics */
+  > 2 │ test.describe('suite', (done) => {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │     test('one', async ({ page }) => {});
-  > 3 │ });
+  > 3 │     test('one', async ({ page }) => {});
+  > 4 │ });
       │ ^^
-    4 │ 
+    5 │ 
   
   i Describe callbacks are invoked without arguments by the test framework.
   

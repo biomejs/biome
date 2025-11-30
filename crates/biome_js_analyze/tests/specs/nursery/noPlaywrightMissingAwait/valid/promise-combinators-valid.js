@@ -1,4 +1,4 @@
-// should not generate diagnostics
+/* should not generate diagnostics */
 // Valid: awaited Promise combinators
 test('awaited Promise.all', async ({ page }) => {
     await Promise.all([

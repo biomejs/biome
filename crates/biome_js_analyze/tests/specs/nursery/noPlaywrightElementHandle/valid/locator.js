@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const button = page.locator('button');
 await button.click();
 

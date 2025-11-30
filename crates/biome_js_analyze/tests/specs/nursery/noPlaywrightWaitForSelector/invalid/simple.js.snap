@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: simple.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.waitForSelector('.submit-button');
 
 
@@ -12,13 +12,14 @@ await page.waitForSelector('.submit-button');
 
 # Diagnostics
 ```
-simple.js:1:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+simple.js:2:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForSelector().
   
-  > 1 │ await page.waitForSelector('.submit-button');
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.waitForSelector('.submit-button');
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i Use locator-based page.locator() or page.getByRole() APIs instead.
   

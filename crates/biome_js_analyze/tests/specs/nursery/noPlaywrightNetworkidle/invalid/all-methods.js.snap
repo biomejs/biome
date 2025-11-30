@@ -4,6 +4,7 @@ expression: all-methods.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test all methods that support networkidle option
 page.waitForLoadState("networkidle");
 
@@ -23,15 +24,16 @@ page.goForward({ waitUntil: "networkidle" });
 
 # Diagnostics
 ```
-all-methods.js:2:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:3:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-    1 │ // Test all methods that support networkidle option
-  > 2 │ page.waitForLoadState("networkidle");
+    1 │ /* should generate diagnostics */
+    2 │ // Test all methods that support networkidle option
+  > 3 │ page.waitForLoadState("networkidle");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+    4 │ 
+    5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -41,16 +43,16 @@ all-methods.js:2:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━
 ```
 
 ```
-all-methods.js:4:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:5:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-    2 │ page.waitForLoadState("networkidle");
-    3 │ 
-  > 4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+    3 │ page.waitForLoadState("networkidle");
+    4 │ 
+  > 5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+    6 │ 
+    7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -60,16 +62,16 @@ all-methods.js:4:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━
 ```
 
 ```
-all-methods.js:6:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:7:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-    4 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
-    5 │ 
-  > 6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+    5 │ page.waitForURL("http://example.com", { waitUntil: "networkidle" });
+    6 │ 
+  > 7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ page.reload({ waitUntil: "networkidle" });
+    8 │ 
+    9 │ page.reload({ waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -79,16 +81,16 @@ all-methods.js:6:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━
 ```
 
 ```
-all-methods.js:8:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:9:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-     6 │ page.goto("http://example.com", { waitUntil: "networkidle" });
-     7 │ 
-   > 8 │ page.reload({ waitUntil: "networkidle" });
+     7 │ page.goto("http://example.com", { waitUntil: "networkidle" });
+     8 │ 
+   > 9 │ page.reload({ waitUntil: "networkidle" });
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 
-    10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+    10 │ 
+    11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -98,16 +100,16 @@ all-methods.js:8:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━
 ```
 
 ```
-all-methods.js:10:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:11:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-     8 │ page.reload({ waitUntil: "networkidle" });
-     9 │ 
-  > 10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+     9 │ page.reload({ waitUntil: "networkidle" });
+    10 │ 
+  > 11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ page.goBack({ waitUntil: "networkidle" });
+    12 │ 
+    13 │ page.goBack({ waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -117,16 +119,16 @@ all-methods.js:10:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━�
 ```
 
 ```
-all-methods.js:12:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:13:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-    10 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
-    11 │ 
-  > 12 │ page.goBack({ waitUntil: "networkidle" });
+    11 │ page.setContent("<html></html>", { waitUntil: "networkidle" });
+    12 │ 
+  > 13 │ page.goBack({ waitUntil: "networkidle" });
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
-    14 │ page.goForward({ waitUntil: "networkidle" });
+    14 │ 
+    15 │ page.goForward({ waitUntil: "networkidle" });
   
   i The networkidle event is unreliable and can lead to flaky tests.
   
@@ -136,15 +138,15 @@ all-methods.js:12:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━�
 ```
 
 ```
-all-methods.js:14:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+all-methods.js:15:1 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-    12 │ page.goBack({ waitUntil: "networkidle" });
-    13 │ 
-  > 14 │ page.goForward({ waitUntil: "networkidle" });
+    13 │ page.goBack({ waitUntil: "networkidle" });
+    14 │ 
+  > 15 │ page.goForward({ waitUntil: "networkidle" });
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 
+    16 │ 
   
   i The networkidle event is unreliable and can lead to flaky tests.
   

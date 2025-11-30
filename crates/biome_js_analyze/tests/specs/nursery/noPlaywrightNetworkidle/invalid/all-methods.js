@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test all methods that support networkidle option
 page.waitForLoadState("networkidle");
 

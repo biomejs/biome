@@ -4,6 +4,7 @@ expression: multiple-arguments.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test $eval and $$eval with multiple arguments
 await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
 
@@ -17,15 +18,16 @@ await this.page.$$eval("span", (els, className) => els.filter(e => e.className =
 
 # Diagnostics
 ```
-multiple-arguments.js:2:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+multiple-arguments.js:3:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.$eval().
   
-    1 │ // Test $eval and $$eval with multiple arguments
-  > 2 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
+    1 │ /* should generate diagnostics */
+    2 │ // Test $eval and $$eval with multiple arguments
+  > 3 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+    4 │ 
+    5 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
   
   i Use locator.evaluate() instead.
   
@@ -35,16 +37,16 @@ multiple-arguments.js:2:7 lint/nursery/noPlaywrightEval ━━━━━━━━
 ```
 
 ```
-multiple-arguments.js:4:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+multiple-arguments.js:5:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.$$eval().
   
-    2 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
-    3 │ 
-  > 4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+    3 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
+    4 │ 
+  > 5 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+    6 │ 
+    7 │ await page.$eval("#search", (el, prop) => el[prop], "value");
   
   i Use locator.evaluateAll() instead.
   
@@ -54,16 +56,16 @@ multiple-arguments.js:4:7 lint/nursery/noPlaywrightEval ━━━━━━━━
 ```
 
 ```
-multiple-arguments.js:6:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+multiple-arguments.js:7:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.$eval().
   
-    4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
-    5 │ 
-  > 6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+    5 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+    6 │ 
+  > 7 │ await page.$eval("#search", (el, prop) => el[prop], "value");
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
+    8 │ 
+    9 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
   
   i Use locator.evaluate() instead.
   
@@ -73,15 +75,15 @@ multiple-arguments.js:6:7 lint/nursery/noPlaywrightEval ━━━━━━━━
 ```
 
 ```
-multiple-arguments.js:8:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+multiple-arguments.js:9:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.$$eval().
   
-    6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
-    7 │ 
-  > 8 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
-      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     7 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+     8 │ 
+   > 9 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
   i Use locator.evaluateAll() instead.
   

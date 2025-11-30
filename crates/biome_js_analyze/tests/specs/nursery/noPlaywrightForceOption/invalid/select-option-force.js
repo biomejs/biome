@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test selectOption with force option (it has different signature with first options argument)
 await page.locator("select").selectOption({ label: "Blue" }, { force: true });
 

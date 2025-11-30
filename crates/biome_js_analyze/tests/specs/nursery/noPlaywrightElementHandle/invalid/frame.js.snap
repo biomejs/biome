@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: frame.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 const element = await frame.$('#element');
 
 
@@ -12,13 +12,14 @@ const element = await frame.$('#element');
 
 # Diagnostics
 ```
-frame.js:1:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+frame.js:2:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of element handles.
   
-  > 1 │ const element = await frame.$('#element');
+    1 │ /* should generate diagnostics */
+  > 2 │ const element = await frame.$('#element');
       │                       ^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i Element handles like page.$() are discouraged.
   

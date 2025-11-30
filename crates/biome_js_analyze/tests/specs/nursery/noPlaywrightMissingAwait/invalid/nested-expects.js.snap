@@ -4,6 +4,7 @@ expression: nested-expects.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test nested expect calls and chaining
 test('nested not operator', async ({ page }) => {
     expect(page).not.toBeVisible();
@@ -21,80 +22,62 @@ test('multiple not calls', async ({ page }) => {
 
 # Diagnostics
 ```
-nested-expects.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-expects.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Async matcher toBeVisible must be awaited or returned.
   
-    1 │ // Test nested expect calls and chaining
-    2 │ test('nested not operator', async ({ page }) => {
-  > 3 │     expect(page).not.toBeVisible();
+    2 │ // Test nested expect calls and chaining
+    3 │ test('nested not operator', async ({ page }) => {
+  > 4 │     expect(page).not.toBeVisible();
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ });
-    5 │ 
+    5 │ });
+    6 │ 
   
   i Add await before the expect call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     1  1 │   // Test nested expect calls and chaining
-     2  2 │   test('nested not operator', async ({ page }) => {
-     3    │ - ····expect(page).not.toBeVisible();
-        3 │ + ····await
-        4 │ + ····expect(page).not.toBeVisible();
-     4  5 │   });
-     5  6 │   
-  
+    4 │ ····await·expect(page).not.toBeVisible();
+      │     ++++++                               
 
 ```
 
 ```
-nested-expects.js:7:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-expects.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Async matcher toHaveText must be awaited or returned.
   
-    6 │ test('chained not and soft', async ({ page }) => {
-  > 7 │     expect.soft(page).not.toHaveText("foo");
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ });
-    9 │ 
+     7 │ test('chained not and soft', async ({ page }) => {
+   > 8 │     expect.soft(page).not.toHaveText("foo");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
   
   i Add await before the expect call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     5  5 │   
-     6  6 │   test('chained not and soft', async ({ page }) => {
-     7    │ - ····expect.soft(page).not.toHaveText("foo");
-        7 │ + ····await
-        8 │ + ····expect.soft(page).not.toHaveText("foo");
-     8  9 │   });
-     9 10 │   
-  
+    8 │ ····await·expect.soft(page).not.toHaveText("foo");
+      │     ++++++                                        
 
 ```
 
 ```
-nested-expects.js:11:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested-expects.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Async matcher toBeEnabled must be awaited or returned.
   
-    10 │ test('multiple not calls', async ({ page }) => {
-  > 11 │     expect(page).not.not.toBeEnabled();
+    11 │ test('multiple not calls', async ({ page }) => {
+  > 12 │     expect(page).not.not.toBeEnabled();
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ });
-    13 │ 
+    13 │ });
+    14 │ 
   
   i Add await before the expect call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-     9  9 │   
-    10 10 │   test('multiple not calls', async ({ page }) => {
-    11    │ - ····expect(page).not.not.toBeEnabled();
-       11 │ + ····await
-       12 │ + ····expect(page).not.not.toBeEnabled();
-    12 13 │   });
-    13 14 │   
-  
+    12 │ ····await·expect(page).not.not.toBeEnabled();
+       │     ++++++                                   
 
 ```

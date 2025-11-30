@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test non-function callbacks
 test.describe("foo", "foo2");
 

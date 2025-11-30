@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Valid: using other waitUntil options
 page.waitForLoadState();
 

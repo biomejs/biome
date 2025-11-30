@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: with-options.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.click('button');
 await page.waitForNavigation({ waitUntil: 'networkidle' });
 
@@ -13,14 +13,15 @@ await page.waitForNavigation({ waitUntil: 'networkidle' });
 
 # Diagnostics
 ```
-with-options.js:2:7 lint/nursery/noPlaywrightWaitForNavigation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with-options.js:3:7 lint/nursery/noPlaywrightWaitForNavigation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForNavigation().
   
-    1 │ await page.click('button');
-  > 2 │ await page.waitForNavigation({ waitUntil: 'networkidle' });
+    1 │ /* should generate diagnostics */
+    2 │ await page.click('button');
+  > 3 │ await page.waitForNavigation({ waitUntil: 'networkidle' });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
+    4 │ 
   
   i waitForNavigation() is deprecated. Use page.waitForURL() or page.waitForLoadState() instead.
   

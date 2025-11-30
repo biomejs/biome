@@ -4,6 +4,7 @@ expression: other-wait-options.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 // Valid: using other waitUntil options
 page.waitForLoadState();
 

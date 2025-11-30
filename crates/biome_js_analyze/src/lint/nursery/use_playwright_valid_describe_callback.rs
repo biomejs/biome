@@ -42,9 +42,9 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    pub NoPlaywrightValidDescribeCallback {
+    pub UsePlaywrightValidDescribeCallback {
         version: "next",
-        name: "noPlaywrightValidDescribeCallback",
+        name: "usePlaywrightValidDescribeCallback",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("valid-describe-callback").same()],
         recommended: false,
@@ -59,7 +59,7 @@ pub enum InvalidReason {
     NotFunction,
 }
 
-impl Rule for NoPlaywrightValidDescribeCallback {
+impl Rule for UsePlaywrightValidDescribeCallback {
     type Query = Ast<JsCallExpression>;
     type State = InvalidReason;
     type Signals = Option<Self::State>;

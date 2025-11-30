@@ -5,8 +5,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, T};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_js_syntax::{
+    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, JsSyntaxKind,
+};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function};
 
@@ -158,7 +160,7 @@ impl Rule for NoPlaywrightMissingAwait {
                     },
                 )
                 .note(markup! {
-                    "Add "<Emphasis>"await"</Emphasis>" before the expect call or return the promise."
+                    "The "<Emphasis>"expect.poll"</Emphasis>" method converts any synchronous expect to an asynchronous polling one. Add "<Emphasis>"await"</Emphasis>" before the call or return the promise."
                 }),
             ),
             MissingAwaitType::TestStep => Some(
@@ -170,7 +172,7 @@ impl Rule for NoPlaywrightMissingAwait {
                     },
                 )
                 .note(markup! {
-                    "Add "<Emphasis>"await"</Emphasis>" before the test.step call or return the promise."
+                    "Test steps are asynchronous. Add "<Emphasis>"await"</Emphasis>" before "<Emphasis>"test.step()"</Emphasis>" or return the promise."
                 }),
             ),
         }
@@ -190,38 +192,41 @@ impl Rule for NoPlaywrightMissingAwait {
             && !is_call_awaited_or_returned(&promise_combinator)
         {
             let mut mutation = ctx.root().begin();
-            let await_expr = make::js_await_expression(
-                make::token(T![await]),
-                promise_combinator.clone().into(),
-            );
+            let expression: AnyJsExpression = promise_combinator.clone().into();
+            let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
+            let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+                make::token(JsSyntaxKind::AWAIT_KW)
+                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                trimmed_expression,
+            ));
 
-            mutation.replace_element(
-                promise_combinator.into_syntax().into(),
-                await_expr.into_syntax().into(),
-            );
+            mutation.replace_node_transfer_trivia(expression, await_expr)?;
 
             return Some(JsRuleAction::new(
                 ctx.metadata().action_category(ctx.category(), ctx.group()),
                 Applicability::MaybeIncorrect,
-                markup! { "Add await to Promise combinator" }.to_owned(),
+                markup! { "Add "<Emphasis>"await"</Emphasis>" before the Promise combinator." }
+                    .to_owned(),
                 mutation,
             ));
         }
 
         // Normal case: fix the call directly
         let mut mutation = ctx.root().begin();
-        let await_expr =
-            make::js_await_expression(make::token(T![await]), call_expr.clone().into());
+        let expression: AnyJsExpression = call_expr.clone().into();
+        let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
+        let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+            make::token(JsSyntaxKind::AWAIT_KW)
+                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            trimmed_expression,
+        ));
 
-        mutation.replace_element(
-            call_expr.clone().into_syntax().into(),
-            await_expr.into_syntax().into(),
-        );
+        mutation.replace_node_transfer_trivia(expression, await_expr)?;
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::MaybeIncorrect,
-            markup! { "Add await" }.to_owned(),
+            markup! { "Add "<Emphasis>"await"</Emphasis>" before the call." }.to_owned(),
             mutation,
         ))
     }

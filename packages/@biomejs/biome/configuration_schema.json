@@ -4005,16 +4005,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoPlaywrightSkippedTestConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoPlaywrightSkippedTestOptions" }
-			]
-		},
-		"NoPlaywrightSkippedTestOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoPlaywrightUselessAwaitConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4022,16 +4012,6 @@
 			]
 		},
 		"NoPlaywrightUselessAwaitOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoPlaywrightValidDescribeCallbackConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoPlaywrightValidDescribeCallbackOptions" }
-			]
-		},
-		"NoPlaywrightValidDescribeCallbackOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5359,26 +5339,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noPlaywrightSkippedTest": {
-					"description": "Disallow usage of .skip annotation in Playwright tests.\nSee https://biomejs.dev/linter/rules/no-playwright-skipped-test",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightSkippedTestConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noPlaywrightUselessAwait": {
 					"description": "Disallow unnecessary await for Playwright methods that don't return promises.\nSee https://biomejs.dev/linter/rules/no-playwright-useless-await",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPlaywrightUselessAwaitConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightValidDescribeCallback": {
-					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/no-playwright-valid-describe-callback",
-					"anyOf": [
-						{
-							"$ref": "#/$defs/NoPlaywrightValidDescribeCallbackConfiguration"
-						},
 						{ "type": "null" }
 					]
 				},
@@ -5572,6 +5536,15 @@
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseMaxParamsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"usePlaywrightValidDescribeCallback": {
+					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -7638,32 +7611,12 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoPlaywrightSkippedTestOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoPlaywrightSkippedTestOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoPlaywrightUselessAwaitOptions": {
 			"type": "object",
 			"properties": {
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightUselessAwaitOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoPlaywrightValidDescribeCallbackOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": {
-					"$ref": "#/$defs/NoPlaywrightValidDescribeCallbackOptions"
-				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9535,6 +9488,17 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseParseIntRadixOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUsePlaywrightValidDescribeCallbackOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12454,6 +12418,16 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePlaywrightValidDescribeCallbackConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePlaywrightValidDescribeCallbackOptions" }
+			]
+		},
+		"UsePlaywrightValidDescribeCallbackOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

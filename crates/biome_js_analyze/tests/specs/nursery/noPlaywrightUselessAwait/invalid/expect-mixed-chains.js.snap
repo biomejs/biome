@@ -4,6 +4,7 @@ expression: expect-mixed-chains.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Invalid: sync expect without async modifiers should trigger the rule
 await expect(1).toBe(1);
 await expect(value).toEqual(expectedValue);
@@ -18,38 +19,16 @@ await expect.soft(value).toBe(123);
 
 # Diagnostics
 ```
-expect-mixed-chains.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Unnecessary await expression.
-  
-    1 │ // Invalid: sync expect without async modifiers should trigger the rule
-  > 2 │ await expect(1).toBe(1);
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ await expect(value).toEqual(expectedValue);
-    4 │ await expect(str).toMatch(/pattern/);
-  
-  i This method does not return a Promise.
-  
-  i Remove the await keyword.
-  
-  i Safe fix: Remove unnecessary await
-  
-    2 │ await·expect(1).toBe(1);
-      │ ------                  
-
-```
-
-```
 expect-mixed-chains.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary await expression.
   
-    1 │ // Invalid: sync expect without async modifiers should trigger the rule
-    2 │ await expect(1).toBe(1);
-  > 3 │ await expect(value).toEqual(expectedValue);
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ await expect(str).toMatch(/pattern/);
-    5 │ await expect(arr).toHaveLength(3);
+    1 │ /* should generate diagnostics */
+    2 │ // Invalid: sync expect without async modifiers should trigger the rule
+  > 3 │ await expect(1).toBe(1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ await expect(value).toEqual(expectedValue);
+    5 │ await expect(str).toMatch(/pattern/);
   
   i This method does not return a Promise.
   
@@ -57,8 +36,8 @@ expect-mixed-chains.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i Safe fix: Remove unnecessary await
   
-    3 │ await·expect(value).toEqual(expectedValue);
-      │ ------                                     
+    3 │ await·expect(1).toBe(1);
+      │ ------                  
 
 ```
 
@@ -67,12 +46,12 @@ expect-mixed-chains.js:4:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
 
   i Unnecessary await expression.
   
-    2 │ await expect(1).toBe(1);
-    3 │ await expect(value).toEqual(expectedValue);
-  > 4 │ await expect(str).toMatch(/pattern/);
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ await expect(arr).toHaveLength(3);
-    6 │ 
+    2 │ // Invalid: sync expect without async modifiers should trigger the rule
+    3 │ await expect(1).toBe(1);
+  > 4 │ await expect(value).toEqual(expectedValue);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ await expect(str).toMatch(/pattern/);
+    6 │ await expect(arr).toHaveLength(3);
   
   i This method does not return a Promise.
   
@@ -80,8 +59,8 @@ expect-mixed-chains.js:4:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i Safe fix: Remove unnecessary await
   
-    4 │ await·expect(str).toMatch(/pattern/);
-      │ ------                               
+    4 │ await·expect(value).toEqual(expectedValue);
+      │ ------                                     
 
 ```
 
@@ -90,12 +69,12 @@ expect-mixed-chains.js:5:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
 
   i Unnecessary await expression.
   
-    3 │ await expect(value).toEqual(expectedValue);
-    4 │ await expect(str).toMatch(/pattern/);
-  > 5 │ await expect(arr).toHaveLength(3);
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
+    3 │ await expect(1).toBe(1);
+    4 │ await expect(value).toEqual(expectedValue);
+  > 5 │ await expect(str).toMatch(/pattern/);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ await expect(arr).toHaveLength(3);
+    7 │ 
   
   i This method does not return a Promise.
   
@@ -103,20 +82,43 @@ expect-mixed-chains.js:5:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i Safe fix: Remove unnecessary await
   
-    5 │ await·expect(arr).toHaveLength(3);
+    5 │ await·expect(str).toMatch(/pattern/);
+      │ ------                               
+
+```
+
+```
+expect-mixed-chains.js:6:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    4 │ await expect(value).toEqual(expectedValue);
+    5 │ await expect(str).toMatch(/pattern/);
+  > 6 │ await expect(arr).toHaveLength(3);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
+  
+  i This method does not return a Promise.
+  
+  i Remove the await keyword.
+  
+  i Safe fix: Remove unnecessary await
+  
+    6 │ await·expect(arr).toHaveLength(3);
       │ ------                            
 
 ```
 
 ```
-expect-mixed-chains.js:8:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+expect-mixed-chains.js:9:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary await expression.
   
-    7 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
-  > 8 │ await expect.soft(value).toBe(123);
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     8 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
+   > 9 │ await expect.soft(value).toBe(123);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
   i This method does not return a Promise.
   
@@ -124,7 +126,7 @@ expect-mixed-chains.js:8:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i Safe fix: Remove unnecessary await
   
-    8 │ await·expect.soft(value).toBe(123);
+    9 │ await·expect.soft(value).toBe(123);
       │ ------                             
 
 ```

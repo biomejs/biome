@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: with-state.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.waitForSelector('#dialog', { state: 'visible' });
 await page.click('#dialog .button');
 
@@ -13,14 +13,15 @@ await page.click('#dialog .button');
 
 # Diagnostics
 ```
-with-state.js:1:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with-state.js:2:7 lint/nursery/noPlaywrightWaitForSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of page.waitForSelector().
   
-  > 1 │ await page.waitForSelector('#dialog', { state: 'visible' });
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.waitForSelector('#dialog', { state: 'visible' });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ await page.click('#dialog .button');
-    3 │ 
+    3 │ await page.click('#dialog .button');
+    4 │ 
   
   i Use locator-based page.locator() or page.getByRole() APIs instead.
   

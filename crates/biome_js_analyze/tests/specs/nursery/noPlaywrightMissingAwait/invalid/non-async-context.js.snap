@@ -4,6 +4,7 @@ expression: non-async-context.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test('example', ({ page }) => {
     expect(page.locator('body')).toBeVisible();
 });
@@ -14,15 +15,16 @@ test('example', ({ page }) => {
 
 # Diagnostics
 ```
-non-async-context.js:2:5 lint/nursery/noPlaywrightMissingAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+non-async-context.js:3:5 lint/nursery/noPlaywrightMissingAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Async matcher toBeVisible must be awaited or returned.
   
-    1 │ test('example', ({ page }) => {
-  > 2 │     expect(page.locator('body')).toBeVisible();
+    1 │ /* should generate diagnostics */
+    2 │ test('example', ({ page }) => {
+  > 3 │     expect(page.locator('body')).toBeVisible();
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ });
-    4 │ 
+    4 │ });
+    5 │ 
   
   i Add await before the expect call or return the promise.
   

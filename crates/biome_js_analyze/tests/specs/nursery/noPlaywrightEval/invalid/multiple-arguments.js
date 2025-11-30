@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test $eval and $$eval with multiple arguments
 await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
 

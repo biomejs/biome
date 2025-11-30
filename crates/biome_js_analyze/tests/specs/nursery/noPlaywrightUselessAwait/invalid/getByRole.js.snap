@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: getByRole.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.getByRole('button');
 
 
@@ -12,13 +12,14 @@ await page.getByRole('button');
 
 # Diagnostics
 ```
-getByRole.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+getByRole.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary await expression.
   
-  > 1 │ await page.getByRole('button');
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.getByRole('button');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i This method does not return a Promise.
   
@@ -26,7 +27,7 @@ getByRole.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━
   
   i Safe fix: Remove unnecessary await
   
-    1 │ await·page.getByRole('button');
+    2 │ await·page.getByRole('button');
       │ ------                         
 
 ```

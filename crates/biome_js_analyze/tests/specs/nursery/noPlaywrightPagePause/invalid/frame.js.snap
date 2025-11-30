@@ -4,6 +4,7 @@ expression: frame.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 const frame = page.frame('iframe');
 await frame.pause();
 
@@ -12,14 +13,15 @@ await frame.pause();
 
 # Diagnostics
 ```
-frame.js:2:7 lint/nursery/noPlaywrightPagePause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+frame.js:3:7 lint/nursery/noPlaywrightPagePause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of frame.pause().
   
-    1 │ const frame = page.frame('iframe');
-  > 2 │ await frame.pause();
+    1 │ /* should generate diagnostics */
+    2 │ const frame = page.frame('iframe');
+  > 3 │ await frame.pause();
       │       ^^^^^^^^^^^^^
-    3 │ 
+    4 │ 
   
   i frame.pause() is a debugging utility and should not be committed to version control.
   

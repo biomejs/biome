@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Test nested element handle calls
 const button1 = await (await page.$("button"));
 

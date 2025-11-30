@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 test('Promise.allSettled', async ({ page }) => {
     Promise.allSettled([
         expect(page).toBeVisible(),

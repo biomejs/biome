@@ -4,6 +4,7 @@ expression: missing-callback.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test missing callback
 test.describe("foo");
 
@@ -13,15 +14,16 @@ describe("bar");
 
 # Diagnostics
 ```
-missing-callback.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing-callback.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe requires a callback function.
   
-    1 │ // Test missing callback
-  > 2 │ test.describe("foo");
+    1 │ /* should generate diagnostics */
+    2 │ // Test missing callback
+  > 3 │ test.describe("foo");
       │ ^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ describe("bar");
+    4 │ 
+    5 │ describe("bar");
   
   i The second argument to describe must be a function that contains the test definitions.
   
@@ -31,15 +33,15 @@ missing-callback.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━
 ```
 
 ```
-missing-callback.js:4:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing-callback.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe requires a callback function.
   
-    2 │ test.describe("foo");
-    3 │ 
-  > 4 │ describe("bar");
+    3 │ test.describe("foo");
+    4 │ 
+  > 5 │ describe("bar");
       │ ^^^^^^^^^^^^^^^
-    5 │ 
+    6 │ 
   
   i The second argument to describe must be a function that contains the test definitions.
   

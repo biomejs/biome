@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Valid: expect with .resolves modifier
 await expect(promise).resolves.toBe(1);
 await expect(fetchData()).resolves.toEqual({ foo: 'bar' });

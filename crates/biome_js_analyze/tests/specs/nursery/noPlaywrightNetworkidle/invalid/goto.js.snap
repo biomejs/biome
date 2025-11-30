@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: goto.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await page.goto('https://example.com', { waitUntil: 'networkidle' });
 
 
@@ -13,13 +13,14 @@ await page.goto('https://example.com', { waitUntil: 'networkidle' });
 
 # Diagnostics
 ```
-goto.js:1:7 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+goto.js:2:7 lint/nursery/noPlaywrightNetworkidle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected use of networkidle option.
   
-  > 1 │ await page.goto('https://example.com', { waitUntil: 'networkidle' });
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.goto('https://example.com', { waitUntil: 'networkidle' });
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i The networkidle event is unreliable and can lead to flaky tests.
   

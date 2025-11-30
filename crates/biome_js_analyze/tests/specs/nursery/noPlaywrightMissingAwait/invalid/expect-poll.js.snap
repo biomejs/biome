@@ -4,6 +4,7 @@ expression: expect-poll.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test('example', async () => {
     expect.poll(() => foo).toBe(true);
 });
@@ -13,26 +14,22 @@ test('example', async () => {
 
 # Diagnostics
 ```
-expect-poll.js:2:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+expect-poll.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i expect.poll must be awaited or returned.
   
-    1 │ test('example', async () => {
-  > 2 │     expect.poll(() => foo).toBe(true);
+    1 │ /* should generate diagnostics */
+    2 │ test('example', async () => {
+  > 3 │     expect.poll(() => foo).toBe(true);
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ });
-    4 │ 
+    4 │ });
+    5 │ 
   
-  i Add await before the expect call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
   
-  i Unsafe fix: Add await
+  i Unsafe fix: Add await before the call.
   
-    1 1 │   test('example', async () => {
-    2   │ - ····expect.poll(()·=>·foo).toBe(true);
-      2 │ + ····await
-      3 │ + ····expect.poll(()·=>·foo).toBe(true);
-    3 4 │   });
-    4 5 │   
-  
+    3 │ ····await·expect.poll(()·=>·foo).toBe(true);
+      │     ++++++                                  
 
 ```

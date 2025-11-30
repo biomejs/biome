@@ -1967,20 +1967,10 @@ See https://biomejs.dev/linter/rules/no-playwright-page-pause
 	 */
 	noPlaywrightPagePause?: NoPlaywrightPagePauseConfiguration;
 	/**
-	* Disallow usage of .skip annotation in Playwright tests.
-See https://biomejs.dev/linter/rules/no-playwright-skipped-test 
-	 */
-	noPlaywrightSkippedTest?: NoPlaywrightSkippedTestConfiguration;
-	/**
 	* Disallow unnecessary await for Playwright methods that don't return promises.
 See https://biomejs.dev/linter/rules/no-playwright-useless-await 
 	 */
 	noPlaywrightUselessAwait?: NoPlaywrightUselessAwaitConfiguration;
-	/**
-	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/no-playwright-valid-describe-callback 
-	 */
-	noPlaywrightValidDescribeCallback?: NoPlaywrightValidDescribeCallbackConfiguration;
 	/**
 	* Disallow using page.waitForNavigation().
 See https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation 
@@ -2120,6 +2110,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
 	useMaxParams?: UseMaxParamsConfiguration;
+	/**
+	* Enforce valid describe() callback.
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+	 */
+	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
 	* Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
 See https://biomejs.dev/linter/rules/use-qwik-method-usage 
@@ -3695,15 +3690,9 @@ export type NoPlaywrightNetworkidleConfiguration =
 export type NoPlaywrightPagePauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightPagePauseOptions;
-export type NoPlaywrightSkippedTestConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoPlaywrightSkippedTestOptions;
 export type NoPlaywrightUselessAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightUselessAwaitOptions;
-export type NoPlaywrightValidDescribeCallbackConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoPlaywrightValidDescribeCallbackOptions;
 export type NoPlaywrightWaitForNavigationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightWaitForNavigationOptions;
@@ -3785,6 +3774,9 @@ export type UseFindConfiguration =
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
+export type UsePlaywrightValidDescribeCallbackConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
 export type UseQwikMethodUsageConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikMethodUsageOptions;
@@ -5156,18 +5148,10 @@ export interface RuleWithNoPlaywrightPagePauseOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightPagePauseOptions;
 }
-export interface RuleWithNoPlaywrightSkippedTestOptions {
-	level: RulePlainConfiguration;
-	options?: NoPlaywrightSkippedTestOptions;
-}
 export interface RuleWithNoPlaywrightUselessAwaitOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightUselessAwaitOptions;
-}
-export interface RuleWithNoPlaywrightValidDescribeCallbackOptions {
-	level: RulePlainConfiguration;
-	options?: NoPlaywrightValidDescribeCallbackOptions;
 }
 export interface RuleWithNoPlaywrightWaitForNavigationOptions {
 	level: RulePlainConfiguration;
@@ -5282,6 +5266,10 @@ export interface RuleWithUseFindOptions {
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
+}
+export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
+	level: RulePlainConfiguration;
+	options?: UsePlaywrightValidDescribeCallbackOptions;
 }
 export interface RuleWithUseQwikMethodUsageOptions {
 	level: RulePlainConfiguration;
@@ -6503,9 +6491,7 @@ export type NoPlaywrightForceOptionOptions = {};
 export type NoPlaywrightMissingAwaitOptions = {};
 export type NoPlaywrightNetworkidleOptions = {};
 export type NoPlaywrightPagePauseOptions = {};
-export type NoPlaywrightSkippedTestOptions = {};
 export type NoPlaywrightUselessAwaitOptions = {};
-export type NoPlaywrightValidDescribeCallbackOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
@@ -6565,6 +6551,7 @@ export interface UseMaxParamsOptions {
 	 */
 	max?: number;
 }
+export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
 export type UseRegexpExecOptions = {};
@@ -7357,9 +7344,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightMissingAwait"
 	| "lint/nursery/noPlaywrightNetworkidle"
 	| "lint/nursery/noPlaywrightPagePause"
-	| "lint/nursery/noPlaywrightSkippedTest"
 	| "lint/nursery/noPlaywrightUselessAwait"
-	| "lint/nursery/noPlaywrightValidDescribeCallback"
+	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"

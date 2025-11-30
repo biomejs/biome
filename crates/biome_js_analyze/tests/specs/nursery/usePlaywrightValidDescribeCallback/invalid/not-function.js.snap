@@ -4,6 +4,7 @@ expression: not-function.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // Test non-function callbacks
 test.describe("foo", "foo2");
 
@@ -21,15 +22,16 @@ test.describe("another", someVariable);
 
 # Diagnostics
 ```
-not-function.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-    1 │ // Test non-function callbacks
-  > 2 │ test.describe("foo", "foo2");
+    1 │ /* should generate diagnostics */
+    2 │ // Test non-function callbacks
+  > 3 │ test.describe("foo", "foo2");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ test.describe("bar", 42);
+    4 │ 
+    5 │ test.describe("bar", 42);
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   
@@ -39,16 +41,16 @@ not-function.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━�
 ```
 
 ```
-not-function.js:4:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-    2 │ test.describe("foo", "foo2");
-    3 │ 
-  > 4 │ test.describe("bar", 42);
+    3 │ test.describe("foo", "foo2");
+    4 │ 
+  > 5 │ test.describe("bar", 42);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ test.describe("baz", { tag: ["@slow"] });
+    6 │ 
+    7 │ test.describe("baz", { tag: ["@slow"] });
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   
@@ -58,16 +60,16 @@ not-function.js:4:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━�
 ```
 
 ```
-not-function.js:6:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:7:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-    4 │ test.describe("bar", 42);
-    5 │ 
-  > 6 │ test.describe("baz", { tag: ["@slow"] });
+    5 │ test.describe("bar", 42);
+    6 │ 
+  > 7 │ test.describe("baz", { tag: ["@slow"] });
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ describe("qux", null);
+    8 │ 
+    9 │ describe("qux", null);
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   
@@ -77,16 +79,16 @@ not-function.js:6:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━�
 ```
 
 ```
-not-function.js:8:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:9:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-     6 │ test.describe("baz", { tag: ["@slow"] });
-     7 │ 
-   > 8 │ describe("qux", null);
+     7 │ test.describe("baz", { tag: ["@slow"] });
+     8 │ 
+   > 9 │ describe("qux", null);
        │ ^^^^^^^^^^^^^^^^^^^^^
-     9 │ 
-    10 │ describe("suite", undefined);
+    10 │ 
+    11 │ describe("suite", undefined);
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   
@@ -96,16 +98,16 @@ not-function.js:8:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━�
 ```
 
 ```
-not-function.js:10:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:11:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-     8 │ describe("qux", null);
-     9 │ 
-  > 10 │ describe("suite", undefined);
+     9 │ describe("qux", null);
+    10 │ 
+  > 11 │ describe("suite", undefined);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ test.describe("another", someVariable);
+    12 │ 
+    13 │ test.describe("another", someVariable);
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   
@@ -115,15 +117,15 @@ not-function.js:10:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━
 ```
 
 ```
-not-function.js:12:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not-function.js:13:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback must be a function.
   
-    10 │ describe("suite", undefined);
-    11 │ 
-  > 12 │ test.describe("another", someVariable);
+    11 │ describe("suite", undefined);
+    12 │ 
+  > 13 │ test.describe("another", someVariable);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
+    14 │ 
   
   i The second argument to describe must be a function, not a string, number, object, or other type.
   

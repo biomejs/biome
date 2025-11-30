@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // Invalid: sync expect without async modifiers should trigger the rule
 await expect(1).toBe(1);
 await expect(value).toEqual(expectedValue);

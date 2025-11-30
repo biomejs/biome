@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: expect-sync.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 await expect(1).toBe(1);
 
 
@@ -12,13 +12,14 @@ await expect(1).toBe(1);
 
 # Diagnostics
 ```
-expect-sync.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+expect-sync.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary await expression.
   
-  > 1 │ await expect(1).toBe(1);
+    1 │ /* should generate diagnostics */
+  > 2 │ await expect(1).toBe(1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    3 │ 
   
   i This method does not return a Promise.
   
@@ -26,7 +27,7 @@ expect-sync.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━�
   
   i Safe fix: Remove unnecessary await
   
-    1 │ await·expect(1).toBe(1);
+    2 │ await·expect(1).toBe(1);
       │ ------                  
 
 ```

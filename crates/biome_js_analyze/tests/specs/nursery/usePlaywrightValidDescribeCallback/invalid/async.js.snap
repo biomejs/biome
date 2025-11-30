@@ -4,6 +4,7 @@ expression: async.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 test.describe('suite', async () => {
     test('one', async ({ page }) => {});
 });
@@ -14,16 +15,17 @@ test.describe('suite', async () => {
 
 # Diagnostics
 ```
-async.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Describe callback should not be async.
   
-  > 1 │ test.describe('suite', async () => {
+    1 │ /* should generate diagnostics */
+  > 2 │ test.describe('suite', async () => {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │     test('one', async ({ page }) => {});
-  > 3 │ });
+  > 3 │     test('one', async ({ page }) => {});
+  > 4 │ });
       │ ^^
-    4 │ 
+    5 │ 
   
   i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
   

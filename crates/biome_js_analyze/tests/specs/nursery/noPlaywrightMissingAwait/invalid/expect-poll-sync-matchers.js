@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // expect.poll with synchronous matchers should still require await
 test('toBe matcher', async () => {
     expect.poll(() => getValue()).toBe(42);
