@@ -5,7 +5,7 @@ use crate::file_handlers::{
     ParserCapabilities, javascript,
 };
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{DocumentFileSource, DocumentServices, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
@@ -127,6 +127,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(JsFileSource::astro().into()),
+        services: DocumentServices::none(),
     }
 }
 

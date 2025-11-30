@@ -4,7 +4,7 @@ use super::{
     ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
+use crate::workspace::{DocumentServices, FixFileResult, GetSyntaxTreeResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -305,6 +305,7 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
+        services: DocumentServices::none(),
     }
 }
 
