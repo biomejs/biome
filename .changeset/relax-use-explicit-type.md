@@ -13,3 +13,7 @@ Allow type annotations to be omitted when types are trivially inferrable from:
 - Conditional expressions (`const val = true ? 'yes' : 'no'`)
 - Function calls (`const num = Math.random()`)
 - Parameter defaults (`const fn = (word = 'hello') => word`)
+
+Also removed the redundant `any` type validation from this rule. The `any` type 
+is now only validated by the dedicated `noExplicitAny` rule, following the 
+Single Responsibility Principle.

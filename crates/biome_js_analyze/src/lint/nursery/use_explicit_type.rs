@@ -195,12 +195,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following example is considered incorrect because `arg` has `any` type.
-    ///
-    /// ```ts,expect_diagnostic
-    /// var arrowFn = (arg: any): string => `test ${arg}`;
-    /// ```
-    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -356,7 +350,6 @@ declare_node_union! {
 
 pub enum ViolationKind {
     UntypedParameter,
-    AnyParameter,
     UntypedFunction,
     UntypedMember,
     UntypedDeclaration,
@@ -368,9 +361,6 @@ impl ViolationKind {
         match self {
             Self::UntypedParameter => markup! {
                 "The parameter doesn't have a type defined."
-            },
-            Self::AnyParameter => markup! {
-                "The parameter has an "<Emphasis>"any"</Emphasis>" type."
             },
             Self::UntypedVariable => markup! {
                 "The variable doesn't have a type defined."
@@ -391,9 +381,6 @@ impl ViolationKind {
         match self {
             Self::UntypedParameter => markup! {
                 "Add a type to the parameter."
-            },
-            Self::AnyParameter => markup! {
-                "Replace "<Emphasis>"any"</Emphasis>" with "<Emphasis>"unknown"</Emphasis>" or a more specific type."
             },
             Self::UntypedVariable => markup! {
                 "Add a type to the variable."
@@ -1239,30 +1226,22 @@ fn has_untyped_parameter(parameters: &JsParameters) -> Option<State> {
     None
 }
 
-/// The formal parameter is triggered if:
-/// - it doesn't have any type
-/// - it its type is `any`
+/// The formal parameter is triggered if it doesn't have any type.
 fn parameter_has_not_type(parameter: &JsFormalParameter) -> Option<State> {
-    let ty = parameter.type_annotation();
-
-    if let Some(ty) = ty {
-        let ty = ty.ty().ok()?;
-        if matches!(ty, AnyTsType::TsAnyType(_)) {
-            Some((ty.range(), ViolationKind::AnyParameter))
-        } else {
-            None
-        }
-    } else {
-        // If parameter has an initializer with a trivially inferrable type, allow it
-        if let Some(initializer) = parameter.initializer()
-            && let Ok(expr) = initializer.expression()
-        {
-            let expr = expr.omit_parentheses();
-            if is_allowed_in_untyped_expression(&expr, false) {
-                return None;
-            }
-        }
-
-        Some((parameter.range(), ViolationKind::UntypedParameter))
+    // If parameter has explicit type annotation, it's valid
+    if parameter.type_annotation().is_some() {
+        return None;
     }
+
+    // If parameter has an initializer with a trivially inferrable type, allow it
+    if let Some(initializer) = parameter.initializer()
+        && let Ok(expr) = initializer.expression()
+    {
+        let expr = expr.omit_parentheses();
+        if is_allowed_in_untyped_expression(&expr, false) {
+            return None;
+        }
+    }
+
+    Some((parameter.range(), ViolationKind::UntypedParameter))
 }
