@@ -127,7 +127,7 @@ impl Rule for UsePlaywrightValidDescribeCallback {
                     let has_params = match params {
                         biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(_) => true,
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
-                            p.items().len() > 0
+                            !p.items().is_empty()
                         }
                     };
                     if has_params {

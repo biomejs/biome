@@ -7,22 +7,22 @@ expression: promise-combinators.js
 /* should generate diagnostics */
 test('Promise.allSettled', async ({ page }) => {
     Promise.allSettled([
-        expect(page).toBeVisible(),
-        expect(page).toHaveText('foo')
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
     ]);
 });
 
 test('Promise.race', async ({ page }) => {
     Promise.race([
-        expect(page).toBeVisible(),
-        expect(page).toHaveText('foo')
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
     ]);
 });
 
 test('Promise.any', async ({ page }) => {
     Promise.any([
-        expect(page).toBeVisible(),
-        expect(page).toHaveText('foo')
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
     ]);
 });
 
@@ -36,9 +36,9 @@ promise-combinators.js:4:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   
     2 │ test('Promise.allSettled', async ({ page }) => {
     3 │     Promise.allSettled([
-  > 4 │         expect(page).toBeVisible(),
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │         expect(page).toHaveText('foo')
+  > 4 │         expect(page.locator('.foo')).toBeVisible(),
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │         expect(page.locator('.bar')).toHaveText('foo')
     6 │     ]);
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -54,9 +54,9 @@ promise-combinators.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   i Async matcher toHaveText must be awaited or returned.
   
     3 │     Promise.allSettled([
-    4 │         expect(page).toBeVisible(),
-  > 5 │         expect(page).toHaveText('foo')
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │         expect(page.locator('.foo')).toBeVisible(),
+  > 5 │         expect(page.locator('.bar')).toHaveText('foo')
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │     ]);
     7 │ });
   
@@ -74,9 +74,9 @@ promise-combinators.js:11:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   
      9 │ test('Promise.race', async ({ page }) => {
     10 │     Promise.race([
-  > 11 │         expect(page).toBeVisible(),
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │         expect(page).toHaveText('foo')
+  > 11 │         expect(page.locator('.foo')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │         expect(page.locator('.bar')).toHaveText('foo')
     13 │     ]);
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -92,9 +92,9 @@ promise-combinators.js:12:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   i Async matcher toHaveText must be awaited or returned.
   
     10 │     Promise.race([
-    11 │         expect(page).toBeVisible(),
-  > 12 │         expect(page).toHaveText('foo')
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │         expect(page.locator('.foo')).toBeVisible(),
+  > 12 │         expect(page.locator('.bar')).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     ]);
     14 │ });
   
@@ -112,9 +112,9 @@ promise-combinators.js:18:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   
     16 │ test('Promise.any', async ({ page }) => {
     17 │     Promise.any([
-  > 18 │         expect(page).toBeVisible(),
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    19 │         expect(page).toHaveText('foo')
+  > 18 │         expect(page.locator('.foo')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │         expect(page.locator('.bar')).toHaveText('foo')
     20 │     ]);
   
   i Unsafe fix: Add await before the Promise combinator.
@@ -130,9 +130,9 @@ promise-combinators.js:19:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
   i Async matcher toHaveText must be awaited or returned.
   
     17 │     Promise.any([
-    18 │         expect(page).toBeVisible(),
-  > 19 │         expect(page).toHaveText('foo')
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │         expect(page.locator('.foo')).toBeVisible(),
+  > 19 │         expect(page.locator('.bar')).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │     ]);
     21 │ });
   

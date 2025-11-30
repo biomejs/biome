@@ -25,7 +25,7 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// test('example', async ({ page }) => {
-    ///     expect(page).toBeVisible();
+    ///     expect(page.getByRole('button')).toBeVisible();
     /// });
     /// ```
     ///
@@ -39,7 +39,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// test('example', async ({ page }) => {
-    ///     await expect(page).toBeVisible();
+    ///     await expect(page.getByRole('button')).toBeVisible();
     /// });
     /// ```
     ///
@@ -51,7 +51,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// test('example', async ({ page }) => {
-    ///     return expect(page).toBeVisible();
+    ///     return expect(page.getByRole('button')).toBeVisible();
     /// });
     /// ```
     ///
