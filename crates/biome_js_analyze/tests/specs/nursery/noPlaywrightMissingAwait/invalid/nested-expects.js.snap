@@ -33,8 +33,6 @@ nested-expects.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━�
     5 │ });
     6 │ 
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the call.
   
     4 │ ····await·expect(page).not.toBeVisible();
@@ -53,8 +51,6 @@ nested-expects.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━�
      9 │ });
     10 │ 
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the call.
   
     8 │ ····await·expect.soft(page).not.toHaveText("foo");
@@ -72,8 +68,6 @@ nested-expects.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ });
     14 │ 
-  
-  i Add await before the expect call or return the promise.
   
   i Unsafe fix: Add await before the call.
   

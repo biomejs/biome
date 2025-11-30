@@ -41,8 +41,6 @@ promise-combinators.js:4:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     5 │         expect(page).toHaveText('foo')
     6 │     ]);
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the Promise combinator.
   
     3 │ ····await·Promise.allSettled([
@@ -61,8 +59,6 @@ promise-combinators.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │     ]);
     7 │ });
-  
-  i Add await before the expect call or return the promise.
   
   i Unsafe fix: Add await before the Promise combinator.
   
@@ -83,8 +79,6 @@ promise-combinators.js:11:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     12 │         expect(page).toHaveText('foo')
     13 │     ]);
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the Promise combinator.
   
     10 │ ····await·Promise.race([
@@ -103,8 +97,6 @@ promise-combinators.js:12:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     ]);
     14 │ });
-  
-  i Add await before the expect call or return the promise.
   
   i Unsafe fix: Add await before the Promise combinator.
   
@@ -125,8 +117,6 @@ promise-combinators.js:18:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     19 │         expect(page).toHaveText('foo')
     20 │     ]);
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the Promise combinator.
   
     17 │ ····await·Promise.any([
@@ -145,8 +135,6 @@ promise-combinators.js:19:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │     ]);
     21 │ });
-  
-  i Add await before the expect call or return the promise.
   
   i Unsafe fix: Add await before the Promise combinator.
   

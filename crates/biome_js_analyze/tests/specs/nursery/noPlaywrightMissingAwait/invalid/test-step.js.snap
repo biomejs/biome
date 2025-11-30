@@ -30,7 +30,7 @@ test-step.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━
     6 │ });
     7 │ 
   
-  i Test steps are asynchronous. Add await before test.step() or return the promise.
+  i Test steps are asynchronous.
   
   i Unsafe fix: Add await before the call.
   

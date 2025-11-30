@@ -26,7 +26,5 @@ non-async-context.js:3:5 lint/nursery/noPlaywrightMissingAwait ━━━━━�
     4 │ });
     5 │ 
   
-  i Add await before the expect call or return the promise.
-  
 
 ```

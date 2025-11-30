@@ -25,8 +25,6 @@ expect-async-matcher.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━�
     4 │ });
     5 │ 
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the call.
   
     3 │ ····await·expect(page.locator('body')).toBeVisible();

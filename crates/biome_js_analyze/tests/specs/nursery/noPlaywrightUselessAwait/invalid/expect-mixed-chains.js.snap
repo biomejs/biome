@@ -32,8 +32,6 @@ expect-mixed-chains.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i This method does not return a Promise.
   
-  i Remove the await keyword.
-  
   i Safe fix: Remove unnecessary await
   
     3 │ await·expect(1).toBe(1);
@@ -54,8 +52,6 @@ expect-mixed-chains.js:4:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
     6 │ await expect(arr).toHaveLength(3);
   
   i This method does not return a Promise.
-  
-  i Remove the await keyword.
   
   i Safe fix: Remove unnecessary await
   
@@ -78,8 +74,6 @@ expect-mixed-chains.js:5:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i This method does not return a Promise.
   
-  i Remove the await keyword.
-  
   i Safe fix: Remove unnecessary await
   
     5 │ await·expect(str).toMatch(/pattern/);
@@ -101,8 +95,6 @@ expect-mixed-chains.js:6:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
   
   i This method does not return a Promise.
   
-  i Remove the await keyword.
-  
   i Safe fix: Remove unnecessary await
   
     6 │ await·expect(arr).toHaveLength(3);
@@ -121,8 +113,6 @@ expect-mixed-chains.js:9:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━�
     10 │ 
   
   i This method does not return a Promise.
-  
-  i Remove the await keyword.
   
   i Safe fix: Remove unnecessary await
   

@@ -25,7 +25,7 @@ expect-poll.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━�
     4 │ });
     5 │ 
   
-  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
   
   i Unsafe fix: Add await before the call.
   

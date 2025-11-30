@@ -180,9 +180,6 @@ impl Rule for NoPlaywrightUselessAwait {
             )
             .note(markup! {
                 "This method does not return a Promise."
-            })
-            .note(markup! {
-                "Remove the "<Emphasis>"await"</Emphasis>" keyword."
             }),
         )
     }

@@ -23,8 +23,6 @@ getByRole.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━
   
   i This method does not return a Promise.
   
-  i Remove the await keyword.
-  
   i Safe fix: Remove unnecessary await
   
     2 │ await·page.getByRole('button');

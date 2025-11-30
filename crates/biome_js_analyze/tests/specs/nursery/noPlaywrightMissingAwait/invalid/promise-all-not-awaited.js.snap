@@ -28,8 +28,6 @@ promise-all-not-awaited.js:4:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  �
     5 │         expect(page.locator('.two')).toBeVisible()
     6 │     ]);
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the Promise combinator.
   
     3 │ ····await·Promise.all([
@@ -48,8 +46,6 @@ promise-all-not-awaited.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  �
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │     ]);
     7 │ });
-  
-  i Add await before the expect call or return the promise.
   
   i Unsafe fix: Add await before the Promise combinator.
   

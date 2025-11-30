@@ -138,18 +138,13 @@ impl Rule for NoPlaywrightMissingAwait {
         match state {
             MissingAwaitType::ExpectMatcher(matcher) => {
                 let matcher_text = matcher.text();
-                Some(
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        node.range(),
-                        markup! {
-                            "Async matcher "<Emphasis>{matcher_text}</Emphasis>" must be awaited or returned."
-                        },
-                    )
-                    .note(markup! {
-                        "Add "<Emphasis>"await"</Emphasis>" before the expect call or return the promise."
-                    }),
-                )
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "Async matcher "<Emphasis>{matcher_text}</Emphasis>" must be awaited or returned."
+                    },
+                ))
             }
             MissingAwaitType::ExpectPoll => Some(
                 RuleDiagnostic::new(
@@ -160,7 +155,7 @@ impl Rule for NoPlaywrightMissingAwait {
                     },
                 )
                 .note(markup! {
-                    "The "<Emphasis>"expect.poll"</Emphasis>" method converts any synchronous expect to an asynchronous polling one. Add "<Emphasis>"await"</Emphasis>" before the call or return the promise."
+                    "The "<Emphasis>"expect.poll"</Emphasis>" method converts any synchronous expect to an asynchronous polling one."
                 }),
             ),
             MissingAwaitType::TestStep => Some(
@@ -172,7 +167,7 @@ impl Rule for NoPlaywrightMissingAwait {
                     },
                 )
                 .note(markup! {
-                    "Test steps are asynchronous. Add "<Emphasis>"await"</Emphasis>" before "<Emphasis>"test.step()"</Emphasis>" or return the promise."
+                    "Test steps are asynchronous."
                 }),
             ),
         }

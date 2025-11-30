@@ -24,8 +24,6 @@ module-level.js:3:1 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i Add await before the expect call or return the promise.
-  
   i Unsafe fix: Add await before the call.
   
     3 │ await·expect(page.locator('body')).toBeVisible();

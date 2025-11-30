@@ -37,7 +37,7 @@ expect-poll-sync-matchers.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE 
     5 │ });
     6 │ 
   
-  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
   
   i Unsafe fix: Add await before the call.
   
@@ -57,7 +57,7 @@ expect-poll-sync-matchers.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE 
      9 │ });
     10 │ 
   
-  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
   
   i Unsafe fix: Add await before the call.
   
@@ -77,7 +77,7 @@ expect-poll-sync-matchers.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE
     13 │ });
     14 │ 
   
-  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
   
   i Unsafe fix: Add await before the call.
   
@@ -97,7 +97,7 @@ expect-poll-sync-matchers.js:16:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE
     17 │ });
     18 │ 
   
-  i The expect.poll method converts any synchronous expect to an asynchronous polling one. Add await before the call or return the promise.
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
   
   i Unsafe fix: Add await before the call.
   
