@@ -54,9 +54,14 @@ declare_lint_rule! {
     }
 }
 
+pub struct ElementHandleCall {
+    pub receiver: TokenText,
+    pub method: TokenText,
+}
+
 impl Rule for NoPlaywrightElementHandle {
     type Query = Ast<JsCallExpression>;
-    type State = TokenText;
+    type State = ElementHandleCall;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -99,7 +104,10 @@ impl Rule for NoPlaywrightElementHandle {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(member_str)
+            Some(ElementHandleCall {
+                receiver: object_text,
+                method: member_str,
+            })
         } else {
             None
         }
@@ -107,7 +115,8 @@ impl Rule for NoPlaywrightElementHandle {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let state_text = state.text();
+        let receiver = state.receiver.text();
+        let method = state.method.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -117,10 +126,10 @@ impl Rule for NoPlaywrightElementHandle {
                 },
             )
             .note(markup! {
-                "Element handles like "<Emphasis>"page."{{state_text}}"()"</Emphasis>" are discouraged."
+                "Element handles like "<Emphasis>{receiver}"."{{method}}"()"</Emphasis>" are discouraged."
             })
             .note(markup! {
-                "Use "<Emphasis>"page.locator()"</Emphasis>" or other locator methods like "<Emphasis>"getByRole()"</Emphasis>" instead."
+                "Use "<Emphasis>{receiver}".locator()"</Emphasis>" or other locator methods like "<Emphasis>"getByRole()"</Emphasis>" instead."
             })
             .note(markup! {
                 "Locators auto-wait and are more reliable than element handles."

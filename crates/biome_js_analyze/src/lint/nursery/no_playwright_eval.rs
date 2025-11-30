@@ -43,9 +43,14 @@ declare_lint_rule! {
     }
 }
 
+pub struct EvalMethodCall {
+    pub receiver: TokenText,
+    pub method: TokenText,
+}
+
 impl Rule for NoPlaywrightEval {
     type Query = Ast<JsCallExpression>;
-    type State = TokenText;
+    type State = EvalMethodCall;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -87,7 +92,10 @@ impl Rule for NoPlaywrightEval {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(member_str)
+            Some(EvalMethodCall {
+                receiver: object_text,
+                method: member_str,
+            })
         } else {
             None
         }
@@ -95,15 +103,16 @@ impl Rule for NoPlaywrightEval {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let state_text = state.text();
-        let is_eval = state_text == "$eval";
+        let receiver = state.receiver.text();
+        let method = state.method.text();
+        let is_eval = method == "$eval";
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>"page."{{state_text}}"()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}"."{{method}}"()"</Emphasis>"."
                 },
             )
             .note(markup! {

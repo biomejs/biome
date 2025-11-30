@@ -21,9 +21,9 @@ frame.js:2:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━
       │                       ^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i Element handles like page.$() are discouraged.
+  i Element handles like frame.$() are discouraged.
   
-  i Use page.locator() or other locator methods like getByRole() instead.
+  i Use frame.locator() or other locator methods like getByRole() instead.
   
   i Locators auto-wait and are more reliable than element handles.
   
