@@ -12,10 +12,13 @@ Allow type annotations to be omitted when types are trivially inferrable from:
 - Array literals (`const arr = [1, 2, 3]`)
 - Conditional expressions (`const val = true ? 'yes' : 'no'`)
 - Function calls (`const num = Math.random()`)
-- Parameter defaults (`const fn = (word = 'hello') => word`)
+- Parameter defaults - any expression is now allowed (`const fn = (max = MAX_ATTEMPTS) => ...`)
 
 Comparison expressions always return `boolean`, so any operands are now allowed
 (including property access like `process.env.NODE_ENV`).
+
+Parameters with default values no longer require type annotations, as TypeScript
+can infer the type from the default value (even when referencing variables).
 
 Also removed the redundant `any` type validation from this rule. The `any` type 
 is now only validated by the dedicated `noExplicitAny` rule, following the 

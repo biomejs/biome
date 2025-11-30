@@ -293,6 +293,17 @@ function processValue(value = 42): number { return value * 2; }
 function greet(message = 'Hello'): void { console.log(message); }
 const calculate = (num = 100): number => num + 10;
 
+// Function parameters with default values referencing variables
+const MAX_ATTEMPTS = 4;
+const DEFAULT_NAME = 'Guest';
+const DEFAULT_CONFIG = { timeout: 1000 };
+
+const retry = (max = MAX_ATTEMPTS): void => {};
+const welcome = (name = DEFAULT_NAME): string => `Hello ${name}`;
+const setup = (config = DEFAULT_CONFIG): void => {};
+function fetchData(attempts = MAX_ATTEMPTS): void {}
+const process = (value = someVariable): void => {};
+
 
 ```
 

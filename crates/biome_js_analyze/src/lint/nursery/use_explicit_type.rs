@@ -1234,14 +1234,11 @@ fn parameter_has_not_type(parameter: &JsFormalParameter) -> Option<State> {
         return None;
     }
 
-    // If parameter has an initializer with a trivially inferrable type, allow it
-    if let Some(initializer) = parameter.initializer()
-        && let Ok(expr) = initializer.expression()
-    {
-        let expr = expr.omit_parentheses();
-        if is_allowed_in_untyped_expression(&expr, false) {
-            return None;
-        }
+    // If parameter has an initializer (default value), TypeScript can infer
+    // the type from it, regardless of what expression it is.
+    // e.g., `const fn = (max = MAX_ATTEMPTS): void => {}` - TypeScript infers `max: number`
+    if parameter.initializer().is_some() {
+        return None;
     }
 
     Some((parameter.range(), ViolationKind::UntypedParameter))
