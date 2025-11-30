@@ -571,6 +571,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins: _,
         categories,
         action_offset,
+        document_services: _,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();

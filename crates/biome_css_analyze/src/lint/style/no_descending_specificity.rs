@@ -125,6 +125,7 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 /// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
+    root: &CssRoot,
     rule: &CssSemanticRule,
     model: &SemanticModel,
     visited_rules: &mut FxHashSet<RuleId>,
@@ -136,7 +137,8 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node(root).syntax().clone())
+        else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
@@ -148,13 +150,13 @@ fn find_descending_selector(
             if last_specificity > &selector.specificity() {
                 descending_selectors.push(DescendingSelector {
                     high: (*last_text_range, *last_specificity),
-                    low: (selector.range(), selector.specificity()),
+                    low: (selector.range(root), selector.specificity()),
                 });
             }
         } else {
             visited_selectors.insert(
                 tail_selector_str,
-                (selector.range(), selector.specificity()),
+                (selector.range(root), selector.specificity()),
             );
         }
     }
@@ -162,6 +164,7 @@ fn find_descending_selector(
     for child_id in rule.child_ids() {
         if let Some(child_rule) = model.get_rule_by_id(child_id) {
             find_descending_selector(
+                root,
                 child_rule,
                 model,
                 visited_rules,
@@ -180,11 +183,13 @@ impl Rule for NoDescendingSpecificity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
+        let root = ctx.root();
         let mut visited_rules = FxHashSet::default();
         let mut visited_selectors = FxHashMap::default();
         let mut descending_selectors = Vec::new();
         for rule in model.rules() {
             find_descending_selector(
+                &root,
                 rule,
                 model,
                 &mut visited_rules,

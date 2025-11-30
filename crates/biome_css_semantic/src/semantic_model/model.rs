@@ -5,12 +5,13 @@ use biome_css_syntax::{
     CssSupportsAtRule,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
-    declare_node_union,
+    AstNode, AstNodeList, AstPtr, SendNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize,
+    TokenText, declare_node_union,
 };
 use rustc_hash::FxHashMap;
+use std::collections::BTreeMap;
 use std::hash::Hash;
-use std::{collections::BTreeMap, rc::Rc};
+use std::sync::Arc;
 
 /// The façade for all semantic information of a CSS document.
 ///
@@ -18,18 +19,20 @@ use std::{collections::BTreeMap, rc::Rc};
 /// It holds a reference-counted pointer to the internal `SemanticModelData`.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
+    root: SendNode,
 }
 
 impl SemanticModel {
-    pub(crate) fn new(data: SemanticModelData) -> Self {
+    pub(crate) fn new(data: SemanticModelData, root: SendNode) -> Self {
         Self {
-            data: Rc::new(data),
+            data: Arc::new(data),
+            root,
         }
     }
 
-    pub fn root(&self) -> &CssRoot {
-        &self.data.root
+    pub fn root(&self) -> CssRoot {
+        self.root.to_language_root::<CssRoot>()
     }
 
     /// Returns a slice of all rules in the CSS document.
@@ -77,6 +80,10 @@ impl SemanticModel {
             .flat_map(|rule| rule.selectors())
             .map(|selector| selector.specificity())
     }
+
+    pub fn is_media_rule(&self, rule: &Rule) -> bool {
+        matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -85,7 +92,6 @@ impl SemanticModel {
 /// and a list of all rules in the document.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    pub(crate) root: CssRoot,
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
@@ -115,7 +121,7 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub(crate) id: RuleId,
-    pub(crate) node: AnyRuleStart,
+    pub(crate) node: AstPtr<AnyRuleStart>,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -134,12 +140,15 @@ impl Rule {
         self.id
     }
 
-    pub fn node(&self) -> &AnyRuleStart {
-        &self.node
+    pub fn node(&self, css_root: &CssRoot) -> AnyRuleStart {
+        self.node.to_node(css_root.syntax())
     }
 
-    pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+    pub fn range(&self, css_root: &CssRoot) -> TextRange {
+        self.node
+            .to_node(css_root.syntax())
+            .syntax()
+            .text_trimmed_range()
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -160,10 +169,6 @@ impl Rule {
 
     pub fn specificity(&self) -> Specificity {
         self.specificity
-    }
-
-    pub const fn is_media_rule(&self) -> bool {
-        matches!(self.node, AnyRuleStart::CssMediaAtRule(_))
     }
 }
 
@@ -213,22 +218,25 @@ impl AnyCssSelectorLike {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    pub(crate) node: AnyCssSelectorLike,
+    pub(crate) node: AstPtr<AnyCssSelectorLike>,
     /// The specificity of the selector.
     pub(crate) specificity: Specificity,
 }
 
 impl Selector {
-    pub fn node(&self) -> &AnyCssSelectorLike {
-        &self.node
+    pub fn node(&self, root: &CssRoot) -> AnyCssSelectorLike {
+        self.node.to_node(root.syntax())
     }
 
-    pub fn text(&self) -> SyntaxNodeText {
-        self.node.syntax().text_trimmed()
+    pub fn text(&self, root: &CssRoot) -> SyntaxNodeText {
+        self.node.to_node(root.syntax()).syntax().text_trimmed()
     }
 
-    pub fn range(&self) -> TextRange {
-        self.node.syntax().text_trimmed_range()
+    pub fn range(&self, root: &CssRoot) -> TextRange {
+        self.node
+            .to_node(root.syntax())
+            .syntax()
+            .text_trimmed_range()
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -293,18 +301,18 @@ impl std::fmt::Display for Specificity {
 /// ```
 #[derive(Debug, Clone)]
 pub struct CssModelDeclaration {
-    pub(crate) declaration: CssDeclaration,
-    pub(crate) property: CssProperty,
+    pub(crate) declaration: AstPtr<CssDeclaration>,
+    pub(crate) property: AstPtr<CssProperty>,
     pub(crate) value: CssPropertyInitialValue,
 }
 
 impl CssModelDeclaration {
-    pub fn declaration(&self) -> &CssDeclaration {
-        &self.declaration
+    pub fn declaration(&self, root: &CssRoot) -> CssDeclaration {
+        self.declaration.to_node(root.syntax())
     }
 
-    pub fn property(&self) -> &CssProperty {
-        &self.property
+    pub fn property(&self, root: &CssRoot) -> CssProperty {
+        self.property.to_node(root.syntax())
     }
 
     pub fn value(&self) -> &CssPropertyInitialValue {
@@ -329,19 +337,19 @@ impl CssProperty {
 
 #[derive(Debug, Clone)]
 pub enum CssPropertyInitialValue {
-    GenericComponent(CssGenericComponentValueList),
-    Composes(CssComposesPropertyValue),
+    GenericComponent(AstPtr<CssGenericComponentValueList>),
+    Composes(AstPtr<CssComposesPropertyValue>),
 }
 
 impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
     fn from(value: CssGenericComponentValueList) -> Self {
-        Self::GenericComponent(value)
+        Self::GenericComponent(AstPtr::new(&value))
     }
 }
 
 impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
     fn from(value: CssComposesPropertyValue) -> Self {
-        Self::Composes(value)
+        Self::Composes(AstPtr::new(&value))
     }
 }
 
@@ -362,7 +370,7 @@ impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
 pub enum CssGlobalCustomVariable {
     Root(CssModelDeclaration),
     AtProperty {
-        property: CssProperty,
+        property: AstPtr<CssProperty>,
         syntax: Option<String>,
         inherits: Option<bool>,
         initial_value: Option<CssPropertyInitialValue>,
