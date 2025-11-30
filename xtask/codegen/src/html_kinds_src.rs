@@ -25,6 +25,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         (".", "DOT"),
         ("[", "L_BRACKET"),
         ("]", "R_BRACKET"),
+        ("#", "HASH"),
     ],
     keywords: &[
         "null", "true", "false", "doctype", "html", "debug", "key", "render", "const", "attach",
@@ -87,6 +88,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "VUE_DIRECTIVE_ARGUMENT",
         "VUE_V_BIND_SHORTHAND_DIRECTIVE",
         "VUE_V_ON_SHORTHAND_DIRECTIVE",
+        "VUE_V_SLOT_SHORTHAND_DIRECTIVE",
         "VUE_STATIC_ARGUMENT",
         "VUE_DYNAMIC_ARGUMENT",
         "VUE_MODIFIER_LIST",

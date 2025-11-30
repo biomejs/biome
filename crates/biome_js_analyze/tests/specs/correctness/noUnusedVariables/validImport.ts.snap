@@ -15,4 +15,4 @@ import c2 = c1;
 
 ```
 
-
+_Note: The parser emitted 1 diagnostics which are not shown here._

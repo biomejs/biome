@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, JsConditionalExpression, JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
-    JsxExpressionAttributeValue, JsxExpressionChild, JsxTagExpression,
-    binding_ext::AnyJsBindingDeclaration,
+    JsxExpressionChild, JsxTagExpression, binding_ext::AnyJsBindingDeclaration,
+    jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
 
     pub NoLeakedRender{
-        version: "next",
+        version: "2.3.8",
         name: "noLeakedRender",
         language: "jsx",
         domains: &[RuleDomain::React],
@@ -106,7 +106,7 @@ impl Rule for NoLeakedRender {
         let query = ctx.query();
         let model = ctx.model();
 
-        if !is_inside_jsx_expression(query.syntax()) {
+        if !is_inside_jsx_expression(query.syntax()).unwrap_or_default() {
             return None;
         }
 
@@ -267,10 +267,12 @@ declare_node_union! {
     pub NoLeakedRenderQuery = JsLogicalExpression | JsConditionalExpression
 }
 
-fn is_inside_jsx_expression(node: &JsSyntaxNode) -> bool {
-    node.ancestors().any(|ancestor| {
-        JsxExpressionChild::can_cast(ancestor.kind())
-            || JsxExpressionAttributeValue::can_cast(ancestor.kind())
-            || JsxTagExpression::can_cast(ancestor.kind())
-    })
+fn is_inside_jsx_expression(node: &JsSyntaxNode) -> Option<bool> {
+    let parent = node.parent()?;
+
+    Some(
+        JsxExpressionChild::can_cast(parent.kind())
+            || JsxTagExpression::can_cast(parent.kind())
+            || AnyJsxElement::can_cast(parent.kind()),
+    )
 }

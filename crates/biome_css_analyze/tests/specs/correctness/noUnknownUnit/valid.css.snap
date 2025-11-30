@@ -77,3 +77,5 @@ a { background-image: image-set(url('first.png') calc(1x * 1), url('second.png')
 a { image-resolution: 1x; }
 a { width: 8ic; }
 ```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._

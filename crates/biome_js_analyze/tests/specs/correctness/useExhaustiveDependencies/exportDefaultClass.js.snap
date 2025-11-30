@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: exportDefaultClass.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -19,3 +18,5 @@ function FunctionComponent() {
 }
 
 ```
+
+_Note: The parser emitted 11 diagnostics which are not shown here._

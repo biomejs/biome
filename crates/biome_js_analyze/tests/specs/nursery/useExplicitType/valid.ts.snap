@@ -286,3 +286,5 @@ const calculate = (num = 100): number => num + 10;
 
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

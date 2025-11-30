@@ -167,6 +167,8 @@ function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${na
 
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

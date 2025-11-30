@@ -131,7 +131,7 @@ This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
 - `taplo-cli`, a small tool for formatting TOML files.
-- `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
+- `wasm-bindgen-cli` and `wasm-opt` for managing the WASM build of Biome.
 
 You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
 
@@ -343,7 +343,7 @@ The npm module `packages/@biomejs/biome` contains Biome's Node.js API that suppo
 For testing and developing, you need to build these packages, following the steps:
 
 1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`;
-2. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
+2. install `wasm-bindgen-cli` and `wasm-opt` by running `just install-tools`;
 3. run `pnpm --filter "@biomejs/backend-jsonrpc" build`;
 4. run the `pnpm --filter "@biomejs/js-api" build:wasm-dev` and `pnpm --filter "@biomejs/js-api" build` commands;
 5. run `pnpm i --filter "@biomejs/js-api" --frozen-lockfile` to link the WebAssembly bindings and the JSON-RPC bindings
@@ -444,17 +444,23 @@ When choosing `minor` or `major`, make sure your PR targets the `next` branch in
 
 The description of the changeset should follow the these guidelines:
 
-- Our changesets should be about _user-facing_ changes. Internal changes don't
-  need changesets.
-- Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
-- Use the present tense when describing Biome behavior, e.g. "Biome now supports ...".
+- Our changesets should be about **user-facing changes**. Internal changes don't
+  need changesets. For example, if you refactored some code, but the user-facing
+  behavior didn't change, you don't need a changeset.
+- **Be concise and clear.** Changesets are not documentation, and they are not test cases.
+  They should give a **quick overview** of what changed, allowing the reader to dig deeper if they want to. A good changeset is usually between 1 and 3 sentences long. **Longer changesets indicate to the user that they should pay more attention to the change, at least if it concerns a feature that is relevant to them.** Consider the impact of your change on the user when writing the changeset. The key is to provide just enough information for the user to understand the change without overwhelming them with details.
+  - For a *new* lint rule, show an example of an invalid case in an inline code snippet for simple things or a code block for more complex examples. If it _really_ helps demonstrate the rule, you can also show a valid case.
+  - For a *change in an existing rule*, clearly demonstrate what is now considered invalid that wasn't before, or vice versa. If it helps communicate the change greatly, show both invalid and valid cases.
+  - For a *formatter change*, show an example of the formatting change using a `diff` code block.
+  - For parser changes, a brief inline example of what can now be parsed that couldn't before (or vice versa) is usually sufficient. If formatting on multiple lines improves clarity, use a code block.
+- **Use past tense when describing what you did**, e.g. "Added new feature", "Fixed edge case".
+- **Use the present tense when describing Biome behavior**, e.g. "Biome now supports ...".
 - If you fixed a bug, please start with a link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444): ...".
-- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
+- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated at the time of writing, it will once the PR is merged).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
-- Whenever applicable, add a code block to show your new changes. For example, for a new rule you should show an invalid case, while for the formatter you should show how the new formatting changes, and so on.
 - End every sentence with a full stop (`.`).
 
-If in doubt, take a look at existing or past changesets.
+If in doubt, take a look at existing changesets, or the most recent entries in `CHANGELOG.md`, and use your best judgement.
 
 ### Documentation
 

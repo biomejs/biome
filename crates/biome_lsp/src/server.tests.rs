@@ -31,10 +31,10 @@ use tower_lsp_server::jsonrpc::{self, Request, Response};
 use tower_lsp_server::lsp_types::{
     self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    DocumentFormattingParams, FormattingOptions, InitializeParams, InitializeResult,
-    InitializedParams, Position, PublishDiagnosticsParams, Range, TextDocumentContentChangeEvent,
-    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, VersionedTextDocumentIdentifier,
-    WorkDoneProgressParams, WorkspaceFolder,
+    DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,
+    InitializeResult, InitializedParams, Position, PublishDiagnosticsParams, Range,
+    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
+    VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
 };
 
 use crate::WorkspaceSettings;
@@ -3891,6 +3891,82 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     );
 
     // ARRANGE: Shutdown server.
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn did_save_syncs_content_from_text_parameter() -> Result<()> {
+    const INITIAL_CONTENT: &str = "const   a=1;";
+    const SAVED_CONTENT: &str = "const   b=2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    let file_path = to_utf8_file_path_buf(uri!("document.js"));
+    fs.insert(file_path, INITIAL_CONTENT);
+
+    let factory = ServerFactory::new_with_fs(fs.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document(INITIAL_CONTENT).await?;
+
+    // Send didSave with text parameter (as per LSP spec)
+    server
+        .notify(
+            "textDocument/didSave",
+            DidSaveTextDocumentParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                text: Some(SAVED_CONTENT.to_string()),
+            },
+        )
+        .await?;
+
+    // Format the document to verify the content was updated
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    // If content was properly updated to "const   b=2;",
+    // formatting should add spaces around = and ;
+    let edits = edits.context("formatting did not return edits")?;
+    assert!(
+        !edits.is_empty(),
+        "Formatting should produce edits for 'const   b=2;'"
+    );
+
+    server.close_document().await?;
+
     server.shutdown().await?;
     reader.abort();
 

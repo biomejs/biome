@@ -82,6 +82,35 @@ pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSy
     Present(m.complete(p, VUE_V_ON_SHORTHAND_DIRECTIVE))
 }
 
+pub(crate) fn parse_vue_v_slot_shorthand_directive(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![#]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let pos = p.source().position();
+    p.bump_with_context(T![#], HtmlLexContext::InsideTagVue);
+    // is there any trivia after the hash and before argument?
+    if let Some(last_trivia) = p.source().trivia_list.last()
+        && pos < last_trivia.text_range().start()
+    {
+        // `# slot="5"` is not valid syntax
+        // but we want to recover gracefully
+        p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
+        return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
+    }
+    parse_vue_dynamic_argument(p)
+        .or_else(|| parse_vue_static_argument(p))
+        .ok();
+    VueModifierList.parse_list(p);
+    if p.at(T![=]) {
+        parse_attribute_initializer(p).ok();
+    }
+
+    Present(m.complete(p, VUE_V_SLOT_SHORTHAND_DIRECTIVE))
+}
+
 fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![:]) {
         return Absent;

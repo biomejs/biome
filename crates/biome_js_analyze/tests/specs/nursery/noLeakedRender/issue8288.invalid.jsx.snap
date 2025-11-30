@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue8288.invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Component1 = () => {
+	return (
+		<Nested>
+			<SecondNested>{userId ? 1 : undefined} </SecondNested>
+		</Nested>
+	);
+};
+
+```
+
+# Diagnostics
+```
+issue8288.invalid.jsx:5:19 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    3 │ 	return (
+    4 │ 		<Nested>
+  > 5 │ 			<SecondNested>{userId ? 1 : undefined} </SecondNested>
+      │ 			               ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 		</Nested>
+    7 │ 	);
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
+  
+  i Replace with a safe alternate value like an empty string , null or another JSX element.
+  
+
+```

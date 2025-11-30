@@ -3998,6 +3998,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoProtoConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoProtoOptions" }
+			]
+		},
+		"NoProtoOptions": { "type": "object", "additionalProperties": false },
 		"NoPrototypeBuiltinsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5190,6 +5197,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProto": {
+					"description": "Disallow the use of the __proto__ property.\nSee https://biomejs.dev/linter/rules/no-proto",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoProtoConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactForwardRef": {
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee https://biomejs.dev/linter/rules/no-react-forward-ref",
 					"anyOf": [
@@ -5366,6 +5380,20 @@
 					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.\nSee https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseQwikValidLexicalScopeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useRegexpExec": {
+					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRegexpExecConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useRequiredScripts": {
+					"description": "Enforce the presence of required scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRequiredScriptsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7391,6 +7419,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoProtoOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoProtoOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoPrototypeBuiltinsOptions": {
 			"type": "object",
 			"properties": {
@@ -9231,6 +9268,24 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseRegexLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseRegexpExecOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRegexpExecOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseRequiredScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRequiredScriptsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12143,6 +12198,31 @@
 		},
 		"UseRegexLiteralsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseRegexpExecConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRegexpExecOptions" }
+			]
+		},
+		"UseRegexpExecOptions": { "type": "object", "additionalProperties": false },
+		"UseRequiredScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRequiredScriptsOptions" }
+			]
+		},
+		"UseRequiredScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"requiredScripts": {
+					"description": "List of script names that must be present in package.json",
+					"type": "array",
+					"default": [],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSelfClosingElementsConfiguration": {

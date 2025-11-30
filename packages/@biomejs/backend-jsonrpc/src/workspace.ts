@@ -1936,6 +1936,11 @@ See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
+	* Disallow the use of the __proto__ property.
+See https://biomejs.dev/linter/rules/no-proto 
+	 */
+	noProto?: NoProtoConfiguration;
+	/**
 	* Replaces usages of forwardRef with passing ref as a prop.
 See https://biomejs.dev/linter/rules/no-react-forward-ref 
 	 */
@@ -2064,6 +2069,16 @@ See https://biomejs.dev/linter/rules/use-qwik-method-usage
 See https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope 
 	 */
 	useQwikValidLexicalScope?: UseQwikValidLexicalScopeConfiguration;
+	/**
+	* Enforce RegExp#exec over String#match if no global flag is provided.
+See https://biomejs.dev/linter/rules/use-regexp-exec 
+	 */
+	useRegexpExec?: UseRegexpExecConfiguration;
+	/**
+	* Enforce the presence of required scripts in package.json.
+See https://biomejs.dev/linter/rules/use-required-scripts 
+	 */
+	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
@@ -3601,6 +3616,9 @@ export type NoNextAsyncClientComponentConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
+export type NoProtoConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProtoOptions;
 export type NoReactForwardRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactForwardRefOptions;
@@ -3676,6 +3694,12 @@ export type UseQwikMethodUsageConfiguration =
 export type UseQwikValidLexicalScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikValidLexicalScopeOptions;
+export type UseRegexpExecConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseRegexpExecOptions;
+export type UseRequiredScriptsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseRequiredScriptsOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5010,6 +5034,10 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
 }
+export interface RuleWithNoProtoOptions {
+	level: RulePlainConfiguration;
+	options?: NoProtoOptions;
+}
 export interface RuleWithNoReactForwardRefOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5115,6 +5143,14 @@ export interface RuleWithUseQwikMethodUsageOptions {
 export interface RuleWithUseQwikValidLexicalScopeOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikValidLexicalScopeOptions;
+}
+export interface RuleWithUseRegexpExecOptions {
+	level: RulePlainConfiguration;
+	options?: UseRegexpExecOptions;
+}
+export interface RuleWithUseRequiredScriptsOptions {
+	level: RulePlainConfiguration;
+	options?: UseRequiredScriptsOptions;
 }
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
@@ -6314,6 +6350,7 @@ export type NoMisusedPromisesOptions = {};
 export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
+export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
@@ -6371,6 +6408,13 @@ export interface UseMaxParamsOptions {
 }
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
+export type UseRegexpExecOptions = {};
+export interface UseRequiredScriptsOptions {
+	/**
+	 * List of script names that must be present in package.json
+	 */
+	requiredScripts?: string[];
+}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7148,6 +7192,7 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noDuplicatedSpreadProps"
@@ -7182,6 +7227,8 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
