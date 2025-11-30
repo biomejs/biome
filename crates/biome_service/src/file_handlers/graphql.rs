@@ -13,9 +13,7 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{
-    CodeAction, DocumentServices, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-};
+use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
@@ -334,7 +332,6 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
-        services: DocumentServices::none(),
     }
 }
 

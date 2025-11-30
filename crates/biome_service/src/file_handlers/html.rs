@@ -385,7 +385,6 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
-        services: DocumentServices::none(),
     }
 }
 

@@ -490,7 +490,6 @@ pub struct Capabilities {
 pub struct ParseResult {
     pub(crate) any_parse: AnyParse,
     pub(crate) language: Option<DocumentFileSource>,
-    pub(crate) services: DocumentServices,
 }
 
 pub struct ParseEmbedResult {
