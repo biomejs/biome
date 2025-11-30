@@ -56,27 +56,29 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@11..16 "name" [] [Whitespace(" ")],
-                },
-                query: CssContainerNotQuery {
-                    not_token: NOT_KW@16..20 "not" [] [Whitespace(" ")],
-                    query: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@20..21 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@21..27 "width" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@11..16 "name" [] [Whitespace(" ")],
+                    },
+                    query: CssContainerNotQuery {
+                        not_token: NOT_KW@16..20 "not" [] [Whitespace(" ")],
+                        query: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@20..21 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@21..27 "width" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: LTEQ@27..30 "<=" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@30..33 "500" [] [],
+                                    unit_token: IDENT@33..35 "px" [] [],
+                                },
                             },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: LTEQ@27..30 "<=" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@30..33 "500" [] [],
-                                unit_token: IDENT@33..35 "px" [] [],
-                            },
+                            r_paren_token: R_PAREN@35..37 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@35..37 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
@@ -89,25 +91,27 @@ CssRoot {
         CssAtRule {
             at_token: AT@41..44 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@54..64 "my-layout" [] [Whitespace(" ")],
-                },
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@64..65 "(" [] [],
-                    feature: CssQueryFeatureRange {
-                        left: CssIdentifier {
-                            value_token: IDENT@65..77 "inline-size" [] [Whitespace(" ")],
-                        },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: R_ANGLE@77..79 ">" [] [Whitespace(" ")],
-                        },
-                        right: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@79..81 "45" [] [],
-                            unit_token: IDENT@81..83 "em" [] [],
-                        },
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@54..64 "my-layout" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@83..85 ")" [] [Whitespace(" ")],
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@64..65 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@65..77 "inline-size" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: R_ANGLE@77..79 ">" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@79..81 "45" [] [],
+                                unit_token: IDENT@81..83 "em" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@83..85 ")" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@85..88 "{" [] [Whitespace("  ")],
@@ -119,46 +123,48 @@ CssRoot {
         CssAtRule {
             at_token: AT@89..92 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@102..107 "card" [] [Whitespace(" ")],
-                },
-                query: CssContainerOrQuery {
-                    left: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@107..108 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@108..120 "inline-size" [] [Whitespace(" ")],
-                            },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: R_ANGLE@120..122 ">" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@122..124 "30" [] [],
-                                unit_token: IDENT@124..126 "em" [] [],
-                            },
-                        },
-                        r_paren_token: R_PAREN@126..128 ")" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@102..107 "card" [] [Whitespace(" ")],
                     },
-                    or_token: OR_KW@128..131 "or" [] [Whitespace(" ")],
-                    right: CssContainerStyleQueryInParens {
-                        style_token: STYLE_KW@131..136 "style" [] [],
-                        l_paren_token: L_PAREN@136..137 "(" [] [],
-                        query: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@137..149 "--responsive" [] [],
+                    query: CssContainerOrQuery {
+                        left: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@107..108 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@108..120 "inline-size" [] [Whitespace(" ")],
                                 },
-                                colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@151..155 "true" [] [],
-                                    },
-                                ],
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: R_ANGLE@120..122 ">" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@122..124 "30" [] [],
+                                    unit_token: IDENT@124..126 "em" [] [],
+                                },
                             },
-                            important: missing (optional),
+                            r_paren_token: R_PAREN@126..128 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@155..157 ")" [] [Whitespace(" ")],
+                        or_token: OR_KW@128..131 "or" [] [Whitespace(" ")],
+                        right: CssContainerStyleQueryInParens {
+                            style_token: STYLE_KW@131..136 "style" [] [],
+                            l_paren_token: L_PAREN@136..137 "(" [] [],
+                            query: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@137..149 "--responsive" [] [],
+                                    },
+                                    colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@151..155 "true" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@155..157 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -171,23 +177,25 @@ CssRoot {
         CssAtRule {
             at_token: AT@161..164 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@164..174 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@174..175 "(" [] [],
-                    feature: CssQueryFeatureRange {
-                        left: CssIdentifier {
-                            value_token: IDENT@175..187 "inline-size" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@164..174 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@174..175 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@175..187 "inline-size" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: GTEQ@187..190 ">=" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@190..191 "0" [] [],
+                                unit_token: IDENT@191..193 "px" [] [],
+                            },
                         },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: GTEQ@187..190 ">=" [] [Whitespace(" ")],
-                        },
-                        right: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@190..191 "0" [] [],
-                            unit_token: IDENT@191..193 "px" [] [],
-                        },
+                        r_paren_token: R_PAREN@193..195 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@193..195 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@195..197 "{" [] [Whitespace(" ")],
@@ -199,43 +207,45 @@ CssRoot {
         CssAtRule {
             at_token: AT@198..201 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@211..216 "card" [] [Whitespace(" ")],
-                },
-                query: CssContainerAndQuery {
-                    left: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@216..217 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@217..229 "inline-size" [] [Whitespace(" ")],
-                            },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: R_ANGLE@229..231 ">" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@231..233 "30" [] [],
-                                unit_token: IDENT@233..235 "em" [] [],
-                            },
-                        },
-                        r_paren_token: R_PAREN@235..237 ")" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@211..216 "card" [] [Whitespace(" ")],
                     },
-                    and_token: AND_KW@237..241 "and" [] [Whitespace(" ")],
-                    right: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@241..242 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@242..254 "inline-size" [] [Whitespace(" ")],
+                    query: CssContainerAndQuery {
+                        left: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@216..217 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@217..229 "inline-size" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: R_ANGLE@229..231 ">" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@231..233 "30" [] [],
+                                    unit_token: IDENT@233..235 "em" [] [],
+                                },
                             },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: L_ANGLE@254..256 "<" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@256..258 "45" [] [],
-                                unit_token: IDENT@258..260 "em" [] [],
-                            },
+                            r_paren_token: R_PAREN@235..237 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@260..262 ")" [] [Whitespace(" ")],
+                        and_token: AND_KW@237..241 "and" [] [Whitespace(" ")],
+                        right: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@241..242 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@242..254 "inline-size" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: L_ANGLE@254..256 "<" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@256..258 "45" [] [],
+                                    unit_token: IDENT@258..260 "em" [] [],
+                                },
+                            },
+                            r_paren_token: R_PAREN@260..262 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -248,30 +258,32 @@ CssRoot {
         CssAtRule {
             at_token: AT@266..269 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@269..279 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@279..280 "(" [] [],
-                    feature: CssQueryFeatureRangeInterval {
-                        left: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@280..283 "100" [] [],
-                            unit_token: IDENT@283..286 "px" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@269..279 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@279..280 "(" [] [],
+                        feature: CssQueryFeatureRangeInterval {
+                            left: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@280..283 "100" [] [],
+                                unit_token: IDENT@283..286 "px" [] [Whitespace(" ")],
+                            },
+                            left_comparison: CssQueryFeatureRangeComparison {
+                                operator: R_ANGLE@286..288 ">" [] [Whitespace(" ")],
+                            },
+                            name: CssIdentifier {
+                                value_token: IDENT@288..294 "width" [] [Whitespace(" ")],
+                            },
+                            right_comparison: CssQueryFeatureRangeComparison {
+                                operator: R_ANGLE@294..296 ">" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@296..299 "150" [] [],
+                                unit_token: IDENT@299..301 "px" [] [],
+                            },
                         },
-                        left_comparison: CssQueryFeatureRangeComparison {
-                            operator: R_ANGLE@286..288 ">" [] [Whitespace(" ")],
-                        },
-                        name: CssIdentifier {
-                            value_token: IDENT@288..294 "width" [] [Whitespace(" ")],
-                        },
-                        right_comparison: CssQueryFeatureRangeComparison {
-                            operator: R_ANGLE@294..296 ">" [] [Whitespace(" ")],
-                        },
-                        right: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@296..299 "150" [] [],
-                            unit_token: IDENT@299..301 "px" [] [],
-                        },
+                        r_paren_token: R_PAREN@301..303 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@301..303 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@303..306 "{" [] [Whitespace("  ")],
@@ -283,30 +295,32 @@ CssRoot {
         CssAtRule {
             at_token: AT@307..310 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@310..320 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerQueryInParens {
-                    l_paren_token: L_PAREN@320..321 "(" [] [],
-                    query: CssContainerNotQuery {
-                        not_token: NOT_KW@321..325 "not" [] [Whitespace(" ")],
-                        query: CssContainerSizeFeatureInParens {
-                            l_paren_token: L_PAREN@325..326 "(" [] [],
-                            feature: CssQueryFeatureRange {
-                                left: CssIdentifier {
-                                    value_token: IDENT@326..332 "width" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@310..320 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerQueryInParens {
+                        l_paren_token: L_PAREN@320..321 "(" [] [],
+                        query: CssContainerNotQuery {
+                            not_token: NOT_KW@321..325 "not" [] [Whitespace(" ")],
+                            query: CssContainerSizeFeatureInParens {
+                                l_paren_token: L_PAREN@325..326 "(" [] [],
+                                feature: CssQueryFeatureRange {
+                                    left: CssIdentifier {
+                                        value_token: IDENT@326..332 "width" [] [Whitespace(" ")],
+                                    },
+                                    comparison: CssQueryFeatureRangeComparison {
+                                        operator: LTEQ@332..335 "<=" [] [Whitespace(" ")],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@335..338 "150" [] [],
+                                        unit_token: IDENT@338..340 "px" [] [],
+                                    },
                                 },
-                                comparison: CssQueryFeatureRangeComparison {
-                                    operator: LTEQ@332..335 "<=" [] [Whitespace(" ")],
-                                },
-                                right: CssRegularDimension {
-                                    value_token: CSS_NUMBER_LITERAL@335..338 "150" [] [],
-                                    unit_token: IDENT@338..340 "px" [] [],
-                                },
+                                r_paren_token: R_PAREN@340..341 ")" [] [],
                             },
-                            r_paren_token: R_PAREN@340..341 ")" [] [],
                         },
+                        r_paren_token: R_PAREN@341..343 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@341..343 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@343..346 "{" [] [Whitespace("  ")],
@@ -318,27 +332,29 @@ CssRoot {
         CssAtRule {
             at_token: AT@347..350 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@350..360 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerQueryInParens {
-                    l_paren_token: L_PAREN@360..361 "(" [] [],
-                    query: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@361..362 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@362..368 "width" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@350..360 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerQueryInParens {
+                        l_paren_token: L_PAREN@360..361 "(" [] [],
+                        query: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@361..362 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@362..368 "width" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: LTEQ@368..371 "<=" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@371..374 "150" [] [],
+                                    unit_token: IDENT@374..376 "px" [] [],
+                                },
                             },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: LTEQ@368..371 "<=" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@371..374 "150" [] [],
-                                unit_token: IDENT@374..376 "px" [] [],
-                            },
+                            r_paren_token: R_PAREN@376..377 ")" [] [],
                         },
-                        r_paren_token: R_PAREN@376..377 ")" [] [],
+                        r_paren_token: R_PAREN@377..379 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@377..379 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@379..382 "{" [] [Whitespace("  ")],
@@ -350,21 +366,23 @@ CssRoot {
         CssAtRule {
             at_token: AT@383..386 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@386..396 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@396..397 "(" [] [],
-                    feature: CssQueryFeaturePlain {
-                        name: CssIdentifier {
-                            value_token: IDENT@397..406 "min-width" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@386..396 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@396..397 "(" [] [],
+                        feature: CssQueryFeaturePlain {
+                            name: CssIdentifier {
+                                value_token: IDENT@397..406 "min-width" [] [],
+                            },
+                            colon_token: COLON@406..408 ":" [] [Whitespace(" ")],
+                            value: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@408..411 "700" [] [],
+                                unit_token: IDENT@411..413 "px" [] [],
+                            },
                         },
-                        colon_token: COLON@406..408 ":" [] [Whitespace(" ")],
-                        value: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@408..411 "700" [] [],
-                            unit_token: IDENT@411..413 "px" [] [],
-                        },
+                        r_paren_token: R_PAREN@413..415 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@413..415 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@415..418 "{" [] [Whitespace("  ")],
@@ -376,23 +394,25 @@ CssRoot {
         CssAtRule {
             at_token: AT@419..422 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@432..440 "sidebar" [] [Whitespace(" ")],
-                },
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@440..441 "(" [] [],
-                    feature: CssQueryFeaturePlain {
-                        name: CssIdentifier {
-                            value_token: IDENT@441..450 "min-width" [] [],
-                        },
-                        colon_token: COLON@450..452 ":" [] [Whitespace(" ")],
-                        value: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@452..455 "400" [] [],
-                            unit_token: IDENT@455..457 "px" [] [],
-                        },
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@432..440 "sidebar" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@457..459 ")" [] [Whitespace(" ")],
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@440..441 "(" [] [],
+                        feature: CssQueryFeaturePlain {
+                            name: CssIdentifier {
+                                value_token: IDENT@441..450 "min-width" [] [],
+                            },
+                            colon_token: COLON@450..452 ":" [] [Whitespace(" ")],
+                            value: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@452..455 "400" [] [],
+                                unit_token: IDENT@455..457 "px" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@457..459 ")" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@459..462 "{" [] [Whitespace("  ")],
@@ -404,28 +424,30 @@ CssRoot {
         CssAtRule {
             at_token: AT@463..466 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@476..481 "test" [] [Whitespace(" ")],
-                },
-                query: CssContainerStyleQueryInParens {
-                    style_token: STYLE_KW@481..486 "style" [] [],
-                    l_paren_token: L_PAREN@486..487 "(" [] [],
-                    query: CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@487..499 "--responsive" [] [],
-                            },
-                            colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@501..505 "true" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@476..481 "test" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@505..507 ")" [] [Whitespace(" ")],
+                    query: CssContainerStyleQueryInParens {
+                        style_token: STYLE_KW@481..486 "style" [] [],
+                        l_paren_token: L_PAREN@486..487 "(" [] [],
+                        query: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@487..499 "--responsive" [] [],
+                                },
+                                colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@501..505 "true" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@505..507 ")" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@507..510 "{" [] [Whitespace("  ")],
@@ -437,26 +459,28 @@ CssRoot {
         CssAtRule {
             at_token: AT@511..514 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerStyleQueryInParens {
-                    style_token: STYLE_KW@524..529 "style" [] [],
-                    l_paren_token: L_PAREN@529..530 "(" [] [],
-                    query: CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@530..542 "--responsive" [] [],
-                            },
-                            colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@544..548 "true" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerStyleQueryInParens {
+                        style_token: STYLE_KW@524..529 "style" [] [],
+                        l_paren_token: L_PAREN@529..530 "(" [] [],
+                        query: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@530..542 "--responsive" [] [],
                                 },
-                            ],
+                                colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@544..548 "true" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        r_paren_token: R_PAREN@548..550 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@548..550 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@550..553 "{" [] [Whitespace("  ")],
@@ -468,25 +492,27 @@ CssRoot {
         CssAtRule {
             at_token: AT@554..557 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@567..572 "card" [] [Whitespace(" ")],
-                },
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@572..573 "(" [] [],
-                    feature: CssQueryFeatureRange {
-                        left: CssIdentifier {
-                            value_token: IDENT@573..585 "inline-size" [] [Whitespace(" ")],
-                        },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: R_ANGLE@585..587 ">" [] [Whitespace(" ")],
-                        },
-                        right: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@587..589 "30" [] [],
-                            unit_token: IDENT@589..591 "em" [] [],
-                        },
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@567..572 "card" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@591..593 ")" [] [Whitespace(" ")],
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@572..573 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@573..585 "inline-size" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: R_ANGLE@585..587 ">" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@587..589 "30" [] [],
+                                unit_token: IDENT@589..591 "em" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@591..593 ")" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@593..596 "{" [] [Whitespace("  ")],
@@ -498,26 +524,28 @@ CssRoot {
         CssAtRule {
             at_token: AT@597..600 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerStyleQueryInParens {
-                    style_token: STYLE_KW@610..615 "style" [] [],
-                    l_paren_token: L_PAREN@615..616 "(" [] [],
-                    query: CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@616..628 "--responsive" [] [],
-                            },
-                            colon_token: COLON@628..630 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@630..634 "true" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerStyleQueryInParens {
+                        style_token: STYLE_KW@610..615 "style" [] [],
+                        l_paren_token: L_PAREN@615..616 "(" [] [],
+                        query: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@616..628 "--responsive" [] [],
                                 },
-                            ],
+                                colon_token: COLON@628..630 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@630..634 "true" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        r_paren_token: R_PAREN@634..636 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@634..636 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@636..639 "{" [] [Whitespace("  ")],
@@ -529,38 +557,40 @@ CssRoot {
         CssAtRule {
             at_token: AT@640..643 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@643..652 "container" [] [],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@652..653 "(" [] [],
-                    feature: CssQueryFeatureRange {
-                        left: CssIdentifier {
-                            value_token: IDENT@653..664 "inline-size" [] [],
-                        },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: GTEQ@664..666 ">=" [] [],
-                        },
-                        right: CssFunction {
-                            name: CssIdentifier {
-                                value_token: IDENT@666..670 "calc" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@643..652 "container" [] [],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@652..653 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@653..664 "inline-size" [] [],
                             },
-                            l_paren_token: L_PAREN@670..671 "(" [] [],
-                            items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
-                                                unit_token: IDENT@674..676 "px" [] [],
-                                            },
-                                        ],
-                                    },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: GTEQ@664..666 ">=" [] [],
+                            },
+                            right: CssFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@666..670 "calc" [] [],
                                 },
-                            ],
-                            r_paren_token: R_PAREN@676..677 ")" [] [],
+                                l_paren_token: L_PAREN@670..671 "(" [] [],
+                                items: CssParameterList [
+                                    CssParameter {
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
+                                                    unit_token: IDENT@674..676 "px" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@676..677 ")" [] [],
+                            },
                         },
+                        r_paren_token: R_PAREN@677..679 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@677..679 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@679..681 "{" [] [Whitespace(" ")],
@@ -572,23 +602,25 @@ CssRoot {
         CssAtRule {
             at_token: AT@682..685 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@685..695 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@695..697 "(" [] [Whitespace(" ")],
-                    feature: CssQueryFeatureRange {
-                        left: CssIdentifier {
-                            value_token: IDENT@697..703 "WIDTH" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@685..695 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@695..697 "(" [] [Whitespace(" ")],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@697..703 "WIDTH" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: LTEQ@703..706 "<=" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@706..709 "150" [] [],
+                                unit_token: IDENT@709..712 "px" [] [Whitespace(" ")],
+                            },
                         },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: LTEQ@703..706 "<=" [] [Whitespace(" ")],
-                        },
-                        right: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@706..709 "150" [] [],
-                            unit_token: IDENT@709..712 "px" [] [Whitespace(" ")],
-                        },
+                        r_paren_token: R_PAREN@712..714 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@712..714 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@714..717 "{" [] [Whitespace("  ")],
@@ -600,23 +632,25 @@ CssRoot {
         CssAtRule {
             at_token: AT@718..720 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerSizeFeatureInParens {
-                    l_paren_token: L_PAREN@730..732 "(" [] [Whitespace(" ")],
-                    feature: CssQueryFeatureReverseRange {
-                        left: CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@732..735 "150" [] [],
-                            unit_token: IDENT@735..738 "px" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@730..732 "(" [] [Whitespace(" ")],
+                        feature: CssQueryFeatureReverseRange {
+                            left: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@732..735 "150" [] [],
+                                unit_token: IDENT@735..738 "px" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: LTEQ@738..741 "<=" [] [Whitespace(" ")],
+                            },
+                            right: CssIdentifier {
+                                value_token: IDENT@741..747 "WIDTH" [] [Whitespace(" ")],
+                            },
                         },
-                        comparison: CssQueryFeatureRangeComparison {
-                            operator: LTEQ@738..741 "<=" [] [Whitespace(" ")],
-                        },
-                        right: CssIdentifier {
-                            value_token: IDENT@741..747 "WIDTH" [] [Whitespace(" ")],
-                        },
+                        r_paren_token: R_PAREN@747..749 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@747..749 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@749..752 "{" [] [Whitespace("  ")],
@@ -628,27 +662,29 @@ CssRoot {
         CssAtRule {
             at_token: AT@753..756 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")],
-                },
-                query: CssContainerNotQuery {
-                    not_token: NOT_KW@780..784 "not" [] [Whitespace(" ")],
-                    query: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@784..785 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@785..791 "width" [] [Whitespace(" ")],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")],
+                    },
+                    query: CssContainerNotQuery {
+                        not_token: NOT_KW@780..784 "not" [] [Whitespace(" ")],
+                        query: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@784..785 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@785..791 "width" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: LTEQ@791..794 "<=" [] [Whitespace(" ")],
+                                },
+                                right: CssRegularDimension {
+                                    value_token: CSS_NUMBER_LITERAL@794..797 "500" [] [],
+                                    unit_token: IDENT@797..799 "px" [] [],
+                                },
                             },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: LTEQ@791..794 "<=" [] [Whitespace(" ")],
-                            },
-                            right: CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@794..797 "500" [] [],
-                                unit_token: IDENT@797..799 "px" [] [],
-                            },
+                            r_paren_token: R_PAREN@799..801 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@799..801 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
@@ -661,30 +697,32 @@ CssRoot {
         CssAtRule {
             at_token: AT@805..808 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@818..823 "name" [] [Whitespace(" ")],
-                },
-                query: CssContainerNotQuery {
-                    not_token: NOT_KW@823..827 "not" [] [Whitespace(" ")],
-                    query: CssContainerStyleQueryInParens {
-                        style_token: STYLE_KW@827..832 "style" [] [],
-                        l_paren_token: L_PAREN@832..833 "(" [] [],
-                        query: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@833..838 "color" [] [],
-                                },
-                                colon_token: COLON@838..840 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@840..843 "red" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@818..823 "name" [] [Whitespace(" ")],
+                    },
+                    query: CssContainerNotQuery {
+                        not_token: NOT_KW@823..827 "not" [] [Whitespace(" ")],
+                        query: CssContainerStyleQueryInParens {
+                            style_token: STYLE_KW@827..832 "style" [] [],
+                            l_paren_token: L_PAREN@832..833 "(" [] [],
+                            query: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@833..838 "color" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@838..840 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@840..843 "red" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
                             },
-                            important: missing (optional),
+                            r_paren_token: R_PAREN@843..845 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@843..845 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
@@ -697,26 +735,28 @@ CssRoot {
         CssAtRule {
             at_token: AT@847..850 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
-                container_token: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")],
-                name: missing (optional),
-                query: CssContainerStyleQueryInParens {
-                    style_token: STYLE_KW@860..866 "style" [] [Whitespace(" ")],
-                    l_paren_token: L_PAREN@866..867 "(" [] [],
-                    query: CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssDashedIdentifier {
-                                value_token: IDENT@867..879 "--responsive" [] [],
-                            },
-                            colon_token: COLON@879..881 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@881..885 "true" [] [],
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerStyleQueryInParens {
+                        style_token: STYLE_KW@860..866 "style" [] [Whitespace(" ")],
+                        l_paren_token: L_PAREN@866..867 "(" [] [],
+                        query: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@867..879 "--responsive" [] [],
                                 },
-                            ],
+                                colon_token: COLON@879..881 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@881..885 "true" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        r_paren_token: R_PAREN@885..887 ")" [] [Whitespace(" ")],
                     },
-                    r_paren_token: R_PAREN@885..887 ")" [] [Whitespace(" ")],
                 },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@887..890 "{" [] [Whitespace("  ")],
@@ -739,473 +779,493 @@ CssRoot {
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
-        0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@11..16
-          0: IDENT@11..16 "name" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_NOT_QUERY@16..37
-          0: NOT_KW@16..20 "not" [] [Whitespace(" ")]
-          1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@20..37
-            0: L_PAREN@20..21 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@21..35
-              0: CSS_IDENTIFIER@21..27
-                0: IDENT@21..27 "width" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@27..30
-                0: LTEQ@27..30 "<=" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@30..35
-                0: CSS_NUMBER_LITERAL@30..33 "500" [] []
-                1: IDENT@33..35 "px" [] []
-            2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@37..41
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@1..37
+          0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@11..16
+            0: IDENT@11..16 "name" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_NOT_QUERY@16..37
+            0: NOT_KW@16..20 "not" [] [Whitespace(" ")]
+            1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@20..37
+              0: L_PAREN@20..21 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@21..35
+                0: CSS_IDENTIFIER@21..27
+                  0: IDENT@21..27 "width" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@27..30
+                  0: LTEQ@27..30 "<=" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@30..35
+                  0: CSS_NUMBER_LITERAL@30..33 "500" [] []
+                  1: IDENT@33..35 "px" [] []
+              2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@37..41
           0: L_CURLY@37..40 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@40..40
           2: R_CURLY@40..41 "}" [] []
     1: CSS_AT_RULE@41..89
       0: AT@41..44 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@44..89
-        0: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@54..64
-          0: IDENT@54..64 "my-layout" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@64..85
-          0: L_PAREN@64..65 "(" [] []
-          1: CSS_QUERY_FEATURE_RANGE@65..83
-            0: CSS_IDENTIFIER@65..77
-              0: IDENT@65..77 "inline-size" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@77..79
-              0: R_ANGLE@77..79 ">" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@79..83
-              0: CSS_NUMBER_LITERAL@79..81 "45" [] []
-              1: IDENT@81..83 "em" [] []
-          2: R_PAREN@83..85 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@85..89
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@44..85
+          0: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@54..64
+            0: IDENT@54..64 "my-layout" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@64..85
+            0: L_PAREN@64..65 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@65..83
+              0: CSS_IDENTIFIER@65..77
+                0: IDENT@65..77 "inline-size" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@77..79
+                0: R_ANGLE@77..79 ">" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@79..83
+                0: CSS_NUMBER_LITERAL@79..81 "45" [] []
+                1: IDENT@81..83 "em" [] []
+            2: R_PAREN@83..85 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@85..89
           0: L_CURLY@85..88 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@88..88
           2: R_CURLY@88..89 "}" [] []
     2: CSS_AT_RULE@89..161
       0: AT@89..92 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@92..161
-        0: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@102..107
-          0: IDENT@102..107 "card" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_OR_QUERY@107..157
-          0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@107..128
-            0: L_PAREN@107..108 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@108..126
-              0: CSS_IDENTIFIER@108..120
-                0: IDENT@108..120 "inline-size" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@120..122
-                0: R_ANGLE@120..122 ">" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@122..126
-                0: CSS_NUMBER_LITERAL@122..124 "30" [] []
-                1: IDENT@124..126 "em" [] []
-            2: R_PAREN@126..128 ")" [] [Whitespace(" ")]
-          1: OR_KW@128..131 "or" [] [Whitespace(" ")]
-          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@131..157
-            0: STYLE_KW@131..136 "style" [] []
-            1: L_PAREN@136..137 "(" [] []
-            2: CSS_DECLARATION@137..155
-              0: CSS_GENERIC_PROPERTY@137..155
-                0: CSS_DASHED_IDENTIFIER@137..149
-                  0: IDENT@137..149 "--responsive" [] []
-                1: COLON@149..151 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@151..155
-                  0: CSS_IDENTIFIER@151..155
-                    0: IDENT@151..155 "true" [] []
-              1: (empty)
-            3: R_PAREN@155..157 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@157..161
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@92..157
+          0: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@102..107
+            0: IDENT@102..107 "card" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_OR_QUERY@107..157
+            0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@107..128
+              0: L_PAREN@107..108 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@108..126
+                0: CSS_IDENTIFIER@108..120
+                  0: IDENT@108..120 "inline-size" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@120..122
+                  0: R_ANGLE@120..122 ">" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@122..126
+                  0: CSS_NUMBER_LITERAL@122..124 "30" [] []
+                  1: IDENT@124..126 "em" [] []
+              2: R_PAREN@126..128 ")" [] [Whitespace(" ")]
+            1: OR_KW@128..131 "or" [] [Whitespace(" ")]
+            2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@131..157
+              0: STYLE_KW@131..136 "style" [] []
+              1: L_PAREN@136..137 "(" [] []
+              2: CSS_DECLARATION@137..155
+                0: CSS_GENERIC_PROPERTY@137..155
+                  0: CSS_DASHED_IDENTIFIER@137..149
+                    0: IDENT@137..149 "--responsive" [] []
+                  1: COLON@149..151 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@151..155
+                    0: CSS_IDENTIFIER@151..155
+                      0: IDENT@151..155 "true" [] []
+                1: (empty)
+              3: R_PAREN@155..157 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@157..161
           0: L_CURLY@157..160 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@160..160
           2: R_CURLY@160..161 "}" [] []
     3: CSS_AT_RULE@161..198
       0: AT@161..164 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@164..198
-        0: CONTAINER_KW@164..174 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@174..195
-          0: L_PAREN@174..175 "(" [] []
-          1: CSS_QUERY_FEATURE_RANGE@175..193
-            0: CSS_IDENTIFIER@175..187
-              0: IDENT@175..187 "inline-size" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@187..190
-              0: GTEQ@187..190 ">=" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@190..193
-              0: CSS_NUMBER_LITERAL@190..191 "0" [] []
-              1: IDENT@191..193 "px" [] []
-          2: R_PAREN@193..195 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@195..198
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@164..195
+          0: CONTAINER_KW@164..174 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@174..195
+            0: L_PAREN@174..175 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@175..193
+              0: CSS_IDENTIFIER@175..187
+                0: IDENT@175..187 "inline-size" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@187..190
+                0: GTEQ@187..190 ">=" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@190..193
+                0: CSS_NUMBER_LITERAL@190..191 "0" [] []
+                1: IDENT@191..193 "px" [] []
+            2: R_PAREN@193..195 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@195..198
           0: L_CURLY@195..197 "{" [] [Whitespace(" ")]
           1: CSS_RULE_LIST@197..197
           2: R_CURLY@197..198 "}" [] []
     4: CSS_AT_RULE@198..266
       0: AT@198..201 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@201..266
-        0: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@211..216
-          0: IDENT@211..216 "card" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_AND_QUERY@216..262
-          0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@216..237
-            0: L_PAREN@216..217 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@217..235
-              0: CSS_IDENTIFIER@217..229
-                0: IDENT@217..229 "inline-size" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@229..231
-                0: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@231..235
-                0: CSS_NUMBER_LITERAL@231..233 "30" [] []
-                1: IDENT@233..235 "em" [] []
-            2: R_PAREN@235..237 ")" [] [Whitespace(" ")]
-          1: AND_KW@237..241 "and" [] [Whitespace(" ")]
-          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@241..262
-            0: L_PAREN@241..242 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@242..260
-              0: CSS_IDENTIFIER@242..254
-                0: IDENT@242..254 "inline-size" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@254..256
-                0: L_ANGLE@254..256 "<" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@256..260
-                0: CSS_NUMBER_LITERAL@256..258 "45" [] []
-                1: IDENT@258..260 "em" [] []
-            2: R_PAREN@260..262 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@262..266
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@201..262
+          0: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@211..216
+            0: IDENT@211..216 "card" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_AND_QUERY@216..262
+            0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@216..237
+              0: L_PAREN@216..217 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@217..235
+                0: CSS_IDENTIFIER@217..229
+                  0: IDENT@217..229 "inline-size" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@229..231
+                  0: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@231..235
+                  0: CSS_NUMBER_LITERAL@231..233 "30" [] []
+                  1: IDENT@233..235 "em" [] []
+              2: R_PAREN@235..237 ")" [] [Whitespace(" ")]
+            1: AND_KW@237..241 "and" [] [Whitespace(" ")]
+            2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@241..262
+              0: L_PAREN@241..242 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@242..260
+                0: CSS_IDENTIFIER@242..254
+                  0: IDENT@242..254 "inline-size" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@254..256
+                  0: L_ANGLE@254..256 "<" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@256..260
+                  0: CSS_NUMBER_LITERAL@256..258 "45" [] []
+                  1: IDENT@258..260 "em" [] []
+              2: R_PAREN@260..262 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@262..266
           0: L_CURLY@262..265 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@265..265
           2: R_CURLY@265..266 "}" [] []
     5: CSS_AT_RULE@266..307
       0: AT@266..269 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@269..307
-        0: CONTAINER_KW@269..279 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@279..303
-          0: L_PAREN@279..280 "(" [] []
-          1: CSS_QUERY_FEATURE_RANGE_INTERVAL@280..301
-            0: CSS_REGULAR_DIMENSION@280..286
-              0: CSS_NUMBER_LITERAL@280..283 "100" [] []
-              1: IDENT@283..286 "px" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@286..288
-              0: R_ANGLE@286..288 ">" [] [Whitespace(" ")]
-            2: CSS_IDENTIFIER@288..294
-              0: IDENT@288..294 "width" [] [Whitespace(" ")]
-            3: CSS_QUERY_FEATURE_RANGE_COMPARISON@294..296
-              0: R_ANGLE@294..296 ">" [] [Whitespace(" ")]
-            4: CSS_REGULAR_DIMENSION@296..301
-              0: CSS_NUMBER_LITERAL@296..299 "150" [] []
-              1: IDENT@299..301 "px" [] []
-          2: R_PAREN@301..303 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@303..307
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@269..303
+          0: CONTAINER_KW@269..279 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@279..303
+            0: L_PAREN@279..280 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE_INTERVAL@280..301
+              0: CSS_REGULAR_DIMENSION@280..286
+                0: CSS_NUMBER_LITERAL@280..283 "100" [] []
+                1: IDENT@283..286 "px" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@286..288
+                0: R_ANGLE@286..288 ">" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@288..294
+                0: IDENT@288..294 "width" [] [Whitespace(" ")]
+              3: CSS_QUERY_FEATURE_RANGE_COMPARISON@294..296
+                0: R_ANGLE@294..296 ">" [] [Whitespace(" ")]
+              4: CSS_REGULAR_DIMENSION@296..301
+                0: CSS_NUMBER_LITERAL@296..299 "150" [] []
+                1: IDENT@299..301 "px" [] []
+            2: R_PAREN@301..303 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@303..307
           0: L_CURLY@303..306 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@306..306
           2: R_CURLY@306..307 "}" [] []
     6: CSS_AT_RULE@307..347
       0: AT@307..310 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@310..347
-        0: CONTAINER_KW@310..320 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_QUERY_IN_PARENS@320..343
-          0: L_PAREN@320..321 "(" [] []
-          1: CSS_CONTAINER_NOT_QUERY@321..341
-            0: NOT_KW@321..325 "not" [] [Whitespace(" ")]
-            1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@325..341
-              0: L_PAREN@325..326 "(" [] []
-              1: CSS_QUERY_FEATURE_RANGE@326..340
-                0: CSS_IDENTIFIER@326..332
-                  0: IDENT@326..332 "width" [] [Whitespace(" ")]
-                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@332..335
-                  0: LTEQ@332..335 "<=" [] [Whitespace(" ")]
-                2: CSS_REGULAR_DIMENSION@335..340
-                  0: CSS_NUMBER_LITERAL@335..338 "150" [] []
-                  1: IDENT@338..340 "px" [] []
-              2: R_PAREN@340..341 ")" [] []
-          2: R_PAREN@341..343 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@343..347
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@310..343
+          0: CONTAINER_KW@310..320 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_QUERY_IN_PARENS@320..343
+            0: L_PAREN@320..321 "(" [] []
+            1: CSS_CONTAINER_NOT_QUERY@321..341
+              0: NOT_KW@321..325 "not" [] [Whitespace(" ")]
+              1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@325..341
+                0: L_PAREN@325..326 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE@326..340
+                  0: CSS_IDENTIFIER@326..332
+                    0: IDENT@326..332 "width" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@332..335
+                    0: LTEQ@332..335 "<=" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@335..340
+                    0: CSS_NUMBER_LITERAL@335..338 "150" [] []
+                    1: IDENT@338..340 "px" [] []
+                2: R_PAREN@340..341 ")" [] []
+            2: R_PAREN@341..343 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@343..347
           0: L_CURLY@343..346 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@346..346
           2: R_CURLY@346..347 "}" [] []
     7: CSS_AT_RULE@347..383
       0: AT@347..350 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@350..383
-        0: CONTAINER_KW@350..360 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_QUERY_IN_PARENS@360..379
-          0: L_PAREN@360..361 "(" [] []
-          1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@361..377
-            0: L_PAREN@361..362 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@362..376
-              0: CSS_IDENTIFIER@362..368
-                0: IDENT@362..368 "width" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@368..371
-                0: LTEQ@368..371 "<=" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@371..376
-                0: CSS_NUMBER_LITERAL@371..374 "150" [] []
-                1: IDENT@374..376 "px" [] []
-            2: R_PAREN@376..377 ")" [] []
-          2: R_PAREN@377..379 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@379..383
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@350..379
+          0: CONTAINER_KW@350..360 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_QUERY_IN_PARENS@360..379
+            0: L_PAREN@360..361 "(" [] []
+            1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@361..377
+              0: L_PAREN@361..362 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@362..376
+                0: CSS_IDENTIFIER@362..368
+                  0: IDENT@362..368 "width" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@368..371
+                  0: LTEQ@368..371 "<=" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@371..376
+                  0: CSS_NUMBER_LITERAL@371..374 "150" [] []
+                  1: IDENT@374..376 "px" [] []
+              2: R_PAREN@376..377 ")" [] []
+            2: R_PAREN@377..379 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@379..383
           0: L_CURLY@379..382 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@382..382
           2: R_CURLY@382..383 "}" [] []
     8: CSS_AT_RULE@383..419
       0: AT@383..386 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@386..419
-        0: CONTAINER_KW@386..396 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@396..415
-          0: L_PAREN@396..397 "(" [] []
-          1: CSS_QUERY_FEATURE_PLAIN@397..413
-            0: CSS_IDENTIFIER@397..406
-              0: IDENT@397..406 "min-width" [] []
-            1: COLON@406..408 ":" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@408..413
-              0: CSS_NUMBER_LITERAL@408..411 "700" [] []
-              1: IDENT@411..413 "px" [] []
-          2: R_PAREN@413..415 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@415..419
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@386..415
+          0: CONTAINER_KW@386..396 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@396..415
+            0: L_PAREN@396..397 "(" [] []
+            1: CSS_QUERY_FEATURE_PLAIN@397..413
+              0: CSS_IDENTIFIER@397..406
+                0: IDENT@397..406 "min-width" [] []
+              1: COLON@406..408 ":" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@408..413
+                0: CSS_NUMBER_LITERAL@408..411 "700" [] []
+                1: IDENT@411..413 "px" [] []
+            2: R_PAREN@413..415 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@415..419
           0: L_CURLY@415..418 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@418..418
           2: R_CURLY@418..419 "}" [] []
     9: CSS_AT_RULE@419..463
       0: AT@419..422 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@422..463
-        0: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@432..440
-          0: IDENT@432..440 "sidebar" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@440..459
-          0: L_PAREN@440..441 "(" [] []
-          1: CSS_QUERY_FEATURE_PLAIN@441..457
-            0: CSS_IDENTIFIER@441..450
-              0: IDENT@441..450 "min-width" [] []
-            1: COLON@450..452 ":" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@452..457
-              0: CSS_NUMBER_LITERAL@452..455 "400" [] []
-              1: IDENT@455..457 "px" [] []
-          2: R_PAREN@457..459 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@459..463
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@422..459
+          0: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@432..440
+            0: IDENT@432..440 "sidebar" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@440..459
+            0: L_PAREN@440..441 "(" [] []
+            1: CSS_QUERY_FEATURE_PLAIN@441..457
+              0: CSS_IDENTIFIER@441..450
+                0: IDENT@441..450 "min-width" [] []
+              1: COLON@450..452 ":" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@452..457
+                0: CSS_NUMBER_LITERAL@452..455 "400" [] []
+                1: IDENT@455..457 "px" [] []
+            2: R_PAREN@457..459 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@459..463
           0: L_CURLY@459..462 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@462..462
           2: R_CURLY@462..463 "}" [] []
     10: CSS_AT_RULE@463..511
       0: AT@463..466 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@466..511
-        0: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@476..481
-          0: IDENT@476..481 "test" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@481..507
-          0: STYLE_KW@481..486 "style" [] []
-          1: L_PAREN@486..487 "(" [] []
-          2: CSS_DECLARATION@487..505
-            0: CSS_GENERIC_PROPERTY@487..505
-              0: CSS_DASHED_IDENTIFIER@487..499
-                0: IDENT@487..499 "--responsive" [] []
-              1: COLON@499..501 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@501..505
-                0: CSS_IDENTIFIER@501..505
-                  0: IDENT@501..505 "true" [] []
-            1: (empty)
-          3: R_PAREN@505..507 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@507..511
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@466..507
+          0: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@476..481
+            0: IDENT@476..481 "test" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@481..507
+            0: STYLE_KW@481..486 "style" [] []
+            1: L_PAREN@486..487 "(" [] []
+            2: CSS_DECLARATION@487..505
+              0: CSS_GENERIC_PROPERTY@487..505
+                0: CSS_DASHED_IDENTIFIER@487..499
+                  0: IDENT@487..499 "--responsive" [] []
+                1: COLON@499..501 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@501..505
+                  0: CSS_IDENTIFIER@501..505
+                    0: IDENT@501..505 "true" [] []
+              1: (empty)
+            3: R_PAREN@505..507 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@507..511
           0: L_CURLY@507..510 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@510..510
           2: R_CURLY@510..511 "}" [] []
     11: CSS_AT_RULE@511..554
       0: AT@511..514 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@514..554
-        0: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@524..550
-          0: STYLE_KW@524..529 "style" [] []
-          1: L_PAREN@529..530 "(" [] []
-          2: CSS_DECLARATION@530..548
-            0: CSS_GENERIC_PROPERTY@530..548
-              0: CSS_DASHED_IDENTIFIER@530..542
-                0: IDENT@530..542 "--responsive" [] []
-              1: COLON@542..544 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@544..548
-                0: CSS_IDENTIFIER@544..548
-                  0: IDENT@544..548 "true" [] []
-            1: (empty)
-          3: R_PAREN@548..550 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@550..554
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@514..550
+          0: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@524..550
+            0: STYLE_KW@524..529 "style" [] []
+            1: L_PAREN@529..530 "(" [] []
+            2: CSS_DECLARATION@530..548
+              0: CSS_GENERIC_PROPERTY@530..548
+                0: CSS_DASHED_IDENTIFIER@530..542
+                  0: IDENT@530..542 "--responsive" [] []
+                1: COLON@542..544 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@544..548
+                  0: CSS_IDENTIFIER@544..548
+                    0: IDENT@544..548 "true" [] []
+              1: (empty)
+            3: R_PAREN@548..550 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@550..554
           0: L_CURLY@550..553 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@553..553
           2: R_CURLY@553..554 "}" [] []
     12: CSS_AT_RULE@554..597
       0: AT@554..557 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@557..597
-        0: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@567..572
-          0: IDENT@567..572 "card" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@572..593
-          0: L_PAREN@572..573 "(" [] []
-          1: CSS_QUERY_FEATURE_RANGE@573..591
-            0: CSS_IDENTIFIER@573..585
-              0: IDENT@573..585 "inline-size" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@585..587
-              0: R_ANGLE@585..587 ">" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@587..591
-              0: CSS_NUMBER_LITERAL@587..589 "30" [] []
-              1: IDENT@589..591 "em" [] []
-          2: R_PAREN@591..593 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@593..597
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@557..593
+          0: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@567..572
+            0: IDENT@567..572 "card" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@572..593
+            0: L_PAREN@572..573 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@573..591
+              0: CSS_IDENTIFIER@573..585
+                0: IDENT@573..585 "inline-size" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@585..587
+                0: R_ANGLE@585..587 ">" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@587..591
+                0: CSS_NUMBER_LITERAL@587..589 "30" [] []
+                1: IDENT@589..591 "em" [] []
+            2: R_PAREN@591..593 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@593..597
           0: L_CURLY@593..596 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@596..596
           2: R_CURLY@596..597 "}" [] []
     13: CSS_AT_RULE@597..640
       0: AT@597..600 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@600..640
-        0: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@610..636
-          0: STYLE_KW@610..615 "style" [] []
-          1: L_PAREN@615..616 "(" [] []
-          2: CSS_DECLARATION@616..634
-            0: CSS_GENERIC_PROPERTY@616..634
-              0: CSS_DASHED_IDENTIFIER@616..628
-                0: IDENT@616..628 "--responsive" [] []
-              1: COLON@628..630 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@630..634
-                0: CSS_IDENTIFIER@630..634
-                  0: IDENT@630..634 "true" [] []
-            1: (empty)
-          3: R_PAREN@634..636 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@636..640
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@600..636
+          0: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@610..636
+            0: STYLE_KW@610..615 "style" [] []
+            1: L_PAREN@615..616 "(" [] []
+            2: CSS_DECLARATION@616..634
+              0: CSS_GENERIC_PROPERTY@616..634
+                0: CSS_DASHED_IDENTIFIER@616..628
+                  0: IDENT@616..628 "--responsive" [] []
+                1: COLON@628..630 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@630..634
+                  0: CSS_IDENTIFIER@630..634
+                    0: IDENT@630..634 "true" [] []
+              1: (empty)
+            3: R_PAREN@634..636 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@636..640
           0: L_CURLY@636..639 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@639..639
           2: R_CURLY@639..640 "}" [] []
     14: CSS_AT_RULE@640..682
       0: AT@640..643 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@643..682
-        0: CONTAINER_KW@643..652 "container" [] []
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@652..679
-          0: L_PAREN@652..653 "(" [] []
-          1: CSS_QUERY_FEATURE_RANGE@653..677
-            0: CSS_IDENTIFIER@653..664
-              0: IDENT@653..664 "inline-size" [] []
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
-              0: GTEQ@664..666 ">=" [] []
-            2: CSS_FUNCTION@666..677
-              0: CSS_IDENTIFIER@666..670
-                0: IDENT@666..670 "calc" [] []
-              1: L_PAREN@670..671 "(" [] []
-              2: CSS_PARAMETER_LIST@671..676
-                0: CSS_PARAMETER@671..676
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..676
-                    0: CSS_COMPONENT_VALUE_LIST@671..676
-                      0: CSS_REGULAR_DIMENSION@671..676
-                        0: CSS_NUMBER_LITERAL@671..674 "200" [] []
-                        1: IDENT@674..676 "px" [] []
-              3: R_PAREN@676..677 ")" [] []
-          2: R_PAREN@677..679 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@679..682
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@643..679
+          0: CONTAINER_KW@643..652 "container" [] []
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@652..679
+            0: L_PAREN@652..653 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@653..677
+              0: CSS_IDENTIFIER@653..664
+                0: IDENT@653..664 "inline-size" [] []
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
+                0: GTEQ@664..666 ">=" [] []
+              2: CSS_FUNCTION@666..677
+                0: CSS_IDENTIFIER@666..670
+                  0: IDENT@666..670 "calc" [] []
+                1: L_PAREN@670..671 "(" [] []
+                2: CSS_PARAMETER_LIST@671..676
+                  0: CSS_PARAMETER@671..676
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..676
+                      0: CSS_COMPONENT_VALUE_LIST@671..676
+                        0: CSS_REGULAR_DIMENSION@671..676
+                          0: CSS_NUMBER_LITERAL@671..674 "200" [] []
+                          1: IDENT@674..676 "px" [] []
+                3: R_PAREN@676..677 ")" [] []
+            2: R_PAREN@677..679 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@679..682
           0: L_CURLY@679..681 "{" [] [Whitespace(" ")]
           1: CSS_RULE_LIST@681..681
           2: R_CURLY@681..682 "}" [] []
     15: CSS_AT_RULE@682..718
       0: AT@682..685 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@685..718
-        0: CONTAINER_KW@685..695 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@695..714
-          0: L_PAREN@695..697 "(" [] [Whitespace(" ")]
-          1: CSS_QUERY_FEATURE_RANGE@697..712
-            0: CSS_IDENTIFIER@697..703
-              0: IDENT@697..703 "WIDTH" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@703..706
-              0: LTEQ@703..706 "<=" [] [Whitespace(" ")]
-            2: CSS_REGULAR_DIMENSION@706..712
-              0: CSS_NUMBER_LITERAL@706..709 "150" [] []
-              1: IDENT@709..712 "px" [] [Whitespace(" ")]
-          2: R_PAREN@712..714 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@714..718
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@685..714
+          0: CONTAINER_KW@685..695 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@695..714
+            0: L_PAREN@695..697 "(" [] [Whitespace(" ")]
+            1: CSS_QUERY_FEATURE_RANGE@697..712
+              0: CSS_IDENTIFIER@697..703
+                0: IDENT@697..703 "WIDTH" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@703..706
+                0: LTEQ@703..706 "<=" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@706..712
+                0: CSS_NUMBER_LITERAL@706..709 "150" [] []
+                1: IDENT@709..712 "px" [] [Whitespace(" ")]
+            2: R_PAREN@712..714 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@714..718
           0: L_CURLY@714..717 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@717..717
           2: R_CURLY@717..718 "}" [] []
     16: CSS_AT_RULE@718..753
       0: AT@718..720 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@720..753
-        0: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@730..749
-          0: L_PAREN@730..732 "(" [] [Whitespace(" ")]
-          1: CSS_QUERY_FEATURE_REVERSE_RANGE@732..747
-            0: CSS_REGULAR_DIMENSION@732..738
-              0: CSS_NUMBER_LITERAL@732..735 "150" [] []
-              1: IDENT@735..738 "px" [] [Whitespace(" ")]
-            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@738..741
-              0: LTEQ@738..741 "<=" [] [Whitespace(" ")]
-            2: CSS_IDENTIFIER@741..747
-              0: IDENT@741..747 "WIDTH" [] [Whitespace(" ")]
-          2: R_PAREN@747..749 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@749..753
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@720..749
+          0: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@730..749
+            0: L_PAREN@730..732 "(" [] [Whitespace(" ")]
+            1: CSS_QUERY_FEATURE_REVERSE_RANGE@732..747
+              0: CSS_REGULAR_DIMENSION@732..738
+                0: CSS_NUMBER_LITERAL@732..735 "150" [] []
+                1: IDENT@735..738 "px" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@738..741
+                0: LTEQ@738..741 "<=" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@741..747
+                0: IDENT@741..747 "WIDTH" [] [Whitespace(" ")]
+            2: R_PAREN@747..749 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@749..753
           0: L_CURLY@749..752 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@752..752
           2: R_CURLY@752..753 "}" [] []
     17: CSS_AT_RULE@753..805
       0: AT@753..756 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@756..805
-        0: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@766..780
-          0: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_NOT_QUERY@780..801
-          0: NOT_KW@780..784 "not" [] [Whitespace(" ")]
-          1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@784..801
-            0: L_PAREN@784..785 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@785..799
-              0: CSS_IDENTIFIER@785..791
-                0: IDENT@785..791 "width" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@791..794
-                0: LTEQ@791..794 "<=" [] [Whitespace(" ")]
-              2: CSS_REGULAR_DIMENSION@794..799
-                0: CSS_NUMBER_LITERAL@794..797 "500" [] []
-                1: IDENT@797..799 "px" [] []
-            2: R_PAREN@799..801 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@801..805
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@756..801
+          0: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@766..780
+            0: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_NOT_QUERY@780..801
+            0: NOT_KW@780..784 "not" [] [Whitespace(" ")]
+            1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@784..801
+              0: L_PAREN@784..785 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@785..799
+                0: CSS_IDENTIFIER@785..791
+                  0: IDENT@785..791 "width" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@791..794
+                  0: LTEQ@791..794 "<=" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@794..799
+                  0: CSS_NUMBER_LITERAL@794..797 "500" [] []
+                  1: IDENT@797..799 "px" [] []
+              2: R_PAREN@799..801 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@801..805
           0: L_CURLY@801..804 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@804..804
           2: R_CURLY@804..805 "}" [] []
     18: CSS_AT_RULE@805..847
       0: AT@805..808 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@808..847
-        0: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@818..823
-          0: IDENT@818..823 "name" [] [Whitespace(" ")]
-        2: CSS_CONTAINER_NOT_QUERY@823..845
-          0: NOT_KW@823..827 "not" [] [Whitespace(" ")]
-          1: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@827..845
-            0: STYLE_KW@827..832 "style" [] []
-            1: L_PAREN@832..833 "(" [] []
-            2: CSS_DECLARATION@833..843
-              0: CSS_GENERIC_PROPERTY@833..843
-                0: CSS_IDENTIFIER@833..838
-                  0: IDENT@833..838 "color" [] []
-                1: COLON@838..840 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@840..843
-                  0: CSS_IDENTIFIER@840..843
-                    0: IDENT@840..843 "red" [] []
-              1: (empty)
-            3: R_PAREN@843..845 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@845..847
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@808..845
+          0: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@818..823
+            0: IDENT@818..823 "name" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_NOT_QUERY@823..845
+            0: NOT_KW@823..827 "not" [] [Whitespace(" ")]
+            1: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@827..845
+              0: STYLE_KW@827..832 "style" [] []
+              1: L_PAREN@832..833 "(" [] []
+              2: CSS_DECLARATION@833..843
+                0: CSS_GENERIC_PROPERTY@833..843
+                  0: CSS_IDENTIFIER@833..838
+                    0: IDENT@833..838 "color" [] []
+                  1: COLON@838..840 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@840..843
+                    0: CSS_IDENTIFIER@840..843
+                      0: IDENT@840..843 "red" [] []
+                1: (empty)
+              3: R_PAREN@843..845 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@845..847
           0: L_CURLY@845..846 "{" [] []
           1: CSS_RULE_LIST@846..846
           2: R_CURLY@846..847 "}" [] []
     19: CSS_AT_RULE@847..891
       0: AT@847..850 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@850..891
-        0: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@860..887
-          0: STYLE_KW@860..866 "style" [] [Whitespace(" ")]
-          1: L_PAREN@866..867 "(" [] []
-          2: CSS_DECLARATION@867..885
-            0: CSS_GENERIC_PROPERTY@867..885
-              0: CSS_DASHED_IDENTIFIER@867..879
-                0: IDENT@867..879 "--responsive" [] []
-              1: COLON@879..881 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@881..885
-                0: CSS_IDENTIFIER@881..885
-                  0: IDENT@881..885 "true" [] []
-            1: (empty)
-          3: R_PAREN@885..887 ")" [] [Whitespace(" ")]
-        3: CSS_RULE_BLOCK@887..891
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@850..887
+          0: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@860..887
+            0: STYLE_KW@860..866 "style" [] [Whitespace(" ")]
+            1: L_PAREN@866..867 "(" [] []
+            2: CSS_DECLARATION@867..885
+              0: CSS_GENERIC_PROPERTY@867..885
+                0: CSS_DASHED_IDENTIFIER@867..879
+                  0: IDENT@867..879 "--responsive" [] []
+                1: COLON@879..881 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@881..885
+                  0: CSS_IDENTIFIER@881..885
+                    0: IDENT@881..885 "true" [] []
+              1: (empty)
+            3: R_PAREN@885..887 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@887..891
           0: L_CURLY@887..890 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@890..890
           2: R_CURLY@890..891 "}" [] []

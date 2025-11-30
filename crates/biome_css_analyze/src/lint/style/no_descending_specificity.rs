@@ -207,7 +207,7 @@ impl Rule for NoDescendingSpecificity {
                 "This selector specificity is "{node.high.1.to_string()}
             ))
             .note(markup! {
-                    "Descending specificity selector may not applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
+                    "Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
             }),
         )
     }

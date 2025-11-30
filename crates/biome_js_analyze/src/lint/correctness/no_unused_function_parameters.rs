@@ -132,7 +132,7 @@ impl Rule for NoUnusedFunctionParameters {
         let binding = ctx.query();
         let declaration = binding.declaration()?;
 
-        let ignore_rest_siblings = ctx.options().ignore_rest_siblings;
+        let ignore_rest_siblings = ctx.options().ignore_rest_siblings();
 
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();

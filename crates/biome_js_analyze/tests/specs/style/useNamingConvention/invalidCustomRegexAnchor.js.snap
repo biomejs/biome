@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomRegexAnchor.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -30,6 +29,8 @@ snapshot_kind: text
 }
 
 ```
+
+_Note: The parser emitted 10 diagnostics which are not shown here._
 
 # Diagnostics
 ```

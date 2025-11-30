@@ -1,7 +1,7 @@
 use crate::react::ReactCreateElementCall;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
@@ -32,6 +32,7 @@ declare_lint_rule! {
         name: "noDangerouslySetInnerHtml",
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-danger").same()],
+        domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
     }

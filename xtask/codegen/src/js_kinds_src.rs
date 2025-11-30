@@ -700,7 +700,10 @@ impl Field {
                     ("]]>", LanguageKind::Html) => "cdata_end",
                     ("{{", LanguageKind::Html) => "l_double_curly",
                     ("}}", LanguageKind::Html) => "r_double_curly",
-
+                    ("{@", LanguageKind::Html) => "sv_curly_at",
+                    ("{#", LanguageKind::Html) => "sv_curly_hash",
+                    ("{/", LanguageKind::Html) => "sv_curly_slash",
+                    ("{:", LanguageKind::Html) => "sv_curly_colon",
                     _ => name,
                 };
 
@@ -709,7 +712,7 @@ impl Field {
                 // we need to replace "-" with "_" for the keywords
                 // e.g. we have `color-profile` in css but it's an invalid ident in rust code
                 if kind_source.keywords.contains(&name) {
-                    format_ident!("{}_token", name.replace('-', "_"))
+                    format_ident!("{}_token", name.replace('-', "_").trim_matches('_'))
                 } else {
                     format_ident!("{}_token", name)
                 }

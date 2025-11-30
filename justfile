@@ -10,12 +10,14 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools
+	cargo binstall cargo-insta taplo-cli wasm-opt
+	cargo binstall wasm-bindgen-cli --version 0.2.105
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools --force
+	cargo binstall cargo-insta taplo-cli wasm-opt --force
+	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -27,12 +29,16 @@ gen-all:
 
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
-  cargo codegen-schema
+  just gen-schema
   just gen-types
 
+# Generates TypeScript types
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
 
+# Generates the JSON Schema of the configuration
+gen-schema:
+  cargo codegen-schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -64,6 +70,69 @@ gen-formatter:
 gen-tw:
   pnpm build
   pnpm execute
+
+# Build WASM for bundler target (development)
+build-wasm-bundler-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-bundler \
+    --target bundler \
+    --typescript
+
+# Build WASM for bundler target (release)
+build-wasm-bundler:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-bundler \
+    --no-demangle \
+    --target bundler \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-bundler/biome_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-bundler/biome_wasm_bg.wasm \
+    -Os \
+    -g
+
+# Build WASM for Node.js target (development)
+build-wasm-node-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-nodejs \
+    --target nodejs \
+    --typescript
+
+# Build WASM for Node.js target (release)
+build-wasm-node:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-nodejs \
+    --no-demangle \
+    --target nodejs \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-nodejs/biome_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-nodejs/biome_wasm_bg.wasm \
+    -Os \
+    -g
+
+# Build WASM for web target (development)
+build-wasm-web-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-web \
+    --target web \
+    --typescript
+
+# Build WASM for web target (release)
+build-wasm-web:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-web \
+    --no-demangle \
+    --target web \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-web/biome_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-web/biome_wasm_bg.wasm \
+    -Os \
+    -g
 
 # Generates the code of the grammars available in Biome
 gen-grammar *args='':
@@ -103,6 +172,16 @@ new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new html lint rule with the given name. Name has to be camel case.
+new-html-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new html lint rule with the given name, but targets vue. Name has to be camel case.
+new-html-vue-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Promotes a rule from the nursery group to a new group
 move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
@@ -139,10 +218,12 @@ test-lintrule name:
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
+  just _touch crates/biome_html_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

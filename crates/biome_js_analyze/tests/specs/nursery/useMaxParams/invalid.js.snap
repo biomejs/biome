@@ -48,6 +48,8 @@ function withThisParam(this, a, b, c, d, e, f, g) {
 
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.js:1:23 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

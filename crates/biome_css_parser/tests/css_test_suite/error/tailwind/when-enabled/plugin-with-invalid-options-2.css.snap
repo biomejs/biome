@@ -1,0 +1,158 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@plugin "my-plugin" {
+  .some-selector > * {
+    primary: "blue";
+    secondary: "green";
+  }
+}
+
+/* Error: `@plugin` can only contain declarations. */
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwPluginAtRule {
+                plugin_token: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")],
+                },
+                block: CssBogusBlock {
+                    items: [
+                        L_CURLY@20..21 "{" [] [],
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        DOT@21..25 "." [Newline("\n"), Whitespace("  ")] [],
+                                        IDENT@25..39 "some-selector" [] [Whitespace(" ")],
+                                        R_ANGLE@39..41 ">" [] [Whitespace(" ")],
+                                        STAR@41..43 "*" [] [Whitespace(" ")],
+                                        L_CURLY@43..44 "{" [] [],
+                                        IDENT@44..56 "primary" [Newline("\n"), Whitespace("    ")] [],
+                                        COLON@56..58 ":" [] [Whitespace(" ")],
+                                        CSS_STRING_LITERAL@58..64 "\"blue\"" [] [],
+                                        SEMICOLON@64..65 ";" [] [],
+                                        IDENT@65..79 "secondary" [Newline("\n"), Whitespace("    ")] [],
+                                        COLON@79..81 ":" [] [Whitespace(" ")],
+                                        CSS_STRING_LITERAL@81..88 "\"green\"" [] [],
+                                        SEMICOLON@88..89 ";" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@89..93 "}" [Newline("\n"), Whitespace("  ")] [],
+                    ],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@93..95 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@95..150 "" [Newline("\n"), Newline("\n"), Comments("/* Error: `@plugin` c ...")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..150
+  0: (empty)
+  1: CSS_RULE_LIST@0..95
+    0: CSS_AT_RULE@0..93
+      0: AT@0..1 "@" [] []
+      1: TW_PLUGIN_AT_RULE@1..93
+        0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
+        1: CSS_STRING@8..20
+          0: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")]
+        2: CSS_BOGUS_BLOCK@20..93
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_BOGUS@21..89
+            0: CSS_BOGUS@21..89
+              0: DOT@21..25 "." [Newline("\n"), Whitespace("  ")] []
+              1: IDENT@25..39 "some-selector" [] [Whitespace(" ")]
+              2: R_ANGLE@39..41 ">" [] [Whitespace(" ")]
+              3: STAR@41..43 "*" [] [Whitespace(" ")]
+              4: L_CURLY@43..44 "{" [] []
+              5: IDENT@44..56 "primary" [Newline("\n"), Whitespace("    ")] []
+              6: COLON@56..58 ":" [] [Whitespace(" ")]
+              7: CSS_STRING_LITERAL@58..64 "\"blue\"" [] []
+              8: SEMICOLON@64..65 ";" [] []
+              9: IDENT@65..79 "secondary" [Newline("\n"), Whitespace("    ")] []
+              10: COLON@79..81 ":" [] [Whitespace(" ")]
+              11: CSS_STRING_LITERAL@81..88 "\"green\"" [] []
+              12: SEMICOLON@88..89 ";" [] []
+          2: R_CURLY@89..93 "}" [Newline("\n"), Whitespace("  ")] []
+        3: (empty)
+    1: CSS_BOGUS_RULE@93..95
+      0: R_CURLY@93..95 "}" [Newline("\n")] []
+  2: EOF@95..150 "" [Newline("\n"), Newline("\n"), Comments("/* Error: `@plugin` c ...")] []
+
+```
+
+## Diagnostics
+
+```
+plugin-with-invalid-options-2.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '.some-selector > * {
+        primary: "blue";
+        secondary: "green";'.
+  
+    1 │ @plugin "my-plugin" {
+  > 2 │   .some-selector > * {
+      │   ^^^^^^^^^^^^^^^^^^^^
+  > 3 │     primary: "blue";
+  > 4 │     secondary: "green";
+      │     ^^^^^^^^^^^^^^^^^^^
+    5 │   }
+    6 │ }
+  
+  i Expected a declaration item here.
+  
+    1 │ @plugin "my-plugin" {
+  > 2 │   .some-selector > * {
+      │   ^^^^^^^^^^^^^^^^^^^^
+  > 3 │     primary: "blue";
+  > 4 │     secondary: "green";
+      │     ^^^^^^^^^^^^^^^^^^^
+    5 │   }
+    6 │ }
+  
+plugin-with-invalid-options-2.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    4 │     secondary: "green";
+    5 │   }
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ /* Error: `@plugin` can only contain declarations. */
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    4 │     secondary: "green";
+    5 │   }
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ /* Error: `@plugin` can only contain declarations. */
+  
+```

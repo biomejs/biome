@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nested-expects.js
+---
+# Input
+```js
+// Test nested expect calls and chaining
+test('nested not operator', async ({ page }) => {
+    expect(page).not.toBeVisible();
+});
+
+test('chained not and soft', async ({ page }) => {
+    expect.soft(page).not.toHaveText("foo");
+});
+
+test('multiple not calls', async ({ page }) => {
+    expect(page).not.not.toBeEnabled();
+});
+
+```
+
+# Diagnostics
+```
+nested-expects.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ // Test nested expect calls and chaining
+    2 │ test('nested not operator', async ({ page }) => {
+  > 3 │     expect(page).not.toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     1  1 │   // Test nested expect calls and chaining
+     2  2 │   test('nested not operator', async ({ page }) => {
+     3    │ - ····expect(page).not.toBeVisible();
+        3 │ + ····await
+        4 │ + ····expect(page).not.toBeVisible();
+     4  5 │   });
+     5  6 │   
+  
+
+```
+
+```
+nested-expects.js:7:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    6 │ test('chained not and soft', async ({ page }) => {
+  > 7 │     expect.soft(page).not.toHaveText("foo");
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ });
+    9 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     5  5 │   
+     6  6 │   test('chained not and soft', async ({ page }) => {
+     7    │ - ····expect.soft(page).not.toHaveText("foo");
+        7 │ + ····await
+        8 │ + ····expect.soft(page).not.toHaveText("foo");
+     8  9 │   });
+     9 10 │   
+  
+
+```
+
+```
+nested-expects.js:11:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeEnabled must be awaited or returned.
+  
+    10 │ test('multiple not calls', async ({ page }) => {
+  > 11 │     expect(page).not.not.toBeEnabled();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ });
+    13 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     9  9 │   
+    10 10 │   test('multiple not calls', async ({ page }) => {
+    11    │ - ····expect(page).not.not.toBeEnabled();
+       11 │ + ····await
+       12 │ + ····expect(page).not.not.toBeEnabled();
+    12 13 │   });
+    13 14 │   
+  
+
+```

@@ -1,0 +1,31 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": true
+    }
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script>
+	import { something } from "file.svelte";
+	statement();
+</script>
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

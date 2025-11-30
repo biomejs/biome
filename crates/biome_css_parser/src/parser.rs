@@ -1,7 +1,7 @@
 use crate::lexer::CssReLexContext;
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
-use biome_css_syntax::CssSyntaxKind;
+use biome_css_syntax::{CssFileSource, CssSyntaxKind};
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -33,6 +33,10 @@ pub struct CssParserOptions {
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
     pub grit_metavariables: bool,
+
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    /// Defaults to `false`.
+    pub tailwind_directives: bool,
 }
 
 impl CssParserOptions {
@@ -54,6 +58,12 @@ impl CssParserOptions {
         self
     }
 
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    pub fn allow_tailwind_directives(mut self) -> Self {
+        self.tailwind_directives = true;
+        self
+    }
+
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.css_modules
@@ -62,6 +72,11 @@ impl CssParserOptions {
     /// Checks if parsing of Grit metavariables is enabled.
     pub fn is_metavariable_enabled(&self) -> bool {
         self.grit_metavariables
+    }
+
+    /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
+    pub fn is_tailwind_directives_enabled(&self) -> bool {
+        self.tailwind_directives
     }
 }
 
@@ -154,4 +169,18 @@ pub struct CssParserCheckpoint {
     // `state` is not checkpointed because it (currently) only contains
     // scoped properties that aren't only dependent on checkpoints and
     // should be reset manually when the scope of their use is exited.
+}
+
+impl From<&CssFileSource> for CssParserOptions {
+    fn from(file_source: &CssFileSource) -> Self {
+        let mut options = Self::default();
+        if file_source.is_css_modules() {
+            options.css_modules = true;
+        }
+        if file_source.is_tailwind_css() {
+            options.tailwind_directives = true;
+        }
+
+        options
+    }
 }

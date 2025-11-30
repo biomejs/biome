@@ -28,7 +28,11 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssBogusAtRule {
                 items: [
-                    PROPERTY_KW@1..10 "property" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            PROPERTY_KW@1..10 "property" [] [Whitespace(" ")],
+                        ],
+                    },
                     CssDeclarationBlock {
                         l_curly_token: L_CURLY@10..11 "{" [] [],
                         declarations: CssDeclarationList [],
@@ -41,10 +45,14 @@ CssRoot {
             at_token: AT@13..15 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    PROPERTY_KW@15..24 "property" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            IDENT@24..33 "my-color" [] [Whitespace(" ")],
+                            PROPERTY_KW@15..24 "property" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    IDENT@24..33 "my-color" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -59,10 +67,14 @@ CssRoot {
             at_token: AT@36..38 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    PROPERTY_KW@38..47 "property" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_NUMBER_LITERAL@47..52 "2353" [] [Whitespace(" ")],
+                            PROPERTY_KW@38..47 "property" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_NUMBER_LITERAL@47..52 "2353" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -77,10 +89,14 @@ CssRoot {
             at_token: AT@55..57 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    PROPERTY_KW@57..66 "property" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            CSS_STRING_LITERAL@66..75 "'string'" [] [Whitespace(" ")],
+                            PROPERTY_KW@57..66 "property" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    CSS_STRING_LITERAL@66..75 "'string'" [] [Whitespace(" ")],
+                                ],
+                            },
                         ],
                     },
                     CssDeclarationBlock {
@@ -95,11 +111,15 @@ CssRoot {
             at_token: AT@78..80 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    PROPERTY_KW@80..89 "property" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            IDENT@89..94 "ident" [] [],
-                            SEMICOLON@94..95 ";" [] [],
+                            PROPERTY_KW@80..89 "property" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    IDENT@89..94 "ident" [] [],
+                                    SEMICOLON@94..95 ";" [] [],
+                                ],
+                            },
                         ],
                     },
                     CssBogusBlock {
@@ -122,7 +142,8 @@ CssRoot {
     0: CSS_AT_RULE@0..13
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..13
-        0: PROPERTY_KW@1..10 "property" [] [Whitespace(" ")]
+        0: CSS_BOGUS@1..10
+          0: PROPERTY_KW@1..10 "property" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@10..13
           0: L_CURLY@10..11 "{" [] []
           1: CSS_DECLARATION_LIST@11..11
@@ -130,41 +151,45 @@ CssRoot {
     1: CSS_AT_RULE@13..36
       0: AT@13..15 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@15..36
-        0: PROPERTY_KW@15..24 "property" [] [Whitespace(" ")]
-        1: CSS_BOGUS@24..33
-          0: IDENT@24..33 "my-color" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@33..36
+        0: CSS_BOGUS@15..33
+          0: PROPERTY_KW@15..24 "property" [] [Whitespace(" ")]
+          1: CSS_BOGUS@24..33
+            0: IDENT@24..33 "my-color" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@33..36
           0: L_CURLY@33..34 "{" [] []
           1: CSS_DECLARATION_LIST@34..34
           2: R_CURLY@34..36 "}" [Newline("\n")] []
     2: CSS_AT_RULE@36..55
       0: AT@36..38 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@38..55
-        0: PROPERTY_KW@38..47 "property" [] [Whitespace(" ")]
-        1: CSS_BOGUS@47..52
-          0: CSS_NUMBER_LITERAL@47..52 "2353" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@52..55
+        0: CSS_BOGUS@38..52
+          0: PROPERTY_KW@38..47 "property" [] [Whitespace(" ")]
+          1: CSS_BOGUS@47..52
+            0: CSS_NUMBER_LITERAL@47..52 "2353" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@52..55
           0: L_CURLY@52..53 "{" [] []
           1: CSS_DECLARATION_LIST@53..53
           2: R_CURLY@53..55 "}" [Newline("\n")] []
     3: CSS_AT_RULE@55..78
       0: AT@55..57 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@57..78
-        0: PROPERTY_KW@57..66 "property" [] [Whitespace(" ")]
-        1: CSS_BOGUS@66..75
-          0: CSS_STRING_LITERAL@66..75 "'string'" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@75..78
+        0: CSS_BOGUS@57..75
+          0: PROPERTY_KW@57..66 "property" [] [Whitespace(" ")]
+          1: CSS_BOGUS@66..75
+            0: CSS_STRING_LITERAL@66..75 "'string'" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@75..78
           0: L_CURLY@75..76 "{" [] []
           1: CSS_DECLARATION_LIST@76..76
           2: R_CURLY@76..78 "}" [Newline("\n")] []
     4: CSS_AT_RULE@78..95
       0: AT@78..80 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@80..95
-        0: PROPERTY_KW@80..89 "property" [] [Whitespace(" ")]
-        1: CSS_BOGUS@89..95
-          0: IDENT@89..94 "ident" [] []
-          1: SEMICOLON@94..95 ";" [] []
-        2: CSS_BOGUS_BLOCK@95..95
+        0: CSS_BOGUS@80..95
+          0: PROPERTY_KW@80..89 "property" [] [Whitespace(" ")]
+          1: CSS_BOGUS@89..95
+            0: IDENT@89..94 "ident" [] []
+            1: SEMICOLON@94..95 ";" [] []
+        1: CSS_BOGUS_BLOCK@95..95
   2: EOF@95..96 "" [Newline("\n")] []
 
 ```

@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#key expression}
+	something
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteKeyBlock {
+            opening_block: SvelteKeyOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                key_token: KEY_KW@2..5 "key" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@5..16 " expression" [] [],
+                },
+                r_curly_token: R_CURLY@16..17 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@17..28 "something" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_block: missing (required),
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..29
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..28
+    0: SVELTE_KEY_BLOCK@0..28
+      0: SVELTE_KEY_OPENING_BLOCK@0..17
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: KEY_KW@2..5 "key" [] []
+        2: HTML_TEXT_EXPRESSION@5..16
+          0: HTML_LITERAL@5..16 " expression" [] []
+        3: R_CURLY@16..17 "}" [] []
+      1: HTML_ELEMENT_LIST@17..28
+        0: HTML_CONTENT@17..28
+          0: HTML_LITERAL@17..28 "something" [Newline("\n"), Whitespace("\t")] []
+      2: (empty)
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+key_missing_close.svelte:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing block, instead found none.
+  
+    1 │ {#key expression}
+    2 │ 	something
+  > 3 │ 
+      │ 
+  
+  i This is where the block started.
+  
+    1 │ {#key expression}
+    2 │ 	something
+  > 3 │ 
+      │ 
+  
+```

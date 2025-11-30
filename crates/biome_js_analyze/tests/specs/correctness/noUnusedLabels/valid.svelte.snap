@@ -24,3 +24,5 @@ expression: valid.svelte
 	let name2 = name;
 </script>
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

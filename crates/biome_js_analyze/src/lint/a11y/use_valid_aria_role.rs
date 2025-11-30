@@ -108,7 +108,7 @@ impl Rule for UseValidAriaRole {
         let node = ctx.query();
         let options = ctx.options();
 
-        let ignore_non_dom = options.ignore_non_dom;
+        let ignore_non_dom = options.ignore_non_dom();
         let allowed_invalid_roles = &options.allow_invalid_roles;
 
         if ignore_non_dom && node.is_custom_component() {
@@ -127,6 +127,7 @@ impl Rule for UseValidAriaRole {
             AriaRole::from_roles(val).is_some()
                 || allowed_invalid_roles
                     .iter()
+                    .flatten()
                     .any(|role| role.as_ref() == val)
         });
 

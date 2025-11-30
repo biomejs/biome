@@ -85,7 +85,7 @@ pub(crate) struct TestCaseFile {
 
 impl TestCaseFile {
     pub(crate) fn parse(&self) -> Parse<AnyJsRoot> {
-        parse(&self.code, self.source_type, self.options.clone())
+        parse(&self.code, self.source_type, self.options)
     }
 
     pub(crate) fn name(&self) -> &str {
@@ -308,7 +308,7 @@ pub(crate) fn run_test_suite(
                     Err(panic) => {
                         let error = panic
                             .downcast_ref::<String>()
-                            .map(|x| x.to_string())
+                            .cloned()
                             .or_else(|| panic.downcast_ref::<&str>().map(|x| (*x).to_string()))
                             .unwrap_or_default();
                         tracing::error!(

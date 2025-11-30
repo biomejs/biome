@@ -1,0 +1,10 @@
+{
+  "name": "test-package",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc",
+    "lint": "biome lint",
+    "dev": "vite",
+    "preview": "vite preview"
+  }
+}

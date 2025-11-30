@@ -1,0 +1,33 @@
+/* Test enhanced --value() function with arbitrary types */
+@utility opacity-* {
+	opacity: --value([percentage]);
+}
+
+@utility width-* {
+	width: --value([length]);
+}
+
+@utility color-* {
+	color: --value([color]);
+}
+
+/* Test enhanced --value() function with theme references */
+@utility spacing-* {
+	margin: --value(--spacing-*);
+}
+
+@utility color-* {
+	color: --value(--color-*);
+}
+
+/* Test enhanced --value() function with bare types */
+@utility flex-* {
+	flex: --value(integer);
+}
+
+/* Test enhanced --value() function with complex multi-expressions */
+@utility complex-* {
+	tab-size: --value(integer, [integer], --tab-size-*);
+	opacity: --value([percentage], --opacity-*);
+	width: --value([length], --width-*);
+}

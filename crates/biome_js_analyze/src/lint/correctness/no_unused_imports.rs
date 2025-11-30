@@ -18,8 +18,8 @@ use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_li
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
-    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
-    JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
+    AnyJsNamedImportSpecifier, AnyJsObjectMember, AnyTsTypeMember, JsExport, JsLanguage,
+    JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
@@ -66,10 +66,12 @@ declare_lint_rule! {
     /// export { B }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// // Header comment
     /// import /*inner comment */ A from 'mod'; // Associated comment
+    /// ```
     ///
+    /// ```ts,expect_diagnostic
     /// // Another header comment
     /// import {
     ///     // A's header comment
@@ -131,7 +133,7 @@ struct JsDocTypeCollectorVisitor {
 }
 
 declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
 impl Visitor for JsDocTypeCollectorVisitor {
@@ -162,8 +164,9 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
     });
 }
 
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
 
 static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());

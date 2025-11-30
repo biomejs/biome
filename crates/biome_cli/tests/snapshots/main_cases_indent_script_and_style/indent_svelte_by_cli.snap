@@ -1,0 +1,19 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.svelte`
+
+```svelte
+<script>
+	import { something } from "file.svelte";
+	statement();
+</script>
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

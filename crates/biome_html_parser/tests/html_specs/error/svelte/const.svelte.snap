@@ -1,0 +1,69 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{@const area = box.width * box.height
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteConstBlock {
+            sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
+            const_token: CONST_KW@2..7 "const" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@7..38 " area = box.width * box.height\n" [] [],
+            },
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@38..38 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..38
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..38
+    0: SVELTE_CONST_BLOCK@0..38
+      0: SV_CURLY_AT@0..2 "{@" [] []
+      1: CONST_KW@2..7 "const" [] []
+      2: HTML_TEXT_EXPRESSION@7..38
+        0: HTML_LITERAL@7..38 " area = box.width * box.height\n" [] []
+      3: (empty)
+  4: EOF@38..38 "" [] []
+
+```
+
+## Diagnostics
+
+```
+const.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ {@const area = box.width * box.height
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ {@const area = box.width * box.height
+  > 2 │ 
+      │ 
+  
+```

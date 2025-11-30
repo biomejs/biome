@@ -41,6 +41,7 @@ Biome Configuration:
   Linter enabled:               true
   Assist enabled:               true
   VCS enabled:                  false
+  HTML full support enabled:    unset
 
 Server:
   Version:                      0.0.0

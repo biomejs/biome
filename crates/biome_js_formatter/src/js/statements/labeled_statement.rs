@@ -20,7 +20,7 @@ impl FormatNodeRule<JsLabeledStatement> for FormatJsLabeledStatement {
         match body? {
             AnyJsStatement::JsEmptyStatement(empty) => {
                 // If the body is an empty statement, force semicolon insertion
-                write!(f, [empty.format(), text(";")])
+                write!(f, [empty.format(), token(";")])
             }
             body => {
                 write!(f, [space(), body.format()])

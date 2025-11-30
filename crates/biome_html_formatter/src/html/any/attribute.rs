@@ -8,9 +8,12 @@ impl FormatRule<AnyHtmlAttribute> for FormatAnyHtmlAttribute {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyHtmlAttribute, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnyHtmlAttribute::AnyVueDirective(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlAttribute(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlBogusAttribute(node) => node.format().fmt(f),
             AnyHtmlAttribute::HtmlDoubleTextExpression(node) => node.format().fmt(f),
+            AnyHtmlAttribute::HtmlSingleTextExpression(node) => node.format().fmt(f),
+            AnyHtmlAttribute::SvelteAttachAttribute(node) => node.format().fmt(f),
         }
     }
 }

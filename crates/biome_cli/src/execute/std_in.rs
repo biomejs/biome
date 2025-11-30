@@ -78,11 +78,15 @@ pub(crate) fn run<'a>(
             })?;
 
             let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(content, code.as_str()),
-                Some("vue") => VueFileHandler::output(content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
-                _ => code,
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
             };
             console.append(markup! {
                 {output}
@@ -174,11 +178,15 @@ pub(crate) fn run<'a>(
                 rule_categories: rule_categories.build(),
             })?;
             let code = fix_file_result.code;
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
-                _ => code,
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
             };
             if output != new_content {
                 version += 1;
@@ -198,11 +206,15 @@ pub(crate) fn run<'a>(
                 path: biome_path.clone(),
             })?;
             let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
-                _ => code,
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
             };
             if (mode.is_safe_fixes_enabled() || mode.is_safe_and_unsafe_fixes_enabled())
                 && output != new_content

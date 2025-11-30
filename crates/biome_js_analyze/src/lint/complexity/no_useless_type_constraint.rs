@@ -58,6 +58,7 @@ declare_lint_rule! {
     /// ```ts,expect_diagnostic
     /// class BazUnknown<T extends unknown> {
     /// }
+    /// ```
     /// ```ts,expect_diagnostic
     /// class BazUnknown {
     ///   quxUnknown<U extends unknown>() {}

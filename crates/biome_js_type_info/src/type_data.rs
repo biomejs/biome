@@ -22,6 +22,7 @@ use biome_rowan::Text;
 use crate::{
     ModuleId, Resolvable, ResolvedTypeId, ResolverId, TypeResolver,
     globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
+    literal::RegexpLiteral,
     type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
 };
 
@@ -647,7 +648,7 @@ pub enum Literal {
     Boolean(BooleanLiteral),
     Number(NumberLiteral),
     Object(ObjectLiteral),
-    RegExp(Text),
+    RegExp(RegexpLiteral),
     String(StringLiteral),
     Template(Text), // TODO: Custom impl of PartialEq for template literals
 }
@@ -1400,6 +1401,17 @@ impl TypeReferenceQualifier {
     /// resolution.
     pub fn is_promise(&self) -> bool {
         self.path.is_identifier("Promise")
+    }
+
+    /// Checks whether this type qualifier references the `RegExp` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `RegExp`, without considering whether another symbol named `RegExp` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `RegExp` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_regex(&self) -> bool {
+        self.path.is_identifier("RegExp")
     }
 
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {

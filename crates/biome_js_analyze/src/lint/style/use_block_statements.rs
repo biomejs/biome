@@ -60,10 +60,6 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     ///    while (x);
     /// ```
-    ///
-    /// ```js,expect_diagnostic
-    ///   with (x);
-    /// ```
     pub UseBlockStatements {
         version: "1.0.0",
         name: "useBlockStatements",

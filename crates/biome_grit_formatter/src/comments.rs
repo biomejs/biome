@@ -5,7 +5,7 @@ use biome_formatter::{
     FormatResult, FormatRule,
     comments::{CommentStyle, Comments, SourceComment, is_doc_comment},
     prelude::*,
-    prelude::{Formatter, align, dynamic_text, format_once, hard_line_break},
+    prelude::{Formatter, align, format_once, hard_line_break, text},
     write,
 };
 use biome_grit_syntax::GritLanguage;
@@ -55,7 +55,7 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
 
             // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [dynamic_text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), source_offset)])?;
 
             source_offset += first_line.text_len();
 
@@ -66,10 +66,7 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
                     1,
                     &format_once(|f| {
                         for line in lines {
-                            write!(
-                                f,
-                                [hard_line_break(), dynamic_text(line.trim(), source_offset)]
-                            )?;
+                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
 
                             source_offset += line.text_len();
                         }

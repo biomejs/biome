@@ -8,3 +8,5 @@ expression: issue_2886.ts
 const [a(
 
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

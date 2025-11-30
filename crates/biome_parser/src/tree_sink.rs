@@ -184,7 +184,7 @@ where
 
 impl<'a, L, Factory> OffsetLosslessTreeSink<'a, L, Factory>
 where
-    L: Language,
+    L: Language + 'static,
     Factory: SyntaxFactory<Kind = L::Kind>,
 {
     /// Create a new offset-aware tree sink with the given base offset

@@ -178,6 +178,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         "css",
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);

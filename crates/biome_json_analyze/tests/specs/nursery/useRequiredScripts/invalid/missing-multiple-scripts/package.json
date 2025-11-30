@@ -1,0 +1,6 @@
+{
+  "name": "test-package",
+  "scripts": {
+    "test": "vitest"
+  }
+}

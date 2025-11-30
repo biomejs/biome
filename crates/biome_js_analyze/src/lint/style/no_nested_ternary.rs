@@ -63,11 +63,11 @@ impl Rule for NoNestedTernary {
         let alternate = node.alternate().ok()?;
         let consequent = node.consequent().ok()?;
 
-        if let AnyJsExpression::JsConditionalExpression(expr) = consequent {
+        if let AnyJsExpression::JsConditionalExpression(expr) = consequent.omit_parentheses() {
             return Some(expr.range());
         }
 
-        if let AnyJsExpression::JsConditionalExpression(expr) = alternate {
+        if let AnyJsExpression::JsConditionalExpression(expr) = alternate.omit_parentheses() {
             return Some(expr.range());
         }
 

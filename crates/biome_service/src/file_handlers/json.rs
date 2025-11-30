@@ -1,6 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities, is_diagnostic_error,
+    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -12,15 +12,10 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::{
-    CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-};
+use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
-};
+use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
@@ -28,7 +23,6 @@ use biome_configuration::json::{
     JsonLinterEnabled, JsonParserConfiguration,
 };
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::Applicability;
 use biome_formatter::{
     BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
@@ -42,8 +36,8 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
+use either::Either;
 use std::borrow::Cow;
-use std::collections::HashSet;
 use tracing::{debug_span, error, instrument};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -121,13 +115,47 @@ impl From<JsonAssistConfiguration> for JsonAssistSettings {
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = JsonLinterSettings;
+    type AssistSettings = JsonAssistSettings;
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
-    type AssistSettings = JsonAssistSettings;
+    type ParserOptions = JsonParserOptions;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
+    }
+
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+        None
+    }
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        if path.ends_with(ConfigName::biome_jsonc()) {
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas()
+        } else {
+            let optional_json_file_source = file_source.to_json_file_source();
+            let mut options = JsonParserOptions {
+                allow_comments: language.allow_comments.map_or_else(
+                    || optional_json_file_source.is_some_and(|x| x.allow_comments()),
+                    |value| value.value(),
+                ),
+                allow_trailing_commas: language.allow_trailing_commas.map_or_else(
+                    || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
+                    |value| value.value(),
+                ),
+            };
+
+            overrides.apply_override_json_parser_options(path, &mut options);
+
+            options
+        }
     }
 
     fn resolve_format_options(
@@ -210,6 +238,33 @@ impl ServiceLanguage for JsonLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.json.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.json.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -263,37 +318,6 @@ impl ServiceLanguage for JsonLanguage {
             .unwrap_or_default()
             .into()
     }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.json.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.json.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        None
-    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -308,7 +332,10 @@ impl ExtensionHandler for JsonFileHandler {
                 assist: Some(assist_enabled),
                 linter: Some(linter_enabled),
             },
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
@@ -322,11 +349,14 @@ impl ExtensionHandler for JsonFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities { search: None },
         }
@@ -356,29 +386,7 @@ fn parse(
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = if biome_path.ends_with(ConfigName::biome_jsonc()) {
-        JsonParserOptions::default()
-            .with_allow_comments()
-            .with_allow_trailing_commas()
-    } else {
-        let parser = &settings.languages.json.parser;
-        let overrides = &settings.override_settings;
-        let optional_json_file_source = file_source.to_json_file_source();
-        let mut options = JsonParserOptions {
-            allow_comments: parser.allow_comments.map_or_else(
-                || optional_json_file_source.is_some_and(|x| x.allow_comments()),
-                |value| value.value(),
-            ),
-            allow_trailing_commas: parser.allow_trailing_commas.map_or_else(
-                || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
-                |value| value.value(),
-            ),
-        };
-
-        overrides.apply_override_json_parser_options(biome_path, &mut options);
-
-        options
-    };
+    let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
 
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
 
@@ -505,10 +513,10 @@ fn lint(params: LintParams) -> LintResults {
 
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -526,7 +534,9 @@ fn lint(params: LintParams) -> LintResults {
             process_lint.process_signal(signal)
         });
 
-    let mut diagnostics = params.parse.into_diagnostics();
+    let mut diagnostics = params
+        .parse
+        .into_serde_diagnostics(params.diagnostic_offset);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())
@@ -560,6 +570,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         plugins: _,
         categories,
+        action_offset,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
@@ -572,10 +583,10 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&only)
-            .with_skip(&skip)
+            .with_only(only)
+            .with_skip(skip)
             .with_path(path.as_path())
-            .with_enabled_rules(&rules)
+            .with_enabled_selectors(rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -599,6 +610,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
@@ -621,11 +633,11 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
-            .with_project_layout(params.project_layout)
+            .with_enabled_selectors(params.enabled_rules)
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -643,122 +655,38 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         return Err(extension_error(params.biome_path));
     };
 
-    let mut actions = Vec::new();
-    let mut skipped_suggested_fixes = 0;
-    let mut errors: u16 = 0;
-    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
-
+    let mut process_fix_all = ProcessFixAll::new(
+        &params,
+        rules,
+        tree.syntax().text_range_with_trivia().len().into(),
+    );
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
-            let current_diagnostic = signal.diagnostic();
-
-            if let Some(diagnostic) = current_diagnostic.as_ref()
-                && is_diagnostic_error(diagnostic, rules.as_deref())
-            {
-                errors += 1;
-            }
-
-            for action in signal.actions() {
-                // suppression actions should not be part of the fixes (safe or suggested)
-                if action.is_suppression() {
-                    continue;
-                }
-
-                match params.fix_file_mode {
-                    FixFileMode::SafeFixes => {
-                        if action.applicability == Applicability::MaybeIncorrect {
-                            skipped_suggested_fixes += 1;
-                        }
-                        if action.applicability == Applicability::Always {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::SafeAndUnsafeFixes => {
-                        if matches!(
-                            action.applicability,
-                            Applicability::Always | Applicability::MaybeIncorrect
-                        ) {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::ApplySuppressions => {
-                        // TODO: implement once a JSON suppression action is available
-                    }
-                }
-            }
-
-            ControlFlow::Continue(())
+            process_fix_all.process_signal(signal)
         });
 
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    tree = match JsonRoot::cast(root) {
-                        Some(tree) => tree,
-                        None => {
-                            return Err(WorkspaceError::RuleError(
-                                RuleError::ReplacedRootWithNonRootError {
-                                    rule_name: action.rule_name.map(|(group, rule)| {
-                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                    }),
-                                },
-                            ));
-                        }
-                    };
-                    actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match JsonRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
 
-                    // Check for runaway edit growth
-                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
-                    if !growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    }
-                }
-            }
-            None => {
-                let code = if params.should_format {
-                    format_node(
+        if result.is_none() {
+            return process_fix_all.finish(|| {
+                Ok(if params.should_format {
+                    Either::Left(format_node(
                         params.settings.format_options::<JsonLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                    )?
-                    .print()?
-                    .into_code()
+                    ))
                 } else {
-                    tree.syntax().to_string()
-                };
-                return Ok(FixFileResult {
-                    code,
-                    skipped_suggested_fixes,
-                    actions,
-                    errors: errors.into(),
-                });
-            }
+                    Either::Right(tree.syntax().to_string())
+                })
+            });
         }
     }
 }

@@ -19,6 +19,11 @@ biome_string_case = { workspace = true }
 camino            = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+biome_html_factory = { path = "../biome_html_factory" }
+biome_html_parser  = { path = "../biome_html_parser" }
+
 [features]
 schema = ["schemars", "biome_rowan/serde"]
 

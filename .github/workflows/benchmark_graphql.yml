@@ -2,6 +2,7 @@ name: Benchmarks GraphQL
 
 on:
   workflow_dispatch:
+  merge_group:
   pull_request:
     types: [ opened, synchronize ]
     branches:
@@ -12,6 +13,7 @@ on:
       - 'crates/biome_graphql_formatter/**/*.rs'
       - 'crates/biome_graphql_parser/**/*.rs'
       - 'crates/biome_graphql_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
   push:
@@ -23,6 +25,7 @@ on:
       - 'crates/biome_graphql_formatter/**/*.rs'
       - 'crates/biome_graphql_parser/**/*.rs'
       - 'crates/biome_graphql_*/**/*.rs'
+      - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
 
@@ -45,7 +48,7 @@ jobs:
     steps:
 
       - name: Checkout PR Branch
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -66,8 +69,9 @@ jobs:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@76578c2a7ddd928664caa737f0e962e3085d4e7c # v3.8.1
+        uses: CodSpeedHQ/action@346a2d8a8d9d38909abd0bc3d23f773110f076ad # v4.4.1
         timeout-minutes: 50
         with:
+          mode: simulation
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}

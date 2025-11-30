@@ -1,0 +1,121 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+<article>
+	{@html content}
+</article>
+
+{@html '<div>'}content{@html '</div>'}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..8 "article" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@8..9 ">" [] [],
+            },
+            children: HtmlElementList [
+                SvelteHtmlBlock {
+                    sv_curly_at_token: SV_CURLY_AT@9..13 "{@" [Newline("\n"), Whitespace("\t")] [],
+                    html_token: HTML_KW@13..17 "html" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@17..25 " content" [] [],
+                    },
+                    r_curly_token: R_CURLY@25..26 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@26..28 "<" [Newline("\n")] [],
+                slash_token: SLASH@28..29 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@29..36 "article" [] [],
+                },
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+        },
+        SvelteHtmlBlock {
+            sv_curly_at_token: SV_CURLY_AT@37..41 "{@" [Newline("\n"), Newline("\n")] [],
+            html_token: HTML_KW@41..45 "html" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@45..53 " '<div>'" [] [],
+            },
+            r_curly_token: R_CURLY@53..54 "}" [] [],
+        },
+        HtmlContent {
+            value_token: HTML_LITERAL@54..61 "content" [] [],
+        },
+        SvelteHtmlBlock {
+            sv_curly_at_token: SV_CURLY_AT@61..63 "{@" [] [],
+            html_token: HTML_KW@63..67 "html" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@67..76 " '</div>'" [] [],
+            },
+            r_curly_token: R_CURLY@76..77 "}" [] [],
+        },
+    ],
+    eof_token: EOF@77..78 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..78
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..77
+    0: HTML_ELEMENT@0..37
+      0: HTML_OPENING_ELEMENT@0..9
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: HTML_LITERAL@1..8 "article" [] []
+        2: HTML_ATTRIBUTE_LIST@8..8
+        3: R_ANGLE@8..9 ">" [] []
+      1: HTML_ELEMENT_LIST@9..26
+        0: SVELTE_HTML_BLOCK@9..26
+          0: SV_CURLY_AT@9..13 "{@" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_KW@13..17 "html" [] []
+          2: HTML_TEXT_EXPRESSION@17..25
+            0: HTML_LITERAL@17..25 " content" [] []
+          3: R_CURLY@25..26 "}" [] []
+      2: HTML_CLOSING_ELEMENT@26..37
+        0: L_ANGLE@26..28 "<" [Newline("\n")] []
+        1: SLASH@28..29 "/" [] []
+        2: HTML_TAG_NAME@29..36
+          0: HTML_LITERAL@29..36 "article" [] []
+        3: R_ANGLE@36..37 ">" [] []
+    1: SVELTE_HTML_BLOCK@37..54
+      0: SV_CURLY_AT@37..41 "{@" [Newline("\n"), Newline("\n")] []
+      1: HTML_KW@41..45 "html" [] []
+      2: HTML_TEXT_EXPRESSION@45..53
+        0: HTML_LITERAL@45..53 " '<div>'" [] []
+      3: R_CURLY@53..54 "}" [] []
+    2: HTML_CONTENT@54..61
+      0: HTML_LITERAL@54..61 "content" [] []
+    3: SVELTE_HTML_BLOCK@61..77
+      0: SV_CURLY_AT@61..63 "{@" [] []
+      1: HTML_KW@63..67 "html" [] []
+      2: HTML_TEXT_EXPRESSION@67..76
+        0: HTML_LITERAL@67..76 " '</div>'" [] []
+      3: R_CURLY@76..77 "}" [] []
+  4: EOF@77..78 "" [Newline("\n")] []
+
+```

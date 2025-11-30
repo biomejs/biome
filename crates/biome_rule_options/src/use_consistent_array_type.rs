@@ -1,14 +1,17 @@
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-#[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseConsistentArrayTypeOptions {
-    pub syntax: ConsistentArrayType,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub syntax: Option<ConsistentArrayType>,
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ConsistentArrayType {

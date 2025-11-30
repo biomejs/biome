@@ -1,0 +1,1168 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	<!-- Chain v-bind and v-on with dynamic arguments and modifiers in various orders -->
+	<div id="root">
+		<!-- Mixed v-bind (longhand/shorthand), dynamic args, boolean, and v-on with dynamic args and modifiers -->
+		<button
+			v-bind:[dataKey].camel="buttonTitle"
+			:[ariaKey].camel="ariaVal"
+			:tabindex="'0'"
+			v-on:[evt].once.passive="handle"
+			@[evt].capture.self="handle2"
+			@click.stop.prevent="clicked"
+		>
+			Click
+		</button>
+
+		<!-- Dynamic + modifiers on both v-bind and v-on, plus boolean dynamic bind without value -->
+		<input
+			:[placeholderKey]="placeholder"
+			@keyup.enter.exact="onEnter"
+			v-on:[keyEvt].capture="onKeyEvt"
+		/>
+
+		<!-- Multiple chained directives with dynamic names on a component -->
+		<component-x
+			v-bind:[propName].camel="propVal"
+			v-bind:[styleKey].camel="styleVal"
+			v-on:[eventName].once="onEvent"
+			@[rawEvt].self="onRaw"
+			:is="componentType"
+		></component-x>
+
+		<!-- Interleaved longhand/shorthand with dynamic args and string literal values -->
+		<a
+			v-bind:[hrefKey].camel="url"
+			@[clickEvt].prevent="follow"
+			:target="'_blank'"
+			:rel="'noopener'"
+		>Link</a>
+
+		<!-- Dense chaining to exercise attribute list termination across many tokens -->
+		<div
+			:[dataA].camel="valA"
+			:[dataB]="valB"
+			v-on:[hoverEvt].once.passive="onHover"
+			@click.exact.stop.prevent="onClickExact"
+			@[keydownEvt].capture.self="onKeyDown"
+		>Dense</div>
+	</div>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..100 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- Chain v-bind and ..."), Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@100..104 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@104..106 "id" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@106..107 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@107..113 "\"root\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@113..114 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@114..228 "<" [Newline("\n"), Whitespace("\t\t"), Comments("<!-- Mixed v-bind (lo ..."), Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@228..234 "button" [] [],
+                                },
+                                attributes: HtmlAttributeList [
+                                    VueDirective {
+                                        name_token: VUE_IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@244..245 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@245..246 "[" [] [],
+                                                name_token: HTML_LITERAL@246..253 "dataKey" [] [],
+                                                r_brack_token: R_BRACKET@253..254 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@254..255 "." [] [],
+                                                modifier_token: HTML_LITERAL@255..260 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@260..261 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@261..274 "\"buttonTitle\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@274..279 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@279..280 "[" [] [],
+                                                name_token: HTML_LITERAL@280..287 "ariaKey" [] [],
+                                                r_brack_token: R_BRACKET@287..288 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@288..289 "." [] [],
+                                                modifier_token: HTML_LITERAL@289..294 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@294..295 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@295..304 "\"ariaVal\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@304..309 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueStaticArgument {
+                                                name_token: HTML_LITERAL@309..317 "tabindex" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@317..318 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@318..323 "\"'0'\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueDirective {
+                                        name_token: VUE_IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@331..332 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@332..333 "[" [] [],
+                                                name_token: HTML_LITERAL@333..336 "evt" [] [],
+                                                r_brack_token: R_BRACKET@336..337 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@337..338 "." [] [],
+                                                modifier_token: HTML_LITERAL@338..342 "once" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@342..343 "." [] [],
+                                                modifier_token: HTML_LITERAL@343..350 "passive" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@350..351 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@351..359 "\"handle\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@359..364 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@364..365 "[" [] [],
+                                            name_token: HTML_LITERAL@365..368 "evt" [] [],
+                                            r_brack_token: R_BRACKET@368..369 "]" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@369..370 "." [] [],
+                                                modifier_token: HTML_LITERAL@370..377 "capture" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@377..378 "." [] [],
+                                                modifier_token: HTML_LITERAL@378..382 "self" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@382..383 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@383..392 "\"handle2\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@392..397 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueStaticArgument {
+                                            name_token: HTML_LITERAL@397..402 "click" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@402..403 "." [] [],
+                                                modifier_token: HTML_LITERAL@403..407 "stop" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@407..408 "." [] [],
+                                                modifier_token: HTML_LITERAL@408..415 "prevent" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@415..416 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@416..425 "\"clicked\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@425..429 ">" [Newline("\n"), Whitespace("\t\t")] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@429..438 "Click" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@438..442 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                slash_token: SLASH@442..443 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@443..449 "button" [] [],
+                                },
+                                r_angle_token: R_ANGLE@449..450 ">" [] [],
+                            },
+                        },
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@450..551 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Dynamic + modifi ..."), Newline("\n"), Whitespace("\t\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@551..556 "input" [] [],
+                            },
+                            attributes: HtmlAttributeList [
+                                VueVBindShorthandDirective {
+                                    arg: VueDirectiveArgument {
+                                        colon_token: COLON@556..561 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@561..562 "[" [] [],
+                                            name_token: HTML_LITERAL@562..576 "placeholderKey" [] [],
+                                            r_brack_token: R_BRACKET@576..577 "]" [] [],
+                                        },
+                                    },
+                                    modifiers: VueModifierList [],
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@577..578 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@578..591 "\"placeholder\"" [] [],
+                                        },
+                                    },
+                                },
+                                VueVOnShorthandDirective {
+                                    at_token: AT@591..596 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                    arg: VueStaticArgument {
+                                        name_token: HTML_LITERAL@596..601 "keyup" [] [],
+                                    },
+                                    modifiers: VueModifierList [
+                                        VueModifier {
+                                            dot_token: DOT@601..602 "." [] [],
+                                            modifier_token: HTML_LITERAL@602..607 "enter" [] [],
+                                        },
+                                        VueModifier {
+                                            dot_token: DOT@607..608 "." [] [],
+                                            modifier_token: HTML_LITERAL@608..613 "exact" [] [],
+                                        },
+                                    ],
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@613..614 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@614..623 "\"onEnter\"" [] [],
+                                        },
+                                    },
+                                },
+                                VueDirective {
+                                    name_token: VUE_IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                    arg: VueDirectiveArgument {
+                                        colon_token: COLON@631..632 ":" [] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@632..633 "[" [] [],
+                                            name_token: HTML_LITERAL@633..639 "keyEvt" [] [],
+                                            r_brack_token: R_BRACKET@639..640 "]" [] [],
+                                        },
+                                    },
+                                    modifiers: VueModifierList [
+                                        VueModifier {
+                                            dot_token: DOT@640..641 "." [] [],
+                                            modifier_token: HTML_LITERAL@641..648 "capture" [] [],
+                                        },
+                                    ],
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@648..649 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@649..659 "\"onKeyEvt\"" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            slash_token: SLASH@659..663 "/" [Newline("\n"), Whitespace("\t\t")] [],
+                            r_angle_token: R_ANGLE@663..664 ">" [] [],
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@664..742 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Multiple chained ..."), Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@742..753 "component-x" [] [],
+                                },
+                                attributes: HtmlAttributeList [
+                                    VueDirective {
+                                        name_token: VUE_IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@763..764 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@764..765 "[" [] [],
+                                                name_token: HTML_LITERAL@765..773 "propName" [] [],
+                                                r_brack_token: R_BRACKET@773..774 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@774..775 "." [] [],
+                                                modifier_token: HTML_LITERAL@775..780 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@780..781 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@781..790 "\"propVal\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueDirective {
+                                        name_token: VUE_IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@800..801 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@801..802 "[" [] [],
+                                                name_token: HTML_LITERAL@802..810 "styleKey" [] [],
+                                                r_brack_token: R_BRACKET@810..811 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@811..812 "." [] [],
+                                                modifier_token: HTML_LITERAL@812..817 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@817..818 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@818..828 "\"styleVal\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueDirective {
+                                        name_token: VUE_IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@836..837 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@837..838 "[" [] [],
+                                                name_token: HTML_LITERAL@838..847 "eventName" [] [],
+                                                r_brack_token: R_BRACKET@847..848 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@848..849 "." [] [],
+                                                modifier_token: HTML_LITERAL@849..853 "once" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@853..854 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@854..863 "\"onEvent\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@863..868 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@868..869 "[" [] [],
+                                            name_token: HTML_LITERAL@869..875 "rawEvt" [] [],
+                                            r_brack_token: R_BRACKET@875..876 "]" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@876..877 "." [] [],
+                                                modifier_token: HTML_LITERAL@877..881 "self" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@881..882 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@882..889 "\"onRaw\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@889..894 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueStaticArgument {
+                                                name_token: HTML_LITERAL@894..896 "is" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@896..897 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@897..912 "\"componentType\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@912..916 ">" [Newline("\n"), Whitespace("\t\t")] [],
+                            },
+                            children: HtmlElementList [],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@916..917 "<" [] [],
+                                slash_token: SLASH@917..918 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@918..929 "component-x" [] [],
+                                },
+                                r_angle_token: R_ANGLE@929..930 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@930..1021 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Interleaved long ..."), Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@1021..1022 "a" [] [],
+                                },
+                                attributes: HtmlAttributeList [
+                                    VueDirective {
+                                        name_token: VUE_IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1032..1033 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@1033..1034 "[" [] [],
+                                                name_token: HTML_LITERAL@1034..1041 "hrefKey" [] [],
+                                                r_brack_token: R_BRACKET@1041..1042 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1042..1043 "." [] [],
+                                                modifier_token: HTML_LITERAL@1043..1048 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1048..1049 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1049..1054 "\"url\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@1054..1059 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@1059..1060 "[" [] [],
+                                            name_token: HTML_LITERAL@1060..1068 "clickEvt" [] [],
+                                            r_brack_token: R_BRACKET@1068..1069 "]" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1069..1070 "." [] [],
+                                                modifier_token: HTML_LITERAL@1070..1077 "prevent" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1077..1078 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1078..1086 "\"follow\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1086..1091 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueStaticArgument {
+                                                name_token: HTML_LITERAL@1091..1097 "target" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1097..1098 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1098..1108 "\"'_blank'\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1108..1113 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueStaticArgument {
+                                                name_token: HTML_LITERAL@1113..1116 "rel" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1116..1117 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1117..1129 "\"'noopener'\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@1129..1133 ">" [Newline("\n"), Whitespace("\t\t")] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@1133..1137 "Link" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@1137..1138 "<" [] [],
+                                slash_token: SLASH@1138..1139 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@1139..1140 "a" [] [],
+                                },
+                                r_angle_token: R_ANGLE@1140..1141 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@1141..1230 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Dense chaining t ..."), Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@1230..1233 "div" [] [],
+                                },
+                                attributes: HtmlAttributeList [
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1233..1238 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@1238..1239 "[" [] [],
+                                                name_token: HTML_LITERAL@1239..1244 "dataA" [] [],
+                                                r_brack_token: R_BRACKET@1244..1245 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1245..1246 "." [] [],
+                                                modifier_token: HTML_LITERAL@1246..1251 "camel" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1251..1252 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1252..1258 "\"valA\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVBindShorthandDirective {
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1258..1263 ":" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@1263..1264 "[" [] [],
+                                                name_token: HTML_LITERAL@1264..1269 "dataB" [] [],
+                                                r_brack_token: R_BRACKET@1269..1270 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1270..1271 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1271..1277 "\"valB\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueDirective {
+                                        name_token: VUE_IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDirectiveArgument {
+                                            colon_token: COLON@1285..1286 ":" [] [],
+                                            arg: VueDynamicArgument {
+                                                l_brack_token: L_BRACKET@1286..1287 "[" [] [],
+                                                name_token: HTML_LITERAL@1287..1295 "hoverEvt" [] [],
+                                                r_brack_token: R_BRACKET@1295..1296 "]" [] [],
+                                            },
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1296..1297 "." [] [],
+                                                modifier_token: HTML_LITERAL@1297..1301 "once" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@1301..1302 "." [] [],
+                                                modifier_token: HTML_LITERAL@1302..1309 "passive" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1309..1310 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1310..1319 "\"onHover\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@1319..1324 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueStaticArgument {
+                                            name_token: HTML_LITERAL@1324..1329 "click" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1329..1330 "." [] [],
+                                                modifier_token: HTML_LITERAL@1330..1335 "exact" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@1335..1336 "." [] [],
+                                                modifier_token: HTML_LITERAL@1336..1340 "stop" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@1340..1341 "." [] [],
+                                                modifier_token: HTML_LITERAL@1341..1348 "prevent" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1348..1349 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1349..1363 "\"onClickExact\"" [] [],
+                                            },
+                                        },
+                                    },
+                                    VueVOnShorthandDirective {
+                                        at_token: AT@1363..1368 "@" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        arg: VueDynamicArgument {
+                                            l_brack_token: L_BRACKET@1368..1369 "[" [] [],
+                                            name_token: HTML_LITERAL@1369..1379 "keydownEvt" [] [],
+                                            r_brack_token: R_BRACKET@1379..1380 "]" [] [],
+                                        },
+                                        modifiers: VueModifierList [
+                                            VueModifier {
+                                                dot_token: DOT@1380..1381 "." [] [],
+                                                modifier_token: HTML_LITERAL@1381..1388 "capture" [] [],
+                                            },
+                                            VueModifier {
+                                                dot_token: DOT@1388..1389 "." [] [],
+                                                modifier_token: HTML_LITERAL@1389..1393 "self" [] [],
+                                            },
+                                        ],
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@1393..1394 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@1394..1405 "\"onKeyDown\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@1405..1409 ">" [Newline("\n"), Whitespace("\t\t")] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@1409..1414 "Dense" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@1414..1415 "<" [] [],
+                                slash_token: SLASH@1415..1416 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@1416..1419 "div" [] [],
+                                },
+                                r_angle_token: R_ANGLE@1419..1420 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@1420..1423 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@1423..1424 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@1424..1427 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@1427..1428 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@1428..1430 "<" [Newline("\n")] [],
+                slash_token: SLASH@1430..1431 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1431..1439 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@1439..1440 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@1440..1441 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..1441
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..1440
+    0: HTML_ELEMENT@0..1440
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..1428
+        0: HTML_ELEMENT@10..1428
+          0: HTML_OPENING_ELEMENT@10..114
+            0: L_ANGLE@10..100 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- Chain v-bind and ..."), Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@100..104
+              0: HTML_LITERAL@100..104 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@104..113
+              0: HTML_ATTRIBUTE@104..113
+                0: HTML_ATTRIBUTE_NAME@104..106
+                  0: HTML_LITERAL@104..106 "id" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@106..113
+                  0: EQ@106..107 "=" [] []
+                  1: HTML_STRING@107..113
+                    0: HTML_STRING_LITERAL@107..113 "\"root\"" [] []
+            3: R_ANGLE@113..114 ">" [] []
+          1: HTML_ELEMENT_LIST@114..1420
+            0: HTML_ELEMENT@114..450
+              0: HTML_OPENING_ELEMENT@114..429
+                0: L_ANGLE@114..228 "<" [Newline("\n"), Whitespace("\t\t"), Comments("<!-- Mixed v-bind (lo ..."), Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@228..234
+                  0: HTML_LITERAL@228..234 "button" [] []
+                2: HTML_ATTRIBUTE_LIST@234..425
+                  0: VUE_DIRECTIVE@234..274
+                    0: VUE_IDENT@234..244 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@244..254
+                      0: COLON@244..245 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@245..254
+                        0: L_BRACKET@245..246 "[" [] []
+                        1: HTML_LITERAL@246..253 "dataKey" [] []
+                        2: R_BRACKET@253..254 "]" [] []
+                    2: VUE_MODIFIER_LIST@254..260
+                      0: VUE_MODIFIER@254..260
+                        0: DOT@254..255 "." [] []
+                        1: HTML_LITERAL@255..260 "camel" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@260..274
+                      0: EQ@260..261 "=" [] []
+                      1: HTML_STRING@261..274
+                        0: HTML_STRING_LITERAL@261..274 "\"buttonTitle\"" [] []
+                  1: VUE_V_BIND_SHORTHAND_DIRECTIVE@274..304
+                    0: VUE_DIRECTIVE_ARGUMENT@274..288
+                      0: COLON@274..279 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_DYNAMIC_ARGUMENT@279..288
+                        0: L_BRACKET@279..280 "[" [] []
+                        1: HTML_LITERAL@280..287 "ariaKey" [] []
+                        2: R_BRACKET@287..288 "]" [] []
+                    1: VUE_MODIFIER_LIST@288..294
+                      0: VUE_MODIFIER@288..294
+                        0: DOT@288..289 "." [] []
+                        1: HTML_LITERAL@289..294 "camel" [] []
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@294..304
+                      0: EQ@294..295 "=" [] []
+                      1: HTML_STRING@295..304
+                        0: HTML_STRING_LITERAL@295..304 "\"ariaVal\"" [] []
+                  2: VUE_V_BIND_SHORTHAND_DIRECTIVE@304..323
+                    0: VUE_DIRECTIVE_ARGUMENT@304..317
+                      0: COLON@304..309 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_STATIC_ARGUMENT@309..317
+                        0: HTML_LITERAL@309..317 "tabindex" [] []
+                    1: VUE_MODIFIER_LIST@317..317
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@317..323
+                      0: EQ@317..318 "=" [] []
+                      1: HTML_STRING@318..323
+                        0: HTML_STRING_LITERAL@318..323 "\"'0'\"" [] []
+                  3: VUE_DIRECTIVE@323..359
+                    0: VUE_IDENT@323..331 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@331..337
+                      0: COLON@331..332 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@332..337
+                        0: L_BRACKET@332..333 "[" [] []
+                        1: HTML_LITERAL@333..336 "evt" [] []
+                        2: R_BRACKET@336..337 "]" [] []
+                    2: VUE_MODIFIER_LIST@337..350
+                      0: VUE_MODIFIER@337..342
+                        0: DOT@337..338 "." [] []
+                        1: HTML_LITERAL@338..342 "once" [] []
+                      1: VUE_MODIFIER@342..350
+                        0: DOT@342..343 "." [] []
+                        1: HTML_LITERAL@343..350 "passive" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@350..359
+                      0: EQ@350..351 "=" [] []
+                      1: HTML_STRING@351..359
+                        0: HTML_STRING_LITERAL@351..359 "\"handle\"" [] []
+                  4: VUE_V_ON_SHORTHAND_DIRECTIVE@359..392
+                    0: AT@359..364 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DYNAMIC_ARGUMENT@364..369
+                      0: L_BRACKET@364..365 "[" [] []
+                      1: HTML_LITERAL@365..368 "evt" [] []
+                      2: R_BRACKET@368..369 "]" [] []
+                    2: VUE_MODIFIER_LIST@369..382
+                      0: VUE_MODIFIER@369..377
+                        0: DOT@369..370 "." [] []
+                        1: HTML_LITERAL@370..377 "capture" [] []
+                      1: VUE_MODIFIER@377..382
+                        0: DOT@377..378 "." [] []
+                        1: HTML_LITERAL@378..382 "self" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@382..392
+                      0: EQ@382..383 "=" [] []
+                      1: HTML_STRING@383..392
+                        0: HTML_STRING_LITERAL@383..392 "\"handle2\"" [] []
+                  5: VUE_V_ON_SHORTHAND_DIRECTIVE@392..425
+                    0: AT@392..397 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_STATIC_ARGUMENT@397..402
+                      0: HTML_LITERAL@397..402 "click" [] []
+                    2: VUE_MODIFIER_LIST@402..415
+                      0: VUE_MODIFIER@402..407
+                        0: DOT@402..403 "." [] []
+                        1: HTML_LITERAL@403..407 "stop" [] []
+                      1: VUE_MODIFIER@407..415
+                        0: DOT@407..408 "." [] []
+                        1: HTML_LITERAL@408..415 "prevent" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@415..425
+                      0: EQ@415..416 "=" [] []
+                      1: HTML_STRING@416..425
+                        0: HTML_STRING_LITERAL@416..425 "\"clicked\"" [] []
+                3: R_ANGLE@425..429 ">" [Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_ELEMENT_LIST@429..438
+                0: HTML_CONTENT@429..438
+                  0: HTML_LITERAL@429..438 "Click" [Newline("\n"), Whitespace("\t\t\t")] []
+              2: HTML_CLOSING_ELEMENT@438..450
+                0: L_ANGLE@438..442 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: SLASH@442..443 "/" [] []
+                2: HTML_TAG_NAME@443..449
+                  0: HTML_LITERAL@443..449 "button" [] []
+                3: R_ANGLE@449..450 ">" [] []
+            1: HTML_SELF_CLOSING_ELEMENT@450..664
+              0: L_ANGLE@450..551 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Dynamic + modifi ..."), Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_TAG_NAME@551..556
+                0: HTML_LITERAL@551..556 "input" [] []
+              2: HTML_ATTRIBUTE_LIST@556..659
+                0: VUE_V_BIND_SHORTHAND_DIRECTIVE@556..591
+                  0: VUE_DIRECTIVE_ARGUMENT@556..577
+                    0: COLON@556..561 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DYNAMIC_ARGUMENT@561..577
+                      0: L_BRACKET@561..562 "[" [] []
+                      1: HTML_LITERAL@562..576 "placeholderKey" [] []
+                      2: R_BRACKET@576..577 "]" [] []
+                  1: VUE_MODIFIER_LIST@577..577
+                  2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@577..591
+                    0: EQ@577..578 "=" [] []
+                    1: HTML_STRING@578..591
+                      0: HTML_STRING_LITERAL@578..591 "\"placeholder\"" [] []
+                1: VUE_V_ON_SHORTHAND_DIRECTIVE@591..623
+                  0: AT@591..596 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                  1: VUE_STATIC_ARGUMENT@596..601
+                    0: HTML_LITERAL@596..601 "keyup" [] []
+                  2: VUE_MODIFIER_LIST@601..613
+                    0: VUE_MODIFIER@601..607
+                      0: DOT@601..602 "." [] []
+                      1: HTML_LITERAL@602..607 "enter" [] []
+                    1: VUE_MODIFIER@607..613
+                      0: DOT@607..608 "." [] []
+                      1: HTML_LITERAL@608..613 "exact" [] []
+                  3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@613..623
+                    0: EQ@613..614 "=" [] []
+                    1: HTML_STRING@614..623
+                      0: HTML_STRING_LITERAL@614..623 "\"onEnter\"" [] []
+                2: VUE_DIRECTIVE@623..659
+                  0: VUE_IDENT@623..631 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                  1: VUE_DIRECTIVE_ARGUMENT@631..640
+                    0: COLON@631..632 ":" [] []
+                    1: VUE_DYNAMIC_ARGUMENT@632..640
+                      0: L_BRACKET@632..633 "[" [] []
+                      1: HTML_LITERAL@633..639 "keyEvt" [] []
+                      2: R_BRACKET@639..640 "]" [] []
+                  2: VUE_MODIFIER_LIST@640..648
+                    0: VUE_MODIFIER@640..648
+                      0: DOT@640..641 "." [] []
+                      1: HTML_LITERAL@641..648 "capture" [] []
+                  3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@648..659
+                    0: EQ@648..649 "=" [] []
+                    1: HTML_STRING@649..659
+                      0: HTML_STRING_LITERAL@649..659 "\"onKeyEvt\"" [] []
+              3: SLASH@659..663 "/" [Newline("\n"), Whitespace("\t\t")] []
+              4: R_ANGLE@663..664 ">" [] []
+            2: HTML_ELEMENT@664..930
+              0: HTML_OPENING_ELEMENT@664..916
+                0: L_ANGLE@664..742 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Multiple chained ..."), Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@742..753
+                  0: HTML_LITERAL@742..753 "component-x" [] []
+                2: HTML_ATTRIBUTE_LIST@753..912
+                  0: VUE_DIRECTIVE@753..790
+                    0: VUE_IDENT@753..763 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@763..774
+                      0: COLON@763..764 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@764..774
+                        0: L_BRACKET@764..765 "[" [] []
+                        1: HTML_LITERAL@765..773 "propName" [] []
+                        2: R_BRACKET@773..774 "]" [] []
+                    2: VUE_MODIFIER_LIST@774..780
+                      0: VUE_MODIFIER@774..780
+                        0: DOT@774..775 "." [] []
+                        1: HTML_LITERAL@775..780 "camel" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@780..790
+                      0: EQ@780..781 "=" [] []
+                      1: HTML_STRING@781..790
+                        0: HTML_STRING_LITERAL@781..790 "\"propVal\"" [] []
+                  1: VUE_DIRECTIVE@790..828
+                    0: VUE_IDENT@790..800 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@800..811
+                      0: COLON@800..801 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@801..811
+                        0: L_BRACKET@801..802 "[" [] []
+                        1: HTML_LITERAL@802..810 "styleKey" [] []
+                        2: R_BRACKET@810..811 "]" [] []
+                    2: VUE_MODIFIER_LIST@811..817
+                      0: VUE_MODIFIER@811..817
+                        0: DOT@811..812 "." [] []
+                        1: HTML_LITERAL@812..817 "camel" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@817..828
+                      0: EQ@817..818 "=" [] []
+                      1: HTML_STRING@818..828
+                        0: HTML_STRING_LITERAL@818..828 "\"styleVal\"" [] []
+                  2: VUE_DIRECTIVE@828..863
+                    0: VUE_IDENT@828..836 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@836..848
+                      0: COLON@836..837 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@837..848
+                        0: L_BRACKET@837..838 "[" [] []
+                        1: HTML_LITERAL@838..847 "eventName" [] []
+                        2: R_BRACKET@847..848 "]" [] []
+                    2: VUE_MODIFIER_LIST@848..853
+                      0: VUE_MODIFIER@848..853
+                        0: DOT@848..849 "." [] []
+                        1: HTML_LITERAL@849..853 "once" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@853..863
+                      0: EQ@853..854 "=" [] []
+                      1: HTML_STRING@854..863
+                        0: HTML_STRING_LITERAL@854..863 "\"onEvent\"" [] []
+                  3: VUE_V_ON_SHORTHAND_DIRECTIVE@863..889
+                    0: AT@863..868 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DYNAMIC_ARGUMENT@868..876
+                      0: L_BRACKET@868..869 "[" [] []
+                      1: HTML_LITERAL@869..875 "rawEvt" [] []
+                      2: R_BRACKET@875..876 "]" [] []
+                    2: VUE_MODIFIER_LIST@876..881
+                      0: VUE_MODIFIER@876..881
+                        0: DOT@876..877 "." [] []
+                        1: HTML_LITERAL@877..881 "self" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@881..889
+                      0: EQ@881..882 "=" [] []
+                      1: HTML_STRING@882..889
+                        0: HTML_STRING_LITERAL@882..889 "\"onRaw\"" [] []
+                  4: VUE_V_BIND_SHORTHAND_DIRECTIVE@889..912
+                    0: VUE_DIRECTIVE_ARGUMENT@889..896
+                      0: COLON@889..894 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_STATIC_ARGUMENT@894..896
+                        0: HTML_LITERAL@894..896 "is" [] []
+                    1: VUE_MODIFIER_LIST@896..896
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@896..912
+                      0: EQ@896..897 "=" [] []
+                      1: HTML_STRING@897..912
+                        0: HTML_STRING_LITERAL@897..912 "\"componentType\"" [] []
+                3: R_ANGLE@912..916 ">" [Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_ELEMENT_LIST@916..916
+              2: HTML_CLOSING_ELEMENT@916..930
+                0: L_ANGLE@916..917 "<" [] []
+                1: SLASH@917..918 "/" [] []
+                2: HTML_TAG_NAME@918..929
+                  0: HTML_LITERAL@918..929 "component-x" [] []
+                3: R_ANGLE@929..930 ">" [] []
+            3: HTML_ELEMENT@930..1141
+              0: HTML_OPENING_ELEMENT@930..1133
+                0: L_ANGLE@930..1021 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Interleaved long ..."), Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@1021..1022
+                  0: HTML_LITERAL@1021..1022 "a" [] []
+                2: HTML_ATTRIBUTE_LIST@1022..1129
+                  0: VUE_DIRECTIVE@1022..1054
+                    0: VUE_IDENT@1022..1032 "v-bind" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@1032..1042
+                      0: COLON@1032..1033 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@1033..1042
+                        0: L_BRACKET@1033..1034 "[" [] []
+                        1: HTML_LITERAL@1034..1041 "hrefKey" [] []
+                        2: R_BRACKET@1041..1042 "]" [] []
+                    2: VUE_MODIFIER_LIST@1042..1048
+                      0: VUE_MODIFIER@1042..1048
+                        0: DOT@1042..1043 "." [] []
+                        1: HTML_LITERAL@1043..1048 "camel" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1048..1054
+                      0: EQ@1048..1049 "=" [] []
+                      1: HTML_STRING@1049..1054
+                        0: HTML_STRING_LITERAL@1049..1054 "\"url\"" [] []
+                  1: VUE_V_ON_SHORTHAND_DIRECTIVE@1054..1086
+                    0: AT@1054..1059 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DYNAMIC_ARGUMENT@1059..1069
+                      0: L_BRACKET@1059..1060 "[" [] []
+                      1: HTML_LITERAL@1060..1068 "clickEvt" [] []
+                      2: R_BRACKET@1068..1069 "]" [] []
+                    2: VUE_MODIFIER_LIST@1069..1077
+                      0: VUE_MODIFIER@1069..1077
+                        0: DOT@1069..1070 "." [] []
+                        1: HTML_LITERAL@1070..1077 "prevent" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1077..1086
+                      0: EQ@1077..1078 "=" [] []
+                      1: HTML_STRING@1078..1086
+                        0: HTML_STRING_LITERAL@1078..1086 "\"follow\"" [] []
+                  2: VUE_V_BIND_SHORTHAND_DIRECTIVE@1086..1108
+                    0: VUE_DIRECTIVE_ARGUMENT@1086..1097
+                      0: COLON@1086..1091 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_STATIC_ARGUMENT@1091..1097
+                        0: HTML_LITERAL@1091..1097 "target" [] []
+                    1: VUE_MODIFIER_LIST@1097..1097
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1097..1108
+                      0: EQ@1097..1098 "=" [] []
+                      1: HTML_STRING@1098..1108
+                        0: HTML_STRING_LITERAL@1098..1108 "\"'_blank'\"" [] []
+                  3: VUE_V_BIND_SHORTHAND_DIRECTIVE@1108..1129
+                    0: VUE_DIRECTIVE_ARGUMENT@1108..1116
+                      0: COLON@1108..1113 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_STATIC_ARGUMENT@1113..1116
+                        0: HTML_LITERAL@1113..1116 "rel" [] []
+                    1: VUE_MODIFIER_LIST@1116..1116
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1116..1129
+                      0: EQ@1116..1117 "=" [] []
+                      1: HTML_STRING@1117..1129
+                        0: HTML_STRING_LITERAL@1117..1129 "\"'noopener'\"" [] []
+                3: R_ANGLE@1129..1133 ">" [Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_ELEMENT_LIST@1133..1137
+                0: HTML_CONTENT@1133..1137
+                  0: HTML_LITERAL@1133..1137 "Link" [] []
+              2: HTML_CLOSING_ELEMENT@1137..1141
+                0: L_ANGLE@1137..1138 "<" [] []
+                1: SLASH@1138..1139 "/" [] []
+                2: HTML_TAG_NAME@1139..1140
+                  0: HTML_LITERAL@1139..1140 "a" [] []
+                3: R_ANGLE@1140..1141 ">" [] []
+            4: HTML_ELEMENT@1141..1420
+              0: HTML_OPENING_ELEMENT@1141..1409
+                0: L_ANGLE@1141..1230 "<" [Newline("\n"), Newline("\n"), Whitespace("\t\t"), Comments("<!-- Dense chaining t ..."), Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@1230..1233
+                  0: HTML_LITERAL@1230..1233 "div" [] []
+                2: HTML_ATTRIBUTE_LIST@1233..1405
+                  0: VUE_V_BIND_SHORTHAND_DIRECTIVE@1233..1258
+                    0: VUE_DIRECTIVE_ARGUMENT@1233..1245
+                      0: COLON@1233..1238 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_DYNAMIC_ARGUMENT@1238..1245
+                        0: L_BRACKET@1238..1239 "[" [] []
+                        1: HTML_LITERAL@1239..1244 "dataA" [] []
+                        2: R_BRACKET@1244..1245 "]" [] []
+                    1: VUE_MODIFIER_LIST@1245..1251
+                      0: VUE_MODIFIER@1245..1251
+                        0: DOT@1245..1246 "." [] []
+                        1: HTML_LITERAL@1246..1251 "camel" [] []
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1251..1258
+                      0: EQ@1251..1252 "=" [] []
+                      1: HTML_STRING@1252..1258
+                        0: HTML_STRING_LITERAL@1252..1258 "\"valA\"" [] []
+                  1: VUE_V_BIND_SHORTHAND_DIRECTIVE@1258..1277
+                    0: VUE_DIRECTIVE_ARGUMENT@1258..1270
+                      0: COLON@1258..1263 ":" [Newline("\n"), Whitespace("\t\t\t")] []
+                      1: VUE_DYNAMIC_ARGUMENT@1263..1270
+                        0: L_BRACKET@1263..1264 "[" [] []
+                        1: HTML_LITERAL@1264..1269 "dataB" [] []
+                        2: R_BRACKET@1269..1270 "]" [] []
+                    1: VUE_MODIFIER_LIST@1270..1270
+                    2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1270..1277
+                      0: EQ@1270..1271 "=" [] []
+                      1: HTML_STRING@1271..1277
+                        0: HTML_STRING_LITERAL@1271..1277 "\"valB\"" [] []
+                  2: VUE_DIRECTIVE@1277..1319
+                    0: VUE_IDENT@1277..1285 "v-on" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DIRECTIVE_ARGUMENT@1285..1296
+                      0: COLON@1285..1286 ":" [] []
+                      1: VUE_DYNAMIC_ARGUMENT@1286..1296
+                        0: L_BRACKET@1286..1287 "[" [] []
+                        1: HTML_LITERAL@1287..1295 "hoverEvt" [] []
+                        2: R_BRACKET@1295..1296 "]" [] []
+                    2: VUE_MODIFIER_LIST@1296..1309
+                      0: VUE_MODIFIER@1296..1301
+                        0: DOT@1296..1297 "." [] []
+                        1: HTML_LITERAL@1297..1301 "once" [] []
+                      1: VUE_MODIFIER@1301..1309
+                        0: DOT@1301..1302 "." [] []
+                        1: HTML_LITERAL@1302..1309 "passive" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1309..1319
+                      0: EQ@1309..1310 "=" [] []
+                      1: HTML_STRING@1310..1319
+                        0: HTML_STRING_LITERAL@1310..1319 "\"onHover\"" [] []
+                  3: VUE_V_ON_SHORTHAND_DIRECTIVE@1319..1363
+                    0: AT@1319..1324 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_STATIC_ARGUMENT@1324..1329
+                      0: HTML_LITERAL@1324..1329 "click" [] []
+                    2: VUE_MODIFIER_LIST@1329..1348
+                      0: VUE_MODIFIER@1329..1335
+                        0: DOT@1329..1330 "." [] []
+                        1: HTML_LITERAL@1330..1335 "exact" [] []
+                      1: VUE_MODIFIER@1335..1340
+                        0: DOT@1335..1336 "." [] []
+                        1: HTML_LITERAL@1336..1340 "stop" [] []
+                      2: VUE_MODIFIER@1340..1348
+                        0: DOT@1340..1341 "." [] []
+                        1: HTML_LITERAL@1341..1348 "prevent" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1348..1363
+                      0: EQ@1348..1349 "=" [] []
+                      1: HTML_STRING@1349..1363
+                        0: HTML_STRING_LITERAL@1349..1363 "\"onClickExact\"" [] []
+                  4: VUE_V_ON_SHORTHAND_DIRECTIVE@1363..1405
+                    0: AT@1363..1368 "@" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: VUE_DYNAMIC_ARGUMENT@1368..1380
+                      0: L_BRACKET@1368..1369 "[" [] []
+                      1: HTML_LITERAL@1369..1379 "keydownEvt" [] []
+                      2: R_BRACKET@1379..1380 "]" [] []
+                    2: VUE_MODIFIER_LIST@1380..1393
+                      0: VUE_MODIFIER@1380..1388
+                        0: DOT@1380..1381 "." [] []
+                        1: HTML_LITERAL@1381..1388 "capture" [] []
+                      1: VUE_MODIFIER@1388..1393
+                        0: DOT@1388..1389 "." [] []
+                        1: HTML_LITERAL@1389..1393 "self" [] []
+                    3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@1393..1405
+                      0: EQ@1393..1394 "=" [] []
+                      1: HTML_STRING@1394..1405
+                        0: HTML_STRING_LITERAL@1394..1405 "\"onKeyDown\"" [] []
+                3: R_ANGLE@1405..1409 ">" [Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_ELEMENT_LIST@1409..1414
+                0: HTML_CONTENT@1409..1414
+                  0: HTML_LITERAL@1409..1414 "Dense" [] []
+              2: HTML_CLOSING_ELEMENT@1414..1420
+                0: L_ANGLE@1414..1415 "<" [] []
+                1: SLASH@1415..1416 "/" [] []
+                2: HTML_TAG_NAME@1416..1419
+                  0: HTML_LITERAL@1416..1419 "div" [] []
+                3: R_ANGLE@1419..1420 ">" [] []
+          2: HTML_CLOSING_ELEMENT@1420..1428
+            0: L_ANGLE@1420..1423 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@1423..1424 "/" [] []
+            2: HTML_TAG_NAME@1424..1427
+              0: HTML_LITERAL@1424..1427 "div" [] []
+            3: R_ANGLE@1427..1428 ">" [] []
+      2: HTML_CLOSING_ELEMENT@1428..1440
+        0: L_ANGLE@1428..1430 "<" [Newline("\n")] []
+        1: SLASH@1430..1431 "/" [] []
+        2: HTML_TAG_NAME@1431..1439
+          0: HTML_LITERAL@1431..1439 "template" [] []
+        3: R_ANGLE@1439..1440 ">" [] []
+  4: EOF@1440..1441 "" [Newline("\n")] []
+
+```

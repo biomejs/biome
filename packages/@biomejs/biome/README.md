@@ -120,17 +120,6 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
         </a>
       </td>
     </tr>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
-          <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" width="400" alt="Vercel" />
-          </picture>
-        </a>
-      </td>
-    </tr>
   </tbody>
 </table>
 
@@ -183,6 +172,9 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
       </td>
       <td align="center" valign="middle">
         <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://graphite.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/61942612?s=200&v=4" width="80" alt="Graphite logo"></a>
       </td>
     </tr>
   </tbody>

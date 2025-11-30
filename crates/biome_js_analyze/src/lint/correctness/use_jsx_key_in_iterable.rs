@@ -62,7 +62,7 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-key").same()],
+        sources: &[RuleSource::EslintReact("jsx-key").same(), RuleSource::EslintQwik("jsx-key").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Qwik],
@@ -427,7 +427,7 @@ fn handle_jsx_child(
                 }
             }
             AnyJsxChild::JsxFragment(node) => {
-                if options.check_shorthand_fragments {
+                if options.check_shorthand_fragments() {
                     ranges.push(node.range())
                 }
             }

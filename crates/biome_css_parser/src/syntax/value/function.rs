@@ -1,9 +1,12 @@
+use super::r#if::is_at_if_function;
 use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_declaration_item;
+use crate::syntax::value::r#if::parse_if_function;
 use crate::syntax::{
-    CssComponentValueList, is_at_any_value, is_nth_at_identifier, parse_regular_identifier,
+    CssComponentValueList, is_at_any_value, is_at_dashed_identifier, is_nth_at_identifier,
+    parse_dashed_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -19,7 +22,7 @@ use biome_parser::{Parser, TokenSet, token_set};
 /// It's used to quickly determine if the parser is positioned at a relevant function.
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_at_url_function(p) || is_at_function(p)
+    is_at_url_function(p) || is_at_if_function(p) || is_at_function(p)
 }
 
 /// Parses any recognized CSS function at the current position in the `CssParser`.
@@ -35,6 +38,8 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_url_function(p) {
         parse_url_function(p)
+    } else if is_at_if_function(p) {
+        parse_if_function(p)
     } else {
         parse_function(p)
     }
@@ -257,4 +262,19 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
     let m = p.start();
     CssComponentValueList.parse_list(p);
     Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+}
+
+/// Parses theme references: --tab-size-*
+pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_dashed_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    parse_dashed_identifier(p).ok();
+    p.expect(T![-]);
+    p.expect(T![*]);
+
+    Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
 }

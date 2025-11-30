@@ -1,0 +1,148 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<template>
+  <!-- Missing value -->
+  <div v-html></div>
+  
+  <!-- Empty value -->
+  <div v-html=""></div>
+  
+  <!-- Unexpected argument -->
+  <div v-html:aaa="foo"></div>
+  
+  <!-- Unexpected modifier -->
+  <div v-html.bbb="foo"></div>
+  
+  <!-- Both argument and modifier -->
+  <div v-html:aaa.bbb="foo"></div>
+  
+  <!-- Multiple modifiers -->
+  <div v-html.bbb.ccc="foo"></div>
+  
+  <!-- With other directives (should still flag v-html) -->
+  <div v-if="condition" v-html:arg="content" v-bind:class="className"></div>
+</template>
+```
+
+# Diagnostics
+```
+invalid.vue:5:8 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive is missing a value.
+  
+    3 │ <template>
+    4 │   <!-- Missing value -->
+  > 5 │   <div v-html></div>
+      │        ^^^^^^
+    6 │   
+    7 │   <!-- Empty value -->
+  
+  i v-html directives require a value containing the HTML content to render.
+  
+  i For example, use v-html="htmlContent" to render the content of the htmlContent variable.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive is missing a value.
+  
+     7 │   <!-- Empty value -->
+   > 8 │   <div v-html=""></div>
+       │        ^^^^^^^^^
+     9 │   
+    10 │   <!-- Unexpected argument -->
+  
+  i v-html directives require a value containing the HTML content to render.
+  
+  i For example, use v-html="htmlContent" to render the content of the htmlContent variable.
+  
+
+```
+
+```
+invalid.vue:11:14 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive does not accept an argument.
+  
+    10 │   <!-- Unexpected argument -->
+  > 11 │   <div v-html:aaa="foo"></div>
+       │              ^^^^
+    12 │   
+    13 │   <!-- Unexpected modifier -->
+  
+  i v-html directives should be used without arguments, like v-html="content".
+  
+
+```
+
+```
+invalid.vue:14:14 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive does not support modifiers.
+  
+    13 │   <!-- Unexpected modifier -->
+  > 14 │   <div v-html.bbb="foo"></div>
+       │              ^^^^
+    15 │   
+    16 │   <!-- Both argument and modifier -->
+  
+  i v-html directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:17:14 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive does not accept an argument.
+  
+    16 │   <!-- Both argument and modifier -->
+  > 17 │   <div v-html:aaa.bbb="foo"></div>
+       │              ^^^^
+    18 │   
+    19 │   <!-- Multiple modifiers -->
+  
+  i v-html directives should be used without arguments, like v-html="content".
+  
+
+```
+
+```
+invalid.vue:20:14 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive does not support modifiers.
+  
+    19 │   <!-- Multiple modifiers -->
+  > 20 │   <div v-html.bbb.ccc="foo"></div>
+       │              ^^^^
+    21 │   
+    22 │   <!-- With other directives (should still flag v-html) -->
+  
+  i v-html directives do not support any modifiers. Remove the modifier.
+  
+
+```
+
+```
+invalid.vue:23:31 lint/nursery/useVueValidVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The v-html directive does not accept an argument.
+  
+    22 │   <!-- With other directives (should still flag v-html) -->
+  > 23 │   <div v-if="condition" v-html:arg="content" v-bind:class="className"></div>
+       │                               ^^^^
+    24 │ </template>
+  
+  i v-html directives should be used without arguments, like v-html="content".
+  
+
+```

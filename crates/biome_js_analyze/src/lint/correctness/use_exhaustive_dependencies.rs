@@ -48,6 +48,7 @@ declare_lint_rule! {
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
+    /// - `useEffectEvent`
     ///
     /// If you want to add more hooks to the rule, check the [options](#options).
     ///
@@ -303,6 +304,7 @@ impl Default for HookConfigMaps {
                 true,
             ),
             StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+            StableReactHookConfiguration::new("useEffectEvent", StableHookResult::Identity, true),
         ]);
 
         Self {
@@ -315,7 +317,7 @@ impl Default for HookConfigMaps {
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
-        for hook in &hooks.hooks {
+        for hook in hooks.hooks.iter().flatten() {
             if let Some(stable_result) = &hook.stable_result
                 && *stable_result != StableHookResult::None
             {
@@ -399,18 +401,6 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
         })
         .last()?
         .parent()?;
-
-    // If the parent node is a call expression, drop the last part of the member expression to
-    // avoid breaking the prototype chain.
-    if let Some(parent) = root.parent()
-        && JsCallExpression::can_cast(parent.kind())
-    {
-        return AnyJsMemberExpression::cast(root)?
-            .object()
-            .ok()?
-            .into_syntax()
-            .cast();
-    }
 
     root.cast()
 }
@@ -707,7 +697,7 @@ impl Rule for UseExhaustiveDependencies {
                         .into_boxed_slice();
                 }
                 None => {
-                    return if options.report_missing_dependencies_array {
+                    return if options.report_missing_dependencies_array() {
                         vec![Fix::MissingDependenciesArray {
                             function_name_range: result.function_name_range,
                         }]
@@ -840,7 +830,7 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            if options.report_unnecessary_dependencies && !excessive_deps.is_empty() {
+            if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
                     component_function,

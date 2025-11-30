@@ -25,6 +25,10 @@ declare_lint_rule! {
     /// only go in a single direction, i.e. they don't point "back" to the
     /// importing file.
     ///
+    /// However, files that import themselves are allowed, and the rule won't trigger for these use cases.
+    /// This allows for encapsulation of functions/variables into a namespace instead of using a
+    /// static class (triggers [noStaticOnlyClass](https://biomejs.dev/linter/rules/no-static-only-class)).
+    ///
     /// :::note
     /// This rule is computationally expensive. If you are particularly
     /// pressed for lint time, or don't think you have an issue with dependency
@@ -77,6 +81,16 @@ declare_lint_rule! {
     /// export function baz() {
     ///     bar();
     /// }
+    /// ```
+    ///
+    /// ```js,file=foobaz.js
+    /// export function foo() {
+    ///     console.log("foobaz");
+    /// }
+    ///
+    /// export * as baz from './foobaz.js';
+    ///
+    /// import { baz } from './foobaz.js';
     /// ```
     ///
     /// ```ts,file=types.ts
@@ -160,7 +174,7 @@ impl Rule for NoImportCycles {
         } = module_info.get_import_path_by_js_node(node)?;
 
         let options = ctx.options();
-        if options.ignore_types && *phase == JsImportPhase::Type {
+        if options.ignore_types() && *phase == JsImportPhase::Type {
             return None;
         }
 
@@ -230,7 +244,7 @@ fn find_cycle(
             phase,
         } in module_info.all_import_paths()
         {
-            if options.ignore_types && phase == JsImportPhase::Type {
+            if options.ignore_types() && phase == JsImportPhase::Type {
                 continue;
             }
 
@@ -243,6 +257,12 @@ fn find_cycle(
             }
 
             if path == ctx.file_path() {
+                // https://github.com/biomejs/biome/issues/6569
+                // prevent flagging on import cycles when they are isolated to a single file
+                if stack.is_empty() && start_path == path {
+                    continue;
+                }
+
                 // Return all the paths from `start_path` to `resolved_path`:
                 let paths = Some(start_path.to_string())
                     .into_iter()
@@ -254,6 +274,7 @@ fn find_cycle(
                     )
                     .chain(Some(path.to_string()))
                     .collect();
+
                 return Some(paths);
             }
 

@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: expect-poll-sync-matchers.js
+---
+# Input
+```js
+// expect.poll with synchronous matchers should still require await
+test('toBe matcher', async () => {
+    expect.poll(() => getValue()).toBe(42);
+});
+
+test('toEqual matcher', async () => {
+    expect.poll(() => getObject()).toEqual({ foo: 'bar' });
+});
+
+test('toMatch matcher', async () => {
+    expect.poll(() => getString()).toMatch(/pattern/);
+});
+
+test('toStrictEqual matcher', async () => {
+    expect.poll(() => getData()).toStrictEqual({ a: 1 });
+});
+
+```
+
+# Diagnostics
+```
+expect-poll-sync-matchers.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    1 │ // expect.poll with synchronous matchers should still require await
+    2 │ test('toBe matcher', async () => {
+  > 3 │     expect.poll(() => getValue()).toBe(42);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     1  1 │   // expect.poll with synchronous matchers should still require await
+     2  2 │   test('toBe matcher', async () => {
+     3    │ - ····expect.poll(()·=>·getValue()).toBe(42);
+        3 │ + ····await
+        4 │ + ····expect.poll(()·=>·getValue()).toBe(42);
+     4  5 │   });
+     5  6 │   
+  
+
+```
+
+```
+expect-poll-sync-matchers.js:7:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    6 │ test('toEqual matcher', async () => {
+  > 7 │     expect.poll(() => getObject()).toEqual({ foo: 'bar' });
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ });
+    9 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     5  5 │   
+     6  6 │   test('toEqual matcher', async () => {
+     7    │ - ····expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
+        7 │ + ····await
+        8 │ + ····expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
+     8  9 │   });
+     9 10 │   
+  
+
+```
+
+```
+expect-poll-sync-matchers.js:11:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    10 │ test('toMatch matcher', async () => {
+  > 11 │     expect.poll(() => getString()).toMatch(/pattern/);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ });
+    13 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     9  9 │   
+    10 10 │   test('toMatch matcher', async () => {
+    11    │ - ····expect.poll(()·=>·getString()).toMatch(/pattern/);
+       11 │ + ····await
+       12 │ + ····expect.poll(()·=>·getString()).toMatch(/pattern/);
+    12 13 │   });
+    13 14 │   
+  
+
+```
+
+```
+expect-poll-sync-matchers.js:15:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    14 │ test('toStrictEqual matcher', async () => {
+  > 15 │     expect.poll(() => getData()).toStrictEqual({ a: 1 });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ });
+    17 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    13 13 │   
+    14 14 │   test('toStrictEqual matcher', async () => {
+    15    │ - ····expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
+       15 │ + ····await
+       16 │ + ····expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
+    16 17 │   });
+    17 18 │   
+  
+
+```
