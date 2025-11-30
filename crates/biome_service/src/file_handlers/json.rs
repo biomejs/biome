@@ -12,9 +12,7 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{
-    CodeAction, DocumentServices, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-};
+use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
@@ -395,7 +393,6 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
-        services: DocumentServices::none(),
     }
 }
 

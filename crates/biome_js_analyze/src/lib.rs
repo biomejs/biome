@@ -159,7 +159,7 @@ where
         .map(|(path, manifest)| (path, Arc::new(manifest)));
 
     let type_resolver = module_graph
-        .module_info_for_path(file_path.as_ref())
+        .js_module_info_for_path(file_path.as_ref())
         .map(|module_info| ModuleResolver::for_module(module_info, module_graph.clone()))
         .map(Arc::new);
 

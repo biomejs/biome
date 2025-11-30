@@ -10,7 +10,7 @@ use crate::file_handlers::FixAllParams;
 use crate::settings::{
     OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{DocumentFileSource, DocumentServices, PullDiagnosticsAndActionsResult};
+use crate::workspace::{DocumentFileSource, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -547,7 +547,6 @@ fn parse(
     ParseResult {
         any_parse: parse.into(),
         language: None,
-        services: DocumentServices::none(),
     }
 }
 
@@ -625,7 +624,7 @@ fn debug_type_info(
     graph: Arc<ModuleGraph>,
 ) -> Result<String, WorkspaceError> {
     let Some(parse) = parse else {
-        let result = graph.module_info_for_path(path);
+        let result = graph.js_module_info_for_path(path);
         return match result {
             None => Ok(String::new()),
             // TODO: print correct type info
