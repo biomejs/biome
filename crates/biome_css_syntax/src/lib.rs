@@ -132,6 +132,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssSupportsCondition::can_cast(*kind) => CSS_BOGUS_SUPPORTS_CONDITION,
             kind if AnyCssIfBranch::can_cast(*kind) => CSS_BOGUS_IF_BRANCH,
             kind if AnyCssIfTest::can_cast(*kind) => CSS_BOGUS_IF_TEST,
+            kind if AnyCssIfTestBooleanExpr::can_cast(*kind) => CSS_BOGUS_IF_TEST_BOOLEAN_EXPR,
 
             _ => CSS_BOGUS,
         }
