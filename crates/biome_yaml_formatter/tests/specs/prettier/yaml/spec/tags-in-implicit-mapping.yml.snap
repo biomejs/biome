@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-in-implicit-mapping.yml
+---
+
+# Input
+
+```yml
+!!str a: b
+c: !!int 42
+e: !!str f
+g: h
+!!int 23: !!bool false
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ c: !!int 42
+ e: !!str f
+ g: h
+-!!int 23: !!bool false
++!!int 23: !!bool false
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+!!str a: b
+c: !!int 42
+e: !!str f
+g: h
+!!int 23: !!bool false```

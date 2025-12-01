@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-13-flow-sequence.yml
+---
+# Input
+
+```yml
+- [ one, two, ]
+- [three ,four]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-- [one, two]
+-- [three, four]
++- [ one, two, ]
++- [three ,four]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- [ one, two, ]
+- [three ,four]```

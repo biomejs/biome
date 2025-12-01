@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/literal-block-scalar.yml
+---
+# Input
+
+```yml
+a: |
+ ab
+ 
+ cd
+ ef
+ 
+
+...
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,8 @@
+ a: |
+-  ab
++ ab
++ 
++ cd
++ ef
++ 
+ 
+-  cd
+-  ef
++...
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: |
+ ab
+ 
+ cd
+ ef
+ 
+
+...```

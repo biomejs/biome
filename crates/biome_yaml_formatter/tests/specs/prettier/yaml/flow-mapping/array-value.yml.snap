@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-mapping/array-value.yml
+---
+# Input
+
+```yml
+{a: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],b: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],c: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1 @@
+-{
+-  a:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
+-  b:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
+-  c:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
+-}
++{a: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],b: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],c: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+{a: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],b: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],c: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]}```
+
+# Lines exceeding max width of 80 characters
+```
+    1: {a: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],b: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],c: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]}
+```

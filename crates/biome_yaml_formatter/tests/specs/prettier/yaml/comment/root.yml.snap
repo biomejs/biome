@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/root.yml
+---
+
+# Input
+
+```yml
+#hello world
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,2 @@
+ #hello world
+ #hello world
+-#hello world
+-#hello world
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,13 +1,5 @@
+ [
+   "#hello world",
+   hard_line_break,
+-  "#hello world",
+-  hard_line_break,
+-  verbatim([
+-    "#hello world",
+-    hard_line_break,
+-    "#hello world",
+-    hard_line_break,
+-    ""
+-  ])
++  verbatim(["#hello world", hard_line_break, ""])
+ ]
+\ No newline at end of file
+
+```

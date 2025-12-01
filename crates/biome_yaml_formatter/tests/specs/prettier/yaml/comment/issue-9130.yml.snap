@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/issue-9130.yml
+---
+# Input
+
+```yml
+- foo: 0
+  bar: 1
+
+  # baz: 2
+- quux: 3
+
+- foo: 0
+  bar: 1
+
+  # baz: 2
+
+  # baz: 3
+- quux: 3
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -10,4 +10,4 @@
+   # baz: 2
+ 
+   # baz: 3
+-- quux: 3
++- quux: 3
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- foo: 0
+  bar: 1
+
+  # baz: 2
+- quux: 3
+
+- foo: 0
+  bar: 1
+
+  # baz: 2
+
+  # baz: 3
+- quux: 3```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/issue-8378.yml
+---
+
+# Input
+
+```yml
+# --- comments ---
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,2 @@
+ # --- comments ---
+ # --- comments ---
+-# --- comments ---
+-# --- comments ---
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,13 +1,5 @@
+ [
+   "# --- comments ---",
+   hard_line_break,
+-  "# --- comments ---",
+-  hard_line_break,
+-  verbatim([
+-    "# --- comments ---",
+-    hard_line_break,
+-    "# --- comments ---",
+-    hard_line_break,
+-    ""
+-  ])
++  verbatim(["# --- comments ---", hard_line_break, ""])
+ ]
+\ No newline at end of file
+
+```

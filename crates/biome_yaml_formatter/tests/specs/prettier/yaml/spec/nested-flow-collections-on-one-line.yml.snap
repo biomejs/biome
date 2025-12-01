@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/nested-flow-collections-on-one-line.yml
+---
+# Input
+
+```yml
+---
+{ a: [b, c, { d: [e, f] } ] }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ ---
+-{ a: [b, c, { d: [e, f] }] }
++{ a: [b, c, { d: [e, f] } ] }
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+{ a: [b, c, { d: [e, f] } ] }```
+
+# Errors
+```
+nested-flow-collections-on-one-line.yml:2:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found '}'.
+  
+    1 │ ---
+  > 2 │ { a: [b, c, { d: [e, f] } ] }
+      │                             ^
+    3 │ 
+  
+  i Expected a block mapping entry here.
+  
+    1 │ ---
+  > 2 │ { a: [b, c, { d: [e, f] } ] }
+      │                             ^
+    3 │ 
+  
+
+```

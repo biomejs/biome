@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/zero-indented-block-scalar-with-line-that-looks-like-a-comment.yml
+---
+# Input
+
+```yml
+--- >
+line1
+# no comment
+line3
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,4 @@
+----
+->
+-  line1
+-  # no comment
+-  line3
++--- >
++line1
++# no comment
++line3
+```
+
+# Output
+
+```yml
+--- >
+line1
+# no comment
+line3
+```

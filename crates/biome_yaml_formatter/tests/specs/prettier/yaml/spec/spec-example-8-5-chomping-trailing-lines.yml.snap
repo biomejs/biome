@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-5-chomping-trailing-lines.yml
+---
+# Input
+
+```yml
+ # Strip
+  # Comments:
+strip: |-
+  # text
+  
+ # Clip
+  # comments:
+
+clip: |
+  # text
+ 
+ # Keep
+  # comments:
+
+keep: |+
+  # text
+
+ # Trail
+  # comments.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,19 +1,17 @@
+-# Strip
+-# Comments:
+ strip: |-
+   # text
+-
+-# Clip
+-# comments:
++  
++ # Clip
++  # comments:
+ 
+ clip: |
+   # text
+-
+-# Keep
+-# comments:
++ 
++ # Keep
++  # comments:
+ 
+ keep: |+
+   # text
+ 
+-# Trail
+-# comments.
+\ No newline at end of file
++ # Trail
++  # comments.
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+strip: |-
+  # text
+  
+ # Clip
+  # comments:
+
+clip: |
+  # text
+ 
+ # Keep
+  # comments:
+
+keep: |+
+  # text
+
+ # Trail
+  # comments.```
