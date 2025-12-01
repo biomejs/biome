@@ -2011,6 +2011,11 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-props
 	 */
 	noVueReservedProps?: NoVueReservedPropsConfiguration;
 	/**
+	* Disallow destructuring of props passed to setup in Vue projects.
+See https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss 
+	 */
+	noVueSetupPropsReactivityLoss?: NoVueSetupPropsReactivityLossConfiguration;
+	/**
 	* Disallow using v-if and v-for directives on the same element.
 See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
@@ -3661,6 +3666,9 @@ export type NoVueReservedKeysConfiguration =
 export type NoVueReservedPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueReservedPropsOptions;
+export type NoVueSetupPropsReactivityLossConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueSetupPropsReactivityLossOptions;
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
@@ -5098,6 +5106,10 @@ export interface RuleWithNoVueReservedPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueReservedPropsOptions;
 }
+export interface RuleWithNoVueSetupPropsReactivityLossOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueSetupPropsReactivityLossOptions;
+}
 export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
@@ -6371,6 +6383,7 @@ export type NoVueDataObjectDeclarationOptions = {};
 export type NoVueDuplicateKeysOptions = {};
 export type NoVueReservedKeysOptions = {};
 export type NoVueReservedPropsOptions = {};
+export type NoVueSetupPropsReactivityLossOptions = {};
 export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
 /**
@@ -7211,6 +7224,7 @@ export type Category =
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/noVueSetupPropsReactivityLoss"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useBiomeSuppressionComment"
