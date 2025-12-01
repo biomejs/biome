@@ -61,6 +61,8 @@ biome_resolver          = { workspace = true }
 biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
+biome_yaml_formatter    = { workspace = true, features = ["serde"] }
+biome_yaml_syntax       = { workspace = true }
 bpaf                    = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
@@ -102,6 +104,7 @@ schema = [
   "biome_html_formatter/schema",
   "biome_fs/schema",
   "biome_module_graph/schema",
+	"biome_yaml_formatter/schema",
 ]
 
 [lints]
