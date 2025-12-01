@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```jsonc,ignore
     /// // biome.json
     /// {
-    ///     "extends": ["./base.json"]
+    ///     "extends": ["./base.json"],
     ///     "files": {
     ///         "includes": ["**", "!**/test"]
     ///     }
