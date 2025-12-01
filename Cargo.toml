@@ -101,6 +101,7 @@ biome_text_size              = { path = "./crates/biome_text_size", version = "0
 biome_ungrammar              = { path = "./crates/biome_ungrammar", version = "0.3.1" }
 biome_unicode_table          = { path = "./crates/biome_unicode_table", version = "0.5.7" }
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.0.1" }
+biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 boa_engine                   = "0.21.1"
