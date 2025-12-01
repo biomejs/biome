@@ -18,53 +18,53 @@ impl ServiceLanguage for YamlLanguage {
     type ParserOptions = ();
     type EnvironmentSettings = ();
 
-    fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
+    fn lookup_settings(_languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         todo!()
     }
 
-    fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         todo!()
     }
 
     fn resolve_parse_options(
-        overrides: &OverrideSettings,
-        language: &Self::ParserSettings,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
+        _overrides: &OverrideSettings,
+        _language: &Self::ParserSettings,
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         todo!()
     }
 
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &Self::FormatterSettings,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
+        _global: &FormatSettings,
+        _overrides: &OverrideSettings,
+        _language: &Self::FormatterSettings,
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         todo!()
     }
 
     fn resolve_analyzer_options(
-        global: &Settings,
-        language: &Self::LinterSettings,
-        environment: Option<&Self::EnvironmentSettings>,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
+        _global: &Settings,
+        _language: &Self::LinterSettings,
+        _environment: Option<&Self::EnvironmentSettings>,
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
+        _suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         todo!()
     }
 
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
         todo!()
     }
 
-    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
         todo!()
     }
 
-    fn assist_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
         todo!()
     }
 }
