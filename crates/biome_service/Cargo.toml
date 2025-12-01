@@ -104,7 +104,7 @@ schema = [
   "biome_html_formatter/schema",
   "biome_fs/schema",
   "biome_module_graph/schema",
-	"biome_yaml_formatter/schema",
+  "biome_yaml_formatter/schema",
 ]
 
 [lints]
