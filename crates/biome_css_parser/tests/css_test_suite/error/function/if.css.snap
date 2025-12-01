@@ -401,26 +401,24 @@ CssRoot {
                                                 if_token: IF_KW@251..253 "if" [] [],
                                                 l_paren_token: L_PAREN@253..254 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
-                                                        items: [
-                                                            CssBogus {
-                                                                items: [
-                                                                    NOT_KW@254..258 "not" [] [Whitespace(" ")],
-                                                                    CssBogusIfTestBooleanExpr {
-                                                                        items: [
-                                                                            NOT_KW@258..261 "not" [] [],
-                                                                            L_PAREN@261..262 "(" [] [],
-                                                                            IDENT@262..269 "--style" [] [],
-                                                                        ],
-                                                                    },
-                                                                ],
-                                                            },
-                                                            COLON@269..271 ":" [] [Whitespace(" ")],
-                                                            CssGenericComponentValueList [
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@271..276 "black" [] [],
+                                                    CssIfBranch {
+                                                        condition: CssBogusIfTestBooleanExpr {
+                                                            items: [
+                                                                NOT_KW@254..258 "not" [] [Whitespace(" ")],
+                                                                CssBogusIfTestBooleanExpr {
+                                                                    items: [
+                                                                        NOT_KW@258..261 "not" [] [],
+                                                                        L_PAREN@261..262 "(" [] [],
+                                                                        IDENT@262..269 "--style" [] [],
+                                                                    ],
                                                                 },
                                                             ],
+                                                        },
+                                                        colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@271..276 "black" [] [],
+                                                            },
                                                         ],
                                                     },
                                                 ],
@@ -2160,8 +2158,8 @@ CssRoot {
                     0: IF_KW@251..253 "if" [] []
                     1: L_PAREN@253..254 "(" [] []
                     2: CSS_IF_BRANCH_LIST@254..276
-                      0: CSS_BOGUS_IF_BRANCH@254..276
-                        0: CSS_BOGUS@254..269
+                      0: CSS_IF_BRANCH@254..276
+                        0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@254..269
                           0: NOT_KW@254..258 "not" [] [Whitespace(" ")]
                           1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@258..269
                             0: NOT_KW@258..261 "not" [] []
