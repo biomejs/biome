@@ -10508,7 +10508,7 @@
 					]
 				},
 				"noBiomeFirstException": {
-					"description": "Prevents the use of the ! pattern in the first position of files.includes in the configuration file.\nSee https://biomejs.dev/linter/rules/no-biome-first-exception",
+					"description": "Prevents the misuse of glob patterns inside the files.includes field.\nSee https://biomejs.dev/linter/rules/no-biome-first-exception",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBiomeFirstExceptionConfiguration" },
 						{ "type": "null" }
