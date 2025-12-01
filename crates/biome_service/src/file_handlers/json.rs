@@ -27,7 +27,7 @@ use biome_formatter::{
     BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::analyze;
+use biome_json_analyze::{JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
@@ -528,11 +528,13 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-
-    let (_, analyze_diagnostics) =
-        analyze(&root, filter, &analyzer_options, file_source, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let services = JsonAnalyzeServices {
+        file_source,
+        configuration_source: params.settings.full_source(),
+    };
+    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, services, |signal| {
+        process_lint.process_signal(signal)
+    });
 
     let mut diagnostics = params
         .parse
@@ -601,8 +603,11 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         error!("Could not determine the file source of the file");
         return PullActionsResult { actions: vec![] };
     };
-
-    analyze(&tree, filter, &analyzer_options, file_source, |signal| {
+    let services = JsonAnalyzeServices {
+        file_source,
+        configuration_source: workspace.full_source(),
+    };
+    analyze(&tree, filter, &analyzer_options, services, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {
             CodeAction {
                 category: item.category.clone(),
@@ -661,7 +666,11 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         tree.syntax().text_range_with_trivia().len().into(),
     );
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
+        let services = JsonAnalyzeServices {
+            file_source,
+            configuration_source: params.settings.full_source(),
+        };
+        let (action, _) = analyze(&tree, filter, &analyzer_options, services, |signal| {
             process_fix_all.process_signal(signal)
         });
 

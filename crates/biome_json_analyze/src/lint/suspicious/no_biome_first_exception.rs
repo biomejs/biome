@@ -1,26 +1,26 @@
-use crate::JsonRuleAction;
-use crate::utils::matches_parent_object;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use crate::{ConfigSource, JsonRuleAction};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_json_factory::make::{
     json_array_element_list, json_string_literal, json_string_value, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonStringValue, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_json_syntax::{AnyJsonValue, JsonArrayElementList, JsonMember, JsonRoot, T};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::no_biome_first_exception::NoBiomeFirstExceptionOptions;
 
 declare_lint_rule! {
-    /// Prevents the use of the `!` pattern in the first position of `files.includes` in the configuration file.
+    /// Prevents the misuse of glob patterns inside the `files.includes` field.
     ///
+    /// ## Leading of negated patterns
     /// If the first pattern of `files.includes` starts with the leading `!`, Biome won't have any file to crawl. Generally,
     /// it is a good practice to declare the files/folders to include first, and then the files/folder to ignore.
     ///
     /// Check the [official documentation](https://biomejs.dev/guides/configure-biome/#exclude-files-via-configuration) for more examples.
     ///
-    /// ## Examples
+    /// ### Examples
     ///
-    /// ### Invalid
+    /// #### Invalid
     ///
     /// ```json,ignore
     /// {
@@ -30,12 +30,38 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### Valid
+    /// #### Valid
     ///
     /// ```json,ignore
     /// {
     ///     "files": {
     ///         "includes": ["src/**", "!dist"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ## Leading with catch-all `**`
+    ///
+    /// If the user configuration file extends from other sources (other configuration files or libraries), and those files contain the catch-all glob `**` in `files.includes`,
+    /// the rule will trigger a violation if also the user configuration file has a `**`.
+    ///
+    /// #### Invalid
+    ///
+    /// ```jsonc,ignore
+    /// // biome.json
+    /// {
+    ///     "extends": ["./base.json"],
+    ///     "files": {
+    ///         "includes": ["**", "!**/test"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsonc,ignore
+    /// // base.json
+    /// {
+    ///     "files": {
+    ///         "includes": ["**", "!**/dist"]
     ///     }
     /// }
     /// ```
@@ -51,14 +77,24 @@ declare_lint_rule! {
 }
 
 impl Rule for NoBiomeFirstException {
-    type Query = Ast<JsonMember>;
-    type State = JsonStringValue;
+    type Query = ConfigSource<JsonRoot>;
+    type State = ViolationKind;
     type Signals = Option<Self::State>;
     type Options = NoBiomeFirstExceptionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
+        let root = ctx.query();
         let file_path = ctx.file_path();
+
+        // we check if and extended package starts with `**`
+        let extends_starts_with_catch_all = ctx.extends().is_some_and(|mut extends| {
+            extends.any(|c| {
+                c.files
+                    .as_ref()
+                    .and_then(|files| files.includes.as_deref())
+                    .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
+            })
+        });
         // we use ends_with so it works only during testing
         if !file_path
             .file_name()
@@ -70,30 +106,45 @@ impl Rule for NoBiomeFirstException {
             return None;
         }
 
-        let name = node.name().ok()?;
+        let value = root.value().ok()?;
+        let value = value.as_json_object_value()?;
 
-        if name.inner_string_text().ok()?.text() != "includes" {
-            return None;
-        }
+        let includes = value
+            .find_member("files")
+            .and_then(|files| files.value().ok())
+            .and_then(|value| value.as_json_object_value().cloned())?
+            .find_member("includes")?;
+        let extends = value.find_member("extends");
 
-        if !matches_parent_object(node, "files") {
-            return None;
-        }
+        let extends_root = extends.is_some_and(|extends| extends.value().ok().is_some());
 
-        let root = ctx.root();
-
-        let extends_root = root
+        let includes_first_value = includes
             .value()
-            .ok()
-            .and_then(|value| value.as_json_object_value().cloned())
-            .and_then(|object| object.find_member("extends"))
-            .is_some_and(|extends| extends.value().ok().is_some());
+            .ok()?
+            .as_json_array_value()?
+            .elements()
+            .iter()
+            .flatten()
+            .next()
+            .and_then(|element| element.as_json_string_value().cloned());
 
-        if extends_root {
-            return None;
+        if extends_root && let Some(includes_first_value) = includes_first_value {
+            return if includes_first_value.inner_string_text().ok()?.text() == "**"
+                && extends_starts_with_catch_all
+            {
+                let includes_value = includes.value().ok()?;
+                let includes_value = includes_value.as_json_array_value()?;
+                let includes_value = includes_value.elements();
+                Some(ViolationKind::ExtendedStar(
+                    includes_first_value.range(),
+                    includes_value,
+                ))
+            } else {
+                None
+            };
         }
 
-        let value = node.value().ok()?;
+        let value = includes.value().ok()?;
         let value = value.as_json_array_value()?;
         if let Some(element) = value.elements().first() {
             let element = element.ok()?;
@@ -105,7 +156,7 @@ impl Rule for NoBiomeFirstException {
                 .text()
                 .starts_with('!')
             {
-                return Some(string_value.clone());
+                return Some(ViolationKind::NoStar(string_value.range(), includes));
             }
         }
 
@@ -113,46 +164,99 @@ impl Rule for NoBiomeFirstException {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.range(),
-                markup! {
+        match state {
+            ViolationKind::ExtendedStar(range, _) => {
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        range,
+                        markup! {
+                    "Biome detected that at least one of your extended packages starts with "<Emphasis>"**"</Emphasis>"."
+                },
+                    )
+                        .note(markup! {
+                    "When an extended package uses a catch-all, adding an additional catch-all could lead to possible issues."
+            }),
+                )
+            }
+            ViolationKind::NoStar(range, _) => {
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        range,
+                        markup! {
                     "Incorrect usage of the exception detected."
                 },
-            )
-            .note(markup! {
+                    )
+                        .note(markup! {
                     "Having a pattern that starts with `!` as first item will cause Biome to match no files."
             }),
-        )
-    }
-
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsonRuleAction> {
-        let mut mutation = ctx.root().begin();
-        let old_list = ctx.query().value().ok()?.as_json_array_value()?.elements();
-        let list = old_list.iter().flatten().collect::<Vec<_>>();
-        let mut new_list = vec![AnyJsonValue::JsonStringValue(json_string_value(
-            json_string_literal("**"),
-        ))];
-
-        new_list.extend(list);
-        let mut separators = vec![];
-
-        for _ in 0..new_list.len() - 1 {
-            separators.push(token(T![,]))
+                )
+            }
         }
-
-        let new_list = json_array_element_list(new_list, separators);
-
-        mutation.replace_node(old_list, new_list);
-
-        Some(JsonRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! {
-                "Add the patter "<Emphasis>"**"</Emphasis>" at the beginning of the list."
-            },
-            mutation,
-        ))
     }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsonRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        match state {
+            ViolationKind::ExtendedStar(_, includes_value) => {
+                let mut iter = includes_value.iter();
+                // remove the first value
+                iter.next();
+                let new_list = iter.flatten().collect::<Vec<_>>();
+                let mut separator_list = vec![];
+                if new_list.len() > 1 {
+                    for _ in 0..new_list.len() - 1 {
+                        separator_list.push(token(T![,]))
+                    }
+                }
+
+                mutation.replace_node(
+                    includes_value.clone(),
+                    json_array_element_list(new_list, separator_list),
+                );
+                Some(JsonRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! {
+                        "Remove "<Emphasis>"**"</Emphasis>" from your list."
+                    },
+                    mutation,
+                ))
+            }
+            ViolationKind::NoStar(_, includes) => {
+                let old_list = includes.value().ok()?.as_json_array_value()?.elements();
+                let list = old_list.iter().flatten().collect::<Vec<_>>();
+                let mut new_list = vec![AnyJsonValue::JsonStringValue(json_string_value(
+                    json_string_literal("**"),
+                ))];
+
+                new_list.extend(list);
+                let mut separators = vec![];
+
+                for _ in 0..new_list.len() - 1 {
+                    separators.push(token(T![,]))
+                }
+
+                let new_list = json_array_element_list(new_list, separators);
+
+                mutation.replace_node(old_list, new_list);
+
+                Some(JsonRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! {
+                        "Add the pattern "<Emphasis>"**"</Emphasis>" at the beginning of the list."
+                    },
+                    mutation,
+                ))
+            }
+        }
+    }
+}
+
+pub enum ViolationKind {
+    ExtendedStar(TextRange, JsonArrayElementList),
+    NoStar(TextRange, JsonMember),
 }

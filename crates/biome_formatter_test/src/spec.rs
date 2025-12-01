@@ -269,7 +269,11 @@ where
                 deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
                     .consume();
             settings
-                .merge_with_configuration(test_options.unwrap_or_default(), None)
+                .merge_with_configuration(
+                    test_options.unwrap_or_default(),
+                    None,
+                    Vec::<(Utf8PathBuf, Configuration)>::new(),
+                )
                 .unwrap();
 
             if !diagnostics.is_empty() {

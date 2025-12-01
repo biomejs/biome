@@ -8,7 +8,6 @@ use crate::execute::{Execution, TraversalMode};
 use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, markup};
 use biome_fs::FileSystem;
-use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
@@ -26,13 +25,15 @@ impl CommandRunner for MigrateCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        loaded_configuration: Configuration,
+        loaded_directory: Option<Utf8PathBuf>,
+        loaded_file: Option<Utf8PathBuf>,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        self.configuration_file_path = loaded_configuration.file_path;
-        self.configuration_directory_path = loaded_configuration.directory_path;
-        Ok(loaded_configuration.configuration)
+        self.configuration_file_path = loaded_file;
+        self.configuration_directory_path = loaded_directory;
+        Ok(loaded_configuration)
     }
 
     fn get_files_to_process(

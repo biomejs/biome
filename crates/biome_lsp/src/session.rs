@@ -916,6 +916,7 @@ impl Session {
                 .map(Utf8PathBuf::as_path)
                 .map(BiomePath::from),
             configuration,
+            extended_configurations: Default::default(),
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind, force)

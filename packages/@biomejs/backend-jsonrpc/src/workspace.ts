@@ -27,6 +27,7 @@ export type SupportKind =
 	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	extendedConfigurations?: [BiomePath, Configuration][];
 	projectKey: ProjectKey;
 	workspaceDirectory?: BiomePath;
 }
@@ -2657,7 +2658,7 @@ See https://biomejs.dev/linter/rules/no-async-promise-executor
 	 */
 	noAsyncPromiseExecutor?: NoAsyncPromiseExecutorConfiguration;
 	/**
-	* Prevents the use of the ! pattern in the first position of files.includes in the configuration file.
+	* Prevents the misuse of glob patterns inside the files.includes field.
 See https://biomejs.dev/linter/rules/no-biome-first-exception 
 	 */
 	noBiomeFirstException?: NoBiomeFirstExceptionConfiguration;

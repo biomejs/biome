@@ -211,6 +211,18 @@ impl Deref for BiomePath {
     }
 }
 
+impl AsRef<Utf8PathBuf> for BiomePath {
+    fn as_ref(&self) -> &Utf8PathBuf {
+        &self.path
+    }
+}
+
+impl AsRef<Utf8Path> for BiomePath {
+    fn as_ref(&self) -> &Utf8Path {
+        self.path.as_ref()
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::Serialize for BiomePath {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

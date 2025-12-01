@@ -983,6 +983,7 @@ impl Workspace for WorkspaceServer {
             workspace_directory,
             configuration,
             project_key,
+            extended_configurations,
         } = params;
         let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
@@ -1006,7 +1007,14 @@ impl Workspace for WorkspaceServer {
                 .ok_or_else(WorkspaceError::no_project)?
         };
 
-        settings.merge_with_configuration(configuration, workspace_directory.clone())?;
+        settings.merge_with_configuration(
+            configuration,
+            workspace_directory.clone(),
+            extended_configurations
+                .into_iter()
+                .map(|(path, config)| (path.into(), config))
+                .collect(),
+        )?;
 
         let loading_directory = if extends_root {
             self.projects.get_project_path(project_key)
@@ -2238,6 +2246,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 directory_path: nested_directory_path,
                 configuration: nested_configuration,
                 diagnostics,
+                extended_configurations,
                 ..
             } = loaded_nested_configuration;
             let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
@@ -2283,6 +2292,10 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
+                extended_configurations: extended_configurations
+                    .into_iter()
+                    .map(|(path, config)| (BiomePath::from(path), config))
+                    .collect(),
             })?;
 
             returned_diagnostics.extend(result.diagnostics)

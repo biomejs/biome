@@ -55,6 +55,8 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
+    /// The list of possible extended configuration files
+    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
 }
 
 impl LoadedConfiguration {
@@ -74,26 +76,31 @@ impl LoadedConfiguration {
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
+        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
+
+        let configuration = match partial_configuration {
+            Some(mut partial_configuration) => {
+                extended_configurations.extend(partial_configuration.apply_extends(
+                    fs,
+                    &configuration_file_path,
+                    &external_resolution_base_path,
+                    &mut diagnostics,
+                )?);
+                partial_configuration.migrate_deprecated_fields();
+                partial_configuration
+            }
+            None => Configuration::default(),
+        };
+
         Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
-                }
-                None => Configuration::default(),
-            },
+            configuration,
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
+            extended_configurations,
         })
     }
 
@@ -458,7 +465,7 @@ pub trait ConfigurationExt {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError>;
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
@@ -491,7 +498,7 @@ impl ConfigurationExt for Configuration {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
         let deserialized = self.deserialize_extends(
             fs,
             file_path.parent().expect("file path should have a parent"),
@@ -499,6 +506,13 @@ impl ConfigurationExt for Configuration {
         )?;
         let (configurations, errors): (Vec<_>, Vec<_>) =
             deserialized.into_iter().map(Deserialized::consume).unzip();
+
+        let configuration_list = configurations
+            .iter()
+            .flatten()
+            .cloned()
+            .map(|c| (file_path.to_path_buf(), c))
+            .collect::<Vec<_>>();
 
         let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
@@ -524,7 +538,7 @@ impl ConfigurationExt for Configuration {
                 .collect::<Vec<_>>(),
         );
 
-        Ok(())
+        Ok(configuration_list)
     }
 
     /// Deserializes all the configuration files that were specified in the
