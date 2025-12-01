@@ -89,4 +89,7 @@
 
 .todo {
 	background: if(style(--foo: bar) and (!bogus): red;);
+	background: if(not foo: red;);
 }
+
+

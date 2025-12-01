@@ -6,6 +6,7 @@ use biome_parser::TokenSet;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::{CompletedMarker, ParsedSyntax};
@@ -25,9 +26,9 @@ use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_declaration;
 use crate::syntax::property::GenericComponentValueList;
-use crate::syntax::property::is_at_generic_component_value;
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
+use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];
@@ -256,7 +257,15 @@ fn parse_any_if_test_boolean_expr_group(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T!['(']) {
         let m = p.start();
         p.bump(T!['(']);
-        parse_any_if_test_boolean_expr(p).ok();
+
+        parse_any_if_test_boolean_expr(p)
+            .or_recover_with_token_set(
+                p,
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')']]),
+                expected_if_test_boolean_not_expr,
+            )
+            .ok();
+
         p.expect(T![')']);
         return Present(m.complete(p, CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS));
     }
@@ -285,7 +294,14 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![not]);
-    parse_any_if_test_boolean_expr_group(p).ok();
+
+    parse_any_if_test_boolean_expr_group(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')'], T![:]]),
+            expected_if_test_boolean_expr_group,
+        )
+        .ok();
 
     Present(m.complete(p, CSS_IF_TEST_BOOLEAN_NOT_EXPR))
 }
@@ -430,7 +446,13 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    parse_any_if_condition(p).ok();
+    parse_any_if_condition(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_BRANCH, token_set![T![')'], T![:]]),
+            expected_if_branch,
+        )
+        .ok();
 
     p.expect(T![:]);
 
