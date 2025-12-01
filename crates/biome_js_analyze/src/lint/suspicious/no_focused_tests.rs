@@ -50,6 +50,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintJest("no-focused-tests").inspired(),
             RuleSource::EslintVitest("no-focused-tests").inspired(),
+            RuleSource::EslintPlaywright("no-focused-test").same(),
         ],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Test],

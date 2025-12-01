@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: getByRole.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await page.getByRole('button');
+
+
+```
+
+# Diagnostics
+```
+getByRole.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await page.getByRole('button');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    2 │ await·page.getByRole('button');
+      │ ------                         
+
+```

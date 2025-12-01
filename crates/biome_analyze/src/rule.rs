@@ -161,6 +161,8 @@ pub enum RuleSource {
     EslintVitest(&'static str),
     /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
     EslintVueJs(&'static str),
+    /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
+    EslintPlaywright(&'static str),
     /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
     GraphqlSchemaLinter(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
@@ -195,6 +197,7 @@ impl std::fmt::Display for RuleSource {
                 write!(f, "eslint-plugin-package-json-dependencies")
             }
             Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
+            Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
             Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
@@ -277,6 +280,7 @@ impl RuleSource {
             | Self::EslintPackageJson(rule_name)
             | Self::EslintPackageJsonDependencies(rule_name)
             | Self::EslintPerfectionist(rule_name)
+            | Self::EslintPlaywright(rule_name)
             | Self::EslintQwik(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
@@ -321,6 +325,7 @@ impl RuleSource {
                 format!("package-json-dependencies/{rule_name}")
             }
             Self::EslintPerfectionist(rule_name) => format!("perfectionist/{rule_name}"),
+            Self::EslintPlaywright(rule_name) => format!("playwright/{rule_name}"),
             Self::EslintQwik(rule_name) => format!("qwik/{rule_name}"),
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
@@ -377,6 +382,7 @@ impl RuleSource {
             Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
+            Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
             Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
         }
@@ -456,6 +462,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Playwright testing library rules
+    Playwright,
     /// Qwik framework rules
     Qwik,
     /// Vue.js framework rules
@@ -474,6 +482,7 @@ impl Display for RuleDomain {
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
+            Self::Playwright => fmt.write_str("playwright"),
             Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
@@ -510,6 +519,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
+            Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Qwik => &[
                 &("@builder.io/qwik", ">=1.0.0"),
                 &("@qwik.dev/core", ">=2.0.0"),
@@ -538,6 +548,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[],
             Self::Next => &[],
+            Self::Playwright => &["test", "expect"],
             Self::Qwik => &[],
             Self::Vue => &[],
             Self::Project => &[],
@@ -551,6 +562,7 @@ impl RuleDomain {
             Self::Test => "test",
             Self::Solid => "solid",
             Self::Next => "next",
+            Self::Playwright => "playwright",
             Self::Qwik => "qwik",
             Self::Vue => "vue",
             Self::Project => "project",
@@ -568,11 +580,11 @@ impl FromStr for RuleDomain {
             "test" => Ok(Self::Test),
             "solid" => Ok(Self::Solid),
             "next" => Ok(Self::Next),
+            "playwright" => Ok(Self::Playwright),
             "qwik" => Ok(Self::Qwik),
             "vue" => Ok(Self::Vue),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
-
             _ => Err("Invalid rule domain"),
         }
     }

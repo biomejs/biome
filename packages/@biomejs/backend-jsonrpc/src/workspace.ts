@@ -978,6 +978,7 @@ export type RuleDomain =
 	| "test"
 	| "solid"
 	| "next"
+	| "playwright"
 	| "qwik"
 	| "vue"
 	| "project"
@@ -1936,6 +1937,56 @@ See https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
+	* Disallow usage of element handles (page.$() and page.$$()).
+See https://biomejs.dev/linter/rules/no-playwright-element-handle 
+	 */
+	noPlaywrightElementHandle?: NoPlaywrightElementHandleConfiguration;
+	/**
+	* Disallow usage of page.$eval() and page.$$eval().
+See https://biomejs.dev/linter/rules/no-playwright-eval 
+	 */
+	noPlaywrightEval?: NoPlaywrightEvalConfiguration;
+	/**
+	* Disallow usage of the { force: true } option.
+See https://biomejs.dev/linter/rules/no-playwright-force-option 
+	 */
+	noPlaywrightForceOption?: NoPlaywrightForceOptionConfiguration;
+	/**
+	* Enforce Playwright async APIs to be awaited or returned.
+See https://biomejs.dev/linter/rules/no-playwright-missing-await 
+	 */
+	noPlaywrightMissingAwait?: NoPlaywrightMissingAwaitConfiguration;
+	/**
+	* Disallow usage of the networkidle option.
+See https://biomejs.dev/linter/rules/no-playwright-networkidle 
+	 */
+	noPlaywrightNetworkidle?: NoPlaywrightNetworkidleConfiguration;
+	/**
+	* Disallow using page.pause().
+See https://biomejs.dev/linter/rules/no-playwright-page-pause 
+	 */
+	noPlaywrightPagePause?: NoPlaywrightPagePauseConfiguration;
+	/**
+	* Disallow unnecessary await for Playwright methods that don't return promises.
+See https://biomejs.dev/linter/rules/no-playwright-useless-await 
+	 */
+	noPlaywrightUselessAwait?: NoPlaywrightUselessAwaitConfiguration;
+	/**
+	* Disallow using page.waitForNavigation().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation 
+	 */
+	noPlaywrightWaitForNavigation?: NoPlaywrightWaitForNavigationConfiguration;
+	/**
+	* Disallow using page.waitForSelector().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-selector 
+	 */
+	noPlaywrightWaitForSelector?: NoPlaywrightWaitForSelectorConfiguration;
+	/**
+	* Disallow using page.waitForTimeout().
+See https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout 
+	 */
+	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
+	/**
 	* Disallow the use of the __proto__ property.
 See https://biomejs.dev/linter/rules/no-proto 
 	 */
@@ -2059,6 +2110,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-max-params 
 	 */
 	useMaxParams?: UseMaxParamsConfiguration;
+	/**
+	* Enforce valid describe() callback.
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+	 */
+	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
 	* Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
 See https://biomejs.dev/linter/rules/use-qwik-method-usage 
@@ -3616,6 +3672,36 @@ export type NoNextAsyncClientComponentConfiguration =
 export type NoParametersOnlyUsedInRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoParametersOnlyUsedInRecursionOptions;
+export type NoPlaywrightElementHandleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightElementHandleOptions;
+export type NoPlaywrightEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightEvalOptions;
+export type NoPlaywrightForceOptionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightForceOptionOptions;
+export type NoPlaywrightMissingAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightMissingAwaitOptions;
+export type NoPlaywrightNetworkidleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightNetworkidleOptions;
+export type NoPlaywrightPagePauseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightPagePauseOptions;
+export type NoPlaywrightUselessAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightUselessAwaitOptions;
+export type NoPlaywrightWaitForNavigationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForNavigationOptions;
+export type NoPlaywrightWaitForSelectorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForSelectorOptions;
+export type NoPlaywrightWaitForTimeoutConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightWaitForTimeoutOptions;
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
@@ -3688,6 +3774,9 @@ export type UseFindConfiguration =
 export type UseMaxParamsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMaxParamsOptions;
+export type UsePlaywrightValidDescribeCallbackConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
 export type UseQwikMethodUsageConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikMethodUsageOptions;
@@ -5034,6 +5123,48 @@ export interface RuleWithNoParametersOnlyUsedInRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoParametersOnlyUsedInRecursionOptions;
 }
+export interface RuleWithNoPlaywrightElementHandleOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightElementHandleOptions;
+}
+export interface RuleWithNoPlaywrightEvalOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightEvalOptions;
+}
+export interface RuleWithNoPlaywrightForceOptionOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightForceOptionOptions;
+}
+export interface RuleWithNoPlaywrightMissingAwaitOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightMissingAwaitOptions;
+}
+export interface RuleWithNoPlaywrightNetworkidleOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightNetworkidleOptions;
+}
+export interface RuleWithNoPlaywrightPagePauseOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightPagePauseOptions;
+}
+export interface RuleWithNoPlaywrightUselessAwaitOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightUselessAwaitOptions;
+}
+export interface RuleWithNoPlaywrightWaitForNavigationOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForNavigationOptions;
+}
+export interface RuleWithNoPlaywrightWaitForSelectorOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForSelectorOptions;
+}
+export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightWaitForTimeoutOptions;
+}
 export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
@@ -5135,6 +5266,10 @@ export interface RuleWithUseFindOptions {
 export interface RuleWithUseMaxParamsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMaxParamsOptions;
+}
+export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
+	level: RulePlainConfiguration;
+	options?: UsePlaywrightValidDescribeCallbackOptions;
 }
 export interface RuleWithUseQwikMethodUsageOptions {
 	level: RulePlainConfiguration;
@@ -6350,6 +6485,16 @@ export type NoMisusedPromisesOptions = {};
 export type NoMultiStrOptions = {};
 export type NoNextAsyncClientComponentOptions = {};
 export type NoParametersOnlyUsedInRecursionOptions = {};
+export type NoPlaywrightElementHandleOptions = {};
+export type NoPlaywrightEvalOptions = {};
+export type NoPlaywrightForceOptionOptions = {};
+export type NoPlaywrightMissingAwaitOptions = {};
+export type NoPlaywrightNetworkidleOptions = {};
+export type NoPlaywrightPagePauseOptions = {};
+export type NoPlaywrightUselessAwaitOptions = {};
+export type NoPlaywrightWaitForNavigationOptions = {};
+export type NoPlaywrightWaitForSelectorOptions = {};
+export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
 export type NoReactForwardRefOptions = {};
 export type NoShadowOptions = {};
@@ -6406,6 +6551,7 @@ export interface UseMaxParamsOptions {
 	 */
 	max?: number;
 }
+export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikMethodUsageOptions = {};
 export type UseQwikValidLexicalScopeOptions = {};
 export type UseRegexpExecOptions = {};
@@ -7192,6 +7338,17 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noPlaywrightElementHandle"
+	| "lint/nursery/noPlaywrightEval"
+	| "lint/nursery/noPlaywrightForceOption"
+	| "lint/nursery/noPlaywrightMissingAwait"
+	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightUselessAwait"
+	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/noPlaywrightWaitForNavigation"
+	| "lint/nursery/noPlaywrightWaitForSelector"
+	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
