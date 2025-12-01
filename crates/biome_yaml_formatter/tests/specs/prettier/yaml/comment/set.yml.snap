@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/set.yml
+---
+# Input
+
+```yml
+- 123
+  # 456
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ - 123
+-  # 456
++  
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- 123
+  ```

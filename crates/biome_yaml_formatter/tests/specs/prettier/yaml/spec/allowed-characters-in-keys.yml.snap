@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/allowed-characters-in-keys.yml
+---
+# Input
+
+```yml
+a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
+?foo: safe question mark
+:foo: safe colon
+-foo: safe dash
+this is#not: a comment
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ ?foo: safe question mark
+ :foo: safe colon
+ -foo: safe dash
+-this is#not: a comment
++this is
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
+?foo: safe question mark
+:foo: safe colon
+-foo: safe dash
+this is```
+
+# Errors
+```
+allowed-characters-in-keys.yml:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found ``
+  
+    4 │ -foo: safe dash
+    5 │ this is#not: a comment
+  > 6 │ 
+      │ 
+  
+  i Remove 
+  
+
+```

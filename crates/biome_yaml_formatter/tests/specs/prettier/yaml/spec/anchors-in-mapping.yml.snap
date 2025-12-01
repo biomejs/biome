@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/anchors-in-mapping.yml
+---
+# Input
+
+```yml
+&a a: b
+c: &d d
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ &a a: b
+-c: &d d
++c: &d d
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+&a a: b
+c: &d d```
+
+# Errors
+```
+anchors-in-mapping.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ &a a: b
+      │ ^
+    2 │ c: &d d
+    3 │ 
+  
+anchors-in-mapping.yml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ &a a: b
+  > 2 │ c: &d d
+      │    ^
+    3 │ 
+  
+
+```

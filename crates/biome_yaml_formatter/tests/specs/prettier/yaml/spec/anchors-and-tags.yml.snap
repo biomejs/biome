@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/anchors-and-tags.yml
+---
+# Input
+
+```yml
+ - &a !!str a
+ - !!int 2
+ - !!int &c 4
+ - &d d
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-- !!str &a a
+-- !!int 2
+-- !!int &c 4
+-- &d d
++- &a !!str a
++ - !!int 2
++ - !!int &c 4
++ - &d d
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- &a !!str a
+ - !!int 2
+ - !!int &c 4
+ - &d d```
+
+# Errors
+```
+anchors-and-tags.yml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │  - &a !!str a
+      │    ^
+    2 │  - !!int 2
+    3 │  - !!int &c 4
+  
+anchors-and-tags.yml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - &a !!str a
+  > 2 │  - !!int 2
+      │    ^
+    3 │  - !!int &c 4
+    4 │  - &d d
+  
+anchors-and-tags.yml:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - &a !!str a
+  > 2 │  - !!int 2
+      │     ^
+    3 │  - !!int &c 4
+    4 │  - &d d
+  
+anchors-and-tags.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - &a !!str a
+    2 │  - !!int 2
+  > 3 │  - !!int &c 4
+      │    ^
+    4 │  - &d d
+    5 │ 
+  
+anchors-and-tags.yml:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - &a !!str a
+    2 │  - !!int 2
+  > 3 │  - !!int &c 4
+      │     ^
+    4 │  - &d d
+    5 │ 
+  
+anchors-and-tags.yml:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │  - !!int 2
+    3 │  - !!int &c 4
+  > 4 │  - &d d
+      │    ^
+    5 │ 
+  
+
+```

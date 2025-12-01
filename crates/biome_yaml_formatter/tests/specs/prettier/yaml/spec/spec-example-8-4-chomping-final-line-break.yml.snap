@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-4-chomping-final-line-break.yml
+---
+# Input
+
+```yml
+strip: |-
+  text
+clip: |
+  text
+keep: |+
+  text
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,4 +3,4 @@
+ clip: |
+   text
+ keep: |+
+-  text
++  text
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+strip: |-
+  text
+clip: |
+  text
+keep: |+
+  text```

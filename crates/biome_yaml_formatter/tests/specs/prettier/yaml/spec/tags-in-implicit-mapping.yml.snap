@@ -1,0 +1,143 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-in-implicit-mapping.yml
+---
+# Input
+
+```yml
+!!str a: b
+c: !!int 42
+e: !!str f
+g: h
+!!int 23: !!bool false
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ c: !!int 42
+ e: !!str f
+ g: h
+-!!int 23: !!bool false
++!!int 23: !!bool false
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+!!str a: b
+c: !!int 42
+e: !!str f
+g: h
+!!int 23: !!bool false```
+
+# Errors
+```
+tags-in-implicit-mapping.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ !!str a: b
+      │ ^
+    2 │ c: !!int 42
+    3 │ e: !!str f
+  
+tags-in-implicit-mapping.yml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ !!str a: b
+      │  ^
+    2 │ c: !!int 42
+    3 │ e: !!str f
+  
+tags-in-implicit-mapping.yml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!str a: b
+  > 2 │ c: !!int 42
+      │    ^
+    3 │ e: !!str f
+    4 │ g: h
+  
+tags-in-implicit-mapping.yml:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!str a: b
+  > 2 │ c: !!int 42
+      │     ^
+    3 │ e: !!str f
+    4 │ g: h
+  
+tags-in-implicit-mapping.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!str a: b
+    2 │ c: !!int 42
+  > 3 │ e: !!str f
+      │    ^
+    4 │ g: h
+    5 │ !!int 23: !!bool false
+  
+tags-in-implicit-mapping.yml:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!str a: b
+    2 │ c: !!int 42
+  > 3 │ e: !!str f
+      │     ^
+    4 │ g: h
+    5 │ !!int 23: !!bool false
+  
+tags-in-implicit-mapping.yml:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ e: !!str f
+    4 │ g: h
+  > 5 │ !!int 23: !!bool false
+      │ ^
+    6 │ 
+  
+tags-in-implicit-mapping.yml:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ e: !!str f
+    4 │ g: h
+  > 5 │ !!int 23: !!bool false
+      │  ^
+    6 │ 
+  
+tags-in-implicit-mapping.yml:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ e: !!str f
+    4 │ g: h
+  > 5 │ !!int 23: !!bool false
+      │           ^
+    6 │ 
+  
+tags-in-implicit-mapping.yml:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ e: !!str f
+    4 │ g: h
+  > 5 │ !!int 23: !!bool false
+      │            ^
+    6 │ 
+  
+
+```

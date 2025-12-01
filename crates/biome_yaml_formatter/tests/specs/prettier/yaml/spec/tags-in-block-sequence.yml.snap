@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-in-block-sequence.yml
+---
+# Input
+
+```yml
+ - !!str a
+ - b
+ - !!int 42
+ - d
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ - !!str a
+-- b
+-- !!int 42
+-- d
++ - b
++ - !!int 42
++ - d
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- !!str a
+ - b
+ - !!int 42
+ - d```
+
+# Errors
+```
+tags-in-block-sequence.yml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │  - !!str a
+      │    ^
+    2 │  - b
+    3 │  - !!int 42
+  
+tags-in-block-sequence.yml:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │  - !!str a
+      │     ^
+    2 │  - b
+    3 │  - !!int 42
+  
+tags-in-block-sequence.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - !!str a
+    2 │  - b
+  > 3 │  - !!int 42
+      │    ^
+    4 │  - d
+    5 │ 
+  
+tags-in-block-sequence.yml:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │  - !!str a
+    2 │  - b
+  > 3 │  - !!int 42
+      │     ^
+    4 │  - d
+    5 │ 
+  
+
+```

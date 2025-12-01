@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/plain-scalar-looking-like-key-comment-anchor-and-tag.yml
+---
+# Input
+
+```yml
+k:#foo
+ &a !t s
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ k:#foo
+-&a !t s
++ &a !t s
+```
+
+# Output
+
+```yml
+k:#foo
+ &a !t s
+```

@@ -1,0 +1,169 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/ansible/playbook.yml
+---
+# Input
+
+```yml
+---
+- hosts: webservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+    notify:
+    - restart apache
+  - name: ensure apache is running
+    service:
+      name: httpd
+      state: started
+  handlers:
+    - name: restart apache
+      service:
+        name: httpd
+        state: restarted
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,22 +5,22 @@
+     max_clients: 200
+   remote_user: root
+   tasks:
+-    - name: ensure apache is at the latest version
+-      yum:
+-        name: httpd
+-        state: latest
+-    - name: write the apache config file
+-      template:
+-        src: /srv/httpd.j2
+-        dest: /etc/httpd.conf
+-      notify:
+-        - restart apache
+-    - name: ensure apache is running
+-      service:
+-        name: httpd
+-        state: started
++  - name: ensure apache is at the latest version
++    yum:
++      name: httpd
++      state: latest
++  - name: write the apache config file
++    template:
++      src: /srv/httpd.j2
++      dest: /etc/httpd.conf
++    notify:
++    - restart apache
++  - name: ensure apache is running
++    service:
++      name: httpd
++      state: started
+   handlers:
+     - name: restart apache
+       service:
+         name: httpd
+-        state: restarted
++        state: restarted
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+- hosts: webservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+    notify:
+    - restart apache
+  - name: ensure apache is running
+    service:
+      name: httpd
+      state: started
+  handlers:
+    - name: restart apache
+      service:
+        name: httpd
+        state: restarted```
+
+# Errors
+```
+playbook.yml:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found 'http_port: 80
+        max_clients: 200
+      remote_user: root
+      tasks:
+      - name: ensure apache is at the latest version
+        yum:
+          name: httpd
+          state: latest
+      - name: write the apache config file
+        template:
+          src: /srv/httpd.j2
+          dest: /etc/httpd.conf
+        notify:
+        - restart apache
+      - name: ensure apache is running
+        service:
+          name: httpd
+          state: started
+      handlers:
+        - name: restart apache
+          service:
+            name: httpd
+            state: restarted'.
+  
+     2 │ - hosts: webservers
+     3 │   vars:
+   > 4 │     http_port: 80
+       │     ^^^^^^^^^^^^^
+   > 5 │     max_clients: 200
+        ...
+  > 24 │       service:
+  > 25 │         name: httpd
+  > 26 │         state: restarted
+       │         ^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Expected a block mapping entry here.
+  
+     2 │ - hosts: webservers
+     3 │   vars:
+   > 4 │     http_port: 80
+       │     ^^^^^^^^^^^^^
+   > 5 │     max_clients: 200
+        ...
+  > 24 │       service:
+  > 25 │         name: httpd
+  > 26 │         state: restarted
+       │         ^^^^^^^^^^^^^^^^
+    27 │ 
+  
+
+```

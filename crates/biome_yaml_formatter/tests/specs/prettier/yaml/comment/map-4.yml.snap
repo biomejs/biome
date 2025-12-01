@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/map-4.yml
+---
+# Input
+
+```yml
+before:
+
+  # before.comment
+after:
+  # after.comment
+
+before-after:
+
+  # before-after.comment
+
+none:
+  # none.comment
+before(2 line):
+
+
+  # before.comment
+after(2 line):
+  # after.comment
+
+
+before-after(2 line):
+
+
+  # before-after.comment
+
+
+none(2):
+  # none.comment
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,13 +12,16 @@
+   # none.comment
+ before(2 line):
+ 
++
+   # before.comment
+ after(2 line):
+   # after.comment
+ 
++
+ before-after(2 line):
+ 
++
+   # before-after.comment
+ 
+-none(2):
+-  # none.comment
++
++none(2):
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+before:
+
+  # before.comment
+after:
+  # after.comment
+
+before-after:
+
+  # before-after.comment
+
+none:
+  # none.comment
+before(2 line):
+
+
+  # before.comment
+after(2 line):
+  # after.comment
+
+
+before-after(2 line):
+
+
+  # before-after.comment
+
+
+none(2):```

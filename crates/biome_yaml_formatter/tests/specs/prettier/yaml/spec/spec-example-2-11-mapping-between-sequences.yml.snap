@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-11-mapping-between-sequences.yml
+---
+# Input
+
+```yml
+? - Detroit Tigers
+  - Chicago cubs
+:
+  - 2001-07-23
+
+? [ New York Yankees,
+    Atlanta Braves ]
+: [ 2001-07-02, 2001-08-12,
+    2001-08-14 ]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,9 @@
+ ? - Detroit Tigers
+   - Chicago cubs
+-: - 2001-07-23
++:
++  - 2001-07-23
+ 
+-[New York Yankees, Atlanta Braves]: [2001-07-02, 2001-08-12, 2001-08-14]
++? [ New York Yankees,
++    Atlanta Braves ]
++: [ 2001-07-02, 2001-08-12,
++    2001-08-14 ]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? - Detroit Tigers
+  - Chicago cubs
+:
+  - 2001-07-23
+
+? [ New York Yankees,
+    Atlanta Braves ]
+: [ 2001-07-02, 2001-08-12,
+    2001-08-14 ]```

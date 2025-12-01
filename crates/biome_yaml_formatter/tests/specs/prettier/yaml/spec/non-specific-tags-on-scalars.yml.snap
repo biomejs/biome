@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/non-specific-tags-on-scalars.yml
+---
+# Input
+
+```yml
+- plain
+- "double quoted"
+- 'single quoted'
+- >
+  block
+- plain again
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ - plain
+ - "double quoted"
+-- "single quoted"
++- 'single quoted'
+ - >
+   block
+-- plain again
++- plain again
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- plain
+- "double quoted"
+- 'single quoted'
+- >
+  block
+- plain again```

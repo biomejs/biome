@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-1-alias-nodes.yml
+---
+# Input
+
+```yml
+First occurrence: &anchor Foo
+Second occurrence: *anchor
+Override anchor: &anchor Bar
+Reuse anchor: *anchor
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ First occurrence: &anchor Foo
+ Second occurrence: *anchor
+ Override anchor: &anchor Bar
+-Reuse anchor: *anchor
++Reuse anchor: *anchor
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+First occurrence: &anchor Foo
+Second occurrence: *anchor
+Override anchor: &anchor Bar
+Reuse anchor: *anchor```
+
+# Errors
+```
+spec-example-7-1-alias-nodes.yml:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ First occurrence: &anchor Foo
+      │                   ^
+    2 │ Second occurrence: *anchor
+    3 │ Override anchor: &anchor Bar
+  
+spec-example-7-1-alias-nodes.yml:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    1 │ First occurrence: &anchor Foo
+  > 2 │ Second occurrence: *anchor
+      │                    ^
+    3 │ Override anchor: &anchor Bar
+    4 │ Reuse anchor: *anchor
+  
+spec-example-7-1-alias-nodes.yml:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ First occurrence: &anchor Foo
+    2 │ Second occurrence: *anchor
+  > 3 │ Override anchor: &anchor Bar
+      │                  ^
+    4 │ Reuse anchor: *anchor
+    5 │ 
+  
+spec-example-7-1-alias-nodes.yml:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    2 │ Second occurrence: *anchor
+    3 │ Override anchor: &anchor Bar
+  > 4 │ Reuse anchor: *anchor
+      │               ^
+    5 │ 
+  
+
+```

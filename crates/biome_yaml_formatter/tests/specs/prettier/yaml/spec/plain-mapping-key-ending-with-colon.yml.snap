@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/plain-mapping-key-ending-with-colon.yml
+---
+# Input
+
+```yml
+---
+key ends with two colons::: value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ ---
+-key ends with two colons::: value
++key ends with two colons::: value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+key ends with two colons::: value```

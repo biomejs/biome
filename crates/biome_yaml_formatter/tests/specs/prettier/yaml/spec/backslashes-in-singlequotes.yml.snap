@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/backslashes-in-singlequotes.yml
+---
+# Input
+
+```yml
+'foo: bar\': baz'
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-'foo: bar\': baz'
++'foo: bar\': baz'
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+'foo: bar\': baz'```

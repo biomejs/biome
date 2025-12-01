@@ -1,0 +1,252 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/various-combinations-of-tags-and-anchors.yml
+---
+# Input
+
+```yml
+---
+&a1
+!!str
+scalar1
+---
+!!str
+&a2
+scalar2
+---
+&a3
+!!str scalar3
+---
+&a4 !!map
+&a5 !!str key5: value4
+---
+a6: 1
+&anchor6 b6: 2
+---
+!!map
+&a8 !!str key8: value7
+---
+!!map
+!!str &a10 key10: value9
+---
+!!str &a11
+value11
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,26 @@
+ ---
+-!!str &a1 scalar1
++&a1
++!!str
++scalar1
+ ---
+-!!str &a2 scalar2
++!!str
++&a2
++scalar2
+ ---
+-!!str &a3 scalar3
++&a3
++!!str scalar3
+ ---
+-!!map &a4
+-!!str &a5 key5: value4
++&a4 !!map
++&a5 !!str key5: value4
+ ---
+ a6: 1
+ &anchor6 b6: 2
+ ---
+ !!map
+-!!str &a8 key8: value7
++&a8 !!str key8: value7
+ ---
+ !!map
+ !!str &a10 key10: value9
+ ---
+-!!str &a11 value11
++!!str &a11
++value11
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+&a1
+!!str
+scalar1
+---
+!!str
+&a2
+scalar2
+---
+&a3
+!!str scalar3
+---
+&a4 !!map
+&a5 !!str key5: value4
+---
+a6: 1
+&anchor6 b6: 2
+---
+!!map
+&a8 !!str key8: value7
+---
+!!map
+!!str &a10 key10: value9
+---
+!!str &a11
+value11```
+
+# Errors
+```
+various-combinations-of-tags-and-anchors.yml:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `a6`
+  
+    14 │ &a5 !!str key5: value4
+    15 │ ---
+  > 16 │ a6: 1
+       │ ^^
+    17 │ &anchor6 b6: 2
+    18 │ ---
+  
+  i Remove a6
+  
+various-combinations-of-tags-and-anchors.yml:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    15 │ ---
+    16 │ a6: 1
+  > 17 │ &anchor6 b6: 2
+       │ ^
+    18 │ ---
+    19 │ !!map
+  
+various-combinations-of-tags-and-anchors.yml:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    16 │ a6: 1
+    17 │ &anchor6 b6: 2
+  > 18 │ ---
+       │ ^^^
+  > 19 │ !!map
+        ...
+  > 24 │ ---
+  > 25 │ !!str &a11
+  > 26 │ value11
+  > 27 │ 
+       │ 
+  
+various-combinations-of-tags-and-anchors.yml:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    17 │ &anchor6 b6: 2
+    18 │ ---
+  > 19 │ !!map
+       │ ^
+    20 │ &a8 !!str key8: value7
+    21 │ ---
+  
+various-combinations-of-tags-and-anchors.yml:19:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    17 │ &anchor6 b6: 2
+    18 │ ---
+  > 19 │ !!map
+       │  ^
+    20 │ &a8 !!str key8: value7
+    21 │ ---
+  
+various-combinations-of-tags-and-anchors.yml:20:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    18 │ ---
+    19 │ !!map
+  > 20 │ &a8 !!str key8: value7
+       │ ^
+    21 │ ---
+    22 │ !!map
+  
+various-combinations-of-tags-and-anchors.yml:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    20 │ &a8 !!str key8: value7
+    21 │ ---
+  > 22 │ !!map
+       │ ^
+    23 │ !!str &a10 key10: value9
+    24 │ ---
+  
+various-combinations-of-tags-and-anchors.yml:22:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    20 │ &a8 !!str key8: value7
+    21 │ ---
+  > 22 │ !!map
+       │  ^
+    23 │ !!str &a10 key10: value9
+    24 │ ---
+  
+various-combinations-of-tags-and-anchors.yml:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    21 │ ---
+    22 │ !!map
+  > 23 │ !!str &a10 key10: value9
+       │ ^
+    24 │ ---
+    25 │ !!str &a11
+  
+various-combinations-of-tags-and-anchors.yml:23:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    21 │ ---
+    22 │ !!map
+  > 23 │ !!str &a10 key10: value9
+       │  ^
+    24 │ ---
+    25 │ !!str &a11
+  
+various-combinations-of-tags-and-anchors.yml:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    23 │ !!str &a10 key10: value9
+    24 │ ---
+  > 25 │ !!str &a11
+       │ ^
+    26 │ value11
+    27 │ 
+  
+various-combinations-of-tags-and-anchors.yml:25:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    23 │ !!str &a10 key10: value9
+    24 │ ---
+  > 25 │ !!str &a11
+       │  ^
+    26 │ value11
+    27 │ 
+  
+
+```

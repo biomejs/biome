@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-21-block-scalar-nodes.yml
+---
+# Input
+
+```yml
+literal: |2
+  value
+folded:
+   !foo
+  >1
+ value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,6 @@
+ literal: |2
+   value
+-folded: !foo >1
+- value
++folded:
++   !foo
++  >1
++ value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+literal: |2
+  value
+folded:
+   !foo
+  >1
+ value```
+
+# Errors
+```
+spec-example-8-21-block-scalar-nodes.yml:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    2 │   value
+    3 │ folded:
+  > 4 │    !foo
+      │    ^
+    5 │   >1
+    6 │  value
+  
+
+```

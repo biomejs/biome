@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/separator.yml
+---
+# Input
+
+```yml
+a
+---
+b
+...
+c
+... #
+d
+...
+---
+e
+...
+#
+---
+f
+--- #
+g
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,11 @@
+ a
+ ---
+ b
+----
++...
+ c
+ ... #
+ d
++...
+ ---
+ e
+ ...
+```
+
+# Output
+
+```yml
+a
+---
+b
+...
+c
+... #
+d
+...
+---
+e
+...
+#
+---
+f
+--- #
+g
+```

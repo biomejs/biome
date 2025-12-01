@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-18-flow-mapping-adjacent-values.yml
+---
+# Input
+
+```yml
+{
+"adjacent":value,
+"readable": value,
+"empty":
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,5 @@
+-{ "adjacent": value, "readable": value, "empty" }
++{
++"adjacent":value,
++"readable": value,
++"empty":
++}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+{
+"adjacent":value,
+"readable": value,
+"empty":
+}```

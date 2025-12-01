@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-7-single-quoted-characters.yml
+---
+# Input
+
+```yml
+'here''s to "quotes"'
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-'here''s to "quotes"'
++'here''s to "quotes"'
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+'here''s to "quotes"'```

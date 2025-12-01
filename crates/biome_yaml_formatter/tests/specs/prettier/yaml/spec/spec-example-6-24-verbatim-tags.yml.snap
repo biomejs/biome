@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-24-verbatim-tags.yml
+---
+# Input
+
+```yml
+!<tag:yaml.org,2002:str> foo :
+  !<!bar> baz
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,2 @@
+-!<tag:yaml.org,2002:str> foo: !<!bar> baz
++!<tag:yaml.org,2002:str> foo :
++  !<!bar> baz
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+!<tag:yaml.org,2002:str> foo :
+  !<!bar> baz```
+
+# Errors
+```
+spec-example-6-24-verbatim-tags.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ !<tag:yaml.org,2002:str> foo :
+      │ ^
+    2 │   !<!bar> baz
+    3 │ 
+  
+spec-example-6-24-verbatim-tags.yml:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !<tag:yaml.org,2002:str> foo :
+  > 2 │   !<!bar> baz
+      │   ^
+    3 │ 
+  
+
+```

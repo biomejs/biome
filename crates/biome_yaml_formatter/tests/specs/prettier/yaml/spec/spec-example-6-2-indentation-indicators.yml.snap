@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-2-indentation-indicators.yml
+---
+# Input
+
+```yml
+? a
+: -	b
+  -  -	c
+     - d
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-a:
+-  - b
+-  - - c
+-    - d
++? a
++: -	b
++  -  -	c
++     - d
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? a
+: -	b
+  -  -	c
+     - d```

@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-18-implicit-block-mapping-entries.yml
+---
+# Input
+
+```yml
+plain key: in-line value
+: # Both empty
+"quoted key":
+- entry
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ plain key: in-line value
+ : # Both empty
+ "quoted key":
+-  - entry
++- entry
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+plain key: in-line value
+: # Both empty
+"quoted key":
+- entry```
+
+# Errors
+```
+spec-example-8-18-implicit-block-mapping-entries.yml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found ': # Both empty
+    "quoted key":
+    - entry'.
+  
+    1 │ plain key: in-line value
+  > 2 │ : # Both empty
+      │ ^^^^^^^^^^^^^^
+  > 3 │ "quoted key":
+  > 4 │ - entry
+      │ ^^^^^^^
+    5 │ 
+  
+  i Expected a block mapping entry here.
+  
+    1 │ plain key: in-line value
+  > 2 │ : # Both empty
+      │ ^^^^^^^^^^^^^^
+  > 3 │ "quoted key":
+  > 4 │ - entry
+      │ ^^^^^^^
+    5 │ 
+  
+
+```

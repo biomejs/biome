@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/bare-document-after-document-end-marker.yml
+---
+# Input
+
+```yml
+---
+scalar1
+...
+key: value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ ---
+ scalar1
+----
+-key: value
++...
++key: value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+scalar1
+...
+key: value```

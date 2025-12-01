@@ -1,0 +1,216 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/whitespace-around-colon-in-mappings.yml
+---
+# Input
+
+```yml
+"top1" : 
+  "key1" : &alias1 scalar1
+'top2' : 
+  'key2' : &alias2 scalar2
+top3: &node3 
+  *alias1 : scalar3
+top4: 
+  *alias2 : scalar4
+top5   :    
+  scalar5
+top6: 
+  &anchor6 'key6' : scalar6
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,12 @@
+-"top1":
+-  "key1": &alias1 scalar1
+-"top2":
+-  "key2": &alias2 scalar2
+-top3: &node3
++"top1" : 
++  "key1" : &alias1 scalar1
++'top2' : 
++  'key2' : &alias2 scalar2
++top3: &node3 
+   *alias1 : scalar3
+-top4:
++top4: 
+   *alias2 : scalar4
+-top5: scalar5
+-top6:
+-  &anchor6 "key6": scalar6
++top5   :    
++  scalar5
++top6: 
++  &anchor6 'key6' : scalar6
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+"top1" : 
+  "key1" : &alias1 scalar1
+'top2' : 
+  'key2' : &alias2 scalar2
+top3: &node3 
+  *alias1 : scalar3
+top4: 
+  *alias2 : scalar4
+top5   :    
+  scalar5
+top6: 
+  &anchor6 'key6' : scalar6```
+
+# Errors
+```
+whitespace-around-colon-in-mappings.yml:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found ':'.
+  
+  > 1 │ "top1" :·
+      │        ^
+    2 │   "key1" : &alias1 scalar1
+    3 │ 'top2' :·
+  
+  i Expected a block mapping entry here.
+  
+  > 1 │ "top1" :·
+      │        ^
+    2 │   "key1" : &alias1 scalar1
+    3 │ 'top2' :·
+  
+whitespace-around-colon-in-mappings.yml:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found ': &alias1 scalar1'.
+  
+    1 │ "top1" :·
+  > 2 │   "key1" : &alias1 scalar1
+      │          ^^^^^^^^^^^^^^^^^
+    3 │ 'top2' :·
+    4 │   'key2' : &alias2 scalar2
+  
+  i Expected a block mapping entry here.
+  
+    1 │ "top1" :·
+  > 2 │   "key1" : &alias1 scalar1
+      │          ^^^^^^^^^^^^^^^^^
+    3 │ 'top2' :·
+    4 │   'key2' : &alias2 scalar2
+  
+whitespace-around-colon-in-mappings.yml:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ "top1" :·
+  > 2 │   "key1" : &alias1 scalar1
+      │            ^
+    3 │ 'top2' :·
+    4 │   'key2' : &alias2 scalar2
+  
+whitespace-around-colon-in-mappings.yml:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found ':'.
+  
+    1 │ "top1" :·
+    2 │   "key1" : &alias1 scalar1
+  > 3 │ 'top2' :·
+      │        ^
+    4 │   'key2' : &alias2 scalar2
+    5 │ top3: &node3·
+  
+  i Expected a block mapping entry here.
+  
+    1 │ "top1" :·
+    2 │   "key1" : &alias1 scalar1
+  > 3 │ 'top2' :·
+      │        ^
+    4 │   'key2' : &alias2 scalar2
+    5 │ top3: &node3·
+  
+whitespace-around-colon-in-mappings.yml:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found ': &alias2 scalar2'.
+  
+    2 │   "key1" : &alias1 scalar1
+    3 │ 'top2' :·
+  > 4 │   'key2' : &alias2 scalar2
+      │          ^^^^^^^^^^^^^^^^^
+    5 │ top3: &node3·
+    6 │   *alias1 : scalar3
+  
+  i Expected a block mapping entry here.
+  
+    2 │   "key1" : &alias1 scalar1
+    3 │ 'top2' :·
+  > 4 │   'key2' : &alias2 scalar2
+      │          ^^^^^^^^^^^^^^^^^
+    5 │ top3: &node3·
+    6 │   *alias1 : scalar3
+  
+whitespace-around-colon-in-mappings.yml:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │   "key1" : &alias1 scalar1
+    3 │ 'top2' :·
+  > 4 │   'key2' : &alias2 scalar2
+      │            ^
+    5 │ top3: &node3·
+    6 │   *alias1 : scalar3
+  
+whitespace-around-colon-in-mappings.yml:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    3 │ 'top2' :·
+    4 │   'key2' : &alias2 scalar2
+  > 5 │ top3: &node3·
+      │       ^
+    6 │   *alias1 : scalar3
+    7 │ top4:·
+  
+whitespace-around-colon-in-mappings.yml:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+     5 │ top3: &node3·
+     6 │   *alias1 : scalar3
+   > 7 │ top4:·
+       │ ^^^^^^
+   > 8 │   *alias2 : scalar4
+   > 9 │ top5   :····
+  > 10 │   scalar5
+  > 11 │ top6:·
+  > 12 │   &anchor6 'key6' : scalar6
+  > 13 │ 
+       │ 
+  
+whitespace-around-colon-in-mappings.yml:8:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+     6 │   *alias1 : scalar3
+     7 │ top4:·
+   > 8 │   *alias2 : scalar4
+       │   ^
+     9 │ top5   :····
+    10 │   scalar5
+  
+whitespace-around-colon-in-mappings.yml:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    10 │   scalar5
+    11 │ top6:·
+  > 12 │   &anchor6 'key6' : scalar6
+       │   ^
+    13 │ 
+  
+
+```

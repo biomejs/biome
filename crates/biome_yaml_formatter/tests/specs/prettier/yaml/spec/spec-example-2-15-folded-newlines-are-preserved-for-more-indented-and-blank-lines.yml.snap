@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-15-folded-newlines-are-preserved-for-more-indented-and-blank-lines.yml
+---
+# Input
+
+```yml
+>
+ Sammy Sosa completed another
+ fine season with great stats.
+
+   63 Home Runs
+   0.288 Batting Average
+
+ What a year!
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ >
+-  Sammy Sosa completed another
+-  fine season with great stats.
++ Sammy Sosa completed another
++ fine season with great stats.
+ 
+-    63 Home Runs
+-    0.288 Batting Average
++   63 Home Runs
++   0.288 Batting Average
+ 
+-  What a year!
++ What a year!
+```
+
+# Output
+
+```yml
+>
+ Sammy Sosa completed another
+ fine season with great stats.
+
+   63 Home Runs
+   0.288 Batting Average
+
+ What a year!
+```

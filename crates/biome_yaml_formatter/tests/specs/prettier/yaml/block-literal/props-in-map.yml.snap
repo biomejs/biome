@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block-literal/props-in-map.yml
+---
+# Input
+
+```yml
+a: !!str &anchor |
+  123
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ a: !!str &anchor |
+-  123
++  123
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: !!str &anchor |
+  123```
+
+# Errors
+```
+props-in-map.yml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ a: !!str &anchor |
+      │    ^
+    2 │   123
+    3 │ 
+  
+props-in-map.yml:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ a: !!str &anchor |
+      │     ^
+    2 │   123
+    3 │ 
+  
+
+```

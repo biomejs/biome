@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-26-ordered-mappings.yml
+---
+# Input
+
+```yml
+# Ordered maps are represented as
+# A sequence of mappings, with
+# each mapping having one key
+--- !!omap
+- Mark McGwire: 65
+- Sammy Sosa: 63
+- Ken Griffy: 58
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,4 @@
+-# Ordered maps are represented as
+-# A sequence of mappings, with
+-# each mapping having one key
+----
+-!!omap
++--- !!omap
+ - Mark McGwire: 65
+ - Sammy Sosa: 63
+-- Ken Griffy: 58
++- Ken Griffy: 58
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+--- !!omap
+- Mark McGwire: 65
+- Sammy Sosa: 63
+- Ken Griffy: 58```
+
+# Errors
+```
+spec-example-2-26-ordered-mappings.yml:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found '- Sammy Sosa: 63'.
+  
+    4 │ --- !!omap
+    5 │ - Mark McGwire: 65
+  > 6 │ - Sammy Sosa: 63
+      │ ^^^^^^^^^^^^^^^^
+    7 │ - Ken Griffy: 58
+    8 │ 
+  
+  i Expected a block mapping entry here.
+  
+    4 │ --- !!omap
+    5 │ - Mark McGwire: 65
+  > 6 │ - Sammy Sosa: 63
+      │ ^^^^^^^^^^^^^^^^
+    7 │ - Ken Griffy: 58
+    8 │ 
+  
+spec-example-2-26-ordered-mappings.yml:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    5 │ - Mark McGwire: 65
+    6 │ - Sammy Sosa: 63
+  > 7 │ - Ken Griffy: 58
+      │ ^^^^^^^^^^^^^^^^
+  > 8 │ 
+      │ 
+  
+
+```

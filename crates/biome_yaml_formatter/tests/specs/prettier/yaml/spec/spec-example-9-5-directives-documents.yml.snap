@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-9-5-directives-documents.yml
+---
+# Input
+
+```yml
+%YAML 1.2
+--- |
+%!PS-Adobe-2.0
+...
+%YAML1.2
+---
+# Empty
+...
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ %YAML 1.2
+----
+-|
+-  %!PS-Adobe-2.0
++--- |
++%!PS-Adobe-2.0
+ ...
+ %YAML1.2
+ ---
+ # Empty
++...
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+%YAML 1.2
+--- |
+%!PS-Adobe-2.0
+...
+%YAML1.2
+---
+# Empty
+...```
+
+# Errors
+```
+spec-example-9-5-directives-documents.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+  > 1 │ %YAML 1.2
+      │ ^
+    2 │ --- |
+    3 │ %!PS-Adobe-2.0
+  
+
+```

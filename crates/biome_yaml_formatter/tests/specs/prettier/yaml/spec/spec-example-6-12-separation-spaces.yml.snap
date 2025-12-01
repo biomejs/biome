@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-12-separation-spaces.yml
+---
+# Input
+
+```yml
+{ first: Sammy, last: Sosa }:
+# Statistics:
+  hr:  # Home runs
+     65
+  avg: # Average
+   0.278
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ { first: Sammy, last: Sosa }:
+-  # Statistics:
+-  hr: # Home runs
+-    65
++# Statistics:
++  hr:  # Home runs
++     65
+   avg: # Average
+-    0.278
++   0.278
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+{ first: Sammy, last: Sosa }:
+# Statistics:
+  hr:  # Home runs
+     65
+  avg: # Average
+   0.278```

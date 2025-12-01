@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/various-trailing-comments.yml
+---
+# Input
+
+```yml
+a: "double
+  quotes" # lala
+b: plain
+ value  # lala
+c  : #lala
+  d
+? # lala
+ - seq1
+: # lala
+ - #lala
+  seq2
+e:
+ &node # lala
+ - x: y
+block: > # lala
+  abcde
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,16 @@
+ a: "double
+   quotes" # lala
+ b: plain
+-  value # lala
+-c: #lala
++ value  # lala
++c  : #lala
+   d
+ ? # lala
+-  - seq1
++ - seq1
+ : # lala
+-  - #lala
+-    seq2
+-e: &node # lala
+-  - x: y
++ - #lala
++  seq2
++e:
++ &node # lala
++ - x: y
+ block: > # lala
+-  abcde
++  abcde
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: "double
+  quotes" # lala
+b: plain
+ value  # lala
+c  : #lala
+  d
+? # lala
+ - seq1
+: # lala
+ - #lala
+  seq2
+e:
+ &node # lala
+ - x: y
+block: > # lala
+  abcde```
+
+# Errors
+```
+various-trailing-comments.yml:13:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    11 │   seq2
+    12 │ e:
+  > 13 │  &node # lala
+       │  ^
+    14 │  - x: y
+    15 │ block: > # lala
+  
+various-trailing-comments.yml:14:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    12 │ e:
+    13 │  &node # lala
+  > 14 │  - x: y
+       │        
+  > 15 │ block: > # lala
+  > 16 │   abcde
+  > 17 │ 
+       │ 
+  
+
+```

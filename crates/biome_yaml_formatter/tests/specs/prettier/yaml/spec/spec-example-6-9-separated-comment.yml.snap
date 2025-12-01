@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-9-separated-comment.yml
+---
+# Input
+
+```yml
+key:    # Comment
+  value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-key: # Comment
+-  value
++key:    # Comment
++  value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+key:    # Comment
+  value```

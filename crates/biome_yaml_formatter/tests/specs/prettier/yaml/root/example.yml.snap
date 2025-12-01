@@ -1,0 +1,1052 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/root/example.yml
+---
+# Input
+
+```yml
+---
+# Collection Types #############################################################
+################################################################################
+
+# http://yaml.org/type/map.html -----------------------------------------------#
+
+map:
+  # Unordered set of key: value pairs.
+  Block style: !!map
+    Clark : Evans
+    Ingy  : döt Net
+    Oren  : Ben-Kiki
+  Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+
+# http://yaml.org/type/omap.html ----------------------------------------------#
+
+omap:
+  # Explicitly typed ordered map (dictionary).
+  Bestiary: !!omap
+    - aardvark: African pig-like ant eater. Ugly.
+    - anteater: South-American ant eater. Two species.
+    - anaconda: South-American constrictor snake. Scaly.
+    # Etc.
+  # Flow style
+  Numbers: !!omap [ one: 1, two: 2, three : 3 ]
+
+# http://yaml.org/type/pairs.html ---------------------------------------------#
+
+pairs:
+  # Explicitly typed pairs.
+  Block tasks: !!pairs
+    - meeting: with team.
+    - meeting: with boss.
+    - break: lunch.
+    - meeting: with client.
+  Flow tasks: !!pairs [ meeting: with team, meeting: with boss ]
+
+# http://yaml.org/type/set.html -----------------------------------------------#
+
+set:
+  # Explicitly typed set.
+  baseball players: !!set
+    ? Mark McGwire
+    ? Sammy Sosa
+    ? Ken Griffey
+  # Flow style
+  baseball teams: !!set { Boston Red Sox, Detroit Tigers, New York Yankees }
+
+# http://yaml.org/type/seq.html -----------------------------------------------#
+
+seq:
+  # Ordered sequence of nodes
+  Block style: !!seq
+  - Mercury   # Rotates - no light/dark sides.
+  - Venus     # Deadliest. Aptly named.
+  - Earth     # Mostly dirt.
+  - Mars      # Seems empty.
+  - Jupiter   # The king.
+  - Saturn    # Pretty.
+  - Uranus    # Where the sun hardly shines.
+  - Neptune   # Boring. No rings.
+  - Pluto     # You call this a planet?
+  Flow style: !!seq [ Mercury, Venus, Earth, Mars,      # Rocks
+                      Jupiter, Saturn, Uranus, Neptune, # Gas
+                      Pluto ]                           # Overrated
+
+
+# Scalar Types #################################################################
+################################################################################
+
+# http://yaml.org/type/bool.html ----------------------------------------------#
+
+bool:
+  - true
+  - True
+  - TRUE
+  - false
+  - False
+  - FALSE
+
+# http://yaml.org/type/float.html ---------------------------------------------#
+
+float:
+  canonical: 6.8523015e+5
+  exponentioal: 685.230_15e+03
+  fixed: 685_230.15
+  sexagesimal: 190:20:30.15
+  negative infinity: -.inf
+  not a number: .NaN
+
+# http://yaml.org/type/int.html -----------------------------------------------#
+
+int:
+  canonical: 685230
+  decimal: +685_230
+  octal: 02472256
+  hexadecimal: 0x_0A_74_AE
+  binary: 0b1010_0111_0100_1010_1110
+  sexagesimal: 190:20:30
+
+# http://yaml.org/type/merge.html ---------------------------------------------#
+
+merge:
+  - &CENTER { x: 1, y: 2 }
+  - &LEFT { x: 0, y: 2 }
+  - &BIG { r: 10 }
+  - &SMALL { r: 1 }
+  
+  # All the following maps are equal:
+  
+  - # Explicit keys
+    x: 1
+    y: 2
+    r: 10
+    label: nothing
+  
+  - # Merge one map
+    << : *CENTER
+    r: 10
+    label: center
+  
+  - # Merge multiple maps
+    << : [ *CENTER, *BIG ]
+    label: center/big
+  
+  - # Override
+    << : [ *BIG, *LEFT, *SMALL ]
+    x: 1
+    label: big/left/small
+
+# http://yaml.org/type/null.html ----------------------------------------------#
+
+null:
+  # This mapping has four keys,
+  # one has a value.
+  empty:
+  canonical: ~
+  english: null
+  ~: null key
+  # This sequence has five
+  # entries, two have values.
+  sparse:
+    - ~
+    - 2nd entry
+    -
+    - 4th entry
+    - Null
+
+# http://yaml.org/type/str.html -----------------------------------------------#
+
+string: abcd
+
+# http://yaml.org/type/timestamp.html -----------------------------------------#
+
+timestamp:
+  canonical:        2001-12-15T02:59:43.1Z
+  valid iso8601:    2001-12-14t21:59:43.10-05:00
+  space separated:  2001-12-14 21:59:43.10 -5
+  no time zone (Z): 2001-12-15 2:59:43.10
+  date (00:00:00Z): 2002-12-14
+
+
+# JavaScript Specific Types ####################################################
+################################################################################
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/RegExp
+
+regexp:
+  simple: !!js/regexp      foobar
+  modifiers: !!js/regexp   /foobar/mi
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+
+undefined: !!js/undefined ~
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+
+function: !!js/function >
+  function foobar() {
+    return 'Wow! JS-YAML Rocks!';
+  }
+
+
+# Custom types #################################################################
+################################################################################
+
+
+# JS-YAML allows you to specify a custom YAML types for your structures.
+# This is a simple example of custom constructor defined in `js/demo.js` for
+# custom `!sexy` type:
+#
+# var SexyYamlType = new jsyaml.Type('!sexy', {
+#   kind: 'sequence',
+#   construct: function (data) {
+#     return data.map(function (string) { return 'sexy ' + string; });
+#   }
+# });
+#
+# var SEXY_SCHEMA = jsyaml.Schema.create([ SexyYamlType ]);
+#
+# result = jsyaml.load(yourData, { schema: SEXY_SCHEMA });
+
+foobar: !sexy
+  - bunny
+  - chocolate
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,9 +7,9 @@
+ map:
+   # Unordered set of key: value pairs.
+   Block style: !!map
+-    Clark: Evans
+-    Ingy: döt Net
+-    Oren: Ben-Kiki
++    Clark : Evans
++    Ingy  : döt Net
++    Oren  : Ben-Kiki
+   Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+ 
+ # http://yaml.org/type/omap.html ----------------------------------------------#
+@@ -22,7 +22,7 @@
+     - anaconda: South-American constrictor snake. Scaly.
+     # Etc.
+   # Flow style
+-  Numbers: !!omap [one: 1, two: 2, three: 3]
++  Numbers: !!omap [ one: 1, two: 2, three : 3 ]
+ 
+ # http://yaml.org/type/pairs.html ---------------------------------------------#
+ 
+@@ -33,7 +33,7 @@
+     - meeting: with boss.
+     - break: lunch.
+     - meeting: with client.
+-  Flow tasks: !!pairs [meeting: with team, meeting: with boss]
++  Flow tasks: !!pairs [ meeting: with team, meeting: with boss ]
+ 
+ # http://yaml.org/type/set.html -----------------------------------------------#
+ 
+@@ -51,26 +51,19 @@
+ seq:
+   # Ordered sequence of nodes
+   Block style: !!seq
+-    - Mercury # Rotates - no light/dark sides.
+-    - Venus # Deadliest. Aptly named.
+-    - Earth # Mostly dirt.
+-    - Mars # Seems empty.
+-    - Jupiter # The king.
+-    - Saturn # Pretty.
+-    - Uranus # Where the sun hardly shines.
+-    - Neptune # Boring. No rings.
+-    - Pluto # You call this a planet?
+-  Flow style: !!seq [
+-      Mercury,
+-      Venus,
+-      Earth,
+-      Mars, # Rocks
+-      Jupiter,
+-      Saturn,
+-      Uranus,
+-      Neptune, # Gas
+-      Pluto,
+-    ] # Overrated
++  - Mercury   # Rotates - no light/dark sides.
++  - Venus     # Deadliest. Aptly named.
++  - Earth     # Mostly dirt.
++  - Mars      # Seems empty.
++  - Jupiter   # The king.
++  - Saturn    # Pretty.
++  - Uranus    # Where the sun hardly shines.
++  - Neptune   # Boring. No rings.
++  - Pluto     # You call this a planet?
++  Flow style: !!seq [ Mercury, Venus, Earth, Mars,      # Rocks
++                      Jupiter, Saturn, Uranus, Neptune, # Gas
++                      Pluto ]                           # Overrated
++
+ 
+ # Scalar Types #################################################################
+ ################################################################################
+@@ -112,26 +105,26 @@
+   - &LEFT { x: 0, y: 2 }
+   - &BIG { r: 10 }
+   - &SMALL { r: 1 }
+-
++  
+   # All the following maps are equal:
+-
++  
+   - # Explicit keys
+     x: 1
+     y: 2
+     r: 10
+     label: nothing
+-
++  
+   - # Merge one map
+-    <<: *CENTER
++    << : *CENTER
+     r: 10
+     label: center
+-
++  
+   - # Merge multiple maps
+-    <<: [*CENTER, *BIG]
++    << : [ *CENTER, *BIG ]
+     label: center/big
+-
++  
+   - # Override
+-    <<: [*BIG, *LEFT, *SMALL]
++    << : [ *BIG, *LEFT, *SMALL ]
+     x: 1
+     label: big/left/small
+ 
+@@ -160,20 +153,21 @@
+ # http://yaml.org/type/timestamp.html -----------------------------------------#
+ 
+ timestamp:
+-  canonical: 2001-12-15T02:59:43.1Z
+-  valid iso8601: 2001-12-14t21:59:43.10-05:00
+-  space separated: 2001-12-14 21:59:43.10 -5
++  canonical:        2001-12-15T02:59:43.1Z
++  valid iso8601:    2001-12-14t21:59:43.10-05:00
++  space separated:  2001-12-14 21:59:43.10 -5
+   no time zone (Z): 2001-12-15 2:59:43.10
+   date (00:00:00Z): 2002-12-14
+ 
++
+ # JavaScript Specific Types ####################################################
+ ################################################################################
+ 
+ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/RegExp
+ 
+ regexp:
+-  simple: !!js/regexp foobar
+-  modifiers: !!js/regexp /foobar/mi
++  simple: !!js/regexp      foobar
++  modifiers: !!js/regexp   /foobar/mi
+ 
+ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+ 
+@@ -186,9 +180,11 @@
+     return 'Wow! JS-YAML Rocks!';
+   }
+ 
++
+ # Custom types #################################################################
+ ################################################################################
+ 
++
+ # JS-YAML allows you to specify a custom YAML types for your structures.
+ # This is a simple example of custom constructor defined in `js/demo.js` for
+ # custom `!sexy` type:
+@@ -206,4 +202,4 @@
+ 
+ foobar: !sexy
+   - bunny
+-  - chocolate
++  - chocolate
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+# Collection Types #############################################################
+################################################################################
+
+# http://yaml.org/type/map.html -----------------------------------------------#
+
+map:
+  # Unordered set of key: value pairs.
+  Block style: !!map
+    Clark : Evans
+    Ingy  : döt Net
+    Oren  : Ben-Kiki
+  Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+
+# http://yaml.org/type/omap.html ----------------------------------------------#
+
+omap:
+  # Explicitly typed ordered map (dictionary).
+  Bestiary: !!omap
+    - aardvark: African pig-like ant eater. Ugly.
+    - anteater: South-American ant eater. Two species.
+    - anaconda: South-American constrictor snake. Scaly.
+    # Etc.
+  # Flow style
+  Numbers: !!omap [ one: 1, two: 2, three : 3 ]
+
+# http://yaml.org/type/pairs.html ---------------------------------------------#
+
+pairs:
+  # Explicitly typed pairs.
+  Block tasks: !!pairs
+    - meeting: with team.
+    - meeting: with boss.
+    - break: lunch.
+    - meeting: with client.
+  Flow tasks: !!pairs [ meeting: with team, meeting: with boss ]
+
+# http://yaml.org/type/set.html -----------------------------------------------#
+
+set:
+  # Explicitly typed set.
+  baseball players: !!set
+    ? Mark McGwire
+    ? Sammy Sosa
+    ? Ken Griffey
+  # Flow style
+  baseball teams: !!set { Boston Red Sox, Detroit Tigers, New York Yankees }
+
+# http://yaml.org/type/seq.html -----------------------------------------------#
+
+seq:
+  # Ordered sequence of nodes
+  Block style: !!seq
+  - Mercury   # Rotates - no light/dark sides.
+  - Venus     # Deadliest. Aptly named.
+  - Earth     # Mostly dirt.
+  - Mars      # Seems empty.
+  - Jupiter   # The king.
+  - Saturn    # Pretty.
+  - Uranus    # Where the sun hardly shines.
+  - Neptune   # Boring. No rings.
+  - Pluto     # You call this a planet?
+  Flow style: !!seq [ Mercury, Venus, Earth, Mars,      # Rocks
+                      Jupiter, Saturn, Uranus, Neptune, # Gas
+                      Pluto ]                           # Overrated
+
+
+# Scalar Types #################################################################
+################################################################################
+
+# http://yaml.org/type/bool.html ----------------------------------------------#
+
+bool:
+  - true
+  - True
+  - TRUE
+  - false
+  - False
+  - FALSE
+
+# http://yaml.org/type/float.html ---------------------------------------------#
+
+float:
+  canonical: 6.8523015e+5
+  exponentioal: 685.230_15e+03
+  fixed: 685_230.15
+  sexagesimal: 190:20:30.15
+  negative infinity: -.inf
+  not a number: .NaN
+
+# http://yaml.org/type/int.html -----------------------------------------------#
+
+int:
+  canonical: 685230
+  decimal: +685_230
+  octal: 02472256
+  hexadecimal: 0x_0A_74_AE
+  binary: 0b1010_0111_0100_1010_1110
+  sexagesimal: 190:20:30
+
+# http://yaml.org/type/merge.html ---------------------------------------------#
+
+merge:
+  - &CENTER { x: 1, y: 2 }
+  - &LEFT { x: 0, y: 2 }
+  - &BIG { r: 10 }
+  - &SMALL { r: 1 }
+  
+  # All the following maps are equal:
+  
+  - # Explicit keys
+    x: 1
+    y: 2
+    r: 10
+    label: nothing
+  
+  - # Merge one map
+    << : *CENTER
+    r: 10
+    label: center
+  
+  - # Merge multiple maps
+    << : [ *CENTER, *BIG ]
+    label: center/big
+  
+  - # Override
+    << : [ *BIG, *LEFT, *SMALL ]
+    x: 1
+    label: big/left/small
+
+# http://yaml.org/type/null.html ----------------------------------------------#
+
+null:
+  # This mapping has four keys,
+  # one has a value.
+  empty:
+  canonical: ~
+  english: null
+  ~: null key
+  # This sequence has five
+  # entries, two have values.
+  sparse:
+    - ~
+    - 2nd entry
+    -
+    - 4th entry
+    - Null
+
+# http://yaml.org/type/str.html -----------------------------------------------#
+
+string: abcd
+
+# http://yaml.org/type/timestamp.html -----------------------------------------#
+
+timestamp:
+  canonical:        2001-12-15T02:59:43.1Z
+  valid iso8601:    2001-12-14t21:59:43.10-05:00
+  space separated:  2001-12-14 21:59:43.10 -5
+  no time zone (Z): 2001-12-15 2:59:43.10
+  date (00:00:00Z): 2002-12-14
+
+
+# JavaScript Specific Types ####################################################
+################################################################################
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/RegExp
+
+regexp:
+  simple: !!js/regexp      foobar
+  modifiers: !!js/regexp   /foobar/mi
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+
+undefined: !!js/undefined ~
+
+# https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+
+function: !!js/function >
+  function foobar() {
+    return 'Wow! JS-YAML Rocks!';
+  }
+
+
+# Custom types #################################################################
+################################################################################
+
+
+# JS-YAML allows you to specify a custom YAML types for your structures.
+# This is a simple example of custom constructor defined in `js/demo.js` for
+# custom `!sexy` type:
+#
+# var SexyYamlType = new jsyaml.Type('!sexy', {
+#   kind: 'sequence',
+#   construct: function (data) {
+#     return data.map(function (string) { return 'sexy ' + string; });
+#   }
+# });
+#
+# var SEXY_SCHEMA = jsyaml.Schema.create([ SexyYamlType ]);
+#
+# result = jsyaml.load(yourData, { schema: SEXY_SCHEMA });
+
+foobar: !sexy
+  - bunny
+  - chocolate```
+
+# Errors
+```
+example.yml:9:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+     7 │ map:
+     8 │   # Unordered set of key: value pairs.
+   > 9 │   Block style: !!map
+       │                ^
+    10 │     Clark : Evans
+    11 │     Ingy  : döt Net
+  
+example.yml:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+     7 │ map:
+     8 │   # Unordered set of key: value pairs.
+   > 9 │   Block style: !!map
+       │                 ^
+    10 │     Clark : Evans
+    11 │     Ingy  : döt Net
+  
+example.yml:11:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found 'Ingy  : döt Net
+        Oren  : Ben-Kiki
+      Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }'.
+  
+     9 │   Block style: !!map
+    10 │     Clark : Evans
+  > 11 │     Ingy  : döt Net
+       │     ^^^^^^^^^^^^^^^
+  > 12 │     Oren  : Ben-Kiki
+  > 13 │   Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ # http://yaml.org/type/omap.html ----------------------------------------------#
+  
+  i Expected a block mapping entry here.
+  
+     9 │   Block style: !!map
+    10 │     Clark : Evans
+  > 11 │     Ingy  : döt Net
+       │     ^^^^^^^^^^^^^^^
+  > 12 │     Oren  : Ben-Kiki
+  > 13 │   Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ # http://yaml.org/type/omap.html ----------------------------------------------#
+  
+example.yml:13:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    11 │     Ingy  : döt Net
+    12 │     Oren  : Ben-Kiki
+  > 13 │   Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+       │               ^
+    14 │ 
+    15 │ # http://yaml.org/type/omap.html ----------------------------------------------#
+  
+example.yml:13:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    11 │     Ingy  : döt Net
+    12 │     Oren  : Ben-Kiki
+  > 13 │   Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
+       │                ^
+    14 │ 
+    15 │ # http://yaml.org/type/omap.html ----------------------------------------------#
+  
+example.yml:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+     15 │ # http://yaml.org/type/omap.html ----------------------------------------------#
+     16 │ 
+   > 17 │ omap:
+        │ ^^^^^
+   > 18 │   # Explicitly typed ordered map (dictionary).
+         ...
+  > 203 │ foobar: !sexy
+  > 204 │   - bunny
+  > 205 │   - chocolate
+  > 206 │ 
+        │ 
+  
+example.yml:19:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    17 │ omap:
+    18 │   # Explicitly typed ordered map (dictionary).
+  > 19 │   Bestiary: !!omap
+       │             ^
+    20 │     - aardvark: African pig-like ant eater. Ugly.
+    21 │     - anteater: South-American ant eater. Two species.
+  
+example.yml:19:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    17 │ omap:
+    18 │   # Explicitly typed ordered map (dictionary).
+  > 19 │   Bestiary: !!omap
+       │              ^
+    20 │     - aardvark: African pig-like ant eater. Ugly.
+    21 │     - anteater: South-American ant eater. Two species.
+  
+example.yml:25:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    23 │     # Etc.
+    24 │   # Flow style
+  > 25 │   Numbers: !!omap [ one: 1, two: 2, three : 3 ]
+       │            ^
+    26 │ 
+    27 │ # http://yaml.org/type/pairs.html ---------------------------------------------#
+  
+example.yml:25:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    23 │     # Etc.
+    24 │   # Flow style
+  > 25 │   Numbers: !!omap [ one: 1, two: 2, three : 3 ]
+       │             ^
+    26 │ 
+    27 │ # http://yaml.org/type/pairs.html ---------------------------------------------#
+  
+example.yml:31:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    29 │ pairs:
+    30 │   # Explicitly typed pairs.
+  > 31 │   Block tasks: !!pairs
+       │                ^
+    32 │     - meeting: with team.
+    33 │     - meeting: with boss.
+  
+example.yml:31:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    29 │ pairs:
+    30 │   # Explicitly typed pairs.
+  > 31 │   Block tasks: !!pairs
+       │                 ^
+    32 │     - meeting: with team.
+    33 │     - meeting: with boss.
+  
+example.yml:36:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    34 │     - break: lunch.
+    35 │     - meeting: with client.
+  > 36 │   Flow tasks: !!pairs [ meeting: with team, meeting: with boss ]
+       │               ^
+    37 │ 
+    38 │ # http://yaml.org/type/set.html -----------------------------------------------#
+  
+example.yml:36:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    34 │     - break: lunch.
+    35 │     - meeting: with client.
+  > 36 │   Flow tasks: !!pairs [ meeting: with team, meeting: with boss ]
+       │                ^
+    37 │ 
+    38 │ # http://yaml.org/type/set.html -----------------------------------------------#
+  
+example.yml:42:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    40 │ set:
+    41 │   # Explicitly typed set.
+  > 42 │   baseball players: !!set
+       │                     ^
+    43 │     ? Mark McGwire
+    44 │     ? Sammy Sosa
+  
+example.yml:42:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    40 │ set:
+    41 │   # Explicitly typed set.
+  > 42 │   baseball players: !!set
+       │                      ^
+    43 │     ? Mark McGwire
+    44 │     ? Sammy Sosa
+  
+example.yml:47:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    45 │     ? Ken Griffey
+    46 │   # Flow style
+  > 47 │   baseball teams: !!set { Boston Red Sox, Detroit Tigers, New York Yankees }
+       │                   ^
+    48 │ 
+    49 │ # http://yaml.org/type/seq.html -----------------------------------------------#
+  
+example.yml:47:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    45 │     ? Ken Griffey
+    46 │   # Flow style
+  > 47 │   baseball teams: !!set { Boston Red Sox, Detroit Tigers, New York Yankees }
+       │                    ^
+    48 │ 
+    49 │ # http://yaml.org/type/seq.html -----------------------------------------------#
+  
+example.yml:53:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    51 │ seq:
+    52 │   # Ordered sequence of nodes
+  > 53 │   Block style: !!seq
+       │                ^
+    54 │   - Mercury   # Rotates - no light/dark sides.
+    55 │   - Venus     # Deadliest. Aptly named.
+  
+example.yml:53:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    51 │ seq:
+    52 │   # Ordered sequence of nodes
+  > 53 │   Block style: !!seq
+       │                 ^
+    54 │   - Mercury   # Rotates - no light/dark sides.
+    55 │   - Venus     # Deadliest. Aptly named.
+  
+example.yml:63:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    61 │   - Neptune   # Boring. No rings.
+    62 │   - Pluto     # You call this a planet?
+  > 63 │   Flow style: !!seq [ Mercury, Venus, Earth, Mars,      # Rocks
+       │               ^
+    64 │                       Jupiter, Saturn, Uranus, Neptune, # Gas
+    65 │                       Pluto ]                           # Overrated
+  
+example.yml:63:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    61 │   - Neptune   # Boring. No rings.
+    62 │   - Pluto     # You call this a planet?
+  > 63 │   Flow style: !!seq [ Mercury, Venus, Earth, Mars,      # Rocks
+       │                ^
+    64 │                       Jupiter, Saturn, Uranus, Neptune, # Gas
+    65 │                       Pluto ]                           # Overrated
+  
+example.yml:104:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    103 │ merge:
+  > 104 │   - &CENTER { x: 1, y: 2 }
+        │     ^
+    105 │   - &LEFT { x: 0, y: 2 }
+    106 │   - &BIG { r: 10 }
+  
+example.yml:105:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    103 │ merge:
+    104 │   - &CENTER { x: 1, y: 2 }
+  > 105 │   - &LEFT { x: 0, y: 2 }
+        │     ^
+    106 │   - &BIG { r: 10 }
+    107 │   - &SMALL { r: 1 }
+  
+example.yml:106:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    104 │   - &CENTER { x: 1, y: 2 }
+    105 │   - &LEFT { x: 0, y: 2 }
+  > 106 │   - &BIG { r: 10 }
+        │     ^
+    107 │   - &SMALL { r: 1 }
+    108 │   
+  
+example.yml:107:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    105 │   - &LEFT { x: 0, y: 2 }
+    106 │   - &BIG { r: 10 }
+  > 107 │   - &SMALL { r: 1 }
+        │     ^
+    108 │   
+    109 │   # All the following maps are equal:
+  
+example.yml:118:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    117 │   - # Merge one map
+  > 118 │     << : *CENTER
+        │          ^
+    119 │     r: 10
+    120 │     label: center
+  
+example.yml:123:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    122 │   - # Merge multiple maps
+  > 123 │     << : [ *CENTER, *BIG ]
+        │            ^
+    124 │     label: center/big
+    125 │   
+  
+example.yml:123:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    122 │   - # Merge multiple maps
+  > 123 │     << : [ *CENTER, *BIG ]
+        │                     ^
+    124 │     label: center/big
+    125 │   
+  
+example.yml:127:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    126 │   - # Override
+  > 127 │     << : [ *BIG, *LEFT, *SMALL ]
+        │            ^
+    128 │     x: 1
+    129 │     label: big/left/small
+  
+example.yml:127:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    126 │   - # Override
+  > 127 │     << : [ *BIG, *LEFT, *SMALL ]
+        │                  ^
+    128 │     x: 1
+    129 │     label: big/left/small
+  
+example.yml:127:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    126 │   - # Override
+  > 127 │     << : [ *BIG, *LEFT, *SMALL ]
+        │                         ^
+    128 │     x: 1
+    129 │     label: big/left/small
+  
+example.yml:169:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    168 │ regexp:
+  > 169 │   simple: !!js/regexp      foobar
+        │           ^
+    170 │   modifiers: !!js/regexp   /foobar/mi
+    171 │ 
+  
+example.yml:169:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    168 │ regexp:
+  > 169 │   simple: !!js/regexp      foobar
+        │            ^
+    170 │   modifiers: !!js/regexp   /foobar/mi
+    171 │ 
+  
+example.yml:170:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    168 │ regexp:
+    169 │   simple: !!js/regexp      foobar
+  > 170 │   modifiers: !!js/regexp   /foobar/mi
+        │              ^
+    171 │ 
+    172 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+  
+example.yml:170:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    168 │ regexp:
+    169 │   simple: !!js/regexp      foobar
+  > 170 │   modifiers: !!js/regexp   /foobar/mi
+        │               ^
+    171 │ 
+    172 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+  
+example.yml:174:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    172 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+    173 │ 
+  > 174 │ undefined: !!js/undefined ~
+        │            ^
+    175 │ 
+    176 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+  
+example.yml:174:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    172 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
+    173 │ 
+  > 174 │ undefined: !!js/undefined ~
+        │             ^
+    175 │ 
+    176 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+  
+example.yml:178:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    176 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+    177 │ 
+  > 178 │ function: !!js/function >
+        │           ^
+    179 │   function foobar() {
+    180 │     return 'Wow! JS-YAML Rocks!';
+  
+example.yml:178:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    176 │ # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function
+    177 │ 
+  > 178 │ function: !!js/function >
+        │            ^
+    179 │   function foobar() {
+    180 │     return 'Wow! JS-YAML Rocks!';
+  
+example.yml:203:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    201 │ # result = jsyaml.load(yourData, { schema: SEXY_SCHEMA });
+    202 │ 
+  > 203 │ foobar: !sexy
+        │         ^
+    204 │   - bunny
+    205 │   - chocolate
+  
+
+```

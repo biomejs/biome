@@ -1,0 +1,118 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-for-root-objects.yml
+---
+# Input
+
+```yml
+--- !!map
+? a
+: b
+--- !!seq
+- !!str c
+--- !!str
+d
+e
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,8 @@
+----
+-!!map
+-a: b
+----
+-!!seq
++--- !!map
++? a
++: b
++--- !!seq
+ - !!str c
+----
+-!!str d
+-e
++--- !!str
++d
++e
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+--- !!map
+? a
+: b
+--- !!seq
+- !!str c
+--- !!str
+d
+e```
+
+# Errors
+```
+tags-for-root-objects.yml:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found ``
+  
+    3 │ : b
+    4 │ --- !!seq
+  > 5 │ - !!str c
+      │ 
+    6 │ --- !!str
+    7 │ d
+  
+  i Remove 
+  
+tags-for-root-objects.yml:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ : b
+    4 │ --- !!seq
+  > 5 │ - !!str c
+      │   ^
+    6 │ --- !!str
+    7 │ d
+  
+tags-for-root-objects.yml:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ : b
+    4 │ --- !!seq
+  > 5 │ - !!str c
+      │    ^
+    6 │ --- !!str
+    7 │ d
+  
+tags-for-root-objects.yml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `e`
+  
+    6 │ --- !!str
+    7 │ d
+  > 8 │ e
+      │ ^
+    9 │ 
+  
+  i Remove e
+  
+tags-for-root-objects.yml:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found ``
+  
+    7 │ d
+    8 │ e
+  > 9 │ 
+      │ 
+  
+  i Remove 
+  
+
+```

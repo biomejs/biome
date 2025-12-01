@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/anchors-with-colon-in-name.yml
+---
+# Input
+
+```yml
+&a: key: &a value
+foo:
+  *a:
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,3 @@
+ &a: key: &a value
+-foo: *a:
++foo:
++  *a:
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+&a: key: &a value
+foo:
+  *a:```
+
+# Errors
+```
+anchors-with-colon-in-name.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ &a: key: &a value
+      │ ^
+    2 │ foo:
+    3 │   *a:
+  
+anchors-with-colon-in-name.yml:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ &a: key: &a value
+      │          ^
+    2 │ foo:
+    3 │   *a:
+  
+anchors-with-colon-in-name.yml:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    1 │ &a: key: &a value
+    2 │ foo:
+  > 3 │   *a:
+      │   ^
+    4 │ 
+  
+
+```

@@ -1,0 +1,96 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/sequence.yml
+---
+# Input
+
+```yml
+-  - a
+
+   # - b
+
+   # - c
+
+   - e
+
+-  - a
+
+   # - b
+
+   # - c
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,9 @@
+-- - a
++-  - a
+ 
+-  # - b
++   # - b
+ 
+-  # - c
++   # - c
+ 
+-  - e
+-
+-- - a
++   - e
+ 
+-  # - b
+-
+-  # - c
++-  - a
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+-  - a
+
+   # - b
+
+   # - c
+
+   - e
+
+-  - a```
+
+# Errors
+```
+sequence.yml:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block sequence entry but instead found '- e
+    
+    -  - a'.
+  
+     5 │    # - c
+     6 │ 
+   > 7 │    - e
+       │    ^^^
+   > 8 │ 
+   > 9 │ -  - a
+       │ ^^^^^^
+    10 │ 
+    11 │    # - b
+  
+  i Expected a block sequence entry here.
+  
+     5 │    # - c
+     6 │ 
+   > 7 │    - e
+       │    ^^^
+   > 8 │ 
+   > 9 │ -  - a
+       │ ^^^^^^
+    10 │ 
+    11 │    # - b
+  
+
+```

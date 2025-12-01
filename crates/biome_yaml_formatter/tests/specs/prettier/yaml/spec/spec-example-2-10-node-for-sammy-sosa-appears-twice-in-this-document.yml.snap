@@ -1,0 +1,100 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-10-node-for-sammy-sosa-appears-twice-in-this-document.yml
+---
+# Input
+
+```yml
+---
+hr:
+  - Mark McGwire
+  # Following node labeled SS
+  - &SS Sammy Sosa
+rbi:
+  - *SS # Subsequent occurrence
+  - Ken Griffey
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,4 +5,4 @@
+   - &SS Sammy Sosa
+ rbi:
+   - *SS # Subsequent occurrence
+-  - Ken Griffey
++  - Ken Griffey
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+hr:
+  - Mark McGwire
+  # Following node labeled SS
+  - &SS Sammy Sosa
+rbi:
+  - *SS # Subsequent occurrence
+  - Ken Griffey```
+
+# Errors
+```
+spec-example-2-10-node-for-sammy-sosa-appears-twice-in-this-document.yml:5:3 parse ━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found '- &SS Sammy Sosa
+    rbi:
+      - *SS # Subsequent occurrence
+      - Ken Griffey'.
+  
+    3 │   - Mark McGwire
+    4 │   # Following node labeled SS
+  > 5 │   - &SS Sammy Sosa
+      │   ^^^^^^^^^^^^^^^^
+  > 6 │ rbi:
+  > 7 │   - *SS # Subsequent occurrence
+  > 8 │   - Ken Griffey
+      │   ^^^^^^^^^^^^^
+    9 │ 
+  
+  i Expected a block mapping entry here.
+  
+    3 │   - Mark McGwire
+    4 │   # Following node labeled SS
+  > 5 │   - &SS Sammy Sosa
+      │   ^^^^^^^^^^^^^^^^
+  > 6 │ rbi:
+  > 7 │   - *SS # Subsequent occurrence
+  > 8 │   - Ken Griffey
+      │   ^^^^^^^^^^^^^
+    9 │ 
+  
+spec-example-2-10-node-for-sammy-sosa-appears-twice-in-this-document.yml:5:5 parse ━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    3 │   - Mark McGwire
+    4 │   # Following node labeled SS
+  > 5 │   - &SS Sammy Sosa
+      │     ^
+    6 │ rbi:
+    7 │   - *SS # Subsequent occurrence
+  
+spec-example-2-10-node-for-sammy-sosa-appears-twice-in-this-document.yml:7:5 parse ━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    5 │   - &SS Sammy Sosa
+    6 │ rbi:
+  > 7 │   - *SS # Subsequent occurrence
+      │     ^
+    8 │   - Ken Griffey
+    9 │ 
+  
+
+```
