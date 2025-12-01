@@ -49,6 +49,8 @@ export const MyComponent = {
 }
 ```
 
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid-parameter-destructuring.js:5:9 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━
