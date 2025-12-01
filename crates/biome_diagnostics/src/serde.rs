@@ -1,5 +1,6 @@
 use std::io;
 
+use crate::display::frame::SourceFile;
 use biome_console::{MarkupBuf, fmt, markup};
 use biome_rowan::TextSize;
 use biome_text_edit::TextEdit;
@@ -146,16 +147,33 @@ struct Location {
     path: Option<Resource<String>>,
     span: Option<TextRange>,
     source_code: Option<String>,
+    start: Option<(usize, usize)>,
+    end: Option<(usize, usize)>,
 }
 
 impl From<super::Location<'_>> for Location {
     fn from(loc: super::Location<'_>) -> Self {
+        let span = loc
+            .span
+            // INFO: We fall back to 1:1. This usually covers diagnostics that belong to the formatter or organize imports
+            .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
+        let (start, end) =
+            loc.source_code
+                .map(SourceFile::new)
+                .map_or((None, None), |source_file| {
+                    (
+                        source_file.location(span.start()).ok(),
+                        source_file.location(span.end()).ok(),
+                    )
+                });
         Self {
             path: loc.resource.map(super::Resource::to_owned),
             span: loc.span,
             source_code: loc
                 .source_code
                 .map(|source_code| source_code.text.to_string()),
+            start: start.map(|loc| (loc.line_number.get(), loc.column_number.get())),
+            end: end.map(|loc| (loc.line_number.get(), loc.column_number.get())),
         }
     }
 }
@@ -430,7 +448,7 @@ mod tests {
     fn serialized() -> Value {
         let advices = json!([
             {
-                "log": [
+               "log": [
                     "warn",
                     [
                         {

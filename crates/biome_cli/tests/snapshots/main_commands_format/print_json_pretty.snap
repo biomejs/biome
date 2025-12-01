@@ -70,7 +70,9 @@ The --json option is unstable/experimental and its output might change between p
 			"location": {
 				"path": { "file": "format.js" },
 				"span": null,
-				"sourceCode": "  statement(  )  "
+				"sourceCode": "  statement(  )  ",
+				"start": [1, 2],
+				"end": [1, 2]
 			},
 			"tags": [],
 			"source": null
