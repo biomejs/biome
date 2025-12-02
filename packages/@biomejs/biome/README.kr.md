@@ -103,7 +103,7 @@ Biome은 기업이 다양한 개발자들 사이에서 인지도를 얻을 수 �
 
 ## 스폰서
 
-### Gold Sponsors
+### Platinum Sponsors
 
 <table>
   <tbody>
@@ -113,7 +113,7 @@ Biome은 기업이 다양한 개발자들 사이에서 인지도를 얻을 수 �
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot" />
           </picture>
         </a>
       </td>
