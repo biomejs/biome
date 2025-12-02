@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// var {bar } = foo;
+    /// var { bar } = foo;
     /// ```
     ///
     pub UseDestructuring {
