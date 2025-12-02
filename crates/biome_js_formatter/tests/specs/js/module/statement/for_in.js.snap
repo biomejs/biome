@@ -37,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -49,6 +50,7 @@ for (aVeryLongVariableNameToEnforceLineBreaksaVeryLongVariableNameToEnforceLineB
 for (a in b) {
 	// trailing
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

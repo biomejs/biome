@@ -37,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -48,4 +49,5 @@ class A extends B {
 
 	// trailing comment
 }
+
 ```

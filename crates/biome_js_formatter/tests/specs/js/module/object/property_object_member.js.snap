@@ -119,6 +119,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -277,6 +278,7 @@ const fluidObject = {
 		skipNext: true,
 	},
 };
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -35,6 +35,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -42,4 +43,5 @@ let {
 	/* biome-ignore format: Test that the property doesn't get formatted */
 	someProperty:    alias,
 } = { someProperty: 20 };
+
 ```

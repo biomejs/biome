@@ -242,6 +242,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
             use_editorconfig: Some(true.into()),
+            trailing_newline: None,
         };
         result.formatter = Some(formatter);
 
@@ -278,6 +279,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
             operator_linebreak: None,
+            trailing_newline: None,
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),

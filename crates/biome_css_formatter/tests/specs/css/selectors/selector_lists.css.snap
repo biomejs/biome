@@ -62,6 +62,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -109,6 +110,7 @@ div selector {
 div selector {
 	background: green;
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

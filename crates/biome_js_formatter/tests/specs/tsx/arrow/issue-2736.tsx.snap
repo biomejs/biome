@@ -50,6 +50,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```tsx
@@ -82,4 +83,5 @@ const ValueMenuDividf: ReactFFC<
 const ValueMenuDividg: ReactFFC<
 	MedddddddddMenuDividerPropsMenuDividerPropszzz
 > = (x) => 5;
+
 ```

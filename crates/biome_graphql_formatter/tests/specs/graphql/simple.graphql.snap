@@ -81,6 +81,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -134,4 +135,5 @@ query (
 ) {
 	likeStory(storyId: $storyId)
 }
+
 ```

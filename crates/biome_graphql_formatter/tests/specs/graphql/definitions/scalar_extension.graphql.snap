@@ -29,8 +29,10 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
 extend scalar Date @scalar_extension
+
 ```
