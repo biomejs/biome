@@ -3628,13 +3628,15 @@ fn trailing_newline_javascript_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--write",
-            "--javascript-formatter-trailing-newline=false",
-            test.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--javascript-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3702,13 +3704,15 @@ fn trailing_newline_json_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--write",
-            "--json-formatter-trailing-newline=false",
-            test.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--json-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3779,13 +3783,15 @@ fn trailing_newline_css_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--write",
-            "--css-formatter-trailing-newline=false",
-            test.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--css-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3855,13 +3861,15 @@ fn trailing_newline_graphql_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--write",
-            "--graphql-formatter-trailing-newline=false",
-            test.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--graphql-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3956,13 +3964,15 @@ fn trailing_newline_html_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--write",
-            "--html-formatter-trailing-newline=false",
-            test.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--html-formatter-trailing-newline=false",
+                test.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
