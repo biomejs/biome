@@ -210,6 +210,7 @@ define_categories! {
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",
+    "lint/nursery/useDestructuring": "https://biomejs.dev/linter/rules/use-destructuring",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",

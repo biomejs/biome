@@ -7,16 +7,17 @@ use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_package::{Dependencies, PackageJson};
 use std::slice;
 
-#[ignore]
 #[test]
 fn quick_test() {
-    const SOURCE: &str = r#"f({ prop: () => {} })"#;
+    const SOURCE: &str = r#"
+	var foo = (a, b).foo;
+"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
-    let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
+    let rule_filter = RuleFilter::Rule("nursery", "useDestructuring");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
