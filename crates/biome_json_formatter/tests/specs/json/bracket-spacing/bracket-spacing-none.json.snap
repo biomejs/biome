@@ -24,10 +24,12 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
 { "foo": { "bar": { "baz": "qux" } } }
+
 ```
 
 ## Output 1
@@ -40,8 +42,10 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: false
+Trailing newline: true
 -----
 
 ```json
 {"foo": {"bar": {"baz": "qux"}}}
+
 ```

@@ -1,7 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -66,6 +66,11 @@ pub struct GraphqlFormatterConfiguration {
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(long("graphql-formatter-trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl GraphqlFormatterConfiguration {

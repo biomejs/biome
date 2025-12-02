@@ -79,6 +79,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -107,4 +108,5 @@ input Point2D {
 input input @input {
 	input: input
 }
+
 ```

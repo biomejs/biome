@@ -10,7 +10,7 @@ use crate::{
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth,
+    LineEnding, LineWidth, TrailingNewline,
 };
 use biome_plugin_loader::Plugins;
 use bpaf::Bpaf;
@@ -174,6 +174,11 @@ pub struct OverrideFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("object-wrap"), argument("auto|always|never"))]
     pub expand: Option<Expand>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("trailing-newline"), argument("true|false"))]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 #[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

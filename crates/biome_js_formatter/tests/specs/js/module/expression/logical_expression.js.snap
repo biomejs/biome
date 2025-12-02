@@ -143,6 +143,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -325,6 +326,7 @@ a in
 (veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongFoo instanceof String &&
 	veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongBar instanceof Number) ||
 	veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongBar instanceof Boolean;
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -39,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -48,4 +49,5 @@ Operator linebreak: After
 	// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
 	a && b
 );
+
 ```

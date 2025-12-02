@@ -3,7 +3,7 @@ use biome_css_syntax::AnyCssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
-    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
     SourceMapGeneration, TransformSourceMap,
 };
 use biome_rowan::{AstNode, TextSize};
@@ -26,6 +26,10 @@ impl FormatOptions for FormatSemanticModelOptions {
 
     fn line_ending(&self) -> LineEnding {
         LineEnding::Lf
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
     }
 
     fn as_print_options(&self) -> PrinterOptions {

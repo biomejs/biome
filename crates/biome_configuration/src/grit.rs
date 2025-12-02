@@ -1,6 +1,6 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -59,6 +59,15 @@ pub struct GritFormatterConfiguration {
     #[bpaf(long("grit-formatter-line-width"), argument("NUMBER"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(
+        long("grit-formatter-trailing-newline"),
+        argument("true|false"),
+        optional
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 pub type GritLinterEnabled = Bool<true>;

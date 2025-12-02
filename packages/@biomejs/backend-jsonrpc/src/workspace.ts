@@ -209,6 +209,10 @@ match these patterns.
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
+	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration
 in `biome.json` will override `.editorconfig` configuration.
 
@@ -426,6 +430,10 @@ export interface CssFormatterConfiguration {
 	 * The type of quotes used in CSS code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Options that changes how the CSS linter behaves
@@ -471,6 +479,7 @@ export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+export type TrailingNewline = boolean;
 /**
  * Options that changes how the GraphQL linter behaves
  */
@@ -512,6 +521,10 @@ export interface GraphqlFormatterConfiguration {
 	 * The type of quotes used in GraphQL code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Options that change how the GraphQL linter behaves.
@@ -549,6 +562,10 @@ export interface GritFormatterConfiguration {
 	 * What's the max width of a line applied to Grit files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 export interface GritLinterConfiguration {
 	/**
@@ -605,6 +622,10 @@ export interface HtmlFormatterConfiguration {
 	 * Whether void elements should be self-closed. Defaults to never.
 	 */
 	selfCloseVoidElements?: SelfCloseVoidElements;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 	/**
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
@@ -710,6 +731,10 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
 	trailingCommas?: JsTrailingCommas;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
@@ -793,6 +818,10 @@ When formatting `package.json`, Biome will use `always` unless configured otherw
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
 	trailingCommas?: JsonTrailingCommas;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 /**
  * Linter options specific to the JSON linter
@@ -1053,6 +1082,10 @@ has syntax errors
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Whether to add a trailing newline at the end of the file. Defaults to true.
+	 */
+	trailingNewline?: TrailingNewline;
 }
 export type OverrideGlobs = Glob[];
 export interface OverrideLinterConfiguration {

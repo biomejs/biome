@@ -17,7 +17,9 @@ use biome_configuration::grit::{
     GritLinterConfiguration, GritLinterEnabled,
 };
 use biome_diagnostics::{Diagnostic, Severity};
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
+};
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
 use biome_grit_parser::parse_grit_with_cache;
@@ -35,6 +37,7 @@ pub struct GritFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<GritFormatterEnabled>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<GritFormatterConfiguration> for GritFormatterSettings {
@@ -45,6 +48,7 @@ impl From<GritFormatterConfiguration> for GritFormatterSettings {
             indent_width: config.indent_width,
             indent_style: config.indent_style,
             enabled: config.enabled,
+            trailing_newline: config.trailing_newline,
         }
     }
 }
@@ -129,12 +133,18 @@ impl ServiceLanguage for GritLanguage {
             .or(global.line_ending)
             .unwrap_or_default();
 
+        let trailing_newline = language
+            .trailing_newline
+            .or(global.trailing_newline)
+            .unwrap_or_default();
+
         let mut options =
             GritFormatOptions::new(file_source.to_grit_file_source().unwrap_or_default())
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_line_ending(line_ending);
+                .with_line_ending(line_ending)
+                .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_grit_format_options(path, &mut options);
 

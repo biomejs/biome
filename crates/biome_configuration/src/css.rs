@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -98,6 +100,11 @@ pub struct CssFormatterConfiguration {
     #[bpaf(long("css-formatter-quote-style"), argument("double|single"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(long("css-formatter-trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl CssFormatterConfiguration {

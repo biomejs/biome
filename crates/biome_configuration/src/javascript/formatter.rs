@@ -2,7 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, QuoteStyle,
+    LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_js_formatter::context::{
     ArrowParentheses, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -125,6 +125,11 @@ pub struct JsFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub operator_linebreak: Option<OperatorLinebreak>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(long("javascript-formatter-trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl JsFormatterConfiguration {

@@ -30,6 +30,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```jsonc
@@ -40,6 +41,7 @@ Bracket spacing: true
 	"list3": [],
 	"list4": []
 }
+
 ```
 
 ## Output 1
@@ -52,6 +54,7 @@ Line width: 80
 Trailing commas: All
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```jsonc
@@ -62,4 +65,5 @@ Bracket spacing: true
 	"list3": [],
 	"list4": [],
 }
+
 ```
