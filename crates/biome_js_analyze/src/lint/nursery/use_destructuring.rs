@@ -74,12 +74,10 @@ impl Rule for UseDestructuring {
                     return should_suggest_destructuring(ident.text_trimmed(), &right);
                 }
 
-                return None;
+                None
             }
             UseDestructuringQuery::JsVariableDeclarator(node) => {
-                if node.initializer().is_none() {
-                    return None;
-                }
+                let initializer = node.initializer()?;
                 let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
                 let has_await_using = declaration.await_token().is_some();
                 if declaration.kind().ok()?.text_trimmed() == "using" || has_await_using {
@@ -87,7 +85,7 @@ impl Rule for UseDestructuring {
                 }
 
                 let left = node.id().ok()?;
-                let right = node.initializer()?.expression().ok()?;
+                let right = initializer.expression().ok()?;
 
                 if let AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(expr)) =
                     left
@@ -96,7 +94,7 @@ impl Rule for UseDestructuring {
                     return should_suggest_destructuring(ident.text_trimmed(), &right);
                 }
 
-                return None;
+                None
             }
         }
     }
@@ -169,7 +167,7 @@ fn should_suggest_destructuring(
                 }
             }
 
-            return None;
+            None
         }
         AnyJsExpression::JsStaticMemberExpression(expr) => {
             if matches!(expr.member().ok()?, AnyJsName::JsPrivateName(_))
@@ -185,9 +183,9 @@ fn should_suggest_destructuring(
             if left == member.text_trimmed() {
                 return Some(UseDestructuringState::Object);
             }
-            return None;
+            None
         }
-        _ => return None,
+        _ => None,
     }
 }
 
