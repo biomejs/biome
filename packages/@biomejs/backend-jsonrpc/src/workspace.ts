@@ -2051,7 +2051,7 @@ See https://biomejs.dev/linter/rules/use-deprecated-date
 	 */
 	useDeprecatedDate?: UseDeprecatedDateConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Require destructuring from arrays and/or objects.
 See https://biomejs.dev/linter/rules/use-destructuring 
 	 */
 	useDestructuring?: UseDestructuringConfiguration;

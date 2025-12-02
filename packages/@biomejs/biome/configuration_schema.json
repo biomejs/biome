@@ -5366,7 +5366,7 @@
 					]
 				},
 				"useDestructuring": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-destructuring",
+					"description": "Require destructuring from arrays and/or objects.\nSee https://biomejs.dev/linter/rules/use-destructuring",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDestructuringConfiguration" },
 						{ "type": "null" }
