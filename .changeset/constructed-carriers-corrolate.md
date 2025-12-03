@@ -22,7 +22,7 @@ class ShouldBeReported {
     //          ^^^^^^^^^^^^----------------- Parameter property declaration
 
     async shouldBeReported() {
-        // `useFloatingPromise` will now report the following usage:
+        // `noFloatingPromises` will now report the following usage:
         this.field.returnsPromise();
     }
 }
