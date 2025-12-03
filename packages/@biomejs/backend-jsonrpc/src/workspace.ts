@@ -2031,6 +2031,11 @@ See https://biomejs.dev/linter/rules/use-array-sort-compare
 	 */
 	useArraySortCompare?: UseArraySortCompareConfiguration;
 	/**
+	* Enforce that await is only used on Promise values.
+See https://biomejs.dev/linter/rules/use-await-thenable 
+	 */
+	useAwaitThenable?: UseAwaitThenableConfiguration;
+	/**
 	* Enforce consistent arrow function bodies.
 See https://biomejs.dev/linter/rules/use-consistent-arrow-return 
 	 */
@@ -3676,6 +3681,9 @@ export type NoVueVIfWithVForConfiguration =
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
+export type UseAwaitThenableConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAwaitThenableOptions;
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
@@ -5119,6 +5127,10 @@ export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySortCompareOptions;
 }
+export interface RuleWithUseAwaitThenableOptions {
+	level: RulePlainConfiguration;
+	options?: UseAwaitThenableOptions;
+}
 export interface RuleWithUseConsistentArrowReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6387,6 +6399,7 @@ export type NoVueReservedPropsOptions = {};
 export type NoVueSetupPropsReactivityLossOptions = {};
 export type NoVueVIfWithVForOptions = {};
 export type UseArraySortCompareOptions = {};
+export type UseAwaitThenableOptions = {};
 /**
  * Options for the `useConsistentArrowReturn` rule.
  */
@@ -7192,6 +7205,7 @@ export type Category =
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noFloatingPromises"
@@ -7209,7 +7223,6 @@ export type Category =
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noShadow"
-	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUnknownAttribute"
@@ -7224,10 +7237,11 @@ export type Category =
 	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
-	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/noVueSetupPropsReactivityLoss"
+	| "lint/nursery/noVueVIfWithVFor"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useArraySortCompare"
+	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
@@ -7242,8 +7256,8 @@ export type Category =
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
-	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useRegexpExec"
+	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"

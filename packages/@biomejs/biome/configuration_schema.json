@@ -5337,6 +5337,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAwaitThenable": {
+					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAwaitThenableConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentArrowReturn": {
 					"description": "Enforce consistent arrow function bodies.\nSee https://biomejs.dev/linter/rules/use-consistent-arrow-return",
 					"anyOf": [
@@ -8533,6 +8540,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAwaitThenableOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAwaitThenableOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBiomeIgnoreFolderOptions": {
 			"type": "object",
 			"properties": {
@@ -11283,6 +11299,16 @@
 			]
 		},
 		"UseAwaitOptions": { "type": "object", "additionalProperties": false },
+		"UseAwaitThenableConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAwaitThenableOptions" }
+			]
+		},
+		"UseAwaitThenableOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBiomeIgnoreFolderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
