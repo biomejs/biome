@@ -702,6 +702,7 @@ AnyCssAtRuleDeclarator =
 	| CssSupportsAtRuleDeclarator
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
+	| CssFunctionAtRuleDeclarator
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -753,6 +754,11 @@ CssViewTransitionAtRuleDeclarator =
 
 CssFunctionAtRuleDeclarator =
 	'function'
+	name: CssDashedIdentifier
+	'('
+	parameters: CssFunctionParameterList
+	')'
+	returns: CssReturnsStatement?
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -1764,11 +1770,6 @@ CssViewTransitionAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFunctionAtRule =
 	declarator: CssFunctionAtRuleDeclarator
-	function_name: CssDashedIdentifier
-	'('
-	parameters: CssFunctionParameterList
-	')'
-	returns: CssReturnsStatement?
 	block: CssDeclarationOrAtRuleBlock
 
 // <function-parameter>#?

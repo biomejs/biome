@@ -1,16 +1,16 @@
-@function func($arg, $arg1, $arg2: 10, $args...) {
+@function --func($arg, $arg1, $arg2: 10, $args...) {
     @return "Func";
 }
-@function func($arg,$arg1,$arg2:10,$args...){
+@function --func($arg,$arg1,$arg2:10,$args...){
     @return "Func";
 }
-@function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+@function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
     @return "Func";
 }
-@function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+@function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
     @return "Func";
 }
-@function func(
+@function --func(
     $arg,
     $arg1,
     $arg2: 10,
@@ -19,7 +19,7 @@
     @return "Func";
 }
 @function
-    func(
+    --func(
         $arg,
         $arg1,
         $arg2: 10,
@@ -28,7 +28,7 @@
     @return "Func";
 }
 @function
-func
+--func
 (
 $arg
 ,
@@ -48,7 +48,7 @@ $args
 }
 @function
 
-func
+--func
 
 (
 
@@ -83,6 +83,6 @@ $args
 ;
 
 }
-@function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+@function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
     @return "Func";
 }

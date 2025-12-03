@@ -7,11 +7,11 @@ pub(crate) struct FormatAnyCssExpression;
 impl FormatRule<AnyCssExpression> for FormatAnyCssExpression {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        todo!()
-        // match node {
-        //     AnyCssExpression::CssBinaryExpression(node) => node.format().fmt(f),
-        //     AnyCssExpression::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
-        //     AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
-        // }
+        match node {
+            AnyCssExpression::CssBinaryExpression(node) => node.format().fmt(f),
+            AnyCssExpression::CssComaSeparatedValue(node) => node.format().fmt(f),
+            AnyCssExpression::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
+            AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
+        }
     }
 }

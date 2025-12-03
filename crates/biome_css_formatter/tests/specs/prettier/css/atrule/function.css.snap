@@ -5,19 +5,19 @@ info: css/atrule/function.css
 # Input
 
 ```css
-@function func($arg, $arg1, $arg2: 10, $args...) {
+@function --func($arg, $arg1, $arg2: 10, $args...) {
     @return "Func";
 }
-@function func($arg,$arg1,$arg2:10,$args...){
+@function --func($arg,$arg1,$arg2:10,$args...){
     @return "Func";
 }
-@function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+@function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
     @return "Func";
 }
-@function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+@function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
     @return "Func";
 }
-@function func(
+@function --func(
     $arg,
     $arg1,
     $arg2: 10,
@@ -26,7 +26,7 @@ info: css/atrule/function.css
     @return "Func";
 }
 @function
-    func(
+    --func(
         $arg,
         $arg1,
         $arg2: 10,
@@ -35,7 +35,7 @@ info: css/atrule/function.css
     @return "Func";
 }
 @function
-func
+--func
 (
 $arg
 ,
@@ -55,7 +55,7 @@ $args
 }
 @function
 
-func
+--func
 
 (
 
@@ -90,7 +90,7 @@ $args
 ;
 
 }
-@function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+@function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
     @return "Func";
 }
 
@@ -102,96 +102,70 @@ $args
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,39 +1,73 @@
- @function func($arg, $arg1, $arg2: 10, $args...) {
+@@ -1,39 +1,51 @@
+-@function func($arg, $arg1, $arg2: 10, $args...) {
++@function --func($arg, $arg1, $arg2: 10, $args...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func($arg,$arg1,$arg2:10,$args...) {
++@function --func($arg, $arg1, $arg2:10, $args...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
++@function --func($arg, $arg1, $arg2 : 10, $args ...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  ) {
++@function --func($arg, $arg1, $arg2  :  10, $args  ...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func(
-+    $arg,
-+    $arg1,
-+    $arg2: 10,
-+    $args...
-+) {
++@function --func($arg, $arg1, $arg2: 10, $args...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func(
-+        $arg,
-+        $arg1,
-+        $arg2: 10,
-+        $args...
-+    ) {
++@function --func($arg, $arg1, $arg2: 10, $args...) {
    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func
-+(
-+$arg
-+,
-+$arg1
-+,
-+$arg2
++@function --func(
++  $arg,
++  $arg1,
++  $arg2
 +:
-+10
-+,
-+$args
-+...
++10,
++  $args
++...,
 +) {
    @return "Func";
  }
 -@function func(
--  $arg,
--  $arg1,
++@function --func(
+   $arg,
+   $arg1,
 -  $arg2: 10,
-+@function func
++  $arg2
 +
-+(
-+
-+$arg
-+
-+,
-+
-+$arg1
-+
-+,
-+
-+$arg2
- 
--  $args...
 +:
 +
-+10
-+
-+,
-+
-+$args
-+
-+...
-+
++10,
++  $args
+ 
+-  $args...
++...,
  ) {
    @return "Func";
  }
 -@function func(
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
++@function --func(
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
 -    10,
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
--) {
-+@function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
+ ) {
    @return "Func";
  }
 ```
@@ -199,248 +173,226 @@ $args
 # Output
 
 ```css
-@function func($arg, $arg1, $arg2: 10, $args...) {
+@function --func($arg, $arg1, $arg2: 10, $args...) {
   @return "Func";
 }
-@function func($arg,$arg1,$arg2:10,$args...) {
+@function --func($arg, $arg1, $arg2:10, $args...) {
   @return "Func";
 }
-@function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+@function --func($arg, $arg1, $arg2 : 10, $args ...) {
   @return "Func";
 }
-@function func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  ) {
+@function --func($arg, $arg1, $arg2  :  10, $args  ...) {
   @return "Func";
 }
-@function func(
-    $arg,
-    $arg1,
-    $arg2: 10,
-    $args...
-) {
+@function --func($arg, $arg1, $arg2: 10, $args...) {
   @return "Func";
 }
-@function func(
-        $arg,
-        $arg1,
-        $arg2: 10,
-        $args...
-    ) {
+@function --func($arg, $arg1, $arg2: 10, $args...) {
   @return "Func";
 }
-@function func
-(
-$arg
-,
-$arg1
-,
-$arg2
+@function --func(
+  $arg,
+  $arg1,
+  $arg2
 :
-10
-,
-$args
-...
+10,
+  $args
+...,
 ) {
   @return "Func";
 }
-@function func
-
-(
-
-$arg
-
-,
-
-$arg1
-
-,
-
-$arg2
+@function --func(
+  $arg,
+  $arg1,
+  $arg2
 
 :
 
-10
+10,
+  $args
 
-,
-
-$args
-
-...
-
+...,
 ) {
   @return "Func";
 }
-@function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+@function --func(
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
+) {
   @return "Func";
 }
 ```
 
 # Errors
 ```
-function.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
-  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                ^
-    2 │     @return "Func";
-    3 │ }
-  
-function.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                      ^
-    2 │     @return "Func";
-    3 │ }
-  
-function.css:1:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                             ^
-    2 │     @return "Func";
-    3 │ }
-  
-function.css:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                                        ^
-    2 │     @return "Func";
-    3 │ }
-  
-function.css:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    2 │     @return "Func";
-    3 │ }
-  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                ^
-    5 │     @return "Func";
-    6 │ }
-  
-function.css:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    2 │     @return "Func";
-    3 │ }
-  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                     ^
-    5 │     @return "Func";
-    6 │ }
-  
-function.css:4:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    2 │     @return "Func";
-    3 │ }
-  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                           ^
-    5 │     @return "Func";
-    6 │ }
-  
-function.css:4:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    2 │     @return "Func";
-    3 │ }
-  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                                    ^
-    5 │     @return "Func";
-    6 │ }
-  
-function.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    5 │     @return "Func";
-    6 │ }
-  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+  > 1 │ @function --func($arg, $arg1, $arg2: 10, $args...) {
       │                  ^
-    8 │     @return "Func";
-    9 │ }
+    2 │     @return "Func";
+    3 │ }
   
-function.css:7:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:1:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+  > 1 │ @function --func($arg, $arg1, $arg2: 10, $args...) {
+      │                        ^
+    2 │     @return "Func";
+    3 │ }
+  
+function.css:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+  > 1 │ @function --func($arg, $arg1, $arg2: 10, $args...) {
+      │                               ^
+    2 │     @return "Func";
+    3 │ }
+  
+function.css:1:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+  > 1 │ @function --func($arg, $arg1, $arg2: 10, $args...) {
+      │                                          ^
+    2 │     @return "Func";
+    3 │ }
+  
+function.css:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function --func($arg,$arg1,$arg2:10,$args...){
+      │                  ^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function --func($arg,$arg1,$arg2:10,$args...){
+      │                       ^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:4:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function --func($arg,$arg1,$arg2:10,$args...){
+      │                             ^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:4:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function --func($arg,$arg1,$arg2:10,$args...){
+      │                                      ^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:7:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     5 │     @return "Func";
     6 │ }
-  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                         ^
+  > 7 │ @function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                    ^
     8 │     @return "Func";
     9 │ }
   
-function.css:7:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:7:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     5 │     @return "Func";
     6 │ }
-  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                                 ^
+  > 7 │ @function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                           ^
     8 │     @return "Func";
     9 │ }
   
-function.css:7:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:7:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     5 │     @return "Func";
     6 │ }
-  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                                              ^
+  > 7 │ @function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                                   ^
     8 │     @return "Func";
     9 │ }
   
-function.css:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:7:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function --func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                                                ^
+    8 │     @return "Func";
+    9 │ }
+  
+function.css:10:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
      8 │     @return "Func";
      9 │ }
-  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                     ^
+  > 10 │ @function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                       ^
     11 │     @return "Func";
     12 │ }
   
-function.css:10:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
      8 │     @return "Func";
      9 │ }
-  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                              ^
+  > 10 │ @function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                                ^
     11 │     @return "Func";
     12 │ }
   
-function.css:10:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:10:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
      8 │     @return "Func";
      9 │ }
-  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                                        ^
+  > 10 │ @function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                                          ^
     11 │     @return "Func";
     12 │ }
   
-function.css:10:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:10:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
      8 │     @return "Func";
      9 │ }
-  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                                                         ^
+  > 10 │ @function  --func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                                                           ^
     11 │     @return "Func";
     12 │ }
   
@@ -449,7 +401,7 @@ function.css:14:5 parse ━━━━━━━━━━━━━━━━━━�
   × unexpected character `$`
   
     12 │ }
-    13 │ @function func(
+    13 │ @function --func(
   > 14 │     $arg,
        │     ^
     15 │     $arg1,
@@ -459,7 +411,7 @@ function.css:15:5 parse ━━━━━━━━━━━━━━━━━━�
 
   × unexpected character `$`
   
-    13 │ @function func(
+    13 │ @function --func(
     14 │     $arg,
   > 15 │     $arg1,
        │     ^
@@ -493,7 +445,7 @@ function.css:23:9 parse ━━━━━━━━━━━━━━━━━━�
   × unexpected character `$`
   
     21 │ @function
-    22 │     func(
+    22 │     --func(
   > 23 │         $arg,
        │         ^
     24 │         $arg1,
@@ -503,7 +455,7 @@ function.css:24:9 parse ━━━━━━━━━━━━━━━━━━�
 
   × unexpected character `$`
   
-    22 │     func(
+    22 │     --func(
     23 │         $arg,
   > 24 │         $arg1,
        │         ^
@@ -536,7 +488,7 @@ function.css:33:1 parse ━━━━━━━━━━━━━━━━━━�
 
   × unexpected character `$`
   
-    31 │ func
+    31 │ --func
     32 │ (
   > 33 │ $arg
        │ ^
@@ -620,43 +572,43 @@ function.css:71:1 parse ━━━━━━━━━━━━━━━━━━�
     72 │ 
     73 │ ...
   
-function.css:86:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:86:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     85 │ }
-  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                ^
+  > 86 │ @function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                  ^
     87 │     @return "Func";
     88 │ }
   
-function.css:86:97 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:86:99 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     85 │ }
-  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                 ^
+  > 86 │ @function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                   ^
     87 │     @return "Func";
     88 │ }
   
-function.css:86:179 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:86:181 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     85 │ }
-  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                                                                                                   ^
+  > 86 │ @function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                                                                                                     ^
     87 │     @return "Func";
     88 │ }
   
-function.css:86:265 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:86:267 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
   
     85 │ }
-  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                                                                                                                                                                                         ^
+  > 86 │ @function --func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                                                                                                                                                                                           ^
     87 │     @return "Func";
     88 │ }
   
@@ -665,5 +617,8 @@ function.css:86:265 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   71: @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+   45:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
+   46:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
+   47:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+   48:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...,
 ```

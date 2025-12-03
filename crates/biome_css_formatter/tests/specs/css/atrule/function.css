@@ -1,0 +1,7 @@
+@function  --test     ( --param1     ) { }
+@function  --test     ( --param1   <string>  ) { }
+@function  --test     ( --param1   <string>   : rem  ) { }
+@function  --test     ( --param1   <string>   : rem  )    returns    <string> { }
+
+
+@function  --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param) { }

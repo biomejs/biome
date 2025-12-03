@@ -882,57 +882,59 @@ pub fn css_function(
 }
 pub fn css_function_at_rule(
     declarator: CssFunctionAtRuleDeclarator,
-    function_name: CssDashedIdentifier,
+    block: CssDeclarationOrAtRuleBlock,
+) -> CssFunctionAtRule {
+    CssFunctionAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_function_at_rule_declarator(
+    function_token: SyntaxToken,
+    name: CssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
-    block: CssDeclarationOrAtRuleBlock,
-) -> CssFunctionAtRuleBuilder {
-    CssFunctionAtRuleBuilder {
-        declarator,
-        function_name,
+) -> CssFunctionAtRuleDeclaratorBuilder {
+    CssFunctionAtRuleDeclaratorBuilder {
+        function_token,
+        name,
         l_paren_token,
         parameters,
         r_paren_token,
-        block,
         returns: None,
     }
 }
-pub struct CssFunctionAtRuleBuilder {
-    declarator: CssFunctionAtRuleDeclarator,
-    function_name: CssDashedIdentifier,
+pub struct CssFunctionAtRuleDeclaratorBuilder {
+    function_token: SyntaxToken,
+    name: CssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
-    block: CssDeclarationOrAtRuleBlock,
     returns: Option<CssReturnsStatement>,
 }
-impl CssFunctionAtRuleBuilder {
+impl CssFunctionAtRuleDeclaratorBuilder {
     pub fn with_returns(mut self, returns: CssReturnsStatement) -> Self {
         self.returns = Some(returns);
         self
     }
-    pub fn build(self) -> CssFunctionAtRule {
-        CssFunctionAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_FUNCTION_AT_RULE,
+    pub fn build(self) -> CssFunctionAtRuleDeclarator {
+        CssFunctionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_FUNCTION_AT_RULE_DECLARATOR,
             [
-                Some(SyntaxElement::Node(self.declarator.into_syntax())),
-                Some(SyntaxElement::Node(self.function_name.into_syntax())),
+                Some(SyntaxElement::Token(self.function_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
                 Some(SyntaxElement::Token(self.l_paren_token)),
                 Some(SyntaxElement::Node(self.parameters.into_syntax())),
                 Some(SyntaxElement::Token(self.r_paren_token)),
                 self.returns
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
             ],
         ))
     }
-}
-pub fn css_function_at_rule_declarator(function_token: SyntaxToken) -> CssFunctionAtRuleDeclarator {
-    CssFunctionAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_FUNCTION_AT_RULE_DECLARATOR,
-        [Some(SyntaxElement::Token(function_token))],
-    ))
 }
 pub fn css_function_parameter(name: CssDashedIdentifier) -> CssFunctionParameterBuilder {
     CssFunctionParameterBuilder {

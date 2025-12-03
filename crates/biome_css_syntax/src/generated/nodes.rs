@@ -2414,34 +2414,14 @@ impl CssFunctionAtRule {
     pub fn as_fields(&self) -> CssFunctionAtRuleFields {
         CssFunctionAtRuleFields {
             declarator: self.declarator(),
-            function_name: self.function_name(),
-            l_paren_token: self.l_paren_token(),
-            parameters: self.parameters(),
-            r_paren_token: self.r_paren_token(),
-            returns: self.returns(),
             block: self.block(),
         }
     }
     pub fn declarator(&self) -> SyntaxResult<CssFunctionAtRuleDeclarator> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn function_name(&self) -> SyntaxResult<CssDashedIdentifier> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn parameters(&self) -> CssFunctionParameterList {
-        support::list(&self.syntax, 3usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
-    }
-    pub fn returns(&self) -> Option<CssReturnsStatement> {
-        support::node(&self.syntax, 5usize)
-    }
     pub fn block(&self) -> SyntaxResult<CssDeclarationOrAtRuleBlock> {
-        support::required_node(&self.syntax, 6usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssFunctionAtRule {
@@ -2455,11 +2435,6 @@ impl Serialize for CssFunctionAtRule {
 #[derive(Serialize)]
 pub struct CssFunctionAtRuleFields {
     pub declarator: SyntaxResult<CssFunctionAtRuleDeclarator>,
-    pub function_name: SyntaxResult<CssDashedIdentifier>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub parameters: CssFunctionParameterList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
-    pub returns: Option<CssReturnsStatement>,
     pub block: SyntaxResult<CssDeclarationOrAtRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2479,10 +2454,30 @@ impl CssFunctionAtRuleDeclarator {
     pub fn as_fields(&self) -> CssFunctionAtRuleDeclaratorFields {
         CssFunctionAtRuleDeclaratorFields {
             function_token: self.function_token(),
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            parameters: self.parameters(),
+            r_paren_token: self.r_paren_token(),
+            returns: self.returns(),
         }
     }
     pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn parameters(&self) -> CssFunctionParameterList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+    pub fn returns(&self) -> Option<CssReturnsStatement> {
+        support::node(&self.syntax, 5usize)
     }
 }
 impl Serialize for CssFunctionAtRuleDeclarator {
@@ -2496,6 +2491,11 @@ impl Serialize for CssFunctionAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssFunctionAtRuleDeclaratorFields {
     pub function_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub parameters: CssFunctionParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub returns: Option<CssReturnsStatement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFunctionParameter {
@@ -9614,6 +9614,7 @@ pub enum AnyCssAtRuleDeclarator {
     CssCounterStyleAtRuleDeclarator(CssCounterStyleAtRuleDeclarator),
     CssFontFaceAtRuleDeclarator(CssFontFaceAtRuleDeclarator),
     CssFontPaletteValuesAtRuleDeclarator(CssFontPaletteValuesAtRuleDeclarator),
+    CssFunctionAtRuleDeclarator(CssFunctionAtRuleDeclarator),
     CssMediaAtRuleDeclarator(CssMediaAtRuleDeclarator),
     CssPositionTryAtRuleDeclarator(CssPositionTryAtRuleDeclarator),
     CssPropertyAtRuleDeclarator(CssPropertyAtRuleDeclarator),
@@ -9656,6 +9657,12 @@ impl AnyCssAtRuleDeclarator {
     ) -> Option<&CssFontPaletteValuesAtRuleDeclarator> {
         match &self {
             Self::CssFontPaletteValuesAtRuleDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_function_at_rule_declarator(&self) -> Option<&CssFunctionAtRuleDeclarator> {
+        match &self {
+            Self::CssFunctionAtRuleDeclarator(item) => Some(item),
             _ => None,
         }
     }
@@ -15195,20 +15202,6 @@ impl std::fmt::Debug for CssFunctionAtRule {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssFunctionAtRule")
                 .field("declarator", &support::DebugSyntaxResult(self.declarator()))
-                .field(
-                    "function_name",
-                    &support::DebugSyntaxResult(self.function_name()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("parameters", &self.parameters())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field("returns", &support::DebugOptionalElement(self.returns()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -15260,6 +15253,17 @@ impl std::fmt::Debug for CssFunctionAtRuleDeclarator {
                     "function_token",
                     &support::DebugSyntaxResult(self.function_token()),
                 )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameters", &self.parameters())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("returns", &support::DebugOptionalElement(self.returns()))
                 .finish()
         } else {
             f.debug_struct("CssFunctionAtRuleDeclarator").finish()
@@ -24138,6 +24142,11 @@ impl From<CssFontPaletteValuesAtRuleDeclarator> for AnyCssAtRuleDeclarator {
         Self::CssFontPaletteValuesAtRuleDeclarator(node)
     }
 }
+impl From<CssFunctionAtRuleDeclarator> for AnyCssAtRuleDeclarator {
+    fn from(node: CssFunctionAtRuleDeclarator) -> Self {
+        Self::CssFunctionAtRuleDeclarator(node)
+    }
+}
 impl From<CssMediaAtRuleDeclarator> for AnyCssAtRuleDeclarator {
     fn from(node: CssMediaAtRuleDeclarator) -> Self {
         Self::CssMediaAtRuleDeclarator(node)
@@ -24180,6 +24189,7 @@ impl AstNode for AnyCssAtRuleDeclarator {
         .union(CssCounterStyleAtRuleDeclarator::KIND_SET)
         .union(CssFontFaceAtRuleDeclarator::KIND_SET)
         .union(CssFontPaletteValuesAtRuleDeclarator::KIND_SET)
+        .union(CssFunctionAtRuleDeclarator::KIND_SET)
         .union(CssMediaAtRuleDeclarator::KIND_SET)
         .union(CssPositionTryAtRuleDeclarator::KIND_SET)
         .union(CssPropertyAtRuleDeclarator::KIND_SET)
@@ -24195,6 +24205,7 @@ impl AstNode for AnyCssAtRuleDeclarator {
                 | CSS_COUNTER_STYLE_AT_RULE_DECLARATOR
                 | CSS_FONT_FACE_AT_RULE_DECLARATOR
                 | CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR
+                | CSS_FUNCTION_AT_RULE_DECLARATOR
                 | CSS_MEDIA_AT_RULE_DECLARATOR
                 | CSS_POSITION_TRY_AT_RULE_DECLARATOR
                 | CSS_PROPERTY_AT_RULE_DECLARATOR
@@ -24222,6 +24233,9 @@ impl AstNode for AnyCssAtRuleDeclarator {
                 Self::CssFontPaletteValuesAtRuleDeclarator(CssFontPaletteValuesAtRuleDeclarator {
                     syntax,
                 })
+            }
+            CSS_FUNCTION_AT_RULE_DECLARATOR => {
+                Self::CssFunctionAtRuleDeclarator(CssFunctionAtRuleDeclarator { syntax })
             }
             CSS_MEDIA_AT_RULE_DECLARATOR => {
                 Self::CssMediaAtRuleDeclarator(CssMediaAtRuleDeclarator { syntax })
@@ -24257,6 +24271,7 @@ impl AstNode for AnyCssAtRuleDeclarator {
             Self::CssCounterStyleAtRuleDeclarator(it) => it.syntax(),
             Self::CssFontFaceAtRuleDeclarator(it) => it.syntax(),
             Self::CssFontPaletteValuesAtRuleDeclarator(it) => it.syntax(),
+            Self::CssFunctionAtRuleDeclarator(it) => it.syntax(),
             Self::CssMediaAtRuleDeclarator(it) => it.syntax(),
             Self::CssPositionTryAtRuleDeclarator(it) => it.syntax(),
             Self::CssPropertyAtRuleDeclarator(it) => it.syntax(),
@@ -24273,6 +24288,7 @@ impl AstNode for AnyCssAtRuleDeclarator {
             Self::CssCounterStyleAtRuleDeclarator(it) => it.into_syntax(),
             Self::CssFontFaceAtRuleDeclarator(it) => it.into_syntax(),
             Self::CssFontPaletteValuesAtRuleDeclarator(it) => it.into_syntax(),
+            Self::CssFunctionAtRuleDeclarator(it) => it.into_syntax(),
             Self::CssMediaAtRuleDeclarator(it) => it.into_syntax(),
             Self::CssPositionTryAtRuleDeclarator(it) => it.into_syntax(),
             Self::CssPropertyAtRuleDeclarator(it) => it.into_syntax(),
@@ -24291,6 +24307,7 @@ impl std::fmt::Debug for AnyCssAtRuleDeclarator {
             Self::CssCounterStyleAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFaceAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontPaletteValuesAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssFunctionAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPositionTryAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPropertyAtRuleDeclarator(it) => std::fmt::Debug::fmt(it, f),
@@ -24309,6 +24326,7 @@ impl From<AnyCssAtRuleDeclarator> for SyntaxNode {
             AnyCssAtRuleDeclarator::CssCounterStyleAtRuleDeclarator(it) => it.into_syntax(),
             AnyCssAtRuleDeclarator::CssFontFaceAtRuleDeclarator(it) => it.into_syntax(),
             AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(it) => it.into_syntax(),
+            AnyCssAtRuleDeclarator::CssFunctionAtRuleDeclarator(it) => it.into_syntax(),
             AnyCssAtRuleDeclarator::CssMediaAtRuleDeclarator(it) => it.into_syntax(),
             AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(it) => it.into_syntax(),
             AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(it) => it.into_syntax(),

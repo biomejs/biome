@@ -962,7 +962,21 @@ impl CssFunctionAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_function_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_block(self, element: CssDeclarationOrAtRuleBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssFunctionAtRuleDeclarator {
+    pub fn with_function_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -991,20 +1005,6 @@ impl CssFunctionAtRule {
             5usize..=5usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
-    }
-    pub fn with_block(self, element: CssDeclarationOrAtRuleBlock) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl CssFunctionAtRuleDeclarator {
-    pub fn with_function_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
     }
 }
 impl CssFunctionParameter {

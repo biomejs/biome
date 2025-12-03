@@ -36,6 +36,19 @@ pub(crate) fn parse_function_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     parse_function_at_rule_declarator(p).ok();
+    parse_declaration_or_at_rule_list_block(p);
+
+    Present(m.complete(p, CSS_FUNCTION_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_function_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![function]);
 
     // TODO: recover on type, default arg
     parse_dashed_identifier(p)
@@ -52,19 +65,6 @@ pub(crate) fn parse_function_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     parse_returns_statement(p).ok();
-    parse_declaration_or_at_rule_list_block(p);
-
-    Present(m.complete(p, CSS_FUNCTION_AT_RULE))
-}
-
-#[inline]
-pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_function_at_rule(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![function]);
 
     Present(m.complete(p, CSS_FUNCTION_AT_RULE_DECLARATOR))
 }
@@ -196,7 +196,7 @@ impl ParseSeparatedList for CssFunctionParameterList {
 
 struct CssFunctionParameterDefaultValueList;
 
-impl ParseNodeList for CssFunctionParameterDefaultValueList {
+impl ParseSeparatedList for CssFunctionParameterDefaultValueList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
@@ -206,7 +206,7 @@ impl ParseNodeList for CssFunctionParameterDefaultValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![,]) || p.at(T![')'])
+        p.at(T![')'])
     }
 
     fn recover(
@@ -220,5 +220,14 @@ impl ParseNodeList for CssFunctionParameterDefaultValueList {
                 .enable_recovery_on_line_break(),
             expected_component_value,
         )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    // TODO: double check this
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 }

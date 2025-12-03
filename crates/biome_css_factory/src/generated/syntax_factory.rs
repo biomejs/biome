@@ -1723,10 +1723,36 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_FUNCTION_AT_RULE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && CssFunctionAtRuleDeclarator::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssDeclarationOrAtRuleBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION_AT_RULE, children)
+            }
+            CSS_FUNCTION_AT_RULE_DECLARATOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![function]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1762,32 +1788,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && CssReturnsStatement::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && CssDeclarationOrAtRuleBlock::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_FUNCTION_AT_RULE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_FUNCTION_AT_RULE, children)
-            }
-            CSS_FUNCTION_AT_RULE_DECLARATOR => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T![function]
                 {
                     slots.mark_present();
                     current_element = elements.next();
