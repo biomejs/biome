@@ -267,6 +267,26 @@ impl CssColorProfileAtRuleDeclarator {
         )
     }
 }
+impl CssComaSeparatedValue {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_items(self, element: CssGenericComponentValueList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssComplexSelector {
     pub fn with_left(self, element: AnyCssSelector) -> Self {
         Self::unwrap_cast(
@@ -972,7 +992,7 @@ impl CssFunctionAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+    pub fn with_block(self, element: CssDeclarationOrAtRuleBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
@@ -994,11 +1014,11 @@ impl CssFunctionParameter {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_type_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
+    pub fn with_ty(self, element: Option<AnyCssType>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_default_value(self, element: Option<CssFunctionParameterDefaultValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
@@ -2686,10 +2706,10 @@ impl CssReturnsStatement {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_type_token(self, element: SyntaxToken) -> Self {
+    pub fn with_ty(self, element: AnyCssType) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

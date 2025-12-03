@@ -138,12 +138,12 @@ fn parse_any_syntax(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_syntax_single_component(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_syntax_single_component(p: &mut CssParser) -> bool {
     is_at_syntax_type(p) || is_at_identifier(p)
 }
 
 #[inline]
-fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_syntax_component(p: &mut CssParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
 
     // handle <transform-list> edge case

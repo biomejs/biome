@@ -1,0 +1,268 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFunctionAtRule {
+                declarator: CssFunctionAtRuleDeclarator {
+                    function_token: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")],
+                },
+                function_name: CssDashedIdentifier {
+                    value_token: IDENT@10..16 "--fn-2" [] [],
+                },
+                l_paren_token: L_PAREN@16..17 "(" [] [],
+                parameters: CssFunctionParameterList [
+                    CssFunctionParameter {
+                        name: CssDashedIdentifier {
+                            value_token: IDENT@17..21 "--a" [] [Whitespace(" ")],
+                        },
+                        ty: CssSyntaxComponent {
+                            component: CssSyntaxType {
+                                l_angle_token: L_ANGLE@21..22 "<" [] [],
+                                type_name: CssRegularSyntaxTypeName {
+                                    name_token: IDENT@22..28 "length" [] [],
+                                },
+                                r_angle_token: R_ANGLE@28..29 ">" [] [],
+                            },
+                            multiplier: missing (optional),
+                        },
+                        default_value: CssFunctionParameterDefaultValue {
+                            colon_token: COLON@29..31 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@31..34 "100" [] [],
+                                },
+                            ],
+                        },
+                    },
+                    COMMA@34..36 "," [] [Whitespace(" ")],
+                    CssFunctionParameter {
+                        name: CssDashedIdentifier {
+                            value_token: IDENT@36..40 "--b" [] [Whitespace(" ")],
+                        },
+                        ty: CssSyntaxComponent {
+                            component: CssSyntaxType {
+                                l_angle_token: L_ANGLE@40..41 "<" [] [],
+                                type_name: CssRegularSyntaxTypeName {
+                                    name_token: IDENT@41..47 "length" [] [],
+                                },
+                                r_angle_token: R_ANGLE@47..48 ">" [] [],
+                            },
+                            multiplier: missing (optional),
+                        },
+                        default_value: CssFunctionParameterDefaultValue {
+                            colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@50..52 "20" [] [],
+                                },
+                            ],
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@52..54 ")" [] [Whitespace(" ")],
+                returns: missing (optional),
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@54..61 "returns" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                    combinator: CSS_SPACE_LITERAL@61..62 " " [] [],
+                    right: missing (required),
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        L_ANGLE@62..63 "<" [] [],
+                    ],
+                },
+                missing separator,
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@63..69 "string" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                    combinator: R_ANGLE@69..71 ">" [] [Whitespace(" ")],
+                    right: missing (required),
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@71..83 "{" [] [Whitespace(" "), Comments("/* ... */"), Whitespace(" ")],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@83..84 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@84..85 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..85
+  0: (empty)
+  1: CSS_RULE_LIST@0..84
+    0: CSS_AT_RULE@0..54
+      0: AT@0..1 "@" [] []
+      1: CSS_FUNCTION_AT_RULE@1..54
+        0: CSS_FUNCTION_AT_RULE_DECLARATOR@1..10
+          0: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")]
+        1: CSS_DASHED_IDENTIFIER@10..16
+          0: IDENT@10..16 "--fn-2" [] []
+        2: L_PAREN@16..17 "(" [] []
+        3: CSS_FUNCTION_PARAMETER_LIST@17..52
+          0: CSS_FUNCTION_PARAMETER@17..34
+            0: CSS_DASHED_IDENTIFIER@17..21
+              0: IDENT@17..21 "--a" [] [Whitespace(" ")]
+            1: CSS_SYNTAX_COMPONENT@21..29
+              0: CSS_SYNTAX_TYPE@21..29
+                0: L_ANGLE@21..22 "<" [] []
+                1: CSS_REGULAR_SYNTAX_TYPE_NAME@22..28
+                  0: IDENT@22..28 "length" [] []
+                2: R_ANGLE@28..29 ">" [] []
+              1: (empty)
+            2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@29..34
+              0: COLON@29..31 ":" [] [Whitespace(" ")]
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@31..34
+                0: CSS_NUMBER@31..34
+                  0: CSS_NUMBER_LITERAL@31..34 "100" [] []
+          1: COMMA@34..36 "," [] [Whitespace(" ")]
+          2: CSS_FUNCTION_PARAMETER@36..52
+            0: CSS_DASHED_IDENTIFIER@36..40
+              0: IDENT@36..40 "--b" [] [Whitespace(" ")]
+            1: CSS_SYNTAX_COMPONENT@40..48
+              0: CSS_SYNTAX_TYPE@40..48
+                0: L_ANGLE@40..41 "<" [] []
+                1: CSS_REGULAR_SYNTAX_TYPE_NAME@41..47
+                  0: IDENT@41..47 "length" [] []
+                2: R_ANGLE@47..48 ">" [] []
+              1: (empty)
+            2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@48..52
+              0: COLON@48..50 ":" [] [Whitespace(" ")]
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@50..52
+                0: CSS_NUMBER@50..52
+                  0: CSS_NUMBER_LITERAL@50..52 "20" [] []
+        4: R_PAREN@52..54 ")" [] [Whitespace(" ")]
+        5: (empty)
+        6: CSS_BOGUS_BLOCK@54..54
+    1: CSS_QUALIFIED_RULE@54..84
+      0: CSS_SELECTOR_LIST@54..71
+        0: CSS_COMPLEX_SELECTOR@54..62
+          0: CSS_COMPOUND_SELECTOR@54..61
+            0: CSS_NESTED_SELECTOR_LIST@54..54
+            1: CSS_TYPE_SELECTOR@54..61
+              0: (empty)
+              1: CSS_IDENTIFIER@54..61
+                0: IDENT@54..61 "returns" [] []
+            2: CSS_SUB_SELECTOR_LIST@61..61
+          1: CSS_SPACE_LITERAL@61..62 " " [] []
+          2: (empty)
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@62..63
+          0: L_ANGLE@62..63 "<" [] []
+        3: (empty)
+        4: CSS_COMPLEX_SELECTOR@63..71
+          0: CSS_COMPOUND_SELECTOR@63..69
+            0: CSS_NESTED_SELECTOR_LIST@63..63
+            1: CSS_TYPE_SELECTOR@63..69
+              0: (empty)
+              1: CSS_IDENTIFIER@63..69
+                0: IDENT@63..69 "string" [] []
+            2: CSS_SUB_SELECTOR_LIST@69..69
+          1: R_ANGLE@69..71 ">" [] [Whitespace(" ")]
+          2: (empty)
+      1: CSS_DECLARATION_OR_RULE_BLOCK@71..84
+        0: L_CURLY@71..83 "{" [] [Whitespace(" "), Comments("/* ... */"), Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@83..83
+        2: R_CURLY@83..84 "}" [] []
+  2: EOF@84..85 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_function_error.css:1:55 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `returns`
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                       ^^^^^^^
+    2 │ 
+  
+  i Remove returns
+  
+at_rule_function_error.css:1:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '<'.
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                               ^
+    2 │ 
+  
+  i Expected a compound selector here.
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                               ^
+    2 │ 
+  
+at_rule_function_error.css:1:64 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `string`
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                                ^^^^^^
+    2 │ 
+  
+  i Remove string
+  
+at_rule_function_error.css:1:72 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                                        ^
+    2 │ 
+  
+  i Expected a compound selector here.
+  
+  > 1 │ @function --fn-2(--a <length>: 100, --b <length>: 20) returns <string> { /* ... */ }
+      │                                                                        ^
+    2 │ 
+  
+```

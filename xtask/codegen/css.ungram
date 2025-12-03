@@ -66,6 +66,9 @@ CssBogusIfTest = SyntaxElement*
 CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
+CssBogusFunctionParameter = SyntaxElement*
+CssBogusType = SyntaxElement*
+CssBogusDashFunctionArgument = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
@@ -1756,6 +1759,9 @@ CssViewTransitionAtRule =
 
 // https://drafts.csswg.org/css-mixins-1/#function-rule
 // @function <function-token> <function-parameter>#? ) [ returns <css-type> ]? { <declaration-list> }
+//
+// @function --transparent(--color, --alpha) { }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFunctionAtRule =
 	declarator: CssFunctionAtRuleDeclarator
 	function_name: CssDashedIdentifier
@@ -1763,23 +1769,47 @@ CssFunctionAtRule =
 	parameters: CssFunctionParameterList
 	')'
 	returns: CssReturnsStatement?
-	block: AnyCssDeclarationBlock
+	block: CssDeclarationOrAtRuleBlock
 
-CssFunctionParameterList = CssFunctionParameter (',' CssFunctionParameter)*
+// <function-parameter>#?
+//
+/// @function --transparent(--color, --alpha) { }
+//                          ^^^^^^^^^^^^^^^^
+CssFunctionParameterList = AnyCssFunctionParameter (',' AnyCssFunctionParameter)*
 
+AnyCssFunctionParameter =
+	CssFunctionParameter
+	| CssBogusFunctionParameter
+
+// <css-type>
+//
+// @function --transparent(--color <color>, --alpha <number>) { }
+//                                 ^^^^^^^          ^^^^^^^^
+AnyCssType =
+	CssTypeFunction
+	| AnyCssSyntaxComponent
+	| CssBogusType
+
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
 CssFunctionParameter =
 	name: CssDashedIdentifier
-	type:  'todo'
+	type:  AnyCssType?
 	default_value: CssFunctionParameterDefaultValue?
 
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
+//                                        ^^^^^                  ^^^^^
 CssFunctionParameterDefaultValue =
 	':'
 	value: CssGenericComponentValueList
 
+// returns <css-type>
+//
+// @function --transparent(--color <color>: red, --alpha <number>: 0.5) returns <color> { }
+//                                                                      ^^^^^^^^^^^^^^^
 CssReturnsStatement =
 	'returns'
-	type: 'todo'
-
+	type: AnyCssType
 
 ///////////////
 // AUXILIARY
@@ -2009,8 +2039,14 @@ AnyCssExpression =
 	CssBinaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| CssComaSeparatedValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
+
+CssComaSeparatedValue =
+	'{'
+	items: CssGenericComponentValueList
+	'}'
 
 CssBinaryExpression =
 	left: AnyCssExpression
@@ -2018,7 +2054,6 @@ CssBinaryExpression =
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
-
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
@@ -2255,6 +2290,7 @@ CssSyntaxType =
 //              ^           ^
 CssSyntaxMultiplier =
 	multiplier: ('#' | '+')
+
 
 // Tailwind
 

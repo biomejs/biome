@@ -19,10 +19,12 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_ATTR_NAME
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_CUSTOM_IDENTIFIER
+            | CSS_BOGUS_DASH_FUNCTION_ARGUMENT
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_DOCUMENT_MATCHER
             | CSS_BOGUS_FONT_FAMILY_NAME
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
+            | CSS_BOGUS_FUNCTION_PARAMETER
             | CSS_BOGUS_IF_BRANCH
             | CSS_BOGUS_IF_TEST
             | CSS_BOGUS_KEYFRAMES_ITEM
@@ -42,6 +44,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SUPPORTS_CONDITION
             | CSS_BOGUS_SYNTAX
             | CSS_BOGUS_SYNTAX_SINGLE_COMPONENT
+            | CSS_BOGUS_TYPE
             | CSS_BOGUS_UNICODE_RANGE_VALUE
             | CSS_BOGUS_URL_MODIFIER
             | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
@@ -503,6 +506,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_COLOR_PROFILE_AT_RULE_DECLARATOR, children)
+            }
+            CSS_COMA_SEPARATED_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssGenericComponentValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_COMA_SEPARATED_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_COMA_SEPARATED_VALUE, children)
             }
             CSS_COMPLEX_SELECTOR => {
                 let mut elements = (&children).into_iter();
@@ -1732,7 +1768,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssDeclarationBlock::can_cast(element.kind())
+                    && CssDeclarationOrAtRuleBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1777,7 +1813,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![todo]
+                    && AnyCssType::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4729,7 +4765,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && element.kind() == T![todo]
+                    && AnyCssType::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6603,7 +6639,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_FUNCTION_PARAMETER_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                CssFunctionParameter::can_cast,
+                AnyCssFunctionParameter::can_cast,
                 T ! [,],
                 false,
             ),

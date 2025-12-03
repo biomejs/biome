@@ -87,7 +87,6 @@ pub(crate) fn expected_any_font_family_name(p: &CssParser, range: TextRange) -> 
     expect_one_of(&["<family-name>", "<string>"], range).into_diagnostic(p)
 }
 
-// TODO: double check this
 pub(crate) fn expected_function_parameter(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expect_one_of(&["<ident>", "<string>"], range).into_diagnostic(p)
+    expected_node("function parameter", range, p)
 }

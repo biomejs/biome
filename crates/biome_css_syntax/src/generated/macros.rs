@@ -77,6 +77,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssColorProfileAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMA_SEPARATED_VALUE => {
+                    let $pattern = unsafe { $crate::CssComaSeparatedValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR => {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
@@ -981,6 +985,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusCustomIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_DASH_FUNCTION_ARGUMENT => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusDashFunctionArgument::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
                     $body
@@ -996,6 +1005,11 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
                     let $pattern =
                         unsafe { $crate::CssBogusFontFeatureValuesItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_FUNCTION_PARAMETER => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusFunctionParameter::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_IF_BRANCH => {
@@ -1075,6 +1089,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT => {
                     let $pattern =
                         unsafe { $crate::CssBogusSyntaxSingleComponent::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_TYPE => {
+                    let $pattern = unsafe { $crate::CssBogusType::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {

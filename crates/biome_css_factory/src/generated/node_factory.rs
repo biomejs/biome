@@ -270,6 +270,20 @@ pub fn css_color_profile_at_rule_declarator(
         ],
     ))
 }
+pub fn css_coma_separated_value(
+    l_curly_token: SyntaxToken,
+    items: CssGenericComponentValueList,
+    r_curly_token: SyntaxToken,
+) -> CssComaSeparatedValue {
+    CssComaSeparatedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMA_SEPARATED_VALUE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn css_complex_selector(
     left: AnyCssSelector,
     combinator_token: SyntaxToken,
@@ -872,7 +886,7 @@ pub fn css_function_at_rule(
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
-    block: AnyCssDeclarationBlock,
+    block: CssDeclarationOrAtRuleBlock,
 ) -> CssFunctionAtRuleBuilder {
     CssFunctionAtRuleBuilder {
         declarator,
@@ -890,7 +904,7 @@ pub struct CssFunctionAtRuleBuilder {
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
-    block: AnyCssDeclarationBlock,
+    block: CssDeclarationOrAtRuleBlock,
     returns: Option<CssReturnsStatement>,
 }
 impl CssFunctionAtRuleBuilder {
@@ -920,22 +934,23 @@ pub fn css_function_at_rule_declarator(function_token: SyntaxToken) -> CssFuncti
         [Some(SyntaxElement::Token(function_token))],
     ))
 }
-pub fn css_function_parameter(
-    name: CssDashedIdentifier,
-    type_token: SyntaxToken,
-) -> CssFunctionParameterBuilder {
+pub fn css_function_parameter(name: CssDashedIdentifier) -> CssFunctionParameterBuilder {
     CssFunctionParameterBuilder {
         name,
-        type_token,
+        ty: None,
         default_value: None,
     }
 }
 pub struct CssFunctionParameterBuilder {
     name: CssDashedIdentifier,
-    type_token: SyntaxToken,
+    ty: Option<AnyCssType>,
     default_value: Option<CssFunctionParameterDefaultValue>,
 }
 impl CssFunctionParameterBuilder {
+    pub fn with_ty(mut self, ty: AnyCssType) -> Self {
+        self.ty = Some(ty);
+        self
+    }
     pub fn with_default_value(mut self, default_value: CssFunctionParameterDefaultValue) -> Self {
         self.default_value = Some(default_value);
         self
@@ -945,7 +960,8 @@ impl CssFunctionParameterBuilder {
             CssSyntaxKind::CSS_FUNCTION_PARAMETER,
             [
                 Some(SyntaxElement::Node(self.name.into_syntax())),
-                Some(SyntaxElement::Token(self.type_token)),
+                self.ty
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.default_value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -2308,15 +2324,12 @@ impl CssRelativeSelectorBuilder {
         ))
     }
 }
-pub fn css_returns_statement(
-    returns_token: SyntaxToken,
-    type_token: SyntaxToken,
-) -> CssReturnsStatement {
+pub fn css_returns_statement(returns_token: SyntaxToken, ty: AnyCssType) -> CssReturnsStatement {
     CssReturnsStatement::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_RETURNS_STATEMENT,
         [
             Some(SyntaxElement::Token(returns_token)),
-            Some(SyntaxElement::Token(type_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
         ],
     ))
 }
@@ -3431,7 +3444,7 @@ where
 }
 pub fn css_function_parameter_list<I, S>(items: I, separators: S) -> CssFunctionParameterList
 where
-    I: IntoIterator<Item = CssFunctionParameter>,
+    I: IntoIterator<Item = AnyCssFunctionParameter>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -3895,6 +3908,16 @@ where
         slots,
     ))
 }
+pub fn css_bogus_dash_function_argument<I>(slots: I) -> CssBogusDashFunctionArgument
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDashFunctionArgument::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DASH_FUNCTION_ARGUMENT,
+        slots,
+    ))
+}
 pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -3932,6 +3955,16 @@ where
 {
     CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_function_parameter<I>(slots: I) -> CssBogusFunctionParameter
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFunctionParameter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FUNCTION_PARAMETER,
         slots,
     ))
 }
@@ -4122,6 +4155,16 @@ where
 {
     CssBogusSyntaxSingleComponent::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT,
+        slots,
+    ))
+}
+pub fn css_bogus_type<I>(slots: I) -> CssBogusType
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_TYPE,
         slots,
     ))
 }

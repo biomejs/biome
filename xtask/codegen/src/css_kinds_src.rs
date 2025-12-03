@@ -396,6 +396,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // Values
         "CSS_PARENTHESIZED_EXPRESSION",
         "CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION",
+        "CSS_COMA_SEPARATED_VALUE",
         "CSS_BINARY_EXPRESSION",
         "CSS_URL_VALUE_RAW",
         "CSS_URL_FUNCTION",
@@ -616,6 +617,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_SYNTAX",
         "CSS_BOGUS_SYNTAX_SINGLE_COMPONENT",
         "CSS_BOGUS_ATTR_NAME",
+        "CSS_BOGUS_FUNCTION_PARAMETER",
+        "CSS_BOGUS_TYPE",
+        "CSS_BOGUS_DASH_FUNCTION_ARGUMENT",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],
