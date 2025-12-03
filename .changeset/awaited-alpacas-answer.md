@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the rule [`useAwaitThenable`](https://biomejs.dev/linter/rules/use-await-thenable/), which enforces that `await` is only used on Promise values.
+Added the nursery rule [`useAwaitThenable`](https://biomejs.dev/linter/rules/use-await-thenable/), which enforces that `await` is only used on Promise values.
 
 #### Invalid
 
