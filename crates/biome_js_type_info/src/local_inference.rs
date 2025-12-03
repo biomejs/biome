@@ -3,24 +3,25 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
-    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsConstructorParameter,
+    AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
     AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
-    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsInitializerClause,
-    JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsNewExpression,
-    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
-    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsConstructorParameters, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
+    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInterfaceDeclaration,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
@@ -30,17 +31,18 @@ use crate::globals::{
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
-    AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
-    NamedFunctionParameter, Namespace, Object, Path, PatternFunctionParameter, PredicateReturnType,
-    ResolvedTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance,
-    TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeofAdditionExpression, TypeofAwaitExpression,
-    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofConditionalExpression,
-    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
-    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
-    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
+    DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
+    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
+    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
+    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility, TypeMemberKind,
+    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
+    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -676,7 +678,7 @@ impl TypeData {
                     scope_id,
                     ty.type_parameters(),
                 ),
-                parameters: function_params_from_js_params(resolver, scope_id, ty.parameters()),
+                parameters: constructor_params_from_js_params(resolver, scope_id, ty.parameters()),
                 return_type: ty
                     .return_type()
                     .ok()
@@ -944,13 +946,7 @@ impl TypeData {
                     TypeReference::types_from_ts_type_list(resolver, scope_id, implements.types())
                 })
                 .unwrap_or_default(),
-            members: decl
-                .members()
-                .into_iter()
-                .filter_map(|member| {
-                    TypeMember::from_any_js_class_member(resolver, scope_id, &member)
-                })
-                .collect(),
+            members: TypeMember::members_from_class_member_list(resolver, scope_id, decl.members()),
         }))
     }
 
@@ -983,13 +979,7 @@ impl TypeData {
                     TypeReference::types_from_ts_type_list(resolver, scope_id, implements.types())
                 })
                 .unwrap_or_default(),
-            members: decl
-                .members()
-                .into_iter()
-                .filter_map(|member| {
-                    TypeMember::from_any_js_class_member(resolver, scope_id, &member)
-                })
-                .collect(),
+            members: TypeMember::members_from_class_member_list(resolver, scope_id, decl.members()),
         }))
     }
 
@@ -1462,22 +1452,77 @@ impl CallArgumentType {
     }
 }
 
+impl ConstructorParameter {
+    pub fn from_any_js_constructor_parameter(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        param: &AnyJsConstructorParameter,
+    ) -> Self {
+        match param {
+            AnyJsConstructorParameter::AnyJsFormalParameter(param) => Self {
+                parameter: FunctionParameter::from_any_js_formal_parameter(
+                    resolver, scope_id, param,
+                ),
+                accessibility: None,
+            },
+            AnyJsConstructorParameter::JsRestParameter(param) => Self {
+                parameter: FunctionParameter::from_js_rest_parameter(resolver, scope_id, param),
+                accessibility: None,
+            },
+            AnyJsConstructorParameter::TsPropertyParameter(param) => param
+                .formal_parameter()
+                .map(|formal_param| Self {
+                    parameter: FunctionParameter::from_any_js_formal_parameter(
+                        resolver,
+                        scope_id,
+                        &formal_param,
+                    ),
+                    accessibility: Some(TypeMemberAccessibility::from_modifier_list(
+                        param.modifiers(),
+                    )),
+                })
+                .unwrap_or_default(),
+        }
+    }
+
+    pub fn params_from_js_constructor_parameters(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        params: &JsConstructorParameters,
+    ) -> Box<[Self]> {
+        params
+            .as_fields()
+            .parameters
+            .into_iter()
+            .flatten()
+            .map(|param| Self::from_any_js_constructor_parameter(resolver, scope_id, &param))
+            .collect()
+    }
+}
+
 impl FunctionParameter {
+    pub fn from_any_js_formal_parameter(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        param: &AnyJsFormalParameter,
+    ) -> Self {
+        match param {
+            AnyJsFormalParameter::JsFormalParameter(param) => {
+                Self::from_js_formal_parameter(resolver, scope_id, param)
+            }
+            _ => Self::default(),
+        }
+    }
+
     pub fn from_any_js_parameter(
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         param: &AnyJsParameter,
     ) -> Self {
         match param {
-            AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
-                param,
-            )) => Self::from_js_formal_parameter(resolver, scope_id, param),
-            AnyJsParameter::AnyJsFormalParameter(_) => Self::Pattern(PatternFunctionParameter {
-                ty: TypeReference::unknown(),
-                bindings: [].into(),
-                is_optional: false,
-                is_rest: false,
-            }),
+            AnyJsParameter::AnyJsFormalParameter(param) => {
+                Self::from_any_js_formal_parameter(resolver, scope_id, param)
+            }
             AnyJsParameter::JsRestParameter(param) => {
                 Self::from_js_rest_parameter(resolver, scope_id, param)
             }
@@ -1769,6 +1814,22 @@ impl TypeMember {
         member: &AnyJsClassMember,
     ) -> Option<Self> {
         match member {
+            AnyJsClassMember::JsConstructorClassMember(member) => {
+                let constructor = Constructor {
+                    type_parameters: [].into(),
+                    parameters: constructor_params_from_js_constructor_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: None,
+                };
+                let ty = resolver.register_and_resolve(constructor.into());
+                Some(Self {
+                    kind: TypeMemberKind::Constructor,
+                    ty: ty.into(),
+                })
+            }
             AnyJsClassMember::JsMethodClassMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     let is_async = member.async_token().is_some();
@@ -2035,7 +2096,7 @@ impl TypeMember {
                         scope_id,
                         member.type_parameters(),
                     ),
-                    parameters: function_params_from_js_params(
+                    parameters: constructor_params_from_js_params(
                         resolver,
                         scope_id,
                         member.parameters(),
@@ -2166,6 +2227,41 @@ impl TypeMember {
                 false => ty,
             },
         }
+    }
+
+    fn members_from_class_member_list(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        member_list: JsClassMemberList,
+    ) -> Box<[Self]> {
+        let mut members: Vec<_> = member_list
+            .into_iter()
+            .filter_map(|member| Self::from_any_js_class_member(resolver, scope_id, &member))
+            .collect();
+
+        // Extend members with those from constructor definitions:
+        let num_members = members.len();
+        for i in 0..num_members {
+            let member = &members[i];
+            if member.is_constructor()
+                && let Some(member_ty) = resolver.resolve_and_get(&member.ty)
+                && let TypeData::Constructor(constructor) = member_ty.as_raw_data()
+            {
+                for param in &constructor.parameters {
+                    if let Some(_accessibility) = param.accessibility
+                        && let FunctionParameter::Named(named_param) = &param.parameter
+                    {
+                        // TODO: Assign accessibility to type members.
+                        members.push(Self {
+                            kind: TypeMemberKind::Named(named_param.name.clone()),
+                            ty: param.parameter.ty().clone(),
+                        });
+                    }
+                }
+            }
+        }
+
+        members.into()
     }
 }
 
@@ -2423,6 +2519,57 @@ impl TypeofThisOrSuperExpression {
 
         Self { parent }
     }
+}
+
+impl TypeMemberAccessibility {
+    fn from_modifier_list(modifier_list: TsPropertyParameterModifierList) -> Self {
+        for modifier in modifier_list {
+            if let Some(modifier) = modifier.as_ts_accessibility_modifier() {
+                return match modifier.modifier_token() {
+                    Ok(token) if token.kind() == JsSyntaxKind::PRIVATE_KW => Self::Private,
+                    Ok(token) if token.kind() == JsSyntaxKind::PROTECTED_KW => Self::Protected,
+                    _ => Self::Public,
+                };
+            }
+        }
+
+        Self::default()
+    }
+}
+
+#[inline]
+fn constructor_params_from_js_constructor_params(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    params: SyntaxResult<JsConstructorParameters>,
+) -> Box<[ConstructorParameter]> {
+    params
+        .map(|params| {
+            ConstructorParameter::params_from_js_constructor_parameters(resolver, scope_id, &params)
+        })
+        .unwrap_or_default()
+}
+
+#[inline]
+fn constructor_params_from_js_params(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    params: SyntaxResult<JsParameters>,
+) -> Box<[ConstructorParameter]> {
+    params
+        .map(|params| {
+            params
+                .as_fields()
+                .items
+                .into_iter()
+                .flatten()
+                .map(|param| ConstructorParameter {
+                    parameter: FunctionParameter::from_any_js_parameter(resolver, scope_id, &param),
+                    accessibility: None,
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 #[inline]
