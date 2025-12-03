@@ -484,6 +484,8 @@ pub enum FsErrorKind {
     DeeplyNestedSymlinkExpansion,
     /// Invalid UTF-8 characters in path.
     NonUtf8Path,
+    /// Can't write file
+    CantWriteFile,
 }
 
 impl console::fmt::Display for FsErrorKind {
@@ -494,6 +496,7 @@ impl console::fmt::Display for FsErrorKind {
             Self::DereferencedSymlink => fmt.write_str("Dereferenced symlink."),
             Self::DeeplyNestedSymlinkExpansion => fmt.write_str("Deeply nested symlink expansion."),
             Self::NonUtf8Path => fmt.write_str("Invalid UTF-8 characters in path."),
+            Self::CantWriteFile => fmt.write_str("Cannot write file."),
         }
     }
 }
@@ -508,6 +511,7 @@ impl std::fmt::Display for FsErrorKind {
                 write!(fmt, "Deeply nested symlink expansion.")
             }
             Self::NonUtf8Path => write!(fmt, "Invalid UTF-8 characters in path."),
+            Self::CantWriteFile => write!(fmt, "Cannot write file."),
         }
     }
 }
@@ -534,7 +538,11 @@ impl Advices for FsErrorKind {
             Self::NonUtf8Path => visitor.record_log(
                 LogCategory::Error,
                 &"Biome encountered a path with invalid UTF-8 characters."
-            )
+            ),
+            Self::CantWriteFile => visitor.record_log(
+                LogCategory::Error,
+                &"Biome can't write to the following file, maybe for permissions reasons."
+            ),
         }
     }
 }

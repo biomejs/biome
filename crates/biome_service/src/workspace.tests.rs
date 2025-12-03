@@ -45,7 +45,7 @@ fn debug_control_flow() {
     block_0[\"<b>block_0</b><br/>Return(JS_RETURN_STATEMENT 19..26)<br/>Return\"]\n\n";
 
     let (workspace, project_key) = create_server();
-    let file = FileGuard::open(
+    let file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -66,7 +66,7 @@ fn debug_control_flow() {
 fn recognize_typescript_definition_file() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
+    let file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -87,7 +87,7 @@ fn correctly_handle_json_files() {
     let (workspace, project_key) = create_server();
 
     // ".json" file
-    let json_file = FileGuard::open(
+    let json_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -101,7 +101,7 @@ fn correctly_handle_json_files() {
     assert!(json_file.format_file().is_ok());
 
     // ".json" file doesn't allow comments
-    let json_file_with_comments = FileGuard::open(
+    let json_file_with_comments = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -115,7 +115,7 @@ fn correctly_handle_json_files() {
     assert!(json_file_with_comments.format_file().is_err());
 
     // ".json" file doesn't allow trailing commas
-    let json_file_with_trailing_commas = FileGuard::open(
+    let json_file_with_trailing_commas = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -129,7 +129,7 @@ fn correctly_handle_json_files() {
     assert!(json_file_with_trailing_commas.format_file().is_err());
 
     // ".jsonc" file allows comments
-    let jsonc_file = FileGuard::open(
+    let jsonc_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -143,7 +143,7 @@ fn correctly_handle_json_files() {
     assert!(jsonc_file.format_file().is_ok());
 
     // ".jsonc" file allow trailing commas
-    let jsonc_file = FileGuard::open(
+    let jsonc_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -157,7 +157,7 @@ fn correctly_handle_json_files() {
     assert!(jsonc_file.format_file().is_ok());
 
     // well-known json-with-comments file allows comments
-    let well_known_json_with_comments_file = FileGuard::open(
+    let well_known_json_with_comments_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -171,7 +171,7 @@ fn correctly_handle_json_files() {
     assert!(well_known_json_with_comments_file.format_file().is_ok());
 
     // well-known json-with-comments file allows comments
-    let well_known_json_with_comments_file = FileGuard::open(
+    let well_known_json_with_comments_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -185,7 +185,7 @@ fn correctly_handle_json_files() {
     assert!(well_known_json_with_comments_file.format_file().is_ok());
 
     // well-known json-with-comments file doesn't allow trailing commas
-    let well_known_json_with_comments_file_with_trailing_commas = FileGuard::open(
+    let well_known_json_with_comments_file_with_trailing_commas = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -203,7 +203,7 @@ fn correctly_handle_json_files() {
     );
 
     // well-known json-with-comments-and-trailing-commas file allows comments and trailing commas
-    let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(
+    let well_known_json_with_comments_and_trailing_commas_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -225,7 +225,7 @@ fn correctly_handle_json_files() {
 fn correctly_parses_graphql_files() {
     let (workspace, project_key) = create_server();
 
-    let graphql_file = FileGuard::open(
+    let graphql_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -256,7 +256,7 @@ type User {
 fn correctly_pulls_lint_diagnostics() {
     let (workspace, project_key) = create_server();
 
-    let graphql_file = FileGuard::open(
+    let graphql_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -286,7 +286,7 @@ fn correctly_pulls_lint_diagnostics() {
 fn pull_grit_debug_info() {
     let (workspace, project_key) = create_server();
 
-    let grit_file = FileGuard::open(
+    let grit_file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -782,7 +782,7 @@ fn test_order() {
 fn debug_type_info() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
+    let file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -816,7 +816,7 @@ class Person {
 fn debug_registered_types() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
+    let file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
@@ -850,7 +850,7 @@ class Person {
 fn debug_semantic_model() {
     let (workspace, project_key) = create_server();
 
-    let file = FileGuard::open(
+    let file = FileGuard::new(
         workspace.as_ref(),
         OpenFileParams {
             project_key,
