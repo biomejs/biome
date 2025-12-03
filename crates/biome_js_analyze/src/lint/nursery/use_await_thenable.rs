@@ -22,16 +22,18 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,file=invalid-primitive.js
     /// await 'value';
+    /// ```
     ///
+    /// ```js,expect_diagnostic,file=invalid-function-call.js
     /// const createValue = () => 'value';
     /// await createValue();
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```js,file=valid-examples.js
     /// await Promise.resolve('value');
     ///
     /// const createValue = async () => 'value';
