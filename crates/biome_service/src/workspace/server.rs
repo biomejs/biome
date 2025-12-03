@@ -16,7 +16,6 @@ use crate::scanner::{
     WorkspaceScannerBridge,
 };
 use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
-use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
@@ -72,7 +71,7 @@ pub struct WorkspaceServer {
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     /// Stores the document sources used across the workspace
-    file_sources: AppendOnlyVec<DocumentFileSource>,
+    file_sources: boxcar::Vec<DocumentFileSource>,
 
     /// Stores patterns to search for.
     patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
@@ -132,7 +131,7 @@ impl WorkspaceServer {
             module_graph: Default::default(),
             plugin_caches: Default::default(),
             documents: Default::default(),
-            file_sources: AppendOnlyVec::default(),
+            file_sources: boxcar::Vec::default(),
             patterns: Default::default(),
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
@@ -260,7 +259,7 @@ impl WorkspaceServer {
     ///
     /// File sources can be inserted using `insert_source()`.
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        if index < self.file_sources.len() {
+        if index < self.file_sources.count() {
             Some(self.file_sources[index])
         } else {
             None
@@ -274,7 +273,7 @@ impl WorkspaceServer {
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
-            .position(|file_source| *file_source == document_file_source)
+            .position(|(_, file_source)| *file_source == document_file_source)
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
