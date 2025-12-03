@@ -2031,7 +2031,7 @@ See https://biomejs.dev/linter/rules/use-array-sort-compare
 	 */
 	useArraySortCompare?: UseArraySortCompareConfiguration;
 	/**
-	* Enforce that await is _only_ used on Promise values.
+	* Enforce that await is only used on Promise values.
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;

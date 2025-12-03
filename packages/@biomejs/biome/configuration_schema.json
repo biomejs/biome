@@ -5338,7 +5338,7 @@
 					]
 				},
 				"useAwaitThenable": {
-					"description": "Enforce that await is _only_ used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
+					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseAwaitThenableConfiguration" },
 						{ "type": "null" }
