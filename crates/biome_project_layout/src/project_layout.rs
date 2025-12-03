@@ -22,7 +22,7 @@ use rustc_hash::FxBuildHasher;
 /// approach makes it very easy for us to invalidate part of the layout when
 /// there are file system changes.
 #[derive(Debug, Default)]
-pub struct ProjectLayout(HashMap<Utf8PathBuf, PackageData, FxBuildHasher>);
+pub struct ProjectLayout(pub HashMap<Utf8PathBuf, PackageData, FxBuildHasher>);
 
 /// The information tracked for each package.
 ///
