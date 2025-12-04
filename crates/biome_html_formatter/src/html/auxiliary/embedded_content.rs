@@ -21,7 +21,7 @@ impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
             .ancestors()
             .skip(1)
             .find_map(HtmlElement::cast)?;
-        if element.is_supported_script_tag() || element.is_style_tag() {
+        if element.is_supported_script_tag() || element.is_supported_style_tag() {
             Some(node.range())
         } else {
             None
