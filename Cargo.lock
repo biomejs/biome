@@ -768,6 +768,7 @@ name = "biome_html_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
