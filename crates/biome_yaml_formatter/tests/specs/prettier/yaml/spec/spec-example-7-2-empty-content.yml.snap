@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-2-empty-content.yml
+---
+# Input
+
+```yml
+{
+  foo : !!str,
+  !!str : bar,
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,4 @@
+-{ foo: !!str , !!str : bar }
++{
++  foo : !!str,
++  !!str : bar,
++}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+{
+  foo : !!str,
+  !!str : bar,
+}```
+
+# Errors
+```
+spec-example-7-2-empty-content.yml:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ {
+  > 2 │   foo : !!str,
+      │         ^
+    3 │   !!str : bar,
+    4 │ }
+  
+spec-example-7-2-empty-content.yml:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ {
+  > 2 │   foo : !!str,
+      │          ^
+    3 │   !!str : bar,
+    4 │ }
+  
+spec-example-7-2-empty-content.yml:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `str`
+  
+    1 │ {
+  > 2 │   foo : !!str,
+      │           ^^^
+    3 │   !!str : bar,
+    4 │ }
+  
+  i Remove str
+  
+spec-example-7-2-empty-content.yml:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ {
+    2 │   foo : !!str,
+  > 3 │   !!str : bar,
+      │   ^
+    4 │ }
+    5 │ 
+  
+spec-example-7-2-empty-content.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ {
+    2 │   foo : !!str,
+  > 3 │   !!str : bar,
+      │    ^
+    4 │ }
+    5 │ 
+  
+spec-example-7-2-empty-content.yml:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `str `
+  
+    1 │ {
+    2 │   foo : !!str,
+  > 3 │   !!str : bar,
+      │     ^^^^
+    4 │ }
+    5 │ 
+  
+  i Remove str 
+  
+
+```

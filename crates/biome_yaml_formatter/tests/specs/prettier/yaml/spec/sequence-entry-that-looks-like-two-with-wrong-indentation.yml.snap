@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/sequence-entry-that-looks-like-two-with-wrong-indentation.yml
+---
+# Input
+
+```yml
+- single multiline
+ - sequence entry
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ - single multiline
+-  - sequence entry
++ - sequence entry
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- single multiline
+ - sequence entry```

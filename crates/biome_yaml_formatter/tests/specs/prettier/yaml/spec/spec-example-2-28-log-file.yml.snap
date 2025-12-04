@@ -1,0 +1,135 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-28-log-file.yml
+---
+# Input
+
+```yml
+---
+Time: 2001-11-23 15:01:42 -5
+User: ed
+Warning:
+  This is an error message
+  for the log file
+---
+Time: 2001-11-23 15:02:31 -5
+User: ed
+Warning:
+  A slightly different error
+  message.
+---
+Date: 2001-11-23 15:03:17 -5
+User: ed
+Fatal:
+  Unknown variable "bar"
+Stack:
+  - file: TopClass.py
+    line: 23
+    code: |
+      x = MoreObject("345\n")
+  - file: MoreClass.py
+    line: 58
+    code: |-
+      foo = bar
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,20 @@
+ ---
+ Time: 2001-11-23 15:01:42 -5
+ User: ed
+-Warning: This is an error message
++Warning:
++  This is an error message
+   for the log file
+ ---
+ Time: 2001-11-23 15:02:31 -5
+ User: ed
+-Warning: A slightly different error
++Warning:
++  A slightly different error
+   message.
+ ---
+ Date: 2001-11-23 15:03:17 -5
+ User: ed
+-Fatal: Unknown variable "bar"
++Fatal:
++  Unknown variable "bar"
+ Stack:
+   - file: TopClass.py
+     line: 23
+@@ -20,4 +23,4 @@
+   - file: MoreClass.py
+     line: 58
+     code: |-
+-      foo = bar
++      foo = bar
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+Time: 2001-11-23 15:01:42 -5
+User: ed
+Warning:
+  This is an error message
+  for the log file
+---
+Time: 2001-11-23 15:02:31 -5
+User: ed
+Warning:
+  A slightly different error
+  message.
+---
+Date: 2001-11-23 15:03:17 -5
+User: ed
+Fatal:
+  Unknown variable "bar"
+Stack:
+  - file: TopClass.py
+    line: 23
+    code: |
+      x = MoreObject("345\n")
+  - file: MoreClass.py
+    line: 58
+    code: |-
+      foo = bar```
+
+# Errors
+```
+spec-example-2-28-log-file.yml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `Time`
+  
+     6 │   for the log file
+     7 │ ---
+   > 8 │ Time: 2001-11-23 15:02:31 -5
+       │ ^^^^
+     9 │ User: ed
+    10 │ Warning:
+  
+  i Remove Time
+  
+spec-example-2-28-log-file.yml:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `Date`
+  
+    12 │   message.
+    13 │ ---
+  > 14 │ Date: 2001-11-23 15:03:17 -5
+       │ ^^^^
+    15 │ User: ed
+    16 │ Fatal:
+  
+  i Remove Date
+  
+
+```

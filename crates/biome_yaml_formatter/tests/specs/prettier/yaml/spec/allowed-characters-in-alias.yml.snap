@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/allowed-characters-in-alias.yml
+---
+# Input
+
+```yml
+a: &:@*!$"<foo>: scalar a
+b: *:@*!$"<foo>:
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ a: &:@*!$"<foo>: scalar a
+-b: *:@*!$"<foo>:
++b: *:@*!$"<foo>:
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: &:@*!$"<foo>: scalar a
+b: *:@*!$"<foo>:```
+
+# Errors
+```
+allowed-characters-in-alias.yml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ a: &:@*!$"<foo>: scalar a
+      │    ^
+    2 │ b: *:@*!$"<foo>:
+    3 │ 
+  
+allowed-characters-in-alias.yml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    1 │ a: &:@*!$"<foo>: scalar a
+  > 2 │ b: *:@*!$"<foo>:
+      │ ^^^^^^^^^^^^^^^^
+  > 3 │ 
+      │ 
+  
+allowed-characters-in-alias.yml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    1 │ a: &:@*!$"<foo>: scalar a
+  > 2 │ b: *:@*!$"<foo>:
+      │    ^
+    3 │ 
+  
+
+```

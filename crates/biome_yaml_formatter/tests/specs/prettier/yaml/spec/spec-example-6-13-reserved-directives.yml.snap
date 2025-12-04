@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-13-reserved-directives.yml
+---
+# Input
+
+```yml
+%FOO  bar baz # Should be ignored
+              # with a warning.
+--- "foo"
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,3 @@
+-%FOO bar baz # Should be ignored
+-# with a warning.
+----
+-"foo"
++%FOO  bar baz # Should be ignored
++              # with a warning.
++--- "foo"
+```
+
+# Output
+
+```yml
+%FOO  bar baz # Should be ignored
+              # with a warning.
+--- "foo"
+```
+
+# Errors
+```
+spec-example-6-13-reserved-directives.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+  > 1 │ %FOO  bar baz # Should be ignored
+      │ ^
+    2 │               # with a warning.
+    3 │ --- "foo"
+  
+
+```

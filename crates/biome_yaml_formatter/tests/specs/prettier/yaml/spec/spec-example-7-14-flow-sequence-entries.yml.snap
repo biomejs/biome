@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-14-flow-sequence-entries.yml
+---
+# Input
+
+```yml
+[
+"double
+ quoted", 'single
+           quoted',
+plain
+ text, [ nested ],
+single: pair,
+]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,8 @@
+ [
+-  "double
+-  quoted",
+-  "single
+-  quoted",
+-  plain
+-  text,
+-  [nested],
+-  single: pair,
+-]
++"double
++ quoted", 'single
++           quoted',
++plain
++ text, [ nested ],
++single: pair,
++]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+[
+"double
+ quoted", 'single
+           quoted',
+plain
+ text, [ nested ],
+single: pair,
+]```

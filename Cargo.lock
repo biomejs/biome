@@ -1562,6 +1562,8 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
+ "biome_yaml_formatter",
+ "biome_yaml_syntax",
  "bpaf",
  "camino",
  "crossbeam",
@@ -1747,12 +1749,19 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "biome_yaml_parser",
  "biome_yaml_syntax",
+ "camino",
+ "countme",
  "schemars",
  "serde",
+ "tests_macros",
 ]
 
 [[package]]

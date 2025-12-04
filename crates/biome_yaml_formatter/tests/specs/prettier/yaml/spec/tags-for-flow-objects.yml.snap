@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-for-flow-objects.yml
+---
+# Input
+
+```yml
+!!map {
+  k: !!seq
+  [ a, !!str b]
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,4 @@
+-!!map { k: !!seq [a, !!str b] }
++!!map {
++  k: !!seq
++  [ a, !!str b]
++}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+!!map {
+  k: !!seq
+  [ a, !!str b]
+}```
+
+# Errors
+```
+tags-for-flow-objects.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ !!map {
+      │ ^
+    2 │   k: !!seq
+    3 │   [ a, !!str b]
+  
+tags-for-flow-objects.yml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ !!map {
+      │  ^
+    2 │   k: !!seq
+    3 │   [ a, !!str b]
+  
+tags-for-flow-objects.yml:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!map {
+  > 2 │   k: !!seq
+      │      ^
+    3 │   [ a, !!str b]
+    4 │ }
+  
+tags-for-flow-objects.yml:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!map {
+  > 2 │   k: !!seq
+      │       ^
+    3 │   [ a, !!str b]
+    4 │ }
+  
+tags-for-flow-objects.yml:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!map {
+    2 │   k: !!seq
+  > 3 │   [ a, !!str b]
+      │        ^
+    4 │ }
+    5 │ 
+  
+tags-for-flow-objects.yml:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ !!map {
+    2 │   k: !!seq
+  > 3 │   [ a, !!str b]
+      │         ^
+    4 │ }
+    5 │ 
+  
+
+```

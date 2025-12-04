@@ -1,0 +1,177 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-27-invoice.yml
+---
+# Input
+
+```yml
+--- !<tag:clarkevans.com,2002:invoice>
+invoice: 34843
+date   : 2001-01-23
+bill-to: &id001
+    given  : Chris
+    family : Dumars
+    address:
+        lines: |
+            458 Walkman Dr.
+            Suite #292
+        city    : Royal Oak
+        state   : MI
+        postal  : 48046
+ship-to: *id001
+product:
+    - sku         : BL394D
+      quantity    : 4
+      description : Basketball
+      price       : 450.00
+    - sku         : BL4438H
+      quantity    : 1
+      description : Super Hoop
+      price       : 2392.00
+tax  : 251.42
+total: 4443.52
+comments:
+    Late afternoon is best.
+    Backup contact is Nancy
+    Billsmer @ 338-4338.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,29 +1,29 @@
+----
+-!<tag:clarkevans.com,2002:invoice>
++--- !<tag:clarkevans.com,2002:invoice>
+ invoice: 34843
+-date: 2001-01-23
++date   : 2001-01-23
+ bill-to: &id001
+-  given: Chris
+-  family: Dumars
+-  address:
+-    lines: |
+-      458 Walkman Dr.
+-      Suite #292
+-    city: Royal Oak
+-    state: MI
+-    postal: 48046
++    given  : Chris
++    family : Dumars
++    address:
++        lines: |
++            458 Walkman Dr.
++            Suite #292
++        city    : Royal Oak
++        state   : MI
++        postal  : 48046
+ ship-to: *id001
+ product:
+-  - sku: BL394D
+-    quantity: 4
+-    description: Basketball
+-    price: 450.00
+-  - sku: BL4438H
+-    quantity: 1
+-    description: Super Hoop
+-    price: 2392.00
+-tax: 251.42
++    - sku         : BL394D
++      quantity    : 4
++      description : Basketball
++      price       : 450.00
++    - sku         : BL4438H
++      quantity    : 1
++      description : Super Hoop
++      price       : 2392.00
++tax  : 251.42
+ total: 4443.52
+-comments: Late afternoon is best.
+-  Backup contact is Nancy
+-  Billsmer @ 338-4338.
++comments:
++    Late afternoon is best.
++    Backup contact is Nancy
++    Billsmer @ 338-4338.
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+--- !<tag:clarkevans.com,2002:invoice>
+invoice: 34843
+date   : 2001-01-23
+bill-to: &id001
+    given  : Chris
+    family : Dumars
+    address:
+        lines: |
+            458 Walkman Dr.
+            Suite #292
+        city    : Royal Oak
+        state   : MI
+        postal  : 48046
+ship-to: *id001
+product:
+    - sku         : BL394D
+      quantity    : 4
+      description : Basketball
+      price       : 450.00
+    - sku         : BL4438H
+      quantity    : 1
+      description : Super Hoop
+      price       : 2392.00
+tax  : 251.42
+total: 4443.52
+comments:
+    Late afternoon is best.
+    Backup contact is Nancy
+    Billsmer @ 338-4338.```
+
+# Errors
+```
+spec-example-2-27-invoice.yml:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │ invoice: 34843
+    3 │ date   : 2001-01-23
+  > 4 │ bill-to: &id001
+      │          ^
+    5 │     given  : Chris
+    6 │     family : Dumars
+  
+spec-example-2-27-invoice.yml:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    12 │         state   : MI
+    13 │         postal  : 48046
+  > 14 │ ship-to: *id001
+       │ ^^^^^^^^^^^^^^^
+  > 15 │ product:
+        ...
+  > 27 │     Late afternoon is best.
+  > 28 │     Backup contact is Nancy
+  > 29 │     Billsmer @ 338-4338.
+  > 30 │ 
+       │ 
+  
+spec-example-2-27-invoice.yml:14:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    12 │         state   : MI
+    13 │         postal  : 48046
+  > 14 │ ship-to: *id001
+       │          ^
+    15 │ product:
+    16 │     - sku         : BL394D
+  
+
+```

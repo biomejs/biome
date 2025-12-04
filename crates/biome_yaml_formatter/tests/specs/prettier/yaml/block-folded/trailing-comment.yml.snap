@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block-folded/trailing-comment.yml
+---
+# Input
+
+```yml
+a: !!str > # hello
+  hello
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ a: !!str > # hello
+-  hello
++  hello
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: !!str > # hello
+  hello```
+
+# Errors
+```
+trailing-comment.yml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ a: !!str > # hello
+      │    ^
+    2 │   hello
+    3 │ 
+  
+trailing-comment.yml:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ a: !!str > # hello
+      │     ^
+    2 │   hello
+    3 │ 
+  
+
+```

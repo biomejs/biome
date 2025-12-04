@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/allowed-characters-in-plain-scalars.yml
+---
+# Input
+
+```yml
+safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+safe question mark: ?foo
+safe colon: :foo
+safe dash: -foo
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+-  !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
++     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+ safe question mark: ?foo
+ safe colon: :foo
+-safe dash: -foo
++safe dash: -foo
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+safe question mark: ?foo
+safe colon: :foo
+safe dash: -foo```
+
+# Errors
+```
+allowed-characters-in-plain-scalars.yml:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+  > 2 │      !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+      │      ^
+    3 │ safe question mark: ?foo
+    4 │ safe colon: :foo
+  
+
+```

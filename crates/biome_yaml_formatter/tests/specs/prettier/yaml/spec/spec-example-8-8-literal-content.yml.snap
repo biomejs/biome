@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-8-literal-content.yml
+---
+# Input
+
+```yml
+|
+ 
+  
+  literal
+   
+  
+  text
+
+ # Comment
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+ |
+-
+-
++ 
++  
+   literal
+    
+-
++  
+   text
+ 
+-# Comment
++ # Comment
+```
+
+# Output
+
+```yml
+|
+ 
+  
+  literal
+   
+  
+  text
+
+ # Comment
+```

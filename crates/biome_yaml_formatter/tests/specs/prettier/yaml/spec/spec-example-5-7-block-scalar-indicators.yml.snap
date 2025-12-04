@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-5-7-block-scalar-indicators.yml
+---
+# Input
+
+```yml
+literal: |
+  some
+  text
+folded: >
+  some
+  text
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,4 +3,4 @@
+   text
+ folded: >
+   some
+-  text
++  text
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+literal: |
+  some
+  text
+folded: >
+  some
+  text```

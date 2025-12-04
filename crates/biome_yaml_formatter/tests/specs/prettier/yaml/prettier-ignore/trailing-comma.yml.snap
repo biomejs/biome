@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/prettier-ignore/trailing-comma.yml
+---
+# Input
+
+```yml
+[
+  # prettier-ignore
+             {  sss  },       # 123
+    {  qqqq },
+  
+  # prettier-ignore
+          [ccc    ]       # 777
+  , [ddd    ]
+]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+ [
+   # prettier-ignore
+-  {  sss  }, # 123
+-  { qqqq },
+-
++             {  sss  },       # 123
++    {  qqqq },
++  
+   # prettier-ignore
+-  [ccc    ], # 777
+-  [ddd],
+-]
++          [ccc    ]       # 777
++  , [ddd    ]
++]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+[
+  # prettier-ignore
+             {  sss  },       # 123
+    {  qqqq },
+  
+  # prettier-ignore
+          [ccc    ]       # 777
+  , [ddd    ]
+]```

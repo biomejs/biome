@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/multiline-plain-scalar-with-empty-line.yml
+---
+# Input
+
+```yml
+---
+plain: a
+ b
+
+ c
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ ---
+ plain: a
+-  b
++ b
+ 
+-  c
++ c
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+plain: a
+ b
+
+ c```

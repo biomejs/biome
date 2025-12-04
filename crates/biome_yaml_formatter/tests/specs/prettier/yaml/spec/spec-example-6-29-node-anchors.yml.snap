@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-29-node-anchors.yml
+---
+# Input
+
+```yml
+First occurrence: &anchor Value
+Second occurrence: *anchor
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ First occurrence: &anchor Value
+-Second occurrence: *anchor
++Second occurrence: *anchor
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+First occurrence: &anchor Value
+Second occurrence: *anchor```
+
+# Errors
+```
+spec-example-6-29-node-anchors.yml:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ First occurrence: &anchor Value
+      │                   ^
+    2 │ Second occurrence: *anchor
+    3 │ 
+  
+spec-example-6-29-node-anchors.yml:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    1 │ First occurrence: &anchor Value
+  > 2 │ Second occurrence: *anchor
+      │                    ^
+    3 │ 
+  
+
+```

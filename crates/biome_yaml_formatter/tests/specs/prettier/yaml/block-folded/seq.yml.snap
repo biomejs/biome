@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block-folded/seq.yml
+---
+# Input
+
+```yml
+- >
+  123
+  456
+  789
+- >1
+    123
+   456
+  789
+- 0
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,4 +6,4 @@
+     123
+    456
+   789
+-- 0
++- 0
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- >
+  123
+  456
+  789
+- >1
+    123
+   456
+  789
+- 0```

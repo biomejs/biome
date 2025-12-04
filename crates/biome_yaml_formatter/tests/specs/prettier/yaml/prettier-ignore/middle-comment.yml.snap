@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/prettier-ignore/middle-comment.yml
+---
+# Input
+
+```yml
+abc:  !!str #   hello
+   123
+# prettier-ignore
+def:  !!str #   hello
+   456
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-abc: !!str #   hello
+-  123
++abc:  !!str #   hello
++   123
+ # prettier-ignore
+ def:  !!str #   hello
+-   456
++   456
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+abc:  !!str #   hello
+   123
+# prettier-ignore
+def:  !!str #   hello
+   456```
+
+# Errors
+```
+middle-comment.yml:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ abc:  !!str #   hello
+      │       ^
+    2 │    123
+    3 │ # biome-ignore format: prettier ignore
+  
+middle-comment.yml:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ abc:  !!str #   hello
+      │        ^
+    2 │    123
+    3 │ # biome-ignore format: prettier ignore
+  
+middle-comment.yml:4:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    2 │    123
+    3 │ # biome-ignore format: prettier ignore
+  > 4 │ def:  !!str #   hello
+      │       ^
+    5 │    456
+    6 │ 
+  
+middle-comment.yml:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    2 │    123
+    3 │ # biome-ignore format: prettier ignore
+  > 4 │ def:  !!str #   hello
+      │        ^
+    5 │    456
+    6 │ 
+  
+
+```

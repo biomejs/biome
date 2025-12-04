@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-sequence/long-plain.yml
+---
+# Input
+
+```yml
+[longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1 @@
+-[
+-  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,
+-  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,
+-  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,
+-]
++[longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+[longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]```
+
+# Lines exceeding max width of 80 characters
+```
+    1: [longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]
+```

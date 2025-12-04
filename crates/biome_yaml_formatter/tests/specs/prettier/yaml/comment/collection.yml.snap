@@ -1,0 +1,128 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/collection.yml
+---
+# Input
+
+```yml
+a: # a.trailingComment
+  123
+  # implicitMappingValue
+
+? b
+  # explicitMappingKey
+: c
+  # explicitMappingValue
+
+d:
+  - 123
+  # sequence
+
+e:
+  - 123
+    # sequenceItem
+
+f:
+  - a
+  # b.leadingComments
+  - b
+    # b.endComments
+  - c
+    # c.endComments
+  # sequence.endComments
+# documentBody.children
+
+empty_content:
+  # hello world
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -25,5 +25,4 @@
+   # sequence.endComments
+ # documentBody.children
+ 
+-empty_content:
+-  # hello world
++empty_content:
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: # a.trailingComment
+  123
+  # implicitMappingValue
+
+? b
+  # explicitMappingKey
+: c
+  # explicitMappingValue
+
+d:
+  - 123
+  # sequence
+
+e:
+  - 123
+    # sequenceItem
+
+f:
+  - a
+  # b.leadingComments
+  - b
+    # b.endComments
+  - c
+    # c.endComments
+  # sequence.endComments
+# documentBody.children
+
+empty_content:```
+
+# Errors
+```
+collection.yml:21:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found '- b
+        # b.endComments
+      - c
+        # c.endComments
+      # sequence.endComments
+    # documentBody.children
+    
+    empty_content:'.
+  
+    19 │   - a
+    20 │   # b.leadingComments
+  > 21 │   - b
+       │   ^^^
+  > 22 │     # b.endComments
+        ...
+  > 27 │ 
+  > 28 │ empty_content:
+       │ ^^^^^^^^^^^^^^
+    29 │   # hello world
+    30 │ 
+  
+  i Expected a block mapping entry here.
+  
+    19 │   - a
+    20 │   # b.leadingComments
+  > 21 │   - b
+       │   ^^^
+  > 22 │     # b.endComments
+        ...
+  > 27 │ 
+  > 28 │ empty_content:
+       │ ^^^^^^^^^^^^^^
+    29 │   # hello world
+    30 │ 
+  
+
+```

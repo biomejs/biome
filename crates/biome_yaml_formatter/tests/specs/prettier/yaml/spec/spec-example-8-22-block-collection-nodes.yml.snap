@@ -1,0 +1,121 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-22-block-collection-nodes.yml
+---
+# Input
+
+```yml
+sequence: !!seq
+- entry
+- !!seq
+ - nested
+mapping: !!map
+ foo: bar
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ sequence: !!seq
+-  - entry
+-  - !!seq
+-    - nested
++- entry
++- !!seq
++ - nested
+ mapping: !!map
+-  foo: bar
++ foo: bar
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+sequence: !!seq
+- entry
+- !!seq
+ - nested
+mapping: !!map
+ foo: bar```
+
+# Errors
+```
+spec-example-8-22-block-collection-nodes.yml:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ sequence: !!seq
+      │           ^
+    2 │ - entry
+    3 │ - !!seq
+  
+spec-example-8-22-block-collection-nodes.yml:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+  > 1 │ sequence: !!seq
+      │            ^
+    2 │ - entry
+    3 │ - !!seq
+  
+spec-example-8-22-block-collection-nodes.yml:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ sequence: !!seq
+    2 │ - entry
+  > 3 │ - !!seq
+      │   ^
+    4 │  - nested
+    5 │ mapping: !!map
+  
+spec-example-8-22-block-collection-nodes.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ sequence: !!seq
+    2 │ - entry
+  > 3 │ - !!seq
+      │    ^
+    4 │  - nested
+    5 │ mapping: !!map
+  
+spec-example-8-22-block-collection-nodes.yml:5:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ - !!seq
+    4 │  - nested
+  > 5 │ mapping: !!map
+      │          ^
+    6 │  foo: bar
+    7 │ 
+  
+spec-example-8-22-block-collection-nodes.yml:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    3 │ - !!seq
+    4 │  - nested
+  > 5 │ mapping: !!map
+      │           ^
+    6 │  foo: bar
+    7 │ 
+  
+spec-example-8-22-block-collection-nodes.yml:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected end of file.
+  
+    5 │ mapping: !!map
+    6 │  foo: bar
+  > 7 │ 
+      │ 
+  
+
+```

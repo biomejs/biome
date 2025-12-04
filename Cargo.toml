@@ -172,6 +172,7 @@ biome_tailwind_parser        = { version = "0.0.1", path = "./crates/biome_tailw
 biome_tailwind_syntax        = { version = "0.0.1", path = "./crates/biome_tailwind_syntax" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
+biome_yaml_formatter         = { version = "0.1.0", path = "./crates/biome_yaml_formatter" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
 

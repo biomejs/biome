@@ -1,0 +1,126 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-23-various-explicit-tags.yml
+---
+# Input
+
+```yml
+---
+not-date: !!str 2002-04-28
+
+picture: !!binary |
+ R0lGODlhDAAMAIQAAP//9/X
+ 17unp5WZmZgAAAOfn515eXv
+ Pz7Y6OjuDg4J+fn5OTk6enp
+ 56enmleECcgggoBADs=
+
+application specific tag: !something |
+ The semantics of the tag
+ above may be different for
+ different documents.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,12 +2,12 @@
+ not-date: !!str 2002-04-28
+ 
+ picture: !!binary |
+-  R0lGODlhDAAMAIQAAP//9/X
+-  17unp5WZmZgAAAOfn515eXv
+-  Pz7Y6OjuDg4J+fn5OTk6enp
+-  56enmleECcgggoBADs=
++ R0lGODlhDAAMAIQAAP//9/X
++ 17unp5WZmZgAAAOfn515eXv
++ Pz7Y6OjuDg4J+fn5OTk6enp
++ 56enmleECcgggoBADs=
+ 
+ application specific tag: !something |
+-  The semantics of the tag
+-  above may be different for
+-  different documents.
++ The semantics of the tag
++ above may be different for
++ different documents.
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+not-date: !!str 2002-04-28
+
+picture: !!binary |
+ R0lGODlhDAAMAIQAAP//9/X
+ 17unp5WZmZgAAAOfn515eXv
+ Pz7Y6OjuDg4J+fn5OTk6enp
+ 56enmleECcgggoBADs=
+
+application specific tag: !something |
+ The semantics of the tag
+ above may be different for
+ different documents.```
+
+# Errors
+```
+spec-example-2-23-various-explicit-tags.yml:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ ---
+  > 2 │ not-date: !!str 2002-04-28
+      │           ^
+    3 │ 
+    4 │ picture: !!binary |
+  
+spec-example-2-23-various-explicit-tags.yml:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    1 │ ---
+  > 2 │ not-date: !!str 2002-04-28
+      │            ^
+    3 │ 
+    4 │ picture: !!binary |
+  
+spec-example-2-23-various-explicit-tags.yml:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    2 │ not-date: !!str 2002-04-28
+    3 │ 
+  > 4 │ picture: !!binary |
+      │          ^
+    5 │  R0lGODlhDAAMAIQAAP//9/X
+    6 │  17unp5WZmZgAAAOfn515eXv
+  
+spec-example-2-23-various-explicit-tags.yml:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+    2 │ not-date: !!str 2002-04-28
+    3 │ 
+  > 4 │ picture: !!binary |
+      │           ^
+    5 │  R0lGODlhDAAMAIQAAP//9/X
+    6 │  17unp5WZmZgAAAOfn515eXv
+  
+spec-example-2-23-various-explicit-tags.yml:10:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!`
+  
+     8 │  56enmleECcgggoBADs=
+     9 │ 
+  > 10 │ application specific tag: !something |
+       │                           ^
+    11 │  The semantics of the tag
+    12 │  above may be different for
+  
+
+```

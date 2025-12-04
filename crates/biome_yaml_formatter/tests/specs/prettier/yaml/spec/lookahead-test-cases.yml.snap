@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/lookahead-test-cases.yml
+---
+# Input
+
+```yml
+- bla"keks: foo
+- bla]keks: foo
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ - bla"keks: foo
+-- bla]keks: foo
++- bla]keks: foo
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- bla"keks: foo
+- bla]keks: foo```

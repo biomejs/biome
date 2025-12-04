@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/directives-and-comments.yml
+---
+# Input
+
+```yml
+# 123
+%YAML 1.2
+# 456
+---
+# 789
+test
+# 000
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,5 @@
+-# 123
+ %YAML 1.2
+ # 456
+ ---
+ # 789
+ test
+-# 000
+```
+
+# Output
+
+```yml
+%YAML 1.2
+# 456
+---
+# 789
+test
+```
+
+# Errors
+```
+directives-and-comments.yml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+    1 │ # 123
+  > 2 │ %YAML 1.2
+      │ ^
+    3 │ # 456
+    4 │ ---
+  
+
+```

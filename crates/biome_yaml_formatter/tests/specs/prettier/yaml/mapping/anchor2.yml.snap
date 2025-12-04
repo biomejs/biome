@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/mapping/anchor2.yml
+---
+# Input
+
+```yml
+key1: &default
+
+  # This key ...
+  subkey1: value1
+
+key2:
+  <<: *default
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,7 @@
+-key1: &default # This key ...
++key1: &default
++
++  # This key ...
+   subkey1: value1
+ 
+ key2:
+-  <<: *default
++  <<: *default
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+key1: &default
+
+  # This key ...
+  subkey1: value1
+
+key2:
+  <<: *default```
+
+# Errors
+```
+anchor2.yml:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ key1: &default
+      │       ^
+    2 │ 
+    3 │   # This key ...
+  
+anchor2.yml:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+    4 │   subkey1: value1
+    5 │ 
+  > 6 │ key2:
+      │ ^^^^^
+  > 7 │   <<: *default
+  > 8 │ 
+      │ 
+  
+anchor2.yml:7:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    6 │ key2:
+  > 7 │   <<: *default
+      │       ^
+    8 │ 
+  
+
+```

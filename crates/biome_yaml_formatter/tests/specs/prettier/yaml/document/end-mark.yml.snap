@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/end-mark.yml
+---
+# Input
+
+```yml
+---
+key: value
+...
+xxxxxxxx
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ ---
+ key: value
+----
++...
+ xxxxxxxx
+```
+
+# Output
+
+```yml
+---
+key: value
+...
+xxxxxxxx
+```

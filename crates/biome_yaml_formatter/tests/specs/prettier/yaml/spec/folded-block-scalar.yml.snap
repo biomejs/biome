@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/folded-block-scalar.yml
+---
+# Input
+
+```yml
+>
+ ab
+ cd
+ 
+ ef
+
+
+ gh
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ >
+-  ab
+-  cd
+-
+-  ef
++ ab
++ cd
++ 
++ ef
+ 
+ 
+-  gh
++ gh
+```
+
+# Output
+
+```yml
+>
+ ab
+ cd
+ 
+ ef
+
+
+ gh
+```

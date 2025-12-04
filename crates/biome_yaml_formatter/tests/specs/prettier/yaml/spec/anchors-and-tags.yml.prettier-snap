@@ -1,0 +1,4 @@
+- !!str &a a
+- !!int 2
+- !!int &c 4
+- &d d

@@ -1,0 +1,89 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/various-location-of-anchors-in-flow-sequence.yml
+---
+# Input
+
+```yml
+&flowseq [
+ a: b,
+ &c c: d,
+ { &e e: f },
+ &g { g: h }
+]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,6 @@
+-&flowseq [a: b, &c c: d, { &e e: f }, &g { g: h }]
++&flowseq [
++ a: b,
++ &c c: d,
++ { &e e: f },
++ &g { g: h }
++]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+&flowseq [
+ a: b,
+ &c c: d,
+ { &e e: f },
+ &g { g: h }
+]```
+
+# Errors
+```
+various-location-of-anchors-in-flow-sequence.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+  > 1 │ &flowseq [
+      │ ^
+    2 │  a: b,
+    3 │  &c c: d,
+  
+various-location-of-anchors-in-flow-sequence.yml:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ &flowseq [
+    2 │  a: b,
+  > 3 │  &c c: d,
+      │  ^
+    4 │  { &e e: f },
+    5 │  &g { g: h }
+  
+various-location-of-anchors-in-flow-sequence.yml:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │  a: b,
+    3 │  &c c: d,
+  > 4 │  { &e e: f },
+      │    ^
+    5 │  &g { g: h }
+    6 │ ]
+  
+various-location-of-anchors-in-flow-sequence.yml:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    3 │  &c c: d,
+    4 │  { &e e: f },
+  > 5 │  &g { g: h }
+      │  ^
+    6 │ ]
+    7 │ 
+  
+
+```

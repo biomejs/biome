@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/mapping/merge-twice.yml
+---
+# Input
+
+```yml
+.anchors:
+  - &anchor1
+    key: value
+  - &anchor2
+    another: prop
+
+foo:
+  bar: baz
+  <<: *anchor1
+  <<: *anchor2
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,4 +7,4 @@
+ foo:
+   bar: baz
+   <<: *anchor1
+-  <<: *anchor2
++  <<: *anchor2
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+.anchors:
+  - &anchor1
+    key: value
+  - &anchor2
+    another: prop
+
+foo:
+  bar: baz
+  <<: *anchor1
+  <<: *anchor2```
+
+# Errors
+```
+merge-twice.yml:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ .anchors:
+  > 2 │   - &anchor1
+      │     ^
+    3 │     key: value
+    4 │   - &anchor2
+  
+merge-twice.yml:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │   - &anchor1
+    3 │     key: value
+  > 4 │   - &anchor2
+      │     ^
+    5 │     another: prop
+    6 │ 
+  
+merge-twice.yml:9:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+     7 │ foo:
+     8 │   bar: baz
+   > 9 │   <<: *anchor1
+       │       ^
+    10 │   <<: *anchor2
+    11 │ 
+  
+merge-twice.yml:10:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+     8 │   bar: baz
+     9 │   <<: *anchor1
+  > 10 │   <<: *anchor2
+       │       ^
+    11 │ 
+  
+
+```

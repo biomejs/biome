@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/block-scalar-indicator-order.yml
+---
+# Input
+
+```yml
+- |2-
+  explicit indent and chomp
+- |-2
+  chomp and explicit indent
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ - |2-
+   explicit indent and chomp
+-- |2-
+-  chomp and explicit indent
++- |-2
++  chomp and explicit indent
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- |2-
+  explicit indent and chomp
+- |-2
+  chomp and explicit indent```

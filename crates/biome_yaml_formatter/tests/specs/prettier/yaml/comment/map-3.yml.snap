@@ -1,0 +1,92 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/map-3.yml
+---
+# Input
+
+```yml
+foo1:
+  - foo
+
+  # - foo
+
+  # - foo
+
+  - foo
+
+foo2:
+  - foo2
+
+  # first line
+  # next line
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,7 +8,4 @@
+   - foo
+ 
+ foo2:
+-  - foo2
+-
+-  # first line
+-  # next line
++  - foo2
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+foo1:
+  - foo
+
+  # - foo
+
+  # - foo
+
+  - foo
+
+foo2:
+  - foo2```
+
+# Errors
+```
+map-3.yml:8:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block mapping entry but instead found '- foo
+    
+    foo2:
+      - foo2'.
+  
+     6 │   # - foo
+     7 │ 
+   > 8 │   - foo
+       │   ^^^^^
+   > 9 │ 
+  > 10 │ foo2:
+  > 11 │   - foo2
+       │   ^^^^^^
+    12 │ 
+    13 │   # first line
+  
+  i Expected a block mapping entry here.
+  
+     6 │   # - foo
+     7 │ 
+   > 8 │   - foo
+       │   ^^^^^
+   > 9 │ 
+  > 10 │ foo2:
+  > 11 │   - foo2
+       │   ^^^^^^
+    12 │ 
+    13 │   # first line
+  
+
+```

@@ -1,0 +1,170 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/node-and-mapping-key-anchors.yml
+---
+# Input
+
+```yml
+---
+top1: &node1
+  &k1 key1: one
+top2: &node2 # comment
+  key2: two
+top3:
+  &k3 key3: three
+top4:
+  &node4
+  &k4 key4: four
+top5:
+  &node5
+  key5: five
+top6: &val6
+  six
+top7:
+  &val7 seven
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,9 +5,13 @@
+   key2: two
+ top3:
+   &k3 key3: three
+-top4: &node4
++top4:
++  &node4
+   &k4 key4: four
+-top5: &node5
++top5:
++  &node5
+   key5: five
+-top6: &val6 six
+-top7: &val7 seven
++top6: &val6
++  six
++top7:
++  &val7 seven
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+top1: &node1
+  &k1 key1: one
+top2: &node2 # comment
+  key2: two
+top3:
+  &k3 key3: three
+top4:
+  &node4
+  &k4 key4: four
+top5:
+  &node5
+  key5: five
+top6: &val6
+  six
+top7:
+  &val7 seven```
+
+# Errors
+```
+node-and-mapping-key-anchors.yml:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    1 │ ---
+  > 2 │ top1: &node1
+      │       ^
+    3 │   &k1 key1: one
+    4 │ top2: &node2 # comment
+  
+node-and-mapping-key-anchors.yml:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token.
+  
+     2 │ top1: &node1
+     3 │   &k1 key1: one
+   > 4 │ top2: &node2 # comment
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+   > 5 │   key2: two
+        ...
+  > 15 │   six
+  > 16 │ top7:
+  > 17 │   &val7 seven
+  > 18 │ 
+       │ 
+  
+node-and-mapping-key-anchors.yml:4:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    2 │ top1: &node1
+    3 │   &k1 key1: one
+  > 4 │ top2: &node2 # comment
+      │       ^
+    5 │   key2: two
+    6 │ top3:
+  
+node-and-mapping-key-anchors.yml:7:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    5 │   key2: two
+    6 │ top3:
+  > 7 │   &k3 key3: three
+      │   ^
+    8 │ top4:
+    9 │   &node4
+  
+node-and-mapping-key-anchors.yml:9:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+     7 │   &k3 key3: three
+     8 │ top4:
+   > 9 │   &node4
+       │   ^
+    10 │   &k4 key4: four
+    11 │ top5:
+  
+node-and-mapping-key-anchors.yml:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    10 │   &k4 key4: four
+    11 │ top5:
+  > 12 │   &node5
+       │   ^
+    13 │   key5: five
+    14 │ top6: &val6
+  
+node-and-mapping-key-anchors.yml:14:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    12 │   &node5
+    13 │   key5: five
+  > 14 │ top6: &val6
+       │       ^
+    15 │   six
+    16 │ top7:
+  
+node-and-mapping-key-anchors.yml:17:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `&`
+  
+    15 │   six
+    16 │ top7:
+  > 17 │   &val7 seven
+       │   ^
+    18 │ 
+  
+
+```
