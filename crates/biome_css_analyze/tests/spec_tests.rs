@@ -1,7 +1,9 @@
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
+use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -128,12 +130,26 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-
-    let (_, errors) = biome_css_analyze::analyze(&root, filter, &options, plugins, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let semantic_model = semantic_model(&root);
+    let services = CssAnalyzerServices::default()
+        .with_file_source(source_type)
+        .with_semantic_model(&semantic_model);
+    let (_, errors) =
+        biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions() {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(
+                                input_file,
+                                input_code,
+                                source_type,
+                                &action,
+                                parser_options,
+                            );
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(
                             input_file,
                             input_code,
@@ -143,30 +159,32 @@ pub(crate) fn analyze_and_snap(
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, source_type, &action, parser_options);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions() {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(
+                            input_file,
+                            input_code,
+                            source_type,
+                            &action,
+                            parser_options,
+                        );
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action, parser_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, source_type, &action, parser_options);
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

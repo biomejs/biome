@@ -12,8 +12,8 @@ pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::Settings;
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
-    PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
+    AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
+    GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
 };
 use biome_analyze::{
     AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal,
@@ -471,6 +471,7 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) document_services: &'a DocumentServices,
 }
 
 #[derive(Default)]
@@ -546,6 +547,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
+    pub(crate) document_services: &'a DocumentServices,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
@@ -562,6 +564,8 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
+    #[expect(unused)]
+    pub(crate) document_services: &'a DocumentServices,
 }
 
 pub(crate) struct LintResults {
@@ -906,6 +910,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
     pub(crate) action_offset: Option<TextSize>,
+    pub(crate) document_services: &'a DocumentServices,
 }
 
 pub(crate) struct UpdateSnippetsNodes {

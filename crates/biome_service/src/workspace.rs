@@ -68,7 +68,7 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
+pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -1078,7 +1078,7 @@ pub struct FixFileParams {
     pub suppression_reason: Option<String>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileResult {

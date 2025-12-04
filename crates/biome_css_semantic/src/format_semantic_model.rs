@@ -1,4 +1,5 @@
-use crate::model::{Rule, Selector, SemanticModel, Specificity};
+use crate::model::{Selector, SemanticModel, Specificity};
+use biome_css_syntax::CssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
@@ -75,43 +76,36 @@ impl Format<FormatSemanticModelContext> for SemanticModel {
             .values()
             .flat_map(|rule| rule.selectors())
             .collect();
-        selectors.sort_by_key(|sel| sel.range().start());
+        selectors.sort_by_key(|sel| sel.range(&self.root()).start());
 
         let mut builder = f.join_nodes_with_hardline();
         for selector in selectors {
-            builder.entry(selector.node().syntax(), selector);
+            builder.entry(
+                selector.node(&self.root()).syntax(),
+                &SelectorWithRoot(selector, &self.root()),
+            );
         }
         builder.finish()
     }
 }
 
-impl Format<FormatSemanticModelContext> for Rule {
+struct SelectorWithRoot<'a>(&'a Selector, &'a CssRoot);
+
+impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
+        let selector = self.0;
+        let root = self.1;
+        let range = std::format!("{:?}", selector.range(root));
         write!(
             f,
             [
                 text(
-                    self.node().syntax().text_trimmed().into_text().text(),
-                    self.node().syntax().text_trimmed_range().start()
+                    selector.text(root).into_text().text(),
+                    selector.range(root).start()
                 ),
                 token(":"),
                 space(),
-                &self.specificity(),
-            ]
-        )
-    }
-}
-
-impl Format<FormatSemanticModelContext> for Selector {
-    fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        let range = std::format!("{:?}", self.range());
-        write!(
-            f,
-            [
-                text(self.text().into_text().text(), self.range().start()),
-                token(":"),
-                space(),
-                &self.specificity(),
+                &selector.specificity(),
                 space(),
                 token(" @ "),
                 text(range.as_str(), TextSize::default()),

@@ -4488,6 +4488,7 @@ dependencies = [
  "biome_console",
  "biome_css_analyze",
  "biome_css_parser",
+ "biome_css_semantic",
  "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",

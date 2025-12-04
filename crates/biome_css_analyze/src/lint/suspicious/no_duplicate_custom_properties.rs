@@ -54,13 +54,14 @@ impl Rule for NoDuplicateCustomProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let model = ctx.model();
+        let root = ctx.root();
 
         let rule = model.get_rule_by_range(node.range())?;
 
         let mut seen: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations() {
-            let prop = declaration.property();
+            let prop = declaration.property(&root);
             let prop_name = prop.value().ok()?;
             let prop_range = prop.range();
 

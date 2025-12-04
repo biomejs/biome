@@ -13,6 +13,7 @@ use biome_analyze::{
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
+use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
@@ -393,7 +394,7 @@ fn assert_lint(
                 });
             }
         }
-        DocumentFileSource::Css(..) => {
+        DocumentFileSource::Css(file_source) => {
             let parse_options = CssParserOptions::default()
                 .allow_css_modules()
                 .allow_tailwind_directives();
@@ -416,8 +417,11 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<CssLanguage>(config)?;
-
-                biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
+                let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
+                let services = CssAnalyzerServices::default()
+                    .with_file_source(file_source)
+                    .with_semantic_model(&semantic_model);
+                biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
