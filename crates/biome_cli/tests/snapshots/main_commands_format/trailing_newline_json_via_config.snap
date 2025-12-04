@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "json": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+## `test.json`
+
+```json
+{ "name": "test" }
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

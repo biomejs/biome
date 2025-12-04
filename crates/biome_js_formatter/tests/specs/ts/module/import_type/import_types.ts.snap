@@ -53,6 +53,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -71,6 +72,7 @@ import type { foo as baz, aaa } from "foo";
 import { foo, type Foo } from "foo";
 import { type Bar } from "bar";
 import { bar, type Bar as Baz } from "baz";
+
 ```
 
 ## Output 1
@@ -91,6 +93,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -109,4 +112,5 @@ import type {foo as baz, aaa} from "foo";
 import {foo, type Foo} from "foo";
 import {type Bar} from "bar";
 import {bar, type Bar as Baz} from "baz";
+
 ```

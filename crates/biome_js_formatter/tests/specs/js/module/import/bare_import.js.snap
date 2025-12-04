@@ -54,6 +54,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -78,6 +79,7 @@ import "very_long_import_very_long_import_very" with {
 	/****/
 	typetypetypetypetypetypetypetypetypetypetype: /****/ "typetypetypetypetypetypetypetypetypetypetypetypetypetype",
 };
+
 ```
 
 # Lines exceeding max width of 80 characters

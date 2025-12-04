@@ -594,7 +594,7 @@ fn takes_last_formatter_enabled_into_account() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", test.as_str()].as_slice()),
+        Args::from(["format", "--write", test.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

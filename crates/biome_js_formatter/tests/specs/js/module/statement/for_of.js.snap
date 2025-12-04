@@ -39,6 +39,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -53,6 +54,7 @@ for (const aVeryLongVariableNameToEnforceLineBreaksaVeryLongVariableNameToEnforc
 
 for await (const a of b) {
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

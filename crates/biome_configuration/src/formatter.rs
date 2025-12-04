@@ -2,7 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth,
+    LineEnding, LineWidth, TrailingNewline,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -74,6 +74,11 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(long("trailing-newline"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
+
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
@@ -124,6 +129,10 @@ impl FormatterConfiguration {
 
     pub fn expand_resolved(&self) -> Expand {
         self.expand.unwrap_or_default()
+    }
+
+    pub fn trailing_newline_resolved(&self) -> TrailingNewline {
+        self.trailing_newline.unwrap_or_default()
     }
 
     pub fn use_editorconfig_resolved(&self) -> bool {

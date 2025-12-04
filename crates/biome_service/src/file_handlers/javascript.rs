@@ -29,7 +29,7 @@ use biome_configuration::javascript::{
 };
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -78,6 +78,7 @@ pub struct JsFormatterSettings {
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
     pub operator_linebreak: Option<OperatorLinebreak>,
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -99,6 +100,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             line_ending: value.line_ending,
             expand: value.expand,
             operator_linebreak: value.operator_linebreak,
+            trailing_newline: value.trailing_newline,
         }
     }
 }
@@ -266,6 +268,12 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default(),
         )
         .with_expand(language.expand.or(global.expand).unwrap_or_default())
+        .with_trailing_newline(
+            language
+                .trailing_newline
+                .or(global.trailing_newline)
+                .unwrap_or_default(),
+        )
         .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)

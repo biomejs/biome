@@ -2,6 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    TrailingNewline,
 };
 use biome_html_formatter::context::{
     IndentScriptAndStyle, SelfCloseVoidElements, WhitespaceSensitivity,
@@ -139,6 +140,15 @@ pub struct HtmlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    #[bpaf(
+        long("html-formatter-trailing-newline"),
+        argument("true|false"),
+        optional
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_newline: Option<TrailingNewline>,
 }
 
 /// Options that changes how the HTML linter behaves

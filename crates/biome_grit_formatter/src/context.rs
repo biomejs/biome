@@ -2,7 +2,7 @@ use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, TransformSourceMap,
+    IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
 };
 use biome_grit_syntax::GritLanguage;
 use biome_grit_syntax::file_source::GritFileSource;
@@ -62,6 +62,8 @@ pub struct GritFormatOptions {
     line_width: LineWidth,
     attribute_position: AttributePosition,
     bracket_spacing: BracketSpacing,
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
     _file_source: GritFileSource,
 }
 
@@ -75,6 +77,7 @@ impl GritFormatOptions {
             line_width: LineWidth::default(),
             bracket_spacing: BracketSpacing::default(),
             attribute_position: AttributePosition::default(),
+            trailing_newline: TrailingNewline::default(),
         }
     }
 
@@ -98,6 +101,11 @@ impl GritFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -114,12 +122,20 @@ impl GritFormatOptions {
         self.line_width = line_width;
     }
 
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
     pub fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
     }
 
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 }
 
@@ -129,7 +145,8 @@ impl Display for GritFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Attribute Position: {}", self.attribute_position)
+        writeln!(f, "Attribute Position: {}", self.attribute_position)?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }
 
@@ -148,6 +165,10 @@ impl FormatOptions for GritFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {
