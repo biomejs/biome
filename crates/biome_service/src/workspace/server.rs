@@ -259,11 +259,7 @@ impl WorkspaceServer {
     ///
     /// File sources can be inserted using `insert_source()`.
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        if index < self.file_sources.count() {
-            Some(self.file_sources[index])
-        } else {
-            None
-        }
+        self.file_sources.get(index).copied()
     }
 
     /// Inserts a file source so that it can be retrieved by index later.

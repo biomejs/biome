@@ -60,7 +60,7 @@ biome_resolver          = { workspace = true }
 biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
-boxcar                  = "0.2.14"
+boxcar                  = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
 either                  = { workspace = true }
