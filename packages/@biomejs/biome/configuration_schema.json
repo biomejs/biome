@@ -5365,6 +5365,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDestructuring": {
+					"description": "Require destructuring from arrays and/or objects.\nSee https://biomejs.dev/linter/rules/use-destructuring",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDestructuringConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
 					"anyOf": [
@@ -8753,6 +8760,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDestructuringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDestructuringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"properties": {
@@ -11599,6 +11615,16 @@
 			]
 		},
 		"UseDeprecatedReasonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDestructuringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDestructuringOptions" }
+			]
+		},
+		"UseDestructuringOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

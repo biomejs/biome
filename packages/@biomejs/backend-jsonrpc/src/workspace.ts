@@ -2051,6 +2051,11 @@ See https://biomejs.dev/linter/rules/use-deprecated-date
 	 */
 	useDeprecatedDate?: UseDeprecatedDateConfiguration;
 	/**
+	* Require destructuring from arrays and/or objects.
+See https://biomejs.dev/linter/rules/use-destructuring 
+	 */
+	useDestructuring?: UseDestructuringConfiguration;
+	/**
 	* Require switch-case statements to be exhaustive.
 See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases 
 	 */
@@ -3693,6 +3698,9 @@ export type UseConsistentGraphqlDescriptionsConfiguration =
 export type UseDeprecatedDateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDeprecatedDateOptions;
+export type UseDestructuringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDestructuringOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
@@ -5144,6 +5152,10 @@ export interface RuleWithUseDeprecatedDateOptions {
 	level: RulePlainConfiguration;
 	options?: UseDeprecatedDateOptions;
 }
+export interface RuleWithUseDestructuringOptions {
+	level: RulePlainConfiguration;
+	options?: UseDestructuringOptions;
+}
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6424,6 +6436,7 @@ export interface UseConsistentGraphqlDescriptionsOptions {
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
+export type UseDestructuringOptions = {};
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
@@ -7247,6 +7260,7 @@ export type Category =
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useDeprecatedDate"
+	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
