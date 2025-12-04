@@ -1,4 +1,10 @@
-use crate::{html::auxiliary::attribute_name::FormatHtmlAttributeNameOptions, prelude::*};
+use crate::{
+    html::auxiliary::{
+        attribute_initializer_clause::FormatHtmlAttributeInitializerClauseOptions,
+        attribute_name::FormatHtmlAttributeNameOptions,
+    },
+    prelude::*,
+};
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlAttribute, HtmlAttributeFields, HtmlTagName};
 
@@ -35,13 +41,27 @@ impl FormatNodeRule<HtmlAttribute> for FormatHtmlAttribute {
 
         write!(
             f,
-            [
-                name.format()?.with_options(FormatHtmlAttributeNameOptions {
-                    is_canonical_html_element: self.is_canonical_html_element,
-                    tag_name: self.tag_name.clone(),
-                }),
-                initializer.format()
-            ]
-        )
+            [name.format()?.with_options(FormatHtmlAttributeNameOptions {
+                is_canonical_html_element: self.is_canonical_html_element,
+                tag_name: self.tag_name.clone(),
+            }),]
+        )?;
+
+        if let Some(initializer) = initializer.as_ref() {
+            write!(
+                f,
+                [initializer
+                    .format()
+                    .with_options(FormatHtmlAttributeInitializerClauseOptions {
+                        tag_name: self
+                            .tag_name
+                            .as_ref()
+                            .and_then(|name| name.token_text_trimmed()),
+                        attribute_name: name.ok().and_then(|name| name.token_text_trimmed()),
+                    })]
+            )?;
+        }
+
+        Ok(())
     }
 }
