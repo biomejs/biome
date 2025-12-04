@@ -14,7 +14,6 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-append-only-vec         = "0.1.8"
 biome_analyze           = { workspace = true, features = ["serde"] }
 biome_configuration     = { workspace = true }
 biome_console           = { workspace = true }
@@ -61,6 +60,7 @@ biome_resolver          = { workspace = true }
 biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
+boxcar                  = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
 either                  = { workspace = true }
