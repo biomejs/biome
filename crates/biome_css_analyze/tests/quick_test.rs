@@ -23,7 +23,7 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
     let semantic_model = biome_css_semantic::semantic_model(&parsed.tree());
     let services = CssAnalyzerServices::default()
         .with_file_source(CssFileSource::default())
-        .with_semantic_model(semantic_model);
+        .with_semantic_model(&semantic_model);
 
     analyze(
         &parsed.tree(),

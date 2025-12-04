@@ -133,7 +133,7 @@ pub(crate) fn analyze_and_snap(
     let semantic_model = semantic_model(&root);
     let services = CssAnalyzerServices::default()
         .with_file_source(source_type)
-        .with_semantic_model(semantic_model);
+        .with_semantic_model(&semantic_model);
     let (_, errors) =
         biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {
             if let Some(mut diag) = event.diagnostic() {

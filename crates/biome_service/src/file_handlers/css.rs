@@ -575,7 +575,7 @@ fn lint(params: LintParams) -> LintResults {
         semantic_model: params
             .document_services
             .as_css_services()
-            .and_then(|services| services.semantic_model.clone()),
+            .and_then(|services| services.semantic_model.as_ref()),
         file_source,
     };
     let (_, analyze_diagnostics) = analyze(
@@ -645,7 +645,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let css_services = CssAnalyzerServices {
         semantic_model: document_services
             .as_css_services()
-            .and_then(|services| services.semantic_model.clone()),
+            .and_then(|services| services.semantic_model.as_ref()),
         file_source,
     };
 
@@ -715,7 +715,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             semantic_model: params
                 .document_services
                 .as_css_services()
-                .and_then(|services| services.semantic_model.clone()),
+                .and_then(|services| services.semantic_model.as_ref()),
             file_source,
         };
 

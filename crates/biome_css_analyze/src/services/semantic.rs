@@ -5,15 +5,14 @@ use biome_analyze::{
 use biome_css_semantic::model::SemanticModel;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_rowan::AstNode;
-use std::sync::Arc;
 
 pub struct SemanticServices {
-    model: Arc<SemanticModel>,
+    model: SemanticModel,
 }
 
 impl SemanticServices {
     pub fn model(&self) -> &SemanticModel {
-        self.model.as_ref()
+        &self.model
     }
 }
 
@@ -23,7 +22,7 @@ impl FromServices for SemanticServices {
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let model: &Arc<SemanticModel> = services
+        let model: &SemanticModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
 

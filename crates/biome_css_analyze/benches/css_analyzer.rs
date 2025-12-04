@@ -60,7 +60,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                         let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
                         let services = biome_css_analyze::CssAnalyzerServices::default()
                             .with_file_source(CssFileSource::default())
-                            .with_semantic_model(semantic_model);
+                            .with_semantic_model(&semantic_model);
                         b.iter(|| {
                             biome_css_analyze::analyze(
                                 &parse.tree(),

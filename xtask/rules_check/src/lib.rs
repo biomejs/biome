@@ -416,7 +416,7 @@ fn assert_lint(
                 let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
                 let services = CssAnalyzerServices::default()
                     .with_file_source(file_source)
-                    .with_semantic_model(semantic_model);
+                    .with_semantic_model(&semantic_model);
                 biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
