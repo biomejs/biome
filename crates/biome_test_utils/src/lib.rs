@@ -30,10 +30,10 @@ use similar::{DiffableStr, TextDiff};
 mod bench_case;
 
 pub use bench_case::BenchCase;
-use biome_service::WorkspaceError;
-use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssRoot;
+use biome_service::WorkspaceError;
+use biome_service::configuration::{LoadedConfiguration, load_configuration};
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
