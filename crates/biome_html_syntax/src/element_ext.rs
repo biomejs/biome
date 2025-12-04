@@ -118,6 +118,11 @@ impl HtmlElement {
         self.get_script_type().is_some_and(ScriptType::is_supported)
     }
 
+    /// It's a style tag, and it doesn't contain `scss` as `lang`
+    pub fn is_supported_style_tag(&self) -> bool {
+        self.is_style_tag() && !self.is_sass_lang()
+    }
+
     /// Returns the type of script for a `<script>` tag.
     ///
     /// Returns `Some` [`ScriptType`] if this is a `<script>` tag, even if it

@@ -569,6 +569,45 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn full_support_enabled_and_scss_is_skipped() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<html><head><title>Svelte</title></head><body></body></html>
+
+<style lang="scss">
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_enabled_and_scss_is_skipped",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn full_support_tsx() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
