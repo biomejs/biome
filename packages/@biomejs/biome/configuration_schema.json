@@ -11876,6 +11876,12 @@
 		},
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
+			"properties": {
+				"checkForEach": {
+					"description": "When `true`, the rule reports `forEach` callbacks that return a value.\nWhen `false` or unset, such callbacks are ignored (default behaviour).",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseJsonImportAttributesConfiguration": {
