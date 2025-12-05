@@ -899,9 +899,9 @@ fn generate_group_struct(
 
             if !docs.is_empty() {
                 let docs = docs.trim_end_matches('.');
-                format!("{}.\nSee {}", docs, url)
+                format!("{}.\nSee <{}>", docs, url)
             } else {
-                format!("See {}", url)
+                format!("See <{}>", url)
             }
         };
 

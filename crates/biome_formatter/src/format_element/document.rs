@@ -72,13 +72,10 @@ impl Document {
                             interned_expands
                         }
                     },
-                    FormatElement::BestFitting(best_fitting) => {
+                    FormatElement::BestFitting(variants) => {
                         enclosing.push(Enclosing::BestFitting);
 
-                        for variant in best_fitting.variants() {
-                            propagate_expands(variant, enclosing, checked_interned);
-                        }
-
+                        propagate_expands(variants, enclosing, checked_interned);
                         enclosing.pop();
                         // BestFitting acts as a boundary, meaning there is no need to continue
                         // processing this element and we can move onto the next. However, we
@@ -182,9 +179,7 @@ fn transform_elements(
                 *element = FormatElement::Interned(Interned::new(nested_elements));
             }
             FormatElement::BestFitting(best_fitting) => {
-                for variant in best_fitting.variants_mut() {
-                    transform_elements(variant, visitor);
-                }
+                transform_elements(best_fitting.as_slice_mut(), visitor);
             }
             _ => {
                 if let Some(replacement) = visitor(element) {
@@ -377,8 +372,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         FormatElement::Line(LineMode::Hard),
                     ])?;
 
-                    for variant in best_fitting.variants() {
-                        write!(f, [variant.deref(), hard_line_break()])?;
+                    for variant in best_fitting {
+                        write!(f, [variant, hard_line_break()])?;
                     }
 
                     f.write_elements([
@@ -586,10 +581,10 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         StartEmbedded(_) => {
                             write!(f, [token("embedded(")])?;
                         }
-                        StartEntry => {
+                        StartEntry | StartBestFittingEntry => {
                             // handled after the match for all start tags
                         }
-                        EndEntry => write!(f, [ContentArrayEnd])?,
+                        EndEntry | EndBestFittingEntry => write!(f, [ContentArrayEnd])?,
 
                         EndFill
                         | EndLabelled
@@ -886,9 +881,13 @@ mod tests {
         //   best_fitting(...)
         // ]
         let interned = Interned::new(vec![FormatElement::ExpandParent, unsafe {
-            FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(vec![
-                Box::new([FormatElement::Token { text: "a" }]),
-                Box::new([FormatElement::Token { text: "b" }]),
+            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(vec![
+                FormatElement::Tag(StartBestFittingEntry),
+                FormatElement::Token { text: "a" },
+                FormatElement::Tag(EndBestFittingEntry),
+                FormatElement::Tag(StartBestFittingEntry),
+                FormatElement::Token { text: "b" },
+                FormatElement::Tag(EndBestFittingEntry),
             ]))
         }]);
 
@@ -913,8 +912,8 @@ mod tests {
     <interned 0> [
       expand_parent,
       best_fitting([
-        ["a"]
-        ["b"]
+        [["a"]]
+        [["b"]]
       ])
     ]
   ]),
