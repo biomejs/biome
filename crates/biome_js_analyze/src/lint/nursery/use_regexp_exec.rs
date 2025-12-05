@@ -3,7 +3,7 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsCallExpression;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_js_type_info::{Literal, ResolvedTypeData, TypeData};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_regexp_exec::UseRegexpExecOptions;
@@ -67,21 +67,9 @@ impl Rule for UseRegexpExec {
 
         let args = node.arguments().ok()?.args();
         let first_arg = args.first()?.ok()?;
-        let express = first_arg.as_any_js_expression()?;
+        let expr = first_arg.as_any_js_expression()?;
 
-        let value_type = ctx.type_of_expression(express);
-
-        if value_type
-            .resolved_data()
-            .map(ResolvedTypeData::as_raw_data)
-            .is_some_and(|ty| match ty {
-                TypeData::Literal(literal) => match literal.as_ref() {
-                    Literal::RegExp(literal) => !literal.flags.contains('g'),
-                    _ => false,
-                },
-                _ => false,
-            })
-        {
+        if evaluate_regexp_literal(ctx, expr) || evaluate_new_expression(ctx, expr) {
             return Some(());
         }
 
@@ -103,4 +91,41 @@ impl Rule for UseRegexpExec {
             }),
         )
     }
+}
+
+fn evaluate_regexp_literal(ctx: &RuleContext<UseRegexpExec>, expr: &AnyJsExpression) -> bool {
+    let value_type = ctx.type_of_expression(expr);
+
+    value_type
+        .resolved_data()
+        .map(ResolvedTypeData::as_raw_data)
+        .is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::RegExp(literal) => !literal.flags.contains('g'),
+                _ => false,
+            },
+            _ => false,
+        })
+}
+
+fn evaluate_new_expression(ctx: &RuleContext<UseRegexpExec>, expr: &AnyJsExpression) -> bool {
+    expr.as_js_new_expression().is_some_and(|expr| {
+        expr.callee()
+            .is_ok_and(|callee| callee.to_trimmed_text() == "RegExp")
+            && expr.arguments().is_some_and(|args| {
+                let args = args.args();
+                if args.len() > 1 {
+                    args.iter().nth(1).is_some_and(|arg| {
+                        arg.is_ok_and(|arg| !arg.to_trimmed_text().contains('g'))
+                    })
+                } else {
+                    args.iter().next().is_some_and(|arg| {
+                        arg.is_ok_and(|arg| {
+                            arg.as_any_js_expression()
+                                .is_some_and(|expr| evaluate_regexp_literal(ctx, expr))
+                        })
+                    })
+                }
+            })
+    })
 }
