@@ -665,6 +665,10 @@ impl JsModuleInfoCollector {
         TypeReference::unknown()
     }
 
+    fn get_binding_by_range(&self, range: TextRange) -> Option<&JsBindingData> {
+        self.bindings.iter().find(|binding| binding.range == range)
+    }
+
     /// Widen the type of binding from its writable references.
     fn widen_binding_from_writable_references(
         &mut self,
@@ -678,6 +682,15 @@ impl JsModuleInfoCollector {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
+            let Some(reference_binding) = self.get_binding_by_range(node.text_trimmed_range())
+            else {
+                continue;
+            };
+
+            // We don't want to widen types inside the same scope
+            if binding.scope_id == reference_binding.scope_id {
+                continue;
+            }
             for ancestor in node.ancestors().skip(1) {
                 if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
                     && let Ok(right) = assignment.right()
