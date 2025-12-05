@@ -162,3 +162,11 @@ declare function f9(x: number): void;
 // Merges "this" params.
 declare function f10(this: string): void;
 declare function f10(this: number): void;
+
+// TODO: Should we check spreading fixed-length tuple types?
+// TypeScript renders these equivalent to the named tuple elements, so we can maybe 
+// handle at least trivial cases
+// export function foo(...vals: [bar: number, foo: string]): string;
+// export function foo(...vals: [bar: string, baz: string]): string;
+// export function foo(bar: boolean): string;
+// export default function foo(bar: any): any { return 1 };
