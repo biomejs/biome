@@ -4,7 +4,7 @@ use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    TransformSourceMap,
+    SourceMapGeneration, TransformSourceMap,
 };
 use biome_rowan::{AstNode, TextSize};
 
@@ -34,6 +34,7 @@ impl FormatOptions for FormatSemanticModelOptions {
             print_width: self.line_width().into(),
             line_ending: self.line_ending(),
             indent_style: self.indent_style(),
+            source_map_generation: SourceMapGeneration::default(),
         }
     }
 }

@@ -15,6 +15,10 @@ pub struct PrinterOptions {
 
     /// Whether the printer should use tabs or spaces to indent code and if spaces, by how many.
     pub indent_style: IndentStyle,
+
+    /// Should the printer generate a source map that allows mapping positions in the source document
+    /// to positions in the formatted document.
+    pub source_map_generation: SourceMapGeneration,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -81,8 +85,18 @@ impl PrinterOptions {
         self
     }
 
+    pub fn with_source_map_generation(mut self, source_map: SourceMapGeneration) -> Self {
+        self.source_map_generation = source_map;
+
+        self
+    }
+
     pub(crate) fn indent_style(&self) -> IndentStyle {
         self.indent_style
+    }
+
+    pub const fn source_map_generation(&self) -> SourceMapGeneration {
+        self.source_map_generation
     }
 
     /// Width of an indent in characters.
@@ -103,6 +117,32 @@ impl Default for PrinterOptions {
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
             line_ending: LineEnding::Lf,
+            source_map_generation: SourceMapGeneration::default(),
         }
+    }
+}
+
+/// Configures whether the printer generates a source map that allows mapping
+/// positions in the source document to positions in the formatted code.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SourceMapGeneration {
+    /// The printer generates no source map.
+    #[default]
+    Disabled,
+
+    /// The printer generates a source map that allows mapping positions in the source document
+    /// to positions in the formatted document. The ability to map positions is useful for range formatting
+    /// or when trying to identify where to move the cursor so that it matches its position in the source document.
+    Enabled,
+}
+
+impl SourceMapGeneration {
+    pub const fn is_enabled(self) -> bool {
+        matches!(self, Self::Enabled)
+    }
+
+    pub const fn is_disabled(self) -> bool {
+        matches!(self, Self::Disabled)
     }
 }
