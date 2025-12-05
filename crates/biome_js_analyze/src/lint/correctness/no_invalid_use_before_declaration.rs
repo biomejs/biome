@@ -169,7 +169,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                         // type Y = typeof X;
                         // const X = 0;
                         // ```
-                        && !AnyJsIdentifierUsage::cast_ref(reference_syntax)
+                        && !AnyJsIdentifierUsage::cast_ref(&reference_syntax)
                             .is_some_and(|usage| usage.is_only_type())
                     {
                         result.push(InvalidUseBeforeDeclaration {

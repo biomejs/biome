@@ -183,7 +183,7 @@ impl Rule for NoMisplacedAssertion {
             let is_exception = is_exception_for_expect(node)?;
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
-                let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
+                let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
                 let import = ident.syntax().ancestors().find_map(JsImport::cast)?;
                 let source_text = import.source_text().ok()?;
                 if (ASSERTION_FUNCTION_NAMES.contains(&call_text.text()))

@@ -1,4 +1,4 @@
-use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
+use crate::services::semantic::{SemanticModelVisitor, SemanticServices};
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
@@ -225,6 +225,7 @@ impl FromServices for JsDocTypeServices {
         let jsdoc_types: &JsDocTypeModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
+
         Ok(Self {
             jsdoc_types: jsdoc_types.clone(),
             semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
@@ -250,9 +251,9 @@ impl Queryable for NoUnusedImportsQuery {
 
     fn build_visitor(
         analyzer: &mut impl AddVisitor<Self::Language>,
-        root: &<Self::Language as Language>::Root,
+        _root: &<Self::Language as Language>::Root,
     ) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelVisitor);
         analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }

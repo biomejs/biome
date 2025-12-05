@@ -125,25 +125,6 @@ invalidShorthand.jsx:3:24 lint/correctness/useJsxKeyInIterable ━━━━━�
 ```
 
 ```
-invalidShorthand.jsx:5:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    3 │ [<Hello />, <Hello />, <Hello />];
-    4 │ 
-  > 5 │ [...[<Hello />, <Hello />], <Hello />];
-      │                             ^^^^^^^^^
-    6 │ 
-    7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalidShorthand.jsx:5:6 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -171,6 +152,25 @@ invalidShorthand.jsx:5:17 lint/correctness/useJsxKeyInIterable ━━━━━�
     4 │ 
   > 5 │ [...[<Hello />, <Hello />], <Hello />];
       │                 ^^^^^^^^^
+    6 │ 
+    7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalidShorthand.jsx:5:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    3 │ [<Hello />, <Hello />, <Hello />];
+    4 │ 
+  > 5 │ [...[<Hello />, <Hello />], <Hello />];
+      │                             ^^^^^^^^^
     6 │ 
     7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
   
@@ -485,42 +485,6 @@ invalidShorthand.jsx:27:43 lint/correctness/useJsxKeyInIterable ━━━━━�
 ```
 
 ```
-invalidShorthand.jsx:44:26 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    43 │ [].map((item) => {
-  > 44 │ 	return item.condition ? <div /> : <div>foo</div>;
-       │ 	                        ^^^^^^^
-    45 │ });
-    46 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalidShorthand.jsx:44:36 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    43 │ [].map((item) => {
-  > 44 │ 	return item.condition ? <div /> : <div>foo</div>;
-       │ 	                                  ^^^^^
-    45 │ });
-    46 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalidShorthand.jsx:29:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -683,6 +647,42 @@ invalidShorthand.jsx:41:30 lint/correctness/useJsxKeyInIterable ━━━━━�
        │                              ^^^^
     42 │ 
     43 │ [].map((item) => {
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalidShorthand.jsx:44:26 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    43 │ [].map((item) => {
+  > 44 │ 	return item.condition ? <div /> : <div>foo</div>;
+       │ 	                        ^^^^^^^
+    45 │ });
+    46 │ 
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalidShorthand.jsx:44:36 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    43 │ [].map((item) => {
+  > 44 │ 	return item.condition ? <div /> : <div>foo</div>;
+       │ 	                                  ^^^^^
+    45 │ });
+    46 │ 
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   

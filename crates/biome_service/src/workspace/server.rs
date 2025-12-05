@@ -1,4 +1,6 @@
-use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
+use super::{document::Document, *};
+use crate::Watcher;
+use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
@@ -15,7 +17,7 @@ use crate::workspace::document::services::embedded_bindings::{
 };
 use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use crate::workspace::document::*;
-use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
+use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumentServices};
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
@@ -67,6 +69,7 @@ use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use std::panic::RefUnwindSafe;
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -434,16 +437,19 @@ impl WorkspaceServer {
             } = parsed;
 
             let mut services = DocumentServices::none();
-            if let Some(language) = language {
-                file_source_index = self.insert_source(language);
-
-                if language.is_css_like()
-                    && (settings.is_linter_enabled() || settings.is_assist_enabled())
-                {
+            if settings.is_linter_enabled() || settings.is_assist_enabled() {
+                if source.is_css_like() {
                     services = CssDocumentServices::default()
                         .with_css_semantic_model(&any_parse.tree())
                         .into();
+                } else if source.is_javascript_like() {
+                    services = JsDocumentServices::default()
+                        .with_js_semantic_model(&any_parse.tree())
+                        .into();
                 }
+            }
+            if let Some(language) = language {
+                file_source_index = self.insert_source(language);
             }
 
             if persist_node_cache {
@@ -1583,6 +1589,20 @@ impl Workspace for WorkspaceServer {
             vec![]
         };
 
+        let mut services = DocumentServices::none();
+        let root = parsed.any_parse;
+        if settings.is_linter_enabled() || settings.is_assist_enabled() {
+            if document_source.is_css_like() {
+                services = CssDocumentServices::default()
+                    .with_css_semantic_model(&root.tree())
+                    .into();
+            } else if document_source.is_javascript_like() {
+                services = JsDocumentServices::default()
+                    .with_js_semantic_model(&root.tree())
+                    .into();
+            }
+        }
+
         if document_source.is_css_like()
             && (settings.is_linter_enabled() || settings.is_assist_enabled())
         {
@@ -1629,7 +1649,7 @@ impl Workspace for WorkspaceServer {
             content,
             version: Some(version),
             file_source_index: index,
-            syntax: Some(Ok(parsed.any_parse)),
+            syntax: Some(Ok(root.clone())),
             embedded_snippets,
             services: services.clone(),
         };

@@ -1,5 +1,5 @@
 use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
-use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
+use crate::services::semantic::{SemanticModelVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
@@ -408,6 +408,7 @@ impl FromServices for FunctionCallServices {
         let early_returns: &EarlyReturnsModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
+
         Ok(Self {
             early_returns: early_returns.clone(),
             semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
@@ -438,9 +439,9 @@ impl Queryable for FunctionCall {
 
     fn build_visitor(
         analyzer: &mut impl AddVisitor<Self::Language>,
-        root: &<Self::Language as Language>::Root,
+        _root: &<Self::Language as Language>::Root,
     ) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelVisitor);
         analyzer.add_visitor(Phases::Syntax, EarlyReturnDetectionVisitor::default);
         analyzer.add_visitor(Phases::Semantic, FunctionCallVisitor::default);
     }
