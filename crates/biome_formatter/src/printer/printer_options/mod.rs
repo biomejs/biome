@@ -139,10 +139,10 @@ pub enum SourceMapGeneration {
 
 impl SourceMapGeneration {
     pub const fn is_enabled(self) -> bool {
-        matches!(self, SourceMapGeneration::Enabled)
+        matches!(self, Self::Enabled)
     }
 
     pub const fn is_disabled(self) -> bool {
-        matches!(self, SourceMapGeneration::Disabled)
+        matches!(self, Self::Disabled)
     }
 }
