@@ -293,7 +293,7 @@ impl FormatElements for FormatElement {
 /// The different variants for this element.
 ///
 /// The first element is the one that takes up the most space horizontally (the most flat),
-/// The last element takes up the least space horizontally (but most horizontal space).
+/// The last element takes up the least horizontal (most vertical).
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct BestFittingVariants(Box<[FormatElement]>);
 

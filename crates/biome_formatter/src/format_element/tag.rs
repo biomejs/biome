@@ -74,7 +74,7 @@ pub enum Tag {
     StartEmbedded(TextRange),
     EndEmbedded,
 
-    /// Entry inside of a [FormatElement::BestFitting]
+    /// Entry inside of a [crate::FormatElement::BestFitting]
     StartBestFittingEntry,
     EndBestFittingEntry,
 }
