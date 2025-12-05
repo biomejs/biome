@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid = () => {
+	return <a>a disallowed word</a>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const Invalid = () => {
+  > 3 │ 	return <a>a disallowed word</a>;
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
