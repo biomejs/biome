@@ -116,8 +116,8 @@ impl Document {
                         // propagate their expansion.
                         false
                     }
-                    FormatElement::Text { text, .. } => text.contains('\n'),
-                    FormatElement::LocatedTokenText { slice, .. } => slice.contains('\n'),
+                    FormatElement::Text { text_width, .. } => text_width.is_multiline(),
+                    FormatElement::LocatedTokenText { text_width, .. } => text_width.is_multiline(),
                     FormatElement::ExpandParent
                     | FormatElement::Line(LineMode::Hard | LineMode::Empty) => true,
                     FormatElement::Token { .. } => false,
@@ -314,21 +314,25 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 FormatElement::Text {
                                     text,
                                     source_position,
+                                    text_width,
                                 } => {
                                     let text = text.to_string().replace('"', "\\\"");
                                     FormatElement::Text {
                                         text: text.into(),
                                         source_position: *source_position,
+                                        text_width: *text_width,
                                     }
                                 }
                                 FormatElement::LocatedTokenText {
                                     slice,
                                     source_position,
+                                    text_width,
                                 } => {
                                     let text = slice.to_string().replace('"', "\\\"");
                                     FormatElement::Text {
                                         text: text.into(),
                                         source_position: *source_position,
+                                        text_width: *text_width,
                                     }
                                 }
                                 _ => unreachable!(),
@@ -795,7 +799,7 @@ mod tests {
 
     use crate::SimpleFormatContext;
     use crate::prelude::*;
-    use crate::{format, format_args, write};
+    use crate::{IndentWidth, format, format_args, write};
 
     #[test]
     fn display_elements() {
@@ -927,12 +931,14 @@ mod tests {
         let token_text = FormatElement::LocatedTokenText {
             source_position: TextSize::default(),
             slice: token.token_text(),
+            text_width: TextWidth::from_text(&token.token_text(), IndentWidth::default()),
         };
 
         let mut document = Document::from(vec![
             FormatElement::Text {
                 text: "\"foo\"".into(),
                 source_position: TextSize::default(),
+                text_width: TextWidth::from_text("\"foo\"", IndentWidth::default()),
             },
             token_text,
         ]);

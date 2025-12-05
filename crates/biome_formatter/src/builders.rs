@@ -1,7 +1,10 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{Argument, Arguments, GroupId, TextRange, TextSize, format_element, write};
+use crate::{
+    Argument, Arguments, FormatContext, FormatOptions, GroupId, TextRange, TextSize,
+    format_element, write,
+};
 use crate::{Buffer, VecBuffer};
 use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
@@ -288,11 +291,15 @@ pub struct Text<'a> {
     position: TextSize,
 }
 
-impl<Context> Format<Context> for Text<'_> {
+impl<Context> Format<Context> for Text<'_>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Text {
             text: self.text.to_string().into_boxed_str(),
             source_position: self.position,
+            text_width: TextWidth::from_text(self.text, f.options().indent_width()),
         })
     }
 }
@@ -321,7 +328,10 @@ pub struct SyntaxTokenCowSlice<'a, L: Language> {
     start: TextSize,
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         match &self.text {
             Cow::Borrowed(text) => {
@@ -338,11 +348,13 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 f.write_element(FormatElement::LocatedTokenText {
                     slice,
                     source_position: self.start,
+                    text_width: TextWidth::from_text(text, f.options().indent_width()),
                 })
             }
             Cow::Owned(text) => f.write_element(FormatElement::Text {
                 text: text.clone().into_boxed_str(),
                 source_position: self.start,
+                text_width: TextWidth::from_text(text, f.options().indent_width()),
             }),
         }
     }
@@ -375,11 +387,15 @@ pub struct LocatedTokenText {
     source_position: TextSize,
 }
 
-impl<Context> Format<Context> for LocatedTokenText {
+impl<Context> Format<Context> for LocatedTokenText
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::LocatedTokenText {
             slice: self.text.clone(),
             source_position: self.source_position,
+            text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
         })
     }
 }

@@ -72,7 +72,7 @@ pub use buffer::{
     VecBuffer,
 };
 pub use builders::BestFitting;
-pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
+pub use format_element::{FormatElement, LINE_TERMINATORS, TextWidth, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
@@ -2057,7 +2057,10 @@ pub fn format_sub_tree<L: FormatLanguage>(
     ))
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTriviaPiece<L> {
+impl<L: Language, Context> Format<Context> for SyntaxTriviaPiece<L>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let range = self.text_range();
 
