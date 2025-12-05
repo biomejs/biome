@@ -555,7 +555,8 @@ impl ConfigurationExt for Configuration {
         let mut deserialized_configurations = vec![];
         if let Some(extends) = extends.as_list() {
             for extend_entry in extends.iter() {
-                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref()) {
+                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref())
+                {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
                     const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
