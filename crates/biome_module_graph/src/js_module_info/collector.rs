@@ -12,7 +12,7 @@ use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
     MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
     TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
@@ -665,8 +665,20 @@ impl JsModuleInfoCollector {
         TypeReference::unknown()
     }
 
-    fn get_binding_by_range(&self, range: TextRange) -> Option<&JsBindingData> {
-        self.bindings.iter().find(|binding| binding.range == range)
+    fn get_scope_by_range(&self, range: TextRange) -> Option<&ScopeId> {
+        let start: u32 = range.start().into();
+        let end: u32 = range.end().into();
+
+        // Search through all scope intervals to find the one that contains this range
+        self.scope_range_by_start
+            .values()
+            .flat_map(|intervals| intervals.iter())
+            .filter(|interval| {
+                // The interval must fully contain the range
+                interval.start <= start && end <= interval.stop
+            })
+            .max_by_key(|interval| interval.val)
+            .map(|interval| &interval.val)
     }
 
     /// Widen the type of binding from its writable references.
@@ -678,34 +690,33 @@ impl JsModuleInfoCollector {
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
         let mut ty = ty.clone();
+        let mut union_collector = UnionCollector::new();
         for reference in references {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
-            let Some(reference_binding) = self.get_binding_by_range(node.text_trimmed_range())
-            else {
+            let Some(reference_scope) = self.get_scope_by_range(node.text_trimmed_range()) else {
                 continue;
             };
 
             // We don't want to widen types inside the same scope
-            if binding.scope_id == reference_binding.scope_id {
+            if binding.scope_id == *reference_scope {
                 continue;
             }
-            for ancestor in node.ancestors().skip(1) {
-                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
-                    && let Ok(right) = assignment.right()
-                {
-                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
-                    let assigned_type = self.reference_to_owned_data(data);
-                    ty = ResolvedTypeId::new(
-                        self.level(),
-                        self.union_with(ty.clone(), assigned_type),
-                    )
-                    .into();
-                }
+            let assignment = node
+                .ancestors()
+                .skip(1)
+                .find_map(|ancestor| JsAssignmentExpression::cast_ref(&ancestor))
+                .and_then(|assignment| assignment.right().ok());
+            if let Some(right) = assignment {
+                let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                let assigned_type = self.reference_to_owned_data(data);
+                union_collector.add(assigned_type);
             }
         }
 
+        let id = self.register_type(union_collector.finish());
+        ty = ResolvedTypeId::new(self.level(), id).into();
         ty
     }
 
