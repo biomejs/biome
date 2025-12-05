@@ -1006,7 +1006,6 @@ impl Workspace for WorkspaceServer {
         let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
         let is_root = configuration.is_root();
-        let extends_root = configuration.extends_root();
         let mut settings = if !is_root {
             if !self.projects.is_project_registered(project_key) {
                 return Err(WorkspaceError::no_project());
@@ -1034,14 +1033,8 @@ impl Workspace for WorkspaceServer {
                 .collect(),
         )?;
 
-        let loading_directory = if extends_root {
-            self.projects.get_project_path(project_key)
-        } else {
-            workspace_directory.clone()
-        };
-
         let plugin_diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
+            &workspace_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
 
