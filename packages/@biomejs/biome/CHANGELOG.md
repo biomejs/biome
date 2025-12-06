@@ -1,5 +1,162 @@
 # @biomejs/biome
 
+## 2.3.9
+
+### Patch Changes
+
+- [#8341](https://github.com/biomejs/biome/pull/8341) [`343dc4d`](https://github.com/biomejs/biome/commit/343dc4dfd48a048f0c833af318b6a10dfc4dab6d) Thanks [@arendjr](https://github.com/arendjr)! - Added the nursery rule [`useAwaitThenable`](https://biomejs.dev/linter/rules/use-await-thenable/), which enforces that `await` is only used on Promise values.
+
+  #### Invalid
+
+  ```js
+  await "value";
+
+  const createValue = () => "value";
+  await createValue();
+  ```
+
+  #### Caution
+
+  This is a first iteration of the rule, and does not yet detect generic ["thenable"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables) values.
+
+- [#8034](https://github.com/biomejs/biome/pull/8034) [`e7e0f6c`](https://github.com/biomejs/biome/commit/e7e0f6c14df92d83d08f86b1e57fc82b4df775b7) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useRegexpExec`](https://biomejs.dev/linter/rules/use-regexp-exec/). Enforce `RegExp#exec` over `String#match` if no global flag is provided.
+
+- [#8137](https://github.com/biomejs/biome/pull/8137) [`d407efb`](https://github.com/biomejs/biome/commit/d407efb8c650b9288f545efedd4b7d3f9783c8d1) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Reduced the internal memory used by the Biome formatter.
+
+- [#8281](https://github.com/biomejs/biome/pull/8281) [`30b046f`](https://github.com/biomejs/biome/commit/30b046faca464404aaeecfe1ed0e8a94b0e25990) Thanks [@tylersayshi](https://github.com/tylersayshi)! - Added the rule [`useRequiredScripts`](https://biomejs.dev/linter/rules/use-required-scripts/), which enforces presence of configurable entries in the `scripts` section of `package.json` files.
+
+- [#8290](https://github.com/biomejs/biome/pull/8290) [`d74c8bd`](https://github.com/biomejs/biome/commit/d74c8bda655a17405809d24126ee09e9e200d51e) Thanks [@dyc3](https://github.com/dyc3)! - The HTML formatter has been updated to match Prettier 3.7's behavior for handling `<iframe>`'s `allow` attribute.
+
+  ```diff
+  - <iframe allow="layout-animations 'none'; unoptimized-images 'none'; oversized-images 'none'; sync-script 'none'; sync-xhr 'none'; unsized-media 'none';"></iframe>
+  + <iframe
+  + 	allow="
+  + 		layout-animations 'none';
+  + 		unoptimized-images 'none';
+  + 		oversized-images 'none';
+  + 		sync-script 'none';
+  + 		sync-xhr 'none';
+  + 		unsized-media 'none';
+  + 	"
+  + ></iframe>
+  ```
+
+- [#8302](https://github.com/biomejs/biome/pull/8302) [`d1d5014`](https://github.com/biomejs/biome/commit/d1d50140f23c9c3ce4f48d9d2b97822234aad798) Thanks [@mlafeldt](https://github.com/mlafeldt)! - Fixed [#8109](https://github.com/biomejs/biome/issues/8109): return statements in Astro frontmatter no longer trigger "Illegal return statement" errors when using `experimentalFullSupportEnabled`.
+
+- [#8346](https://github.com/biomejs/biome/pull/8346) [`f3aee1a`](https://github.com/biomejs/biome/commit/f3aee1a92fba7c61de4b6f5ada3063fb126db885) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#8292](https://github.com/biomejs/biome/issues/8292): Implement tracking
+  of types of TypeScript constructor parameter properties.
+
+  This resolves certain false negatives in `noFloatingPromises` and other typed
+  rules.
+
+  #### Example
+
+  ```ts
+  class AsyncClass {
+    async returnsPromise() {
+      return "value";
+    }
+  }
+
+  class ShouldBeReported {
+    constructor(public field: AsyncClass) {}
+    //          ^^^^^^^^^^^^----------------- Parameter property declaration
+
+    async shouldBeReported() {
+      // `noFloatingPromises` will now report the following usage:
+      this.field.returnsPromise();
+    }
+  }
+  ```
+
+- [#8326](https://github.com/biomejs/biome/pull/8326) [`153e3c6`](https://github.com/biomejs/biome/commit/153e3c6ba999481c8dff2531bcbbd62f4977cd19) Thanks [@ematipico](https://github.com/ematipico)! - Improved the rule `noBiomeFirstException`. The rule can now inspect if extended configurations already contain the catch-all `**` inside `files.includes` and, if so, the rule suggests removing `**` from the user configuration.
+
+- [#8296](https://github.com/biomejs/biome/pull/8296) [`9d3ef10`](https://github.com/biomejs/biome/commit/9d3ef10d007e637c43b2f5e97758767da5f03d32) Thanks [@dyc3](https://github.com/dyc3)! - `biome rage` now shows if you have experimental HTML full support enabled.
+
+- [#8281](https://github.com/biomejs/biome/pull/8281) [`30b046f`](https://github.com/biomejs/biome/commit/30b046faca464404aaeecfe1ed0e8a94b0e25990) Thanks [@tylersayshi](https://github.com/tylersayshi)! - Fixed [`noDuplicateDependencies`](https://biomejs.dev/linter/rules/no-duplicate-dependencies/) incorrectly triggering on files like `_package.json`.
+
+- [#8315](https://github.com/biomejs/biome/pull/8315) [`c7915c4`](https://github.com/biomejs/biome/commit/c7915c445fbe00d94713e4a285df3e0becde64a7) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#5213](https://github.com/biomejs/biome/issues/5213): The [`noDoneCallback`](https://biomejs.dev/linter/rules/no-done-callback/) rule no longer flags false positives when a method is called on a regular variable bound to identifiers such as `before`, `after`, `beforeEach`, and `afterEach`.
+
+- [#8297](https://github.com/biomejs/biome/pull/8297) [`efa694c`](https://github.com/biomejs/biome/commit/efa694c019cbdbac5328b76bb70c464ad9befbf8) Thanks [@Yonom](https://github.com/Yonom)! - Added support for negative value utilities in [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/). Negative value utilities such as `-ml-2` or `-top-4` are now recognized and sorted correctly alongside their positive counterparts.
+
+  ```jsx
+  // Now detected as unsorted:
+  <div class="-ml-2 p-4 -mt-1" />
+  // Suggested fix:
+  <div class="-mt-1 -ml-2 p-4" />
+  ```
+
+- [#8335](https://github.com/biomejs/biome/pull/8335) [`3710702`](https://github.com/biomejs/biome/commit/3710702c3c489f57f82c24311023e1ffad53172a) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Added the new nursery rule [`useDestructuring`](https://biomejs.dev/linter/rules/use-destructuring). This rule helps to encourage destructuring from arrays and objects.
+
+  For example, the following code triggers because the variable name `x` matches the property `foo.x`, making it ideal for object destructuring syntax.
+
+  ```js
+  var x = foo.x;
+  ```
+
+- [#8365](https://github.com/biomejs/biome/pull/8365) [`8f36051`](https://github.com/biomejs/biome/commit/8f36051bc30978b2900329a18176de423db25cfe) Thanks [@JacquesLeupin](https://github.com/JacquesLeupin)! - Fixed [#8360](https://github.com/biomejs/biome/issues/8360): GritQL plugins defined in child configurations with `extends: "//"` now work correctly.
+
+- [#8306](https://github.com/biomejs/biome/pull/8306) [`8de2774`](https://github.com/biomejs/biome/commit/8de2774fb507a10e32ecf920bb5d0f801a9e869c) Thanks [@dibashthapa](https://github.com/dibashthapa)! - Fixed [#8288](https://github.com/biomejs/biome/issues/8288): Fixed the issue with false positive errors
+
+  This new change will ignore attribute and only show diagnostics for JSX Expressions
+
+  For example
+
+  Valid:
+
+  ```jsx
+  <Something checked={isOpen && items.length} />
+  ```
+
+  Invalid:
+
+  ```jsx
+  const Component = () => {
+    return isOpen && items.length;
+  };
+  ```
+
+- [#8356](https://github.com/biomejs/biome/pull/8356) [`f9673fc`](https://github.com/biomejs/biome/commit/f9673fc0816908cd686eab7a48d4e8be3f51c7c7) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7917](https://github.com/biomejs/biome/issues/7917), where Biome removed the styles contained in a `<style lang="scss">`, when `experimentalFullSupportEnabled` is enabled.
+
+- [#8249](https://github.com/biomejs/biome/pull/8249) [`893e36c`](https://github.com/biomejs/biome/commit/893e36c7c39d210ccedfe040bb414945262b5d92) Thanks [@cormacrelf](https://github.com/cormacrelf)! - Addressed [#7538](https://github.com/biomejs/biome/issues/7538). Reduced the
+  volume of logging from the LSP server.
+
+  Use `biome clean` to remove large logs.
+
+- [#8303](https://github.com/biomejs/biome/pull/8303) [`db2c65b`](https://github.com/biomejs/biome/commit/db2c65b7eaf057eda12434e98acf5430fe77b165) Thanks [@hirokiokada77](https://github.com/hirokiokada77)! - Fixed [#8300](https://github.com/biomejs/biome/issues/8300): [`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) now detects JSDoc tags on object properties.
+
+  ```js
+  import type LinkOnObjectProperty from "mod";
+
+  const testLinkOnObjectProperty = {
+  	/**
+  	 * {@link LinkOnObjectProperty}
+  	 */
+  	property: 0,
+  };
+  ```
+
+- [#8328](https://github.com/biomejs/biome/pull/8328) [`9cf2332`](https://github.com/biomejs/biome/commit/9cf233275d1369bcce191146660ea92b26d6f211) Thanks [@Netail](https://github.com/Netail)! - Corrected rule source reference. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#8284](https://github.com/biomejs/biome/pull/8284) [`4976d1b`](https://github.com/biomejs/biome/commit/4976d1bebf81f874a0378f904e03c38fdb397702) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Improved the performance of the Biome Formatter by enabling the internal source maps only when needed.
+
+- [#8260](https://github.com/biomejs/biome/pull/8260) [`a226b28`](https://github.com/biomejs/biome/commit/a226b2862daa6e8d130bf3bfd88f6693412607e6) Thanks [@ho991217](https://github.com/ho991217)! - Fixed [biome-vscode#817](https://github.com/biomejs/biome-vscode/issues/817): Biome now updates documents when the `textDocument/didSave` notification is received.
+
+- [#7513](https://github.com/biomejs/biome/pull/7513) [`e039f3b`](https://github.com/biomejs/biome/commit/e039f3b17cdf4e4b7c2ae9b0b0c58a9800b5703c) Thanks [@AsherDe](https://github.com/AsherDe)! - Added the nursery rule [`noVueSetupPropsReactivityLoss`](https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss/).
+
+  This new rule disallows usages that cause the reactivity of `props` passed to the `setup` function to be lost.
+
+  Invalid code example:
+
+  ```jsx
+  export default {
+    setup({ count }) {
+      // `count` is no longer reactive here.
+      return () => h("div", count);
+    },
+  };
+  ```
+
 ## 2.3.8
 
 ### Patch Changes
@@ -3191,7 +3348,7 @@
   `import defer`(which is a [stage3 proposal](https://github.com/tc39/proposal-defer-import-eval)). The syntax look like this:
 
   ```ts
-  import defer * as foo from "<specifier>";
+  import * as foo from "<specifier>";
   ```
 
 - [#6938](https://github.com/biomejs/biome/pull/6938) [`5feb5a6`](https://github.com/biomejs/biome/commit/5feb5a675adb246b04b1540cba16ff1c5fd49cb1) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#6919](https://github.com/biomejs/biome/issues/6919) and [#6920](https://github.com/biomejs/biome/issues/6920):
