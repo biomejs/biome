@@ -1,0 +1,97 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<Foo @ click="handleClick" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                VueBogusDirective {
+                    items: [
+                        AT@5..7 "@" [] [Whitespace(" ")],
+                    ],
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..12 "click" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@12..13 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@13..27 "\"handleClick\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@27..28 "/" [] [],
+            r_angle_token: R_ANGLE@28..29 ">" [] [],
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..30
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..29
+    0: HTML_SELF_CLOSING_ELEMENT@0..29
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..5
+        0: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@5..27
+        0: VUE_BOGUS_DIRECTIVE@5..7
+          0: AT@5..7 "@" [] [Whitespace(" ")]
+        1: HTML_ATTRIBUTE@7..27
+          0: HTML_ATTRIBUTE_NAME@7..12
+            0: HTML_LITERAL@7..12 "click" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@12..27
+            0: EQ@12..13 "=" [] []
+            1: HTML_STRING@13..27
+              0: HTML_STRING_LITERAL@13..27 "\"handleClick\"" [] [Whitespace(" ")]
+      3: SLASH@27..28 "/" [] []
+      4: R_ANGLE@28..29 ">" [] []
+  4: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid-v-on-shorthand.vue:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a vue directive argument but instead found ' '.
+  
+  > 1 │ <Foo @ click="handleClick" />
+      │       ^
+    2 │ 
+  
+  i Expected a vue directive argument here.
+  
+  > 1 │ <Foo @ click="handleClick" />
+      │       ^
+    2 │ 
+  
+```
