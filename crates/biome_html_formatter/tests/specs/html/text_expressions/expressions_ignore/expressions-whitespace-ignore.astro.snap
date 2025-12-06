@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: text_expressions/expressions_ignore/expressions-whitespace-ignore.astro
+---
+# Input
+
+```astro
+<p>{name} ({username})</p>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+<p>{name}({username})</p>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"name" => 4..8
+"username" => 11..19
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: ignore
+Indent script and style: false
+Self close void elements: never
+-----
+
+```astro
+<p>{name}({username})</p>
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"name" => 4..8
+"username" => 11..19
