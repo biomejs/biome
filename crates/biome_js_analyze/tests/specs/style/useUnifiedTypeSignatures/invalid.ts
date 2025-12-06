@@ -163,10 +163,13 @@ declare function f9(x: number): void;
 declare function f10(this: string): void;
 declare function f10(this: number): void;
 
-// TODO: Should we check spreading fixed-length tuple types?
-// TypeScript renders these equivalent to the named tuple elements, so we can maybe 
-// handle at least trivial cases
-// export function foo(...vals: [bar: number, foo: string]): string;
-// export function foo(...vals: [bar: string, baz: string]): string;
-// export function foo(bar: boolean): string;
-// export default function foo(bar: any): any { return 1 };
+function tuple([a, b]: [string, string]): void;
+function tuple([c, d]: [number, string]): void;
+
+function f({ a, b }: Record<string, string>): void;
+function f({ c, d }: Record<string, number>): void;
+function f(foo: Record<string, any>): void {}
+
+// Merges latter 2 type parameters into 1
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;

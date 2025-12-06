@@ -36,7 +36,7 @@ class banana {
 /** jsdoc 2 */
 /** jsdoc 3 */
 declare function f10(this: string): void;
-/** jsdoc 1 */
+/** not jsdoc 1 */
 /** jsdoc 2 */
-/** not jsdoc 3 */
+/** jsdoc 3 */
 declare function f10(this: number): void;
