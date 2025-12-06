@@ -30,6 +30,8 @@ use similar::{DiffableStr, TextDiff};
 mod bench_case;
 
 pub use bench_case::BenchCase;
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssRoot;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 
@@ -202,7 +204,7 @@ pub fn module_graph_for_test_file(
     let fs = OsFileSystem::new(dir);
     let paths = get_added_paths(&fs, &paths);
 
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths);
 
     Arc::new(module_graph)
 }
@@ -225,6 +227,28 @@ pub fn get_added_paths<'a>(
                     "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
                 parsed.try_tree()
+            })?;
+            Some((path, root))
+        })
+        .collect()
+}
+
+/// Loads and parses files from the file system to pass them to service methods.
+pub fn get_css_added_paths<'a>(
+    fs: &dyn FileSystem,
+    paths: &'a [BiomePath],
+) -> Vec<(&'a BiomePath, CssRoot)> {
+    paths
+        .iter()
+        .filter_map(|path| {
+            let root = fs.read_file_from_path(path).ok().map(|content| {
+                let parsed = biome_css_parser::parse_css(&content, CssParserOptions::default());
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                );
+                parsed.tree()
             })?;
             Some((path, root))
         })

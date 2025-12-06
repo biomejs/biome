@@ -125,7 +125,7 @@ fn get_deprecated_imports_from_module_source(
     target_path: &Utf8Path,
     module_graph: &ModuleGraph,
 ) -> Vec<NoDeprecatedImportsState> {
-    let Some(module_info) = module_graph.module_info_for_path(target_path) else {
+    let Some(module_info) = module_graph.js_module_info_for_path(target_path) else {
         return Vec::new();
     };
 

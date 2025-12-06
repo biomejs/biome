@@ -63,7 +63,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
-use biome_module_graph::SerializedJsModuleInfo;
+use biome_module_graph::SerializedModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
@@ -1350,7 +1350,7 @@ impl From<BiomePath> for FileExitsParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetModuleGraphResult {
-    pub data: FxHashMap<String, SerializedJsModuleInfo>,
+    pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
