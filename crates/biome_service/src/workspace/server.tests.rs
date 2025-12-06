@@ -523,13 +523,15 @@ const Bar = styled(Component)`
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
     let result = workspace
         .format_file(FormatFileParams {
-            path: Utf8PathBuf::from(FILE_PATH).into(),
             project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
         })
         .unwrap();
 
