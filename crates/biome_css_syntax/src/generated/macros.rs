@@ -329,10 +329,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssImportSupports::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_INLINE_ROOT => {
-                    let $pattern = unsafe { $crate::CssInlineRoot::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_AT_RULE => {
                     let $pattern = unsafe { $crate::CssKeyframesAtRule::new_unchecked(node) };
                     $body
@@ -712,6 +708,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SCOPE_RANGE_START => {
                     let $pattern = unsafe { $crate::CssScopeRangeStart::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SNIPPET_ROOT => {
+                    let $pattern = unsafe { $crate::CssSnippetRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE => {

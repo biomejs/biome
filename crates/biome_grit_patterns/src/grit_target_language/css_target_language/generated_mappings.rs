@@ -98,7 +98,6 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
         "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),
         "CssImportSupports" => lang::CssImportSupports::KIND_SET.iter().next(),
-        "CssInlineRoot" => lang::CssInlineRoot::KIND_SET.iter().next(),
         "CssKeyframesAtRule" => lang::CssKeyframesAtRule::KIND_SET.iter().next(),
         "CssKeyframesBlock" => lang::CssKeyframesBlock::KIND_SET.iter().next(),
         "CssKeyframesIdentSelector" => lang::CssKeyframesIdentSelector::KIND_SET.iter().next(),
@@ -206,6 +205,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssScopeRangeEnd" => lang::CssScopeRangeEnd::KIND_SET.iter().next(),
         "CssScopeRangeInterval" => lang::CssScopeRangeInterval::KIND_SET.iter().next(),
         "CssScopeRangeStart" => lang::CssScopeRangeStart::KIND_SET.iter().next(),
+        "CssSnippetRoot" => lang::CssSnippetRoot::KIND_SET.iter().next(),
         "CssStartingStyleAtRule" => lang::CssStartingStyleAtRule::KIND_SET.iter().next(),
         "CssStartingStyleAtRuleDeclarator" => lang::CssStartingStyleAtRuleDeclarator::KIND_SET
             .iter()

@@ -8,8 +8,8 @@ impl FormatRule<AnyCssRoot> for FormatAnyCssRoot {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssRoot, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssRoot::CssInlineRoot(node) => node.format().fmt(f),
             AnyCssRoot::CssRoot(node) => node.format().fmt(f),
+            AnyCssRoot::CssSnippetRoot(node) => node.format().fmt(f),
         }
     }
 }

@@ -602,9 +602,7 @@ fn parse_template_expression(
         return None;
     }
 
-    // SAFETY: Checked above that the template expression has exactly one element inside.
-    let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = expr.elements().first().unwrap()
-    else {
+    let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first() else {
         return None;
     };
 
@@ -1153,7 +1151,7 @@ fn format_embedded(
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
                 let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
-                    biome_css_formatter::format_node_with_offset(css_options, &node).unwrap();
+                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
             }
             _ => None,

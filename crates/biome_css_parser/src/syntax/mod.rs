@@ -55,7 +55,7 @@ pub(crate) fn parse_root(p: &mut CssParser) {
         EmbeddingKind::Styled => {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
-            m.complete(p, CSS_INLINE_ROOT);
+            m.complete(p, CSS_SNIPPET_ROOT);
         }
         EmbeddingKind::None => {
             p.eat(UNICODE_BOM);

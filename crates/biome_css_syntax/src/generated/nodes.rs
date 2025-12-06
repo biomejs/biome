@@ -3168,46 +3168,6 @@ pub struct CssImportSupportsFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssInlineRoot {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssInlineRoot {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssInlineRootFields {
-        CssInlineRootFields {
-            items: self.items(),
-            eof_token: self.eof_token(),
-        }
-    }
-    pub fn items(&self) -> CssDeclarationOrRuleList {
-        support::list(&self.syntax, 0usize)
-    }
-    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-}
-impl Serialize for CssInlineRoot {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct CssInlineRootFields {
-    pub items: CssDeclarationOrRuleList,
-    pub eof_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssKeyframesAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6848,6 +6808,46 @@ impl Serialize for CssScopeRangeStart {
 #[derive(Serialize)]
 pub struct CssScopeRangeStartFields {
     pub start: SyntaxResult<CssScopeEdge>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSnippetRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSnippetRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSnippetRootFields {
+        CssSnippetRootFields {
+            items: self.items(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn items(&self) -> CssDeclarationOrRuleList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssSnippetRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSnippetRootFields {
+    pub items: CssDeclarationOrRuleList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssStartingStyleAtRule {
@@ -11209,19 +11209,19 @@ impl AnyCssRelativeSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRoot {
-    CssInlineRoot(CssInlineRoot),
     CssRoot(CssRoot),
+    CssSnippetRoot(CssSnippetRoot),
 }
 impl AnyCssRoot {
-    pub fn as_css_inline_root(&self) -> Option<&CssInlineRoot> {
-        match &self {
-            Self::CssInlineRoot(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_root(&self) -> Option<&CssRoot> {
         match &self {
             Self::CssRoot(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_snippet_root(&self) -> Option<&CssSnippetRoot> {
+        match &self {
+            Self::CssSnippetRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -15743,54 +15743,6 @@ impl From<CssImportSupports> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssInlineRoot {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_INLINE_ROOT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_INLINE_ROOT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssInlineRoot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssInlineRoot")
-                .field("items", &self.items())
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("CssInlineRoot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<CssInlineRoot> for SyntaxNode {
-    fn from(n: CssInlineRoot) -> Self {
-        n.syntax
-    }
-}
-impl From<CssInlineRoot> for SyntaxElement {
-    fn from(n: CssInlineRoot) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssKeyframesAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20236,6 +20188,54 @@ impl From<CssScopeRangeStart> for SyntaxNode {
 }
 impl From<CssScopeRangeStart> for SyntaxElement {
     fn from(n: CssScopeRangeStart) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSnippetRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SNIPPET_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SNIPPET_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSnippetRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSnippetRoot")
+                .field("items", &self.items())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssSnippetRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSnippetRoot> for SyntaxNode {
+    fn from(n: CssSnippetRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSnippetRoot> for SyntaxElement {
+    fn from(n: CssSnippetRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -28950,56 +28950,56 @@ impl From<AnyCssRelativeSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssInlineRoot> for AnyCssRoot {
-    fn from(node: CssInlineRoot) -> Self {
-        Self::CssInlineRoot(node)
-    }
-}
 impl From<CssRoot> for AnyCssRoot {
     fn from(node: CssRoot) -> Self {
         Self::CssRoot(node)
     }
 }
+impl From<CssSnippetRoot> for AnyCssRoot {
+    fn from(node: CssSnippetRoot) -> Self {
+        Self::CssSnippetRoot(node)
+    }
+}
 impl AstNode for AnyCssRoot {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssInlineRoot::KIND_SET.union(CssRoot::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssRoot::KIND_SET.union(CssSnippetRoot::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_INLINE_ROOT | CSS_ROOT)
+        matches!(kind, CSS_ROOT | CSS_SNIPPET_ROOT)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_INLINE_ROOT => Self::CssInlineRoot(CssInlineRoot { syntax }),
             CSS_ROOT => Self::CssRoot(CssRoot { syntax }),
+            CSS_SNIPPET_ROOT => Self::CssSnippetRoot(CssSnippetRoot { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssInlineRoot(it) => &it.syntax,
-            Self::CssRoot(it) => &it.syntax,
+            Self::CssRoot(it) => it.syntax(),
+            Self::CssSnippetRoot(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssInlineRoot(it) => it.syntax,
-            Self::CssRoot(it) => it.syntax,
+            Self::CssRoot(it) => it.into_syntax(),
+            Self::CssSnippetRoot(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssInlineRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRoot(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssRoot> for SyntaxNode {
     fn from(n: AnyCssRoot) -> Self {
         match n {
-            AnyCssRoot::CssInlineRoot(it) => it.into(),
-            AnyCssRoot::CssRoot(it) => it.into(),
+            AnyCssRoot::CssRoot(it) => it.into_syntax(),
+            AnyCssRoot::CssSnippetRoot(it) => it.into_syntax(),
         }
     }
 }
@@ -31945,11 +31945,6 @@ impl std::fmt::Display for CssImportSupports {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssInlineRoot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssKeyframesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -32381,6 +32376,11 @@ impl std::fmt::Display for CssScopeRangeInterval {
     }
 }
 impl std::fmt::Display for CssScopeRangeStart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSnippetRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

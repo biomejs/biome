@@ -1133,15 +1133,6 @@ pub fn css_import_supports(
         ],
     ))
 }
-pub fn css_inline_root(items: CssDeclarationOrRuleList, eof_token: SyntaxToken) -> CssInlineRoot {
-    CssInlineRoot::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_INLINE_ROOT,
-        [
-            Some(SyntaxElement::Node(items.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
-}
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
     name: AnyCssKeyframesName,
@@ -2340,6 +2331,15 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
     CssScopeRangeStart::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SCOPE_RANGE_START,
         [Some(SyntaxElement::Node(start.into_syntax()))],
+    ))
+}
+pub fn css_snippet_root(items: CssDeclarationOrRuleList, eof_token: SyntaxToken) -> CssSnippetRoot {
+    CssSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
     ))
 }
 pub fn css_starting_style_at_rule(

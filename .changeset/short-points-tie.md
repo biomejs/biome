@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added support for formatting embedded CSS in JS snippets.
+Added support for formatting embedded CSS snippets in JavaScript.
 
 For example, the following snippets are now formatted:
 

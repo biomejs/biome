@@ -69,14 +69,14 @@ CssBogusAttrName = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
-	| CssInlineRoot
+	| CssSnippetRoot
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
 	rules: CssRuleList
 	eof: 'EOF'
 
-CssInlineRoot =
+CssSnippetRoot =
 	items: CssDeclarationOrRuleList
 	eof: 'EOF'
 
