@@ -72,7 +72,7 @@ impl JsdocComment {
 
     /// Returns an iterator over the given node's serialized JSDoc comments.
     /// Nodes lacking a first token will return an empty iterator.
-    pub fn get_jsdocs<'a>(node: &'a JsSyntaxNode) -> impl Iterator<Item = String> + use<'a> {
+    pub fn get_jsdocs(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
         node.first_token()
             .into_iter()
             .flat_map(|token| token.leading_trivia().pieces())
@@ -83,7 +83,7 @@ impl JsdocComment {
                         TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
                 )
                 .then(|| text)
-                .filter(|text: &&str| Self::text_is_jsdoc_comment(*text))
+                .filter(|text: &&str| Self::text_is_jsdoc_comment(text))
                 .map(|text| text.to_owned())
             })
     }
@@ -140,6 +140,7 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_js_factory::ident;
 
     #[test]
     fn test_text_is_jsdoc_comment() {
@@ -157,5 +158,8 @@ mod tests {
 
     // TODO: Figure out how to make syntax nodes for unit tests
     #[test]
-    fn test_get_jsdocs() {}
+    fn test_get_jsdocs() {
+        assert!(JsdocComment)
+        
+    }
 }
