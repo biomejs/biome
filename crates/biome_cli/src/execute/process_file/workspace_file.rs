@@ -1,10 +1,10 @@
-use crate::execute::diagnostics::{ResultExt, ResultIoExt};
+use crate::execute::diagnostics::ResultExt;
+use crate::execute::diagnostics::ResultIoExt;
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{Error, category};
 use biome_fs::{BiomePath, File, OpenOptions};
-use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
+use biome_service::workspace::{FileContent, FileExitsParams, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
-
 /// Small wrapper that holds information and operations around the current processed file
 pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
@@ -27,23 +27,28 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             .open_with_options(path.as_path(), open_options)
             .with_file_path(path.to_string())?;
 
-        let mut input = String::new();
-        file.read_to_string(&mut input)
-            .with_file_path(path.to_string())?;
+        let guard = FileGuard::open(ctx.workspace, ctx.project_key, path.clone())
+            .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
 
-        let guard = FileGuard::open(
-            ctx.workspace,
-            OpenFileParams {
+        if ctx.workspace.file_exists(FileExitsParams {
+            file_path: path.clone(),
+        })? {
+            Ok(Self { guard, path, file })
+        } else {
+            let mut input = String::new();
+            file.read_to_string(&mut input)
+                .with_file_path(path.to_string())?;
+
+            ctx.workspace.open_file(OpenFileParams {
                 project_key: ctx.project_key,
                 document_file_source: None,
                 path: path.clone(),
                 content: FileContent::from_client(&input),
                 persist_node_cache: false,
-            },
-        )
-        .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
+            })?;
 
-        Ok(Self { file, guard, path })
+            Ok(Self { guard, path, file })
+        }
     }
 
     pub(crate) fn guard(&self) -> &FileGuard<'app, dyn Workspace + 'ctx> {
