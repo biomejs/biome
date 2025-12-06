@@ -7665,7 +7665,8 @@ export interface JsonFileSource {
 }
 export interface CssFileSource {
 	/**
-	 * Used to mark if the CSS is embedded inside some particular files. This affects the parsing. For example, if inside a styled`` literal, a top-level declaration is allowed.
+	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
+For example, if inside a styled`` literal, a top-level declaration is allowed. 
 	 */
 	embeddingKind: EmbeddingKind2;
 	variant: CssVariant;
