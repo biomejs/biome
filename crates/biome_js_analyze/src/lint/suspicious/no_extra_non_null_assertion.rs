@@ -90,17 +90,10 @@ impl Rule for NoExtraNonNullAssertion {
                     .and_then(AnyJsExpression::cast)?;
 
                 // Cases considered as invalid:
-                // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression
                 // - TsNonNullAssertionExpression > TsNonNullAssertionExpression
                 // - JsCallExpression[optional] > TsNonNullAssertionExpression
                 // - JsStaticMemberExpression[optional] > TsNonNullAssertionExpression
                 let has_extra_non_assertion = match parent {
-                    AnyJsExpression::JsAssignmentExpression(expr) => expr
-                        .left()
-                        .ok()?
-                        .as_any_js_assignment()?
-                        .as_ts_non_null_assertion_assignment()
-                        .is_some(),
                     AnyJsExpression::TsNonNullAssertionExpression(_) => true,
                     AnyJsExpression::JsStaticMemberExpression(expr) => expr.is_optional(),
                     AnyJsExpression::JsCallExpression(expr) => expr.is_optional(),

@@ -19,3 +19,8 @@ function case5(key: string | null) {
 function issue3419(value: string | null): string {
   return (value!);
 }
+
+// https://github.com/biomejs/biome/issues/8314
+let a: number | undefined;
+let b: number | undefined;
+a! += b!;
