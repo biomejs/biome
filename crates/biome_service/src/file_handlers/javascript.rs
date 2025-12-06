@@ -36,6 +36,8 @@ use biome_formatter::{
     IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
+use biome_graphql_parser::parse_graphql_with_offset_and_cache;
+use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
@@ -48,9 +50,10 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsClassDeclaration, JsClassExpression,
-    JsFileSource, JsFunctionDeclaration, JsLanguage, JsSyntaxNode, JsTemplateExpression,
-    JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
+    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
+    JsLanguage, JsSyntaxNode, JsTemplateExpression, JsVariableDeclarator, TextRange, TextSize,
+    TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -573,7 +576,7 @@ fn parse_embedded_nodes(
     let mut nodes = Vec::new();
     let js_root: AnyJsRoot = root.tree();
 
-    // Walk through all HTML elements looking for script tags and style tags
+    // Walk through all JS elements looking for template expressions
     for node in js_root.syntax().descendants() {
         let Some(expr) = JsTemplateExpression::cast_ref(&node) else {
             continue;
@@ -595,8 +598,6 @@ fn parse_template_expression(
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
-    let tag = expr.tag()?;
-
     // TODO: Interpolations are not supported yet.
     if expr.elements().len() != 1 {
         return None;
@@ -606,7 +607,8 @@ fn parse_template_expression(
         return None;
     };
 
-    if is_styled_tag(&tag) {
+    let tag = expr.tag();
+    if is_styled_tag(tag.as_ref()) {
         let file_source = DocumentFileSource::Css(
             CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
         );
@@ -628,20 +630,38 @@ fn parse_template_expression(
         );
 
         Some((snippet, file_source))
+    } else if is_graphql_tag(tag.as_ref(), &expr) {
+        let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
+        let content = chunk.template_chunk_token().ok()?;
+        let parse = parse_graphql_with_offset_and_cache(
+            content.text(),
+            content.text_range().start(),
+            cache,
+        );
+
+        let snippet = EmbeddedSnippet::new(
+            parse.into(),
+            chunk.range(),
+            content.text_range(),
+            content.text_range().start(),
+        );
+
+        Some((snippet, file_source))
     } else {
         None
     }
 }
 
-fn is_styled_tag(tag: &AnyJsExpression) -> bool {
+fn is_styled_tag(tag: Option<&AnyJsExpression>) -> bool {
     // css``
-    if let AnyJsExpression::JsIdentifierExpression(ident) = tag
+    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
         && ident.name().is_ok_and(|name| name.has_name("css"))
     {
         return true;
     }
+
     // styled.div``
-    if let AnyJsExpression::JsStaticMemberExpression(expr) = tag
+    if let Some(AnyJsExpression::JsStaticMemberExpression(expr)) = tag
         && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.object()
         && ident.name().is_ok_and(|name| name.has_name("styled"))
     {
@@ -649,9 +669,30 @@ fn is_styled_tag(tag: &AnyJsExpression) -> bool {
     }
 
     // styled(Component)``
-    if let AnyJsExpression::JsCallExpression(expr) = tag
+    if let Some(AnyJsExpression::JsCallExpression(expr)) = tag
         && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.callee()
         && ident.name().is_ok_and(|name| name.has_name("styled"))
+    {
+        return true;
+    }
+
+    false
+}
+
+fn is_graphql_tag(tag: Option<&AnyJsExpression>, template: &JsTemplateExpression) -> bool {
+    // gql``
+    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
+        && ident.name().is_ok_and(|name| name.has_name("gql"))
+    {
+        return true;
+    }
+
+    // graphql(``)
+    if let Some(list) = template.parent::<JsCallArgumentList>()
+        && let Some(args) = list.parent::<JsCallArguments>()
+        && let Some(call) = args.parent::<JsCallExpression>()
+        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee()
+        && ident.name().is_ok_and(|name| name.has_name("graphql"))
     {
         return true;
     }
@@ -1153,6 +1194,15 @@ fn format_embedded(
                 let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+                Some(wrap_document(formatted.into_document()))
+            }
+            DocumentFileSource::Graphql(_) => {
+                let graphql_options =
+                    settings.format_options::<GraphqlLanguage>(biome_path, &node.source);
+                let node = node.node.clone().embedded_syntax::<GraphqlLanguage>();
+                let formatted =
+                    biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
+                        .ok()?;
                 Some(wrap_document(formatted.into_document()))
             }
             _ => None,
