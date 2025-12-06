@@ -15,13 +15,14 @@ function bar(a: string): string;
 function bar(a: boolean): string;
 function bar(a: any): any {}
 
+// interface call signstures
 interface frotz {
-	/***/
-	(a: number, b: number, c: string) => string;
-	(a: number, b: string, c: string) => string;
+	/** ddddd */
+	(a: number, b: number, c: string): string;
+	(a: number, b: string, c: number): string;
 }
 
-// same jsdocs
+// class methods
 class banana {
 	/** bake a cake */
 	private bake(cakeType: string): void;
