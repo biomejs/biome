@@ -711,7 +711,8 @@ impl Rule for OrganizeImports {
         let root = ctx.query();
         let mut result = Vec::new();
         let options = ctx.options();
-        let sort_order = options.identifier_order;
+        let groups = options.groups.as_ref();
+        let sort_order = options.identifier_order.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
@@ -724,10 +725,9 @@ impl Rule for OrganizeImports {
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = 0;
                 }
-                let key = ImportKey::new(info, &options.groups);
-                let blank_line_separated_groups = options
-                    .groups
-                    .separated_by_blank_line(prev_group, key.group);
+                let key = ImportKey::new(info, groups);
+                let blank_line_separated_groups = groups
+                    .is_some_and(|groups| groups.separated_by_blank_line(prev_group, key.group));
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
@@ -747,7 +747,7 @@ impl Rule for OrganizeImports {
                 } else if leading_newline_count > 1
                     && !starts_chunk
                     // Ignore blank lines when groups are not explicitly set
-                    && !options.groups.is_empty()
+                    && !groups.is_none_or(|groups| groups.is_empty())
                     && !blank_line_separated_groups
                 {
                     // An import inside a chunk must not start with a blank line
@@ -821,7 +821,8 @@ impl Rule for OrganizeImports {
         }
 
         let options = ctx.options();
-        let sort_order = options.identifier_order;
+        let groups = options.groups.as_ref();
+        let sort_order = options.identifier_order.unwrap_or_default();
         let root = ctx.query();
         let items = root.items().into_syntax();
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
@@ -929,7 +930,7 @@ impl Rule for OrganizeImports {
                                 let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
-                                    key: ImportKey::new(info, &options.groups),
+                                    key: ImportKey::new(info, groups),
                                     was_merged: false,
                                     item: Some(item),
                                 })
@@ -979,9 +980,9 @@ impl Rule for OrganizeImports {
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
                         let blank_line_separated_groups = index != 0
-                            && options
-                                .groups
-                                .separated_by_blank_line(prev_group, key.group);
+                            && groups.is_some_and(|groups| {
+                                groups.separated_by_blank_line(prev_group, key.group)
+                            });
                         prev_group = key.group;
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {

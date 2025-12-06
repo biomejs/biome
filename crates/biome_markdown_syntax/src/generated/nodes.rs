@@ -2753,14 +2753,14 @@ impl AstNode for AnyCodeBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::MdFencedCodeBlock(it) => &it.syntax,
-            Self::MdIndentCodeBlock(it) => &it.syntax,
+            Self::MdFencedCodeBlock(it) => it.syntax(),
+            Self::MdIndentCodeBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::MdFencedCodeBlock(it) => it.syntax,
-            Self::MdIndentCodeBlock(it) => it.syntax,
+            Self::MdFencedCodeBlock(it) => it.into_syntax(),
+            Self::MdIndentCodeBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -2775,8 +2775,8 @@ impl std::fmt::Debug for AnyCodeBlock {
 impl From<AnyCodeBlock> for SyntaxNode {
     fn from(n: AnyCodeBlock) -> Self {
         match n {
-            AnyCodeBlock::MdFencedCodeBlock(it) => it.into(),
-            AnyCodeBlock::MdIndentCodeBlock(it) => it.into(),
+            AnyCodeBlock::MdFencedCodeBlock(it) => it.into_syntax(),
+            AnyCodeBlock::MdIndentCodeBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -2820,16 +2820,16 @@ impl AstNode for AnyContainerBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::MdBulletListItem(it) => &it.syntax,
-            Self::MdOrderListItem(it) => &it.syntax,
-            Self::MdQuote(it) => &it.syntax,
+            Self::MdBulletListItem(it) => it.syntax(),
+            Self::MdOrderListItem(it) => it.syntax(),
+            Self::MdQuote(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::MdBulletListItem(it) => it.syntax,
-            Self::MdOrderListItem(it) => it.syntax,
-            Self::MdQuote(it) => it.syntax,
+            Self::MdBulletListItem(it) => it.into_syntax(),
+            Self::MdOrderListItem(it) => it.into_syntax(),
+            Self::MdQuote(it) => it.into_syntax(),
         }
     }
 }
@@ -2845,9 +2845,9 @@ impl std::fmt::Debug for AnyContainerBlock {
 impl From<AnyContainerBlock> for SyntaxNode {
     fn from(n: AnyContainerBlock) -> Self {
         match n {
-            AnyContainerBlock::MdBulletListItem(it) => it.into(),
-            AnyContainerBlock::MdOrderListItem(it) => it.into(),
-            AnyContainerBlock::MdQuote(it) => it.into(),
+            AnyContainerBlock::MdBulletListItem(it) => it.into_syntax(),
+            AnyContainerBlock::MdOrderListItem(it) => it.into_syntax(),
+            AnyContainerBlock::MdQuote(it) => it.into_syntax(),
         }
     }
 }
@@ -2927,23 +2927,23 @@ impl AstNode for AnyLeafBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::MdHeader(it) => &it.syntax,
-            Self::MdHtmlBlock(it) => &it.syntax,
-            Self::MdLinkBlock(it) => &it.syntax,
-            Self::MdParagraph(it) => &it.syntax,
-            Self::MdSetextHeader(it) => &it.syntax,
-            Self::MdThematicBreakBlock(it) => &it.syntax,
+            Self::MdHeader(it) => it.syntax(),
+            Self::MdHtmlBlock(it) => it.syntax(),
+            Self::MdLinkBlock(it) => it.syntax(),
+            Self::MdParagraph(it) => it.syntax(),
+            Self::MdSetextHeader(it) => it.syntax(),
+            Self::MdThematicBreakBlock(it) => it.syntax(),
             Self::AnyCodeBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::MdHeader(it) => it.syntax,
-            Self::MdHtmlBlock(it) => it.syntax,
-            Self::MdLinkBlock(it) => it.syntax,
-            Self::MdParagraph(it) => it.syntax,
-            Self::MdSetextHeader(it) => it.syntax,
-            Self::MdThematicBreakBlock(it) => it.syntax,
+            Self::MdHeader(it) => it.into_syntax(),
+            Self::MdHtmlBlock(it) => it.into_syntax(),
+            Self::MdLinkBlock(it) => it.into_syntax(),
+            Self::MdParagraph(it) => it.into_syntax(),
+            Self::MdSetextHeader(it) => it.into_syntax(),
+            Self::MdThematicBreakBlock(it) => it.into_syntax(),
             Self::AnyCodeBlock(it) => it.into_syntax(),
         }
     }
@@ -2964,13 +2964,13 @@ impl std::fmt::Debug for AnyLeafBlock {
 impl From<AnyLeafBlock> for SyntaxNode {
     fn from(n: AnyLeafBlock) -> Self {
         match n {
-            AnyLeafBlock::AnyCodeBlock(it) => it.into(),
-            AnyLeafBlock::MdHeader(it) => it.into(),
-            AnyLeafBlock::MdHtmlBlock(it) => it.into(),
-            AnyLeafBlock::MdLinkBlock(it) => it.into(),
-            AnyLeafBlock::MdParagraph(it) => it.into(),
-            AnyLeafBlock::MdSetextHeader(it) => it.into(),
-            AnyLeafBlock::MdThematicBreakBlock(it) => it.into(),
+            AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
+            AnyLeafBlock::MdHeader(it) => it.into_syntax(),
+            AnyLeafBlock::MdHtmlBlock(it) => it.into_syntax(),
+            AnyLeafBlock::MdLinkBlock(it) => it.into_syntax(),
+            AnyLeafBlock::MdParagraph(it) => it.into_syntax(),
+            AnyLeafBlock::MdSetextHeader(it) => it.into_syntax(),
+            AnyLeafBlock::MdThematicBreakBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -3027,8 +3027,8 @@ impl std::fmt::Debug for AnyMdBlock {
 impl From<AnyMdBlock> for SyntaxNode {
     fn from(n: AnyMdBlock) -> Self {
         match n {
-            AnyMdBlock::AnyContainerBlock(it) => it.into(),
-            AnyMdBlock::AnyLeafBlock(it) => it.into(),
+            AnyMdBlock::AnyContainerBlock(it) => it.into_syntax(),
+            AnyMdBlock::AnyLeafBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -3125,28 +3125,28 @@ impl AstNode for AnyMdInline {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::MdHardLine(it) => &it.syntax,
-            Self::MdHtmlBlock(it) => &it.syntax,
-            Self::MdInlineCode(it) => &it.syntax,
-            Self::MdInlineEmphasis(it) => &it.syntax,
-            Self::MdInlineImage(it) => &it.syntax,
-            Self::MdInlineItalic(it) => &it.syntax,
-            Self::MdInlineLink(it) => &it.syntax,
-            Self::MdSoftBreak(it) => &it.syntax,
-            Self::MdTextual(it) => &it.syntax,
+            Self::MdHardLine(it) => it.syntax(),
+            Self::MdHtmlBlock(it) => it.syntax(),
+            Self::MdInlineCode(it) => it.syntax(),
+            Self::MdInlineEmphasis(it) => it.syntax(),
+            Self::MdInlineImage(it) => it.syntax(),
+            Self::MdInlineItalic(it) => it.syntax(),
+            Self::MdInlineLink(it) => it.syntax(),
+            Self::MdSoftBreak(it) => it.syntax(),
+            Self::MdTextual(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::MdHardLine(it) => it.syntax,
-            Self::MdHtmlBlock(it) => it.syntax,
-            Self::MdInlineCode(it) => it.syntax,
-            Self::MdInlineEmphasis(it) => it.syntax,
-            Self::MdInlineImage(it) => it.syntax,
-            Self::MdInlineItalic(it) => it.syntax,
-            Self::MdInlineLink(it) => it.syntax,
-            Self::MdSoftBreak(it) => it.syntax,
-            Self::MdTextual(it) => it.syntax,
+            Self::MdHardLine(it) => it.into_syntax(),
+            Self::MdHtmlBlock(it) => it.into_syntax(),
+            Self::MdInlineCode(it) => it.into_syntax(),
+            Self::MdInlineEmphasis(it) => it.into_syntax(),
+            Self::MdInlineImage(it) => it.into_syntax(),
+            Self::MdInlineItalic(it) => it.into_syntax(),
+            Self::MdInlineLink(it) => it.into_syntax(),
+            Self::MdSoftBreak(it) => it.into_syntax(),
+            Self::MdTextual(it) => it.into_syntax(),
         }
     }
 }
@@ -3168,15 +3168,15 @@ impl std::fmt::Debug for AnyMdInline {
 impl From<AnyMdInline> for SyntaxNode {
     fn from(n: AnyMdInline) -> Self {
         match n {
-            AnyMdInline::MdHardLine(it) => it.into(),
-            AnyMdInline::MdHtmlBlock(it) => it.into(),
-            AnyMdInline::MdInlineCode(it) => it.into(),
-            AnyMdInline::MdInlineEmphasis(it) => it.into(),
-            AnyMdInline::MdInlineImage(it) => it.into(),
-            AnyMdInline::MdInlineItalic(it) => it.into(),
-            AnyMdInline::MdInlineLink(it) => it.into(),
-            AnyMdInline::MdSoftBreak(it) => it.into(),
-            AnyMdInline::MdTextual(it) => it.into(),
+            AnyMdInline::MdHardLine(it) => it.into_syntax(),
+            AnyMdInline::MdHtmlBlock(it) => it.into_syntax(),
+            AnyMdInline::MdInlineCode(it) => it.into_syntax(),
+            AnyMdInline::MdInlineEmphasis(it) => it.into_syntax(),
+            AnyMdInline::MdInlineImage(it) => it.into_syntax(),
+            AnyMdInline::MdInlineItalic(it) => it.into_syntax(),
+            AnyMdInline::MdInlineLink(it) => it.into_syntax(),
+            AnyMdInline::MdSoftBreak(it) => it.into_syntax(),
+            AnyMdInline::MdTextual(it) => it.into_syntax(),
         }
     }
 }

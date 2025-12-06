@@ -1,0 +1,83 @@
+.missing-colon {
+	color: if(style(--foo: bar) black);
+}
+
+.empty-condition {
+	color: if(: black);
+}
+
+.unclosed-style {
+	color: if(style(--foo: bar: black);
+}
+
+.invalid-style-query {
+	color: if(style(not a valid query): black);
+}
+
+.double-not {
+	color: if(not not(--style: black): black;);
+}
+
+.double-not-and {
+	color: if(not (style(--style: black) and not(--style: black)): black;);
+}
+
+.missing-open-paren {
+	color: if style(--foo: bar): black;);
+}
+
+.missing-supports-paren {
+	color: if(supports --foo: bar): black;);
+}
+
+.missing-media-close-paren {
+	color: if(media(print: black;);
+}
+
+.missing-and-operand {
+	color: if(style(--foo: bar) and: black;);
+}
+
+.missing-or-operand {
+	color: if(style(--foo: bar) or: black;);
+}
+
+.invalid-else {
+	color: if(style(--foo: bar): black; elsif: white;);
+}
+
+.multiple-semicolons {
+	color: if(style(--foo: bar): black;;);
+}
+
+.missing-test-name {
+	color: if((--foo: bar): black;);
+}
+
+.unknown-test {
+	color: if(custom(--foo: bar): black;);
+}
+
+.incomplete-parens-expr {
+	color: if((: black;);
+}
+
+.mixed-operators {
+	color: if(style(--a: 1) and style(--b: 2) or style(--c: 3): black;);
+}
+
+.empty-else {
+	color: if(style(--foo: bar): black; else);
+}
+
+.and-no-left {
+	color: if(and style(--foo: bar): black;);
+}
+
+.or-no-left {
+	color: if(or style(--foo: bar): black;);
+}
+
+.empty-if {
+	color: if();
+}

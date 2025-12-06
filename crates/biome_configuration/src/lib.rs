@@ -427,11 +427,11 @@ impl From<&str> for Schema {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Schema {
-    fn schema_name() -> String {
-        "Schema".into()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Schema")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -471,8 +471,8 @@ impl Deserializable for Schema {
                                         .with_range(range)
                                         .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
-                                        {KeyValuePair("Expected", markup!({VERSION}))}
-                                        {KeyValuePair("Found", markup!({config_version_str}))}
+                                        {KeyValuePair::new("Expected", markup!({VERSION}))}
+                                        {KeyValuePair::new("Found", markup!({config_version_str}))}
                                     ))
                                         .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
                                 )

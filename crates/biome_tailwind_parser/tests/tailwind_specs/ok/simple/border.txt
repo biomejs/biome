@@ -1,0 +1,1 @@
+border-slate-500 border-teal-600 border-solid

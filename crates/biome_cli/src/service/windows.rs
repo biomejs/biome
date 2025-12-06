@@ -1,4 +1,6 @@
+use crate::logging::LogOptions;
 use biome_lsp::{ServerConnection, ServerFactory};
+use biome_service::WatcherOptions;
 use camino::Utf8PathBuf;
 use std::{
     convert::Infallible,
@@ -68,24 +70,31 @@ const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> io::Result<()> {
     let binary = env::current_exe()?;
 
     let mut cmd = Command::new(binary);
     cmd.arg("__run_server");
 
+    cmd.arg(format!("--watcher-kind={}", watcher_options.watcher_kind));
+    cmd.arg(format!(
+        "--watcher-polling-interval={}",
+        watcher_options.polling_interval
+    ));
+
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
     }
 
-    if let Some(log_path) = log_path {
-        cmd.arg(format!("--log-path={}", log_path.as_str()));
-    }
-    if let Some(log_file_name_prefix) = log_file_name_prefix {
-        cmd.arg(format!("--log-prefix-name={}", log_file_name_prefix));
-    }
+    cmd.arg(format!("--log-path={}", log_options.log_path.as_str()));
+
+    cmd.arg(format!(
+        "--log-prefix-name={}",
+        log_options.log_prefix_name.as_str()
+    ));
+
     cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
 
     cmd.spawn()?;
@@ -179,8 +188,8 @@ impl AsyncWrite for ClientWriteHalf {
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> io::Result<bool> {
     let mut did_spawn = false;
 
@@ -190,8 +199,8 @@ pub(crate) async fn ensure_daemon(
             Ok(None) => {
                 spawn_daemon(
                     stop_on_disconnect,
-                    log_path.clone(),
-                    log_file_name_prefix.clone(),
+                    watcher_options.clone(),
+                    log_options.clone(),
                 )?;
                 did_spawn = true;
                 time::sleep(Duration::from_millis(50)).await;
@@ -206,7 +215,7 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global pipe name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None, None).await?;
+    ensure_daemon(true, WatcherOptions::default(), LogOptions::default()).await?;
     println!("{}", get_pipe_name());
     Ok(())
 }

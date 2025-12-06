@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use xtask::project_root;
+use xtask_glue::project_root;
 
 use crate::TestResults;
 use crate::results::emit_compare;

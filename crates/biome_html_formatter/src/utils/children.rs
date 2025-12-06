@@ -168,7 +168,7 @@ pub(crate) struct HtmlRawSpace;
 
 impl Format<HtmlFormatContext> for HtmlRawSpace {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        write!(f, [text(" ")])
+        write!(f, [token(" ")])
     }
 }
 

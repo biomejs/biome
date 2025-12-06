@@ -3,9 +3,9 @@ use quote::quote;
 use serde::{Deserialize, Serialize};
 use std::io;
 use ureq::get;
-use xtask::*;
-use xtask::{Mode, project_root};
 use xtask_codegen::update;
+use xtask_glue::*;
+use xtask_glue::{Mode, project_root};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -41,7 +41,7 @@ pub(crate) fn generate_license(mode: Mode) -> Result<()> {
 
     update(
         &config_root.join("generated.rs"),
-        &xtask::reformat(tokens.to_string())?,
+        &xtask_glue::reformat(tokens.to_string())?,
         &mode,
     )?;
 

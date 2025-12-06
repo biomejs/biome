@@ -61,4 +61,3 @@ Self close void elements: never
 ## Unimplemented nodes/tokens
 
 "\n  import Button from './Button.svelte';\n  import TextInput from './TextInput.svelte';\n  import Select from './Select.svelte';\n" => 18..145
-"['a', 'b']" => 241..251

@@ -75,6 +75,14 @@ pub struct AnalyzerConfiguration {
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     jsx_runtime: Option<JsxRuntime>,
 
+    /// The JSX factory function identifier (e.g., "h" from "h" or "React" from "React.createElement")
+    /// Only applies when jsx_runtime is ReactClassic.
+    jsx_factory: Option<Box<str>>,
+
+    /// The JSX fragment factory function identifier (e.g., "Fragment")
+    /// Only applies when jsx_runtime is ReactClassic.
+    jsx_fragment_factory: Option<Box<str>>,
+
     /// Whether the CSS files contain CSS Modules
     css_modules: bool,
 }
@@ -92,6 +100,18 @@ impl AnalyzerConfiguration {
 
     pub fn with_jsx_runtime(mut self, jsx_runtime: JsxRuntime) -> Self {
         self.jsx_runtime = Some(jsx_runtime);
+        self
+    }
+
+    /// Sets the JSX factory identifier for the classic JSX runtime.
+    pub fn with_jsx_factory(mut self, jsx_factory: Option<Box<str>>) -> Self {
+        self.jsx_factory = jsx_factory;
+        self
+    }
+
+    /// Sets the JSX fragment factory identifier for the classic JSX runtime.
+    pub fn with_jsx_fragment_factory(mut self, jsx_fragment_factory: Option<Box<str>>) -> Self {
+        self.jsx_fragment_factory = jsx_fragment_factory;
         self
     }
 
@@ -158,6 +178,26 @@ impl AnalyzerOptions {
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
         self.configuration.jsx_runtime
+    }
+
+    /// Returns the configured JSX factory identifier, if any.
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.configuration.jsx_factory.as_deref()
+    }
+
+    /// Sets the JSX factory identifier.
+    pub fn set_jsx_factory(&mut self, jsx_factory: Option<Box<str>>) {
+        self.configuration.jsx_factory = jsx_factory;
+    }
+
+    /// Sets the JSX fragment factory identifier.
+    pub fn set_jsx_fragment_factory(&mut self, jsx_fragment_factory: Option<Box<str>>) {
+        self.configuration.jsx_fragment_factory = jsx_fragment_factory;
+    }
+
+    /// Returns the configured JSX fragment factory identifier, if any.
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.configuration.jsx_fragment_factory.as_deref()
     }
 
     pub fn rule_options<R>(&self) -> Option<R::Options>

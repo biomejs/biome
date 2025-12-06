@@ -73,8 +73,10 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")],
-                range: missing (optional),
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")],
+                    range: missing (optional),
+                },
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     rules: CssRuleList [
@@ -123,25 +125,27 @@ CssRoot {
         CssAtRule {
             at_token: AT@87..90 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@90..96 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeStart {
-                    start: CssScopeEdge {
-                        l_paren_token: L_PAREN@96..97 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: missing (optional),
-                                sub_selectors: CssSubSelectorList [
-                                    CssClassSelector {
-                                        dot_token: DOT@97..98 "." [] [],
-                                        name: CssCustomIdentifier {
-                                            value_token: IDENT@98..110 "light-scheme" [] [],
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@90..96 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeStart {
+                        start: CssScopeEdge {
+                            l_paren_token: L_PAREN@96..97 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@97..98 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@98..110 "light-scheme" [] [],
+                                            },
                                         },
-                                    },
-                                ],
-                            },
-                        ],
-                        r_paren_token: R_PAREN@110..112 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@110..112 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -192,37 +196,39 @@ CssRoot {
         CssAtRule {
             at_token: AT@188..191 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@191..197 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeEnd {
-                    to_token: TO_KW@197..200 "to" [] [Whitespace(" ")],
-                    end: CssScopeEdge {
-                        l_paren_token: L_PAREN@200..201 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssComplexSelector {
-                                left: CssCompoundSelector {
-                                    nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: missing (optional),
-                                    sub_selectors: CssSubSelectorList [
-                                        CssClassSelector {
-                                            dot_token: DOT@201..202 "." [] [],
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@202..210 "content" [] [Whitespace(" ")],
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@191..197 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeEnd {
+                        to_token: TO_KW@197..200 "to" [] [Whitespace(" ")],
+                        end: CssScopeEdge {
+                            l_paren_token: L_PAREN@200..201 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@201..202 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@202..210 "content" [] [Whitespace(" ")],
+                                                },
                                             },
-                                        },
-                                    ],
-                                },
-                                combinator: R_ANGLE@210..212 ">" [] [Whitespace(" ")],
-                                right: CssCompoundSelector {
-                                    nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: CssUniversalSelector {
-                                        namespace: missing (optional),
-                                        star_token: STAR@212..213 "*" [] [],
+                                        ],
                                     },
-                                    sub_selectors: CssSubSelectorList [],
+                                    combinator: R_ANGLE@210..212 ">" [] [Whitespace(" ")],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssUniversalSelector {
+                                            namespace: missing (optional),
+                                            star_token: STAR@212..213 "*" [] [],
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
                                 },
-                            },
-                        ],
-                        r_paren_token: R_PAREN@213..215 ")" [] [Whitespace(" ")],
+                            ],
+                            r_paren_token: R_PAREN@213..215 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -314,55 +320,57 @@ CssRoot {
         CssAtRule {
             at_token: AT@276..279 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@279..285 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeInterval {
-                    start: CssScopeEdge {
-                        l_paren_token: L_PAREN@285..286 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: missing (optional),
-                                sub_selectors: CssSubSelectorList [
-                                    CssClassSelector {
-                                        dot_token: DOT@286..287 "." [] [],
-                                        name: CssCustomIdentifier {
-                                            value_token: IDENT@287..299 "media-object" [] [],
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                        r_paren_token: R_PAREN@299..301 ")" [] [Whitespace(" ")],
-                    },
-                    to_token: TO_KW@301..304 "to" [] [Whitespace(" ")],
-                    end: CssScopeEdge {
-                        l_paren_token: L_PAREN@304..305 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssComplexSelector {
-                                left: CssCompoundSelector {
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@279..285 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeInterval {
+                        start: CssScopeEdge {
+                            l_paren_token: L_PAREN@285..286 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
-                                            dot_token: DOT@305..306 "." [] [],
+                                            dot_token: DOT@286..287 "." [] [],
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@306..314 "content" [] [Whitespace(" ")],
+                                                value_token: IDENT@287..299 "media-object" [] [],
                                             },
                                         },
                                     ],
                                 },
-                                combinator: R_ANGLE@314..316 ">" [] [Whitespace(" ")],
-                                right: CssCompoundSelector {
-                                    nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: CssUniversalSelector {
-                                        namespace: missing (optional),
-                                        star_token: STAR@316..317 "*" [] [],
+                            ],
+                            r_paren_token: R_PAREN@299..301 ")" [] [Whitespace(" ")],
+                        },
+                        to_token: TO_KW@301..304 "to" [] [Whitespace(" ")],
+                        end: CssScopeEdge {
+                            l_paren_token: L_PAREN@304..305 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@305..306 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@306..314 "content" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
                                     },
-                                    sub_selectors: CssSubSelectorList [],
+                                    combinator: R_ANGLE@314..316 ">" [] [Whitespace(" ")],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssUniversalSelector {
+                                            namespace: missing (optional),
+                                            star_token: STAR@316..317 "*" [] [],
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
                                 },
-                            },
-                        ],
-                        r_paren_token: R_PAREN@317..319 ")" [] [Whitespace(" ")],
+                            ],
+                            r_paren_token: R_PAREN@317..319 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -454,37 +462,39 @@ CssRoot {
         CssAtRule {
             at_token: AT@380..383 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@383..389 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeEnd {
-                    to_token: TO_KW@389..392 "TO" [] [Whitespace(" ")],
-                    end: CssScopeEdge {
-                        l_paren_token: L_PAREN@392..393 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssComplexSelector {
-                                left: CssCompoundSelector {
-                                    nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: missing (optional),
-                                    sub_selectors: CssSubSelectorList [
-                                        CssClassSelector {
-                                            dot_token: DOT@393..394 "." [] [],
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@394..402 "content" [] [Whitespace(" ")],
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@383..389 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeEnd {
+                        to_token: TO_KW@389..392 "TO" [] [Whitespace(" ")],
+                        end: CssScopeEdge {
+                            l_paren_token: L_PAREN@392..393 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@393..394 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@394..402 "content" [] [Whitespace(" ")],
+                                                },
                                             },
-                                        },
-                                    ],
-                                },
-                                combinator: R_ANGLE@402..404 ">" [] [Whitespace(" ")],
-                                right: CssCompoundSelector {
-                                    nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: CssUniversalSelector {
-                                        namespace: missing (optional),
-                                        star_token: STAR@404..405 "*" [] [],
+                                        ],
                                     },
-                                    sub_selectors: CssSubSelectorList [],
+                                    combinator: R_ANGLE@402..404 ">" [] [Whitespace(" ")],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssUniversalSelector {
+                                            namespace: missing (optional),
+                                            star_token: STAR@404..405 "*" [] [],
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
                                 },
-                            },
-                        ],
-                        r_paren_token: R_PAREN@405..407 ")" [] [Whitespace(" ")],
+                            ],
+                            r_paren_token: R_PAREN@405..407 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -576,25 +586,27 @@ CssRoot {
         CssAtRule {
             at_token: AT@468..471 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@471..477 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeStart {
-                    start: CssScopeEdge {
-                        l_paren_token: L_PAREN@477..478 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: missing (optional),
-                                sub_selectors: CssSubSelectorList [
-                                    CssIdSelector {
-                                        hash_token: HASH@478..479 "#" [] [],
-                                        name: CssCustomIdentifier {
-                                            value_token: IDENT@479..484 "inner" [] [],
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@471..477 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeStart {
+                        start: CssScopeEdge {
+                            l_paren_token: L_PAREN@477..478 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssIdSelector {
+                                            hash_token: HASH@478..479 "#" [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@479..484 "inner" [] [],
+                                            },
                                         },
-                                    },
-                                ],
-                            },
-                        ],
-                        r_paren_token: R_PAREN@484..486 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@484..486 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -688,90 +700,92 @@ CssRoot {
         CssAtRule {
             at_token: AT@559..562 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssScopeAtRule {
-                scope_token: SCOPE_KW@562..568 "scope" [] [Whitespace(" ")],
-                range: CssScopeRangeInterval {
-                    start: CssScopeEdge {
-                        l_paren_token: L_PAREN@568..569 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: missing (optional),
-                                sub_selectors: CssSubSelectorList [
-                                    CssClassSelector {
-                                        dot_token: DOT@569..570 "." [] [],
-                                        name: CssCustomIdentifier {
-                                            value_token: IDENT@570..582 "media-object" [] [],
-                                        },
-                                    },
-                                ],
-                            },
-                            COMMA@582..584 "," [] [Whitespace(" ")],
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: CssTypeSelector {
-                                    namespace: missing (optional),
-                                    ident: CssIdentifier {
-                                        value_token: IDENT@584..587 "div" [] [],
-                                    },
-                                },
-                                sub_selectors: CssSubSelectorList [
-                                    CssPseudoClassSelector {
-                                        colon_token: COLON@587..588 ":" [] [],
-                                        class: CssPseudoClassIdentifier {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@588..594 "active" [] [],
-                                            },
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                        r_paren_token: R_PAREN@594..596 ")" [] [Whitespace(" ")],
-                    },
-                    to_token: TO_KW@596..599 "to" [] [Whitespace(" ")],
-                    end: CssScopeEdge {
-                        l_paren_token: L_PAREN@599..600 "(" [] [],
-                        selectors: CssSelectorList [
-                            CssComplexSelector {
-                                left: CssCompoundSelector {
+                declarator: CssScopeAtRuleDeclarator {
+                    scope_token: SCOPE_KW@562..568 "scope" [] [Whitespace(" ")],
+                    range: CssScopeRangeInterval {
+                        start: CssScopeEdge {
+                            l_paren_token: L_PAREN@568..569 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
-                                            dot_token: DOT@600..601 "." [] [],
+                                            dot_token: DOT@569..570 "." [] [],
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@601..609 "content" [] [Whitespace(" ")],
+                                                value_token: IDENT@570..582 "media-object" [] [],
                                             },
                                         },
                                     ],
                                 },
-                                combinator: R_ANGLE@609..611 ">" [] [Whitespace(" ")],
-                                right: CssCompoundSelector {
+                                COMMA@582..584 "," [] [Whitespace(" ")],
+                                CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [],
-                                    simple_selector: CssUniversalSelector {
+                                    simple_selector: CssTypeSelector {
                                         namespace: missing (optional),
-                                        star_token: STAR@611..612 "*" [] [],
-                                    },
-                                    sub_selectors: CssSubSelectorList [],
-                                },
-                            },
-                            COMMA@612..614 "," [] [Whitespace(" ")],
-                            CssCompoundSelector {
-                                nesting_selectors: CssNestedSelectorList [],
-                                simple_selector: missing (optional),
-                                sub_selectors: CssSubSelectorList [
-                                    CssPseudoClassSelector {
-                                        colon_token: COLON@614..615 ":" [] [],
-                                        class: CssPseudoClassIdentifier {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@615..620 "hover" [] [],
-                                            },
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@584..587 "div" [] [],
                                         },
                                     },
-                                ],
-                            },
-                        ],
-                        r_paren_token: R_PAREN@620..622 ")" [] [Whitespace(" ")],
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@587..588 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@588..594 "active" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@594..596 ")" [] [Whitespace(" ")],
+                        },
+                        to_token: TO_KW@596..599 "to" [] [Whitespace(" ")],
+                        end: CssScopeEdge {
+                            l_paren_token: L_PAREN@599..600 "(" [] [],
+                            selectors: CssSelectorList [
+                                CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@600..601 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@601..609 "content" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    combinator: R_ANGLE@609..611 ">" [] [Whitespace(" ")],
+                                    right: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssUniversalSelector {
+                                            namespace: missing (optional),
+                                            star_token: STAR@611..612 "*" [] [],
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                                COMMA@612..614 "," [] [Whitespace(" ")],
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@614..615 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@615..620 "hover" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@620..622 ")" [] [Whitespace(" ")],
+                        },
                     },
                 },
                 block: CssRuleBlock {
@@ -795,9 +809,10 @@ CssRoot {
     0: CSS_AT_RULE@0..87
       0: AT@0..1 "@" [] []
       1: CSS_SCOPE_AT_RULE@1..87
-        0: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")]
-        1: (empty)
-        2: CSS_RULE_BLOCK@7..87
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@1..7
+          0: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")]
+          1: (empty)
+        1: CSS_RULE_BLOCK@7..87
           0: L_CURLY@7..8 "{" [] []
           1: CSS_RULE_LIST@8..85
             0: CSS_QUALIFIED_RULE@8..85
@@ -828,21 +843,22 @@ CssRoot {
     1: CSS_AT_RULE@87..188
       0: AT@87..90 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@90..188
-        0: SCOPE_KW@90..96 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_START@96..112
-          0: CSS_SCOPE_EDGE@96..112
-            0: L_PAREN@96..97 "(" [] []
-            1: CSS_SELECTOR_LIST@97..110
-              0: CSS_COMPOUND_SELECTOR@97..110
-                0: CSS_NESTED_SELECTOR_LIST@97..97
-                1: (empty)
-                2: CSS_SUB_SELECTOR_LIST@97..110
-                  0: CSS_CLASS_SELECTOR@97..110
-                    0: DOT@97..98 "." [] []
-                    1: CSS_CUSTOM_IDENTIFIER@98..110
-                      0: IDENT@98..110 "light-scheme" [] []
-            2: R_PAREN@110..112 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@112..188
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@90..112
+          0: SCOPE_KW@90..96 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_START@96..112
+            0: CSS_SCOPE_EDGE@96..112
+              0: L_PAREN@96..97 "(" [] []
+              1: CSS_SELECTOR_LIST@97..110
+                0: CSS_COMPOUND_SELECTOR@97..110
+                  0: CSS_NESTED_SELECTOR_LIST@97..97
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@97..110
+                    0: CSS_CLASS_SELECTOR@97..110
+                      0: DOT@97..98 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@98..110
+                        0: IDENT@98..110 "light-scheme" [] []
+              2: R_PAREN@110..112 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@112..188
           0: L_CURLY@112..113 "{" [] []
           1: CSS_RULE_LIST@113..186
             0: CSS_QUALIFIED_RULE@113..186
@@ -873,30 +889,31 @@ CssRoot {
     2: CSS_AT_RULE@188..276
       0: AT@188..191 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@191..276
-        0: SCOPE_KW@191..197 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_END@197..215
-          0: TO_KW@197..200 "to" [] [Whitespace(" ")]
-          1: CSS_SCOPE_EDGE@200..215
-            0: L_PAREN@200..201 "(" [] []
-            1: CSS_SELECTOR_LIST@201..213
-              0: CSS_COMPLEX_SELECTOR@201..213
-                0: CSS_COMPOUND_SELECTOR@201..210
-                  0: CSS_NESTED_SELECTOR_LIST@201..201
-                  1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@201..210
-                    0: CSS_CLASS_SELECTOR@201..210
-                      0: DOT@201..202 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@202..210
-                        0: IDENT@202..210 "content" [] [Whitespace(" ")]
-                1: R_ANGLE@210..212 ">" [] [Whitespace(" ")]
-                2: CSS_COMPOUND_SELECTOR@212..213
-                  0: CSS_NESTED_SELECTOR_LIST@212..212
-                  1: CSS_UNIVERSAL_SELECTOR@212..213
-                    0: (empty)
-                    1: STAR@212..213 "*" [] []
-                  2: CSS_SUB_SELECTOR_LIST@213..213
-            2: R_PAREN@213..215 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@215..276
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@191..215
+          0: SCOPE_KW@191..197 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_END@197..215
+            0: TO_KW@197..200 "to" [] [Whitespace(" ")]
+            1: CSS_SCOPE_EDGE@200..215
+              0: L_PAREN@200..201 "(" [] []
+              1: CSS_SELECTOR_LIST@201..213
+                0: CSS_COMPLEX_SELECTOR@201..213
+                  0: CSS_COMPOUND_SELECTOR@201..210
+                    0: CSS_NESTED_SELECTOR_LIST@201..201
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@201..210
+                      0: CSS_CLASS_SELECTOR@201..210
+                        0: DOT@201..202 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@202..210
+                          0: IDENT@202..210 "content" [] [Whitespace(" ")]
+                  1: R_ANGLE@210..212 ">" [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@212..213
+                    0: CSS_NESTED_SELECTOR_LIST@212..212
+                    1: CSS_UNIVERSAL_SELECTOR@212..213
+                      0: (empty)
+                      1: STAR@212..213 "*" [] []
+                    2: CSS_SUB_SELECTOR_LIST@213..213
+              2: R_PAREN@213..215 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@215..276
           0: L_CURLY@215..216 "{" [] []
           1: CSS_RULE_LIST@216..274
             0: CSS_QUALIFIED_RULE@216..245
@@ -954,42 +971,43 @@ CssRoot {
     3: CSS_AT_RULE@276..380
       0: AT@276..279 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@279..380
-        0: SCOPE_KW@279..285 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_INTERVAL@285..319
-          0: CSS_SCOPE_EDGE@285..301
-            0: L_PAREN@285..286 "(" [] []
-            1: CSS_SELECTOR_LIST@286..299
-              0: CSS_COMPOUND_SELECTOR@286..299
-                0: CSS_NESTED_SELECTOR_LIST@286..286
-                1: (empty)
-                2: CSS_SUB_SELECTOR_LIST@286..299
-                  0: CSS_CLASS_SELECTOR@286..299
-                    0: DOT@286..287 "." [] []
-                    1: CSS_CUSTOM_IDENTIFIER@287..299
-                      0: IDENT@287..299 "media-object" [] []
-            2: R_PAREN@299..301 ")" [] [Whitespace(" ")]
-          1: TO_KW@301..304 "to" [] [Whitespace(" ")]
-          2: CSS_SCOPE_EDGE@304..319
-            0: L_PAREN@304..305 "(" [] []
-            1: CSS_SELECTOR_LIST@305..317
-              0: CSS_COMPLEX_SELECTOR@305..317
-                0: CSS_COMPOUND_SELECTOR@305..314
-                  0: CSS_NESTED_SELECTOR_LIST@305..305
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@279..319
+          0: SCOPE_KW@279..285 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_INTERVAL@285..319
+            0: CSS_SCOPE_EDGE@285..301
+              0: L_PAREN@285..286 "(" [] []
+              1: CSS_SELECTOR_LIST@286..299
+                0: CSS_COMPOUND_SELECTOR@286..299
+                  0: CSS_NESTED_SELECTOR_LIST@286..286
                   1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@305..314
-                    0: CSS_CLASS_SELECTOR@305..314
-                      0: DOT@305..306 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@306..314
-                        0: IDENT@306..314 "content" [] [Whitespace(" ")]
-                1: R_ANGLE@314..316 ">" [] [Whitespace(" ")]
-                2: CSS_COMPOUND_SELECTOR@316..317
-                  0: CSS_NESTED_SELECTOR_LIST@316..316
-                  1: CSS_UNIVERSAL_SELECTOR@316..317
-                    0: (empty)
-                    1: STAR@316..317 "*" [] []
-                  2: CSS_SUB_SELECTOR_LIST@317..317
-            2: R_PAREN@317..319 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@319..380
+                  2: CSS_SUB_SELECTOR_LIST@286..299
+                    0: CSS_CLASS_SELECTOR@286..299
+                      0: DOT@286..287 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@287..299
+                        0: IDENT@287..299 "media-object" [] []
+              2: R_PAREN@299..301 ")" [] [Whitespace(" ")]
+            1: TO_KW@301..304 "to" [] [Whitespace(" ")]
+            2: CSS_SCOPE_EDGE@304..319
+              0: L_PAREN@304..305 "(" [] []
+              1: CSS_SELECTOR_LIST@305..317
+                0: CSS_COMPLEX_SELECTOR@305..317
+                  0: CSS_COMPOUND_SELECTOR@305..314
+                    0: CSS_NESTED_SELECTOR_LIST@305..305
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@305..314
+                      0: CSS_CLASS_SELECTOR@305..314
+                        0: DOT@305..306 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@306..314
+                          0: IDENT@306..314 "content" [] [Whitespace(" ")]
+                  1: R_ANGLE@314..316 ">" [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@316..317
+                    0: CSS_NESTED_SELECTOR_LIST@316..316
+                    1: CSS_UNIVERSAL_SELECTOR@316..317
+                      0: (empty)
+                      1: STAR@316..317 "*" [] []
+                    2: CSS_SUB_SELECTOR_LIST@317..317
+              2: R_PAREN@317..319 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@319..380
           0: L_CURLY@319..320 "{" [] []
           1: CSS_RULE_LIST@320..378
             0: CSS_QUALIFIED_RULE@320..349
@@ -1047,30 +1065,31 @@ CssRoot {
     4: CSS_AT_RULE@380..468
       0: AT@380..383 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@383..468
-        0: SCOPE_KW@383..389 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_END@389..407
-          0: TO_KW@389..392 "TO" [] [Whitespace(" ")]
-          1: CSS_SCOPE_EDGE@392..407
-            0: L_PAREN@392..393 "(" [] []
-            1: CSS_SELECTOR_LIST@393..405
-              0: CSS_COMPLEX_SELECTOR@393..405
-                0: CSS_COMPOUND_SELECTOR@393..402
-                  0: CSS_NESTED_SELECTOR_LIST@393..393
-                  1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@393..402
-                    0: CSS_CLASS_SELECTOR@393..402
-                      0: DOT@393..394 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@394..402
-                        0: IDENT@394..402 "content" [] [Whitespace(" ")]
-                1: R_ANGLE@402..404 ">" [] [Whitespace(" ")]
-                2: CSS_COMPOUND_SELECTOR@404..405
-                  0: CSS_NESTED_SELECTOR_LIST@404..404
-                  1: CSS_UNIVERSAL_SELECTOR@404..405
-                    0: (empty)
-                    1: STAR@404..405 "*" [] []
-                  2: CSS_SUB_SELECTOR_LIST@405..405
-            2: R_PAREN@405..407 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@407..468
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@383..407
+          0: SCOPE_KW@383..389 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_END@389..407
+            0: TO_KW@389..392 "TO" [] [Whitespace(" ")]
+            1: CSS_SCOPE_EDGE@392..407
+              0: L_PAREN@392..393 "(" [] []
+              1: CSS_SELECTOR_LIST@393..405
+                0: CSS_COMPLEX_SELECTOR@393..405
+                  0: CSS_COMPOUND_SELECTOR@393..402
+                    0: CSS_NESTED_SELECTOR_LIST@393..393
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@393..402
+                      0: CSS_CLASS_SELECTOR@393..402
+                        0: DOT@393..394 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@394..402
+                          0: IDENT@394..402 "content" [] [Whitespace(" ")]
+                  1: R_ANGLE@402..404 ">" [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@404..405
+                    0: CSS_NESTED_SELECTOR_LIST@404..404
+                    1: CSS_UNIVERSAL_SELECTOR@404..405
+                      0: (empty)
+                      1: STAR@404..405 "*" [] []
+                    2: CSS_SUB_SELECTOR_LIST@405..405
+              2: R_PAREN@405..407 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@407..468
           0: L_CURLY@407..408 "{" [] []
           1: CSS_RULE_LIST@408..466
             0: CSS_QUALIFIED_RULE@408..437
@@ -1128,21 +1147,22 @@ CssRoot {
     5: CSS_AT_RULE@468..559
       0: AT@468..471 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@471..559
-        0: SCOPE_KW@471..477 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_START@477..486
-          0: CSS_SCOPE_EDGE@477..486
-            0: L_PAREN@477..478 "(" [] []
-            1: CSS_SELECTOR_LIST@478..484
-              0: CSS_COMPOUND_SELECTOR@478..484
-                0: CSS_NESTED_SELECTOR_LIST@478..478
-                1: (empty)
-                2: CSS_SUB_SELECTOR_LIST@478..484
-                  0: CSS_ID_SELECTOR@478..484
-                    0: HASH@478..479 "#" [] []
-                    1: CSS_CUSTOM_IDENTIFIER@479..484
-                      0: IDENT@479..484 "inner" [] []
-            2: R_PAREN@484..486 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@486..559
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@471..486
+          0: SCOPE_KW@471..477 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_START@477..486
+            0: CSS_SCOPE_EDGE@477..486
+              0: L_PAREN@477..478 "(" [] []
+              1: CSS_SELECTOR_LIST@478..484
+                0: CSS_COMPOUND_SELECTOR@478..484
+                  0: CSS_NESTED_SELECTOR_LIST@478..478
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@478..484
+                    0: CSS_ID_SELECTOR@478..484
+                      0: HASH@478..479 "#" [] []
+                      1: CSS_CUSTOM_IDENTIFIER@479..484
+                        0: IDENT@479..484 "inner" [] []
+              2: R_PAREN@484..486 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@486..559
           0: L_CURLY@486..487 "{" [] []
           1: CSS_RULE_LIST@487..557
             0: CSS_AT_RULE@487..557
@@ -1199,65 +1219,66 @@ CssRoot {
     6: CSS_AT_RULE@559..624
       0: AT@559..562 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SCOPE_AT_RULE@562..624
-        0: SCOPE_KW@562..568 "scope" [] [Whitespace(" ")]
-        1: CSS_SCOPE_RANGE_INTERVAL@568..622
-          0: CSS_SCOPE_EDGE@568..596
-            0: L_PAREN@568..569 "(" [] []
-            1: CSS_SELECTOR_LIST@569..594
-              0: CSS_COMPOUND_SELECTOR@569..582
-                0: CSS_NESTED_SELECTOR_LIST@569..569
-                1: (empty)
-                2: CSS_SUB_SELECTOR_LIST@569..582
-                  0: CSS_CLASS_SELECTOR@569..582
-                    0: DOT@569..570 "." [] []
-                    1: CSS_CUSTOM_IDENTIFIER@570..582
-                      0: IDENT@570..582 "media-object" [] []
-              1: COMMA@582..584 "," [] [Whitespace(" ")]
-              2: CSS_COMPOUND_SELECTOR@584..594
-                0: CSS_NESTED_SELECTOR_LIST@584..584
-                1: CSS_TYPE_SELECTOR@584..587
-                  0: (empty)
-                  1: CSS_IDENTIFIER@584..587
-                    0: IDENT@584..587 "div" [] []
-                2: CSS_SUB_SELECTOR_LIST@587..594
-                  0: CSS_PSEUDO_CLASS_SELECTOR@587..594
-                    0: COLON@587..588 ":" [] []
-                    1: CSS_PSEUDO_CLASS_IDENTIFIER@588..594
-                      0: CSS_IDENTIFIER@588..594
-                        0: IDENT@588..594 "active" [] []
-            2: R_PAREN@594..596 ")" [] [Whitespace(" ")]
-          1: TO_KW@596..599 "to" [] [Whitespace(" ")]
-          2: CSS_SCOPE_EDGE@599..622
-            0: L_PAREN@599..600 "(" [] []
-            1: CSS_SELECTOR_LIST@600..620
-              0: CSS_COMPLEX_SELECTOR@600..612
-                0: CSS_COMPOUND_SELECTOR@600..609
-                  0: CSS_NESTED_SELECTOR_LIST@600..600
+        0: CSS_SCOPE_AT_RULE_DECLARATOR@562..622
+          0: SCOPE_KW@562..568 "scope" [] [Whitespace(" ")]
+          1: CSS_SCOPE_RANGE_INTERVAL@568..622
+            0: CSS_SCOPE_EDGE@568..596
+              0: L_PAREN@568..569 "(" [] []
+              1: CSS_SELECTOR_LIST@569..594
+                0: CSS_COMPOUND_SELECTOR@569..582
+                  0: CSS_NESTED_SELECTOR_LIST@569..569
                   1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@600..609
-                    0: CSS_CLASS_SELECTOR@600..609
-                      0: DOT@600..601 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@601..609
-                        0: IDENT@601..609 "content" [] [Whitespace(" ")]
-                1: R_ANGLE@609..611 ">" [] [Whitespace(" ")]
-                2: CSS_COMPOUND_SELECTOR@611..612
-                  0: CSS_NESTED_SELECTOR_LIST@611..611
-                  1: CSS_UNIVERSAL_SELECTOR@611..612
+                  2: CSS_SUB_SELECTOR_LIST@569..582
+                    0: CSS_CLASS_SELECTOR@569..582
+                      0: DOT@569..570 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@570..582
+                        0: IDENT@570..582 "media-object" [] []
+                1: COMMA@582..584 "," [] [Whitespace(" ")]
+                2: CSS_COMPOUND_SELECTOR@584..594
+                  0: CSS_NESTED_SELECTOR_LIST@584..584
+                  1: CSS_TYPE_SELECTOR@584..587
                     0: (empty)
-                    1: STAR@611..612 "*" [] []
-                  2: CSS_SUB_SELECTOR_LIST@612..612
-              1: COMMA@612..614 "," [] [Whitespace(" ")]
-              2: CSS_COMPOUND_SELECTOR@614..620
-                0: CSS_NESTED_SELECTOR_LIST@614..614
-                1: (empty)
-                2: CSS_SUB_SELECTOR_LIST@614..620
-                  0: CSS_PSEUDO_CLASS_SELECTOR@614..620
-                    0: COLON@614..615 ":" [] []
-                    1: CSS_PSEUDO_CLASS_IDENTIFIER@615..620
-                      0: CSS_IDENTIFIER@615..620
-                        0: IDENT@615..620 "hover" [] []
-            2: R_PAREN@620..622 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_BLOCK@622..624
+                    1: CSS_IDENTIFIER@584..587
+                      0: IDENT@584..587 "div" [] []
+                  2: CSS_SUB_SELECTOR_LIST@587..594
+                    0: CSS_PSEUDO_CLASS_SELECTOR@587..594
+                      0: COLON@587..588 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@588..594
+                        0: CSS_IDENTIFIER@588..594
+                          0: IDENT@588..594 "active" [] []
+              2: R_PAREN@594..596 ")" [] [Whitespace(" ")]
+            1: TO_KW@596..599 "to" [] [Whitespace(" ")]
+            2: CSS_SCOPE_EDGE@599..622
+              0: L_PAREN@599..600 "(" [] []
+              1: CSS_SELECTOR_LIST@600..620
+                0: CSS_COMPLEX_SELECTOR@600..612
+                  0: CSS_COMPOUND_SELECTOR@600..609
+                    0: CSS_NESTED_SELECTOR_LIST@600..600
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@600..609
+                      0: CSS_CLASS_SELECTOR@600..609
+                        0: DOT@600..601 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@601..609
+                          0: IDENT@601..609 "content" [] [Whitespace(" ")]
+                  1: R_ANGLE@609..611 ">" [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@611..612
+                    0: CSS_NESTED_SELECTOR_LIST@611..611
+                    1: CSS_UNIVERSAL_SELECTOR@611..612
+                      0: (empty)
+                      1: STAR@611..612 "*" [] []
+                    2: CSS_SUB_SELECTOR_LIST@612..612
+                1: COMMA@612..614 "," [] [Whitespace(" ")]
+                2: CSS_COMPOUND_SELECTOR@614..620
+                  0: CSS_NESTED_SELECTOR_LIST@614..614
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@614..620
+                    0: CSS_PSEUDO_CLASS_SELECTOR@614..620
+                      0: COLON@614..615 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@615..620
+                        0: CSS_IDENTIFIER@615..620
+                          0: IDENT@615..620 "hover" [] []
+              2: R_PAREN@620..622 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@622..624
           0: L_CURLY@622..623 "{" [] []
           1: CSS_RULE_LIST@623..623
           2: R_CURLY@623..624 "}" [] []

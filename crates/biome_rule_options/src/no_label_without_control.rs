@@ -5,9 +5,26 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoLabelWithoutControlOptions {
     /// Array of component names that should be considered the same as an `input` element.
-    pub input_components: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub input_components: Option<Box<[Box<str>]>>,
     /// Array of attributes that should be treated as the `label` accessible text content.
-    pub label_attributes: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub label_attributes: Option<Box<[Box<str>]>>,
     /// Array of component names that should be considered the same as a `label` element.
-    pub label_components: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub label_components: Option<Box<[Box<str>]>>,
+}
+
+impl biome_deserialize::Merge for NoLabelWithoutControlOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(input_components) = other.input_components {
+            self.input_components = Some(input_components);
+        }
+        if let Some(label_attributes) = other.label_attributes {
+            self.label_attributes = Some(label_attributes);
+        }
+        if let Some(label_components) = other.label_components {
+            self.label_components = Some(label_components);
+        }
+    }
 }

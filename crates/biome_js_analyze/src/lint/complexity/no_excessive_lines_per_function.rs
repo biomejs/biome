@@ -143,7 +143,7 @@ impl Rule for NoExcessiveLinesPerFunction {
 
         if let AnyFunctionLike::AnyJsFunction(func) = binding
             && is_iife(func)
-            && options.skip_iifes
+            && options.skip_iifes()
         {
             return None;
         };
@@ -163,7 +163,7 @@ impl Rule for NoExcessiveLinesPerFunction {
                 )
             })
             .fold(0, |acc, token| {
-                if options.skip_blank_lines {
+                if options.skip_blank_lines() {
                     return acc + token.has_leading_newline() as usize;
                 };
 
@@ -175,7 +175,7 @@ impl Rule for NoExcessiveLinesPerFunction {
                     .count()
             });
 
-        if function_lines_count > options.max_lines.get().into() {
+        if function_lines_count > options.max_lines().get().into() {
             return Some(State {
                 function_lines_count,
             });
@@ -193,7 +193,7 @@ impl Rule for NoExcessiveLinesPerFunction {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This function has too many lines ("{state.function_lines_count}"). Maximum allowed is "{options.max_lines.to_string()}"."
+                    "This function has too many lines ("{state.function_lines_count}"). Maximum allowed is "{options.max_lines().to_string()}"."
                 },
             )
             .note(markup! {

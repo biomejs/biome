@@ -1,7 +1,7 @@
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use crate::{
     JsRuleAction,
-    react::{ReactLibrary, is_global_react_import},
+    react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
 };
 use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
@@ -164,8 +164,9 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
     });
 }
 
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
 
 static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
@@ -623,10 +624,22 @@ fn is_unused(ctx: &RuleContext<NoUnusedImports>, local_name: &AnyJsBinding) -> b
     let AnyJsBinding::JsIdentifierBinding(binding) = &local_name else {
         return false;
     };
-    if ctx.jsx_runtime() == JsxRuntime::ReactClassic
-        && is_global_react_import(binding, ReactLibrary::React)
-    {
-        return false;
+    if ctx.jsx_runtime() == JsxRuntime::ReactClassic {
+        // Check for standard React import
+        if is_global_react_import(binding, ReactLibrary::React) {
+            return false;
+        }
+        // Check for custom JSX factory imports
+        if let Some(jsx_factory) = ctx.jsx_factory()
+            && is_jsx_factory_import(binding, jsx_factory)
+        {
+            return false;
+        }
+        if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory()
+            && is_jsx_factory_import(binding, jsx_fragment_factory)
+        {
+            return false;
+        }
     }
 
     let jsdoc_types = ctx.jsdoc_types();

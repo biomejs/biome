@@ -20,6 +20,7 @@ expression: redactor(content)
 ---
 const title = "My Page";
 ---
+
 <html>
 	<body>
 		<script>

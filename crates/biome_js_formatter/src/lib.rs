@@ -374,7 +374,7 @@ where
         let needs_parentheses = self.needs_parentheses(node);
 
         if needs_parentheses {
-            write!(f, [text("(")])?;
+            write!(f, [token("(")])?;
         }
 
         if let Some(range) = self.embedded_node_range(node, f) {
@@ -394,7 +394,7 @@ where
         }
 
         if needs_parentheses {
-            write!(f, [text(")")])?;
+            write!(f, [token(")")])?;
         }
 
         Ok(())

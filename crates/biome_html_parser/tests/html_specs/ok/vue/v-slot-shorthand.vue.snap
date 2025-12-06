@@ -1,0 +1,194 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template #header></template>
+<template #footer="slotProps"></template>
+<template #[dynamicSlot]></template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueVSlotShorthandDirective {
+                        hash_token: HASH@10..11 "#" [] [],
+                        arg: VueStaticArgument {
+                            name_token: HTML_LITERAL@11..17 "header" [] [],
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@17..18 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@18..19 "<" [] [],
+                slash_token: SLASH@19..20 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@20..28 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@29..31 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@31..40 "template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueVSlotShorthandDirective {
+                        hash_token: HASH@40..41 "#" [] [],
+                        arg: VueStaticArgument {
+                            name_token: HTML_LITERAL@41..47 "footer" [] [],
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@47..48 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@48..59 "\"slotProps\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@59..60 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@60..61 "<" [] [],
+                slash_token: SLASH@61..62 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@62..70 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@70..71 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@71..73 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@73..82 "template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueVSlotShorthandDirective {
+                        hash_token: HASH@82..83 "#" [] [],
+                        arg: VueDynamicArgument {
+                            l_brack_token: L_BRACKET@83..84 "[" [] [],
+                            name_token: HTML_LITERAL@84..95 "dynamicSlot" [] [],
+                            r_brack_token: R_BRACKET@95..96 "]" [] [],
+                        },
+                        modifiers: VueModifierList [],
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@96..97 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@97..98 "<" [] [],
+                slash_token: SLASH@98..99 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@99..107 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@107..108 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@108..109 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..109
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..108
+    0: HTML_ELEMENT@0..29
+      0: HTML_OPENING_ELEMENT@0..18
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..10
+          0: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@10..17
+          0: VUE_V_SLOT_SHORTHAND_DIRECTIVE@10..17
+            0: HASH@10..11 "#" [] []
+            1: VUE_STATIC_ARGUMENT@11..17
+              0: HTML_LITERAL@11..17 "header" [] []
+            2: VUE_MODIFIER_LIST@17..17
+            3: (empty)
+        3: R_ANGLE@17..18 ">" [] []
+      1: HTML_ELEMENT_LIST@18..18
+      2: HTML_CLOSING_ELEMENT@18..29
+        0: L_ANGLE@18..19 "<" [] []
+        1: SLASH@19..20 "/" [] []
+        2: HTML_TAG_NAME@20..28
+          0: HTML_LITERAL@20..28 "template" [] []
+        3: R_ANGLE@28..29 ">" [] []
+    1: HTML_ELEMENT@29..71
+      0: HTML_OPENING_ELEMENT@29..60
+        0: L_ANGLE@29..31 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@31..40
+          0: HTML_LITERAL@31..40 "template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@40..59
+          0: VUE_V_SLOT_SHORTHAND_DIRECTIVE@40..59
+            0: HASH@40..41 "#" [] []
+            1: VUE_STATIC_ARGUMENT@41..47
+              0: HTML_LITERAL@41..47 "footer" [] []
+            2: VUE_MODIFIER_LIST@47..47
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@47..59
+              0: EQ@47..48 "=" [] []
+              1: HTML_STRING@48..59
+                0: HTML_STRING_LITERAL@48..59 "\"slotProps\"" [] []
+        3: R_ANGLE@59..60 ">" [] []
+      1: HTML_ELEMENT_LIST@60..60
+      2: HTML_CLOSING_ELEMENT@60..71
+        0: L_ANGLE@60..61 "<" [] []
+        1: SLASH@61..62 "/" [] []
+        2: HTML_TAG_NAME@62..70
+          0: HTML_LITERAL@62..70 "template" [] []
+        3: R_ANGLE@70..71 ">" [] []
+    2: HTML_ELEMENT@71..108
+      0: HTML_OPENING_ELEMENT@71..97
+        0: L_ANGLE@71..73 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@73..82
+          0: HTML_LITERAL@73..82 "template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@82..96
+          0: VUE_V_SLOT_SHORTHAND_DIRECTIVE@82..96
+            0: HASH@82..83 "#" [] []
+            1: VUE_DYNAMIC_ARGUMENT@83..96
+              0: L_BRACKET@83..84 "[" [] []
+              1: HTML_LITERAL@84..95 "dynamicSlot" [] []
+              2: R_BRACKET@95..96 "]" [] []
+            2: VUE_MODIFIER_LIST@96..96
+            3: (empty)
+        3: R_ANGLE@96..97 ">" [] []
+      1: HTML_ELEMENT_LIST@97..97
+      2: HTML_CLOSING_ELEMENT@97..108
+        0: L_ANGLE@97..98 "<" [] []
+        1: SLASH@98..99 "/" [] []
+        2: HTML_TAG_NAME@99..107
+          0: HTML_LITERAL@99..107 "template" [] []
+        3: R_ANGLE@107..108 ">" [] []
+  4: EOF@108..109 "" [Newline("\n")] []
+
+```

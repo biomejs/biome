@@ -90,11 +90,11 @@ impl Format<FormatSemanticModelContext> for Rule {
         write!(
             f,
             [
-                dynamic_text(
+                text(
                     self.node().syntax().text_trimmed().into_text().text(),
                     self.node().syntax().text_trimmed_range().start()
                 ),
-                text(":"),
+                token(":"),
                 space(),
                 &self.specificity(),
             ]
@@ -108,13 +108,13 @@ impl Format<FormatSemanticModelContext> for Selector {
         write!(
             f,
             [
-                dynamic_text(self.text().into_text().text(), self.range().start()),
-                text(":"),
+                text(self.text().into_text().text(), self.range().start()),
+                token(":"),
                 space(),
                 &self.specificity(),
                 space(),
-                text(" @ "),
-                dynamic_text(range.as_str(), TextSize::default()),
+                token(" @ "),
+                text(range.as_str(), TextSize::default()),
             ]
         )
     }
@@ -125,15 +125,15 @@ impl Format<FormatSemanticModelContext> for Specificity {
         write!(
             f,
             [
-                text("("),
-                dynamic_text(self.0.to_string().as_str(), TextSize::default()),
-                text(","),
+                token("("),
+                text(self.0.to_string().as_str(), TextSize::default()),
+                token(","),
                 space(),
-                dynamic_text(self.1.to_string().as_str(), TextSize::default()),
-                text(","),
+                text(self.1.to_string().as_str(), TextSize::default()),
+                token(","),
                 space(),
-                dynamic_text(self.2.to_string().as_str(), TextSize::default()),
-                text(")")
+                text(self.2.to_string().as_str(), TextSize::default()),
+                token(")")
             ]
         )
     }

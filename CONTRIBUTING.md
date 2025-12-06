@@ -536,6 +536,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
+- [Maikel @Netail](https://github.com/netail)
 - [Marat Dulin @mdevils](https://github.com/mdevils)
 - [Vladimir Ivanov_@vlad](https://github.com/vladimir-ivanov)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)

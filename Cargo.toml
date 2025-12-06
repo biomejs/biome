@@ -1,16 +1,24 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
+members  = ["crates/*", "xtask/glue", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
 resolver = "2"
 
 [workspace.lints.rust]
-absolute_paths_not_starting_with_crate = "warn"
-dead_code                              = "warn"
-trivial_numeric_casts                  = "warn"
-unused_import_braces                   = "warn"
-unused_lifetimes                       = "warn"
-unused_macro_rules                     = "warn"
+# https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
+ambiguous-negative-literals    = "warn"
+dead_code                      = "warn"
+explicit-outlives-requirements = "warn"
+impl-trait-overcaptures        = "warn"
+impl-trait-redundant-captures  = "warn"
+missing-unsafe-on-extern       = "warn"
+redundant-lifetimes            = "warn"
+trivial_numeric_casts          = "warn"
+unit-bindings                  = "warn"
+unsafe-attr-outside-unsafe     = "warn"
+unused_import_braces           = "warn"
+unused_lifetimes               = "warn"
+unused_macro_rules             = "warn"
 
 [workspace.lints.clippy]
 allow_attributes        = "deny"
@@ -188,6 +196,9 @@ biome_ruledoc_utils  = { path = "./crates/biome_ruledoc_utils" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
+xtask_codegen        = { path = "xtask/codegen" }
+xtask_coverage       = { path = "xtask/coverage" }
+xtask_glue           = { path = "xtask/glue" }
 
 # Crates needed in the workspace
 anyhow               = "1.0.100"
@@ -199,6 +210,7 @@ countme              = "3.0.1"
 crossbeam            = "0.8.4"
 dashmap              = "6.1.0"
 dirs                 = "6.0.0"
+either               = "1.15.0"
 enumflags2           = "0.7.12"
 getrandom            = "0.2.15"
 globset              = "0.4.18"
@@ -206,9 +218,9 @@ grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.25"
-indexmap             = { version = "2.12.0" }
+indexmap             = { version = "2.12.1" }
 insta                = "1.43.2"
-jiff                 = "0.2.15"
+jiff                 = "0.2.16"
 libc                 = "0.2.177"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
@@ -217,12 +229,12 @@ proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.103"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
-quote                = "1.0.41"
+quote                = "1.0.42"
 rayon                = "1.11.0"
 regex                = "1.12.2"
 rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
-schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
+schemars             = { version = "1.1.0", features = ["indexmap2", "smallvec1"] }
 serde                = { version = "1.0.228", features = ["derive"] }
 serde_json           = "1.0.145"
 similar              = "2.7.0"
@@ -239,11 +251,12 @@ tracing              = { version = "0.1.41", default-features = false, features 
 tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.1.2"
+ureq                 = "3.1.4"
 url                  = "2.5.7"
+uuid                 = "1.18.1"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"
-windows              = "0.61.3"
+windows              = "0.62.2"
 
 [profile.dev.package.biome_wasm]
 debug     = true

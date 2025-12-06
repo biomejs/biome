@@ -103,14 +103,14 @@ impl Rule for UseConsistentArrayType {
             AnyTsType::TsTypeOperatorType(_) | AnyTsType::TsArrayType(_)
                 if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) =>
             {
-                if options.syntax == ConsistentArrayType::Shorthand {
+                if options.syntax.unwrap_or_default() == ConsistentArrayType::Shorthand {
                     return None;
                 }
                 let array_kind = get_array_kind_by_any_type(query)?;
                 transform_array_type(query.to_owned(), array_kind)
             }
             AnyTsType::TsReferenceType(ty) => {
-                if options.syntax == ConsistentArrayType::Generic {
+                if options.syntax.unwrap_or_default() == ConsistentArrayType::Generic {
                     return None;
                 }
 
@@ -138,7 +138,7 @@ impl Rule for UseConsistentArrayType {
             AnyTsType::TsTypeOperatorType(_) | AnyTsType::TsArrayType(_)
                 if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) =>
             {
-                if options.syntax == ConsistentArrayType::Shorthand {
+                if options.syntax.unwrap_or_default() == ConsistentArrayType::Shorthand {
                     return None;
                 }
 
@@ -152,7 +152,7 @@ impl Rule for UseConsistentArrayType {
                 Some(RuleDiagnostic::new(rule_category!(), query.range(), title))
             }
             AnyTsType::TsReferenceType(ty) => {
-                if options.syntax == ConsistentArrayType::Generic {
+                if options.syntax.unwrap_or_default() == ConsistentArrayType::Generic {
                     return None;
                 }
 

@@ -1,12 +1,13 @@
+mod base_name_store;
 mod tests;
 
+use crate::lexer::base_name_store::BASENAME_STORE;
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::{SyntaxKind, TextLen};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
-use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 
 pub(crate) struct TailwindLexer<'src> {
@@ -132,24 +133,10 @@ impl<'src> TailwindLexer<'src> {
     fn consume_base(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
-        // Find the longest matching base name
-        let source_from_position = &self.source[self.position..];
-        let base_name = BASENAMES_WITH_DASHES
-            .iter()
-            .rfind(|&name| source_from_position.starts_with(name));
-
-        if let Some(base_name) = base_name {
-            self.advance(base_name.len());
-            return TW_BASE;
-        }
-
-        while let Some(byte) = self.current_byte() {
-            let char = self.current_char_unchecked();
-            if char.is_whitespace() || byte == b'-' || byte == b'!' || byte == b':' {
-                break;
-            }
-            self.advance(char.len_utf8());
-        }
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+        let end = BASENAME_STORE.matcher(slice).base_end();
+        self.advance(end);
 
         TW_BASE
     }

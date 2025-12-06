@@ -61,6 +61,11 @@ CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
+CssBogusIfBranch = SyntaxElement*
+CssBogusIfTest = SyntaxElement*
+CssBogusSyntax = SyntaxElement*
+CssBogusSyntaxSingleComponent = SyntaxElement*
+CssBogusAttrName = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
@@ -674,6 +679,74 @@ AnyCssAtRule =
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
 
+// An at-rule declarator is an at-rule, without the block part.
+// Used primarily in tailwind `@custom-variant` definitions.
+CssAtRuleDeclarator =
+	'@'
+	declarator: AnyCssAtRuleDeclarator
+
+AnyCssAtRuleDeclarator =
+	CssColorProfileAtRuleDeclarator
+	| CssCounterStyleAtRuleDeclarator
+	| CssPropertyAtRuleDeclarator
+	| CssFontFaceAtRuleDeclarator
+	| CssFontPaletteValuesAtRuleDeclarator
+	| CssPositionTryAtRuleDeclarator
+	| CssViewTransitionAtRuleDeclarator
+	| CssMediaAtRuleDeclarator
+	| CssContainerAtRuleDeclarator
+	| CssSupportsAtRuleDeclarator
+	| CssScopeAtRuleDeclarator
+	| CssStartingStyleAtRuleDeclarator
+
+// Conditional block declarator nodes
+CssMediaAtRuleDeclarator =
+	'media'
+	queries: CssMediaQueryList
+
+CssContainerAtRuleDeclarator =
+	'container'
+	name: CssCustomIdentifier?
+	query: AnyCssContainerQuery
+
+CssSupportsAtRuleDeclarator =
+	'supports'
+	condition: AnyCssSupportsCondition
+
+CssScopeAtRuleDeclarator =
+	'scope'
+	range: AnyCssScopeRange?
+
+CssStartingStyleAtRuleDeclarator =
+	'starting-style'
+
+// Declaration block declarator nodes
+CssColorProfileAtRuleDeclarator =
+	'color-profile'
+	name: CssCustomIdentifier
+
+CssCounterStyleAtRuleDeclarator =
+	'counter-style'
+	name: CssCustomIdentifier
+
+CssPropertyAtRuleDeclarator =
+	'property'
+	name: CssDashedIdentifier
+
+CssFontFaceAtRuleDeclarator =
+	'font-face'
+
+CssFontPaletteValuesAtRuleDeclarator =
+	'font-palette-values'
+	name: CssDashedIdentifier
+
+CssPositionTryAtRuleDeclarator =
+	'position-try'
+	name: CssDashedIdentifier
+
+CssViewTransitionAtRuleDeclarator =
+	'view-transition'
+
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
 CssCharsetAtRule =
@@ -687,24 +760,21 @@ CssCharsetAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // TODO: `name` should be `<dashed-ident> | device-cmyk` instead
 CssColorProfileAtRule =
-	'color-profile'
-	name: CssCustomIdentifier
+	declarator: CssColorProfileAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 CssCounterStyleAtRule =
-	'counter-style'
-	name: CssCustomIdentifier
+	declarator: CssCounterStyleAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 CssPropertyAtRule =
-	'property'
-	name: CssDashedIdentifier
+	declarator: CssPropertyAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
-	'font-face'
+	declarator: CssFontFaceAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 
@@ -778,8 +848,7 @@ CssFontFeatureValuesItem =
 // @font-palette-values --ident {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
-	'font-palette-values'
-	name: CssDashedIdentifier
+	declarator: CssFontPaletteValuesAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 
@@ -808,9 +877,7 @@ CssFontPaletteValuesAtRule =
 // @container name (width <= 500px) {  }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssContainerAtRule =
-	'container'
-	name: CssCustomIdentifier?
-	query: AnyCssContainerQuery
+	declarator: CssContainerAtRuleDeclarator
 	block: AnyCssConditionalBlock
 
 // <container-query>
@@ -1058,8 +1125,7 @@ CssKeyframesPercentageSelector =
 // @media screen, all, print {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAtRule =
-	'media'
-	queries: CssMediaQueryList
+	declarator: CssMediaAtRuleDeclarator
 	block: AnyCssConditionalBlock
 
 // @media screen, (width > 500px), print {}
@@ -1360,8 +1426,7 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 // @supports (display: grid) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsAtRule =
-	'supports'
-	condition: AnyCssSupportsCondition
+	declarator: CssSupportsAtRuleDeclarator
 	block: AnyCssConditionalBlock
 
 AnyCssSupportsCondition =
@@ -1437,8 +1502,7 @@ CssSupportsFeatureSelector =
 //   }
 
 CssScopeAtRule =
-	'scope'
-	range: AnyCssScopeRange?
+	declarator: CssScopeAtRuleDeclarator
 	block: AnyCssConditionalBlock
 
 AnyCssScopeRange =
@@ -1541,7 +1605,7 @@ AnyCssNamespaceUrl = CssUrlFunction | CssString
 //  }
 // }
 CssStartingStyleAtRule =
-	'starting-style'
+	declarator: CssStartingStyleAtRuleDeclarator
 	block: AnyCssConditionalBlock
 
 // https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
@@ -1670,8 +1734,7 @@ CssUnknownAtRuleComponentList = SyntaxElement*
 // @position-try --ident { }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPositionTryAtRule =
-	'position-try'
-	name: CssDashedIdentifier
+	declarator: CssPositionTryAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 // https://drafts.csswg.org/css-view-transitions-2/#view-transition-rule
@@ -1680,7 +1743,7 @@ CssPositionTryAtRule =
 // @view-transition { }
 // ^^^^^^^^^^^^^^^^^^^^
 CssViewTransitionAtRule =
-	'view-transition'
+	declarator: CssViewTransitionAtRuleDeclarator
 	block: AnyCssDeclarationBlock
 
 ///////////////
@@ -1749,6 +1812,8 @@ CssRatio =
 AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
+	| CssIfFunction
+	| CssAttrFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1793,6 +1858,117 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
 CssParameter = AnyCssExpression
+
+// https://drafts.csswg.org/css-values-5/#if-notation
+// <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )
+// <if-branch> = <if-condition> : <declaration-value>?
+// <if-condition> = <boolean-expr[ <if-test> ]> | else
+// <if-test> =
+//  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
+//  media( <media-feature> | <media-condition> ) |
+//  style( <style-query> )
+CssIfFunction =
+	'if'
+	'('
+	CssIfBranchList
+	')'
+
+CssIfBranchList = AnyCssIfBranch (';' AnyCssIfBranch)* ';'?
+
+// https://drafts.csswg.org/css-values-5/#typedef-boolean-expr
+
+// <boolean-expr[ <if-test> ]> =
+//   not <boolean-expr-group>
+//   | <boolean-expr-group> [ [ and <boolean-expr-group> ]* | [ or <boolean-expr-group> ]* ]
+AnyCssIfTestBooleanExpr =
+	CssIfTestBooleanNotExpr
+	| AnyCssIfTestBooleanAndCombinableExpr
+	| AnyCssIfTestBooleanOrCombinableExpr
+
+// not <boolean-expr-group>
+CssIfTestBooleanNotExpr =
+	'not'
+	expression: AnyCssIfTestBooleanExprGroup
+
+AnyCssIfTestBooleanAndCombinableExpr =
+	AnyCssIfTestBooleanExprGroup
+	| CssIfTestBooleanAndExpr
+
+CssIfTestBooleanAndExpr =
+	left: AnyCssIfTestBooleanExprGroup
+	'and'
+	right: AnyCssIfTestBooleanAndCombinableExpr
+
+AnyCssIfTestBooleanOrCombinableExpr =
+	AnyCssIfTestBooleanExprGroup
+	| CssIfTestBooleanOrExpr
+
+CssIfTestBooleanOrExpr =
+	left: AnyCssIfTestBooleanExprGroup
+	'or'
+	right: AnyCssIfTestBooleanOrCombinableExpr
+
+// <boolean-expr-group> = <if-test> | ( <boolean-expr> )
+AnyCssIfTestBooleanExprGroup =
+	AnyCssIfTest
+	| CssIfTestBooleanExprInParens
+
+// ( <boolean-expr> )
+CssIfTestBooleanExprInParens =
+	'('
+	expression: AnyCssIfTestBooleanExpr
+	')'
+
+CssElseKeyword = 'else'
+
+AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
+
+CssIfBranch =
+	condition: AnyCssIfCondition
+	':'
+	value: CssGenericComponentValueList
+
+AnyCssIfBranch =
+	CssIfBranch
+	| CssBogusIfBranch
+
+CssIfSupportsIdentifierTest =
+	ident: CssIdentifier
+	':'
+	value: AnyCssGenericComponentValue
+
+AnyCssIfSupportsTestCondition =
+	CssIfSupportsIdentifierTest
+	| AnyCssImportSupportsCondition
+
+CssIfSupportsTest =
+	'supports'
+	'('
+	test: AnyCssIfSupportsTestCondition
+	')'
+
+AnyCssIfMediaTestQuery =
+	AnyCssMediaCondition
+	| AnyCssQueryFeature
+
+CssIfMediaTest =
+	'media'
+	'('
+	test: AnyCssIfMediaTestQuery
+	')'
+
+CssIfStyleTest =
+	'style'
+	'('
+	test: AnyCssContainerStyleQuery
+	')'
+
+AnyCssIfTest =
+	CssIfSupportsTest
+	| CssIfMediaTest
+	| CssIfStyleTest
+	| CssBogusIfTest
+
 
 AnyCssExpression =
 	CssBinaryExpression
@@ -1878,6 +2054,172 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
 
+// https://drafts.csswg.org/css-values-5/#attr-notation
+// attr() = attr( <attr-name> <attr-type>? , <declaration-value>?)
+//
+// <attr-name> = [ <ident-token>? '|' ]? <ident-token>
+// <attr-type> = type( <syntax> ) | raw-string | number | <attr-unit>
+//
+// attr(data-test type(*), rem);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssAttrFunction =
+	name: 'attr'
+	'('
+	attr_name: CssAttrNameList
+	attr_type: AnyCssAttrType?
+	fallback_value: CssAttrFallbackValue?
+	')'
+
+// [ <ident-token>? '|' ]? <ident-token>
+// attr(data-test | data-test-2 | data-test-3)
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
+
+AnyCssAttrName =
+	CssIdentifier
+	| CssBogusAttrName
+
+// Literal value that can be used as a type in the attr() function.
+// attr(data-test raw-string)
+//                ^^^^^^^^^^
+CssRawStringDeclarator =
+	'raw-string'
+
+// Literal value that can be used as a type in the attr() function.
+// attr(data-test number)
+//                ^^^^^
+CssNumberDeclarator =
+	'number'
+
+// attr(data-test rem);
+//                ^^^
+AnyCssAttrUnit =
+	 CssRegularAttrUnit
+	| CssUnknownAttrUnit
+
+// A known CSS unit name such as "px", "rem", "em".
+CssRegularAttrUnit =
+	unit: 'ident'
+
+// A fallback node for unrecognized attr unit names.
+CssUnknownAttrUnit =
+	unit: 'ident'
+
+AnyCssAttrType =
+	CssRawStringDeclarator
+	| CssTypeFunction
+	| CssNumberDeclarator
+	| AnyCssAttrUnit
+
+// attr(data-test type(*), rem);
+//                       ^^^^^
+CssAttrFallbackValue =
+	','
+	value: CssGenericComponentValueList
+
+// type( <syntax> )
+CssTypeFunction =
+	name: 'type'
+	'('
+	type: AnyCssSyntax
+	')'
+
+// type(*)
+//      ^
+CssUniversalSyntax =
+	'*'
+
+// https://drafts.csswg.org/css-values-5/#typedef-syntax
+// <syntax> = '*' | <syntax-component> [ <syntax-combinator> <syntax-component> ]* | <syntax-string>
+// <syntax-component> = <syntax-single-component> <syntax-multiplier>?
+//                    | '<' transform-list '>'
+// <syntax-single-component> = '<' <syntax-type-name> '>' | <ident>
+// <syntax-type-name> = angle | color | custom-ident | image | integer
+//                    | length | length-percentage | number
+//                    | percentage | resolution | string | time
+//                    | url | transform-function
+// <syntax-combinator> = '|'
+// <syntax-multiplier> = [ '#' | '+' ]
+//
+// <syntax-string> = <string>
+AnyCssSyntax =
+	CssUniversalSyntax
+	| CssSyntaxComponentList
+	| AnyCssSyntaxComponent
+	| CssString
+	| CssBogusSyntax
+
+// <syntax-component> [ <syntax-combinator> <syntax-component> ]*
+//
+// type(<ident> | auto)
+//      ^^^^^^^^^^^^^^
+CssSyntaxComponentList = AnyCssSyntaxComponent ('|' AnyCssSyntaxComponent)*
+
+// <syntax-single-component> <syntax-multiplier>? | '<' transform-list '>'
+//
+// type(<ident># | <transform-list>)
+//      ^^^^^^^^   ^^^^^^^^^^^^^^^^
+AnyCssSyntaxComponent =
+	CssSyntaxComponentWithoutMultiplier
+	| CssSyntaxComponent
+
+// <transform-list> is treated differently from other syntax components
+// type(<transform-list>)
+//      ^^^^^^^^^^^^^^^^
+CssSyntaxComponentWithoutMultiplier =
+	'<'
+	type_name: 'ident'
+	'>'
+
+// <syntax-single-component> <syntax-multiplier>?
+//
+// type(<ident>#)
+//      ^^^^^^^^
+CssSyntaxComponent =
+	component: AnyCssSyntaxSingleComponent
+	multiplier: CssSyntaxMultiplier?
+
+//'<' <syntax-type-name> '>' | <ident>
+//
+// type(<ident> | auto)
+//      ^^^^^^^   ^^^^
+AnyCssSyntaxSingleComponent =
+	CssSyntaxType
+	| CssIdentifier
+	| CssBogusSyntaxSingleComponent
+
+// '<' <syntax-type-name> '>'
+//
+// type(<ident>)
+//      ^^^^^^^
+AnyCssSyntaxTypeName =
+	CssRegularSyntaxTypeName
+	| CssUnknownSyntaxTypeName
+
+// A known syntax type name such as "angle", "color", "custom-ident"
+// See https://drafts.csswg.org/css-values-5/#typedef-syntax for the complete set
+// type(<ident>)
+//       ^^^^^
+CssRegularSyntaxTypeName =
+	name: 'ident'
+
+// A fallback node for unrecognized syntax type names.
+// type(<unknown>)
+//       ^^^^^^^
+CssUnknownSyntaxTypeName =
+	name: 'ident'
+
+// type(<ident>)
+//      ^^^^^^^
+CssSyntaxType =
+	'<'
+	type_name: AnyCssSyntaxTypeName
+	'>'
+
+// type(<number># | <string>+)
+//              ^           ^
+CssSyntaxMultiplier =
+	multiplier: ('#' | '+')
 
 // Tailwind
 
@@ -1936,9 +2278,13 @@ AnyTwCustomVariantSelector =
 	AnyCssRuleBlock
 	| TwCustomVariantShorthand
 
+AnyTwCustomVariantShorthand =
+	CssSelectorList
+	| CssAtRuleDeclarator
+
 TwCustomVariantShorthand =
   '('
-  selector: AnyCssSelector
+  selector: AnyTwCustomVariantShorthand
   ')'
   ';'
 

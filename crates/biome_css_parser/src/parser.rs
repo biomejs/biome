@@ -176,3 +176,17 @@ pub struct CssParserCheckpoint {
     // scoped properties that aren't only dependent on checkpoints and
     // should be reset manually when the scope of their use is exited.
 }
+
+impl From<&CssFileSource> for CssParserOptions {
+    fn from(file_source: &CssFileSource) -> Self {
+        let mut options = Self::default();
+        if file_source.is_css_modules() {
+            options.css_modules = true;
+        }
+        if file_source.is_tailwind_css() {
+            options.tailwind_directives = true;
+        }
+
+        options
+    }
+}

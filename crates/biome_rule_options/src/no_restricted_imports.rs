@@ -27,12 +27,22 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedImportsOptions {
     /// A list of import paths that should trigger the rule.
-    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    pub paths: FxHashMap<Box<str>, Paths>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub paths: Option<FxHashMap<Box<str>, Paths>>,
 
     /// gitignore-style patterns that should trigger the rule.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub patterns: Option<Box<[Patterns]>>,
+}
+impl biome_deserialize::Merge for NoRestrictedImportsOptions {
+    fn merge_with(&mut self, other: Self) {
+        if let Some(paths) = other.paths {
+            self.paths = Some(paths);
+        }
+        if let Some(patterns) = other.patterns {
+            self.patterns = Some(patterns);
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -192,15 +202,15 @@ impl Deserializable for Patterns {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct PatternOptions {
     /// An array of gitignore-style patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
     group: Option<SourcesMatcher>,
 
     /// A custom message for diagnostics related to this pattern.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
     message: Option<Box<str>>,
 
     /// A regex pattern for import names to forbid within the matched modules.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
     import_name_pattern: Option<RestrictedRegex>,
 
     /// If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.

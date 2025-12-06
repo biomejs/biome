@@ -64,21 +64,21 @@ impl Deref for RuleDomains {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleDomains {
-    fn schema_name() -> String {
-        "RuleDomains".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("RuleDomains")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-
-        Schema::Object(SchemaObject {
-            instance_type: Some(InstanceType::Object.into()),
-            object: Some(Box::new(ObjectValidation {
-                property_names: Some(Box::new(generator.subschema_for::<RuleDomain>())),
-                additional_properties: Some(Box::new(generator.subschema_for::<RuleDomainValue>())),
-                ..Default::default()
-            })),
-            ..Default::default()
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let _names = generator.subschema_for::<RuleDomain>();
+        let _values = generator.subschema_for::<RuleDomainValue>();
+        schemars::json_schema!({
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/$defs/RuleDomain"
+            },
+            "additionalProperties": {
+                "$ref": "#/$defs/RuleDomainValue"
+            }
         })
     }
 }

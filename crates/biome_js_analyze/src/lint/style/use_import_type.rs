@@ -1,6 +1,6 @@
 use crate::{
     JsRuleAction,
-    react::{ReactLibrary, is_global_react_import},
+    react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
     services::semantic::Semantic,
 };
 use biome_analyze::{
@@ -186,15 +186,13 @@ impl Rule for UseImportType {
             return None;
         }
         let model = ctx.model();
-        let style = ctx.options().style;
+        let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
-                let is_default_used_as_type = if ctx.jsx_runtime() == JsxRuntime::ReactClassic
-                    && is_global_react_import(default_binding, ReactLibrary::React)
-                {
+                let is_default_used_as_type = if is_jsx_factory_binding(ctx, default_binding) {
                     false
                 } else {
                     is_only_used_as_type(model, default_binding)
@@ -250,9 +248,7 @@ impl Rule for UseImportType {
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
                         let namespace_binding = namespace_specifier.local_name().ok()?;
                         let namespace_binding = namespace_binding.as_js_identifier_binding()?;
-                        if ctx.jsx_runtime() == JsxRuntime::ReactClassic
-                            && is_global_react_import(namespace_binding, ReactLibrary::React)
-                        {
+                        if is_jsx_factory_binding(ctx, namespace_binding) {
                             return None;
                         }
 
@@ -278,9 +274,7 @@ impl Rule for UseImportType {
                 }
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
-                if ctx.jsx_runtime() == JsxRuntime::ReactClassic
-                    && is_global_react_import(default_binding, ReactLibrary::React)
-                {
+                if is_jsx_factory_binding(ctx, default_binding) {
                     return None;
                 }
 
@@ -346,9 +340,7 @@ impl Rule for UseImportType {
                 }
                 let namespace_binding = clause.namespace_specifier().ok()?.local_name().ok()?;
                 let namespace_binding = namespace_binding.as_js_identifier_binding()?;
-                if ctx.jsx_runtime() == JsxRuntime::ReactClassic
-                    && is_global_react_import(namespace_binding, ReactLibrary::React)
-                {
+                if is_jsx_factory_binding(ctx, namespace_binding) {
                     return None;
                 }
 
@@ -1103,4 +1095,35 @@ fn split_named_import_specifiers(
         named_specifiers.with_specifiers(value_specifiers)
     };
     Some((named_type, named_value))
+}
+
+/// Helper function to check if a binding is a JSX factory or fragment factory
+fn is_jsx_factory_binding(
+    ctx: &RuleContext<UseImportType>,
+    binding: &biome_js_syntax::JsIdentifierBinding,
+) -> bool {
+    if ctx.jsx_runtime() != JsxRuntime::ReactClassic {
+        return false;
+    }
+
+    // Check for standard React import
+    if is_global_react_import(binding, ReactLibrary::React) {
+        return true;
+    }
+
+    // Check for custom JSX factory
+    if let Some(jsx_factory) = ctx.jsx_factory()
+        && is_jsx_factory_import(binding, jsx_factory)
+    {
+        return true;
+    }
+
+    // Check for custom JSX fragment factory
+    if let Some(jsx_fragment_factory) = ctx.jsx_fragment_factory()
+        && is_jsx_factory_import(binding, jsx_fragment_factory)
+    {
+        return true;
+    }
+
+    false
 }

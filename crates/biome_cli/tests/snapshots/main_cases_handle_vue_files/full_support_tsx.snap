@@ -1,0 +1,53 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script lang="tsx">
+import { sure } from "sure.js";
+import z from "zod";
+
+interface Props {
+	title: string;
+}
+
+const schema = z.object().optional();
+schema + sure();
+const _props: Props = { title: "Hello" };
+
+function _FunctionalComponent() {
+	return <div></div>;
+}
+</script>
+
+<template>
+	<div></div>
+</template>
+
+<style>
+.class {
+	background: red;
+}
+</style>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

@@ -101,10 +101,10 @@ impl biome_deserialize::Deserializable for OverrideGlobs {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for OverrideGlobs {
-    fn schema_name() -> String {
-        "OverrideGlobs".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("OverrideGlobs")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         Vec::<biome_glob::Glob>::json_schema(generator)
     }
 }

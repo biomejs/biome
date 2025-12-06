@@ -1,9 +1,7 @@
-use crate::LoggingLevel;
-use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -61,33 +59,6 @@ pub struct CliOptions {
     )]
     pub reporter: CliReporter,
 
-    /// Optional path to redirect log messages to.
-    ///
-    /// If omitted, logs are printed to stdout.
-    #[bpaf(long("log-file"))]
-    pub log_file: Option<String>,
-
-    /// The level of logging. In order, from the most verbose to the least
-    /// verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
-    #[bpaf(
-        long("log-level"),
-        argument("none|debug|info|warn|error"),
-        fallback(LoggingLevel::default()),
-        display_fallback
-    )]
-    pub log_level: LoggingLevel,
-
-    /// How the log should look like.
-    #[bpaf(
-        long("log-kind"),
-        argument("pretty|compact|json"),
-        fallback(LoggingKind::default()),
-        display_fallback
-    )]
-    pub log_kind: LoggingKind,
-
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(
         long("diagnostic-level"),
@@ -100,13 +71,20 @@ pub struct CliOptions {
 
 impl CliOptions {
     /// Computes the [ConfigurationPathHint] based on the options passed by the user
-    pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
+    pub(crate) fn as_configuration_path_hint(
+        &self,
+        working_directory: &Utf8Path,
+    ) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
             Some(path) => {
                 let path = Utf8PathBuf::from(path);
                 let path = path.strip_prefix("./").unwrap_or(&path);
-                ConfigurationPathHint::FromUser(path.to_path_buf())
+                if path.is_absolute() {
+                    ConfigurationPathHint::FromUser(path.to_path_buf())
+                } else {
+                    ConfigurationPathHint::FromUser(working_directory.join(path))
+                }
             }
         }
     }

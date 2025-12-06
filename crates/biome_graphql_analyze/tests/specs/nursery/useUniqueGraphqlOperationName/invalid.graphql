@@ -1,0 +1,29 @@
+query user {
+  user {
+    id
+  }
+}
+
+query user {
+  me {
+    id
+  }
+}
+
+mutation updateUser {
+  updateUser {
+    id
+  }
+}
+
+mutation updateUser {
+  updateProfile {
+    name
+  }
+}
+
+mutation updateUser {
+  updateSettings {
+    theme
+  }
+}

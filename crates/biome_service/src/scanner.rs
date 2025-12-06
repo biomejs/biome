@@ -10,6 +10,9 @@ mod workspace_bridges;
 #[cfg(test)]
 mod test_utils;
 
+use crate::diagnostics::Panic;
+use crate::projects::ProjectKey;
+use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
@@ -26,11 +29,7 @@ use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
 
-use crate::diagnostics::Panic;
-use crate::projects::ProjectKey;
-use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
-
-pub use watcher::{Watcher, WatcherInstruction};
+pub use watcher::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
 pub(crate) use workspace_bridges::{
     ScannerWatcherBridge, WorkspaceScannerBridge, WorkspaceWatcherBridge,
 };

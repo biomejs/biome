@@ -121,24 +121,8 @@ impl Visitor for DuplicateHooksVisitor {
                 };
 
                 // When the visitor enters a function node, push a new entry on the stack
-                if let Ok(callee) = node.callee() {
-                    if callee.contains_a_test_pattern() == Ok(true) {
-                        if let Some(function_name) = callee.get_callee_object_name()
-                            && function_name.text_trimmed() == "describe"
-                        {
-                            self.stack.push(HooksContext::default());
-                        }
-                    }
-                    // describe.each has a different syntax
-                    else if let AnyJsExpression::JsCallExpression(call_expression) = callee
-                        && let Ok(callee) = call_expression.callee()
-                        && matches!(
-                            callee.to_trimmed_text().text(),
-                            "describe.each" | "describe.only.each" | "fdescribe.each"
-                        )
-                    {
-                        self.stack.push(HooksContext::default());
-                    }
+                if Self::is_test_describe_call(&node) {
+                    self.stack.push(HooksContext::default());
                 }
 
                 if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
@@ -166,15 +150,42 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
                 if let Some(node) = JsCallExpression::cast_ref(node)
-                    && let Ok(callee) = node.callee()
-                    && callee.contains_a_test_pattern() == Ok(true)
-                    && let Some(function_name) = callee.get_callee_object_name()
-                    && function_name.text_trimmed() == "describe"
+                    && Self::is_test_describe_call(&node)
                 {
                     self.stack.pop();
                 }
             }
         }
+    }
+}
+
+impl DuplicateHooksVisitor {
+    /// Determines if a [call expression] is a `describe.` call by checking:
+    /// 1. The node must be a test call expression
+    ///    e.g. `it.only`, `describe.skip`, `test`
+    /// 2. The test call must be a `describe.` call
+    ///    first section = `describe` | `fdescribe` | `xdescribe` e.g. `describe.only`, `describe.skip`
+    ///    or second section = `describe` e.g. `test.describe`
+    ///
+    /// [call expression]: crate::JsCallExpression
+    fn is_test_describe_call(node: &JsCallExpression) -> bool {
+        if let Ok(callee) = node.callee()
+            && node.is_test_call_expression() == Ok(true)
+        {
+            let text = callee.to_trimmed_text();
+            let mut split = text.split('.');
+
+            let first = split.next();
+            let second = split.next();
+
+            if matches!(first, Some("describe" | "fdescribe" | "xdescribe"))
+                || second == Some("describe")
+            {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
@@ -229,10 +240,11 @@ impl Rule for NoDuplicateTestHooks {
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "The test hook "<Emphasis>{node_name.text_trimmed()}</Emphasis>" is used multiple times in the same test block."
+                    "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
                 },
-            ).note(markup! {
-                "The presence of the same hook more than once in the same test block can create unexpected errors inside tests. Remove one of them."
+            )
+            .note(markup! {
+                "Remove this duplicate hook or consolidate the logic into a single hook."
             }),
         )
     }

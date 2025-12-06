@@ -1,190 +1,164 @@
+use crate::update;
 use biome_configuration::Configuration;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use schemars::schema::{RootSchema, Schema, SchemaObject};
-use schemars::schema_for;
-use serde_json::to_string;
-use xtask::{Mode, Result, project_root};
-use xtask_codegen::update;
+use schemars::{Schema, schema_for};
+use serde_json::{Map, Value, to_string};
+use xtask_glue::*;
 
-pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {
-    let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
-
-    let schema = rename_partial_references_in_schema(schema_for!(Configuration));
+/// Returns the configuration schema as a string
+pub fn generate_schema_as_string() -> Result<String> {
+    let schema = rename_references_in_schema(schema_for!(Configuration));
 
     let json_schema = to_string(&schema)?;
     let parsed = parse_json(&json_schema, JsonParserOptions::default());
     let formatted =
-        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
-            .unwrap()
-            .print()
-            .unwrap();
+        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())?
+            .print()?;
 
-    update(&schema_path_npm, formatted.as_code(), &mode)?;
+    Ok(formatted.into_code())
+}
+
+/// Generate the schema and saves it at `packages/@biomejs/biome/configuration_schema.json`
+pub fn generate_configuration_schema(mode: Mode) -> Result<()> {
+    let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
+
+    let schema = generate_schema_as_string()?;
+
+    update(&schema_path_npm, schema.as_str(), &mode)?;
 
     Ok(())
 }
 
-/// Strips all "Partial" prefixes from type names in the schema.
+/// Rename complex type names with simpler ones.
 ///
-/// We do this to avoid leaking our `Partial` derive macro to the outside world,
-/// since it should be just an implementation detail.
-fn rename_partial_references_in_schema(mut schema: RootSchema) -> RootSchema {
-    if let Some(meta) = schema.schema.metadata.as_mut()
-        && let Some(title) = meta.title.as_ref()
+/// Complex names are generated from generic types.
+fn rename_type(name: &str) -> Option<String> {
+    if let Some(stripped) = name.strip_prefix("RuleWithOptions_for_") {
+        Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleWithFixOptions_for_") {
+        Some(format!("RuleWith{stripped}"))
+    } else if let Some(stripped) = name.strip_prefix("RuleAssistWithOptions_for_") {
+        Some(format!("RuleAssistWith{stripped}"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
     {
-        if title == "RuleWithOptions_for_Null" {
-            meta.title = Some("RuleWithNoOptions".to_string());
-        } else if title == "RuleWithFixOptions_for_Null" {
-            meta.title = Some("RuleWithFixNoOptions".to_string());
-        } else if title == "RuleConfiguration_for_Null" {
-            meta.title = Some("RuleConfiguration".to_string());
-        } else if title == "RuleFixConfiguration_for_Null" {
-            meta.title = Some("RuleFixConfiguration".to_string());
-        } else if let Some(stripped) = title.strip_prefix("RuleWithOptions_for_") {
-            meta.title = Some(format!("RuleWith{stripped}"));
-        } else if let Some(stripped) = title.strip_prefix("RuleWithFixOptions_for_") {
-            meta.title = Some(format!("RuleWith{stripped}"));
-        } else if let Some(stripped) = title
-            .strip_prefix("RuleConfiguration_for_")
-            .map(|x| x.strip_suffix("Options").unwrap_or(x))
-        {
-            meta.title = Some(format!("{stripped}Configuration"));
-        } else if let Some(stripped) = title
-            .strip_prefix("RuleFixConfiguration_for_")
-            .map(|x| x.strip_suffix("Options").unwrap_or(x))
-        {
-            meta.title = Some(format!("{stripped}Configuration"));
-        }
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleFixConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else if let Some(stripped) = name
+        .strip_prefix("RuleAssistConfiguration_for_")
+        .map(|x| x.strip_suffix("Options").unwrap_or(x))
+    {
+        Some(format!("{stripped}Configuration"))
+    } else {
+        name.strip_prefix("SeverityOrGroup_for_")
+            .map(|stripped| format!("SeverityOr{stripped}"))
+    }
+}
+
+/// Rename complex names with simpler ones.
+///
+/// Complex names are generated from generic types.
+fn rename_references_in_schema(mut schema: Schema) -> Schema {
+    // Rename the root schema title if needed
+    if let Some(title) = schema.get("title").and_then(|v| v.as_str())
+        && let Some(renamed_title) = rename_type(title)
+    {
+        schema.insert("title".to_string(), Value::String(renamed_title));
     }
 
-    rename_partial_references_in_schema_object(&mut schema.schema);
+    // Rename references in the root schema value
+    if let Some(obj) = schema.as_object_mut() {
+        rename_references_in_object(obj);
+    }
 
-    schema.definitions = schema
-        .definitions
-        .into_iter()
-        .map(|(mut key, mut schema)| {
-            if key == "RuleWithOptions_for_Null" || key == "RuleWithFixOptions_for_Null" {
-                key = if key == "RuleWithOptions_for_Null" {
-                    "RuleWithNoOptions".to_string()
-                } else {
-                    "RuleWithFixNoOptions".to_string()
-                };
-                if let Schema::Object(schema_object) = &mut schema
-                    && let Some(object) = &mut schema_object.object
-                {
-                    object.required.remove("options");
-                    object.properties.remove("options");
+    // Process definitions (try both $defs and definitions for backwards compatibility)
+    for defs_key in ["$defs", "definitions"] {
+        if let Some(Value::Object(defs)) = schema.get_mut(defs_key) {
+            let keys_to_rename: Vec<_> = defs
+                .keys()
+                .filter_map(|key| rename_type(key).map(|new_key| (key.clone(), new_key)))
+                .collect();
+
+            // Rename definition keys
+            for (old_key, new_key) in keys_to_rename {
+                if let Some(value) = defs.remove(&old_key) {
+                    defs.insert(new_key, value);
                 }
-            } else if key == "RuleConfiguration_for_Null" {
-                key = "RuleConfiguration".to_string();
-            } else if key == "RuleFixConfiguration_for_Null" {
-                key = "RuleFixConfiguration".to_string();
-            } else if let Some(stripped) = key.strip_prefix("RuleWithOptions_for_") {
-                key = format!("RuleWith{stripped}");
-                if let Schema::Object(schema_object) = &mut schema
-                    && let Some(object) = &mut schema_object.object
-                {
-                    object.required.remove("options");
-                }
-            } else if let Some(stripped) = key.strip_prefix("RuleWithFixOptions_for_") {
-                key = format!("RuleWith{stripped}");
-                if let Schema::Object(schema_object) = &mut schema
-                    && let Some(object) = &mut schema_object.object
-                {
-                    object.required.remove("options");
-                }
-            } else if let Some(stripped) = key
-                .strip_prefix("RuleConfiguration_for_")
-                .map(|x| x.strip_suffix("Options").unwrap_or(x))
-            {
-                key = format!("{stripped}Configuration");
-            } else if let Some(stripped) = key
-                .strip_prefix("RuleFixConfiguration_for_")
-                .map(|x| x.strip_suffix("Options").unwrap_or(x))
-            {
-                key = format!("{stripped}Configuration");
             }
 
-            if let Schema::Object(object) = &mut schema {
-                rename_partial_references_in_schema_object(object);
+            // Recursively process each definition
+            for value in defs.values_mut() {
+                if let Value::Object(obj) = value {
+                    rename_references_in_object(obj);
+                }
             }
-
-            (key, schema)
-        })
-        .collect();
+            break; // Only process the first one found
+        }
+    }
 
     schema
 }
 
-fn rename_partial_references_in_schema_object(object: &mut SchemaObject) {
-    if let Some(object) = &mut object.object {
-        for prop_schema in object.properties.values_mut() {
-            if let Schema::Object(object) = prop_schema {
-                rename_partial_references_in_schema_object(object);
+/// Recursively rename references in a schema object
+fn rename_references_in_object(obj: &mut Map<String, Value>) {
+    // Rename $ref if it references a definition that should be renamed
+    if let Some(Value::String(reference)) = obj.get_mut("$ref") {
+        if let Some(stripped_ref) = reference.strip_prefix("#/definitions/")
+            && let Some(renamed_ref) = rename_type(stripped_ref)
+        {
+            *reference = format!("#/definitions/{renamed_ref}");
+        } else if let Some(stripped_ref) = reference.strip_prefix("#/$defs/")
+            && let Some(renamed_ref) = rename_type(stripped_ref)
+        {
+            *reference = format!("#/$defs/{renamed_ref}");
+        }
+    }
+
+    // Process properties
+    if let Some(Value::Object(properties)) = obj.get_mut("properties") {
+        for prop_value in properties.values_mut() {
+            if let Value::Object(prop_obj) = prop_value {
+                rename_references_in_object(prop_obj);
             }
         }
     }
 
-    if let Some(reference) = &mut object.reference {
-        if reference == "#/definitions/RuleWithOptions_for_Null" {
-            *reference = "#/definitions/RuleWithNoOptions".to_string();
-        } else if reference == "#/definitions/RuleWithFixOptions_for_Null" {
-            *reference = "#/definitions/RuleWithFixNoOptions".to_string();
-        } else if reference == "#/definitions/RuleConfiguration_for_Null" {
-            *reference = "#/definitions/RuleConfiguration".to_string();
-        } else if reference == "#/definitions/RuleFixConfiguration_for_Null" {
-            *reference = "#/definitions/RuleFixConfiguration".to_string();
-        } else if let Some(stripped) = reference.strip_prefix("#/definitions/RuleWithOptions_for_")
-        {
-            *reference = format!("#/definitions/RuleWith{stripped}");
-        } else if let Some(stripped) =
-            reference.strip_prefix("#/definitions/RuleWithFixOptions_for_")
-        {
-            *reference = format!("#/definitions/RuleWith{stripped}");
-        } else if let Some(stripped) = reference
-            .strip_prefix("#/definitions/RuleConfiguration_for_")
-            .map(|x| x.strip_suffix("Options").unwrap_or(x))
-        {
-            *reference = format!("#/definitions/{stripped}Configuration");
-        } else if let Some(stripped) = reference
-            .strip_prefix("#/definitions/RuleFixConfiguration_for_")
-            .map(|x| x.strip_suffix("Options").unwrap_or(x))
-        {
-            *reference = format!("#/definitions/{stripped}Configuration");
+    // Process items
+    if let Some(items) = obj.get_mut("items") {
+        match items {
+            Value::Object(items_obj) => rename_references_in_object(items_obj),
+            Value::Array(arr) => {
+                for item in arr {
+                    if let Value::Object(item_obj) = item {
+                        rename_references_in_object(item_obj);
+                    }
+                }
+            }
+            _ => {}
         }
     }
 
-    if let Some(subschemas) = &mut object.subschemas {
-        rename_partial_references_in_optional_schema_vec(&mut subschemas.all_of);
-        rename_partial_references_in_optional_schema_vec(&mut subschemas.any_of);
-        rename_partial_references_in_optional_schema_vec(&mut subschemas.one_of);
-
-        rename_partial_references_in_optional_schema_box(&mut subschemas.not);
-        rename_partial_references_in_optional_schema_box(&mut subschemas.if_schema);
-        rename_partial_references_in_optional_schema_box(&mut subschemas.then_schema);
-        rename_partial_references_in_optional_schema_box(&mut subschemas.else_schema);
+    // Process subschemas (allOf, anyOf, oneOf)
+    for subschema_key in ["allOf", "anyOf", "oneOf"] {
+        if let Some(Value::Array(schemas)) = obj.get_mut(subschema_key) {
+            for schema in schemas {
+                if let Value::Object(schema_obj) = schema {
+                    rename_references_in_object(schema_obj);
+                }
+            }
+        }
     }
-}
 
-fn rename_partial_references_in_optional_schema_box(schema: &mut Option<Box<Schema>>) {
-    if let Some(schema) = schema
-        && let Schema::Object(object) = schema.as_mut()
-    {
-        rename_partial_references_in_schema_object(object);
-    }
-}
-
-fn rename_partial_references_in_optional_schema_vec(schemas: &mut Option<Vec<Schema>>) {
-    if let Some(schemas) = schemas {
-        rename_partial_references_in_schema_slice(schemas);
-    }
-}
-
-fn rename_partial_references_in_schema_slice(schemas: &mut [Schema]) {
-    for schema in schemas {
-        if let Schema::Object(object) = schema {
-            rename_partial_references_in_schema_object(object);
+    // Process single subschemas (not, if, then, else)
+    for key in ["not", "if", "then", "else"] {
+        if let Some(Value::Object(schema_obj)) = obj.get_mut(key) {
+            rename_references_in_object(schema_obj);
         }
     }
 }

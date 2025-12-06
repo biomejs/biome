@@ -1,7 +1,7 @@
 use crate::js_kinds_src::{AstSrc, Field};
 use crate::language_kind::LanguageKind;
 use quote::{format_ident, quote};
-use xtask::Result;
+use xtask_glue::Result;
 
 pub fn generate_nodes_mut(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let node_boilerplate_impls: Vec<_> = ast
@@ -88,6 +88,6 @@ pub fn generate_nodes_mut(ast: &AstSrc, language_kind: LanguageKind) -> Result<S
         .replace("T ! [ ", "T![")
         .replace(" ] )", "])");
 
-    let pretty = xtask::reformat(ast)?;
+    let pretty = xtask_glue::reformat(ast)?;
     Ok(pretty)
 }

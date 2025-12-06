@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: numeric_literals.ts
+---
+# Input
+```ts
+interface _NumericKeys {
+	99: string;
+	11: string;
+	5: number;
+}
+
+```
+
+# Diagnostics
+```
+numeric_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _NumericKeys {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	99: string;
+  > 3 │ 	11: string;
+  > 4 │ 	5: number;
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _NumericKeys {
+    2   │ - → 99:·string;
+      2 │ + → 5:·number;
+    3 3 │   	11: string;
+    4   │ - → 5:·number;
+      4 │ + → 99:·string;
+    5 5 │   }
+    6 6 │   
+  
+
+```

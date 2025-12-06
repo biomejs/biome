@@ -1,0 +1,75 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<Foo @update:modelValue="onUpdate" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                VueVOnShorthandDirective {
+                    at_token: AT@5..6 "@" [] [],
+                    arg: VueStaticArgument {
+                        name_token: HTML_LITERAL@6..23 "update:modelValue" [] [],
+                    },
+                    modifiers: VueModifierList [],
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@23..24 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@24..35 "\"onUpdate\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@35..36 "/" [] [],
+            r_angle_token: R_ANGLE@36..37 ">" [] [],
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..38
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..37
+    0: HTML_SELF_CLOSING_ELEMENT@0..37
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..5
+        0: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@5..35
+        0: VUE_V_ON_SHORTHAND_DIRECTIVE@5..35
+          0: AT@5..6 "@" [] []
+          1: VUE_STATIC_ARGUMENT@6..23
+            0: HTML_LITERAL@6..23 "update:modelValue" [] []
+          2: VUE_MODIFIER_LIST@23..23
+          3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..35
+            0: EQ@23..24 "=" [] []
+            1: HTML_STRING@24..35
+              0: HTML_STRING_LITERAL@24..35 "\"onUpdate\"" [] [Whitespace(" ")]
+      3: SLASH@35..36 "/" [] []
+      4: R_ANGLE@36..37 ">" [] []
+  4: EOF@37..38 "" [Newline("\n")] []
+
+```

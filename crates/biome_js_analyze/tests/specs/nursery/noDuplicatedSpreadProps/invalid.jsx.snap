@@ -1,0 +1,128 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+const Invalid1 = () => {
+	return <div {...props} something="else" {...props}></div>
+}
+
+const Invalid2 = () => {
+	return <div {...foo.bar} {...props} {...props}></div>
+}
+
+const Invalid3 = () => {
+	return <div {...{}} {...props} {...props}></div>
+}
+
+const Invalid4 = () => {
+	return <div {...props} something="else" {...props} />
+}
+
+const Invalid5 = () => {
+	return <div {...foo.bar} {...props} {...props} />
+}
+
+const Invalid6 = () => {
+	return <div {...{}} {...props} {...props} />
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+    1 │ const Invalid1 = () => {
+  > 2 │ 	return <div {...props} something="else" {...props}></div>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```
+
+```
+invalid.jsx:6:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+    5 │ const Invalid2 = () => {
+  > 6 │ 	return <div {...foo.bar} {...props} {...props}></div>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```
+
+```
+invalid.jsx:10:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+     9 │ const Invalid3 = () => {
+  > 10 │ 	return <div {...{}} {...props} {...props}></div>
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```
+
+```
+invalid.jsx:14:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+    13 │ const Invalid4 = () => {
+  > 14 │ 	return <div {...props} something="else" {...props} />
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```
+
+```
+invalid.jsx:18:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+    17 │ const Invalid5 = () => {
+  > 18 │ 	return <div {...foo.bar} {...props} {...props} />
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```
+
+```
+invalid.jsx:22:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The expression props has spread more than once.
+  
+    21 │ const Invalid6 = () => {
+  > 22 │ 	return <div {...{}} {...props} {...props} />
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+
+```

@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<marquee />
+<blink />
+<blink></blink>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <marquee />
+      │ ^^^^^^^^^^^
+    3 │ <blink />
+    4 │ <blink></blink>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'marquee' element.
+  
+    1   │ - <!--·should·generate·diagnostics·-->
+    2   │ - <marquee·/>
+      1 │ + 
+    3 2 │   <blink />
+    4 3 │   <blink></blink>
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <marquee />
+  > 3 │ <blink />
+      │ ^^^^^^^^^
+    4 │ <blink></blink>
+    5 │ 
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <marquee />
+    3   │ - <blink·/>
+    4 3 │   <blink></blink>
+    5 4 │   
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    2 │ <marquee />
+    3 │ <blink />
+  > 4 │ <blink></blink>
+      │ ^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+    2 2 │   <marquee />
+    3 3 │   <blink />
+    4   │ - <blink></blink>
+    5 4 │   
+  
+
+```
