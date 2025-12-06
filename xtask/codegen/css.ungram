@@ -63,6 +63,7 @@ CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
 CssBogusIfBranch = SyntaxElement*
 CssBogusIfTest = SyntaxElement*
+CssBogusIfTestBooleanExpr = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -1855,12 +1856,16 @@ CssParameter = AnyCssExpression
 //  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 //  media( <media-feature> | <media-condition> ) |
 //  style( <style-query> )
+//
+// if(style(--color: green)): red);
 CssIfFunction =
 	'if'
 	'('
 	CssIfBranchList
 	')'
 
+// if(style(--theme: dark): red; else: blue)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfBranchList = AnyCssIfBranch (';' AnyCssIfBranch)* ';'?
 
 // https://drafts.csswg.org/css-values-5/#typedef-boolean-expr
@@ -1872,8 +1877,12 @@ AnyCssIfTestBooleanExpr =
 	CssIfTestBooleanNotExpr
 	| AnyCssIfTestBooleanAndCombinableExpr
 	| AnyCssIfTestBooleanOrCombinableExpr
+	| CssBogusIfTestBooleanExpr
 
 // not <boolean-expr-group>
+//
+// if(not style(--color: green): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanNotExpr =
 	'not'
 	expression: AnyCssIfTestBooleanExprGroup
@@ -1882,6 +1891,8 @@ AnyCssIfTestBooleanAndCombinableExpr =
 	AnyCssIfTestBooleanExprGroup
 	| CssIfTestBooleanAndExpr
 
+// if(style(--color: green) and style(--color: blue)): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanAndExpr =
 	left: AnyCssIfTestBooleanExprGroup
 	'and'
@@ -1891,6 +1902,8 @@ AnyCssIfTestBooleanOrCombinableExpr =
 	AnyCssIfTestBooleanExprGroup
 	| CssIfTestBooleanOrExpr
 
+// if(style(--color: green) or style(--color: blue)): red)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanOrExpr =
 	left: AnyCssIfTestBooleanExprGroup
 	'or'
@@ -1902,15 +1915,22 @@ AnyCssIfTestBooleanExprGroup =
 	| CssIfTestBooleanExprInParens
 
 // ( <boolean-expr> )
+//
+// if(style(--foo: bar) and (style(--fiz: buzz) or style(--baz: qux)): red)
+//                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfTestBooleanExprInParens =
 	'('
 	expression: AnyCssIfTestBooleanExpr
 	')'
 
+// if(media(width < 700px): 0 auto; else: 20px auto;);
+//                                  ^^^^
 CssElseKeyword = 'else'
 
 AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
 
+// if(style(--color: green): red; else: blue)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^
 CssIfBranch =
 	condition: AnyCssIfCondition
 	':'
@@ -1920,6 +1940,8 @@ AnyCssIfBranch =
 	CssIfBranch
 	| CssBogusIfBranch
 
+// supports(color: lch(75% 0 0)): lch(75% 0 0)
+//          ^^^^^^^^^^^^^^^^^^^
 CssIfSupportsIdentifierTest =
 	ident: CssIdentifier
 	':'
@@ -1929,6 +1951,8 @@ AnyCssIfSupportsTestCondition =
 	CssIfSupportsIdentifierTest
 	| AnyCssImportSupportsCondition
 
+// if(supports(selector(:buffering)): 1em;)
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssIfSupportsTest =
 	'supports'
 	'('
@@ -1939,6 +1963,8 @@ AnyCssIfMediaTestQuery =
 	AnyCssMediaCondition
 	| AnyCssQueryFeature
 
+// if(media(width > 700px): calc(3rem + 2vw))
+//    ^^^^^^^^^^^^^^^^^^^^
 CssIfMediaTest =
 	'media'
 	'('

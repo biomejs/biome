@@ -14,6 +14,7 @@ impl FormatRule<AnyCssIfTestBooleanExpr> for FormatAnyCssIfTestBooleanExpr {
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanOrCombinableExpr(node) => {
                 node.format().fmt(f)
             }
+            AnyCssIfTestBooleanExpr::CssBogusIfTestBooleanExpr(node) => node.format().fmt(f),
             AnyCssIfTestBooleanExpr::CssIfTestBooleanNotExpr(node) => node.format().fmt(f),
         }
     }
