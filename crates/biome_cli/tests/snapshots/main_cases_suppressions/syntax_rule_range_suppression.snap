@@ -19,31 +19,6 @@ function sommething(chalk: ChalkInstance) {
 # Emitted Messages
 
 ```block
-file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
-  
-    2 │ // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
-    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
-  > 4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
-      │             ^^^^^^^^^^^^^^^^^^
-    5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
-    6 │ 
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Unsafe fix: Remove the unused imports.
-  
-    2 2 │   // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
-    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
-    4   │ - import·type·{·ChalkInstance2·}·from·"chalk2"·with·{·"resolution-mode":·"import"·};
-    5 4 │   // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
-    6 5 │   
-  
-
-```
-
-```block
 file.ts:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function sommething is unused.
@@ -65,6 +40,31 @@ file.ts:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
       7 │ + function·_sommething(chalk:·ChalkInstance)·{
     8 8 │     console.log(chalk.yellow('we do something here'));
     9 9 │   }
+  
+
+```
+
+```block
+file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+  > 4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+      │             ^^^^^^^^^^^^^^^^^^
+    5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 2 │   // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4   │ - import·type·{·ChalkInstance2·}·from·"chalk2"·with·{·"resolution-mode":·"import"·};
+    5 4 │   // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 5 │   
   
 
 ```

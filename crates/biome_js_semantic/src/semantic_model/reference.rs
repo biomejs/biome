@@ -1,12 +1,12 @@
 use biome_js_syntax::{AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression};
 
 use super::*;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Provides all information regarding to a specific reference.
 #[derive(Debug)]
 pub struct Reference {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: ReferenceId,
 }
 
@@ -71,8 +71,8 @@ impl Reference {
     }
 
     /// Returns the node of this reference
-    pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.binding_node_by_start[&self.range_start()]
+    pub fn syntax(&self) -> JsSyntaxNode {
+        self.data.binding_node_by_start[&self.range_start()].to_node(self.data.to_root().syntax())
     }
 
     /// Returns the binding of this reference
@@ -126,7 +126,7 @@ impl Reference {
 /// Provides all information regarding a specific function or method call.
 #[derive(Debug)]
 pub struct FunctionCall {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: ReferenceId,
 }
 
@@ -137,8 +137,8 @@ impl FunctionCall {
     }
 
     /// Returns the node of this reference
-    pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.binding_node_by_start[&self.range_start()]
+    pub fn syntax(&self) -> JsSyntaxNode {
+        self.data.binding_node_by_start[&self.range_start()].to_node(self.data.to_root().syntax())
     }
 
     /// Returns the typed AST node of this reference
@@ -182,14 +182,15 @@ pub struct SemanticModelUnresolvedReference {
 
 #[derive(Debug)]
 pub struct UnresolvedReference {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: u32,
 }
 
 impl UnresolvedReference {
-    pub fn syntax(&self) -> &JsSyntaxNode {
+    pub fn syntax(&self) -> JsSyntaxNode {
         let reference = &self.data.unresolved_reference(self.id);
-        &self.data.binding_node_by_start[&reference.range.start()]
+        self.data.binding_node_by_start[&reference.range.start()]
+            .to_node(self.data.to_root().syntax())
     }
 
     pub fn tree(&self) -> AnyJsIdentifierUsage {

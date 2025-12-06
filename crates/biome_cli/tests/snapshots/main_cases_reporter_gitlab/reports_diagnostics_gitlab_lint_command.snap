@@ -66,18 +66,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 [
   {
-    "description": "This import is unused.",
-    "check_name": "lint/correctness/noUnusedImports",
-    "fingerprint": "12247285991248580551",
-    "severity": "major",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 1
-      }
-    }
-  },
-  {
     "description": "Several of these imports are unused.",
     "check_name": "lint/correctness/noUnusedImports",
     "fingerprint": "15587197597897976171",
@@ -162,9 +150,81 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
+    "description": "This import is unused.",
+    "check_name": "lint/correctness/noUnusedImports",
+    "fingerprint": "12247285991248580551",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
     "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "1113933937129958476",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 15
+      }
+    }
+  },
+  {
+    "description": "This variable f is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "17581182407618726497",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 14
+      }
+    }
+  },
+  {
+    "description": "This variable f is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "7876075472853952714",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 16
+      }
+    }
+  },
+  {
+    "description": "This variable f is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "9844529903890075314",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
+    "description": "This variable f is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "13391528371208812095",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
+    "description": "This variable f is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "17201637410894263274",
     "severity": "major",
     "location": {
       "path": "main.ts",
@@ -198,66 +258,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
-    "description": "This variable f is unused.",
-    "check_name": "lint/correctness/noUnusedVariables",
-    "fingerprint": "17581182407618726497",
-    "severity": "major",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 14
-      }
-    }
-  },
-  {
-    "description": "This variable f is unused.",
-    "check_name": "lint/correctness/noUnusedVariables",
-    "fingerprint": "7876075472853952714",
-    "severity": "major",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 15
-      }
-    }
-  },
-  {
-    "description": "This variable f is unused.",
-    "check_name": "lint/correctness/noUnusedVariables",
-    "fingerprint": "9844529903890075314",
-    "severity": "major",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 16
-      }
-    }
-  },
-  {
-    "description": "This variable f is unused.",
-    "check_name": "lint/correctness/noUnusedVariables",
-    "fingerprint": "13391528371208812095",
-    "severity": "major",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 17
-      }
-    }
-  },
-  {
-    "description": "This variable f is unused.",
-    "check_name": "lint/correctness/noUnusedVariables",
-    "fingerprint": "17201637410894263274",
-    "severity": "major",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 18
-      }
-    }
-  },
-  {
     "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "8145265504203493155",
@@ -265,7 +265,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 4
+        "begin": 5
       }
     }
   },
@@ -277,19 +277,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 18
-      }
-    }
-  },
-  {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "8601445511714044637",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 19
+        "begin": 15
       }
     }
   },
@@ -301,19 +289,43 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 6
+        "begin": 7
       }
     }
   },
   {
-    "description": "Using == may be unsafe if you are relying on type coercion.",
-    "check_name": "lint/suspicious/noDoubleEquals",
-    "fingerprint": "18366180239442454213",
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "2162620893763553997",
     "severity": "critical",
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 7
+        "begin": 15
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "8601445511714044637",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 16
+      }
+    }
+  },
+  {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "1339939023879653211",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 16
       }
     }
   },
@@ -342,6 +354,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "18285621777301161439",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "7842353260163629265",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
     "description": "This is an unexpected use of the debugger statement.",
     "check_name": "lint/suspicious/noDebugger",
     "fingerprint": "15654042585868945756",
@@ -350,6 +386,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
       "path": "index.ts",
       "lines": {
         "begin": 11
+      }
+    }
+  },
+  {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "10582308848964879795",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "4835254919265693190",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 18
       }
     }
   },
@@ -368,72 +428,24 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
   {
     "description": "This variable implicitly has the any type.",
     "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "2162620893763553997",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 14
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "1339939023879653211",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 15
-      }
-    }
-  },
-  {
-    "description": "Using == may be unsafe if you are relying on type coercion.",
-    "check_name": "lint/suspicious/noDoubleEquals",
-    "fingerprint": "17264185503232320851",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 5
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "18285621777301161439",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 16
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "10582308848964879795",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 17
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
     "fingerprint": "1645910940962206533",
     "severity": "critical",
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 18
+        "begin": 19
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "3103625193263367010",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 19
       }
     }
   },
@@ -445,7 +457,31 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 19
+        "begin": 14
+      }
+    }
+  },
+  {
+    "description": "Using == may be unsafe if you are relying on type coercion.",
+    "check_name": "lint/suspicious/noDoubleEquals",
+    "fingerprint": "18366180239442454213",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 6
+      }
+    }
+  },
+  {
+    "description": "Using == may be unsafe if you are relying on type coercion.",
+    "check_name": "lint/suspicious/noDoubleEquals",
+    "fingerprint": "17264185503232320851",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 4
       }
     }
   },
@@ -462,93 +498,9 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "7842353260163629265",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 15
-      }
-    }
-  },
-  {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "4835254919265693190",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 16
-      }
-    }
-  },
-  {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "3103625193263367010",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 17
-      }
-    }
-  },
-  {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "710662920264236176",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 17
-      }
-    }
-  },
-  {
     "description": "This variable implicitly has the any type.",
     "check_name": "lint/suspicious/noImplicitAnyLet",
     "fingerprint": "5606951167272714146",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 15
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "5567686698145153289",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 16
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "12478924188343149788",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 17
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "12221078446259530036",
     "severity": "critical",
     "location": {
       "path": "main.ts",
@@ -560,12 +512,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
   {
     "description": "This variable implicitly has the any type.",
     "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "16715583845852699027",
+    "fingerprint": "5567686698145153289",
     "severity": "critical",
     "location": {
       "path": "main.ts",
       "lines": {
-        "begin": 19
+        "begin": 14
       }
     }
   },
@@ -584,24 +536,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
   {
     "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
     "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "11240683920503391137",
+    "fingerprint": "710662920264236176",
     "severity": "critical",
     "location": {
       "path": "main.ts",
       "lines": {
         "begin": 15
-      }
-    }
-  },
-  {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "14476601875768703957",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 16
       }
     }
   },
@@ -618,26 +558,38 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
-    "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "16119156397775465086",
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "12478924188343149788",
     "severity": "critical",
     "location": {
       "path": "main.ts",
       "lines": {
-        "begin": 18
+        "begin": 15
       }
     }
   },
   {
     "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
     "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "16860125444609679494",
+    "fingerprint": "11240683920503391137",
     "severity": "critical",
     "location": {
       "path": "main.ts",
       "lines": {
-        "begin": 19
+        "begin": 16
+      }
+    }
+  },
+  {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "12221078446259530036",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 16
       }
     }
   },
@@ -666,6 +618,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "16715583845852699027",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "14476601875768703957",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
     "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "3753031813987153088",
@@ -690,6 +666,18 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     }
   },
   {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "16119156397775465086",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
     "description": "This is an unexpected use of the debugger statement.",
     "check_name": "lint/suspicious/noDebugger",
     "fingerprint": "12725857318666866021",
@@ -698,6 +686,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
       "path": "main.ts",
       "lines": {
         "begin": 10
+      }
+    }
+  },
+  {
+    "description": "This variable implicitly has the any type.",
+    "check_name": "lint/suspicious/noImplicitAnyLet",
+    "fingerprint": "97210195248059969",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 19
+      }
+    }
+  },
+  {
+    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "16860125444609679494",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 19
       }
     }
   },
@@ -722,18 +734,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
       "path": "main.ts",
       "lines": {
         "begin": 12
-      }
-    }
-  },
-  {
-    "description": "This variable implicitly has the any type.",
-    "check_name": "lint/suspicious/noImplicitAnyLet",
-    "fingerprint": "97210195248059969",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 14
       }
     }
   }

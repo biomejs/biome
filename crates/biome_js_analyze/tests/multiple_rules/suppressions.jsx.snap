@@ -722,6 +722,42 @@ suppressions.jsx:128:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━
 ```
 
 ```
+suppressions.jsx:208:7 lint/correctness/noChildrenProp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid passing children using a prop
+  
+    206 │     <span
+    207 │       role="button"
+  > 208 │       children={[]}
+        │       ^^^^^^^^
+    209 │     >Some text</span>
+    210 │   )
+  
+  i The canonical way to pass children in React is to use JSX elements
+  
+  i Safe fix: Suppress rule lint/correctness/noChildrenProp for this line.
+  
+    206 206 │       <span
+    207 207 │         role="button"
+    208     │ - ······children={[]}
+        208 │ + ······//·biome-ignore·lint/correctness/noChildrenProp:·<explanation>
+        209 │ + ······children={[]}
+    209 210 │       >Some text</span>
+    210 211 │     )
+  
+  i Safe fix: Suppress rule lint/correctness/noChildrenProp for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/correctness/noChildrenProp:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
 suppressions.jsx:293:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
@@ -865,42 +901,6 @@ suppressions.jsx:328:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
       1   1 │   ///! lint/a11y/useKeyWithClickEvents
       2     │ - ///!·lint/a11y/useSemanticElements
           2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
-          3 │ + ///!·lint/a11y/useSemanticElements
-      3   4 │   ///! lint/correctness/noChildrenProp
-      4   5 │   
-  
-
-```
-
-```
-suppressions.jsx:208:7 lint/correctness/noChildrenProp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid passing children using a prop
-  
-    206 │     <span
-    207 │       role="button"
-  > 208 │       children={[]}
-        │       ^^^^^^^^
-    209 │     >Some text</span>
-    210 │   )
-  
-  i The canonical way to pass children in React is to use JSX elements
-  
-  i Safe fix: Suppress rule lint/correctness/noChildrenProp for this line.
-  
-    206 206 │       <span
-    207 207 │         role="button"
-    208     │ - ······children={[]}
-        208 │ + ······//·biome-ignore·lint/correctness/noChildrenProp:·<explanation>
-        209 │ + ······children={[]}
-    209 210 │       >Some text</span>
-    210 211 │     )
-  
-  i Safe fix: Suppress rule lint/correctness/noChildrenProp for the whole file.
-  
-      1   1 │   ///! lint/a11y/useKeyWithClickEvents
-      2     │ - ///!·lint/a11y/useSemanticElements
-          2 │ + /**·biome-ignore-all·lint/correctness/noChildrenProp:·<explanation>·*/
           3 │ + ///!·lint/a11y/useSemanticElements
       3   4 │   ///! lint/correctness/noChildrenProp
       4   5 │   

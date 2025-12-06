@@ -44,14 +44,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-::warning title=lint/correctness/noUnusedImports,file=index.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
-```
-
-```block
-::warning title=lint/correctness/noUnusedImports,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
-```
-
-```block
 ::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable f is unused.
 ```
 
@@ -60,11 +52,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedImports,file=main.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedImports,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
 ```
 
 ```block
@@ -76,7 +68,19 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+```
+
+```block
 ::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
+```
+
+```block
+::error title=lint/suspicious/noRedeclare,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
 ```
 
 ```block
@@ -92,15 +96,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=lint/suspicious/noImplicitAnyLet,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/suspicious/noRedeclare,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
-```
-
-```block
 ::error title=lint/suspicious/noRedeclare,file=index.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
+```
+
+```block
+::error title=lint/suspicious/noImplicitAnyLet,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
 ```
 
 ```block
@@ -109,6 +109,10 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 ::error title=assist/source/organizeImports,file=main.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
+```
+
+```block
+::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
 ```
 
 ```block
@@ -124,15 +128,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
-```
-
-```block
 ::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
+```
+
+```block
+::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
 ```
 
 ```block

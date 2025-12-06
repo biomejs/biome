@@ -293,66 +293,6 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency on memoizedCallback.
-  
-    32 │   const [isPending, startTransition] = useTransition();
-    33 │   const event = useEffectEvent(() => {});
-  > 34 │   useEffect(() => {
-       │   ^^^^^^^^^
-    35 │       console.log(name);
-    36 │       setName(1);
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    39 │       dispatch(1);
-    40 │ 
-  > 41 │       console.log(memoizedCallback);
-       │                   ^^^^^^^^^^^^^^^^
-    42 │       console.log(memoizedValue);
-    43 │       console.log(deferredValue);
-  
-  i Either include it or remove the dependency array.
-  
-  i Unsafe fix: Add the missing dependency to the list.
-  
-    48 │ ··},·[memoizedCallback]);
-       │       ++++++++++++++++   
-
-```
-
-```
-missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
-
-  × This hook does not specify its dependency on state.
-  
-    32 │   const [isPending, startTransition] = useTransition();
-    33 │   const event = useEffectEvent(() => {});
-  > 34 │   useEffect(() => {
-       │   ^^^^^^^^^
-    35 │       console.log(name);
-    36 │       setName(1);
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    36 │       setName(1);
-    37 │ 
-  > 38 │       console.log(state);
-       │                   ^^^^^
-    39 │       dispatch(1);
-    40 │ 
-  
-  i Either include it or remove the dependency array.
-  
-  i Unsafe fix: Add the missing dependency to the list.
-  
-    48 │ ··},·[state]);
-       │       +++++   
-
-```
-
-```
-missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
-
   × This hook does not specify its dependency on name.
   
     32 │   const [isPending, startTransition] = useTransition();
@@ -377,6 +317,65 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
     48 │ ··},·[name]);
        │       ++++   
+
+```
+
+```
+missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
+
+  × This hook does not specify its dependency on memoizedValue.
+  
+    32 │   const [isPending, startTransition] = useTransition();
+    33 │   const event = useEffectEvent(() => {});
+  > 34 │   useEffect(() => {
+       │   ^^^^^^^^^
+    35 │       console.log(name);
+    36 │       setName(1);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    41 │       console.log(memoizedCallback);
+  > 42 │       console.log(memoizedValue);
+       │                   ^^^^^^^^^^^^^
+    43 │       console.log(deferredValue);
+    44 │ 
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    48 │ ··},·[memoizedValue]);
+       │       +++++++++++++   
+
+```
+
+```
+missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
+
+  × This hook does not specify its dependency on memoizedCallback.
+  
+    32 │   const [isPending, startTransition] = useTransition();
+    33 │   const event = useEffectEvent(() => {});
+  > 34 │   useEffect(() => {
+       │   ^^^^^^^^^
+    35 │       console.log(name);
+    36 │       setName(1);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    39 │       dispatch(1);
+    40 │ 
+  > 41 │       console.log(memoizedCallback);
+       │                   ^^^^^^^^^^^^^^^^
+    42 │       console.log(memoizedValue);
+    43 │       console.log(deferredValue);
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    48 │ ··},·[memoizedCallback]);
+       │       ++++++++++++++++   
 
 ```
 
@@ -413,7 +412,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency on memoizedValue.
+  × This hook does not specify its dependency on state.
   
     32 │   const [isPending, startTransition] = useTransition();
     33 │   const event = useEffectEvent(() => {});
@@ -424,18 +423,19 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i This dependency is being used here, but is not specified in the hook dependency list.
   
-    41 │       console.log(memoizedCallback);
-  > 42 │       console.log(memoizedValue);
-       │                   ^^^^^^^^^^^^^
-    43 │       console.log(deferredValue);
-    44 │ 
+    36 │       setName(1);
+    37 │ 
+  > 38 │       console.log(state);
+       │                   ^^^^^
+    39 │       dispatch(1);
+    40 │ 
   
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
   
-    48 │ ··},·[memoizedValue]);
-       │       +++++++++++++   
+    48 │ ··},·[state]);
+       │       +++++   
 
 ```
 

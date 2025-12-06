@@ -52,46 +52,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
   "diagnostics": [
     {
       "code": {
-        "url": "https://biomejs.dev/linter/rules/no-unused-imports",
-        "value": "lint/correctness/noUnusedImports"
-      },
-      "location": {
-        "path": "index.ts",
-        "range": {
-          "end": {
-            "column": 12,
-            "line": 1
-          },
-          "start": {
-            "column": 8,
-            "line": 1
-          }
-        }
-      },
-      "message": "This import is unused."
-    },
-    {
-      "code": {
-        "url": "https://biomejs.dev/linter/rules/no-unused-imports",
-        "value": "lint/correctness/noUnusedImports"
-      },
-      "location": {
-        "path": "index.ts",
-        "range": {
-          "end": {
-            "column": 11,
-            "line": 2
-          },
-          "start": {
-            "column": 10,
-            "line": 2
-          }
-        }
-      },
-      "message": "Several of these imports are unused."
-    },
-    {
-      "code": {
         "url": "https://biomejs.dev/linter/rules/no-unused-variables",
         "value": "lint/correctness/noUnusedVariables"
       },
@@ -136,7 +96,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         "value": "lint/correctness/noUnusedImports"
       },
       "location": {
-        "path": "main.ts",
+        "path": "index.ts",
         "range": {
           "end": {
             "column": 12,
@@ -156,7 +116,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         "value": "lint/correctness/noUnusedImports"
       },
       "location": {
-        "path": "main.ts",
+        "path": "index.ts",
         "range": {
           "end": {
             "column": 11,
@@ -209,6 +169,46 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This variable f is unused."
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-unused-imports",
+        "value": "lint/correctness/noUnusedImports"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 12,
+            "line": 1
+          },
+          "start": {
+            "column": 8,
+            "line": 1
+          }
+        }
+      },
+      "message": "This import is unused."
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-unused-imports",
+        "value": "lint/correctness/noUnusedImports"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 11,
+            "line": 2
+          },
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        }
+      },
+      "message": "Several of these imports are unused."
     },
     {
       "code": {
@@ -229,6 +229,41 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "The imports and exports are not sorted."
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-redeclare",
+        "value": "lint/suspicious/noRedeclare"
+      },
+      "location": {
+        "path": "index.ts",
+        "range": {
+          "end": {
+            "column": 11,
+            "line": 2
+          },
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        }
+      },
+      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 11,
+              "line": 1
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "'z' is defined here:"
+        }
+      ]
     },
     {
       "code": {
@@ -292,61 +327,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     },
     {
       "code": {
-        "url": "https://biomejs.dev/linter/rules/no-implicit-any-let",
-        "value": "lint/suspicious/noImplicitAnyLet"
-      },
-      "location": {
-        "path": "index.ts",
-        "range": {
-          "end": {
-            "column": 8,
-            "line": 9
-          },
-          "start": {
-            "column": 7,
-            "line": 9
-          }
-        }
-      },
-      "message": "This variable implicitly has the any type."
-    },
-    {
-      "code": {
-        "url": "https://biomejs.dev/linter/rules/no-redeclare",
-        "value": "lint/suspicious/noRedeclare"
-      },
-      "location": {
-        "path": "index.ts",
-        "range": {
-          "end": {
-            "column": 11,
-            "line": 2
-          },
-          "start": {
-            "column": 10,
-            "line": 2
-          }
-        }
-      },
-      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "'z' is defined here:"
-        }
-      ]
-    },
-    {
-      "code": {
         "url": "https://biomejs.dev/linter/rules/no-redeclare",
         "value": "lint/suspicious/noRedeclare"
       },
@@ -379,6 +359,26 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           "text": "'f' is defined here:"
         }
       ]
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-implicit-any-let",
+        "value": "lint/suspicious/noImplicitAnyLet"
+      },
+      "location": {
+        "path": "index.ts",
+        "range": {
+          "end": {
+            "column": 8,
+            "line": 9
+          },
+          "start": {
+            "column": 7,
+            "line": 9
+          }
+        }
+      },
+      "message": "This variable implicitly has the any type."
     },
     {
       "code": {
@@ -408,6 +408,41 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     },
     {
       "code": {
+        "url": "https://biomejs.dev/linter/rules/no-redeclare",
+        "value": "lint/suspicious/noRedeclare"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 11,
+            "line": 2
+          },
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        }
+      },
+      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 11,
+              "line": 1
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "'z' is defined here:"
+        }
+      ]
+    },
+    {
+      "code": {
         "url": "https://biomejs.dev/linter/rules/no-double-equals",
         "value": "lint/suspicious/noDoubleEquals"
       },
@@ -468,61 +503,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     },
     {
       "code": {
-        "url": "https://biomejs.dev/linter/rules/no-implicit-any-let",
-        "value": "lint/suspicious/noImplicitAnyLet"
-      },
-      "location": {
-        "path": "main.ts",
-        "range": {
-          "end": {
-            "column": 8,
-            "line": 9
-          },
-          "start": {
-            "column": 7,
-            "line": 9
-          }
-        }
-      },
-      "message": "This variable implicitly has the any type."
-    },
-    {
-      "code": {
-        "url": "https://biomejs.dev/linter/rules/no-redeclare",
-        "value": "lint/suspicious/noRedeclare"
-      },
-      "location": {
-        "path": "main.ts",
-        "range": {
-          "end": {
-            "column": 11,
-            "line": 2
-          },
-          "start": {
-            "column": 10,
-            "line": 2
-          }
-        }
-      },
-      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "'z' is defined here:"
-        }
-      ]
-    },
-    {
-      "code": {
         "url": "https://biomejs.dev/linter/rules/no-redeclare",
         "value": "lint/suspicious/noRedeclare"
       },
@@ -555,6 +535,26 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           "text": "'f' is defined here:"
         }
       ]
+    },
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-implicit-any-let",
+        "value": "lint/suspicious/noImplicitAnyLet"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 8,
+            "line": 9
+          },
+          "start": {
+            "column": 7,
+            "line": 9
+          }
+        }
+      },
+      "message": "This variable implicitly has the any type."
     },
     {
       "code": {

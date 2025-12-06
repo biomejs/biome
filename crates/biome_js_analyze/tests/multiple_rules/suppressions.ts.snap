@@ -80,78 +80,6 @@ suppressions.ts:9:15 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
 ```
 
 ```
-suppressions.ts:30:19 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Using == may be unsafe if you are relying on type coercion.
-  
-    28 │ if (1) {
-    29 │     /* biome-ignore lint/suspicious/noConsole: ... */
-  > 30 │     console.log(1 == 0)
-       │                   ^^
-    31 │     /* biome-ignore lint/suspicious/noDoubleEquals: ... */
-    32 │ }
-  
-  i == is only allowed when comparing against null.
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
-  
-    28 28 │   if (1) {
-    29 29 │       /* biome-ignore lint/suspicious/noConsole: ... */
-    30    │ - ····console.log(1·==·0)
-       30 │ + ····//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-       31 │ + ········console.log(1·==·0)
-    31 32 │       /* biome-ignore lint/suspicious/noDoubleEquals: ... */
-    32 33 │   }
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
-  
-     1  1 │   ///! lint/suspicious/noDoubleEquals
-     2    │ - ///!·lint/suspicious/noConsole
-        2 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
-        3 │ + ///!·lint/suspicious/noConsole
-     3  4 │   ///! lint/style/useArrayLiterals
-     4  5 │   
-  
-
-```
-
-```
-suppressions.ts:36:19 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Using == may be unsafe if you are relying on type coercion.
-  
-    34 │ if (1) {
-    35 │     /* biome-ignore lint/suspicious/noConsole: ... */
-  > 36 │     console.log(1 == Array())
-       │                   ^^
-    37 │     /* biome-ignore lint/suspicious/noDoubleEquals: ... */
-    38 │ }
-  
-  i == is only allowed when comparing against null.
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
-  
-    34 34 │   if (1) {
-    35 35 │       /* biome-ignore lint/suspicious/noConsole: ... */
-    36    │ - ····console.log(1·==·Array())
-       36 │ + ····//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-       37 │ + ········console.log(1·==·Array())
-    37 38 │       /* biome-ignore lint/suspicious/noDoubleEquals: ... */
-    38 39 │   }
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
-  
-     1  1 │   ///! lint/suspicious/noDoubleEquals
-     2    │ - ///!·lint/suspicious/noConsole
-        2 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
-        3 │ + ///!·lint/suspicious/noConsole
-     3  4 │   ///! lint/style/useArrayLiterals
-     4  5 │   
-  
-
-```
-
-```
 suppressions.ts:17:18 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
@@ -250,6 +178,78 @@ suppressions.ts:26:123 lint/style/useArrayLiterals  FIXABLE  ━━━━━━�
      1  1 │   ///! lint/suspicious/noDoubleEquals
      2    │ - ///!·lint/suspicious/noConsole
         2 │ + /**·biome-ignore-all·lint/style/useArrayLiterals:·<explanation>·*/
+        3 │ + ///!·lint/suspicious/noConsole
+     3  4 │   ///! lint/style/useArrayLiterals
+     4  5 │   
+  
+
+```
+
+```
+suppressions.ts:30:19 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using == may be unsafe if you are relying on type coercion.
+  
+    28 │ if (1) {
+    29 │     /* biome-ignore lint/suspicious/noConsole: ... */
+  > 30 │     console.log(1 == 0)
+       │                   ^^
+    31 │     /* biome-ignore lint/suspicious/noDoubleEquals: ... */
+    32 │ }
+  
+  i == is only allowed when comparing against null.
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
+  
+    28 28 │   if (1) {
+    29 29 │       /* biome-ignore lint/suspicious/noConsole: ... */
+    30    │ - ····console.log(1·==·0)
+       30 │ + ····//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       31 │ + ········console.log(1·==·0)
+    31 32 │       /* biome-ignore lint/suspicious/noDoubleEquals: ... */
+    32 33 │   }
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1  1 │   ///! lint/suspicious/noDoubleEquals
+     2    │ - ///!·lint/suspicious/noConsole
+        2 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        3 │ + ///!·lint/suspicious/noConsole
+     3  4 │   ///! lint/style/useArrayLiterals
+     4  5 │   
+  
+
+```
+
+```
+suppressions.ts:36:19 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using == may be unsafe if you are relying on type coercion.
+  
+    34 │ if (1) {
+    35 │     /* biome-ignore lint/suspicious/noConsole: ... */
+  > 36 │     console.log(1 == Array())
+       │                   ^^
+    37 │     /* biome-ignore lint/suspicious/noDoubleEquals: ... */
+    38 │ }
+  
+  i == is only allowed when comparing against null.
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
+  
+    34 34 │   if (1) {
+    35 35 │       /* biome-ignore lint/suspicious/noConsole: ... */
+    36    │ - ····console.log(1·==·Array())
+       36 │ + ····//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       37 │ + ········console.log(1·==·Array())
+    37 38 │       /* biome-ignore lint/suspicious/noDoubleEquals: ... */
+    38 39 │   }
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1  1 │   ///! lint/suspicious/noDoubleEquals
+     2    │ - ///!·lint/suspicious/noConsole
+        2 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
         3 │ + ///!·lint/suspicious/noConsole
      3  4 │   ///! lint/style/useArrayLiterals
      4  5 │   

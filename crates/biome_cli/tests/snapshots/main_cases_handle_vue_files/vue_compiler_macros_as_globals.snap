@@ -31,22 +31,6 @@ const slots = defineSlots<{
 # Emitted Messages
 
 ```block
-file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected any. Specify a different type.
-  
-    16 │ const slots = defineSlots<{
-  > 17 │ 		default(props: { msg: string }): any
-       │ 		                                 ^^^
-    18 │ }>()
-    19 │ 
-  
-  i any disables many type checking rules. Its use should be avoided.
-  
-
-```
-
-```block
 file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable slots is unused.
@@ -68,6 +52,22 @@ file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
        15 │ + const·_slots·=·defineSlots<{
     16 16 │   		default(props: { msg: string }): any
     17 17 │   }>()
+  
+
+```
+
+```block
+file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    16 │ const slots = defineSlots<{
+  > 17 │ 		default(props: { msg: string }): any
+       │ 		                                 ^^^
+    18 │ }>()
+    19 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
   
 
 ```

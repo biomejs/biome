@@ -22,6 +22,19 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+check.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class A is unused.
+  
+  > 1 │ class A { #foo; #foo }
+      │       ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```
+
+```block
 check.js:1:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
@@ -48,19 +61,6 @@ check.js:1:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
   
     1 │ class·A·{·#foo;·#foo·}
       │                 ----- 
-
-```
-
-```block
-check.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This class A is unused.
-  
-  > 1 │ class A { #foo; #foo }
-      │       ^
-  
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
-  
 
 ```
 

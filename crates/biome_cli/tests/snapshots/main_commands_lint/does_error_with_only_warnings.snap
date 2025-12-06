@@ -39,6 +39,21 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+file.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class A is unused.
+  
+  > 1 │ class A {};
+      │       ^
+    2 │ A = 0;
+    3 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```
+
+```block
 file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! 'A' is a class.
@@ -54,21 +69,6 @@ file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━�
       │       ^
     2 │ A = 0;
     3 │ 
-  
-
-```
-
-```block
-file.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This class A is unused.
-  
-  > 1 │ class A {};
-      │       ^
-    2 │ A = 0;
-    3 │ 
-  
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```

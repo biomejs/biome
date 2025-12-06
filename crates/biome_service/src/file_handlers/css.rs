@@ -397,7 +397,7 @@ fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
 
 fn parse(
     biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: &Settings,
     cache: &mut NodeCache,
@@ -434,7 +434,7 @@ fn parse(
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     ParseResult {
         any_parse: parse.into(),
-        language: None,
+        language: Some(file_source),
     }
 }
 
@@ -712,10 +712,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let css_services = CssAnalyzerServices {
-            semantic_model: params
-                .document_services
-                .as_css_services()
-                .and_then(|services| services.semantic_model.as_ref()),
+            semantic_model: None,
             file_source,
         };
 

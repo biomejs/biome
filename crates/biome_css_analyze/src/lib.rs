@@ -21,7 +21,7 @@ use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
 
@@ -144,7 +144,10 @@ where
 
     services.insert_service(css_services.file_source);
     if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(semantic_model.clone());
+        services.insert_service(Arc::new(semantic_model.clone()));
+    } else {
+        let semantic_model = biome_css_semantic::semantic_model(root);
+        services.insert_service(Arc::new(semantic_model));
     }
 
     for ((phase, _), visitor) in visitors {

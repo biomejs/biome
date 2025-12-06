@@ -1,7 +1,3 @@
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-
 use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, read_config};
@@ -15,7 +11,7 @@ use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
-use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
+use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumentServices};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
@@ -46,6 +42,9 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -403,16 +402,19 @@ impl WorkspaceServer {
             } = parsed;
 
             let mut services = DocumentServices::none();
-            if let Some(language) = language {
-                file_source_index = self.insert_source(language);
-
-                if language.is_css_like()
-                    && (settings.is_linter_enabled() || settings.is_assist_enabled())
-                {
+            if settings.is_linter_enabled() || settings.is_assist_enabled() {
+                if source.is_css_like() {
                     services = CssDocumentServices::default()
                         .with_css_semantic_model(&any_parse.tree())
                         .into();
+                } else if source.is_javascript_like() {
+                    services = JsDocumentServices::default()
+                        .with_js_semantic_model(&any_parse.tree())
+                        .into();
                 }
+            }
+            if let Some(language) = language {
+                file_source_index = self.insert_source(language);
             }
 
             if persist_node_cache {
@@ -433,7 +435,6 @@ impl WorkspaceServer {
         {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
 
-            debug!("{:#?}", &any_parse);
             let mut node_cache = NodeCache::default();
             self.parse_embedded_language_snippets(
                 &biome_path,
@@ -1363,15 +1364,9 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, existing_version, services) = documents
+        let (index, existing_version) = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.version,
-                    document.services.clone(),
-                )
-            })
+            .map(|document| (document.file_source_index, document.version))
             .ok_or_else(WorkspaceError::not_found)?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
@@ -1400,7 +1395,6 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
-        let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
 
@@ -1422,11 +1416,25 @@ impl Workspace for WorkspaceServer {
             vec![]
         };
 
+        let mut services = DocumentServices::none();
+        let root = parsed.any_parse;
+        if settings.is_linter_enabled() || settings.is_assist_enabled() {
+            if document_source.is_css_like() {
+                services = CssDocumentServices::default()
+                    .with_css_semantic_model(&root.tree())
+                    .into();
+            } else if document_source.is_javascript_like() {
+                services = JsDocumentServices::default()
+                    .with_js_semantic_model(&root.tree())
+                    .into();
+            }
+        }
+
         let document = Document {
             content,
             version: Some(version),
             file_source_index: index,
-            syntax: Some(Ok(parsed.any_parse)),
+            syntax: Some(Ok(root.clone())),
             embedded_snippets,
             services,
         };
@@ -1447,7 +1455,10 @@ impl Workspace for WorkspaceServer {
         if self.is_indexed(&path) {
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
+                UpdateKind::AddedOrChanged(
+                    OpenFileReason::ClientRequest,
+                    root.unwrap_as_send_node(),
+                ),
             )?;
             final_diagnostics.extend(
                 diagnostics
