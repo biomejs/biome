@@ -261,12 +261,12 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
 
     parse_declaration(p).ok();
 
-    // If the next token is a closing brace ('}'), the semicolon is optional.
+    // If the next token is a closing brace ('}') or an EOF, the semicolon is optional.
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }
     // div { color: red }
-    if !p.at(T!['}']) {
-        if p.nth_at(1, T!['}']) {
+    if !p.at(T!['}']) || p.at(EOF) {
+        if p.nth_at(1, T!['}']) || p.nth_at(1, EOF) {
             p.eat(T![;]);
         } else {
             p.expect(T![;]);
