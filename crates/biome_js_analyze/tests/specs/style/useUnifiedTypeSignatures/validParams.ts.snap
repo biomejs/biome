@@ -10,9 +10,9 @@ function f(bar: number): string;
 function f(barrer: string): string;
 function f(whatever: any): any {}
 
-export function exams(amICooked = 0): void;
-export function exams(reason: string): void;
-export function exams(foo: any): any;
+export async function exams(amICooked = 0): Promise<void>;
+export async function exams(reason: string): Promise<void>;
+export async function exams(foo: any): Promise<any>;
 
 interface frotz {
 	(a: number, b: number, c: string) => string;

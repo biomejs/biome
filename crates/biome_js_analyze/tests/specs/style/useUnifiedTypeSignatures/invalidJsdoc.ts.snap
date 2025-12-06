@@ -27,21 +27,22 @@ function bar(a: any): any {}
 // not jsdoc comments
 interface frotz {
 	// a b c d e f g...
-	(a: string, b: number, c: number) => string;
+	(a: string, b: number, c: number): string;
 	/*************************** HIJKLMNOPQRS */
-	(a: number, b: number, c: string) => string;
+	(a: number, b: number, c: string): string;
 	/* t u v w x y z */
-	(a: number, b: string, c: string) => string;
+	(a: number, b: string, c: string): string;
 }
 
 // same jsdocs
 class banana {
 	/** bake a cake */
-	function bake(cakeType: string): void;
+	public bake(cakeType: string): void;
 	/** bake a cake */
-	function bake(flourAmt: number): void;
+	public bake(flourAmt: number): void;
 	/** bake a cake */
-	function bake(ingredients: object): void;
+	public bake(ingredients: object): void;
+	public bake(whatever: any): void {};
 }
 
 // several identical jsdocs (all get checked)
@@ -138,38 +139,95 @@ invalidJsdoc.ts:15:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 
 ```
-invalidJsdoc.ts:45:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidJsdoc.ts:26:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Overload signatures are hard to read and maintain.
   
-    43 │ /** jsdoc 2 */
-    44 │ /** jsdoc 3 */
-  > 45 │ declare function f10(this: string): void;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ /** jsdoc 1 */
-    47 │ /** jsdoc 2 */
+    24 │ 	(a: string, b: number, c: number): string;
+    25 │ 	/*************************** HIJKLMNOPQRS */
+  > 26 │ 	(a: number, b: number, c: string): string;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	/* t u v w x y z */
+    28 │ 	(a: number, b: string, c: string): string;
   
   i Unsafe fix: Combine overloads using a type union.
   
-    38 38 │   	function bake(ingredients: object): void;
-    39 39 │   }
-    40    │ - 
-    41    │ - //·several·identical·jsdocs·(all·get·checked)
-    42    │ - /**·jsdoc·1·*/
-    43    │ - /**·jsdoc·2·*/
-    44    │ - /**·jsdoc·3·*/
-    45    │ - declare·function·f10(this:·string):·void;
-       40 │ + 
-       41 │ + //·several·identical·jsdocs·(all·get·checked)
-       42 │ + /**·jsdoc·1·*/
-       43 │ + /**·jsdoc·2·*/
-       44 │ + /**·jsdoc·3·*/
-    46 45 │   /** jsdoc 1 */
-    47 46 │   /** jsdoc 2 */
-    48 47 │   /** jsdoc 3 */
-    49    │ - declare·function·f10(this:·number):·void;
-       48 │ + declare·function·f10(this:·number·|·string):·void;
-    50 49 │   
+    23 23 │   	// a b c d e f g...
+    24 24 │   	(a: string, b: number, c: number): string;
+    25    │ - → /***************************·HIJKLMNOPQRS·*/
+    26    │ - → (a:·number,·b:·number,·c:·string):·string;
+    27    │ - → /*·t·u·v·w·x·y·z·*/
+    28    │ - → (a:·number,·b:·string,·c:·string):·string;
+       25 │ + → /***************************·HIJKLMNOPQRS·*/
+       26 │ + → → /*·t·u·v·w·x·y·z·*/
+       27 │ + → (a:·number,·b:·string·|·number,·c:·string):·string;
+    29 28 │   }
+    30 29 │   
+  
+
+```
+
+```
+invalidJsdoc.ts:34:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    32 │ class banana {
+    33 │ 	/** bake a cake */
+  > 34 │ 	public bake(cakeType: string): void;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 	/** bake a cake */
+    36 │ 	public bake(flourAmt: number): void;
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    31 31 │   // same jsdocs
+    32 32 │   class banana {
+    33    │ - → /**·bake·a·cake·*/
+    34    │ - → public·bake(cakeType:·string):·void;
+    35 33 │   	/** bake a cake */
+    36    │ - → public·bake(flourAmt:·number):·void;
+       34 │ + → → /**·bake·a·cake·*/
+       35 │ + → public·bake(flourAmt:·number·|·string):·void;
+    37 36 │   	/** bake a cake */
+    38 37 │   	public bake(ingredients: object): void;
+  
+
+```
+
+```
+invalidJsdoc.ts:46:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    44 │ /** jsdoc 2 */
+    45 │ /** jsdoc 3 */
+  > 46 │ declare function f10(this: string): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ /** jsdoc 1 */
+    48 │ /** jsdoc 2 */
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    39 39 │   	public bake(whatever: any): void {};
+    40 40 │   }
+    41    │ - 
+    42    │ - //·several·identical·jsdocs·(all·get·checked)
+    43    │ - /**·jsdoc·1·*/
+    44    │ - /**·jsdoc·2·*/
+    45    │ - /**·jsdoc·3·*/
+    46    │ - declare·function·f10(this:·string):·void;
+       41 │ + 
+       42 │ + //·several·identical·jsdocs·(all·get·checked)
+       43 │ + /**·jsdoc·1·*/
+       44 │ + /**·jsdoc·2·*/
+       45 │ + /**·jsdoc·3·*/
+    47 46 │   /** jsdoc 1 */
+    48 47 │   /** jsdoc 2 */
+    49 48 │   /** jsdoc 3 */
+    50    │ - declare·function·f10(this:·number):·void;
+       49 │ + declare·function·f10(this:·number·|·string):·void;
+    51 50 │   
   
 
 ```

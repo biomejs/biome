@@ -124,7 +124,7 @@ declare_lint_rule! {
     /// ### `ignoreDifferentJsDoc`
     ///
     /// If set to `true`, overloads with different JSDoc comments from one another will be ignored.
-    /// Ones without comments will still be checked (and can poentially be merged with documented signatures)
+    /// Ones without comments will still be checked (and can potentially be merged with documented signatures)
     ///
     /// Default: `false`
     ///
@@ -406,7 +406,8 @@ trait AnyJsParameterListExt {
     fn try_merge(&self, other: &Self) -> Option<Vec<MergeParameterInfo>>;
 
     /// Checks if the names of the current type's entries are a subset of those from another type's.
-    /// Notably, returns `true` if either iterator has fewer elements than the other.
+    /// Notably, returns `true` if either iterator has fewer elements than the other
+    /// and all names in the smaller one match up.
     fn are_names_subset(&self, other: &Self) -> bool;
 }
 

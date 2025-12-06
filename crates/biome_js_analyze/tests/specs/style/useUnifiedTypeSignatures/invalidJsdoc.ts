@@ -21,21 +21,22 @@ function bar(a: any): any {}
 // not jsdoc comments
 interface frotz {
 	// a b c d e f g...
-	(a: string, b: number, c: number) => string;
+	(a: string, b: number, c: number): string;
 	/*************************** HIJKLMNOPQRS */
-	(a: number, b: number, c: string) => string;
+	(a: number, b: number, c: string): string;
 	/* t u v w x y z */
-	(a: number, b: string, c: string) => string;
+	(a: number, b: string, c: string): string;
 }
 
 // same jsdocs
 class banana {
 	/** bake a cake */
-	function bake(cakeType: string): void;
+	public bake(cakeType: string): void;
 	/** bake a cake */
-	function bake(flourAmt: number): void;
+	public bake(flourAmt: number): void;
 	/** bake a cake */
-	function bake(ingredients: object): void;
+	public bake(ingredients: object): void;
+	public bake(whatever: any): void {};
 }
 
 // several identical jsdocs (all get checked)
