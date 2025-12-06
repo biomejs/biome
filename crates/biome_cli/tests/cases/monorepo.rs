@@ -676,3 +676,70 @@ fn should_ignore_linter_nested_file() {
         result,
     ));
 }
+
+#[test]
+fn plugins_in_child_config_with_extends_root() {
+    let mut fs = TemporaryFs::new("plugins_in_child_config_with_extends_root");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "linter": {
+        "enabled": true
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "packages/mobile/biome.json",
+        r#"{
+    "extends": "//",
+    "plugins": ["./biome-plugins/no-object-assign.grit"],
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "packages/mobile/biome-plugins/no-object-assign.grit",
+        r#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    fs.create_file(
+        "packages/mobile/src/file.js",
+        r#"const merged = Object.assign({}, a, b);
+"#,
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                &format!("{}/packages/mobile/src/file.js", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "plugins_in_child_config_with_extends_root",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
