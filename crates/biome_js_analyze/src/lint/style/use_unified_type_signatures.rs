@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsFormalParameter, AnyJsObjectMemberName, AnyJsParameter,
     AnyTsMethodSignatureModifier, AnyTsReturnType, AnyTsType, JsBogusBinding, JsComputedMemberName,
     JsExport, JsIdentifierBinding, JsLanguage, JsLiteralMemberName, JsMetavariable,
-    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T,
+    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, T,
     TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsDeclareStatement,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsTypeParameters,
@@ -302,7 +302,7 @@ fn try_merge_overloads(
     }
 
     // TODO: Should we drop duplicate JSDocs from the output?
-    if opts.ignore_different_jsdoc.unwrap_or_default()
+    if opts.ignore_different_js_doc.unwrap_or_default()
         && let (docs1, docs2) = (
             JsdocComment::get_jsdocs(&overload1.wrapper_syntax()),
             JsdocComment::get_jsdocs(&overload2.wrapper_syntax()),
@@ -316,7 +316,7 @@ fn try_merge_overloads(
     let parameters2 = overload2.parameters()?;
 
     if opts.ignore_differently_named_parameters.unwrap_or_default()
-        && !parameters1.are_names_subset(&parameters2)
+        && !parameters1.same_param_names(&parameters2)
     {
         return None;
     }
@@ -405,10 +405,11 @@ trait AnyJsParameterListExt {
     /// Returns a list of parameters that needs to be made optional.
     fn try_merge(&self, other: &Self) -> Option<Vec<MergeParameterInfo>>;
 
-    /// Checks if the names of the current type's entries are a subset of those from another type's.
-    /// Notably, returns `true` if either iterator has fewer elements than the other
-    /// and all names in the smaller one match up.
-    fn are_names_subset(&self, other: &Self) -> bool;
+    /// Checks if all the parameters in this list have identical names to those from another list.
+    ///
+    /// Notably, will only progress to the smaller of the 2 lists before stopping, and will consider any parameters
+    /// without name tokens (like array spread or destructuring literals) as "matching" any other parameter.
+    fn same_param_names(&self, other: &Self) -> bool;
 }
 
 impl AnyJsParameterListExt for AnyJsParameterList {
@@ -508,15 +509,20 @@ impl AnyJsParameterListExt for AnyJsParameterList {
         Some(result)
     }
 
-    fn are_names_subset(&self, other: &Self) -> bool {
+    fn same_param_names(&self, other: &Self) -> bool {
         self.iter()
             .zip(other.iter())
             .all(|(self_param, other_param)| {
-                let (Ok(self_param), Ok(other_param)) = (self_param, other_param) else {
-                    return false;
+                // nodes without parameter names (destructuring, etc.) should count as matching anything else
+                // for lack of names
+                let (Some(self_name), Some(other_name)) = (
+                    self_param.ok().and_then(|param| param.name_token()), 
+                    other_param.ok().and_then(|param| param.name_token()),
+                ) else {
+                    return true;
                 };
 
-                self_param.is_name_equal(&other_param)
+                self_name.text_trimmed() == other_name.text_trimmed() 
             })
     }
 }
@@ -623,17 +629,6 @@ impl<T: NameEquals> NameEquals for Option<T> {
             (None, None) => true,
             _ => false,
         }
-    }
-}
-
-impl NameEquals for AnyParameter {
-    fn is_name_equal(&self, other: &Self) -> bool {
-        let (Some(self_name), Some(other_name)) = (self.get_name_token(), other.get_name_token())
-        else {
-            return false;
-        };
-
-        self_name.text_trimmed() == other_name.text_trimmed()
     }
 }
 
@@ -899,8 +894,6 @@ trait ParameterExt {
     fn compare(&self, other: &Self) -> ParameterCompareResult;
     /// Checks if the parameter can be optional.
     fn can_be_optional(&self) -> bool;
-    /// Get this parameter's name syntax token if it has one.
-    fn get_name_token(&self) -> Option<JsSyntaxToken>;
 }
 
 impl ParameterExt for AnyParameter {
@@ -968,29 +961,6 @@ impl ParameterExt for AnyParameter {
                 AnyJsFormalParameter::JsFormalParameter(_),
             ))
         )
-    }
-
-    // TODO: Move this somewhere global and easily accessable - I see like 2 other rules duplicating this
-    // or a variant thereof
-    fn get_name_token(&self) -> Option<JsSyntaxToken> {
-        let (Self::AnyJsParameter(AnyJsParameter::AnyJsFormalParameter(
-            AnyJsFormalParameter::JsFormalParameter(param),
-        ))
-        | Self::AnyJsConstructorParameter(AnyJsConstructorParameter::AnyJsFormalParameter(
-            AnyJsFormalParameter::JsFormalParameter(param),
-        ))) = self
-        else {
-            return None;
-        };
-
-        // only identifier bindings will have names
-        param
-            .binding()
-            .ok()?
-            .as_any_js_binding()?
-            .as_js_identifier_binding()?
-            .name_token()
-            .ok()
     }
 }
 

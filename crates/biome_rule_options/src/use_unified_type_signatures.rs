@@ -14,5 +14,5 @@ pub struct UseUnifiedTypeSignaturesOptions {
 
     /// Whether to ignore overloads with different JSDoc comments.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub ignore_different_jsdoc: Option<bool>,
+    pub ignore_different_js_doc: Option<bool>,
 }
