@@ -66,24 +66,25 @@ impl JsdocComment {
 
     /// Execute a callback on all JSDoc comments preceding the given node.
     // TODO: Remove this and replace it since we now expose the raw iterator
-    pub fn for_each<F>(node: &JsSyntaxNode, func: F) where F: FnMut(&str) {
-        Self::get_jsdocs(node).for_each(func)
+    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F) where F: FnMut(&str) {
+        Self::get_jsdocs(node).for_each(|str: String| func(str.as_str()))
     }
 
     /// Returns an iterator over the given node's serialized JSDoc comments.
     /// Nodes lacking a first token will return an empty iterator.
-    pub fn get_jsdocs(node: &JsSyntaxNode) -> impl Iterator<Item = &str> {
+    pub fn get_jsdocs<'a>(node: &'a JsSyntaxNode) -> impl Iterator<Item = String> + use<'a> {
         node.first_token()
             .into_iter()
             .flat_map(|token| token.leading_trivia().pieces())
             .filter_map(|trivia| {
-                if let TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment = trivia.kind()
-                    && let text = trivia.text()
-                    && Self::text_is_jsdoc_comment(text)
-                {
-                    Some(text);
-                };
-                None
+                let text = trivia.text();
+                matches!(
+                        trivia.kind(),
+                        TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
+                )
+                .then(|| text)
+                .filter(|text: &&str| Self::text_is_jsdoc_comment(*text))
+                .map(|text| text.to_owned())
             })
     }
 }

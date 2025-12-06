@@ -6,7 +6,7 @@
                 "useUnifiedTypeSignatures": {
                     "level": "on",
                     "options": {
-                        "ignoreDifferentJsdoc": true
+                        "ignoreDifferentlyNamedParameters": true
                     }
                 }
             }

@@ -1,4 +1,4 @@
-/* should not emit diagnostics */
+/* should not generate diagnostics */
 
 /** jsdoc 1 */
 function f(bar: number): string;

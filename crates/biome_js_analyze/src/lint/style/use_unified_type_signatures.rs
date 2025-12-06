@@ -12,8 +12,8 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsFormalParameter, AnyJsObjectMemberName, AnyJsParameter,
     AnyTsMethodSignatureModifier, AnyTsReturnType, AnyTsType, JsBogusBinding, JsComputedMemberName,
     JsExport, JsIdentifierBinding, JsLanguage, JsLiteralMemberName, JsMetavariable,
-    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T, TsCallSignatureTypeMember,
-    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
+    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T,
+    TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsDeclareStatement,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsTypeParameters,
 };
@@ -123,7 +123,8 @@ declare_lint_rule! {
     ///
     /// ### `ignoreDifferentJsDoc`
     ///
-    /// If set to `true`, overloads with different JSDoc comments will be ignored.
+    /// If set to `true`, overloads with different JSDoc comments from one another will be ignored.
+    /// Ones without comments will still be checked (and can poentially be merged with documented signatures)
     ///
     /// Default: `false`
     ///
@@ -212,7 +213,6 @@ impl Rule for UseUnifiedTypeSignatures {
                 signature_to_extend_wrapper,
             );
         } else {
-            // Nothing important to transfer, just remove the signature.
             mutation.remove_node(signature_to_remove_wrapper);
         }
 
@@ -301,7 +301,7 @@ fn try_merge_overloads(
         return None;
     }
 
-    // TODO: Do we want to ignore overloads without comments and attempt to merge them?
+    // TODO: Should we drop duplicate JSDocs from the output?
     if opts.ignore_different_jsdoc.unwrap_or_default()
         && let (docs1, docs2) = (
             JsdocComment::get_jsdocs(&overload1.wrapper_syntax()),
@@ -627,7 +627,8 @@ impl<T: NameEquals> NameEquals for Option<T> {
 
 impl NameEquals for AnyParameter {
     fn is_name_equal(&self, other: &Self) -> bool {
-        let (Some(self_name), Some(other_name)) = (self.get_name_token(), other.get_name_token()) else {
+        let (Some(self_name), Some(other_name)) = (self.get_name_token(), other.get_name_token())
+        else {
             return false;
         };
 
@@ -989,7 +990,6 @@ impl ParameterExt for AnyParameter {
             .as_js_identifier_binding()?
             .name_token()
             .ok()
-        
     }
 }
 
