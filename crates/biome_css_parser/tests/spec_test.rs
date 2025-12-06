@@ -2,6 +2,7 @@ use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::{CssFileSource, EmbeddingKind};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
@@ -84,7 +85,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let parsed = parse_css(&content, options);
+    let mut source_type = CssFileSource::css();
+    if file_name.ends_with(".styled.css") {
+        source_type = source_type.with_embedding_kind(EmbeddingKind::Styled);
+    }
+
+    let parsed = parse_css(&content, source_type, options);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
