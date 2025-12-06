@@ -1,8 +1,8 @@
 use biome_css_syntax::{
-    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
-    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
-    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
-    CssSupportsAtRule,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
+    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule,
+    CssStartingStyleAtRule, CssSupportsAtRule,
 };
 use biome_rowan::{
     AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
@@ -28,7 +28,7 @@ impl SemanticModel {
         }
     }
 
-    pub fn root(&self) -> &CssRoot {
+    pub fn root(&self) -> &AnyCssRoot {
         &self.data.root
     }
 
@@ -85,7 +85,7 @@ impl SemanticModel {
 /// and a list of all rules in the document.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    pub(crate) root: CssRoot,
+    pub(crate) root: AnyCssRoot,
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.

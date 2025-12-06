@@ -710,6 +710,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssScopeRangeStart::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_SNIPPET_ROOT => {
+                    let $pattern = unsafe { $crate::CssSnippetRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssStartingStyleAtRule::new_unchecked(node) };
                     $body

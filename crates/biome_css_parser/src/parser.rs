@@ -11,6 +11,7 @@ use biome_parser::{ParserContextCheckpoint, prelude::*};
 pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,
     source: CssTokenSource<'source>,
+    pub(crate) source_type: CssFileSource,
     state: CssParserState,
     options: CssParserOptions,
 }
@@ -81,10 +82,15 @@ impl CssParserOptions {
 }
 
 impl<'source> CssParser<'source> {
-    pub fn new(source: &'source str, options: CssParserOptions) -> Self {
+    pub fn new(
+        source: &'source str,
+        source_type: CssFileSource,
+        options: CssParserOptions,
+    ) -> Self {
         Self {
             context: ParserContext::default(),
             source: CssTokenSource::from_str(source, options),
+            source_type,
             state: CssParserState::new(),
             options,
         }

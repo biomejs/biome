@@ -98,6 +98,7 @@ pub(crate) mod scope_edge;
 pub(crate) mod scope_range_end;
 pub(crate) mod scope_range_interval;
 pub(crate) mod scope_range_start;
+pub(crate) mod snippet_root;
 pub(crate) mod starting_style_at_rule_declarator;
 pub(crate) mod supports_and_condition;
 pub(crate) mod supports_at_rule_declarator;

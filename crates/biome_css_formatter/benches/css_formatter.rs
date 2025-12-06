@@ -1,7 +1,7 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::{AnyCssRoot, CssFileSource};
 use biome_formatter::Printed;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
@@ -37,13 +37,13 @@ fn bench_css_formatter(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let parsed = parse_css(code, CssParserOptions::default());
+                let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: CssRoot) -> Printed {
+                        fn format(root: AnyCssRoot) -> Printed {
                             let formatted =
                                 format_node(CssFormatOptions::default(), root.syntax()).unwrap();
                             let printed = formatted.print();

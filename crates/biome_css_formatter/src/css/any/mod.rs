@@ -74,6 +74,7 @@ pub(crate) mod pseudo_value;
 pub(crate) mod query_feature;
 pub(crate) mod query_feature_value;
 pub(crate) mod relative_selector;
+pub(crate) mod root;
 pub(crate) mod rule;
 pub(crate) mod rule_block;
 pub(crate) mod scope_range;
