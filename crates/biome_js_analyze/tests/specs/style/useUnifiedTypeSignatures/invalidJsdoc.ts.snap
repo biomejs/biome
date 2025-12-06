@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidJsdoc.ts
+---
+# Input
+```ts
+// no jsdoc is still fair game
+function f(bar: number): string;
+function f(baz: string): string;
+function f(whatever: any): any {}
+
+// 1 overload has JSDocs, but 2 do not (and are mergeable)
+/** jsdoc 1 */
+function foo(bar: number): string;
+function foo(baz: string): string;
+function foo(qux: boolean): string;
+function foo(whatever: any): any {}
+
+// jsdoc on implementation
+
+function bar(a: number): string;
+function bar(a: string): string;
+function bar(a: boolean): string;
+/** jsdoc 1 */
+function bar(a: any): any {}
+
+// not jsdoc comments
+interface frotz {
+	// a b c d e f g...
+	(a: string, b: number, c: number) => string;
+	/*************************** HIJKLMNOPQRS */
+	(a: number, b: number, c: string) => string;
+	/* t u v w x y z */
+	(a: number, b: string, c: string) => string;
+}
+
+// same jsdocs
+class banana {
+	/** bake a cake */
+	function bake(cakeType: string): void;
+	/** bake a cake */
+	function bake(flourAmt: number): void;
+	/** bake a cake */
+	function bake(ingredients: object): void;
+}
+
+// several identical jsdocs (all get checked)
+/** jsdoc 1 */
+/** jsdoc 2 */
+/** jsdoc 3 */
+declare function f10(this: string): void;
+/** jsdoc 1 */
+/** jsdoc 2 */
+/** jsdoc 3 */
+declare function f10(this: number): void;
+
+```
+
+# Diagnostics
+```
+invalidJsdoc.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    1 │ // no jsdoc is still fair game
+  > 2 │ function f(bar: number): string;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ function f(baz: string): string;
+    4 │ function f(whatever: any): any {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     1    │ - //·no·jsdoc·is·still·fair·game
+     2    │ - function·f(bar:·number):·string;
+     3    │ - function·f(baz:·string):·string;
+        1 │ + //·no·jsdoc·is·still·fair·game
+        2 │ + function·f(baz:·string·|·number):·string;
+     4  3 │   function f(whatever: any): any {}
+     5  4 │   
+  
+
+```
+
+```
+invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+     7 │ /** jsdoc 1 */
+     8 │ function foo(bar: number): string;
+   > 9 │ function foo(baz: string): string;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ function foo(qux: boolean): string;
+    11 │ function foo(whatever: any): any {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     7  7 │   /** jsdoc 1 */
+     8  8 │   function foo(bar: number): string;
+     9    │ - function·foo(baz:·string):·string;
+    10    │ - function·foo(qux:·boolean):·string;
+        9 │ + function·foo(qux:·boolean·|·string):·string;
+    11 10 │   function foo(whatever: any): any {}
+    12 11 │   
+  
+
+```
+
+```
+invalidJsdoc.ts:15:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    13 │ // jsdoc on implementation
+    14 │ 
+  > 15 │ function bar(a: number): string;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ function bar(a: string): string;
+    17 │ function bar(a: boolean): string;
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    10 10 │   function foo(qux: boolean): string;
+    11 11 │   function foo(whatever: any): any {}
+    12    │ - 
+    13    │ - //·jsdoc·on·implementation
+    14    │ - 
+    15    │ - function·bar(a:·number):·string;
+    16    │ - function·bar(a:·string):·string;
+       12 │ + 
+       13 │ + //·jsdoc·on·implementation
+       14 │ + 
+       15 │ + function·bar(a:·string·|·number):·string;
+    17 16 │   function bar(a: boolean): string;
+    18 17 │   /** jsdoc 1 */
+  
+
+```
+
+```
+invalidJsdoc.ts:45:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    43 │ /** jsdoc 2 */
+    44 │ /** jsdoc 3 */
+  > 45 │ declare function f10(this: string): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ /** jsdoc 1 */
+    47 │ /** jsdoc 2 */
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    38 38 │   	function bake(ingredients: object): void;
+    39 39 │   }
+    40    │ - 
+    41    │ - //·several·identical·jsdocs·(all·get·checked)
+    42    │ - /**·jsdoc·1·*/
+    43    │ - /**·jsdoc·2·*/
+    44    │ - /**·jsdoc·3·*/
+    45    │ - declare·function·f10(this:·string):·void;
+       40 │ + 
+       41 │ + //·several·identical·jsdocs·(all·get·checked)
+       42 │ + /**·jsdoc·1·*/
+       43 │ + /**·jsdoc·2·*/
+       44 │ + /**·jsdoc·3·*/
+    46 45 │   /** jsdoc 1 */
+    47 46 │   /** jsdoc 2 */
+    48 47 │   /** jsdoc 3 */
+    49    │ - declare·function·f10(this:·number):·void;
+       48 │ + declare·function·f10(this:·number·|·string):·void;
+    50 49 │   
+  
+
+```
