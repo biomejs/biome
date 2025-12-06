@@ -12,11 +12,12 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsFormalParameter, AnyJsObjectMemberName, AnyJsParameter,
     AnyTsMethodSignatureModifier, AnyTsReturnType, AnyTsType, JsBogusBinding, JsComputedMemberName,
     JsExport, JsIdentifierBinding, JsLanguage, JsLiteralMemberName, JsMetavariable,
-    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, T, TsCallSignatureTypeMember,
-    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
+    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T,
+    TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsDeclareStatement,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsTypeParameters,
 };
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxResult, TextRange,
     TriviaPieceKind, chain_trivia_pieces, declare_node_union,
@@ -40,9 +41,22 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// interface I {
+    /// function f({ a }: Record<"a", string>): void;
+    /// function f({ a }: Record<"a", boolean>): void;
+    /// function f(obj: any): void {};
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// type T = {
     ///     a(): void;
     ///     a(x: number): void;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// interface I {
+    ///     (): void;
+    ///     (x: number): void;
     /// }
     /// ```
     ///
@@ -50,6 +64,10 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// function f(a: number | string): void {}
+    /// ```
+    ///
+    /// ```ts
+    /// function f({ a }: Record<"a", string | boolean>): void;
     /// ```
     ///
     /// ```ts
@@ -73,6 +91,58 @@ declare_lint_rule! {
     /// function f(x: unknown): void {}
     /// ```
     ///
+    /// Different rest signatures cannot be merged:
+    /// (cf https://github.com/microsoft/TypeScript/issues/5077)
+    /// ```ts
+    /// function foo(...x: string[]): void;
+    /// function foo(...x: number[]): void;
+    /// function foo(...x: any[]): void {}
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `ignoreDifferentlyNamedParameters`
+    ///
+    /// If set to `true`, overloads with differently named parameters will be ignored,
+    /// even if said parameters would be of otherwise mergeable types.
+    ///
+    /// Default: `false`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreDifferentlyNamedParameters": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
+    /// function bake(numApples: number): void;
+    /// function bake(cakeType: string): void;
+    /// ```
+    ///
+    /// ### `ignoreDifferentJsDoc`
+    ///
+    /// If set to `true`, overloads with different JSDoc comments from one another will be ignored.
+    /// Ones without comments will still be checked (and can potentially be merged with documented signatures)
+    ///
+    /// Default: `false`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreDifferentJsDoc": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
+    /// /** Print foo + 1 */
+    /// function doThing(foo: number): void;
+    /// /** Print foo concatenated with 3 */
+    /// function doThing(foo: string): void;
+    /// ```
+    ///
     pub UseUnifiedTypeSignatures {
         version: "2.1.0",
         name: "useUnifiedTypeSignatures",
@@ -94,50 +164,18 @@ impl Rule for UseUnifiedTypeSignatures {
 
         let overload_info = OverloadInfo::from_overload_signature(node)?;
 
+        let opts = ctx.options();
+
         // Yes, this is a O(n^2) algorithm, but we need to compare all overload signatures
         // with each other. This shouldn't be a problem in practice,
         // since the number of overloads is usually relatively small.
         for (i, overload1) in overload_info.overload_signatures.iter().enumerate() {
             for overload2 in &overload_info.overload_signatures[i + 1..] {
-                if !overload1
-                    .type_parameters()
-                    .is_type_equal(&overload2.type_parameters())
-                {
-                    // We can only combine signatures if their type parameters are equal.
+                if let Some(info) = try_merge_overloads(overload1, overload2, opts) {
+                    return Some(info);
+                } else {
                     continue;
                 }
-
-                if !overload1
-                    .return_type_annotation()
-                    .is_type_equal(&overload2.return_type_annotation())
-                {
-                    // We can only combine signatures if their return types are equal.
-                    continue;
-                }
-
-                let (Some(parameters1), Some(parameters2)) =
-                    (overload1.parameters(), overload2.parameters())
-                else {
-                    continue;
-                };
-
-                let Some((signature_to_remove, signature_to_keep, instructions)) = parameters2
-                    .try_merge(&parameters1)
-                    .map(|instr| (overload1.clone(), overload2.clone(), instr))
-                    .or_else(|| {
-                        parameters1
-                            .try_merge(&parameters2)
-                            .map(|instr| (overload2.clone(), overload1.clone(), instr))
-                    })
-                else {
-                    continue;
-                };
-
-                return Some(MergeOverloadSignaturesInfo {
-                    signature_to_remove,
-                    signature_to_extend: signature_to_keep,
-                    parameters_to_merge: instructions.into_boxed_slice(),
-                });
             }
         }
 
@@ -175,7 +213,6 @@ impl Rule for UseUnifiedTypeSignatures {
                 signature_to_extend_wrapper,
             );
         } else {
-            // Nothing important to transfer, just remove the signature.
             mutation.remove_node(signature_to_remove_wrapper);
         }
 
@@ -240,6 +277,66 @@ impl Rule for UseUnifiedTypeSignatures {
             mutation,
         ))
     }
+}
+
+/// Attempt to merge a pair of function overloads, returning information for the range to delete.
+fn try_merge_overloads(
+    overload1: &AnyPotentialTsOverloadSignature,
+    overload2: &AnyPotentialTsOverloadSignature,
+    opts: &UseUnifiedTypeSignaturesOptions,
+) -> Option<MergeOverloadSignaturesInfo> {
+    if !overload1
+        .type_parameters()
+        .is_type_equal(&overload2.type_parameters())
+    {
+        // We can only combine signatures if their type parameters are equal.
+        return None;
+    }
+
+    if !overload1
+        .return_type_annotation()
+        .is_type_equal(&overload2.return_type_annotation())
+    {
+        // We can only combine signatures if their return types are equal.
+        return None;
+    }
+
+    // TODO: Should we drop duplicate JSDocs from the output?
+    if opts.ignore_different_jsdoc.unwrap_or_default()
+        && let (docs1, docs2) = (
+            JsdocComment::get_jsdocs(&overload1.wrapper_syntax()),
+            JsdocComment::get_jsdocs(&overload2.wrapper_syntax()),
+        )
+        && docs1.ne(docs2)
+    {
+        return None;
+    }
+
+    let parameters1 = overload1.parameters()?;
+    let parameters2 = overload2.parameters()?;
+
+    if opts.ignore_differently_named_parameters.unwrap_or_default()
+        && !parameters1.are_names_subset(&parameters2)
+    {
+        return None;
+    }
+
+    // TODO: Should try_merge be made to return a tuple itself?
+    parameters2
+        .try_merge(&parameters1)
+        .map(|instr| (overload1.clone(), overload2.clone(), instr))
+        .or_else(|| {
+            parameters1
+                .try_merge(&parameters2)
+                .map(|instr| (overload2.clone(), overload1.clone(), instr))
+        })
+        .map(
+            |(signature_to_remove, signature_to_keep, instructions)| MergeOverloadSignaturesInfo {
+                signature_to_remove,
+                signature_to_extend: signature_to_keep,
+                parameters_to_merge: instructions.into_boxed_slice(),
+            },
+        )
 }
 
 /// Represents the information needed to merge overload signatures.
@@ -307,6 +404,11 @@ trait AnyJsParameterListExt {
     /// Checks if the parameters in this list are assignable to the parameters in the other list.
     /// Returns a list of parameters that needs to be made optional.
     fn try_merge(&self, other: &Self) -> Option<Vec<MergeParameterInfo>>;
+
+    /// Checks if the names of the current type's entries are a subset of those from another type's.
+    /// Notably, returns `true` if either iterator has fewer elements than the other
+    /// and all names in the smaller one match up.
+    fn are_names_subset(&self, other: &Self) -> bool;
 }
 
 impl AnyJsParameterListExt for AnyJsParameterList {
@@ -405,6 +507,18 @@ impl AnyJsParameterListExt for AnyJsParameterList {
 
         Some(result)
     }
+
+    fn are_names_subset(&self, other: &Self) -> bool {
+        self.iter()
+            .zip(other.iter())
+            .all(|(self_param, other_param)| {
+                let (Ok(self_param), Ok(other_param)) = (self_param, other_param) else {
+                    return false;
+                };
+
+                self_param.is_name_equal(&other_param)
+            })
+    }
 }
 
 declare_node_union! {
@@ -465,8 +579,10 @@ impl AnyFunctionOrMethodName {
     }
 }
 
+// TODO: Consolidate this with the `IsNameEqual` trait from `use_grouped_accessor_pair.rs`
+// (and maybe anywhere else these kinds of checks are performed).
 trait NameEquals {
-    /// Checks if the name of the current node is equal to the name of another node.
+    /// Checks if the name of the current type is equal to the name of another type.
     fn is_name_equal(&self, other: &Self) -> bool;
 }
 
@@ -507,6 +623,17 @@ impl<T: NameEquals> NameEquals for Option<T> {
             (None, None) => true,
             _ => false,
         }
+    }
+}
+
+impl NameEquals for AnyParameter {
+    fn is_name_equal(&self, other: &Self) -> bool {
+        let (Some(self_name), Some(other_name)) = (self.get_name_token(), other.get_name_token())
+        else {
+            return false;
+        };
+
+        self_name.text_trimmed() == other_name.text_trimmed()
     }
 }
 
@@ -772,6 +899,8 @@ trait ParameterExt {
     fn compare(&self, other: &Self) -> ParameterCompareResult;
     /// Checks if the parameter can be optional.
     fn can_be_optional(&self) -> bool;
+    /// Get this parameter's name syntax token if it has one.
+    fn get_name_token(&self) -> Option<JsSyntaxToken>;
 }
 
 impl ParameterExt for AnyParameter {
@@ -839,6 +968,29 @@ impl ParameterExt for AnyParameter {
                 AnyJsFormalParameter::JsFormalParameter(_),
             ))
         )
+    }
+
+    // TODO: Move this somewhere global and easily accessable - I see like 2 other rules duplicating this
+    // or a variant thereof
+    fn get_name_token(&self) -> Option<JsSyntaxToken> {
+        let (Self::AnyJsParameter(AnyJsParameter::AnyJsFormalParameter(
+            AnyJsFormalParameter::JsFormalParameter(param),
+        ))
+        | Self::AnyJsConstructorParameter(AnyJsConstructorParameter::AnyJsFormalParameter(
+            AnyJsFormalParameter::JsFormalParameter(param),
+        ))) = self
+        else {
+            return None;
+        };
+
+        // only identifier bindings will have names
+        param
+            .binding()
+            .ok()?
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()
     }
 }
 

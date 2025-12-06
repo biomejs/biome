@@ -1,5 +1,4 @@
 use std::ops::Deref;
-
 use biome_js_syntax::{JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::TriviaPieceKind;
 
@@ -22,7 +21,7 @@ use biome_rowan::TriviaPieceKind;
 ///
 /// The normalised representation will become:
 /// `"Magic constant of fooness.\n\nFor if you want more ways to write 1."`.
-///    
+///
 /// See https://jsdoc.app/ for the JSDoc reference.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct JsdocComment(String);
@@ -65,24 +64,28 @@ impl JsdocComment {
             && text.ends_with("*/")
     }
 
-    /// Iterates all JSDoc comments preceding the node.
-    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
-    where
-        F: FnMut(&str),
-    {
-        if let Some(token) = node.first_token() {
-            for trivia in token.leading_trivia().pieces() {
-                match trivia.kind() {
-                    TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
-                        let text = trivia.text();
-                        if Self::text_is_jsdoc_comment(text) {
-                            func(text)
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
+    /// Execute a callback on all JSDoc comments preceding the given node.
+    // TODO: Remove this and replace it since we now expose the raw iterator
+    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F) where F: FnMut(&str) {
+        Self::get_jsdocs(node).for_each(|str: String| func(str.as_str()))
+    }
+
+    /// Returns an iterator over the given node's serialized JSDoc comments.
+    /// Nodes lacking a first token will return an empty iterator.
+    pub fn get_jsdocs<'a>(node: &'a JsSyntaxNode) -> impl Iterator<Item = String> + use<'a> {
+        node.first_token()
+            .into_iter()
+            .flat_map(|token| token.leading_trivia().pieces())
+            .filter_map(|trivia| {
+                let text = trivia.text();
+                matches!(
+                        trivia.kind(),
+                        TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
+                )
+                .then(|| text)
+                .filter(|text: &&str| Self::text_is_jsdoc_comment(*text))
+                .map(|text| text.to_owned())
+            })
     }
 }
 
@@ -151,4 +154,8 @@ mod tests {
         assert!(!JsdocComment::text_is_jsdoc_comment("/***/"));
         assert!(!JsdocComment::text_is_jsdoc_comment("/**/"));
     }
+
+    // TODO: Figure out how to make syntax nodes for unit tests
+    #[test]
+    fn test_get_jsdocs() {}
 }
