@@ -3,8 +3,8 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, JsSyntaxKind, TsNonNullAssertionAssignment,
-    TsNonNullAssertionExpression,
+    AnyJsAssignment, AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind,
+    TsNonNullAssertionAssignment, TsNonNullAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_extra_non_null_assertion::NoExtraNonNullAssertionOptions;
@@ -82,6 +82,24 @@ impl Rule for NoExtraNonNullAssertion {
                 }
             }
             AnyTsNonNullAssertion::TsNonNullAssertionExpression(_) => {
+                // First check if this is nested within another non-null assertion (always invalid)
+
+                let mut is_nested_in_non_null_assertion = false;
+                for ancestor in node.syntax().ancestors().skip(1) {
+                    if JsParenthesizedExpression::can_cast(ancestor.kind()) {
+                        continue;
+                    }
+                    if TsNonNullAssertionExpression::can_cast(ancestor.kind()) {
+                        is_nested_in_non_null_assertion = true;
+                        break;
+                    }
+                }
+
+                if is_nested_in_non_null_assertion {
+                    return Some(());
+                }
+
+                // Then check other cases
                 let parent = node
                     .syntax()
                     .ancestors()
@@ -90,17 +108,28 @@ impl Rule for NoExtraNonNullAssertion {
                     .and_then(AnyJsExpression::cast)?;
 
                 // Cases considered as invalid:
-                // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression
-                // - TsNonNullAssertionExpression > TsNonNullAssertionExpression
+                // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression (nested in left side)
                 // - JsCallExpression[optional] > TsNonNullAssertionExpression
                 // - JsStaticMemberExpression[optional] > TsNonNullAssertionExpression
                 let has_extra_non_assertion = match parent {
-                    AnyJsExpression::JsAssignmentExpression(expr) => expr
-                        .left()
-                        .ok()?
-                        .as_any_js_assignment()?
-                        .as_ts_non_null_assertion_assignment()
-                        .is_some(),
+                    AnyJsExpression::JsAssignmentExpression(expr) => {
+                        // Only flag if the non-null assertion is nested within the left side,
+                        // not if it's a separate assertion on the right side
+                        let left = expr.left().ok()?;
+                        let left_syntax = left.syntax();
+                        let current_syntax = node.syntax();
+
+                        // Check if current node is nested within the left side
+                        if left_syntax.children().any(|desc| desc == *current_syntax) {
+                            left.as_any_js_assignment()?
+                                .as_ts_non_null_assertion_assignment()
+                                .is_some()
+                        } else {
+                            // Current node is on the right side, don't flag it
+                            // (nested assertions on right side are already handled above)
+                            false
+                        }
+                    }
                     AnyJsExpression::TsNonNullAssertionExpression(_) => true,
                     AnyJsExpression::JsStaticMemberExpression(expr) => expr.is_optional(),
                     AnyJsExpression::JsCallExpression(expr) => expr.is_optional(),
