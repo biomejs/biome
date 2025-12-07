@@ -149,7 +149,7 @@ impl Rule for UseUnifiedTypeSignatures {
             rule_category!(),
             state.signature_to_remove.overload_range(),
             markup! {
-                "Overload signatures are hard to read and maintain."
+                "Multiple similar overload signatures are hard to read and maintain."
             },
         ))
     }
