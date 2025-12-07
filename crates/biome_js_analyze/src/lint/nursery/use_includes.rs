@@ -258,9 +258,16 @@ impl Rule for UseIncludes {
                     make::token(T![')']),
                 );
 
-                let new_call_expr =
+                let mut new_call_expr =
                     make::js_call_expression(AnyJsExpression::from(new_callee), new_arguments)
                         .build();
+
+                if let Some(trivia) = data.call_expression.syntax().first_leading_trivia() {
+                    new_call_expr = new_call_expr.with_leading_trivia_pieces(trivia.pieces())?;
+                }
+                if let Some(trivia) = data.call_expression.syntax().last_trailing_trivia() {
+                    new_call_expr = new_call_expr.with_trailing_trivia_pieces(trivia.pieces())?;
+                }
 
                 mutation.replace_node(
                     AnyJsExpression::from(data.call_expression.clone()),

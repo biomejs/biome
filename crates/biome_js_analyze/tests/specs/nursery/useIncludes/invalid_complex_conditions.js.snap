@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_complex_conditions.js
+---
+# Input
+```js
+// complex conditions
+if ("foo".indexOf("o") !== -1 && bar > 4) {}
+const F = "foo".indexOf("o") !== -1 && bar > 4
+
+```
+
+# Diagnostics
+```
+invalid_complex_conditions.js:2:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    1 │ // complex conditions
+  > 2 │ if ("foo".indexOf("o") !== -1 && bar > 4) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
+    4 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+    1 1 │   // complex conditions
+    2   │ - if·("foo".indexOf("o")·!==·-1·&&·bar·>·4)·{}
+      2 │ + if·("foo".includes("o")·&&·bar·>·4)·{}
+    3 3 │   const F = "foo".indexOf("o") !== -1 && bar > 4
+    4 4 │   
+  
+
+```
+
+```
+invalid_complex_conditions.js:3:11 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    1 │ // complex conditions
+    2 │ if ("foo".indexOf("o") !== -1 && bar > 4) {}
+  > 3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+    1 1 │   // complex conditions
+    2 2 │   if ("foo".indexOf("o") !== -1 && bar > 4) {}
+    3   │ - const·F·=·"foo".indexOf("o")·!==·-1·&&·bar·>·4
+      3 │ + const·F·=·"foo".includes("o")·&&·bar·>·4
+    4 4 │   
+  
+
+```

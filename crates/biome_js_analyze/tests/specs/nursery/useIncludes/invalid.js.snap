@@ -6,86 +6,72 @@ expression: invalid.js
 ```js
 // should generate diagnostics
 
+// Basic indexOf patterns - not equal to -1
 "foo".indexOf("o") !== -1;
-["a", "b", "c"].indexOf("a") === -1;
-
 "foo".indexOf(bar) >= 0;
 
+// Basic indexOf patterns - equal to -1 (negated)
+["a", "b", "c"].indexOf("a") === -1;
 ["a", "b", "c"].indexOf(bar) < 0;
 
-/a/.test("abc");
+// Greater than or equal to 0
+"hello".indexOf("e") >= 0;
 
+// Less than 0 (negated)
+"hello".indexOf("x") < 0;
+
+// Not equal to -1
+"test".indexOf("t") != -1;
+
+// Equal to -1 (negated)
+"test".indexOf("x") == -1;
 
 ```
 
 # Diagnostics
 ```
-invalid.js:3:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
-  
-    1 │ // should generate diagnostics
-    2 │ 
-  > 3 │ "foo".indexOf("o") !== -1;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ ["a", "b", "c"].indexOf("a") === -1;
-    5 │ 
-  
-  i Safe fix: Replace with 'includes()'
-  
-     1  1 │   // should generate diagnostics
-     2  2 │   
-     3    │ - "foo".indexOf("o")·!==·-1;
-        3 │ + "foo".includes("o");
-     4  4 │   ["a", "b", "c"].indexOf("a") === -1;
-     5  5 │   
-  
-
-```
-
-```
 invalid.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    3 │ "foo".indexOf("o") !== -1;
-  > 4 │ ["a", "b", "c"].indexOf("a") === -1;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ "foo".indexOf(bar) >= 0;
+    3 │ // Basic indexOf patterns - not equal to -1
+  > 4 │ "foo".indexOf("o") !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ "foo".indexOf(bar) >= 0;
+    6 │ 
   
   i Safe fix: Replace with 'includes()'
   
      2  2 │   
-     3  3 │   "foo".indexOf("o") !== -1;
-     4    │ - ["a",·"b",·"c"].indexOf("a")·===·-1;
-        4 │ + !["a",·"b",·"c"].includes("a");
-     5  5 │   
-     6  6 │   "foo".indexOf(bar) >= 0;
+     3  3 │   // Basic indexOf patterns - not equal to -1
+     4    │ - "foo".indexOf("o")·!==·-1;
+        4 │ + "foo".includes("o");
+     5  5 │   "foo".indexOf(bar) >= 0;
+     6  6 │   
   
 
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    4 │ ["a", "b", "c"].indexOf("a") === -1;
-    5 │ 
-  > 6 │ "foo".indexOf(bar) >= 0;
+    3 │ // Basic indexOf patterns - not equal to -1
+    4 │ "foo".indexOf("o") !== -1;
+  > 5 │ "foo".indexOf(bar) >= 0;
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ ["a", "b", "c"].indexOf(bar) < 0;
+    6 │ 
+    7 │ // Basic indexOf patterns - equal to -1 (negated)
   
   i Safe fix: Replace with 'includes()'
   
-     4  4 │   ["a", "b", "c"].indexOf("a") === -1;
-     5  5 │   
-     6    │ - "foo".indexOf(bar)·>=·0;
-        6 │ + "foo".includes(bar);
-     7  7 │   
-     8  8 │   ["a", "b", "c"].indexOf(bar) < 0;
+     3  3 │   // Basic indexOf patterns - not equal to -1
+     4  4 │   "foo".indexOf("o") !== -1;
+     5    │ - "foo".indexOf(bar)·>=·0;
+        5 │ + "foo".includes(bar);
+     6  6 │   
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
   
 
 ```
@@ -95,44 +81,134 @@ invalid.js:8:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-     6 │ "foo".indexOf(bar) >= 0;
-     7 │ 
-   > 8 │ ["a", "b", "c"].indexOf(bar) < 0;
+     7 │ // Basic indexOf patterns - equal to -1 (negated)
+   > 8 │ ["a", "b", "c"].indexOf("a") === -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ ["a", "b", "c"].indexOf(bar) < 0;
+    10 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+     6  6 │   
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
+     8    │ - ["a",·"b",·"c"].indexOf("a")·===·-1;
+        8 │ + !["a",·"b",·"c"].includes("a");
+     9  9 │   ["a", "b", "c"].indexOf(bar) < 0;
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+     7 │ // Basic indexOf patterns - equal to -1 (negated)
+     8 │ ["a", "b", "c"].indexOf("a") === -1;
+   > 9 │ ["a", "b", "c"].indexOf(bar) < 0;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 
-    10 │ /a/.test("abc");
+    10 │ 
+    11 │ // Greater than or equal to 0
   
   i Safe fix: Replace with 'includes()'
   
-     6  6 │   "foo".indexOf(bar) >= 0;
-     7  7 │   
-     8    │ - ["a",·"b",·"c"].indexOf(bar)·<·0;
-        8 │ + !["a",·"b",·"c"].includes(bar);
-     9  9 │   
-    10 10 │   /a/.test("abc");
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
+     8  8 │   ["a", "b", "c"].indexOf("a") === -1;
+     9    │ - ["a",·"b",·"c"].indexOf(bar)·<·0;
+        9 │ + !["a",·"b",·"c"].includes(bar);
+    10 10 │   
+    11 11 │   // Greater than or equal to 0
   
 
 ```
 
 ```
-invalid.js:10:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-     8 │ ["a", "b", "c"].indexOf(bar) < 0;
-     9 │ 
-  > 10 │ /a/.test("abc");
-       │ ^^^^^^^^^^^^^^^
-    11 │ 
+    11 │ // Greater than or equal to 0
+  > 12 │ "hello".indexOf("e") >= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Less than 0 (negated)
   
   i Safe fix: Replace with 'includes()'
   
-     8  8 │   ["a", "b", "c"].indexOf(bar) < 0;
-     9  9 │   
-    10    │ - /a/.test("abc");
-       10 │ + "abc".includes("a");
-    11 11 │   
-    12 12 │   
+    10 10 │   
+    11 11 │   // Greater than or equal to 0
+    12    │ - "hello".indexOf("e")·>=·0;
+       12 │ + "hello".includes("e");
+    13 13 │   
+    14 14 │   // Less than 0 (negated)
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    14 │ // Less than 0 (negated)
+  > 15 │ "hello".indexOf("x") < 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Not equal to -1
+  
+  i Safe fix: Replace with 'includes()'
+  
+    13 13 │   
+    14 14 │   // Less than 0 (negated)
+    15    │ - "hello".indexOf("x")·<·0;
+       15 │ + !"hello".includes("x");
+    16 16 │   
+    17 17 │   // Not equal to -1
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    17 │ // Not equal to -1
+  > 18 │ "test".indexOf("t") != -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Equal to -1 (negated)
+  
+  i Safe fix: Replace with 'includes()'
+  
+    16 16 │   
+    17 17 │   // Not equal to -1
+    18    │ - "test".indexOf("t")·!=·-1;
+       18 │ + "test".includes("t");
+    19 19 │   
+    20 20 │   // Equal to -1 (negated)
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    20 │ // Equal to -1 (negated)
+  > 21 │ "test".indexOf("x") == -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+    19 19 │   
+    20 20 │   // Equal to -1 (negated)
+    21    │ - "test".indexOf("x")·==·-1;
+       21 │ + !"test".includes("x");
+    22 22 │   
   
 
 ```
