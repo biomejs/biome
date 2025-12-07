@@ -874,13 +874,13 @@ fn generate_group_struct(
                     }
 
                     Event::Start(tag) => match tag {
-                        Tag::Strong | Tag::Paragraph => {}
+                        Tag::Emphasis | Tag::Strong | Tag::Paragraph => {}
 
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
                     Event::End(tag) => match tag {
-                        TagEnd::Strong | TagEnd::Paragraph => {}
+                        TagEnd::Emphasis | TagEnd::Strong | TagEnd::Paragraph => {}
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
@@ -899,9 +899,9 @@ fn generate_group_struct(
 
             if !docs.is_empty() {
                 let docs = docs.trim_end_matches('.');
-                format!("{}.\nSee {}", docs, url)
+                format!("{}.\nSee <{}>", docs, url)
             } else {
-                format!("See {}", url)
+                format!("See <{}>", url)
             }
         };
 

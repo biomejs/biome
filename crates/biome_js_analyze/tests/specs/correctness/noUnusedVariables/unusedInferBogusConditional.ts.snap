@@ -7,6 +7,8 @@ expression: unusedInferBogusConditional.ts
 export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 unusedInferBogusConditional.ts:1:65 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

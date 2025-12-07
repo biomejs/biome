@@ -893,7 +893,7 @@ impl Rule for ForLoopCountReferences {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // The model holds all informations about the semantic, like scopes and declarations
+        // The model holds all information about the semantic, like scopes and declarations
         let model = ctx.model();
 
         // Here we are extracting the `let i = 0;` declaration in for loop

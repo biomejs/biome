@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+await 'value';
+
+const createValue = () => 'value';
+await createValue();
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ await 'value';
+      │ ^^^^^^^^^^^^^
+    4 │ 
+    5 │ const createValue = () => 'value';
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    5 │ const createValue = () => 'value';
+  > 6 │ await createValue();
+      │ ^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+
+```

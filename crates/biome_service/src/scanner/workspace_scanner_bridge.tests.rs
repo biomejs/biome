@@ -201,6 +201,7 @@ fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -240,6 +241,7 @@ fn should_not_index_an_ignored_file_inside_file_includes() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -280,6 +282,7 @@ fn should_index_an_ignored_file_if_it_is_a_dependency_of_a_non_ignored_file() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -327,6 +330,7 @@ fn should_not_index_a_force_ignored_file_even_if_it_is_a_dependency() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -369,6 +373,7 @@ fn should_not_index_dependency_with_scan_kind_known_files() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -409,6 +414,7 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 
@@ -450,6 +456,7 @@ fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
                 }),
                 ..Default::default()
             },
+            extended_configurations: Default::default(),
         })
         .expect("can update settings");
 

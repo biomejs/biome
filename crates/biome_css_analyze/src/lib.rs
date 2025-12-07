@@ -17,7 +17,7 @@ use biome_analyze::{
     ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
     PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
-use biome_css_syntax::{CssLanguage, TextRange};
+use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
@@ -31,6 +31,27 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     metadata
 });
 
+#[derive(Debug, Clone, Default)]
+pub struct CssAnalyzerServices<'a> {
+    pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
+    pub file_source: CssFileSource,
+}
+
+impl<'a> CssAnalyzerServices<'a> {
+    pub fn with_file_source(mut self, file_source: CssFileSource) -> Self {
+        self.file_source = file_source;
+        self
+    }
+
+    pub fn with_semantic_model(
+        mut self,
+        semantic_model: &'a biome_css_semantic::model::SemanticModel,
+    ) -> Self {
+        self.semantic_model = Some(semantic_model);
+        self
+    }
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action
@@ -38,6 +59,7 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<CssLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    services: CssAnalyzerServices,
     plugins: AnalyzerPluginSlice<'a>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -45,7 +67,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, plugins, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        |_| {},
+        options,
+        services,
+        plugins,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -59,6 +89,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    css_services: CssAnalyzerServices,
     plugins: AnalyzerPluginSlice<'a>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -96,7 +127,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -110,6 +141,11 @@ where
         Box::new(CssSuppressionAction),
         &mut emit_signal,
     );
+
+    services.insert_service(css_services.file_source);
+    if let Some(semantic_model) = css_services.semantic_model {
+        services.insert_service(semantic_model.clone());
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
@@ -140,18 +176,18 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::{AnalysisFilter, ControlFlow, CssAnalyzerServices, analyze};
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::TextRange;
+    use biome_css_semantic::semantic_model;
+    use biome_css_syntax::{CssFileSource, TextRange};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{
         Diagnostic, DiagnosticExt, PrintDiagnostic, Severity, category, print_diagnostic_to_string,
     };
     use std::slice;
-
-    use crate::{AnalysisFilter, ControlFlow, analyze};
 
     #[ignore]
     #[test]
@@ -190,6 +226,10 @@ mod tests {
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
         let options = AnalyzerOptions::default();
+        let css_services = CssAnalyzerServices {
+            semantic_model: Some(&semantic_model(&parsed.tree())),
+            file_source: CssFileSource::css(),
+        };
         analyze(
             &parsed.tree(),
             AnalysisFilter {
@@ -197,6 +237,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            css_services,
             &[],
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -242,18 +283,29 @@ mod tests {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, &[], |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let error = diag
-                    .with_file_path("dummyFile")
-                    .with_file_source_code(SOURCE);
-                let text = print_diagnostic_to_string(&error);
-                eprintln!("{text}");
-                panic!("Unexpected diagnostic");
-            }
+        let css_services = CssAnalyzerServices {
+            semantic_model: None,
+            file_source: CssFileSource::css(),
+        };
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            css_services,
+            &[],
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
 
-            ControlFlow::<Never>::Continue(())
-        });
+                ControlFlow::<Never>::Continue(())
+            },
+        );
     }
 
     #[test]
@@ -282,18 +334,29 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, &[], |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let error = diag
-                    .with_file_path("dummyFile")
-                    .with_file_source_code(SOURCE);
-                let text = print_diagnostic_to_string(&error);
-                eprintln!("{text}");
-                panic!("Unexpected diagnostic");
-            }
+        let css_services = CssAnalyzerServices {
+            semantic_model: Some(&semantic_model(&parsed.tree())),
+            file_source: CssFileSource::css(),
+        };
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            css_services,
+            &[],
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
 
-            ControlFlow::<Never>::Continue(())
-        });
+                ControlFlow::<Never>::Continue(())
+            },
+        );
     }
 
     #[test]
@@ -318,18 +381,29 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, &[], |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let error = diag
-                    .with_file_path("dummyFile")
-                    .with_file_source_code(SOURCE);
-                let text = print_diagnostic_to_string(&error);
-                eprintln!("{text}");
-                panic!("Unexpected diagnostic");
-            }
+        let css_services = CssAnalyzerServices {
+            semantic_model: Some(&semantic_model(&parsed.tree())),
+            file_source: CssFileSource::css(),
+        };
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            css_services,
+            &[],
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
 
-            ControlFlow::<Never>::Continue(())
-        });
+                ControlFlow::<Never>::Continue(())
+            },
+        );
     }
 
     #[test]
@@ -351,15 +425,26 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, &[], |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let code = diag.category().unwrap();
-                if code != category!("suppressions/unused") {
-                    panic!("unexpected diagnostic {code:?}");
+        let css_services = CssAnalyzerServices {
+            semantic_model: Some(&semantic_model(&parsed.tree())),
+            file_source: CssFileSource::css(),
+        };
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            css_services,
+            &[],
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let code = diag.category().unwrap();
+                    if code != category!("suppressions/unused") {
+                        panic!("unexpected diagnostic {code:?}");
+                    }
                 }
-            }
 
-            ControlFlow::<Never>::Continue(())
-        });
+                ControlFlow::<Never>::Continue(())
+            },
+        );
     }
 }

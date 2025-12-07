@@ -3,3 +3,4 @@
 # https://rust-lang.github.io/rustup/concepts/profiles.html
 profile = "default"
 channel = "1.91.1"
+targets = ["wasm32-unknown-unknown"]

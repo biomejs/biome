@@ -7,3 +7,5 @@ expression: valid.graphql
 # should not generate diagnostics
 // var a = 1;
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

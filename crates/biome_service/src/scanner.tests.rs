@@ -62,6 +62,7 @@ fn scanner_only_loads_used_type_definitions_from_node_modules() {
             project_key,
             configuration: Default::default(),
             workspace_directory: Some(fixtures_path.clone().into()),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -141,6 +142,7 @@ fn scanner_ignored_files_are_not_loaded() {
             project_key,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -193,6 +195,7 @@ fn scanner_required_files_are_only_ignored_in_ignored_directories() {
             project_key,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
