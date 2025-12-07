@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added 2 options from `typescript-eslint` (`ignoreDifferentlyNamedParameters` and `ignoreDifferentJsDoc`) to `lint/style/useUnifiedTypeSignatures`.
+Added 2 options from `typescript-eslint` (`ignoreDifferentlyNamedParameters` and `ignoreDifferentJsDoc`) to [`useUnifiedTypeSignatures`](https://biomejs.dev/linter/rules/use-unified-type-signatures/).
 
 Each of them will conditionally cause the rule to ignore function overloads with either differently named parameters or different JSDoc comments.
 
