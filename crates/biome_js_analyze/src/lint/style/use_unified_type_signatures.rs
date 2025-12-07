@@ -60,6 +60,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// export function fizzbuzz([fizz, buzz]: [number, number]): void;
+    /// export function fizzbuzz([fizz, buzz]: [string, string]): void;
+    /// export default function fizzbuzz([fizz, buzz]: [string | number, string | number]): void {}
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -74,6 +80,11 @@ declare_lint_rule! {
     /// interface I {
     ///     a(x?: number): void;
     /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export function fizzbuzz([fizz, buzz]: [number, number] | [string, string]): void;
+    /// export default function fizzbuzz([fizz, buzz]: [string | number, string | number]): void {}
     /// ```
     ///
     /// Different return types cannot be merged:
@@ -105,6 +116,9 @@ declare_lint_rule! {
     ///
     /// If set to `true`, overloads with differently named parameters will be ignored,
     /// even if said parameters would be of otherwise mergeable types.
+    /// 
+    /// Parameter declarations that lack specified "names" (such as array spread and destructuring literals)
+    /// will be ignored for this check.
     ///
     /// Default: `false`
     ///
@@ -124,7 +138,7 @@ declare_lint_rule! {
     /// ### `ignoreDifferentJsDoc`
     ///
     /// If set to `true`, overloads with different JSDoc comments from one another will be ignored.
-    /// Ones without comments will still be checked (and can potentially be merged with documented signatures)
+    /// Ones with identical comments will be merged as normal.
     ///
     /// Default: `false`
     ///
@@ -141,6 +155,8 @@ declare_lint_rule! {
     /// function doThing(foo: number): void;
     /// /** Print foo concatenated with 3 */
     /// function doThing(foo: string): void;
+    /// /** @deprecated - don't use this, it crashes the program */
+    /// function doThing(foo: boolean): void;
     /// ```
     ///
     pub UseUnifiedTypeSignatures {
@@ -300,6 +316,7 @@ fn try_merge_overloads(
     }
 
     // TODO: Should we drop duplicate JSDocs from the output?
+    // TODO: Should we consider functions without JSDocs as mergeable with documented ones
     if opts.ignore_different_js_doc()
         && let (docs1, docs2) = (
             JsdocComment::get_jsdocs(&overload1.wrapper_syntax()),
@@ -512,7 +529,10 @@ impl AnyJsParameterListExt for AnyJsParameterList {
             .zip(other.iter())
             .all(|(self_param, other_param)| {
                 // nodes without parameter names (destructuring, etc.) should count as matching anything else
-                // for lack of names
+                // for lack of names.
+                // NB: While this could (in theory) produce type errors by merging a destructuring literal with a non-object parameter,
+                // any such code would be nonsensical and arguably deserve to break.
+                // Put another way, if merging the overloads produces new type errors for you, you're probably doing something wrong.
                 let (Some(self_name), Some(other_name)) = (
                     self_param.ok().and_then(|param| param.name_token()),
                     other_param.ok().and_then(|param| param.name_token()),

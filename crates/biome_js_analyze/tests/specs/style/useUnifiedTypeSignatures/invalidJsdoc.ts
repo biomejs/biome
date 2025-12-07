@@ -10,6 +10,12 @@ function foo(baz: string): string;
 function foo(qux: boolean): string;
 function foo(whatever: any): any {}
 
+// TODO: Decide on whether to allow or deny this example (TSEslint passes, though of dubious merit)
+// /** baba is you */
+// export function foo(bar: string): void	
+// export function foo(bar: number): void
+// export function foo(bar: any): void {} 
+
 // jsdoc on implementation
 
 function bar(a: number): string;

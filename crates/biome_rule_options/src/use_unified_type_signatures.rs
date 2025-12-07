@@ -18,9 +18,9 @@ pub struct UseUnifiedTypeSignaturesOptions {
 
 impl UseUnifiedTypeSignaturesOptions {
     pub fn ignore_differently_named_parameters(&self) -> bool {
-        return self.ignore_differently_named_parameters.or_else(|| false)
+        return self.ignore_differently_named_parameters.unwrap_or(false)
     }
     pub fn ignore_different_js_doc(&self) -> bool {
-        return self.ignore_different_js_doc.or_else(|| false)
+        return self.ignore_different_js_doc.unwrap_or(false)
     }
 }
