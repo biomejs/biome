@@ -1,6 +1,6 @@
-use std::ops::Deref;
 use biome_js_syntax::{JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::TriviaPieceKind;
+use std::ops::Deref;
 
 /// Represents a normalised JSDoc comment.
 ///
@@ -66,7 +66,10 @@ impl JsdocComment {
 
     /// Execute a callback on all JSDoc comments preceding the given node.
     // TODO: Remove this and replace it since we now expose the raw iterator
-    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F) where F: FnMut(&str) {
+    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
+    where
+        F: FnMut(&str),
+    {
         Self::get_jsdocs(node).for_each(|str: String| func(str.as_str()))
     }
 
@@ -79,8 +82,8 @@ impl JsdocComment {
             .filter_map(|trivia| {
                 let text = trivia.text();
                 matches!(
-                        trivia.kind(),
-                        TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
+                    trivia.kind(),
+                    TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
                 )
                 .then(|| text)
                 .filter(|text: &&str| Self::text_is_jsdoc_comment(text))
@@ -139,9 +142,9 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::JsFileSource;
-    use super::*;
 
     #[test]
     fn test_text_is_jsdoc_comment() {
@@ -164,18 +167,23 @@ mod tests {
 
     #[test]
     fn test_get_jsdocs() {
-        assert_jsdoc_comments(r"
+        assert_jsdoc_comments(
+            r"
             /** blubber */
             const a = 5;
             ",
-            vec!["/** blubber */"]);
-        assert_jsdoc_comments(r"
+            vec!["/** blubber */"],
+        );
+        assert_jsdoc_comments(
+            r"
             /** j1 */
             /** j2 */
             const a = 5;
             ",
-            vec!["/** j1 */","/** j2 */"]);
-        assert_jsdoc_comments(r"
+            vec!["/** j1 */", "/** j2 */"],
+        );
+        assert_jsdoc_comments(
+            r"
             /** 
              * multiline
              * yay
@@ -183,32 +191,45 @@ mod tests {
              */
             export function fizzbuzz(foo: any) {};
             ",
-            vec![r"/** 
+            vec![
+                r"/** 
              * multiline
              * yay
              * @param foo - the fooness of great
-             */"]);
-        assert_jsdoc_comments(r"
+             */",
+            ],
+        );
+        assert_jsdoc_comments(
+            r"
             /** j1 */
             // foo bar baz qux quux
             /** j2 */
             const rgb = 555;
             ",
-            vec!["/** j1 */","/** j2 */"]);
+            vec!["/** j1 */", "/** j2 */"],
+        );
 
-        
         assert_jsdoc_comments("const a = 5;", vec![]);
-        assert_jsdoc_comments(r"
+        assert_jsdoc_comments(
+            r"
             // not jsdoc
             function a = () => 5;
-            ", vec![]);
-        assert_jsdoc_comments(r"
+            ",
+            vec![],
+        );
+        assert_jsdoc_comments(
+            r"
             /* also not jsdoc */
             function a = () => 5;
-            ", vec![]);
-        assert_jsdoc_comments(r"
+            ",
+            vec![],
+        );
+        assert_jsdoc_comments(
+            r"
             /*** too many asterisks */
             function a = () => 5;
-            ", vec![]);
+            ",
+            vec![],
+        );
     }
 }

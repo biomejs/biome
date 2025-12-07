@@ -12,8 +12,8 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsFormalParameter, AnyJsObjectMemberName, AnyJsParameter,
     AnyTsMethodSignatureModifier, AnyTsReturnType, AnyTsType, JsBogusBinding, JsComputedMemberName,
     JsExport, JsIdentifierBinding, JsLanguage, JsLiteralMemberName, JsMetavariable,
-    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, T,
-    TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
+    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxNode, T, TsCallSignatureTypeMember,
+    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsDeclareStatement,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsTypeParameters,
 };
@@ -516,13 +516,13 @@ impl AnyJsParameterListExt for AnyJsParameterList {
                 // nodes without parameter names (destructuring, etc.) should count as matching anything else
                 // for lack of names
                 let (Some(self_name), Some(other_name)) = (
-                    self_param.ok().and_then(|param| param.name_token()), 
+                    self_param.ok().and_then(|param| param.name_token()),
                     other_param.ok().and_then(|param| param.name_token()),
                 ) else {
                     return true;
                 };
 
-                self_name.text_trimmed() == other_name.text_trimmed() 
+                self_name.text_trimmed() == other_name.text_trimmed()
             })
     }
 }

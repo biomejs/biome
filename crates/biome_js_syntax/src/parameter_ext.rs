@@ -469,12 +469,11 @@ impl AnyParameter {
             },
         }
     }
-    
+
     /// Obtain the name syntax token for this parameter, if it has one.
-    /// TODO: move this method into AnyJsBindingPattern and then remove it from everywhere else 
+    /// TODO: move this method into AnyJsBindingPattern and then remove it from everywhere else
     pub fn name_token(&self) -> Option<JsSyntaxToken> {
-        self
-            .binding()?
+        self.binding()?
             .as_any_js_binding()?
             .as_js_identifier_binding()?
             .name_token()

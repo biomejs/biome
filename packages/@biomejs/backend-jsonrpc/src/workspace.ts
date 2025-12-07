@@ -8602,7 +8602,16 @@ export interface UseTemplateOptions {}
 export interface UseThrowNewErrorOptions {}
 export interface UseThrowOnlyErrorOptions {}
 export interface UseTrimStartEndOptions {}
-export interface UseUnifiedTypeSignaturesOptions {}
+export interface UseUnifiedTypeSignaturesOptions {
+	/**
+	 * Whether to ignore overloads with different JSDoc comments.
+	 */
+	ignoreDifferentJsDoc?: boolean;
+	/**
+	 * Whether to ignore overloads with differently named parameters.
+	 */
+	ignoreDifferentlyNamedParameters?: boolean;
+}
 export interface NoAlertOptions {}
 export interface NoApproximativeNumericConstantOptions {}
 export interface NoArrayIndexKeyOptions {}
