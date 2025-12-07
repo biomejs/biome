@@ -173,8 +173,6 @@ impl Rule for UseUnifiedTypeSignatures {
             for overload2 in &overload_info.overload_signatures[i + 1..] {
                 if let Some(info) = try_merge_overloads(overload1, overload2, opts) {
                     return Some(info);
-                } else {
-                    continue;
                 }
             }
         }
