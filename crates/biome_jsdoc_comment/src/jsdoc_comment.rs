@@ -213,21 +213,21 @@ mod tests {
         assert_jsdoc_comments(
             r"
             // not jsdoc
-            function a = () => 5;
+            const a = () => 5;
             ",
             vec![],
         );
         assert_jsdoc_comments(
             r"
             /* also not jsdoc */
-            function a = () => 5;
+            class a {};
             ",
             vec![],
         );
         assert_jsdoc_comments(
             r"
             /*** too many asterisks */
-            function a = () => 5;
+            var l = 345678;
             ",
             vec![],
         );
