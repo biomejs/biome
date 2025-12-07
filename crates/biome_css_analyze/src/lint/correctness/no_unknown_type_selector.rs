@@ -27,7 +27,7 @@ fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) ->
     else {
         return false;
     };
-    
+
     if type_selector_text != "root" {
         return false;
     }
@@ -36,11 +36,13 @@ fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) ->
     type_selector
         .syntax()
         .grand_parent()
-        .and_then(|gp| CssPseudoElementFunctionSelector::cast(gp))
+        .and_then(CssPseudoElementFunctionSelector::cast)
         .and_then(|func| func.name().ok())
         .and_then(|name| name.value_token().ok())
         .map(|token| token.token_text_trimmed().text().to_string())
-        .map_or(false, |name_text| VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&name_text.as_str()))
+        .is_some_and(|name_text| {
+            VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&name_text.as_str())
+        })
 }
 
 declare_lint_rule! {
