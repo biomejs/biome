@@ -300,7 +300,7 @@ fn try_merge_overloads(
     }
 
     // TODO: Should we drop duplicate JSDocs from the output?
-    if opts.ignore_different_js_doc.unwrap_or_default()
+    if opts.ignore_different_js_doc()
         && let (docs1, docs2) = (
             JsdocComment::get_jsdocs(&overload1.wrapper_syntax()),
             JsdocComment::get_jsdocs(&overload2.wrapper_syntax()),
@@ -313,7 +313,7 @@ fn try_merge_overloads(
     let parameters1 = overload1.parameters()?;
     let parameters2 = overload2.parameters()?;
 
-    if opts.ignore_differently_named_parameters.unwrap_or_default()
+    if opts.ignore_differently_named_parameters()
         && !parameters1.same_param_names(&parameters2)
     {
         return None;

@@ -15,3 +15,12 @@ pub struct UseUnifiedTypeSignaturesOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub ignore_different_js_doc: Option<bool>,
 }
+
+impl UseUnifiedTypeSignaturesOptions {
+    pub fn ignore_differently_named_parameters(&self) -> bool {
+        return self.ignore_differently_named_parameters.or_else(|| false)
+    }
+    pub fn ignore_different_js_doc(&self) -> bool {
+        return self.ignore_different_js_doc.or_else(|| false)
+    }
+}
