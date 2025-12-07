@@ -34,8 +34,12 @@ pub struct ResolvedTypeId(ResolverId, TypeId);
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.0.level() == TypeResolverLevel::Global {
-            if self.1.index() < NUM_PREDEFINED_TYPES {
-                f.write_str(global_type_name(self.1))
+            // GlobalsResolverBuilder makes sure the type store is fully filled.
+            // Every global TypeId whose index less than NUM_PREDEFINED_TYPES
+            // must have a name returned by global_type_name().
+            // GLOBAL_TYPE_MEMBERS ensures this invariant.
+            if let Some(name) = global_type_name(self.1) {
+                f.write_str(name)
             } else {
                 let id = self.1.index() - NUM_PREDEFINED_TYPES;
                 f.write_fmt(format_args!("Global TypeId({id})"))

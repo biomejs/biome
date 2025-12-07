@@ -8,7 +8,7 @@ use crate::configuration::to_analyzer_rules;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{CodeAction, EmbeddedSnippet};
+use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -438,8 +438,8 @@ fn parse_embedded_nodes(
             }
         } else if element.is_style_tag() {
             let result = parse_embedded_style(element.clone(), cache, biome_path, settings);
-            if let Some((content, file_source)) = result {
-                nodes.push((content.into(), file_source));
+            if let Some((content, services, file_source)) = result {
+                nodes.push(((content, services).into(), file_source));
             }
         }
     }
@@ -551,7 +551,11 @@ pub(crate) fn parse_embedded_style(
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
-) -> Option<(EmbeddedSnippet<CssLanguage>, DocumentFileSource)> {
+) -> Option<(
+    EmbeddedSnippet<CssLanguage>,
+    DocumentServices,
+    DocumentFileSource,
+)> {
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
@@ -564,7 +568,7 @@ pub(crate) fn parse_embedded_style(
         }
 
         let file_source = DocumentFileSource::Css(CssFileSource::css());
-        let content = element.children().iter().next().and_then(|child| {
+        let (snippet, services) = element.children().iter().next().and_then(|child| {
             let child = child.as_any_html_content()?;
             let child = child.as_html_embedded_content()?;
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
@@ -576,14 +580,22 @@ pub(crate) fn parse_embedded_style(
                 options,
             );
 
-            Some(EmbeddedSnippet::new(
-                parse.into(),
-                child.range(),
-                content.text_range(),
-                content.text_range().start(),
+            let mut services = CssDocumentServices::default();
+            if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+                services = services.with_css_semantic_model(&parse.tree())
+            }
+
+            Some((
+                EmbeddedSnippet::new(
+                    parse.into(),
+                    child.range(),
+                    content.text_range(),
+                    content.text_range().start(),
+                ),
+                services.into(),
             ))
         })?;
-        Some((content, file_source))
+        Some((snippet, services, file_source))
     } else {
         None
     }
@@ -794,6 +806,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins: _,
         categories,
         action_offset,
+        document_services: _,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();

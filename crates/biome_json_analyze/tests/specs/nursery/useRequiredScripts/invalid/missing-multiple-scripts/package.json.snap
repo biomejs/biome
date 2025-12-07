@@ -1,0 +1,35 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "test-package",
+  "scripts": {
+    "test": "vitest"
+  }
+}
+
+```
+
+# Diagnostics
+```
+package.json:3:3 lint/nursery/useRequiredScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The required scripts build, lint are missing from package.json.
+  
+    1 │ {
+    2 │   "name": "test-package",
+  > 3 │   "scripts": {
+      │   ^^^^^^^^^^^^
+  > 4 │     "test": "vitest"
+  > 5 │   }
+      │   ^
+    6 │ }
+    7 │ 
+  
+  i Consistent scripts across packages ensure that each can be run reliably from the root of our project. Add the missing scripts to your package.json.
+  
+
+```

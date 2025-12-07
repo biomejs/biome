@@ -71,6 +71,8 @@ class C { static { { let a; } { let a; } } }
 interface A { [index: string]: string; [index: number]: string; }
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Input
 ```cjs
 const foo = function foo() { const foo = 0; }

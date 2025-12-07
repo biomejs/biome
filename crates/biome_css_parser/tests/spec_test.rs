@@ -58,7 +58,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 .consume();
 
         settings
-            .merge_with_configuration(test_options.unwrap_or_default(), None)
+            .merge_with_configuration(test_options.unwrap_or_default(), None, vec![])
             .unwrap();
 
         let settings = settings.languages.css.parser;

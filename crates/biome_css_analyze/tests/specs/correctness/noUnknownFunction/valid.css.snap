@@ -24,3 +24,5 @@ a { height: calc-size(0px); }
 }
 
 ```
+
+_Note: The parser emitted 3 diagnostics which are not shown here._

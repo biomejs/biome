@@ -33,7 +33,7 @@ impl From<RuleDiagnostic> for AnalyzerDiagnostic {
 }
 
 #[derive(Debug)]
-enum DiagnosticKind {
+pub enum DiagnosticKind {
     /// It holds various info related to diagnostics emitted by the rules
     Rule(Box<RuleDiagnostic>),
     /// We have raw information to create a basic [Diagnostic]
@@ -135,7 +135,7 @@ impl AnalyzerDiagnostic {
     }
 
     /// The location of the diagnostic is shifted using this offset.
-    /// This is only applied when the [Self::kind] is [DiagnosticKind::Rule]
+    /// This is only applied when the `Self::kind` is [DiagnosticKind::Rule]
     pub fn add_diagnostic_offset(&mut self, offset: TextSize) {
         if let DiagnosticKind::Rule(rule_diagnostic) = &mut self.kind {
             let diagnostic = rule_diagnostic.as_mut();

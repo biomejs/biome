@@ -36,6 +36,8 @@ a { --test: attr(data-test unknown); }
 
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.css:1:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

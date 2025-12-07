@@ -242,6 +242,7 @@ function Foo({cond}) {
             project_key,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 
@@ -357,6 +358,7 @@ function Foo({cond}) {
             project_key,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
         })
         .unwrap();
 

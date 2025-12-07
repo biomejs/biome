@@ -94,6 +94,8 @@ abstract class InvalidNoPublic17 {
 
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalidNoPublic.ts:2:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
