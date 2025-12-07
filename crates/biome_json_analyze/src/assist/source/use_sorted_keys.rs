@@ -6,8 +6,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
-use biome_json_syntax::{AnyJsonValue, JsonMemberList, JsonObjectValue, T, TextRange};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 use std::{cmp::Ordering, ops::Not};
@@ -107,22 +107,39 @@ declare_source_rule! {
     }
 }
 
+/// Checks if an object/array spans multiple lines by examining CST trivia.
+/// For non-empty containers, checks the first token of the members/elements.
+/// For empty containers, checks the closing brace/bracket token.
+fn has_multiline_content(
+    members_first_token: Option<SyntaxToken<JsonLanguage>>,
+    closing_token: SyntaxResult<SyntaxToken<JsonLanguage>>,
+) -> bool {
+    members_first_token.map_or_else(
+        || {
+            closing_token
+                .map(|token| token.has_leading_newline())
+                .unwrap_or(false)
+        },
+        |token| token.has_leading_newline(),
+    )
+}
+
 /// Determines the nesting depth of a JSON value for grouping purposes.
 /// Multi-line objects and multi-line arrays are considered nested (depth 1).
 /// Primitives, single-line arrays, and single-line objects are considered simple (depth 0).
 fn get_nesting_depth(value: &AnyJsonValue) -> Ordering {
     match value {
         AnyJsonValue::JsonObjectValue(obj) => {
-            // Check if object spans multiple lines by looking for newlines
-            if obj.syntax().text_trimmed().contains_char('\n') {
+            let members = obj.json_member_list();
+            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
                 Ordering::Greater
             } else {
                 Ordering::Equal
             }
         }
         AnyJsonValue::JsonArrayValue(array) => {
-            // Check if array spans multiple lines by looking for newlines
-            if array.syntax().text_trimmed().contains_char('\n') {
+            let elements = array.elements();
+            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
                 Ordering::Greater
             } else {
                 Ordering::Equal

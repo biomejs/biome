@@ -11,9 +11,9 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsObjectMember, JsObjectExpression, JsObjectMemberList, T,
+    AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -166,20 +166,37 @@ declare_source_rule! {
     }
 }
 
+/// Checks if an object/array spans multiple lines by examining CST trivia.
+/// For non-empty containers, checks the first token of the members/elements.
+/// For empty containers, checks the closing brace/bracket token.
+fn has_multiline_content(
+    members_first_token: Option<SyntaxToken<JsLanguage>>,
+    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
+) -> bool {
+    members_first_token.map_or_else(
+        || {
+            closing_token
+                .map(|token| token.has_leading_newline())
+                .unwrap_or(false)
+        },
+        |token| token.has_leading_newline(),
+    )
+}
+
 /// Determines the nesting depth of a JavaScript expression for grouping purposes.
 fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
     match value {
         AnyJsExpression::JsObjectExpression(obj) => {
-            // Check if object spans multiple lines by looking for newlines
-            if obj.syntax().text_trimmed().contains_char('\n') {
+            let members = obj.members();
+            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
                 Ordering::Greater
             } else {
                 Ordering::Equal
             }
         }
         AnyJsExpression::JsArrayExpression(array) => {
-            // Check if array spans multiple lines by looking for newlines
-            if array.syntax().text_trimmed().contains_char('\n') {
+            let elements = array.elements();
+            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
                 Ordering::Greater
             } else {
                 Ordering::Equal

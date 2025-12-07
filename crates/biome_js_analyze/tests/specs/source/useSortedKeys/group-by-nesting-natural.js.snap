@@ -24,6 +24,29 @@ const obj = {
   ]
 };
 
+// Edge case: object with content on same line as closing brace (non-formatted)
+const edgeCase1 = {
+  obj: {
+    b: "" },
+  obj2: {
+
+  },
+  a: 1
+};
+
+// Edge case: empty multi-line object
+const edgeCase2 = {
+  empty: {
+  },
+  a: 1
+};
+
+// Edge case: single-line nested object (should NOT be treated as nested)
+const edgeCase3 = {
+  nested: { a: 1, b: 2 },
+  z: 1
+};
+
 ```
 
 # Diagnostics
@@ -68,6 +91,74 @@ group-by-nesting-natural.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━�
        13 │ + ··},
     14 14 │     multiLineArray: [
     15 15 │       "item1",
+  
+
+```
+
+```
+group-by-nesting-natural.js:23:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by nesting level and key.
+  
+    21 │ // Edge case: object with content on same line as closing brace (non-formatted)
+    22 │ const edgeCase1 = {
+  > 23 │   obj: {
+       │   ^^^^^^
+  > 24 │     b: "" },
+  > 25 │   obj2: {
+  > 26 │ 
+  > 27 │   },
+  > 28 │   a: 1
+       │   ^^^^
+    29 │ };
+    30 │ 
+  
+  i Safe fix: Sort the object properties by key.
+  
+    21 21 │   // Edge case: object with content on same line as closing brace (non-formatted)
+    22 22 │   const edgeCase1 = {
+    23    │ - ··obj:·{
+       23 │ + ··a:·1,·
+       24 │ + ··obj:·{
+    24 25 │       b: "" },
+    25 26 │     obj2: {
+    26 27 │   
+    27    │ - ··},
+    28    │ - ··a:·1
+       28 │ + ··}
+    29 29 │   };
+    30 30 │   
+  
+
+```
+
+```
+group-by-nesting-natural.js:33:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by nesting level and key.
+  
+    31 │ // Edge case: empty multi-line object
+    32 │ const edgeCase2 = {
+  > 33 │   empty: {
+       │   ^^^^^^^^
+  > 34 │   },
+  > 35 │   a: 1
+       │   ^^^^
+    36 │ };
+    37 │ 
+  
+  i Safe fix: Sort the object properties by key.
+  
+    31 31 │   // Edge case: empty multi-line object
+    32 32 │   const edgeCase2 = {
+    33    │ - ··empty:·{
+    34    │ - ··},
+    35    │ - ··a:·1
+       33 │ + ··a:·1,·
+       34 │ + ··empty:·{
+       35 │ + ··}
+    36 36 │   };
+    37 37 │   
   
 
 ```

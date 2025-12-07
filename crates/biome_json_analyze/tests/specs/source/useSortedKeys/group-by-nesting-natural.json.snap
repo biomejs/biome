@@ -21,7 +21,24 @@ expression: group-by-nesting-natural.json
     "item1",
     "item2",
     "item3"
-  ]
+  ],
+  "edgeCase1": {
+    "obj": {
+      "b": "" },
+    "obj2": {
+
+    },
+    "a": 1
+  },
+  "edgeCase2": {
+    "empty": {
+    },
+    "a": 1
+  },
+  "edgeCase3": {
+    "nested": { "a": 1, "b": 2 },
+    "z": 1
+  }
 }
 
 ```
@@ -38,36 +55,128 @@ group-by-nesting-natural.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━�
    > 3 │   "details": {
    > 4 │     "description": "This is a nested object",
         ...
-  > 17 │     "item3"
-  > 18 │   ]
-  > 19 │ }
+  > 34 │     "z": 1
+  > 35 │   }
+  > 36 │ }
        │ ^
-    20 │ 
+    37 │ 
   
   i Safe fix: Sort the members by key.
   
      1  1 │   {
      2    │ - ··"name":·"Sample·Item",
      3    │ - ··"details":·{
+     4    │ - ····"description":·"This·is·a·nested·object",
+     5    │ - ····"status":·"active"
+     6    │ - ··},
+     7    │ - ··"id":·"12345",
         2 │ + ··"count":·42,
         3 │ + ··"id":·"12345",
         4 │ + ··"name":·"Sample·Item",
-        5 │ + ··"tags":·["short",·"array"],
-        6 │ + ··"details":·{
-     4  7 │       "description": "This is a nested object",
-     5  8 │       "status": "active"
-     6  9 │     },
-     7    │ - ··"id":·"12345",
-     8    │ - ··"tags":·["short",·"array"],
+     8  5 │     "tags": ["short", "array"],
      9    │ - ··"metadata":·{
-       10 │ + ··"metadata":·{
-    10 11 │       "created": "2024-01-01",
-    11 12 │       "updated": "2024-01-02"
+    10    │ - ····"created":·"2024-01-01",
+    11    │ - ····"updated":·"2024-01-02"
     12    │ - ··},
     13    │ - ··"count":·42,
-       13 │ + ··},
-    14 14 │     "multiLineArray": [
-    15 15 │       "item1",
+    14    │ - ··"multiLineArray":·[
+    15    │ - ····"item1",
+    16    │ - ····"item2",
+    17    │ - ····"item3"
+    18    │ - ··],
+    19    │ - ··"edgeCase1":·{
+        6 │ + ··"details":·{
+        7 │ + ····"description":·"This·is·a·nested·object",
+        8 │ + ····"status":·"active"
+        9 │ + ··},
+       10 │ + ··"edgeCase1":·{
+    20 11 │       "obj": {
+    21 12 │         "b": "" },
+    ····· │ 
+    33 24 │       "nested": { "a": 1, "b": 2 },
+    34 25 │       "z": 1
+    35    │ - ··}
+       26 │ + ··},
+       27 │ + ··"metadata":·{
+       28 │ + ····"created":·"2024-01-01",
+       29 │ + ····"updated":·"2024-01-02"
+       30 │ + ··},
+       31 │ + ··"multiLineArray":·[
+       32 │ + ····"item1",
+       33 │ + ····"item2",
+       34 │ + ····"item3"
+       35 │ + ··]
+    36 36 │   }
+    37 37 │   
+  
+
+```
+
+```
+group-by-nesting-natural.json:19:16 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by nesting level and key.
+  
+    17 │     "item3"
+    18 │   ],
+  > 19 │   "edgeCase1": {
+       │                ^
+  > 20 │     "obj": {
+        ...
+  > 25 │     "a": 1
+  > 26 │   },
+       │   ^
+    27 │   "edgeCase2": {
+    28 │     "empty": {
+  
+  i Safe fix: Sort the members by key.
+  
+    18 18 │     ],
+    19 19 │     "edgeCase1": {
+    20    │ - ····"obj":·{
+       20 │ + ····"a":·1,
+       21 │ + ····"obj":·{
+    21 22 │         "b": "" },
+    22 23 │       "obj2": {
+    23 24 │   
+    24    │ - ····},
+    25    │ - ····"a":·1
+       25 │ + ····}
+    26 26 │     },
+    27 27 │     "edgeCase2": {
+  
+
+```
+
+```
+group-by-nesting-natural.json:27:16 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by nesting level and key.
+  
+    25 │     "a": 1
+    26 │   },
+  > 27 │   "edgeCase2": {
+       │                ^
+  > 28 │     "empty": {
+  > 29 │     },
+  > 30 │     "a": 1
+  > 31 │   },
+       │   ^
+    32 │   "edgeCase3": {
+    33 │     "nested": { "a": 1, "b": 2 },
+  
+  i Safe fix: Sort the members by key.
+  
+    26 26 │     },
+    27 27 │     "edgeCase2": {
+    28    │ - ····"empty":·{
+    29    │ - ····},
+    30    │ - ····"a":·1
+       28 │ + ····"a":·1,
+       29 │ + ····"empty":·{
+       30 │ + ····}
+    31 31 │     },
+    32 32 │     "edgeCase3": {
   
 
 ```
