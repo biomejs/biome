@@ -912,6 +912,8 @@ impl<'src> CssLexer<'src> {
             b"layer" => LAYER_KW,
             b"supports" => SUPPORTS_KW,
             b"selector" => SELECTOR_KW,
+            b"if" => IF_KW,
+            b"else" => ELSE_KW,
             b"url" => URL_KW,
             b"src" => SRC_KW,
             b"scope" => SCOPE_KW,
@@ -940,6 +942,7 @@ impl<'src> CssLexer<'src> {
             b"config" => CONFIG_KW,
             b"plugin" => PLUGIN_KW,
             b"slot" => SLOT_KW,
+            b"inline" => INLINE_KW,
             _ => IDENT,
         }
     }

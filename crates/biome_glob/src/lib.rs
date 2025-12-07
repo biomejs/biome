@@ -280,6 +280,11 @@ impl Glob {
     fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
         self.glob.is_match_candidate(&path.0)
     }
+
+    /// Returns the pattern as a string slice.
+    pub fn as_str(&self) -> &str {
+        self.glob.glob().glob()
+    }
 }
 impl AsRef<Self> for Glob {
     fn as_ref(&self) -> &Self {
@@ -379,11 +384,11 @@ impl biome_deserialize::Deserializable for Glob {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
-    fn schema_name() -> String {
-        "Glob".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Glob")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

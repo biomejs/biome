@@ -1,0 +1,132 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template # data-foo="bar" foo="bar"></template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueBogusDirective {
+                        items: [
+                            HASH@10..12 "#" [] [Whitespace(" ")],
+                        ],
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@12..20 "data-foo" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@20..21 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@21..27 "\"bar\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@27..30 "foo" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@30..31 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@31..36 "\"bar\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@37..38 "<" [] [],
+                slash_token: SLASH@38..39 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..47 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@47..48 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@48..49 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..49
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..48
+    0: HTML_ELEMENT@0..48
+      0: HTML_OPENING_ELEMENT@0..37
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..10
+          0: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@10..36
+          0: VUE_BOGUS_DIRECTIVE@10..12
+            0: HASH@10..12 "#" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@12..27
+            0: HTML_ATTRIBUTE_NAME@12..20
+              0: HTML_LITERAL@12..20 "data-foo" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..27
+              0: EQ@20..21 "=" [] []
+              1: HTML_STRING@21..27
+                0: HTML_STRING_LITERAL@21..27 "\"bar\"" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE@27..36
+            0: HTML_ATTRIBUTE_NAME@27..30
+              0: HTML_LITERAL@27..30 "foo" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..36
+              0: EQ@30..31 "=" [] []
+              1: HTML_STRING@31..36
+                0: HTML_STRING_LITERAL@31..36 "\"bar\"" [] []
+        3: R_ANGLE@36..37 ">" [] []
+      1: HTML_ELEMENT_LIST@37..37
+      2: HTML_CLOSING_ELEMENT@37..48
+        0: L_ANGLE@37..38 "<" [] []
+        1: SLASH@38..39 "/" [] []
+        2: HTML_TAG_NAME@39..47
+          0: HTML_LITERAL@39..47 "template" [] []
+        3: R_ANGLE@47..48 ">" [] []
+  4: EOF@48..49 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid-v-slot-shorthand.vue:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a vue directive argument but instead found ' '.
+  
+  > 1 │ <template # data-foo="bar" foo="bar"></template>
+      │            ^
+    2 │ 
+  
+  i Expected a vue directive argument here.
+  
+  > 1 │ <template # data-foo="bar" foo="bar"></template>
+      │            ^
+    2 │ 
+  
+```

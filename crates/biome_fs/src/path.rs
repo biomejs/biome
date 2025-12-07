@@ -211,6 +211,18 @@ impl Deref for BiomePath {
     }
 }
 
+impl AsRef<Utf8PathBuf> for BiomePath {
+    fn as_ref(&self) -> &Utf8PathBuf {
+        &self.path
+    }
+}
+
+impl AsRef<Utf8Path> for BiomePath {
+    fn as_ref(&self) -> &Utf8Path {
+        self.path.as_ref()
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::Serialize for BiomePath {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -243,11 +255,11 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for BiomePath {
-    fn schema_name() -> String {
-        "BiomePath".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("BiomePath")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }
@@ -328,7 +340,7 @@ mod test {
         let path6 = BiomePath::new(Utf8PathBuf::from("src/frontend/biome.jsonc"));
         let path7 = BiomePath::new(Utf8PathBuf::from("src/frontend/package.json"));
 
-        let mut paths = vec![path1, path2, path3, path4, path5, path6, path7];
+        let mut paths = [path1, path2, path3, path4, path5, path6, path7];
         paths.sort();
         let mut iter = paths.iter();
         assert_eq!(iter.next().unwrap().to_string(), "src/biome.json");

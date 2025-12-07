@@ -6,11 +6,11 @@
 //! bindings to the Workspace API
 
 use crate::{TextRange, TextSize};
-use schemars::{JsonSchema, r#gen::SchemaGenerator, schema::Schema};
+use schemars::{JsonSchema, Schema, SchemaGenerator};
 
 impl JsonSchema for TextSize {
-    fn schema_name() -> String {
-        String::from("TextSize")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("TextSize")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
@@ -21,8 +21,8 @@ impl JsonSchema for TextSize {
 }
 
 impl JsonSchema for TextRange {
-    fn schema_name() -> String {
-        String::from("TextRange")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("TextRange")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {

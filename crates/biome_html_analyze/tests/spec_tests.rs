@@ -1,6 +1,6 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -13,8 +13,8 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,json,jsonc}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -93,10 +93,10 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
 ) {
-    let parsed = parse_html(input_code, HtmlParseOptions::default());
+    let mut diagnostics = Vec::new();
+    let parsed = parse_html(input_code, (&source_type).into());
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<HtmlLanguage>(input_file, &mut diagnostics);
 
@@ -143,6 +143,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         "html",
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
@@ -151,7 +152,7 @@ pub(crate) fn analyze_and_snap(
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
-    _source_type: HtmlFileSource,
+    source_type: HtmlFileSource,
     action: &AnalyzerAction<HtmlLanguage>,
 ) {
     let (new_tree, text_edit) = match action
@@ -179,7 +180,7 @@ fn check_code_action(
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_html(&output, HtmlParseOptions::default());
+    let re_parse = parse_html(&output, (&source_type).into());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 

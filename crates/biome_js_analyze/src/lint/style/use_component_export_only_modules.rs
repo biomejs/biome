@@ -171,14 +171,19 @@ impl Rule for UseComponentExportOnlyModules {
                         .identifier
                         .as_ref()
                         .and_then(|x| x.name_token())
-                        && ctx.options().allow_export_names.iter().any(|export_name| {
-                            export_name.as_ref() == exported_item_id.text_trimmed()
-                        })
+                        && ctx
+                            .options()
+                            .allow_export_names
+                            .iter()
+                            .flatten()
+                            .any(|export_name| {
+                                export_name.as_ref() == exported_item_id.text_trimmed()
+                            })
                     {
                         continue;
                     }
                     // Allow exporting constants along with components
-                    if ctx.options().allow_constant_export
+                    if ctx.options().allow_constant_export()
                         && exported_item
                             .exported
                             .clone()

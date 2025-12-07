@@ -262,6 +262,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         source_type.file_extension(),
+        parsed.diagnostics().len(),
     );
 
     // FIXME: I wish we could do this more generically, but we cannot do this

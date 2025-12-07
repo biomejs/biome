@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
-snapshot_kind: text
 ---
 ## Input
 
@@ -24,7 +23,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssViewTransitionAtRule {
-                view_transition_token: VIEW_TRANSITION_KW@1..17 "view-transition" [] [Whitespace(" ")],
+                declarator: CssViewTransitionAtRuleDeclarator {
+                    view_transition_token: VIEW_TRANSITION_KW@1..17 "view-transition" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@17..19 "{" [] [Whitespace(" ")],
                     declarations: CssDeclarationList [],
@@ -35,7 +36,9 @@ CssRoot {
         CssAtRule {
             at_token: AT@20..23 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssViewTransitionAtRule {
-                view_transition_token: VIEW_TRANSITION_KW@23..39 "view-transition" [] [Whitespace(" ")],
+                declarator: CssViewTransitionAtRuleDeclarator {
+                    view_transition_token: VIEW_TRANSITION_KW@23..39 "view-transition" [] [Whitespace(" ")],
+                },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@39..40 "{" [] [],
                     declarations: CssDeclarationList [
@@ -75,7 +78,8 @@ CssRoot {
     0: CSS_AT_RULE@0..20
       0: AT@0..1 "@" [] []
       1: CSS_VIEW_TRANSITION_AT_RULE@1..20
-        0: VIEW_TRANSITION_KW@1..17 "view-transition" [] [Whitespace(" ")]
+        0: CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR@1..17
+          0: VIEW_TRANSITION_KW@1..17 "view-transition" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@17..20
           0: L_CURLY@17..19 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@19..19
@@ -83,7 +87,8 @@ CssRoot {
     1: CSS_AT_RULE@20..62
       0: AT@20..23 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_VIEW_TRANSITION_AT_RULE@23..62
-        0: VIEW_TRANSITION_KW@23..39 "view-transition" [] [Whitespace(" ")]
+        0: CSS_VIEW_TRANSITION_AT_RULE_DECLARATOR@23..39
+          0: VIEW_TRANSITION_KW@23..39 "view-transition" [] [Whitespace(" ")]
         1: CSS_DECLARATION_BLOCK@39..62
           0: L_CURLY@39..40 "{" [] []
           1: CSS_DECLARATION_LIST@40..60

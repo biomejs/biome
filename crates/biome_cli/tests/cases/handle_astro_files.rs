@@ -223,6 +223,9 @@ let schema = z.object().optional();
 schema + sure()
 ---
 
+
+
+
 <html><head><title>Astro</title></head><body></body></html>
 
 <style>
@@ -662,6 +665,84 @@ fn format_astro_with_typescript_script_tag() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_astro_with_typescript_script_tag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn dont_indent_frontmatter() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true, "indentScriptAndStyle": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+import Foo from "./Foo.astro"
+const bar = 123
+if (bar>1) {console.log(bar+1)}
+---
+<Foo>{bar}</Foo>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+
+<script>
+function foo(){console.log("Hello")}
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "dont_indent_frontmatter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_throw_parse_error_for_return_full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(astro_file_path.into(), ASTRO_RETURN.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_throw_parse_error_for_return_full_support",
         fs,
         console,
         result,

@@ -1,0 +1,859 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<div allowTransparency="true" />
+	<div hasOwnProperty="should not be allowed property"></div>
+	<div abc="should not be allowed property"></div>
+	<div aria-fake="should not be allowed property"></div>
+	<div someProp="bar"></div>
+	<div class="bar"></div>
+	<div for="bar"></div>
+	<div accept-charset="bar"></div>
+	<div http-equiv="bar"></div>
+	<div accesskey="bar"></div>
+	<div onclick="bar"></div>
+	<div onmousedown="bar"></div>
+	<div onMousedown="bar"></div>
+	<use xlink:href="bar" />
+	<rect clip-path="bar" />
+	<script crossorigin nomodule />
+	<div crossorigin />
+	<div crossOrigin />
+	<div as="audio" />
+	<div
+		onAbort={abort}
+		onDurationChange={durationChange}
+		onEmptied={emptied}
+		onEnded={end}
+		onResize={resize}
+		onError={error}
+	/>
+	<div onLoad={load} />
+	<div fill="pink" />
+	<div
+		controls={controls}
+		loop={true}
+		muted={false}
+		src={videoSrc}
+		playsInline={true}
+		allowFullScreen
+	></div>
+	<div download="foo" />
+	<div imageSrcSet="someImageSrcSet" />
+	<div imageSizes="someImageSizes" />
+	<div data-xml-anything="invalid" />
+	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+	<div abbr="abbr" />
+	<div webkitDirectory="" />
+	<div webkitdirectory="" />
+	<div
+		className="App"
+		data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c="customValue"
+	>
+		Hello, world!
+	</div>
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'allowTransparency' is not a valid DOM attribute.
+  
+    1 │ <>
+  > 2 │ 	<div allowTransparency="true" />
+      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<div hasOwnProperty="should not be allowed property"></div>
+    4 │ 	<div abc="should not be allowed property"></div>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:3:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'hasOwnProperty' is not a valid DOM attribute.
+  
+    1 │ <>
+    2 │ 	<div allowTransparency="true" />
+  > 3 │ 	<div hasOwnProperty="should not be allowed property"></div>
+      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<div abc="should not be allowed property"></div>
+    5 │ 	<div aria-fake="should not be allowed property"></div>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:4:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'abc' is not a valid DOM attribute.
+  
+    2 │ 	<div allowTransparency="true" />
+    3 │ 	<div hasOwnProperty="should not be allowed property"></div>
+  > 4 │ 	<div abc="should not be allowed property"></div>
+      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<div aria-fake="should not be allowed property"></div>
+    6 │ 	<div someProp="bar"></div>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:5:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'aria-fake' is not a valid DOM attribute.
+  
+    3 │ 	<div hasOwnProperty="should not be allowed property"></div>
+    4 │ 	<div abc="should not be allowed property"></div>
+  > 5 │ 	<div aria-fake="should not be allowed property"></div>
+      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<div someProp="bar"></div>
+    7 │ 	<div class="bar"></div>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'someProp' is not a valid DOM attribute.
+  
+    4 │ 	<div abc="should not be allowed property"></div>
+    5 │ 	<div aria-fake="should not be allowed property"></div>
+  > 6 │ 	<div someProp="bar"></div>
+      │ 	     ^^^^^^^^^^^^^^
+    7 │ 	<div class="bar"></div>
+    8 │ 	<div for="bar"></div>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:7:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'class' is not a valid React prop name.
+  
+    5 │ 	<div aria-fake="should not be allowed property"></div>
+    6 │ 	<div someProp="bar"></div>
+  > 7 │ 	<div class="bar"></div>
+      │ 	     ^^^^^^^^^^^
+    8 │ 	<div for="bar"></div>
+    9 │ 	<div accept-charset="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'className' instead of 'class' for React components.
+  
+
+```
+
+```
+invalid.jsx:8:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'for' is not a valid React prop name.
+  
+     6 │ 	<div someProp="bar"></div>
+     7 │ 	<div class="bar"></div>
+   > 8 │ 	<div for="bar"></div>
+       │ 	     ^^^^^^^^^
+     9 │ 	<div accept-charset="bar"></div>
+    10 │ 	<div http-equiv="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'htmlFor' instead of 'for' for React components.
+  
+
+```
+
+```
+invalid.jsx:9:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'accept-charset' is not a valid React prop name.
+  
+     7 │ 	<div class="bar"></div>
+     8 │ 	<div for="bar"></div>
+   > 9 │ 	<div accept-charset="bar"></div>
+       │ 	     ^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<div http-equiv="bar"></div>
+    11 │ 	<div accesskey="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'acceptCharset' instead of 'accept-charset' for React components.
+  
+
+```
+
+```
+invalid.jsx:10:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'http-equiv' is not a valid React prop name.
+  
+     8 │ 	<div for="bar"></div>
+     9 │ 	<div accept-charset="bar"></div>
+  > 10 │ 	<div http-equiv="bar"></div>
+       │ 	     ^^^^^^^^^^^^^^^^
+    11 │ 	<div accesskey="bar"></div>
+    12 │ 	<div onclick="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'httpEquiv' instead of 'http-equiv' for React components.
+  
+
+```
+
+```
+invalid.jsx:11:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'accesskey' is not a valid React prop name.
+  
+     9 │ 	<div accept-charset="bar"></div>
+    10 │ 	<div http-equiv="bar"></div>
+  > 11 │ 	<div accesskey="bar"></div>
+       │ 	     ^^^^^^^^^^^^^^^
+    12 │ 	<div onclick="bar"></div>
+    13 │ 	<div onmousedown="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'accessKey' instead of 'accesskey' for React components.
+  
+
+```
+
+```
+invalid.jsx:12:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onclick' is not a valid React prop name.
+  
+    10 │ 	<div http-equiv="bar"></div>
+    11 │ 	<div accesskey="bar"></div>
+  > 12 │ 	<div onclick="bar"></div>
+       │ 	     ^^^^^^^^^^^^^
+    13 │ 	<div onmousedown="bar"></div>
+    14 │ 	<div onMousedown="bar"></div>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onClick' instead of 'onclick' for React components.
+  
+
+```
+
+```
+invalid.jsx:13:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onmousedown' is not a valid React prop name.
+  
+    11 │ 	<div accesskey="bar"></div>
+    12 │ 	<div onclick="bar"></div>
+  > 13 │ 	<div onmousedown="bar"></div>
+       │ 	     ^^^^^^^^^^^^^^^^^
+    14 │ 	<div onMousedown="bar"></div>
+    15 │ 	<use xlink:href="bar" />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onMouseDown' instead of 'onmousedown' for React components.
+  
+
+```
+
+```
+invalid.jsx:14:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onMousedown' is not a valid React prop name.
+  
+    12 │ 	<div onclick="bar"></div>
+    13 │ 	<div onmousedown="bar"></div>
+  > 14 │ 	<div onMousedown="bar"></div>
+       │ 	     ^^^^^^^^^^^^^^^^^
+    15 │ 	<use xlink:href="bar" />
+    16 │ 	<rect clip-path="bar" />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onMouseDown' instead of 'onMousedown' for React components.
+  
+
+```
+
+```
+invalid.jsx:15:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'xlink:href' is not a valid React prop name.
+  
+    13 │ 	<div onmousedown="bar"></div>
+    14 │ 	<div onMousedown="bar"></div>
+  > 15 │ 	<use xlink:href="bar" />
+       │ 	     ^^^^^^^^^^^^^^^^
+    16 │ 	<rect clip-path="bar" />
+    17 │ 	<script crossorigin nomodule />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'xlinkHref' instead of 'xlink:href' for React components.
+  
+
+```
+
+```
+invalid.jsx:16:8 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'clip-path' is not a valid React prop name.
+  
+    14 │ 	<div onMousedown="bar"></div>
+    15 │ 	<use xlink:href="bar" />
+  > 16 │ 	<rect clip-path="bar" />
+       │ 	      ^^^^^^^^^^^^^^^
+    17 │ 	<script crossorigin nomodule />
+    18 │ 	<div crossorigin />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'clipPath' instead of 'clip-path' for React components.
+  
+
+```
+
+```
+invalid.jsx:17:10 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'crossorigin' is not a valid React prop name.
+  
+    15 │ 	<use xlink:href="bar" />
+    16 │ 	<rect clip-path="bar" />
+  > 17 │ 	<script crossorigin nomodule />
+       │ 	        ^^^^^^^^^^^
+    18 │ 	<div crossorigin />
+    19 │ 	<div crossOrigin />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'crossOrigin' instead of 'crossorigin' for React components.
+  
+
+```
+
+```
+invalid.jsx:17:22 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'nomodule' is not a valid React prop name.
+  
+    15 │ 	<use xlink:href="bar" />
+    16 │ 	<rect clip-path="bar" />
+  > 17 │ 	<script crossorigin nomodule />
+       │ 	                    ^^^^^^^^
+    18 │ 	<div crossorigin />
+    19 │ 	<div crossOrigin />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'noModule' instead of 'nomodule' for React components.
+  
+
+```
+
+```
+invalid.jsx:18:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'crossorigin' is not a valid React prop name.
+  
+    16 │ 	<rect clip-path="bar" />
+    17 │ 	<script crossorigin nomodule />
+  > 18 │ 	<div crossorigin />
+       │ 	     ^^^^^^^^^^^
+    19 │ 	<div crossOrigin />
+    20 │ 	<div as="audio" />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'crossOrigin' instead of 'crossorigin' for React components.
+  
+
+```
+
+```
+invalid.jsx:19:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'crossOrigin' is not valid on a <div> element.
+  
+    17 │ 	<script crossorigin nomodule />
+    18 │ 	<div crossorigin />
+  > 19 │ 	<div crossOrigin />
+       │ 	     ^^^^^^^^^^^
+    20 │ 	<div as="audio" />
+    21 │ 	<div
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: script,img,video,audio,link,image
+  
+
+```
+
+```
+invalid.jsx:20:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'as' is not valid on a <div> element.
+  
+    18 │ 	<div crossorigin />
+    19 │ 	<div crossOrigin />
+  > 20 │ 	<div as="audio" />
+       │ 	     ^^^^^^^^^^
+    21 │ 	<div
+    22 │ 		onAbort={abort}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: link
+  
+
+```
+
+```
+invalid.jsx:22:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onAbort' is not valid on a <div> element.
+  
+    20 │ 	<div as="audio" />
+    21 │ 	<div
+  > 22 │ 		onAbort={abort}
+       │ 		^^^^^^^^^^^^^^^
+    23 │ 		onDurationChange={durationChange}
+    24 │ 		onEmptied={emptied}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:23:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onDurationChange' is not valid on a <div> element.
+  
+    21 │ 	<div
+    22 │ 		onAbort={abort}
+  > 23 │ 		onDurationChange={durationChange}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 		onEmptied={emptied}
+    25 │ 		onEnded={end}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:24:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onEmptied' is not valid on a <div> element.
+  
+    22 │ 		onAbort={abort}
+    23 │ 		onDurationChange={durationChange}
+  > 24 │ 		onEmptied={emptied}
+       │ 		^^^^^^^^^^^^^^^^^^^
+    25 │ 		onEnded={end}
+    26 │ 		onResize={resize}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:25:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onEnded' is not valid on a <div> element.
+  
+    23 │ 		onDurationChange={durationChange}
+    24 │ 		onEmptied={emptied}
+  > 25 │ 		onEnded={end}
+       │ 		^^^^^^^^^^^^^
+    26 │ 		onResize={resize}
+    27 │ 		onError={error}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:26:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onResize' is not valid on a <div> element.
+  
+    24 │ 		onEmptied={emptied}
+    25 │ 		onEnded={end}
+  > 26 │ 		onResize={resize}
+       │ 		^^^^^^^^^^^^^^^^^
+    27 │ 		onError={error}
+    28 │ 	/>
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:27:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onError' is not valid on a <div> element.
+  
+    25 │ 		onEnded={end}
+    26 │ 		onResize={resize}
+  > 27 │ 		onError={error}
+       │ 		^^^^^^^^^^^^^^^
+    28 │ 	/>
+    29 │ 	<div onLoad={load} />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video,img,link,source,script,picture,iframe
+  
+
+```
+
+```
+invalid.jsx:29:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'onLoad' is not valid on a <div> element.
+  
+    27 │ 		onError={error}
+    28 │ 	/>
+  > 29 │ 	<div onLoad={load} />
+       │ 	     ^^^^^^^^^^^^^
+    30 │ 	<div fill="pink" />
+    31 │ 	<div
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: script,img,link,picture,iframe,object,source
+  
+
+```
+
+```
+invalid.jsx:30:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'fill' is not valid on a <div> element.
+  
+    28 │ 	/>
+    29 │ 	<div onLoad={load} />
+  > 30 │ 	<div fill="pink" />
+       │ 	     ^^^^^^^^^^^
+    31 │ 	<div
+    32 │ 		controls={controls}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: altGlyph,circle,ellipse,g,line,marker,mask,path,polygon,polyline,rect,svg,symbol,text,textPath,tref,tspan,use,animate,animateColor,animateMotion,animateTransform,set
+  
+
+```
+
+```
+invalid.jsx:32:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'controls' is not valid on a <div> element.
+  
+    30 │ 	<div fill="pink" />
+    31 │ 	<div
+  > 32 │ 		controls={controls}
+       │ 		^^^^^^^^^^^^^^^^^^^
+    33 │ 		loop={true}
+    34 │ 		muted={false}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:33:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'loop' is not valid on a <div> element.
+  
+    31 │ 	<div
+    32 │ 		controls={controls}
+  > 33 │ 		loop={true}
+       │ 		^^^^^^^^^^^
+    34 │ 		muted={false}
+    35 │ 		src={videoSrc}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:34:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'muted' is not valid on a <div> element.
+  
+    32 │ 		controls={controls}
+    33 │ 		loop={true}
+  > 34 │ 		muted={false}
+       │ 		^^^^^^^^^^^^^
+    35 │ 		src={videoSrc}
+    36 │ 		playsInline={true}
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: audio,video
+  
+
+```
+
+```
+invalid.jsx:36:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'playsInline' is not valid on a <div> element.
+  
+    34 │ 		muted={false}
+    35 │ 		src={videoSrc}
+  > 36 │ 		playsInline={true}
+       │ 		^^^^^^^^^^^^^^^^^^
+    37 │ 		allowFullScreen
+    38 │ 	></div>
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: video
+  
+
+```
+
+```
+invalid.jsx:37:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'allowFullScreen' is not valid on a <div> element.
+  
+    35 │ 		src={videoSrc}
+    36 │ 		playsInline={true}
+  > 37 │ 		allowFullScreen
+       │ 		^^^^^^^^^^^^^^^
+    38 │ 	></div>
+    39 │ 	<div download="foo" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: iframe,video
+  
+
+```
+
+```
+invalid.jsx:39:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'download' is not valid on a <div> element.
+  
+    37 │ 		allowFullScreen
+    38 │ 	></div>
+  > 39 │ 	<div download="foo" />
+       │ 	     ^^^^^^^^^^^^^^
+    40 │ 	<div imageSrcSet="someImageSrcSet" />
+    41 │ 	<div imageSizes="someImageSizes" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: a,area
+  
+
+```
+
+```
+invalid.jsx:40:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'imageSrcSet' is not valid on a <div> element.
+  
+    38 │ 	></div>
+    39 │ 	<div download="foo" />
+  > 40 │ 	<div imageSrcSet="someImageSrcSet" />
+       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 	<div imageSizes="someImageSizes" />
+    42 │ 	<div data-xml-anything="invalid" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: link
+  
+
+```
+
+```
+invalid.jsx:41:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'imageSizes' is not valid on a <div> element.
+  
+    39 │ 	<div download="foo" />
+    40 │ 	<div imageSrcSet="someImageSrcSet" />
+  > 41 │ 	<div imageSizes="someImageSizes" />
+       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	<div data-xml-anything="invalid" />
+    43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: link
+  
+
+```
+
+```
+invalid.jsx:42:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'data-xml-anything' is not a valid DOM attribute.
+  
+    40 │ 	<div imageSrcSet="someImageSrcSet" />
+    41 │ 	<div imageSizes="someImageSizes" />
+  > 42 │ 	<div data-xml-anything="invalid" />
+       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+    44 │ 	<div abbr="abbr" />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:43:48 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'dataNotAnDataAttribute' is not a valid DOM attribute.
+  
+    41 │ 	<div imageSizes="someImageSizes" />
+    42 │ 	<div data-xml-anything="invalid" />
+  > 43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+       │ 	                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 	<div abbr="abbr" />
+    45 │ 	<div webkitDirectory="" />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:44:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'abbr' is not valid on a <div> element.
+  
+    42 │ 	<div data-xml-anything="invalid" />
+    43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+  > 44 │ 	<div abbr="abbr" />
+       │ 	     ^^^^^^^^^^^
+    45 │ 	<div webkitDirectory="" />
+    46 │ 	<div webkitdirectory="" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: th,td
+  
+
+```
+
+```
+invalid.jsx:45:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'webkitDirectory' is not valid on a <div> element.
+  
+    43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+    44 │ 	<div abbr="abbr" />
+  > 45 │ 	<div webkitDirectory="" />
+       │ 	     ^^^^^^^^^^^^^^^^^^
+    46 │ 	<div webkitdirectory="" />
+    47 │ 	<div
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: input
+  
+
+```
+
+```
+invalid.jsx:46:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'webkitDirectory' is not valid on a <div> element.
+  
+    44 │ 	<div abbr="abbr" />
+    45 │ 	<div webkitDirectory="" />
+  > 46 │ 	<div webkitdirectory="" />
+       │ 	     ^^^^^^^^^^^^^^^^^^
+    47 │ 	<div
+    48 │ 		className="App"
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: input
+  
+
+```
+
+```
+invalid.jsx:49:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The property 'data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c' is not a valid DOM attribute.
+  
+    47 │ 	<div
+    48 │ 		className="App"
+  > 49 │ 		data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c="customValue"
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	>
+    51 │ 		Hello, world!
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```

@@ -27,7 +27,7 @@ impl Format<HtmlFormatContext> for FormatTokenAsLowercase<HtmlLanguage> {
                 f,
                 [format_replaced(
                     &self.token,
-                    &dynamic_text(&lowercase, self.token.text_trimmed_range().start()),
+                    &text(&lowercase, self.token.text_trimmed_range().start()),
                 )]
             ),
         }

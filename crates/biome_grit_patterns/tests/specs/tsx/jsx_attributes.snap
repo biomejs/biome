@@ -1,0 +1,12 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: jsx_attributes
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:6-1:16",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

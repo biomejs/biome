@@ -1,16 +1,19 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_configuration::{ConfigurationSource, ExtendedConfigurations};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
-    write_analyzer_snapshot,
+    has_bogus_nodes_or_empty_slots, load_configuration_source, parse_test_path,
+    register_leak_checker, write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
+use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
@@ -23,7 +26,10 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let file_name = input_file.file_name().unwrap();
 
     // We should skip running test for .options.json as input_file
-    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+    if file_name.ends_with(".options.json")
+        || file_name.ends_with(".options.jsonc")
+        || file_name.starts_with("_ignore")
+    {
         return;
     }
 
@@ -147,14 +153,29 @@ pub(crate) fn analyze_and_snap(
     action_type: CheckActionType,
     parser_options: JsonParserOptions,
 ) {
+    let mut diagnostics = Vec::new();
     let parsed = parse_json(input_code, parser_options);
+    if !parsed.diagnostics().is_empty() {
+        for diag in parsed.diagnostics() {
+            let formatted = diagnostic_to_string(file_name, input_code, diag.clone().into());
+            diagnostics.push(formatted);
+        }
+    }
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
+    let configuration_source = load_configuration_source(input_file);
     let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
-
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, file_source, |event| {
+    let services = JsonAnalyzeServices {
+        file_source,
+        configuration_source: configuration_source.map(|(config, list)| {
+            Arc::new(ConfigurationSource {
+                source: Some((config, Some(input_file.to_path_buf()))),
+                extended_configurations: ExtendedConfigurations::from(list),
+            })
+        }),
+    };
+    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, services, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if action.is_suppression() {
@@ -192,6 +213,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         language.as_str(),
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);

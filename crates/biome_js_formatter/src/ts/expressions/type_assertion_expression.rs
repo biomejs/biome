@@ -50,9 +50,9 @@ impl FormatNodeRule<TsTypeAssertionExpression> for FormatTsTypeAssertionExpressi
                     format_args![
                         format_cast,
                         group(&format_args![
-                            text("("),
+                            token("("),
                             block_indent(&format_expression),
-                            text(")")
+                            token(")")
                         ])
                     ],
                     format_args![format_cast, format_expression]

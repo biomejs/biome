@@ -76,7 +76,7 @@ impl CodeBlock {
                 );
             };
 
-            settings.merge_with_configuration(config, None)?;
+            settings.merge_with_configuration(config, None, vec![])?;
         }
 
         let language_settings = &L::lookup_settings(&settings.languages).linter;
@@ -94,6 +94,7 @@ impl CodeBlock {
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {
+        // Always use the JS-first resolution path (experimental full HTML support disabled)
         DocumentFileSource::from_extension(&self.tag, false)
     }
 

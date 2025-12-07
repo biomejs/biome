@@ -114,12 +114,14 @@ CssRoot {
                     CssAtRule {
                         at_token: AT@56..62 "@" [Newline("\n"), Whitespace("    ")] [],
                         rule: CssMediaAtRule {
-                            media_token: MEDIA_KW@62..68 "media" [] [Whitespace(" ")],
-                            queries: CssMediaQueryList [
-                                CssMetavariable {
-                                    value_token: GRIT_METAVARIABLE@68..74 "µbaz" [] [Whitespace(" ")],
-                                },
-                            ],
+                            declarator: CssMediaAtRuleDeclarator {
+                                media_token: MEDIA_KW@62..68 "media" [] [Whitespace(" ")],
+                                queries: CssMediaQueryList [
+                                    CssMetavariable {
+                                        value_token: GRIT_METAVARIABLE@68..74 "µbaz" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
                             block: CssDeclarationOrRuleBlock {
                                 l_curly_token: L_CURLY@74..75 "{" [] [],
                                 items: CssDeclarationOrRuleList [],
@@ -223,11 +225,12 @@ CssRoot {
           0: CSS_AT_RULE@56..76
             0: AT@56..62 "@" [Newline("\n"), Whitespace("    ")] []
             1: CSS_MEDIA_AT_RULE@62..76
-              0: MEDIA_KW@62..68 "media" [] [Whitespace(" ")]
-              1: CSS_MEDIA_QUERY_LIST@68..74
-                0: CSS_METAVARIABLE@68..74
-                  0: GRIT_METAVARIABLE@68..74 "µbaz" [] [Whitespace(" ")]
-              2: CSS_DECLARATION_OR_RULE_BLOCK@74..76
+              0: CSS_MEDIA_AT_RULE_DECLARATOR@62..74
+                0: MEDIA_KW@62..68 "media" [] [Whitespace(" ")]
+                1: CSS_MEDIA_QUERY_LIST@68..74
+                  0: CSS_METAVARIABLE@68..74
+                    0: GRIT_METAVARIABLE@68..74 "µbaz" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@74..76
                 0: L_CURLY@74..75 "{" [] []
                 1: CSS_DECLARATION_OR_RULE_LIST@75..75
                 2: R_CURLY@75..76 "}" [] []

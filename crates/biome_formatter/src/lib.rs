@@ -74,6 +74,7 @@ pub use buffer::{
 pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
+pub use printer::SourceMapGeneration;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
 use std::str::FromStr;
@@ -1021,8 +1022,16 @@ where
         Ok(printed)
     }
 
-    pub fn print_with_indent(&self, indent: u16) -> PrintResult<Printed> {
-        let print_options = self.context.options().as_print_options();
+    pub fn print_with_indent(
+        &self,
+        indent: u16,
+        source_map: SourceMapGeneration,
+    ) -> PrintResult<Printed> {
+        let print_options = self
+            .context
+            .options()
+            .as_print_options()
+            .with_source_map_generation(source_map);
         let printed = Printer::new(print_options).print_with_indent(&self.document, indent)?;
 
         let printed = match self.context.source_map() {
@@ -1147,7 +1156,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
 ///         write!(f, [
 ///             hard_line_break(),
-///             dynamic_text(&self.0, TextSize::from(0)),
+///             text(&self.0, TextSize::from(0)),
 ///             hard_line_break(),
 ///         ])
 ///     }
@@ -1396,7 +1405,7 @@ where
 /// let mut state = FormatState::new(SimpleFormatContext::default());
 /// let mut buffer = VecBuffer::new(&mut state);
 ///
-/// write!(&mut buffer, [format_args!(text("Hello World"))])?;
+/// write!(&mut buffer, [format_args!(token("Hello World"))])?;
 ///
 /// let formatted = Formatted::new(Document::from(buffer.into_vec()), SimpleFormatContext::default());
 ///
@@ -1415,7 +1424,7 @@ where
 /// let mut state = FormatState::new(SimpleFormatContext::default());
 /// let mut buffer = VecBuffer::new(&mut state);
 ///
-/// write!(&mut buffer, [text("Hello World")])?;
+/// write!(&mut buffer, [token("Hello World")])?;
 ///
 /// let formatted = Formatted::new(Document::from(buffer.into_vec()), SimpleFormatContext::default());
 ///
@@ -1447,7 +1456,7 @@ pub fn write<Context>(
 /// use biome_formatter::{format, format_args};
 ///
 /// # fn main() -> FormatResult<()> {
-/// let formatted = format!(SimpleFormatContext::default(), [&format_args!(text("test"))])?;
+/// let formatted = format!(SimpleFormatContext::default(), [&format_args!(token("test"))])?;
 /// assert_eq!("test", formatted.print()?.as_code());
 /// # Ok(())
 /// # }
@@ -1460,7 +1469,7 @@ pub fn write<Context>(
 /// use biome_formatter::{format};
 ///
 /// # fn main() -> FormatResult<()> {
-/// let formatted = format!(SimpleFormatContext::default(), [text("test")])?;
+/// let formatted = format!(SimpleFormatContext::default(), [token("test")])?;
 /// assert_eq!("test", formatted.print()?.as_code());
 /// # Ok(())
 /// # }
@@ -2045,7 +2054,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
     };
 
     let formatted = format_node(root, language, false)?;
-    let mut printed = formatted.print_with_indent(initial_indent)?;
+    let mut printed = formatted.print_with_indent(initial_indent, SourceMapGeneration::Enabled)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();
 

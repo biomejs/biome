@@ -200,6 +200,21 @@ impl Type {
         })
     }
 
+    /// Returns whether this type is a bigint with the given `value`.
+    pub fn is_bigint_literal(&self, value: i64) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::BigInt(literal) => literal
+                    .trim_end_matches('n')
+                    .parse::<i64>()
+                    .ok()
+                    .is_some_and(|literal_value| literal_value == value),
+                _ => false,
+            },
+            _ => false,
+        })
+    }
+
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
         self.id == GLOBAL_PROMISE_ID

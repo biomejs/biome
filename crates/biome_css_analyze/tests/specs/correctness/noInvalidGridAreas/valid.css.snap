@@ -35,3 +35,5 @@ a { grid-template-areas: "s s s"
 }
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

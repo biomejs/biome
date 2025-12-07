@@ -15,3 +15,5 @@ class B {
 }
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

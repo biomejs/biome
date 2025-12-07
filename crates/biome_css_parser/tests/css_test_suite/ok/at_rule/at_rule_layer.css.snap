@@ -858,29 +858,31 @@ CssRoot {
                             CssAtRule {
                                 at_token: AT@810..813 "@" [Newline("\n"), Whitespace("\t")] [],
                                 rule: CssMediaAtRule {
-                                    media_token: MEDIA_KW@813..819 "media" [] [Whitespace(" ")],
-                                    queries: CssMediaQueryList [
-                                        CssMediaAndTypeQuery {
-                                            left: CssMediaTypeQuery {
-                                                modifier: ONLY_KW@819..824 "ONLY" [] [Whitespace(" ")],
-                                                ty: CssMediaType {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@824..831 "screen" [] [Whitespace(" ")],
+                                    declarator: CssMediaAtRuleDeclarator {
+                                        media_token: MEDIA_KW@813..819 "media" [] [Whitespace(" ")],
+                                        queries: CssMediaQueryList [
+                                            CssMediaAndTypeQuery {
+                                                left: CssMediaTypeQuery {
+                                                    modifier: ONLY_KW@819..824 "ONLY" [] [Whitespace(" ")],
+                                                    ty: CssMediaType {
+                                                        value: CssIdentifier {
+                                                            value_token: IDENT@824..831 "screen" [] [Whitespace(" ")],
+                                                        },
                                                     },
                                                 },
-                                            },
-                                            and_token: AND_KW@831..835 "AND" [] [Whitespace(" ")],
-                                            right: CssMediaFeatureInParens {
-                                                l_paren_token: L_PAREN@835..836 "(" [] [],
-                                                feature: CssQueryFeatureBoolean {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@836..841 "color" [] [],
+                                                and_token: AND_KW@831..835 "AND" [] [Whitespace(" ")],
+                                                right: CssMediaFeatureInParens {
+                                                    l_paren_token: L_PAREN@835..836 "(" [] [],
+                                                    feature: CssQueryFeatureBoolean {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@836..841 "color" [] [],
+                                                        },
                                                     },
+                                                    r_paren_token: R_PAREN@841..844 ")" [] [Whitespace("  ")],
                                                 },
-                                                r_paren_token: R_PAREN@841..844 ")" [] [Whitespace("  ")],
                                             },
-                                        },
-                                    ],
+                                        ],
+                                    },
                                     block: CssDeclarationOrRuleBlock {
                                         l_curly_token: L_CURLY@844..845 "{" [] [],
                                         items: CssDeclarationOrRuleList [
@@ -1693,22 +1695,23 @@ CssRoot {
               0: CSS_AT_RULE@810..887
                 0: AT@810..813 "@" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_MEDIA_AT_RULE@813..887
-                  0: MEDIA_KW@813..819 "media" [] [Whitespace(" ")]
-                  1: CSS_MEDIA_QUERY_LIST@819..844
-                    0: CSS_MEDIA_AND_TYPE_QUERY@819..844
-                      0: CSS_MEDIA_TYPE_QUERY@819..831
-                        0: ONLY_KW@819..824 "ONLY" [] [Whitespace(" ")]
-                        1: CSS_MEDIA_TYPE@824..831
-                          0: CSS_IDENTIFIER@824..831
-                            0: IDENT@824..831 "screen" [] [Whitespace(" ")]
-                      1: AND_KW@831..835 "AND" [] [Whitespace(" ")]
-                      2: CSS_MEDIA_FEATURE_IN_PARENS@835..844
-                        0: L_PAREN@835..836 "(" [] []
-                        1: CSS_QUERY_FEATURE_BOOLEAN@836..841
-                          0: CSS_IDENTIFIER@836..841
-                            0: IDENT@836..841 "color" [] []
-                        2: R_PAREN@841..844 ")" [] [Whitespace("  ")]
-                  2: CSS_DECLARATION_OR_RULE_BLOCK@844..887
+                  0: CSS_MEDIA_AT_RULE_DECLARATOR@813..844
+                    0: MEDIA_KW@813..819 "media" [] [Whitespace(" ")]
+                    1: CSS_MEDIA_QUERY_LIST@819..844
+                      0: CSS_MEDIA_AND_TYPE_QUERY@819..844
+                        0: CSS_MEDIA_TYPE_QUERY@819..831
+                          0: ONLY_KW@819..824 "ONLY" [] [Whitespace(" ")]
+                          1: CSS_MEDIA_TYPE@824..831
+                            0: CSS_IDENTIFIER@824..831
+                              0: IDENT@824..831 "screen" [] [Whitespace(" ")]
+                        1: AND_KW@831..835 "AND" [] [Whitespace(" ")]
+                        2: CSS_MEDIA_FEATURE_IN_PARENS@835..844
+                          0: L_PAREN@835..836 "(" [] []
+                          1: CSS_QUERY_FEATURE_BOOLEAN@836..841
+                            0: CSS_IDENTIFIER@836..841
+                              0: IDENT@836..841 "color" [] []
+                          2: R_PAREN@841..844 ")" [] [Whitespace("  ")]
+                  1: CSS_DECLARATION_OR_RULE_BLOCK@844..887
                     0: L_CURLY@844..845 "{" [] []
                     1: CSS_DECLARATION_OR_RULE_LIST@845..884
                       0: CSS_NESTED_QUALIFIED_RULE@845..884

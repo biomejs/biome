@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -34,6 +33,8 @@ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
 @font-face { color: U+0100-024F; }
 a { unicode-range: U+0100-024F; }
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```

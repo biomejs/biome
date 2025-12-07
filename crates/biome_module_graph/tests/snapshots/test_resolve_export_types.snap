@@ -73,13 +73,13 @@ BindingId(3) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 42
+Module TypeId(0) => number: 42
 
 Module TypeId(1) => Module(0) TypeId(0)
 
 Module TypeId(2) => number
 
-Module TypeId(3) => value: Life, The Universe, and Everything
+Module TypeId(3) => string: Life, The Universe, and Everything
 
 Module TypeId(4) => Module(0) TypeId(10)
 

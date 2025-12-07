@@ -1,5 +1,6 @@
 name: Pull request Markdown
 on:
+  merge_group:
   pull_request:
     branches:
       - main
@@ -11,8 +12,8 @@ jobs:
   lint:
     runs-on: depot-ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
-      - uses: DavidAnson/markdownlint-cli2-action@c076bbe50e2ba547b66eb496a32a9ea20950d138
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+      - uses: DavidAnson/markdownlint-cli2-action@e4bf40dee69f036098589e4b9dbb433098fda5d3
         with:
           globs: |
             **/*.md

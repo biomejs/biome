@@ -8,6 +8,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("nursery", "noNextAsyncClientComponent"),
+        RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),
         RuleFilter::Rule("performance", "useGoogleFontPreconnect"),
@@ -28,7 +29,11 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnresolvedImports"),
+        RuleFilter::Rule("nursery", "useArraySortCompare"),
+        RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
+        RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useRegexpExec"),
     ]
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -52,7 +57,11 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
+        RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
+        RuleFilter::Rule("nursery", "noLeakedRender"),
         RuleFilter::Rule("nursery", "noReactForwardRef"),
+        RuleFilter::Rule("nursery", "noSyncScripts"),
+        RuleFilter::Rule("nursery", "noUnknownAttribute"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),
@@ -63,6 +72,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noSolidDestructuredProps"),
+        RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
         RuleFilter::Rule("performance", "useSolidForComponent"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
@@ -81,6 +91,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
+        RuleFilter::Rule("nursery", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
     ]

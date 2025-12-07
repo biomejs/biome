@@ -54,3 +54,5 @@ function withThisParamValid(this, a, b, c) {
 }
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

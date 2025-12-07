@@ -69,6 +69,8 @@ useVisibleTask$(({ track, cleanup }) => {
 }); 
 ```
 
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.js:1:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

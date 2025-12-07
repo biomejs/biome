@@ -12,6 +12,8 @@ import { names } from "module-name" with { key: "data", key2: "data2", key: "dat
 
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 issue-5710.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

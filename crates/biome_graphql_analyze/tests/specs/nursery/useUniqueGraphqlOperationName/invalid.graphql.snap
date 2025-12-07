@@ -1,0 +1,109 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query user {
+  user {
+    id
+  }
+}
+
+query user {
+  me {
+    id
+  }
+}
+
+mutation updateUser {
+  updateUser {
+    id
+  }
+}
+
+mutation updateUser {
+  updateProfile {
+    name
+  }
+}
+
+mutation updateUser {
+  updateSettings {
+    theme
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:7:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Operation named "user" is already defined.
+  
+     5 │ }
+     6 │ 
+   > 7 │ query user {
+       │ ^^^^^^^^^^^^
+   > 8 │   me {
+   > 9 │     id
+  > 10 │   }
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ mutation updateUser {
+  
+  i GraphQL operation names must be unique to ensure proper identification.
+  
+  i Rename the operation to have a unique name.
+  
+
+```
+
+```
+invalid.graphql:19:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Operation named "updateUser" is already defined.
+  
+    17 │ }
+    18 │ 
+  > 19 │ mutation updateUser {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+  > 20 │   updateProfile {
+  > 21 │     name
+  > 22 │   }
+  > 23 │ }
+       │ ^
+    24 │ 
+    25 │ mutation updateUser {
+  
+  i GraphQL operation names must be unique to ensure proper identification.
+  
+  i Rename the operation to have a unique name.
+  
+
+```
+
+```
+invalid.graphql:25:1 lint/nursery/useUniqueGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Operation named "updateUser" is already defined.
+  
+    23 │ }
+    24 │ 
+  > 25 │ mutation updateUser {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+  > 26 │   updateSettings {
+  > 27 │     theme
+  > 28 │   }
+  > 29 │ }
+       │ ^
+    30 │ 
+  
+  i GraphQL operation names must be unique to ensure proper identification.
+  
+  i Rename the operation to have a unique name.
+  
+
+```

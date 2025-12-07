@@ -201,6 +201,8 @@ pub trait Lexer<'src> {
     }
 
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
+    ///
+    /// See also: [`Self::prev_byte_at`]
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
         self.source()
@@ -216,6 +218,18 @@ pub trait Lexer<'src> {
         } else {
             self.source().as_bytes().get(self.position() - 1).copied()
         }
+    }
+
+    /// Returns the byte at position `self.position - offset` or `None` if it is out of bounds. Looks backwards instead of forwards.
+    #[inline]
+    fn prev_byte_at(&self, offset: usize) -> Option<u8> {
+        if offset > self.position() {
+            return None;
+        }
+        self.source()
+            .as_bytes()
+            .get(self.position() - offset)
+            .copied()
     }
 
     #[inline]
@@ -298,7 +312,7 @@ pub trait Lexer<'src> {
         false
     }
 
-    /// Consume a grit metavariable(µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
+    /// Consume a grit metavariable(µ\[a-zA-Z_]\[a-zA-Z0-9_]*|µ...)
     /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());

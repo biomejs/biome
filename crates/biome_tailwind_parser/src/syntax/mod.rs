@@ -56,7 +56,8 @@ impl ParseSeparatedList for CandidateList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
+                .enable_recovery_on_line_break(),
             expected_candidate,
         )
     }
@@ -68,11 +69,16 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     VariantList.parse_list(p);
 
+    if p.at(T![-]) {
+        p.bump_with_context(T![-], TailwindLexContext::SawNegative);
+    }
+
     let candidate = parse_arbitrary_candidate(p)
         .or_else(|| parse_functional_or_static_candidate(p))
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
+                .enable_recovery_on_line_break(),
             expected_candidate,
         );
 
@@ -112,10 +118,11 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
 
-    p.bump(DASH);
+    p.expect(T![-]);
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, NEWLINE, T![!], EOF]),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]])
+            .enable_recovery_on_line_break(),
         expected_value,
     ) {
         Ok(_) => {}
@@ -192,10 +199,7 @@ fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(
-            TW_BOGUS_MODIFIER,
-            token_set![WHITESPACE, NEWLINE, T![!], EOF],
-        ),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]]),
         expected_value,
     ) {
         Ok(_) => {}

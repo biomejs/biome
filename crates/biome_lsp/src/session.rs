@@ -707,7 +707,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: true,
+                watch: scan_kind.is_project(),
                 force,
                 scan_kind,
                 verbose: false,
@@ -916,6 +916,7 @@ impl Session {
                 .map(Utf8PathBuf::as_path)
                 .map(BiomePath::from),
             configuration,
+            extended_configurations: Default::default(),
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind, force)

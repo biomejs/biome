@@ -114,7 +114,11 @@ impl Rule for NoForEach {
 
         let options = ctx.options();
         // Check if `forEach` is called by a valid identifier.
-        if !options.allowed_identifiers.is_empty() {
+        if options
+            .allowed_identifiers
+            .as_ref()
+            .is_some_and(|ids| !ids.is_empty())
+        {
             let object = member_expression.object().ok()?;
             if let Some(reference) = object.as_js_reference_identifier() {
                 let value_token = reference.value_token().ok()?;
@@ -122,6 +126,7 @@ impl Rule for NoForEach {
                 if options
                     .allowed_identifiers
                     .iter()
+                    .flatten()
                     .any(|identifier| identifier.as_ref() == name)
                 {
                     return None;

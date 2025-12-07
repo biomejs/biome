@@ -569,6 +569,160 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn full_support_enabled_and_scss_is_skipped() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<html><head><title>Svelte</title></head><body></body></html>
+
+<style lang="scss">
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_enabled_and_scss_is_skipped",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_tsx() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<script lang="tsx">
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+interface Props {
+    title: string;
+}
+
+let schema = z.object().optional();
+schema + sure();
+const props: Props = { title: "Hello" };
+
+function FunctionalComponent() {
+    return <div></div>;
+}
+
+</script>
+
+<template>
+    <div></div>
+</template>
+
+<style>
+.class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_tsx",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_jsx() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<script lang="jsx">
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+let schema = z.object().optional();
+schema + sure();
+
+function FunctionalComponent() {
+    return <div></div>;
+}
+
+</script>
+
+<template>
+    <div></div>
+</template>
+
+<style>
+.class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_jsx",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

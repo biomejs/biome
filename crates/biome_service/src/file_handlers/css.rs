@@ -1,7 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, EnabledForPath, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, ProcessLint, SearchCapabilities, is_diagnostic_error,
-    search,
+    LintParams, LintResults, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -13,27 +12,22 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
-use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
-    CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
-    PullActionsResult,
+    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
-};
+use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
     CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
 };
-use biome_css_analyze::analyze;
+use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
-use biome_diagnostics::Applicability;
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
@@ -42,9 +36,9 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
+use either::Either;
 use std::borrow::Cow;
-use std::collections::HashSet;
-use tracing::{debug_span, error, info, trace_span};
+use tracing::{error, info};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -364,6 +358,7 @@ impl ExtensionHandler for CssFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -543,8 +538,14 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    let _ =
-        debug_span!("Linting CSS file", path =? params.path, language =? params.language).entered();
+    let Some(file_source) = params.language.to_css_file_source() else {
+        return LintResults {
+            diagnostics: vec![],
+            errors: 0,
+            skipped_diagnostics: 0,
+        };
+    };
+
     let settings = &params.settings;
     let analyzer_options = settings.analyzer_options::<CssLanguage>(
         params.path,
@@ -570,11 +571,18 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-
+    let css_services = CssAnalyzerServices {
+        semantic_model: params
+            .document_services
+            .as_css_services()
+            .and_then(|services| services.semantic_model.as_ref()),
+        file_source,
+    };
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
+        css_services,
         &params.plugins,
         |signal| process_lint.process_signal(signal),
     );
@@ -604,11 +612,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins,
         categories,
         action_offset,
+        document_services,
     } = params;
-    let _ = debug_span!("Code actions CSS", range =? range, path =? path).entered();
     let tree = parse.tree();
-    let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_css_file_source() else {
+    let Some(file_source) = language.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
@@ -635,21 +642,34 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     info!("CSS runs the analyzer");
+    let css_services = CssAnalyzerServices {
+        semantic_model: document_services
+            .as_css_services()
+            .and_then(|services| services.semantic_model.as_ref()),
+        file_source,
+    };
 
-    analyze(&tree, filter, &analyzer_options, &plugins, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                offset: action_offset,
-                suggestion: item.suggestion,
-            }
-        }));
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        css_services,
+        &plugins,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    offset: action_offset,
+                    suggestion: item.suggestion,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -657,7 +677,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: CssRoot = params.parse.tree();
-
+    let Some(file_source) = params.document_file_source.to_css_file_source() else {
+        error!("Could not determine the file source of the file");
+        return Ok(FixFileResult::default());
+    };
     // Compute final rules (taking `overrides` into account)
     let rules = params.settings.as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
@@ -671,7 +694,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
             .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout)
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -681,133 +704,52 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut actions = Vec::new();
-    let mut skipped_suggested_fixes = 0;
-    let mut errors: u16 = 0;
-    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
+    let mut process_fix_all = ProcessFixAll::new(
+        &params,
+        rules,
+        tree.syntax().text_range_with_trivia().len().into(),
+    );
 
     loop {
+        let css_services = CssAnalyzerServices {
+            semantic_model: params
+                .document_services
+                .as_css_services()
+                .and_then(|services| services.semantic_model.as_ref()),
+            file_source,
+        };
+
         let (action, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
+            css_services,
             &params.plugins,
-            |signal| {
-                let current_diagnostic = signal.diagnostic();
-
-                if let Some(diagnostic) = current_diagnostic.as_ref()
-                    && is_diagnostic_error(diagnostic, rules.as_deref())
-                {
-                    errors += 1;
-                }
-
-                for action in signal.actions() {
-                    match params.fix_file_mode {
-                        FixFileMode::SafeFixes => {
-                            // suppression actions should not be part of safe fixes
-                            if action.is_suppression() {
-                                continue;
-                            }
-                            if action.applicability == Applicability::MaybeIncorrect {
-                                skipped_suggested_fixes += 1;
-                            }
-                            if action.applicability == Applicability::Always {
-                                errors = errors.saturating_sub(1);
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                        FixFileMode::SafeAndUnsafeFixes => {
-                            // suppression actions should not be part of safe fixes
-                            if action.is_suppression() {
-                                continue;
-                            }
-                            if matches!(
-                                action.applicability,
-                                Applicability::Always | Applicability::MaybeIncorrect
-                            ) {
-                                errors = errors.saturating_sub(1);
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                        FixFileMode::ApplySuppressions => {
-                            if action.is_suppression() {
-                                return ControlFlow::Break(action);
-                            }
-                        }
-                    }
-                }
-
-                ControlFlow::Continue(())
-            },
+            |signal| process_fix_all.process_signal(signal),
         );
 
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    tree = match CssRoot::cast(root) {
-                        Some(tree) => tree,
-                        None => {
-                            return Err(WorkspaceError::RuleError(
-                                RuleError::ReplacedRootWithNonRootError {
-                                    rule_name: action.rule_name.map(|(group, rule)| {
-                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                    }),
-                                },
-                            ));
-                        }
-                    };
-                    actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match CssRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+            Some(tree.syntax().text_range_with_trivia().len().into())
+        })?;
 
-                    // Check for runaway edit growth
-                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
-                    if !growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    }
-                }
-            }
-            None => {
-                let code = if params.should_format {
-                    format_node(
+        if result.is_none() {
+            return process_fix_all.finish(|| {
+                Ok(if params.should_format {
+                    Either::Left(format_node(
                         params.settings.format_options::<CssLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),
                         tree.syntax(),
-                    )?
-                    .print()?
-                    .into_code()
+                    ))
                 } else {
-                    tree.syntax().to_string()
-                };
-                return Ok(FixFileResult {
-                    code,
-                    skipped_suggested_fixes,
-                    actions,
-                    errors: errors.into(),
-                });
-            }
+                    Either::Right(tree.syntax().to_string())
+                })
+            });
         }
     }
 }

@@ -250,6 +250,17 @@ plain token
 }
 
 #[test]
+fn lex_document_end_like_plain_token() {
+    assert_lex!(
+        " ...",
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:3,
+        FLOW_END:0,
+    );
+}
+
+#[test]
 fn lex_mapping_with_multiline_plain() {
     assert_lex!(
         r#"

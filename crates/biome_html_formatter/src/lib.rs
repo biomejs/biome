@@ -20,11 +20,14 @@ mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
+pub(crate) mod separated;
+mod svelte;
 mod trivia;
 pub mod utils;
 mod verbatim;
+mod vue;
 
-/// Formats a Html file based on its features.
+/// Formats a HTML file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
 pub fn format_node(
@@ -306,7 +309,6 @@ impl IntoFormat<HtmlFormatContext> for HtmlSyntaxToken {
 }
 
 /// Formatting specific [Iterator] extensions
-#[expect(dead_code)]
 pub(crate) trait FormattedIterExt {
     /// Converts every item to an object that knows how to format it.
     fn formatted<Context>(self) -> FormattedIter<Self, Self::Item, Context>

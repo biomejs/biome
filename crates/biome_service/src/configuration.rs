@@ -22,6 +22,7 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_analyze::METADATA as html_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
@@ -54,6 +55,8 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
+    /// The list of possible extended configuration files
+    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
 }
 
 impl LoadedConfiguration {
@@ -73,26 +76,31 @@ impl LoadedConfiguration {
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
+        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
+
+        let configuration = match partial_configuration {
+            Some(mut partial_configuration) => {
+                extended_configurations.extend(partial_configuration.apply_extends(
+                    fs,
+                    &configuration_file_path,
+                    &external_resolution_base_path,
+                    &mut diagnostics,
+                )?);
+                partial_configuration.migrate_deprecated_fields();
+                partial_configuration
+            }
+            None => Configuration::default(),
+        };
+
         Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
-                }
-                None => Configuration::default(),
-            },
+            configuration,
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
+            extended_configurations,
         })
     }
 
@@ -437,12 +445,14 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -455,7 +465,7 @@ pub trait ConfigurationExt {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError>;
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
@@ -488,7 +498,7 @@ impl ConfigurationExt for Configuration {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
         let deserialized = self.deserialize_extends(
             fs,
             file_path.parent().expect("file path should have a parent"),
@@ -496,6 +506,13 @@ impl ConfigurationExt for Configuration {
         )?;
         let (configurations, errors): (Vec<_>, Vec<_>) =
             deserialized.into_iter().map(Deserialized::consume).unzip();
+
+        let configuration_list = configurations
+            .iter()
+            .flatten()
+            .cloned()
+            .map(|c| (file_path.to_path_buf(), c))
+            .collect::<Vec<_>>();
 
         let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
@@ -521,7 +538,7 @@ impl ConfigurationExt for Configuration {
                 .collect::<Vec<_>>(),
         );
 
-        Ok(())
+        Ok(configuration_list)
     }
 
     /// Deserializes all the configuration files that were specified in the

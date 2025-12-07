@@ -602,9 +602,10 @@ We would like to set the options in the `biome.json` configuration file:
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "enabled": true,
       "nursery": {
-        "my-rule": {
+        "myRule": {
+          "level": "on",
           "options": {
             "behavior": "A",
             "threshold": 30,
@@ -622,21 +623,33 @@ We would like to set the options in the `biome.json` configuration file:
 The first step is to create the Rust data representation of the rule's options.
 
 ```rust
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct MyRuleOptions {
-    behavior: Behavior,
-    threshold: u8,
-    behavior_exceptions: Box<[Box<str>]>
+    behavior: Option<Behavior>,
+    threshold: Option<u8>,
+    behavior_exceptions: Option<Box<[Box<str>]>>,
 }
 
-#[derive(Clone, Debug, Default, Deserializable)]
+#[derive(Clone, Debug, Default, Deserializable, Merge)]
 pub enum Behavior {
     #[default]
     A,
     B,
     C,
+}
+
+impl biome_deserialize::Merge for MyRuleOptions {
+    fn merge_with(&mut self, other: Self) {
+        // `self` corresponds to the (shared) extended configuration.
+        // `other` is the user configuration.
+        self.behavior.merge_with(other.behavior);
+        self.threshold.merge_with(other.threshold);
+        if let Some(behavior_exceptions) = other.behavior_exceptions {
+            self.behavior_exceptions = Some(behavior_exceptions);
+        }
+    }
 }
 ```
 
@@ -648,6 +661,91 @@ they have to implement the `Deserializable` trait from the `biome_deserialize` c
 This is what the `Deserializable` keyword in the `#[derive]` statements above did.
 It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
 for you.
+
+The rule's options type have also to implement `biome_deserialize::Merge`.
+This allows merging the rule's options coming from a shared extended configuration with
+the rule's options set by a user configuration.
+In the following example, the shared configuration set `behavior` and `behaviorExceptions`.
+
+```json5
+// shared.jsonc
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "behavior": "A",
+            "behaviorExceptions": ["e"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The shared configuration is extended by the following user configuration that re-set
+`threshold` and `behaviorExceptions`.
+
+```json5
+// biome.jsonc
+{
+  "extends": ["./shared.jsonc"],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "threshold": 30,
+            "behaviorExceptions": ["f"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The Implementation of the `biome_deserialize_macros::Merge` trait defines how these options
+are merged into the final one.
+The provided implementation of `biome_deserialize_macros::Merge` for `MyRuleOptions` allows
+obtaining the following result when merging the previous configuration:
+
+```json5
+// Merged result
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "myRule": {
+          "level": "on",
+          "options": {
+            "behavior": "A",
+            "threshold": 30,
+            "behaviorExceptions": ["f"],
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+You can also use the `biome_deserialize_macros::Merge` derive macro to implement the trait.
+This is what we did for `Behavior`.
+We didn't use the `biome_deserialize_macros::Merge` derive macro for `MyRuleOptions`
+because the implementation could extend `behaviorExceptions` instead of resetting it.
+In other words, if we use the derive macro, the obtained merged `behaviorExceptions`
+could be `["e", "f"]` instead of `["f"]`.
+When merging rules options, you usually want to resetting the options instead of combining them.
+
+Note that every option is also wrapped in an `Option<_>`.
+This allows to properly merge options by tracking the ones that are set and the ones that are unset.
 
 With these types in place, you can set the associated type `Options` of the rule:
 
@@ -703,11 +801,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseMyRuleOptions {
-    #[serde(default, skip_serializing_if = "is_default")]
-    main_behavior: Behavior,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    main_behavior: Option<Behavior>,
 
-    #[serde(default, skip_serializing_if = "is_default")]
-    extra_behaviors: Vec<Behavior>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    extra_behaviors: Option<Box<[Behavior]>>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -718,8 +816,6 @@ pub enum Behavior {
     B,
     C,
 }
-
-const fn is_default() -> bool { true }
 ```
 
 ##### Testing & Documenting Rule Options
@@ -797,7 +893,7 @@ impl Rule for ForLoopCountReferences {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // The model holds all informations about the semantic, like scopes and declarations
+        // The model holds all information about the semantic, like scopes and declarations
         let model = ctx.model();
 
         // Here we are extracting the `let i = 0;` declaration in for loop

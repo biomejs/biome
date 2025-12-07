@@ -13,6 +13,7 @@ use biome_analyze::{
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
+use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
@@ -22,6 +23,7 @@ use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
+use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
@@ -268,6 +270,7 @@ impl DiagnosticWriter {
 fn assert_lint(
     group: &'static str,
     rule: &'static str,
+    rule_language: &'static str,
     test: &CodeBlock,
     code: &str,
     config: Option<Configuration>,
@@ -281,11 +284,20 @@ fn assert_lint(
     // what was emitted matches the expectations set for this code block.
     let mut diagnostics = DiagnosticWriter::default();
 
-    match test.document_file_source() {
+    let document_file_source = if rule_language == "html" {
+        // HACK: Force HTML analysis for rules that come from the HTML analyzer
+        DocumentFileSource::Html(
+            biome_html_syntax::HtmlFileSource::try_from_extension(&test.tag)
+                .unwrap_or_else(|_| biome_html_syntax::HtmlFileSource::html()),
+        )
+    } else {
+        test.document_file_source()
+    };
+    match document_file_source {
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
             let (code, file_source) = match file_source.as_embedding_kind() {
-                EmbeddingKind::Astro => (
+                EmbeddingKind::Astro { .. } => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
                 ),
@@ -360,8 +372,11 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<JsonLanguage>(config)?;
-
-                biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
+                let json_services = JsonAnalyzeServices {
+                    file_source,
+                    configuration_source: None,
+                };
+                biome_json_analyze::analyze(&root, filter, &options, json_services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -379,7 +394,7 @@ fn assert_lint(
                 });
             }
         }
-        DocumentFileSource::Css(..) => {
+        DocumentFileSource::Css(file_source) => {
             let parse_options = CssParserOptions::default()
                 .allow_css_modules()
                 .allow_tailwind_directives();
@@ -402,8 +417,11 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<CssLanguage>(config)?;
-
-                biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
+                let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
+                let services = CssAnalyzerServices::default()
+                    .with_file_source(file_source)
+                    .with_semantic_model(&semantic_model);
+                biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -745,7 +763,7 @@ fn parse_documentation(
 ) -> anyhow::Result<()> {
     let parser = Parser::new(rule_metadata.docs);
 
-    let mut test_runner = TestRunner::new(group, rule_metadata.name);
+    let mut test_runner = TestRunner::new(group, rule_metadata.name, rule_metadata.language);
 
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
@@ -827,6 +845,7 @@ struct PendingTest {
 struct TestRunner {
     group: &'static str,
     rule_name: &'static str,
+    rule_language: &'static str,
 
     /// Code block tests for the current documentation section.
     /// Tests are deferred and run as a batch when the section ends.
@@ -840,10 +859,11 @@ struct TestRunner {
 }
 
 impl TestRunner {
-    pub fn new(group: &'static str, rule_name: &'static str) -> Self {
+    pub fn new(group: &'static str, rule_name: &'static str, rule_language: &'static str) -> Self {
         Self {
             group,
             rule_name,
+            rule_language,
             pending_tests: Vec::new(),
             file_system: HashMap::new(),
         }
@@ -860,6 +880,7 @@ impl TestRunner {
             assert_lint(
                 self.group,
                 self.rule_name,
+                self.rule_language,
                 &test.test,
                 &test.block,
                 test.options_snapshot,
