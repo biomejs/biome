@@ -25,14 +25,19 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// ["a", "b", "c"].indexOf("a") === -1
     /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// /bar/.test("foobar")
+    /// ```
     /// ### Valid
     ///
     /// ```js
     /// !["a", "b", "c"].includes("a");
+    /// /[a-c]/.test("b");
     /// ```
     ///
     pub UseIncludes {
-        version: "next", // TODO
+        version: "next",
         name: "useIncludes",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-includes").same()],
@@ -407,7 +412,7 @@ fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool
         return false;
     };
 
-    // Fast path for literals (already handled in your original code)
+
     if matches!(
         receiver_expr,
         AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(

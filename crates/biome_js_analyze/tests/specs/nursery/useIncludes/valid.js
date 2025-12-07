@@ -13,3 +13,5 @@ let obj = { indexOf: () => 0 };
 obj.indexOf("a") !== -1;
 
 /a/i.test("abc");
+
+/[ab]/.test("abc");

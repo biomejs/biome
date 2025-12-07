@@ -9,4 +9,3 @@
 
 /a/.test("abc");
 
-/[ab]/.test("abc");

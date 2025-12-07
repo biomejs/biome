@@ -15,7 +15,6 @@ expression: invalid.js
 
 /a/.test("abc");
 
-/[ab]/.test("abc");
 
 ```
 
@@ -125,7 +124,6 @@ invalid.js:10:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   > 10 │ /a/.test("abc");
        │ ^^^^^^^^^^^^^^^
     11 │ 
-    12 │ /[ab]/.test("abc");
   
   i Safe fix: Replace with 'includes()'
   
@@ -134,7 +132,7 @@ invalid.js:10:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     10    │ - /a/.test("abc");
        10 │ + "abc".includes("a");
     11 11 │   
-    12 12 │   /[ab]/.test("abc");
+    12 12 │   
   
 
 ```
