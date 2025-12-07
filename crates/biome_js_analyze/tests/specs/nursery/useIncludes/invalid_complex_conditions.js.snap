@@ -4,7 +4,7 @@ expression: invalid_complex_conditions.js
 ---
 # Input
 ```js
-// complex conditions
+// should generate diagnostics
 if ("foo".indexOf("o") !== -1 && bar > 4) {}
 const F = "foo".indexOf("o") !== -1 && bar > 4
 
@@ -16,7 +16,7 @@ invalid_complex_conditions.js:2:5 lint/nursery/useIncludes  FIXABLE  ━━━�
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    1 │ // complex conditions
+    1 │ // should generate diagnostics
   > 2 │ if ("foo".indexOf("o") !== -1 && bar > 4) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
@@ -24,7 +24,7 @@ invalid_complex_conditions.js:2:5 lint/nursery/useIncludes  FIXABLE  ━━━�
   
   i Safe fix: Replace with 'includes()'
   
-    1 1 │   // complex conditions
+    1 1 │   // should generate diagnostics
     2   │ - if·("foo".indexOf("o")·!==·-1·&&·bar·>·4)·{}
       2 │ + if·("foo".includes("o")·&&·bar·>·4)·{}
     3 3 │   const F = "foo".indexOf("o") !== -1 && bar > 4
@@ -38,7 +38,7 @@ invalid_complex_conditions.js:3:11 lint/nursery/useIncludes  FIXABLE  ━━━�
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    1 │ // complex conditions
+    1 │ // should generate diagnostics
     2 │ if ("foo".indexOf("o") !== -1 && bar > 4) {}
   > 3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -46,7 +46,7 @@ invalid_complex_conditions.js:3:11 lint/nursery/useIncludes  FIXABLE  ━━━�
   
   i Safe fix: Replace with 'includes()'
   
-    1 1 │   // complex conditions
+    1 1 │   // should generate diagnostics
     2 2 │   if ("foo".indexOf("o") !== -1 && bar > 4) {}
     3   │ - const·F·=·"foo".indexOf("o")·!==·-1·&&·bar·>·4
       3 │ + const·F·=·"foo".includes("o")·&&·bar·>·4

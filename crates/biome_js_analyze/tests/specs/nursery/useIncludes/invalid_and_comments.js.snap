@@ -4,6 +4,8 @@ expression: invalid_and_comments.js
 ---
 # Input
 ```js
+// should generate diagnostics
+
 // indexOf with comments
 "foo".indexOf("o") /* comment */ !== -1;
 /* comment */ "foo".indexOf("o") !== -1;
@@ -19,164 +21,165 @@ expression: invalid_and_comments.js
 
 # Diagnostics
 ```
-invalid_and_comments.js:2:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
-  
-    1 │ // indexOf with comments
-  > 2 │ "foo".indexOf("o") /* comment */ !== -1;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ /* comment */ "foo".indexOf("o") !== -1;
-    4 │ "foo"/* comment */.indexOf("o") !== -1;
-  
-  i Safe fix: Replace with 'includes()'
-  
-     1  1 │   // indexOf with comments
-     2    │ - "foo".indexOf("o")·/*·comment·*/·!==·-1;
-        2 │ + "foo".includes("o");
-     3  3 │   /* comment */ "foo".indexOf("o") !== -1;
-     4  4 │   "foo"/* comment */.indexOf("o") !== -1;
-  
-
-```
-
-```
-invalid_and_comments.js:3:15 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
-  
-    1 │ // indexOf with comments
-    2 │ "foo".indexOf("o") /* comment */ !== -1;
-  > 3 │ /* comment */ "foo".indexOf("o") !== -1;
-      │               ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ "foo"/* comment */.indexOf("o") !== -1;
-    5 │ ("foo".indexOf("o")) /* comment */ !== -1;
-  
-  i Safe fix: Replace with 'includes()'
-  
-     1  1 │   // indexOf with comments
-     2  2 │   "foo".indexOf("o") /* comment */ !== -1;
-     3    │ - /*·comment·*/·"foo".indexOf("o")·!==·-1;
-        3 │ + /*·comment·*/·"foo".includes("o");
-     4  4 │   "foo"/* comment */.indexOf("o") !== -1;
-     5  5 │   ("foo".indexOf("o")) /* comment */ !== -1;
-  
-
-```
-
-```
 invalid_and_comments.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    2 │ "foo".indexOf("o") /* comment */ !== -1;
-    3 │ /* comment */ "foo".indexOf("o") !== -1;
-  > 4 │ "foo"/* comment */.indexOf("o") !== -1;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ ("foo".indexOf("o")) /* comment */ !== -1;
-    6 │ 
+    3 │ // indexOf with comments
+  > 4 │ "foo".indexOf("o") /* comment */ !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ /* comment */ "foo".indexOf("o") !== -1;
+    6 │ "foo"/* comment */.indexOf("o") !== -1;
   
   i Safe fix: Replace with 'includes()'
   
-     2  2 │   "foo".indexOf("o") /* comment */ !== -1;
-     3  3 │   /* comment */ "foo".indexOf("o") !== -1;
-     4    │ - "foo"/*·comment·*/.indexOf("o")·!==·-1;
-        4 │ + "foo"/*·comment·*/.includes("o");
-     5  5 │   ("foo".indexOf("o")) /* comment */ !== -1;
-     6  6 │   
+     2  2 │   
+     3  3 │   // indexOf with comments
+     4    │ - "foo".indexOf("o")·/*·comment·*/·!==·-1;
+        4 │ + "foo".includes("o");
+     5  5 │   /* comment */ "foo".indexOf("o") !== -1;
+     6  6 │   "foo"/* comment */.indexOf("o") !== -1;
   
 
 ```
 
 ```
-invalid_and_comments.js:5:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_and_comments.js:5:15 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    3 │ /* comment */ "foo".indexOf("o") !== -1;
-    4 │ "foo"/* comment */.indexOf("o") !== -1;
-  > 5 │ ("foo".indexOf("o")) /* comment */ !== -1;
+    3 │ // indexOf with comments
+    4 │ "foo".indexOf("o") /* comment */ !== -1;
+  > 5 │ /* comment */ "foo".indexOf("o") !== -1;
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ "foo"/* comment */.indexOf("o") !== -1;
+    7 │ ("foo".indexOf("o")) /* comment */ !== -1;
+  
+  i Safe fix: Replace with 'includes()'
+  
+     3  3 │   // indexOf with comments
+     4  4 │   "foo".indexOf("o") /* comment */ !== -1;
+     5    │ - /*·comment·*/·"foo".indexOf("o")·!==·-1;
+        5 │ + /*·comment·*/·"foo".includes("o");
+     6  6 │   "foo"/* comment */.indexOf("o") !== -1;
+     7  7 │   ("foo".indexOf("o")) /* comment */ !== -1;
+  
+
+```
+
+```
+invalid_and_comments.js:6:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    4 │ "foo".indexOf("o") /* comment */ !== -1;
+    5 │ /* comment */ "foo".indexOf("o") !== -1;
+  > 6 │ "foo"/* comment */.indexOf("o") !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ ("foo".indexOf("o")) /* comment */ !== -1;
+    8 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+     4  4 │   "foo".indexOf("o") /* comment */ !== -1;
+     5  5 │   /* comment */ "foo".indexOf("o") !== -1;
+     6    │ - "foo"/*·comment·*/.indexOf("o")·!==·-1;
+        6 │ + "foo"/*·comment·*/.includes("o");
+     7  7 │   ("foo".indexOf("o")) /* comment */ !== -1;
+     8  8 │   
+  
+
+```
+
+```
+invalid_and_comments.js:7:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    5 │ /* comment */ "foo".indexOf("o") !== -1;
+    6 │ "foo"/* comment */.indexOf("o") !== -1;
+  > 7 │ ("foo".indexOf("o")) /* comment */ !== -1;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ // Regex with comments
+    8 │ 
+    9 │ // Regex with comments
   
   i Safe fix: Replace with 'includes()'
   
-     3  3 │   /* comment */ "foo".indexOf("o") !== -1;
-     4  4 │   "foo"/* comment */.indexOf("o") !== -1;
-     5    │ - ("foo".indexOf("o"))·/*·comment·*/·!==·-1;
-        5 │ + "foo".includes("o");
-     6  6 │   
-     7  7 │   // Regex with comments
+     5  5 │   /* comment */ "foo".indexOf("o") !== -1;
+     6  6 │   "foo"/* comment */.indexOf("o") !== -1;
+     7    │ - ("foo".indexOf("o"))·/*·comment·*/·!==·-1;
+        7 │ + "foo".includes("o");
+     8  8 │   
+     9  9 │   // Regex with comments
   
 
 ```
 
 ```
-invalid_and_comments.js:8:15 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_and_comments.js:10:15 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-     7 │ // Regex with comments
-   > 8 │ /* comment */ /a/.test("abc");
+     9 │ // Regex with comments
+  > 10 │ /* comment */ /a/.test("abc");
        │               ^^^^^^^^^^^^^^^
-     9 │ /a/.test("abc") /* comment */;
-    10 │ /a//* comment */.test("abc");
+    11 │ /a/.test("abc") /* comment */;
+    12 │ /a//* comment */.test("abc");
   
   i Safe fix: Replace with 'includes()'
   
-     6  6 │   
-     7  7 │   // Regex with comments
-     8    │ - /*·comment·*/·/a/.test("abc");
-        8 │ + /*·comment·*/·"abc".includes("a");
-     9  9 │   /a/.test("abc") /* comment */;
-    10 10 │   /a//* comment */.test("abc");
+     8  8 │   
+     9  9 │   // Regex with comments
+    10    │ - /*·comment·*/·/a/.test("abc");
+       10 │ + /*·comment·*/·"abc".includes("a");
+    11 11 │   /a/.test("abc") /* comment */;
+    12 12 │   /a//* comment */.test("abc");
   
 
 ```
 
 ```
-invalid_and_comments.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_and_comments.js:11:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-     7 │ // Regex with comments
-     8 │ /* comment */ /a/.test("abc");
-   > 9 │ /a/.test("abc") /* comment */;
+     9 │ // Regex with comments
+    10 │ /* comment */ /a/.test("abc");
+  > 11 │ /a/.test("abc") /* comment */;
        │ ^^^^^^^^^^^^^^^
-    10 │ /a//* comment */.test("abc");
-    11 │ 
+    12 │ /a//* comment */.test("abc");
+    13 │ 
   
   i Safe fix: Replace with 'includes()'
   
-     7  7 │   // Regex with comments
-     8  8 │   /* comment */ /a/.test("abc");
-     9    │ - /a/.test("abc")·/*·comment·*/;
-        9 │ + "abc".includes("a")·/*·comment·*/;
-    10 10 │   /a//* comment */.test("abc");
-    11 11 │   
+     9  9 │   // Regex with comments
+    10 10 │   /* comment */ /a/.test("abc");
+    11    │ - /a/.test("abc")·/*·comment·*/;
+       11 │ + "abc".includes("a")·/*·comment·*/;
+    12 12 │   /a//* comment */.test("abc");
+    13 13 │   
   
 
 ```
 
 ```
-invalid_and_comments.js:10:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_and_comments.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-     8 │ /* comment */ /a/.test("abc");
-     9 │ /a/.test("abc") /* comment */;
-  > 10 │ /a//* comment */.test("abc");
+    10 │ /* comment */ /a/.test("abc");
+    11 │ /a/.test("abc") /* comment */;
+  > 12 │ /a//* comment */.test("abc");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 
+    13 │ 
   
   i Safe fix: Replace with 'includes()'
   
-     8  8 │   /* comment */ /a/.test("abc");
-     9  9 │   /a/.test("abc") /* comment */;
-    10    │ - /a//*·comment·*/.test("abc");
-       10 │ + "abc".includes("a");
-    11 11 │   
+    10 10 │   /* comment */ /a/.test("abc");
+    11 11 │   /a/.test("abc") /* comment */;
+    12    │ - /a//*·comment·*/.test("abc");
+       12 │ + "abc".includes("a");
+    13 13 │   
   
 
 ```

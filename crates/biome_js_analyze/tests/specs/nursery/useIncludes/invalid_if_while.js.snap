@@ -4,6 +4,8 @@ expression: invalid_if_while.js
 ---
 # Input
 ```js
+// should generate diagnostics
+
 // in if/while
 if ("foo".indexOf("o") !== -1) {}
 while (["a", "b", "c"].indexOf("a") === -1) {}
@@ -27,164 +29,118 @@ if (("foo".indexOf("o")) !== -1) {}
 
 # Diagnostics
 ```
-invalid_if_while.js:2:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
-  
-    1 │ // in if/while
-  > 2 │ if ("foo".indexOf("o") !== -1) {}
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ while (["a", "b", "c"].indexOf("a") === -1) {}
-    4 │ if (("foo".indexOf("o")) !== -1) {}
-  
-  i Safe fix: Replace with 'includes()'
-  
-     1  1 │   // in if/while
-     2    │ - if·("foo".indexOf("o")·!==·-1)·{}
-        2 │ + if·("foo".includes("o"))·{}
-     3  3 │   while (["a", "b", "c"].indexOf("a") === -1) {}
-     4  4 │   if (("foo".indexOf("o")) !== -1) {}
-  
-
-```
-
-```
-invalid_if_while.js:3:8 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
-  
-    1 │ // in if/while
-    2 │ if ("foo".indexOf("o") !== -1) {}
-  > 3 │ while (["a", "b", "c"].indexOf("a") === -1) {}
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ if (("foo".indexOf("o")) !== -1) {}
-    5 │ 
-  
-  i Safe fix: Replace with 'includes()'
-  
-     1  1 │   // in if/while
-     2  2 │   if ("foo".indexOf("o") !== -1) {}
-     3    │ - while·(["a",·"b",·"c"].indexOf("a")·===·-1)·{}
-        3 │ + while·(!["a",·"b",·"c"].includes("a"))·{}
-     4  4 │   if (("foo".indexOf("o")) !== -1) {}
-     5  5 │   
-  
-
-```
-
-```
 invalid_if_while.js:4:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    2 │ if ("foo".indexOf("o") !== -1) {}
-    3 │ while (["a", "b", "c"].indexOf("a") === -1) {}
-  > 4 │ if (("foo".indexOf("o")) !== -1) {}
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ // With parentheses
+    3 │ // in if/while
+  > 4 │ if ("foo".indexOf("o") !== -1) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+    6 │ if (("foo".indexOf("o")) !== -1) {}
   
   i Safe fix: Replace with 'includes()'
   
-     2  2 │   if ("foo".indexOf("o") !== -1) {}
-     3  3 │   while (["a", "b", "c"].indexOf("a") === -1) {}
-     4    │ - if·(("foo".indexOf("o"))·!==·-1)·{}
+     2  2 │   
+     3  3 │   // in if/while
+     4    │ - if·("foo".indexOf("o")·!==·-1)·{}
         4 │ + if·("foo".includes("o"))·{}
-     5  5 │   
-     6  6 │   // With parentheses
+     5  5 │   while (["a", "b", "c"].indexOf("a") === -1) {}
+     6  6 │   if (("foo".indexOf("o")) !== -1) {}
   
 
 ```
 
 ```
-invalid_if_while.js:7:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_if_while.js:5:8 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
   
-    6 │ // With parentheses
-  > 7 │ ("hello".indexOf("e")) !== -1;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ // Basic regex patterns
+    3 │ // in if/while
+    4 │ if ("foo".indexOf("o") !== -1) {}
+  > 5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ if (("foo".indexOf("o")) !== -1) {}
+    7 │ 
   
   i Safe fix: Replace with 'includes()'
   
-     5  5 │   
-     6  6 │   // With parentheses
-     7    │ - ("hello".indexOf("e"))·!==·-1;
-        7 │ + "hello".includes("e");
-     8  8 │   
-     9  9 │   // Basic regex patterns
+     3  3 │   // in if/while
+     4  4 │   if ("foo".indexOf("o") !== -1) {}
+     5    │ - while·(["a",·"b",·"c"].indexOf("a")·===·-1)·{}
+        5 │ + while·(!["a",·"b",·"c"].includes("a"))·{}
+     6  6 │   if (("foo".indexOf("o")) !== -1) {}
+     7  7 │   
   
 
 ```
 
 ```
-invalid_if_while.js:10:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_if_while.js:6:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    4 │ if ("foo".indexOf("o") !== -1) {}
+    5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+  > 6 │ if (("foo".indexOf("o")) !== -1) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // With parentheses
+  
+  i Safe fix: Replace with 'includes()'
+  
+     4  4 │   if ("foo".indexOf("o") !== -1) {}
+     5  5 │   while (["a", "b", "c"].indexOf("a") === -1) {}
+     6    │ - if·(("foo".indexOf("o"))·!==·-1)·{}
+        6 │ + if·("foo".includes("o"))·{}
+     7  7 │   
+     8  8 │   // With parentheses
+  
+
+```
+
+```
+invalid_if_while.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+     8 │ // With parentheses
+   > 9 │ ("hello".indexOf("e")) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Basic regex patterns
+  
+  i Safe fix: Replace with 'includes()'
+  
+     7  7 │   
+     8  8 │   // With parentheses
+     9    │ - ("hello".indexOf("e"))·!==·-1;
+        9 │ + "hello".includes("e");
+    10 10 │   
+    11 11 │   // Basic regex patterns
+  
+
+```
+
+```
+invalid_if_while.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-     9 │ // Basic regex patterns
-  > 10 │ /a/.test("abc");
+    11 │ // Basic regex patterns
+  > 12 │ /a/.test("abc");
        │ ^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ // Unicode characters in regex
+    13 │ 
+    14 │ // Unicode characters in regex
   
   i Safe fix: Replace with 'includes()'
   
-     8  8 │   
-     9  9 │   // Basic regex patterns
-    10    │ - /a/.test("abc");
-       10 │ + "abc".includes("a");
-    11 11 │   
-    12 12 │   // Unicode characters in regex
-  
-
-```
-
-```
-invalid_if_while.js:13:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
-  
-    12 │ // Unicode characters in regex
-  > 13 │ /á/.test("café");
-       │ ^^^^^^^^^^^^^^^^
-    14 │ /😀/.test("hello 😀");
-    15 │ /中/.test("中文");
-  
-  i Safe fix: Replace with 'includes()'
-  
-    11 11 │   
-    12 12 │   // Unicode characters in regex
-    13    │ - /á/.test("café");
-       13 │ + "café".includes("á");
-    14 14 │   /😀/.test("hello 😀");
-    15 15 │   /中/.test("中文");
-  
-
-```
-
-```
-invalid_if_while.js:14:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
-  
-    12 │ // Unicode characters in regex
-    13 │ /á/.test("café");
-  > 14 │ /😀/.test("hello 😀");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    15 │ /中/.test("中文");
-    16 │ 
-  
-  i Safe fix: Replace with 'includes()'
-  
-    12 12 │   // Unicode characters in regex
-    13 13 │   /á/.test("café");
-    14    │ - /😀/.test("hello·😀");
-       14 │ + "hello·😀".includes("😀");
-    15 15 │   /中/.test("中文");
-    16 16 │   
+    10 10 │   
+    11 11 │   // Basic regex patterns
+    12    │ - /a/.test("abc");
+       12 │ + "abc".includes("a");
+    13 13 │   
+    14 14 │   // Unicode characters in regex
   
 
 ```
@@ -194,42 +150,89 @@ invalid_if_while.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-    13 │ /á/.test("café");
-    14 │ /😀/.test("hello 😀");
-  > 15 │ /中/.test("中文");
-       │ ^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ // Whitespace in regex
+    14 │ // Unicode characters in regex
+  > 15 │ /á/.test("café");
+       │ ^^^^^^^^^^^^^^^^
+    16 │ /😀/.test("hello 😀");
+    17 │ /中/.test("中文");
   
   i Safe fix: Replace with 'includes()'
   
-    13 13 │   /á/.test("café");
-    14 14 │   /😀/.test("hello 😀");
-    15    │ - /中/.test("中文");
-       15 │ + "中文".includes("中");
-    16 16 │   
-    17 17 │   // Whitespace in regex
+    13 13 │   
+    14 14 │   // Unicode characters in regex
+    15    │ - /á/.test("café");
+       15 │ + "café".includes("á");
+    16 16 │   /😀/.test("hello 😀");
+    17 17 │   /中/.test("中文");
   
 
 ```
 
 ```
-invalid_if_while.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_if_while.js:16:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
   
-    17 │ // Whitespace in regex
-  > 18 │ / /.test("hello world");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ 
+    14 │ // Unicode characters in regex
+    15 │ /á/.test("café");
+  > 16 │ /😀/.test("hello 😀");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    17 │ /中/.test("中文");
+    18 │ 
   
   i Safe fix: Replace with 'includes()'
   
-    16 16 │   
-    17 17 │   // Whitespace in regex
-    18    │ - /·/.test("hello·world");
-       18 │ + "hello·world".includes("·");
-    19 19 │   
+    14 14 │   // Unicode characters in regex
+    15 15 │   /á/.test("café");
+    16    │ - /😀/.test("hello·😀");
+       16 │ + "hello·😀".includes("😀");
+    17 17 │   /中/.test("中文");
+    18 18 │   
+  
+
+```
+
+```
+invalid_if_while.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    15 │ /á/.test("café");
+    16 │ /😀/.test("hello 😀");
+  > 17 │ /中/.test("中文");
+       │ ^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Whitespace in regex
+  
+  i Safe fix: Replace with 'includes()'
+  
+    15 15 │   /á/.test("café");
+    16 16 │   /😀/.test("hello 😀");
+    17    │ - /中/.test("中文");
+       17 │ + "中文".includes("中");
+    18 18 │   
+    19 19 │   // Whitespace in regex
+  
+
+```
+
+```
+invalid_if_while.js:20:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    19 │ // Whitespace in regex
+  > 20 │ / /.test("hello world");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Safe fix: Replace with 'includes()'
+  
+    18 18 │   
+    19 19 │   // Whitespace in regex
+    20    │ - /·/.test("hello·world");
+       20 │ + "hello·world".includes("·");
+    21 21 │   
   
 
 ```

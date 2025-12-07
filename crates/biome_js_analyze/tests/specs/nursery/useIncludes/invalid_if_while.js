@@ -1,3 +1,5 @@
+// should generate diagnostics
+
 // in if/while
 if ("foo".indexOf("o") !== -1) {}
 while (["a", "b", "c"].indexOf("a") === -1) {}

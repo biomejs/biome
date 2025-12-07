@@ -1,3 +1,5 @@
+// should generate diagnostics
+
 // indexOf with comments
 "foo".indexOf("o") /* comment */ !== -1;
 /* comment */ "foo".indexOf("o") !== -1;
