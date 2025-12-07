@@ -40,9 +40,7 @@ fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) ->
         .and_then(|func| func.name().ok())
         .and_then(|name| name.value_token().ok())
         .map(|token| token.token_text_trimmed().text().to_string())
-        .is_some_and(|name_text| {
-            VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&name_text.as_str())
-        })
+        .is_some_and(|name_text| VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&name_text.as_str()))
 }
 
 declare_lint_rule! {
