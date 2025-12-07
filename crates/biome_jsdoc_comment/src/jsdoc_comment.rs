@@ -139,8 +139,9 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
 
 #[cfg(test)]
 mod tests {
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_syntax::JsFileSource;
     use super::*;
-    use biome_js_factory::ident;
 
     #[test]
     fn test_text_is_jsdoc_comment() {
@@ -156,10 +157,58 @@ mod tests {
         assert!(!JsdocComment::text_is_jsdoc_comment("/**/"));
     }
 
-    // TODO: Figure out how to make syntax nodes for unit tests
+    fn assert_jsdoc_comments(text: &str, jsdocs: Vec<&str>) {
+        let source = parse(text, JsFileSource::tsx(), JsParserOptions::default()).syntax();
+        assert!(JsdocComment::get_jsdocs(&source).eq(jsdocs));
+    }
+
     #[test]
     fn test_get_jsdocs() {
-        assert!(JsdocComment)
+        assert_jsdoc_comments(r"
+            /** blubber */
+            const a = 5;
+            ",
+            vec!["/** blubber */"]);
+        assert_jsdoc_comments(r"
+            /** j1 */
+            /** j2 */
+            const a = 5;
+            ",
+            vec!["/** j1 */","/** j2 */"]);
+        assert_jsdoc_comments(r"
+            /** 
+             * multiline
+             * yay
+             * @param foo - the fooness of great
+             */
+            export function fizzbuzz(foo: any) {};
+            ",
+            vec![r"/** 
+             * multiline
+             * yay
+             * @param foo - the fooness of great
+             */"]);
+        assert_jsdoc_comments(r"
+            /** j1 */
+            // foo bar baz qux quux
+            /** j2 */
+            const rgb = 555;
+            ",
+            vec!["/** j1 */","/** j2 */"]);
+
         
+        assert_jsdoc_comments("const a = 5;", vec![]);
+        assert_jsdoc_comments(r"
+            // not jsdoc
+            function a = () => 5;
+            ", vec![]);
+        assert_jsdoc_comments(r"
+            /* also not jsdoc */
+            function a = () => 5;
+            ", vec![]);
+        assert_jsdoc_comments(r"
+            /*** too many asterisks */
+            function a = () => 5;
+            ", vec![]);
     }
 }

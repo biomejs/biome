@@ -1098,6 +1098,7 @@ name = "biome_jsdoc_comment"
 version = "0.0.1"
 dependencies = [
  "biome_formatter",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_rowan",
