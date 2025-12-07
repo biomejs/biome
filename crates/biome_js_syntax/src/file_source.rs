@@ -132,7 +132,7 @@ pub enum EmbeddingKind {
 
 impl EmbeddingKind {
     pub const fn is_astro(&self) -> bool {
-        matches!(self, Self::Astro { frontmatter: false })
+        matches!(self, Self::Astro { .. })
     }
     pub const fn is_astro_frontmatter(&self) -> bool {
         matches!(self, Self::Astro { frontmatter: true })

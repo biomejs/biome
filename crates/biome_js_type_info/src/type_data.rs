@@ -452,10 +452,19 @@ pub struct Constructor {
     pub type_parameters: Box<[TypeReference]>,
 
     /// Call parameter of the constructor.
-    pub parameters: Box<[FunctionParameter]>,
+    pub parameters: Box<[ConstructorParameter]>,
 
     /// Return type when the constructor is called.
     pub return_type: Option<TypeReference>,
+}
+
+/// A constructor parameter.
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+pub struct ConstructorParameter {
+    pub parameter: FunctionParameter,
+
+    /// Optional visibility, if the parameter declares a class field.
+    pub accessibility: Option<TypeMemberAccessibility>,
 }
 
 /// Tracks two types that are associated with the same name.
@@ -540,6 +549,17 @@ impl Function {
 pub enum FunctionParameter {
     Named(NamedFunctionParameter),
     Pattern(PatternFunctionParameter),
+}
+
+impl Default for FunctionParameter {
+    fn default() -> Self {
+        Self::Pattern(PatternFunctionParameter {
+            ty: TypeReference::unknown(),
+            bindings: [].into(),
+            is_optional: false,
+            is_rest: false,
+        })
+    }
 }
 
 impl FunctionParameter {
@@ -1486,6 +1506,15 @@ impl ScopeId {
         // Thus, it is safe to subtract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
+}
+
+/// Accessibility of a type member.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+pub enum TypeMemberAccessibility {
+    Private,
+    Protected,
+    #[default]
+    Public,
 }
 
 /// A union of types.

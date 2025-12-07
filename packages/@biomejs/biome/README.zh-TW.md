@@ -101,7 +101,7 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
 
 ## 贊助商
 
-### 金牌贊助商
+### 鉑金贊助商
 
 <table>
   <tbody>
@@ -111,7 +111,7 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot" />
           </picture>
         </a>
       </td>

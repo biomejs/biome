@@ -7,7 +7,7 @@ use crate::file_handlers::{
 };
 use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use biome_formatter::Printed;
+use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
@@ -157,7 +157,7 @@ fn format(
     };
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
-    match formatted.print_with_indent(indent_amount) {
+    match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
             error!("The file {} couldn't be formatted", biome_path.as_str());

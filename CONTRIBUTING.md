@@ -131,7 +131,7 @@ This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
 - `taplo-cli`, a small tool for formatting TOML files.
-- `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
+- `wasm-bindgen-cli` and `wasm-opt` for managing the WASM build of Biome.
 
 You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
 
@@ -343,7 +343,7 @@ The npm module `packages/@biomejs/biome` contains Biome's Node.js API that suppo
 For testing and developing, you need to build these packages, following the steps:
 
 1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`;
-2. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
+2. install `wasm-bindgen-cli` and `wasm-opt` by running `just install-tools`;
 3. run `pnpm --filter "@biomejs/backend-jsonrpc" build`;
 4. run the `pnpm --filter "@biomejs/js-api" build:wasm-dev` and `pnpm --filter "@biomejs/js-api" build` commands;
 5. run `pnpm i --filter "@biomejs/js-api" --frozen-lockfile` to link the WebAssembly bindings and the JSON-RPC bindings

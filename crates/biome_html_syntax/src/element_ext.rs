@@ -1,6 +1,6 @@
 use crate::{
     AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlEmbeddedContent,
-    HtmlSelfClosingElement, HtmlSyntaxToken, ScriptType, inner_string_text,
+    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
 };
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
@@ -118,6 +118,11 @@ impl HtmlElement {
         self.get_script_type().is_some_and(ScriptType::is_supported)
     }
 
+    /// It's a style tag, and it doesn't contain `scss` as `lang`
+    pub fn is_supported_style_tag(&self) -> bool {
+        self.is_style_tag() && !self.is_sass_lang()
+    }
+
     /// Returns the type of script for a `<script>` tag.
     ///
     /// Returns `Some` [`ScriptType`] if this is a `<script>` tag, even if it
@@ -203,6 +208,20 @@ impl HtmlElement {
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
         self.is_style_tag() && self.has_attribute("lang", "scss")
+    }
+}
+
+impl HtmlTagName {
+    /// Returns the token text of the attribute name.
+    pub fn token_text(&self) -> Option<TokenText> {
+        self.value_token().ok().map(|token| token.token_text())
+    }
+
+    /// Returns the trimmed token text of the attribute name.
+    pub fn token_text_trimmed(&self) -> Option<TokenText> {
+        self.value_token()
+            .ok()
+            .map(|token| token.token_text_trimmed())
     }
 }
 

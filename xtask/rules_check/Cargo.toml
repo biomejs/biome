@@ -12,6 +12,7 @@ biome_configuration   = { workspace = true }
 biome_console         = { workspace = true }
 biome_css_analyze     = { workspace = true }
 biome_css_parser      = { workspace = true }
+biome_css_semantic    = { workspace = true }
 biome_css_syntax      = { workspace = true }
 biome_deserialize     = { workspace = true }
 biome_diagnostics     = { workspace = true }

@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<html>
+	<head>
+		<title>Svelte</title>
+	</head>
+	<body></body>
+</html>
+
+<style lang="scss">
+#id { font-family: comic-sans } .class { background: red}
+</style>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

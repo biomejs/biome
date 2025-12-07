@@ -114,7 +114,7 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 ## प्रायोजक[^37]
 
-### स्वर्ण प्रायोजक[^42]
+### प्लैटिनम प्रायोजक[^42]
 
 <table>
   <tbody>
@@ -124,7 +124,7 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot" />
           </picture>
         </a>
       </td>
@@ -236,6 +236,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 [^39]: विशिष्ट - specific
 [^40]: *वोट* - vote
 [^41]: बकाया_कार्य - backlog
-[^42]: स्वर्ण_प्रायोजक - Gold Sponsor
+[^42]: प्लैटिनम_प्रायोजक - Platinum Sponsor
 [^43]: रजत_प्रायोजक - Silver Sponsor
 [^44]: कांस्य_प्रायोजक - Bronze Sponsor

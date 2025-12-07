@@ -793,6 +793,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins,
         categories,
         action_offset,
+        document_services: _,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1023,6 +1024,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         enabled_selectors,
         plugins,
         diagnostic_offset,
+        document_services: _,
     } = params;
     let tree = parse.tree();
     let analyzer_options =
