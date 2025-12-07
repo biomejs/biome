@@ -116,7 +116,7 @@ declare_lint_rule! {
     ///
     /// If set to `true`, overloads with differently named parameters will be ignored,
     /// even if said parameters would be of otherwise mergeable types.
-    /// 
+    ///
     /// Parameter declarations that lack specified "names" (such as array spread and destructuring literals)
     /// will be ignored for this check.
     ///
@@ -330,9 +330,7 @@ fn try_merge_overloads(
     let parameters1 = overload1.parameters()?;
     let parameters2 = overload2.parameters()?;
 
-    if opts.ignore_differently_named_parameters()
-        && !parameters1.same_param_names(&parameters2)
-    {
+    if opts.ignore_differently_named_parameters() && !parameters1.same_param_names(&parameters2) {
         return None;
     }
 
