@@ -29,7 +29,7 @@ use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
-use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
@@ -37,7 +37,6 @@ use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
-use std::path::Path;
 use std::str::FromStr;
 use tracing::instrument;
 
@@ -556,9 +555,8 @@ impl ConfigurationExt for Configuration {
         let mut deserialized_configurations = vec![];
         if let Some(extends) = extends.as_list() {
             for extend_entry in extends.iter() {
-                let extend_entry_as_path = Path::new(extend_entry.as_ref());
-
-                let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
+                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref())
+                {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
                     const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
