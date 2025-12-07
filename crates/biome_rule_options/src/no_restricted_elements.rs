@@ -43,16 +43,20 @@ impl Deref for CustomRestrictedElements {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for CustomRestrictedElements {
-    fn schema_name() -> String {
-        "CustomRestrictedElements".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("CustomRestrictedElements")
     }
 
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
-        let mut schema = generator
-            .subschema_for::<CustomRestrictedElementsBaseType>()
-            .into_object();
-        schema.object().min_properties = Some(1);
-        schemars::schema::Schema::Object(schema)
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        // Generate schema for FxHashMap<Box<str>, Box<str>> inline
+        schemars::json_schema!({
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            },
+            "minProperties": 1,
+            "description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used."
+        })
     }
 }
 

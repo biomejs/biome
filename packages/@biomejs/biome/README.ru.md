@@ -120,17 +120,6 @@ Biome предлагает простую спонсорскую програм�
         </a>
       </td>
     </tr>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
-          <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" width="400" alt="Vercel" />
-          </picture>
-        </a>
-      </td>
-    </tr>
   </tbody>
 </table>
 

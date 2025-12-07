@@ -338,25 +338,25 @@ Module TypeId(4) => Namespace {
     ],
 }
 
-Module TypeId(5) => value: ascii
+Module TypeId(5) => string: ascii
 
-Module TypeId(6) => value: utf8
+Module TypeId(6) => string: utf8
 
-Module TypeId(7) => value: utf-8
+Module TypeId(7) => string: utf-8
 
-Module TypeId(8) => value: utf16le
+Module TypeId(8) => string: utf16le
 
-Module TypeId(9) => value: ucs2
+Module TypeId(9) => string: ucs2
 
-Module TypeId(10) => value: ucs-2
+Module TypeId(10) => string: ucs-2
 
-Module TypeId(11) => value: base64
+Module TypeId(11) => string: base64
 
-Module TypeId(12) => value: latin1
+Module TypeId(12) => string: latin1
 
-Module TypeId(13) => value: binary
+Module TypeId(13) => string: binary
 
-Module TypeId(14) => value: hex
+Module TypeId(14) => string: hex
 
 Module TypeId(15) => Module(0) TypeId(3) | Module(0) TypeId(37) | Module(0) TypeId(35)
 

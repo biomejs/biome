@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/if_else.svelte
+---
+# Input
+
+```svelte
+<!-- if / else -->
+{#if porridge.temperature > 100}
+	<p>too hot!</p>
+{:else}
+	<p>too cold!</p>
+{/if}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```svelte
+<!-- if / else -->
+{#if porridge.temperature > 100}
+	<p>too hot!</p>
+{:else}
+	<p>too cold!</p>
+{/if}
+```

@@ -1,0 +1,32 @@
+/* should not generate diagnostics */
+const Valid1 = () => {
+	return <div {...props} something="else"></div>
+}
+
+const Valid2 = () => {
+	return <div something="else" {...props}></div>
+}
+
+const Valid3 = () => {
+	return <div {...props} something="else" {...otherProps}></div>
+}
+
+const Valid4 = () => {
+	return <div {...{}} something="else" {...otherProps}></div>
+}
+
+const Valid5 = () => {
+	return <div {...props} something="else" />
+}
+
+const Valid6 = () => {
+	return <div something="else" {...props} />
+}
+
+const Valid7 = () => {
+	return <div {...props} something="else" {...otherProps} />
+}
+
+const Valid8 = () => {
+	return <div {...{}} something="else" {...otherProps} />
+}

@@ -24,7 +24,7 @@ Global TypeId(1) => undefined | Global TypeId(0) | number
 
 Global TypeId(2) => undefined | Global TypeId(0) | number
 
-Global TypeId(3) => value: 0
+Global TypeId(3) => number: 0
 
 Global TypeId(4) => undefined | Global TypeId(0) | Global TypeId(3)
 ```

@@ -1,0 +1,169 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div role="range"></div>
+<div role="datepicker"></div>
+<div role=""></div>
+<div role="datepicker" />
+<div role="unknown-invalid-role" />
+<div role="tabpanel row foobar"></div>
+<div role="doc-endnotes range"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div role="range"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div role="datepicker"></div>
+    4 │ <div role=""></div>
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    2 │ <div·role="range"></div>
+      │      ------------       
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div role="range"></div>
+  > 3 │ <div role="datepicker"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div role=""></div>
+    5 │ <div role="datepicker" />
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    3 │ <div·role="datepicker"></div>
+      │      -----------------       
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    2 │ <div role="range"></div>
+    3 │ <div role="datepicker"></div>
+  > 4 │ <div role=""></div>
+      │ ^^^^^^^^^^^^^^^^^^^
+    5 │ <div role="datepicker" />
+    6 │ <div role="unknown-invalid-role" />
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    4 │ <div·role=""></div>
+      │      -------       
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    3 │ <div role="datepicker"></div>
+    4 │ <div role=""></div>
+  > 5 │ <div role="datepicker" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div role="unknown-invalid-role" />
+    7 │ <div role="tabpanel row foobar"></div>
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    5 │ <div·role="datepicker"·/>
+      │      ------------------  
+
+```
+
+```
+invalid.html:6:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    4 │ <div role=""></div>
+    5 │ <div role="datepicker" />
+  > 6 │ <div role="unknown-invalid-role" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div role="tabpanel row foobar"></div>
+    8 │ <div role="doc-endnotes range"></div>
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    6 │ <div·role="unknown-invalid-role"·/>
+      │      ----------------------------  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    5 │ <div role="datepicker" />
+    6 │ <div role="unknown-invalid-role" />
+  > 7 │ <div role="tabpanel row foobar"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div role="doc-endnotes range"></div>
+    9 │ 
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    7 │ <div·role="tabpanel·row·foobar"></div>
+      │      --------------------------       
+
+```
+
+```
+invalid.html:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    6 │ <div role="unknown-invalid-role" />
+    7 │ <div role="tabpanel row foobar"></div>
+  > 8 │ <div role="doc-endnotes range"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    8 │ <div·role="doc-endnotes·range"></div>
+      │      -------------------------       
+
+```

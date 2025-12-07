@@ -153,6 +153,20 @@ impl LSPServer {
                                 }),
                                 kind: Some(WatchKind::all()),
                             },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.gitignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.ignore".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
                         ]
                     })
                     .collect();
@@ -174,6 +188,15 @@ impl LSPServer {
                                 "{}/.editorconfig",
                                 base_path.as_path().as_str()
                             )),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.gitignore".to_string()),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String("**/.ignore".to_string()),
+
                             kind: Some(WatchKind::all()),
                         },
                     ],
@@ -311,7 +334,7 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip_all)]
     async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-        self.session.load_extension_settings().await;
+        self.session.load_extension_settings(None).await;
         self.session.load_workspace_settings(false).await;
 
         self.session.set_initialized();
@@ -333,8 +356,8 @@ impl LanguageServer for LSPServer {
 
     #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
-        let _ = params;
-        self.session.load_extension_settings().await;
+        let settings = params.settings;
+        self.session.load_extension_settings(Some(settings)).await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
@@ -354,9 +377,11 @@ impl LanguageServer for LSPServer {
                     && (ConfigName::file_names()
                         .iter()
                         .any(|file_name| watched_file.ends_with(file_name))
-                        || watched_file.ends_with(".editorconfig"))
+                        || (watched_file.ends_with(".editorconfig"))
+                        || watched_file.ends_with(".gitignore")
+                        || watched_file.ends_with(".ignore"))
                 {
-                    self.session.load_extension_settings().await;
+                    self.session.load_extension_settings(None).await;
                     self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;
                     self.session.update_all_diagnostics().await;

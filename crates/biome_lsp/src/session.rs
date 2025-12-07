@@ -4,7 +4,7 @@ use crate::extension_settings::{CONFIGURATION_SECTION, ExtensionSettings};
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
-use biome_configuration::ConfigurationPathHint;
+use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
@@ -422,6 +422,7 @@ impl Session {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
+            inline_config: self.inline_config(),
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -449,6 +450,7 @@ impl Session {
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
                 pull_code_actions: false,
+                inline_config: self.inline_config(),
             })?;
 
             result
@@ -738,7 +740,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: true,
+                watch: scan_kind.is_project(),
                 force,
                 scan_kind,
                 verbose: false,
@@ -905,6 +907,11 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
+        let inline_configuration = self.inline_config();
+        if let Some(inline_configuration) = inline_configuration {
+            configuration.merge_with(inline_configuration);
+        }
+
         // If the configuration from the LSP or the workspace, the directory path is used as
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
@@ -974,34 +981,44 @@ impl Session {
     /// Requests "workspace/configuration" from client and updates Session config.
     /// It must be done before loading workspace settings in [`Self::load_workspace_settings`].
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn load_extension_settings(&self) {
-        let item = lsp_types::ConfigurationItem {
-            scope_uri: match self.initialize_params.get() {
-                Some(params) => params.root_uri.clone(),
-                None => None,
-            },
-            section: Some(String::from(CONFIGURATION_SECTION)),
-        };
+    pub(crate) async fn load_extension_settings(&self, settings: Option<Value>) {
+        match settings {
+            None => {
+                let item = lsp_types::ConfigurationItem {
+                    scope_uri: match self.initialize_params.get() {
+                        Some(params) => params.root_uri.clone(),
+                        None => None,
+                    },
+                    section: Some(String::from(CONFIGURATION_SECTION)),
+                };
 
-        let client_configurations = match self.client.configuration(vec![item]).await {
-            Ok(client_configurations) => client_configurations,
-            Err(err) => {
-                error!("Couldn't read configuration from the client: {err}");
-                return;
+                let client_configurations = match self.client.configuration(vec![item]).await {
+                    Ok(client_configurations) => client_configurations,
+                    Err(err) => {
+                        error!("Couldn't read configuration from the client: {err}");
+                        return;
+                    }
+                };
+
+                let client_configuration = client_configurations.into_iter().next();
+
+                if let Some(client_configuration) = client_configuration {
+                    info!("Loaded client configuration: {client_configuration:#?}");
+
+                    let mut config = self.extension_settings.write().unwrap();
+                    if let Err(err) = config.set_workspace_settings(client_configuration) {
+                        error!("Couldn't set client configuration: {}", err);
+                    }
+                } else {
+                    info!("Client did not return any configuration");
+                }
             }
-        };
-
-        let client_configuration = client_configurations.into_iter().next();
-
-        if let Some(client_configuration) = client_configuration {
-            info!("Loaded client configuration: {client_configuration:#?}");
-
-            let mut config = self.extension_settings.write().unwrap();
-            if let Err(err) = config.set_workspace_settings(client_configuration) {
-                error!("Couldn't set client configuration: {}", err);
+            Some(settings) => {
+                let mut config = self.extension_settings.write().unwrap();
+                if let Err(err) = config.set_workspace_settings(settings) {
+                    error!("Couldn't set client configuration: {}", err);
+                }
             }
-        } else {
-            info!("Client did not return any configuration");
         }
     }
 
@@ -1052,6 +1069,10 @@ impl Session {
             .read()
             .unwrap()
             .requires_configuration()
+    }
+
+    pub(crate) fn inline_config(&self) -> Option<Configuration> {
+        self.extension_settings.read().unwrap().inline_config()
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {

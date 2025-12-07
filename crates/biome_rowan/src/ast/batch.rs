@@ -221,6 +221,37 @@ where
         self.replace_element_discard_trivia(prev_token.into(), next_token.into())
     }
 
+    /// Push a change to replace the "prev_node" with "next_node".
+    ///
+    /// - leading trivia of `prev_node`
+    /// - leading trivia of `next_node`
+    /// - trailing trivia of `prev_node`
+    /// - trailing trivia of `next_node`
+    pub fn replace_node_transfer_trivia<T>(&mut self, prev_node: T, next_node: T) -> Option<()>
+    where
+        T: AstNode<Language = L>,
+    {
+        let prev_node = prev_node.into_syntax();
+        let next_node = next_node.into_syntax();
+
+        let leading_trivia = chain_trivia_pieces(
+            prev_node.first_token()?.leading_trivia().pieces(),
+            next_node.first_token()?.leading_trivia().pieces(),
+        );
+
+        let trailing_trivia = chain_trivia_pieces(
+            prev_node.last_token()?.trailing_trivia().pieces(),
+            next_node.last_token()?.trailing_trivia().pieces(),
+        );
+        let new_node = next_node
+            .with_leading_trivia_pieces(leading_trivia)?
+            .with_trailing_trivia_pieces(trailing_trivia)?;
+
+        self.replace_element_discard_trivia(prev_node.into(), new_node.into());
+
+        Some(())
+    }
+
     /// Push a change to replace the "prev_token" with "next_token".
     ///
     /// - leading trivia of `prev_token`

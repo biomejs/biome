@@ -1,0 +1,1 @@
+break-before-auto break-after-page mix-blend-normal

@@ -12,12 +12,12 @@ const a = 1 === 1;
 ## Result
 
 ```
-a => value: true
+a => bool: true
 
 ```
 
 ## Registered types
 
 ```
-Global TypeId(0) => value: true
+Global TypeId(0) => bool: true
 ```

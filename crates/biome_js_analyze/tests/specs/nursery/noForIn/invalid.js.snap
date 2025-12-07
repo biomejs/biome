@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const array = [];
+
+for (const i in array) {
+	console.log(array[i]);
+}
+
+for (const i in array) {
+	console.log(i, array[i]);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected for-in loop.
+  
+    1 │ const array = [];
+    2 │ 
+  > 3 │ for (const i in array) {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ 	console.log(array[i]);
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ for (const i in array) {
+  
+  i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected for-in loop.
+  
+     5 │ }
+     6 │ 
+   > 7 │ for (const i in array) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │ 	console.log(i, array[i]);
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i For-in loops are confusing and easy to misuse. You likely want to use a regular loop, for-of loop or forEach instead.
+  
+
+```

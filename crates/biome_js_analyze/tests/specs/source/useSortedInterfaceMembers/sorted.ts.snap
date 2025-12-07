@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sorted.ts
+---
+# Input
+```ts
+interface _AlreadySortedInterface {
+	aProperty: string;
+	bMethod(): number;
+	cField: boolean;
+	dGetter: object;
+}
+
+```

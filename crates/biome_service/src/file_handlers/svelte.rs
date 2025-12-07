@@ -5,7 +5,7 @@ use crate::file_handlers::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, javascript,
 };
-use crate::settings::Settings;
+use crate::settings::SettingsWithEditor;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -107,6 +107,7 @@ impl ExtensionHandler for SvelteFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -124,7 +125,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = SvelteFileHandler::input(text);
@@ -145,7 +146,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -168,7 +169,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_range(biome_path, document_file_source, parse, settings, range)
@@ -178,7 +179,7 @@ pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)

@@ -46,7 +46,7 @@ biome_js_parser    = { workspace = true }
 biome_json_parser  = { workspace = true }
 biome_json_value   = { workspace = true }
 biome_test_utils   = { workspace = true }
-divan              = { package = "codspeed-divan-compat", version = "*" }
+divan              = { package = "codspeed-divan-compat", version = "=4.1.0" }
 insta              = { workspace = true }
 walkdir            = { workspace = true }
 

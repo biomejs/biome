@@ -102,7 +102,7 @@ impl Rule for UseHtmlLang {
             }
         ).note(
             markup! {
-                "Setting a "<Emphasis>"lang"</Emphasis>" attribute on HTML document elements configures the language"
+                "Setting a "<Emphasis>"lang"</Emphasis>" attribute on HTML document elements configures the language "
                 "used by screen readers when no user default is specified."
             }
         ))

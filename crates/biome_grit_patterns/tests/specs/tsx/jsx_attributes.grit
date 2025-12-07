@@ -1,0 +1,3 @@
+JsxAttribute($name, $value) as $attr where {
+    $name <: "style"
+}

@@ -155,65 +155,37 @@ pub enum StableHookResult {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for StableHookResult {
-    fn schema_name() -> String {
-        "StableHookResult".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("StableHookResult")
     }
 
-    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-        Schema::Object(SchemaObject {
-            subschemas: Some(Box::new(SubschemaValidation {
-                one_of: Some(vec![
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Boolean.into()),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Whether the hook has a stable result.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::Integer.into()),
-                                format: Some("uint8".to_owned()),
-                                number: Some(Box::new(NumberValidation {
-                                    minimum: Some(0.),
-                                    maximum: Some(255.),
-                                    ..Default::default()
-                                })),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Used to indicate the hook returns an array and some of its indices have stable identities.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::String.into()),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Used to indicate the hook returns an object and some of its properties have stable identities.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                ]),
-                ..Default::default()
-            })),
-            ..Default::default()
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "oneOf": [
+                {
+                    "type": "boolean",
+                    "description": "Whether the hook has a stable result."
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "format": "uint8",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "minItems": 1,
+                    "description": "Used to indicate the hook returns an array and some of its indices have stable identities."
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "Used to indicate the hook returns an object and some of its properties have stable identities."
+                }
+            ]
         })
     }
 }

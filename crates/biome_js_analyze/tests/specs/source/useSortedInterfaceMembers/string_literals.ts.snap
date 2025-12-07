@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: string_literals.ts
+---
+# Input
+```ts
+interface _Foo {
+	"zz": string;
+	"aa": string;
+}
+
+```
+
+# Diagnostics
+```
+string_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _Foo {
+      │ ^^^^^^^^^^^^^^^^
+  > 2 │ 	"zz": string;
+  > 3 │ 	"aa": string;
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _Foo {
+    2   │ - → "zz":·string;
+    3   │ - → "aa":·string;
+      2 │ + → "aa":·string;
+      3 │ + → "zz":·string;
+    4 4 │   }
+    5 5 │   
+  
+
+```

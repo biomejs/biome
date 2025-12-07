@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -23,6 +22,12 @@ var f = f;
 function f(a = b, b = 0) {}
 
 function g(a = a) {}
+
+const instance = new Class1();
+class Class1 {}
+
+const instance2 = new Class2();
+export default class Class2 {}
 
 ```
 
@@ -176,6 +181,7 @@ invalid.js:18:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
   > 18 │ function g(a = a) {}
        │                ^
     19 │ 
+    20 │ const instance = new Class1();
   
   i The parameter is declared here:
   
@@ -184,6 +190,52 @@ invalid.js:18:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
   > 18 │ function g(a = a) {}
        │            ^
     19 │ 
+    20 │ const instance = new Class1();
+  
+
+```
+
+```
+invalid.js:20:22 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    18 │ function g(a = a) {}
+    19 │ 
+  > 20 │ const instance = new Class1();
+       │                      ^^^^^^
+    21 │ class Class1 {}
+    22 │ 
+  
+  i The class is declared here:
+  
+    20 │ const instance = new Class1();
+  > 21 │ class Class1 {}
+       │       ^^^^^^
+    22 │ 
+    23 │ const instance2 = new Class2();
+  
+
+```
+
+```
+invalid.js:23:23 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    21 │ class Class1 {}
+    22 │ 
+  > 23 │ const instance2 = new Class2();
+       │                       ^^^^^^
+    24 │ export default class Class2 {}
+    25 │ 
+  
+  i The class is declared here:
+  
+    23 │ const instance2 = new Class2();
+  > 24 │ export default class Class2 {}
+       │                      ^^^^^^
+    25 │ 
   
 
 ```

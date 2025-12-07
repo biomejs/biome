@@ -65,6 +65,19 @@ pub(crate) fn parse_supports_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    parse_supports_at_rule_declarator(p).ok();
+    parse_conditional_block(p);
+
+    Present(m.complete(p, CSS_SUPPORTS_AT_RULE))
+}
+
+#[inline]
+pub(crate) fn parse_supports_at_rule_declarator(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_supports_at_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
     p.bump(T![supports]);
 
     parse_any_supports_condition(p)
@@ -74,12 +87,11 @@ pub(crate) fn parse_supports_at_rule(p: &mut CssParser) -> ParsedSyntax {
             expected_any_supports_condition,
         )
         .ok();
-    parse_conditional_block(p);
 
-    Present(m.complete(p, CSS_SUPPORTS_AT_RULE))
+    Present(m.complete(p, CSS_SUPPORTS_AT_RULE_DECLARATOR))
 }
 
-struct AnySupportsConditionParseRecovery;
+pub(crate) struct AnySupportsConditionParseRecovery;
 
 impl ParseRecovery for AnySupportsConditionParseRecovery {
     type Kind = CssSyntaxKind;

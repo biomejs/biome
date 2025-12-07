@@ -1,0 +1,219 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+  <p v-if="true" class="flex">Hello</p>
+  <p v-else class="flex">World</p>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..14 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@14..16 "p" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueDirective {
+                                name_token: VUE_IDENT@16..20 "v-if" [] [],
+                                arg: missing (optional),
+                                modifiers: VueModifierList [],
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@20..21 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@21..28 "\"true\"" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@28..33 "class" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@33..34 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@34..40 "\"flex\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@40..41 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@41..46 "Hello" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@46..47 "<" [] [],
+                        slash_token: SLASH@47..48 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@48..49 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@49..50 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@50..54 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@54..56 "p" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            VueDirective {
+                                name_token: VUE_IDENT@56..63 "v-else" [] [Whitespace(" ")],
+                                arg: missing (optional),
+                                modifiers: VueModifierList [],
+                                initializer: missing (optional),
+                            },
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@63..68 "class" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@68..69 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@69..75 "\"flex\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@75..76 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@76..81 "World" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@81..82 "<" [] [],
+                        slash_token: SLASH@82..83 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@83..84 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@84..85 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@85..87 "<" [Newline("\n")] [],
+                slash_token: SLASH@87..88 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@88..96 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@96..97 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@97..98 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..98
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..97
+    0: HTML_ELEMENT@0..97
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..85
+        0: HTML_ELEMENT@10..50
+          0: HTML_OPENING_ELEMENT@10..41
+            0: L_ANGLE@10..14 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@14..16
+              0: HTML_LITERAL@14..16 "p" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@16..40
+              0: VUE_DIRECTIVE@16..28
+                0: VUE_IDENT@16..20 "v-if" [] []
+                1: (empty)
+                2: VUE_MODIFIER_LIST@20..20
+                3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..28
+                  0: EQ@20..21 "=" [] []
+                  1: HTML_STRING@21..28
+                    0: HTML_STRING_LITERAL@21..28 "\"true\"" [] [Whitespace(" ")]
+              1: HTML_ATTRIBUTE@28..40
+                0: HTML_ATTRIBUTE_NAME@28..33
+                  0: HTML_LITERAL@28..33 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@33..40
+                  0: EQ@33..34 "=" [] []
+                  1: HTML_STRING@34..40
+                    0: HTML_STRING_LITERAL@34..40 "\"flex\"" [] []
+            3: R_ANGLE@40..41 ">" [] []
+          1: HTML_ELEMENT_LIST@41..46
+            0: HTML_CONTENT@41..46
+              0: HTML_LITERAL@41..46 "Hello" [] []
+          2: HTML_CLOSING_ELEMENT@46..50
+            0: L_ANGLE@46..47 "<" [] []
+            1: SLASH@47..48 "/" [] []
+            2: HTML_TAG_NAME@48..49
+              0: HTML_LITERAL@48..49 "p" [] []
+            3: R_ANGLE@49..50 ">" [] []
+        1: HTML_ELEMENT@50..85
+          0: HTML_OPENING_ELEMENT@50..76
+            0: L_ANGLE@50..54 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@54..56
+              0: HTML_LITERAL@54..56 "p" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@56..75
+              0: VUE_DIRECTIVE@56..63
+                0: VUE_IDENT@56..63 "v-else" [] [Whitespace(" ")]
+                1: (empty)
+                2: VUE_MODIFIER_LIST@63..63
+                3: (empty)
+              1: HTML_ATTRIBUTE@63..75
+                0: HTML_ATTRIBUTE_NAME@63..68
+                  0: HTML_LITERAL@63..68 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@68..75
+                  0: EQ@68..69 "=" [] []
+                  1: HTML_STRING@69..75
+                    0: HTML_STRING_LITERAL@69..75 "\"flex\"" [] []
+            3: R_ANGLE@75..76 ">" [] []
+          1: HTML_ELEMENT_LIST@76..81
+            0: HTML_CONTENT@76..81
+              0: HTML_LITERAL@76..81 "World" [] []
+          2: HTML_CLOSING_ELEMENT@81..85
+            0: L_ANGLE@81..82 "<" [] []
+            1: SLASH@82..83 "/" [] []
+            2: HTML_TAG_NAME@83..84
+              0: HTML_LITERAL@83..84 "p" [] []
+            3: R_ANGLE@84..85 ">" [] []
+      2: HTML_CLOSING_ELEMENT@85..97
+        0: L_ANGLE@85..87 "<" [Newline("\n")] []
+        1: SLASH@87..88 "/" [] []
+        2: HTML_TAG_NAME@88..96
+          0: HTML_LITERAL@88..96 "template" [] []
+        3: R_ANGLE@96..97 ">" [] []
+  4: EOF@97..98 "" [Newline("\n")] []
+
+```

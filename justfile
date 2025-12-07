@@ -27,12 +27,16 @@ gen-all:
 
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
-  cargo codegen-schema
+  just gen-schema
   just gen-types
 
+# Generates TypeScript types
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
 
+# Generates the JSON Schema of the configuration
+gen-schema:
+  cargo codegen-schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -103,6 +107,16 @@ new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new html lint rule with the given name. Name has to be camel case.
+new-html-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new html lint rule with the given name, but targets vue. Name has to be camel case.
+new-html-vue-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Promotes a rule from the nursery group to a new group
 move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
@@ -139,10 +153,12 @@ test-lintrule name:
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
+  just _touch crates/biome_html_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

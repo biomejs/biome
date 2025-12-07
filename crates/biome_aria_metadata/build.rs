@@ -32,15 +32,21 @@ const ISO_COUNTRIES: &[&str] = &[
 
 const ISO_LANGUAGES: &[&str] = &[
     "ab", "aa", "af", "sq", "am", "ar", "an", "hy", "as", "ay", "az", "ba", "eu", "bn", "dz", "bh",
-    "bi", "br", "bg", "my", "be", "km", "ca", "zh", "zh-Hans", "zh-Hant", "co", "hr", "cs", "da",
-    "nl", "en", "eo", "et", "fo", "fa", "fj", "fi", "fr", "fy", "gl", "gd", "gv", "ka", "de", "el",
-    "kl", "gn", "gu", "ht", "ha", "he", "iw", "hi", "hu", "is", "io", "id", "in", "ia", "ie", "iu",
-    "ik", "ga", "it", "ja", "jv", "kn", "ks", "kk", "rw", "ky", "rn", "ko", "ku", "lo", "la", "lv",
-    "li", "ln", "lt", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mo", "mn", "na", "ne", "no", "nb",
-    "nn", "oc", "or", "om", "ps", "pl", "pt", "pa", "qu", "rm", "ro", "ru", "sm", "sg", "sa", "sr",
-    "sh", "st", "tn", "sn", "ii", "sd", "si", "ss", "sk", "sl", "so", "es", "su", "sw", "sv", "tl",
-    "tg", "ta", "tt", "te", "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz",
-    "vi", "vo", "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
+    "bi", "br", "bg", "my", "be", "km", "ca", "zh", "co", "hr", "cs", "da", "nl", "en", "eo", "et",
+    "fo", "fa", "fj", "fi", "fr", "fy", "gl", "gd", "gv", "ka", "de", "el", "kl", "gn", "gu", "ht",
+    "ha", "he", "iw", "hi", "hu", "is", "io", "id", "in", "ia", "ie", "iu", "ik", "ga", "it", "ja",
+    "jv", "kn", "ks", "kk", "rw", "ky", "rn", "ko", "ku", "lo", "la", "lv", "li", "ln", "lt", "mk",
+    "mg", "ms", "ml", "mt", "mi", "mr", "mo", "mn", "na", "ne", "no", "nb", "nn", "oc", "or", "om",
+    "ps", "pl", "pt", "pa", "qu", "rm", "ro", "ru", "sm", "sg", "sa", "sr", "sh", "st", "tn", "sn",
+    "ii", "sd", "si", "ss", "sk", "sl", "so", "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te",
+    "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz", "vi", "vo", "wa", "cy",
+    "wo", "xh", "yi", "ji", "yo", "zu",
+];
+
+const ISO_SCRIPTS: &[&str] = &[
+    "Arab", "Armn", "Beng", "Cyrl", "Deva", "Ethi", "Grek", "Gujr", "Guru", "Hang", "Hani", "Hans",
+    "Hant", "Hebr", "Hira", "Kana", "Khmr", "Laoo", "Latn", "Mlym", "Mymr", "Orya", "Sinh", "Taml",
+    "Telu", "Thai", "Tibt", "Zyyy",
 ];
 
 #[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
@@ -266,12 +272,14 @@ fn main() -> io::Result<()> {
 
     let iso_countries = generate_enums(ISO_COUNTRIES, "IsoCountries");
     let iso_languages = generate_enums(ISO_LANGUAGES, "IsoLanguages");
+    let iso_scripts = generate_enums(ISO_SCRIPTS, "IsoScripts");
 
     let tokens = quote! {
         #aria_attributes
         #aria_roles
         #iso_countries
         #iso_languages
+        #iso_scripts
     };
     let ast = tokens.to_string();
 

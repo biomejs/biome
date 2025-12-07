@@ -3,7 +3,9 @@ use super::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, SearchCapabilities,
 };
-use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
+use crate::settings::{
+    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+};
 use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
 use crate::{
     WorkspaceError,
@@ -264,6 +266,7 @@ impl ExtensionHandler for GritFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 update_snippets: None,
+                pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -276,19 +279,19 @@ impl ExtensionHandler for GritFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<GritLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<GritLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<GritLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
@@ -296,7 +299,7 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_grit_with_cache(text, cache);
@@ -320,7 +323,7 @@ fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
@@ -336,7 +339,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
@@ -354,7 +357,7 @@ fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
@@ -369,7 +372,7 @@ fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);

@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo == null;
+foo != null;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/noEqualsToNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × null comparison with == is disallowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ foo == null;
+      │     ^^
+    3 │ foo != null;
+    4 │ 
+  
+  i Unsafe fix: Use === instead.
+  
+    2 │ foo·===·null;
+      │       +      
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noEqualsToNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × null comparison with != is disallowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo == null;
+  > 3 │ foo != null;
+      │     ^^
+    4 │ 
+  
+  i Unsafe fix: Use !== instead.
+  
+    3 │ foo·!==·null;
+      │       +      
+
+```

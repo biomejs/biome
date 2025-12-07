@@ -55,16 +55,6 @@ mod client;
 mod document;
 mod server;
 
-pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
-use std::{
-    borrow::Cow,
-    fmt::{Debug, Display, Formatter},
-    panic::RefUnwindSafe,
-    str,
-    sync::Arc,
-    time::Duration,
-};
-
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
@@ -78,11 +68,20 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
+pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display, Formatter},
+    panic::RefUnwindSafe,
+    str,
+    sync::Arc,
+    time::Duration,
+};
 use tokio::sync::watch;
 use tracing::debug;
 
@@ -94,8 +93,9 @@ pub use crate::{
     settings::Settings,
 };
 #[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
+use schemars::{Schema, SchemaGenerator};
 
+use crate::settings::SettingsWithEditor;
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
 
@@ -117,6 +117,9 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -148,7 +151,10 @@ impl FeaturesSupported {
     /// Adds the features that are enabled in `capabilities` to this result.
     #[inline]
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
-        if capabilities.formatter.format.is_some() {
+        if capabilities.formatter.format.is_some()
+            || capabilities.formatter.format_range.is_some()
+            || capabilities.formatter.format_on_type.is_some()
+        {
             self.insert(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
@@ -179,7 +185,7 @@ impl FeaturesSupported {
     #[inline]
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &Settings,
+        settings: &SettingsWithEditor,
         path: &Utf8Path,
         capabilities: &Capabilities,
     ) -> Self {
@@ -219,7 +225,8 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+        if let Some(experimental_full_html_support) =
+            settings.as_ref().experimental_full_html_support
             && experimental_full_html_support.value()
         {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
@@ -423,21 +430,23 @@ impl<'de> serde::Deserialize<'de> for FeaturesSupported {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeaturesSupported {
-    fn schema_name() -> String {
-        "FeaturesSupported".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeaturesSupported")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
-        use schemars::schema::*;
+        // Generate schemas for FeatureKind and SupportKind first
+        let _feature_kind_schema = generator.subschema_for::<FeatureKind>();
+        let _support_kind_schema = generator.subschema_for::<SupportKind>();
 
-        Schema::Object(SchemaObject {
-            instance_type: Some(InstanceType::Object.into()),
-            object: Some(Box::new(ObjectValidation {
-                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
-                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
-                ..Default::default()
-            })),
-            ..Default::default()
+        schemars::json_schema!({
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/$defs/FeatureKind"
+            },
+            "additionalProperties": {
+                "$ref": "#/$defs/SupportKind"
+            }
         })
     }
 }
@@ -507,8 +516,8 @@ pub enum SupportKind {
     FileNotSupported,
 }
 
-impl std::fmt::Display for SupportKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for SupportKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Supported => write!(f, "Supported"),
             Self::Ignored => write!(f, "Ignored"),
@@ -668,8 +677,8 @@ impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeatureName {
-    fn schema_name() -> String {
-        String::from("FeatureName")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("FeatureName")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
@@ -767,6 +776,9 @@ pub struct OpenFileParams {
     /// the file is opened through the LSP Proxy.
     #[serde(default)]
     pub persist_node_cache: bool,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -895,6 +907,9 @@ pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -944,13 +959,15 @@ pub struct PullDiagnosticsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsResult {
-    pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
     pub skipped_diagnostics: u64,
 }
@@ -971,6 +988,33 @@ pub struct PullActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    #[serde(default)]
+    pub only: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub skip: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsResult {
+    pub diagnostics: Vec<(Diagnostic, Vec<CodeAction>)>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -996,6 +1040,8 @@ pub struct CodeAction {
 pub struct FormatFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1005,6 +1051,8 @@ pub struct FormatRangeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub range: TextRange,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1014,6 +1062,8 @@ pub struct FormatOnTypeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub offset: TextSize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
@@ -1047,6 +1097,8 @@ pub struct FixFileParams {
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1449,6 +1501,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// position within a file.
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
+    /// Pulls diagnostics with their relative code actions
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code.
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
@@ -1571,7 +1629,7 @@ pub fn client<T>(
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {
-    Ok(Box::new(client::WorkspaceClient::new(transport, fs)?))
+    Ok(Box::new(WorkspaceClient::new(transport, fs)?))
 }
 
 /// [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)
@@ -1642,6 +1700,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             path: self.path.clone(),
             version,
             content,
+            inline_config: None,
         })
     }
 
@@ -1667,6 +1726,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             enabled_rules: vec![],
             pull_code_actions,
+            inline_config: None,
         })
     }
 
@@ -1688,6 +1748,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             suppression_reason,
             enabled_rules,
             categories,
+            inline_config: None,
         })
     }
 
@@ -1695,6 +1756,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         self.workspace.format_file(FormatFileParams {
             project_key: self.project_key,
             path: self.path.clone(),
+            inline_config: None,
         })
     }
 
@@ -1710,6 +1772,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             range,
+            inline_config: None,
         })
     }
 
@@ -1718,6 +1781,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             offset,
+            inline_config: None,
         })
     }
 
@@ -1740,6 +1804,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             rule_categories,
             suppression_reason,
             enabled_rules: vec![],
+            inline_config: None,
         })
     }
 

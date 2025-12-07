@@ -10,6 +10,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
     match node_name {
         // Native Biome AST patterns
         "CssAtRule" => lang::CssAtRule::KIND_SET.iter().next(),
+        "CssAtRuleDeclarator" => lang::CssAtRuleDeclarator::KIND_SET.iter().next(),
+        "CssAttrFallbackValue" => lang::CssAttrFallbackValue::KIND_SET.iter().next(),
+        "CssAttrFunction" => lang::CssAttrFunction::KIND_SET.iter().next(),
         "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
         "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
@@ -20,6 +23,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssClassSelector" => lang::CssClassSelector::KIND_SET.iter().next(),
         "CssColor" => lang::CssColor::KIND_SET.iter().next(),
         "CssColorProfileAtRule" => lang::CssColorProfileAtRule::KIND_SET.iter().next(),
+        "CssColorProfileAtRuleDeclarator" => lang::CssColorProfileAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssComplexSelector" => lang::CssComplexSelector::KIND_SET.iter().next(),
         "CssComposesImportSpecifier" => lang::CssComposesImportSpecifier::KIND_SET.iter().next(),
         "CssComposesProperty" => lang::CssComposesProperty::KIND_SET.iter().next(),
@@ -27,6 +33,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssCompoundSelector" => lang::CssCompoundSelector::KIND_SET.iter().next(),
         "CssContainerAndQuery" => lang::CssContainerAndQuery::KIND_SET.iter().next(),
         "CssContainerAtRule" => lang::CssContainerAtRule::KIND_SET.iter().next(),
+        "CssContainerAtRuleDeclarator" => {
+            lang::CssContainerAtRuleDeclarator::KIND_SET.iter().next()
+        }
         "CssContainerNotQuery" => lang::CssContainerNotQuery::KIND_SET.iter().next(),
         "CssContainerOrQuery" => lang::CssContainerOrQuery::KIND_SET.iter().next(),
         "CssContainerQueryInParens" => lang::CssContainerQueryInParens::KIND_SET.iter().next(),
@@ -41,6 +50,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             lang::CssContainerStyleQueryInParens::KIND_SET.iter().next()
         }
         "CssCounterStyleAtRule" => lang::CssCounterStyleAtRule::KIND_SET.iter().next(),
+        "CssCounterStyleAtRuleDeclarator" => lang::CssCounterStyleAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssCustomIdentifier" => lang::CssCustomIdentifier::KIND_SET.iter().next(),
         "CssDashedIdentifier" => lang::CssDashedIdentifier::KIND_SET.iter().next(),
         "CssDeclaration" => lang::CssDeclaration::KIND_SET.iter().next(),
@@ -51,18 +63,37 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssDeclarationWithSemicolon" => lang::CssDeclarationWithSemicolon::KIND_SET.iter().next(),
         "CssDocumentAtRule" => lang::CssDocumentAtRule::KIND_SET.iter().next(),
         "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
+        "CssElseKeyword" => lang::CssElseKeyword::KIND_SET.iter().next(),
         "CssEmptyDeclaration" => lang::CssEmptyDeclaration::KIND_SET.iter().next(),
         "CssFontFaceAtRule" => lang::CssFontFaceAtRule::KIND_SET.iter().next(),
+        "CssFontFaceAtRuleDeclarator" => lang::CssFontFaceAtRuleDeclarator::KIND_SET.iter().next(),
         "CssFontFamilyName" => lang::CssFontFamilyName::KIND_SET.iter().next(),
         "CssFontFeatureValuesAtRule" => lang::CssFontFeatureValuesAtRule::KIND_SET.iter().next(),
         "CssFontFeatureValuesBlock" => lang::CssFontFeatureValuesBlock::KIND_SET.iter().next(),
         "CssFontFeatureValuesItem" => lang::CssFontFeatureValuesItem::KIND_SET.iter().next(),
         "CssFontPaletteValuesAtRule" => lang::CssFontPaletteValuesAtRule::KIND_SET.iter().next(),
+        "CssFontPaletteValuesAtRuleDeclarator" => {
+            lang::CssFontPaletteValuesAtRuleDeclarator::KIND_SET
+                .iter()
+                .next()
+        }
         "CssFunction" => lang::CssFunction::KIND_SET.iter().next(),
         "CssGenericDelimiter" => lang::CssGenericDelimiter::KIND_SET.iter().next(),
         "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
         "CssIdSelector" => lang::CssIdSelector::KIND_SET.iter().next(),
         "CssIdentifier" => lang::CssIdentifier::KIND_SET.iter().next(),
+        "CssIfBranch" => lang::CssIfBranch::KIND_SET.iter().next(),
+        "CssIfFunction" => lang::CssIfFunction::KIND_SET.iter().next(),
+        "CssIfMediaTest" => lang::CssIfMediaTest::KIND_SET.iter().next(),
+        "CssIfStyleTest" => lang::CssIfStyleTest::KIND_SET.iter().next(),
+        "CssIfSupportsIdentifierTest" => lang::CssIfSupportsIdentifierTest::KIND_SET.iter().next(),
+        "CssIfSupportsTest" => lang::CssIfSupportsTest::KIND_SET.iter().next(),
+        "CssIfTestBooleanAndExpr" => lang::CssIfTestBooleanAndExpr::KIND_SET.iter().next(),
+        "CssIfTestBooleanExprInParens" => {
+            lang::CssIfTestBooleanExprInParens::KIND_SET.iter().next()
+        }
+        "CssIfTestBooleanNotExpr" => lang::CssIfTestBooleanNotExpr::KIND_SET.iter().next(),
+        "CssIfTestBooleanOrExpr" => lang::CssIfTestBooleanOrExpr::KIND_SET.iter().next(),
         "CssImportAnonymousLayer" => lang::CssImportAnonymousLayer::KIND_SET.iter().next(),
         "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
         "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),
@@ -84,6 +115,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssMediaAndCondition" => lang::CssMediaAndCondition::KIND_SET.iter().next(),
         "CssMediaAndTypeQuery" => lang::CssMediaAndTypeQuery::KIND_SET.iter().next(),
         "CssMediaAtRule" => lang::CssMediaAtRule::KIND_SET.iter().next(),
+        "CssMediaAtRuleDeclarator" => lang::CssMediaAtRuleDeclarator::KIND_SET.iter().next(),
         "CssMediaConditionInParens" => lang::CssMediaConditionInParens::KIND_SET.iter().next(),
         "CssMediaConditionQuery" => lang::CssMediaConditionQuery::KIND_SET.iter().next(),
         "CssMediaFeatureInParens" => lang::CssMediaFeatureInParens::KIND_SET.iter().next(),
@@ -99,6 +131,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssNestedSelector" => lang::CssNestedSelector::KIND_SET.iter().next(),
         "CssNthOffset" => lang::CssNthOffset::KIND_SET.iter().next(),
         "CssNumber" => lang::CssNumber::KIND_SET.iter().next(),
+        "CssNumberDeclarator" => lang::CssNumberDeclarator::KIND_SET.iter().next(),
         "CssPageAtRule" => lang::CssPageAtRule::KIND_SET.iter().next(),
         "CssPageAtRuleBlock" => lang::CssPageAtRuleBlock::KIND_SET.iter().next(),
         "CssPageSelector" => lang::CssPageSelector::KIND_SET.iter().next(),
@@ -107,7 +140,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssParenthesizedExpression" => lang::CssParenthesizedExpression::KIND_SET.iter().next(),
         "CssPercentage" => lang::CssPercentage::KIND_SET.iter().next(),
         "CssPositionTryAtRule" => lang::CssPositionTryAtRule::KIND_SET.iter().next(),
+        "CssPositionTryAtRuleDeclarator" => {
+            lang::CssPositionTryAtRuleDeclarator::KIND_SET.iter().next()
+        }
         "CssPropertyAtRule" => lang::CssPropertyAtRule::KIND_SET.iter().next(),
+        "CssPropertyAtRuleDeclarator" => lang::CssPropertyAtRuleDeclarator::KIND_SET.iter().next(),
         "CssPseudoClassFunctionCompoundSelector" => {
             lang::CssPseudoClassFunctionCompoundSelector::KIND_SET
                 .iter()
@@ -155,19 +192,27 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         }
         "CssQueryFeatureReverseRange" => lang::CssQueryFeatureReverseRange::KIND_SET.iter().next(),
         "CssRatio" => lang::CssRatio::KIND_SET.iter().next(),
+        "CssRawStringDeclarator" => lang::CssRawStringDeclarator::KIND_SET.iter().next(),
+        "CssRegularAttrUnit" => lang::CssRegularAttrUnit::KIND_SET.iter().next(),
         "CssRegularDimension" => lang::CssRegularDimension::KIND_SET.iter().next(),
+        "CssRegularSyntaxTypeName" => lang::CssRegularSyntaxTypeName::KIND_SET.iter().next(),
         "CssRelativeSelector" => lang::CssRelativeSelector::KIND_SET.iter().next(),
         "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
         "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
         "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),
+        "CssScopeAtRuleDeclarator" => lang::CssScopeAtRuleDeclarator::KIND_SET.iter().next(),
         "CssScopeEdge" => lang::CssScopeEdge::KIND_SET.iter().next(),
         "CssScopeRangeEnd" => lang::CssScopeRangeEnd::KIND_SET.iter().next(),
         "CssScopeRangeInterval" => lang::CssScopeRangeInterval::KIND_SET.iter().next(),
         "CssScopeRangeStart" => lang::CssScopeRangeStart::KIND_SET.iter().next(),
         "CssStartingStyleAtRule" => lang::CssStartingStyleAtRule::KIND_SET.iter().next(),
+        "CssStartingStyleAtRuleDeclarator" => lang::CssStartingStyleAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "CssString" => lang::CssString::KIND_SET.iter().next(),
         "CssSupportsAndCondition" => lang::CssSupportsAndCondition::KIND_SET.iter().next(),
         "CssSupportsAtRule" => lang::CssSupportsAtRule::KIND_SET.iter().next(),
+        "CssSupportsAtRuleDeclarator" => lang::CssSupportsAtRuleDeclarator::KIND_SET.iter().next(),
         "CssSupportsConditionInParens" => {
             lang::CssSupportsConditionInParens::KIND_SET.iter().next()
         }
@@ -177,6 +222,15 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssSupportsFeatureSelector" => lang::CssSupportsFeatureSelector::KIND_SET.iter().next(),
         "CssSupportsNotCondition" => lang::CssSupportsNotCondition::KIND_SET.iter().next(),
         "CssSupportsOrCondition" => lang::CssSupportsOrCondition::KIND_SET.iter().next(),
+        "CssSyntaxComponent" => lang::CssSyntaxComponent::KIND_SET.iter().next(),
+        "CssSyntaxComponentWithoutMultiplier" => {
+            lang::CssSyntaxComponentWithoutMultiplier::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssSyntaxMultiplier" => lang::CssSyntaxMultiplier::KIND_SET.iter().next(),
+        "CssSyntaxType" => lang::CssSyntaxType::KIND_SET.iter().next(),
+        "CssTypeFunction" => lang::CssTypeFunction::KIND_SET.iter().next(),
         "CssTypeSelector" => lang::CssTypeSelector::KIND_SET.iter().next(),
         "CssUnicodeCodepoint" => lang::CssUnicodeCodepoint::KIND_SET.iter().next(),
         "CssUnicodeRange" => lang::CssUnicodeRange::KIND_SET.iter().next(),
@@ -184,8 +238,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssUnicodeRangeWildcard" => lang::CssUnicodeRangeWildcard::KIND_SET.iter().next(),
         "CssUniversalNamespacePrefix" => lang::CssUniversalNamespacePrefix::KIND_SET.iter().next(),
         "CssUniversalSelector" => lang::CssUniversalSelector::KIND_SET.iter().next(),
+        "CssUniversalSyntax" => lang::CssUniversalSyntax::KIND_SET.iter().next(),
+        "CssUnknownAttrUnit" => lang::CssUnknownAttrUnit::KIND_SET.iter().next(),
         "CssUnknownBlockAtRule" => lang::CssUnknownBlockAtRule::KIND_SET.iter().next(),
         "CssUnknownDimension" => lang::CssUnknownDimension::KIND_SET.iter().next(),
+        "CssUnknownSyntaxTypeName" => lang::CssUnknownSyntaxTypeName::KIND_SET.iter().next(),
         "CssUnknownValueAtRule" => lang::CssUnknownValueAtRule::KIND_SET.iter().next(),
         "CssUrlFunction" => lang::CssUrlFunction::KIND_SET.iter().next(),
         "CssUrlValueRaw" => lang::CssUrlValueRaw::KIND_SET.iter().next(),
@@ -204,6 +261,9 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "CssViewTransitionAtRule" => lang::CssViewTransitionAtRule::KIND_SET.iter().next(),
+        "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
+            .iter()
+            .next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
         "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),
         "TwCustomVariantAtRule" => lang::TwCustomVariantAtRule::KIND_SET.iter().next(),

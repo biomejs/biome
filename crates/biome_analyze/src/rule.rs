@@ -97,36 +97,54 @@ impl TryFrom<FixKind> for Applicability {
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
+    /// Rules from [Deno Lint](https://github.com/denoland/deno_lint)
+    DenoLint(&'static str),
     /// Rules from [Eslint](https://eslint.org/)
     Eslint(&'static str),
+    /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
+    EslintBarrelFiles(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
     EslintGraphql(&'static str),
-    /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
-    GraphqlSchemaLinter(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
     EslintImportAccess(&'static str),
     /// Rules from [Eslint Plugin Jest](https://github.com/jest-community/eslint-plugin-jest)
     EslintJest(&'static str),
-    /// Rules from [Eslint Plugin JSX A11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
-    EslintJsxA11y(&'static str),
     /// Rules from [Eslint Plugin JSDOc](https://github.com/gajus/eslint-plugin-jsdoc)
     EslintJsDoc(&'static str),
+    /// Rules from [Eslint Plugin JSX A11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
+    EslintJsxA11y(&'static str),
+    /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
+    EslintMysticatea(&'static str),
+    /// Rules from [Eslint Plugin N](https://github.com/eslint-community/eslint-plugin-n)
+    EslintN(&'static str),
+    /// Rules from [Eslint Plugin Next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
+    EslintNext(&'static str),
+    /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
+    EslintNoSecrets(&'static str),
+    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
+    EslintPackageJson(&'static str),
+    /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
+    EslintPackageJsonDependencies(&'static str),
     /// Rules from [Eslint Plugin Perfectionist](https://perfectionist.dev/)
     EslintPerfectionist(&'static str),
+    /// Rules from [Eslint Plugin Qwik](https://github.com/QwikDev/qwik)
+    EslintQwik(&'static str),
     /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'static str),
+    /// Rules from [Eslint Plugin React Prefer Function Component](https://github.com/tatethurston/eslint-plugin-react-prefer-function-component)
+    EslintReactPreferFunctionComponent(&'static str),
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
     EslintReactRefresh(&'static str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactX(&'static str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'static str),
-    /// Rules from [Eslint Plugin React Prefer Function Component](https://github.com/tatethurston/eslint-plugin-react-prefer-function-component)
-    ReactPreferFunctionComponent(&'static str),
+    /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
+    EslintRegexp(&'static str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'static str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
@@ -139,32 +157,14 @@ pub enum RuleSource {
     EslintUnicorn(&'static str),
     /// Rules from [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
     EslintUnusedImports(&'static str),
-    /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
-    EslintMysticatea(&'static str),
-    /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
-    EslintBarrelFiles(&'static str),
-    /// Rules from [Eslint Plugin N](https://github.com/eslint-community/eslint-plugin-n)
-    EslintN(&'static str),
-    /// Rules from [Eslint Plugin Next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
-    EslintNext(&'static str),
-    /// Rules from [Eslint Plugin Qwik](https://github.com/QwikDev/qwik)
-    EslintQwik(&'static str),
-    /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
-    Stylelint(&'static str),
-    /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
-    EslintNoSecrets(&'static str),
-    /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
-    EslintRegexp(&'static str),
-    /// Rules from [deno lint](https://github.com/denoland/deno_lint)
-    DenoLint(&'static str),
     /// Rules from [Eslint Plugin Vitest](https://github.com/vitest-dev/eslint-plugin-vitest)
     EslintVitest(&'static str),
     /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
     EslintVueJs(&'static str),
-    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
-    EslintPackageJson(&'static str),
-    /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
-    EslintPackageJsonDependencies(&'static str),
+    /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
+    GraphqlSchemaLinter(&'static str),
+    /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
+    Stylelint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -177,44 +177,44 @@ impl std::fmt::Display for RuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Clippy(_) => write!(f, "Clippy"),
+            Self::DenoLint(_) => write!(f, "Deno Lint"),
             Self::Eslint(_) => write!(f, "ESLint"),
+            Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
-            Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
-            Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             Self::EslintJsDoc(_) => write!(f, "eslint-plugin-jsdoc"),
-            Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
-            Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
-            Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
-            Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
-            Self::EslintReactX(_) => write!(f, "eslint-plugin-react-x"),
-            Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
-            Self::ReactPreferFunctionComponent(_) => {
-                write!(f, "eslint-plugin-react-prefer-function-component")
-            }
-            Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
-            Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
-            Self::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
-            Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
-            Self::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
-            Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
+            Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             Self::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
-            Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
             Self::EslintN(_) => write!(f, "eslint-plugin-n"),
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
-            Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
-            Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
-            Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
-            Self::DenoLint(_) => write!(f, "deno-lint"),
-            Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
-            Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
             Self::EslintPackageJson(_) => write!(f, "eslint-plugin-package-json"),
             Self::EslintPackageJsonDependencies(_) => {
                 write!(f, "eslint-plugin-package-json-dependencies")
             }
+            Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
+            Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
+            Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
+            Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            Self::EslintReactPreferFunctionComponent(_) => {
+                write!(f, "eslint-plugin-react-prefer-function-component")
+            }
+            Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
+            Self::EslintReactX(_) => write!(f, "eslint-plugin-react-x"),
+            Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
+            Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
+            Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
+            Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
+            Self::EslintStylistic(_) => write!(f, "@stylistic/eslint-plugin"),
+            Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
+            Self::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
+            Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
+            Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
+            Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
+            Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
+            Self::Stylelint(_) => write!(f, "Stylelint"),
         }
     }
 }
@@ -261,124 +261,124 @@ impl RuleSource {
     pub fn as_rule_name(&self) -> &'static str {
         match self {
             Self::Clippy(rule_name)
+            | Self::DenoLint(rule_name)
             | Self::Eslint(rule_name)
+            | Self::EslintBarrelFiles(rule_name)
             | Self::EslintGraphql(rule_name)
-            | Self::GraphqlSchemaLinter(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
-            | Self::EslintJsxA11y(rule_name)
             | Self::EslintJsDoc(rule_name)
+            | Self::EslintJsxA11y(rule_name)
+            | Self::EslintMysticatea(rule_name)
+            | Self::EslintN(rule_name)
+            | Self::EslintNext(rule_name)
+            | Self::EslintNoSecrets(rule_name)
+            | Self::EslintPackageJson(rule_name)
+            | Self::EslintPackageJsonDependencies(rule_name)
             | Self::EslintPerfectionist(rule_name)
+            | Self::EslintQwik(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
+            | Self::EslintReactPreferFunctionComponent(rule_name)
             | Self::EslintReactRefresh(rule_name)
             | Self::EslintReactX(rule_name)
             | Self::EslintReactXyz(rule_name)
-            | Self::ReactPreferFunctionComponent(rule_name)
-            | Self::EslintTypeScript(rule_name)
+            | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
+            | Self::EslintTypeScript(rule_name)
             | Self::EslintUnicorn(rule_name)
             | Self::EslintUnusedImports(rule_name)
-            | Self::EslintMysticatea(rule_name)
-            | Self::EslintBarrelFiles(rule_name)
-            | Self::EslintN(rule_name)
-            | Self::EslintNext(rule_name)
-            | Self::EslintQwik(rule_name)
-            | Self::EslintNoSecrets(rule_name)
-            | Self::EslintRegexp(rule_name)
-            | Self::Stylelint(rule_name)
-            | Self::DenoLint(rule_name)
             | Self::EslintVitest(rule_name)
             | Self::EslintVueJs(rule_name)
-            | Self::EslintPackageJson(rule_name)
-            | Self::EslintPackageJsonDependencies(rule_name) => rule_name,
+            | Self::GraphqlSchemaLinter(rule_name)
+            | Self::Stylelint(rule_name) => rule_name,
         }
     }
 
     pub fn to_namespaced_rule_name(&self) -> String {
         match self {
             Self::Clippy(rule_name)
+            | Self::DenoLint(rule_name)
             | Self::Eslint(rule_name)
-            | Self::GraphqlSchemaLinter(rule_name) => (*rule_name).to_string(),
+            | Self::GraphqlSchemaLinter(rule_name)
+            | Self::Stylelint(rule_name) => (*rule_name).to_string(),
+            Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("@graphql-eslint/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
-            Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
             Self::EslintJsDoc(rule_name) => format!("jsdoc/{rule_name}"),
-            Self::EslintPerfectionist(rule_name) => format!("perfectionist/{rule_name}"),
-            Self::EslintReact(rule_name) => format!("react/{rule_name}"),
-            Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
-            Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
-            Self::EslintReactX(rule_name) => format!("react-x/{rule_name}"),
-            Self::EslintReactXyz(rule_name) => format!("@eslint-react/{rule_name}"),
-            Self::ReactPreferFunctionComponent(rule_name) => {
-                format!("react-prefer-function-component/{rule_name}")
-            }
-            Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
-            Self::EslintSolid(rule_name) => format!("solidjs/{rule_name}"),
-            Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
-            Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
-            Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
-            Self::EslintUnusedImports(rule_name) => format!("unused-imports/{rule_name}"),
+            Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
-            Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
-            Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
-            Self::EslintQwik(rule_name) => format!("qwik/{rule_name}"),
-            Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
+            Self::EslintNext(rule_name) => format!("@next/next/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
-            Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
-            Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
-            Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
-            Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
             Self::EslintPackageJson(rule_name) => format!("package-json/{rule_name}"),
             Self::EslintPackageJsonDependencies(rule_name) => {
                 format!("package-json-dependencies/{rule_name}")
             }
+            Self::EslintPerfectionist(rule_name) => format!("perfectionist/{rule_name}"),
+            Self::EslintQwik(rule_name) => format!("qwik/{rule_name}"),
+            Self::EslintReact(rule_name) => format!("react/{rule_name}"),
+            Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
+            Self::EslintReactPreferFunctionComponent(rule_name) => {
+                format!("react-prefer-function-component/{rule_name}")
+            }
+            Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
+            Self::EslintReactX(rule_name) => format!("react-x/{rule_name}"),
+            Self::EslintReactXyz(rule_name) => format!("@eslint-react/{rule_name}"),
+            Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
+            Self::EslintSolid(rule_name) => format!("solid/{rule_name}"),
+            Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
+            Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
+            Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
+            Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
+            Self::EslintUnusedImports(rule_name) => format!("unused-imports/{rule_name}"),
+            Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
+            Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
         }
     }
 
     pub fn to_rule_url(&self) -> String {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
+            Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
-            Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
-            Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsDoc(rule_name) => format!("https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
+            Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
+            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
+            Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint/#{rule_name}"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
+            Self::EslintReactPreferFunctionComponent(_) => "https://github.com/tatethurston/eslint-plugin-react-prefer-function-component".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
             Self::EslintReactX(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
-            Self::ReactPreferFunctionComponent(_) => "https://github.com/tatethurston/eslint-plugin-react-prefer-function-component".to_string(),
-            Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
+            Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
-            Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
-            Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint/#{rule_name}"),
-            Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
-            Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
-            Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
-            Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
-            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
-            Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
+            Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
+            Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
         }
     }
 
@@ -393,7 +393,14 @@ impl RuleSource {
 
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
-        !matches!(self, Self::Clippy(_) | Self::Eslint(_) | Self::Stylelint(_))
+        !matches!(
+            self,
+            Self::Clippy(_)
+                | Self::DenoLint(_)
+                | Self::Eslint(_)
+                | Self::GraphqlSchemaLinter(_)
+                | Self::Stylelint(_)
+        )
     }
 
     pub const fn is_stylelint(&self) -> bool {
