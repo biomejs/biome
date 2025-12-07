@@ -1948,7 +1948,7 @@ See <https://biomejs.dev/linter/rules/no-react-forward-ref>
 	noReactForwardRef?: NoReactForwardRefConfiguration;
 	/**
 	* Disallow javascript: URLs in HTML.
-See https://biomejs.dev/linter/rules/no-script-url 
+See <https://biomejs.dev/linter/rules/no-script-url> 
 	 */
 	noScriptUrl?: NoScriptUrlConfiguration;
 	/**

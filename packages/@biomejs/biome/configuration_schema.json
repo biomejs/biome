@@ -5229,7 +5229,7 @@
 					]
 				},
 				"noScriptUrl": {
-					"description": "Disallow javascript: URLs in HTML.\nSee https://biomejs.dev/linter/rules/no-script-url",
+					"description": "Disallow javascript: URLs in HTML.\nSee <https://biomejs.dev/linter/rules/no-script-url>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
 						{ "type": "null" }
