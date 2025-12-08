@@ -89,7 +89,7 @@ declare_lint_rule! {
     /// ```js
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
-    /// console.log(brand, rest);
+    /// console.log(rest);
     /// ```
     ///
     /// ## Options
