@@ -6,7 +6,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange};
+use biome_json_syntax::{
+    AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
+};
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
