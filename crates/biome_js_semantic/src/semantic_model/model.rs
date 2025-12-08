@@ -1,5 +1,7 @@
 use super::*;
-use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
+use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsSyntaxNodePtr};
+use biome_rowan::SendNode;
+use std::sync::Arc;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BindingId(pub(crate) u32);
@@ -68,15 +70,15 @@ impl ScopeId {
 /// to outlive the [SemanticModel], and to not include lifetimes.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    pub(crate) root: AnyJsRoot,
+    pub(crate) root: SendNode,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
     // Maps the start of a node range to its scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     /// Binding and reference nodes indexed by their range start
-    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
-    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
+    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNodePtr>,
+    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNodePtr>,
     // Maps any range start in the code to its bindings
     pub(crate) declared_at_by_start: FxHashMap<TextSize, BindingId>,
     // List of all the declarations
@@ -98,6 +100,10 @@ impl SemanticModelData {
 
     pub(crate) fn global(&self, global_id: u32) -> &SemanticModelGlobalBindingData {
         &self.globals[global_id as usize]
+    }
+
+    pub(crate) fn to_root(&self) -> AnyJsRoot {
+        self.root.to_language_root::<AnyJsRoot>()
     }
 
     pub(crate) fn unresolved_reference(
@@ -171,14 +177,18 @@ impl Eq for SemanticModelData {}
 /// See `SemanticModelData` for more information about the internals.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
 }
 
 impl SemanticModel {
     pub(crate) fn new(data: SemanticModelData) -> Self {
         Self {
-            data: Rc::new(data),
+            data: Arc::new(data),
         }
+    }
+
+    pub fn root(&self) -> AnyJsRoot {
+        self.data.root.to_language_root::<AnyJsRoot>()
     }
 
     /// Iterate all scopes

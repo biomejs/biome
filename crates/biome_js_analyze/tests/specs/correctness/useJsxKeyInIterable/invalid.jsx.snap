@@ -194,25 +194,6 @@ invalid.jsx:3:24 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    3 │ [<Hello />, <Hello />, <Hello />];
-    4 │ 
-  > 5 │ [...[<Hello />, <Hello />], <Hello />];
-      │                             ^^^^^^^^^
-    6 │ 
-    7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:5:6 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -240,6 +221,25 @@ invalid.jsx:5:17 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
     4 │ 
   > 5 │ [...[<Hello />, <Hello />], <Hello />];
       │                 ^^^^^^^^^
+    6 │ 
+    7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:5:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    3 │ [<Hello />, <Hello />, <Hello />];
+    4 │ 
+  > 5 │ [...[<Hello />, <Hello />], <Hello />];
+      │                             ^^^^^^^^^
     6 │ 
     7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
   
@@ -478,42 +478,6 @@ invalid.jsx:25:43 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:42:26 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    41 │ [].map((item) => {
-  > 42 │ 	return item.condition ? <div /> : <div>foo</div>;
-       │ 	                        ^^^^^^^
-    43 │ });
-    44 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:42:36 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    41 │ [].map((item) => {
-  > 42 │ 	return item.condition ? <div /> : <div>foo</div>;
-       │ 	                                  ^^^^^
-    43 │ });
-    44 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:27:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -676,6 +640,42 @@ invalid.jsx:39:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
        │                              ^^^^
     40 │ 
     41 │ [].map((item) => {
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:42:26 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    41 │ [].map((item) => {
+  > 42 │ 	return item.condition ? <div /> : <div>foo</div>;
+       │ 	                        ^^^^^^^
+    43 │ });
+    44 │ 
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:42:36 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    41 │ [].map((item) => {
+  > 42 │ 	return item.condition ? <div /> : <div>foo</div>;
+       │ 	                                  ^^^^^
+    43 │ });
+    44 │ 
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   

@@ -7,6 +7,7 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -57,10 +58,12 @@ export function f(options: PostcssOptions) {
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
     let services = crate::JsAnalyzerServices::from((
         module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
         project_layout,
         JsFileSource::tsx(),
+        Some(semantic_model),
     ));
 
     analyze(
