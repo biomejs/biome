@@ -9,7 +9,7 @@ use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
-pub use parser::CssParserOptions;
+pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
 mod parser;

@@ -25,7 +25,7 @@ use biome_configuration::css::{
 use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
@@ -161,7 +161,15 @@ impl ServiceLanguage for CssLanguage {
                 .allow_wrong_line_comments
                 .unwrap_or_default()
                 .into(),
-            css_modules: language.css_modules_enabled.unwrap_or_default().into(),
+            css_modules: language
+                .css_modules_enabled
+                .map_or(CssModulesKind::None, |bool| {
+                    if bool.value() {
+                        CssModulesKind::Classic
+                    } else {
+                        CssModulesKind::None
+                    }
+                }),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives_enabled(),
         };
@@ -411,14 +419,16 @@ fn parse(
             .allow_wrong_line_comments
             .unwrap_or_default()
             .into(),
-        css_modules: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .css_modules_enabled
-            .unwrap_or_default()
-            .into(),
+        css_modules: settings.as_ref().languages.css.parser.css_modules_enabled.map_or(
+            CssModulesKind::None,
+            |bool| {
+                if bool.value() {
+                    CssModulesKind::Classic
+                } else {
+                    CssModulesKind::None
+                }
+            },
+        ),
         grit_metavariables: false,
         tailwind_directives: settings
             .as_ref()

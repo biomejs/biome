@@ -69,7 +69,7 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if p.options().is_css_modules_disabled() {
+    if CssSyntaxFeatures::CssModules.is_unsupported(p) {
         // `composes` is not a standard CSS feature.
         // Provide a hint on how to enable parsing of the `composes` declaration.
         p.error(composes_not_allowed(p, p.cur_range()));
