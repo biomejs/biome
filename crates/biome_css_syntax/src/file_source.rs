@@ -10,8 +10,28 @@ pub enum EmbeddingKind {
     /// styled-components or Emotion embedded CSS
     Styled,
 
+    /// The CSS is embedded inside HTML-like files
+    Html(EmbeddingHtmlKind),
+
     #[default]
     None,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum EmbeddingHtmlKind {
+    #[default]
+    None,
+    /// `.html` files
+    Html,
+    /// `.vue` files
+    Vue,
+    /// `.astro` files
+    Astro,
+    /// `.svelte` files
+    Svelte,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -62,6 +82,13 @@ impl CssFileSource {
         }
     }
 
+    pub fn new_css_modules() -> Self {
+        Self {
+            variant: CssVariant::CssModules,
+            embedding_kind: EmbeddingKind::None,
+        }
+    }
+
     pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
         self.embedding_kind = kind;
         self
@@ -71,12 +98,6 @@ impl CssFileSource {
         &self.embedding_kind
     }
 
-    pub fn new_css_modules() -> Self {
-        Self {
-            variant: CssVariant::CssModules,
-        }
-    }
-
     pub fn with_css_modules(mut self) -> Self {
         self.variant = CssVariant::CssModules;
         self
@@ -84,6 +105,13 @@ impl CssFileSource {
 
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
+    }
+
+    pub fn is_vue_embedded(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Html(EmbeddingHtmlKind::Vue)
+        )
     }
 
     pub fn is_tailwind_css(&self) -> bool {

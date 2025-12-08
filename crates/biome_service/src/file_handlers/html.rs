@@ -581,6 +581,8 @@ pub(crate) fn parse_embedded_style(
             let mut options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
             if html_file_source.is_vue() {
                 options.css_modules = CssModulesKind::Vue
+            } else if !html_file_source.is_html() {
+                options.css_modules = CssModulesKind::Classic
             }
             let content = child.value_token().ok()?;
             let parse = parse_css_with_offset_and_cache(

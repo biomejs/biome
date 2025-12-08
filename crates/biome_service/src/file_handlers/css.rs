@@ -154,7 +154,7 @@ impl ServiceLanguage for CssLanguage {
         overrides: &OverrideSettings,
         language: &Self::ParserSettings,
         path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
@@ -163,13 +163,23 @@ impl ServiceLanguage for CssLanguage {
                 .into(),
             css_modules: language
                 .css_modules_enabled
-                .map_or(CssModulesKind::None, |bool| {
+                .map(|bool| {
                     if bool.value() {
                         CssModulesKind::Classic
                     } else {
                         CssModulesKind::None
                     }
-                }),
+                })
+                .or_else(|| {
+                    file_source.to_css_file_source().map(|files_source| {
+                        if files_source.is_vue_embedded() {
+                            CssModulesKind::Vue
+                        } else {
+                            CssModulesKind::Classic
+                        }
+                    })
+                })
+                .unwrap_or_default(),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives_enabled(),
         };
@@ -244,15 +254,7 @@ impl ServiceLanguage for CssLanguage {
 
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules(global, file_path.as_path()))
-            .with_preferred_quote(preferred_quote)
-            .with_css_modules(
-                global
-                    .languages
-                    .css
-                    .parser
-                    .css_modules_enabled
-                    .is_some_and(|css_modules_enabled| css_modules_enabled.into()),
-            );
+            .with_preferred_quote(preferred_quote);
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())
@@ -419,16 +421,19 @@ fn parse(
             .allow_wrong_line_comments
             .unwrap_or_default()
             .into(),
-        css_modules: settings.as_ref().languages.css.parser.css_modules_enabled.map_or(
-            CssModulesKind::None,
-            |bool| {
+        css_modules: settings
+            .as_ref()
+            .languages
+            .css
+            .parser
+            .css_modules_enabled
+            .map_or(CssModulesKind::None, |bool| {
                 if bool.value() {
                     CssModulesKind::Classic
                 } else {
                     CssModulesKind::None
                 }
-            },
-        ),
+            }),
         grit_metavariables: false,
         tailwind_directives: settings
             .as_ref()

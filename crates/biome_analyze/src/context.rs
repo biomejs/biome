@@ -22,7 +22,6 @@ pub struct RuleContext<'a, R: Rule> {
     jsx_runtime: Option<JsxRuntime>,
     jsx_factory: Option<&'a str>,
     jsx_fragment_factory: Option<&'a str>,
-    css_modules: bool,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -43,7 +42,6 @@ where
         jsx_runtime: Option<JsxRuntime>,
         jsx_factory: Option<&'a str>,
         jsx_fragment_factory: Option<&'a str>,
-        css_modules: bool,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -59,8 +57,7 @@ where
             preferred_indentation,
             jsx_runtime,
             jsx_factory,
-            jsx_fragment_factory,
-            css_modules,
+            jsx_fragment_factory
         })
     }
 
@@ -201,10 +198,6 @@ where
     /// Returns the preferred indentation style that should be when providing code actions.
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.preferred_indentation
-    }
-
-    pub fn is_css_modules(&self) -> bool {
-        self.css_modules
     }
 
     /// Attempts to retrieve a service from the current context
