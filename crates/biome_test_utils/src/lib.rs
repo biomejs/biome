@@ -17,7 +17,7 @@ use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
-use biome_package::{Dependencies, Manifest, PackageJson, TsConfigJson, TurboJson};
+use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::WorkspaceError;
@@ -331,7 +331,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-fn find_pnpm_workspace_catalog(input_file: &Utf8Path) -> Option<Dependencies> {
+fn find_pnpm_workspace_catalog(input_file: &Utf8Path) -> Option<Catalogs> {
     for dir in input_file.ancestors() {
         let workspace_file = dir.join("pnpm-workspace.yaml");
 

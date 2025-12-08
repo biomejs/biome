@@ -11,6 +11,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_json_value::JsonValue;
 use biome_text_size::TextRange;
 use camino::Utf8Path;
+use rustc_hash::FxHashMap;
 use std::{ops::Deref, str::FromStr};
 
 /// Deserialized `package.json`.
@@ -33,7 +34,7 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub catalog: Option<Dependencies>,
+    pub catalog: Option<Catalogs>,
     pub license: Option<(Box<str>, TextRange)>,
 
     pub author: Option<Box<str>>,
@@ -108,21 +109,18 @@ impl PackageJson {
         false
     }
 
-    /// Extract the `catalog` entries from a pnpm workspace file.
-    ///
-    /// This parser is intentionally minimal and only supports the shape:
-    ///
-    /// ```yaml
-    /// catalog:
-    ///   react: 19.0.0
-    /// ```
-    ///
-    /// Extra keys or comments are ignored. Returns `None` when no catalog is
-    /// found or no entries are present.
-    pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Dependencies> {
-        let mut in_catalog = false;
-        let mut catalog_indent = 0usize;
-        let mut entries: Vec<(Box<str>, Box<str>)> = Vec::new();
+    /// Extract catalog entries from a pnpm workspace file, supporting both the
+    /// default `catalog:` and named catalogs under `catalogs:`.
+    pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Catalogs> {
+        let mut catalogs = Catalogs::default();
+
+        let mut in_default = false;
+        let mut default_indent = 0usize;
+        let mut default_entries: Vec<(Box<str>, Box<str>)> = Vec::new();
+
+        let mut catalogs_indent = None;
+        let mut current_catalog: Option<(Box<str>, Vec<(Box<str>, Box<str>)>)> = None;
+        let mut current_catalog_indent = 0usize;
 
         for line in source.lines() {
             let trimmed_start = line.trim_start();
@@ -133,47 +131,129 @@ impl PackageJson {
 
             let indent = line.len() - trimmed_start.len();
 
-            if !in_catalog {
+            if !in_default && catalogs_indent.is_none() {
                 if trimmed_start.starts_with("catalog:") {
-                    in_catalog = true;
-                    catalog_indent = indent;
+                    in_default = true;
+                    default_indent = indent;
+                    continue;
+                }
+
+                if trimmed_start.starts_with("catalogs:") {
+                    catalogs_indent = Some(indent);
+                    continue;
+                }
+            }
+
+            if in_default {
+                if indent <= default_indent {
+                    in_default = false;
+                } else if let Some(entry) = parse_entry(trimmed_start) {
+                    default_entries.push(entry);
                 }
                 continue;
             }
 
-            // Stop if we reached another top-level key.
-            if indent <= catalog_indent {
-                break;
-            }
-
-            if let Some((raw_key, raw_value)) = trimmed_start.split_once(':') {
-                let key = raw_key.trim().trim_matches(['\'', '"']);
-                let mut value = raw_value.trim();
-
-                if value.starts_with('"') && value.ends_with('"') && value.len() >= 2 {
-                    value = &value[1..value.len() - 1];
-                } else if value.starts_with('\'') && value.ends_with('\'') && value.len() >= 2 {
-                    value = &value[1..value.len() - 1];
+            if let Some(cat_indent) = catalogs_indent {
+                if indent <= cat_indent {
+                    if let Some((name, entries)) = current_catalog.take() {
+                        catalogs
+                            .named
+                            .insert(name, Dependencies(entries.into_boxed_slice()));
+                    }
+                    continue;
                 }
 
-                if !key.is_empty() && !value.is_empty() {
-                    entries.push((key.into(), value.into()));
+                if let Some((name, entries)) = &mut current_catalog {
+                    if indent <= current_catalog_indent {
+                        let entries = std::mem::take(entries);
+                        catalogs
+                            .named
+                            .insert(name.clone(), Dependencies(entries.into_boxed_slice()));
+                        current_catalog = None;
+                    }
+                }
+
+                if current_catalog.is_none() {
+                    if let Some((raw_name, _)) = trimmed_start.split_once(':') {
+                        let name = raw_name.trim().trim_matches(['\'', '"']);
+                        if !name.is_empty() {
+                            current_catalog = Some((name.into(), Vec::new()));
+                            current_catalog_indent = indent;
+                        }
+                    }
+                    continue;
+                }
+
+                if let Some((_, entries)) = &mut current_catalog {
+                    if indent > current_catalog_indent {
+                        if let Some(entry) = parse_entry(trimmed_start) {
+                            entries.push(entry);
+                        }
+                    }
                 }
             }
         }
 
-        if entries.is_empty() {
+        if let Some((name, entries)) = current_catalog.take() {
+            catalogs
+                .named
+                .insert(name, Dependencies(entries.into_boxed_slice()));
+        }
+
+        if !default_entries.is_empty() {
+            catalogs.default = Some(Dependencies(default_entries.into_boxed_slice()));
+        }
+
+        if catalogs.is_empty() {
             None
         } else {
-            Some(Dependencies(entries.into_boxed_slice()))
+            Some(catalogs)
         }
     }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Catalogs {
+    pub default: Option<Dependencies>,
+    pub named: FxHashMap<Box<str>, Dependencies>,
+}
+
+impl Catalogs {
+    fn is_empty(&self) -> bool {
+        self.default.is_none() && self.named.is_empty()
+    }
+
+    fn lookup<'a>(&'a self, specifier: &str, catalog_name: Option<&str>) -> Option<&'a str> {
+        if let Some(name) = catalog_name {
+            return self.named.get(name).and_then(|deps| deps.get(specifier));
+        }
+
+        self.default.as_ref().and_then(|deps| deps.get(specifier))
+    }
+}
+
+fn parse_entry(value: &str) -> Option<(Box<str>, Box<str>)> {
+    let (raw_key, raw_value) = value.split_once(':')?;
+    let key = raw_key.trim().trim_matches(['\'', '"']);
+    let mut val = raw_value.trim();
+
+    if val.starts_with('"') && val.ends_with('"') && val.len() >= 2 {
+        val = &val[1..val.len() - 1];
+    } else if val.starts_with('\'') && val.ends_with('\'') && val.len() >= 2 {
+        val = &val[1..val.len() - 1];
+    }
+
+    if key.is_empty() || val.is_empty() {
+        return None;
+    }
+
+    Some((key.into(), val.into()))
 }
 
 fn dependency_satisfies(
     specifier: &str,
     version: &str,
-    catalog: Option<&Dependencies>,
+    catalog: Option<&Catalogs>,
     range: &str,
 ) -> bool {
     let resolved_version = resolve_dependency_version(specifier, version, catalog);
@@ -184,18 +264,18 @@ fn dependency_satisfies(
 fn resolve_dependency_version<'a>(
     specifier: &str,
     version: &'a str,
-    catalog: Option<&'a Dependencies>,
+    catalog: Option<&'a Catalogs>,
 ) -> &'a str {
-    if let Some(catalog) = catalog
-        && let Some(catalog_specifier) = version.strip_prefix("catalog:")
+    if let Some(catalogs) = catalog
+        && let Some(rest) = version.strip_prefix("catalog:")
     {
-        let catalog_key = if catalog_specifier.is_empty() {
-            specifier
+        let (catalog_name, package_name) = if rest.is_empty() {
+            (None, specifier)
         } else {
-            catalog_specifier
+            (Some(rest), specifier)
         };
 
-        if let Some(mapped_version) = catalog.get(catalog_key) {
+        if let Some(mapped_version) = catalogs.lookup(package_name, catalog_name) {
             return mapped_version;
         }
     }
@@ -504,7 +584,27 @@ mod tests {
     fn matches_dependency_with_pnpm_catalog() {
         let package_json = PackageJson {
             dependencies: Dependencies(Box::new([("react".into(), "catalog:".into())])),
-            catalog: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+            catalog: Some(Catalogs {
+                default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+                named: FxHashMap::default(),
+            }),
+            ..Default::default()
+        };
+
+        assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn matches_dependency_with_named_pnpm_catalog() {
+        let package_json = PackageJson {
+            dependencies: Dependencies(Box::new([("react".into(), "catalog:react19".into())])),
+            catalog: Some(Catalogs {
+                default: None,
+                named: FxHashMap::from_iter([(
+                    "react19".into(),
+                    Dependencies(Box::new([("react".into(), "19.0.0".into())])),
+                )]),
+            }),
             ..Default::default()
         };
 
@@ -524,7 +624,27 @@ catalog:
         let catalog =
             PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
 
-        assert_eq!(catalog.get("react"), Some("19.0.0"));
-        assert_eq!(catalog.get("react-dom"), Some("^19.0.0"));
+        let default = catalog.default.expect("default catalog");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+        assert_eq!(default.get("react-dom"), Some("^19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_named() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalogs:
+  react19:
+    react: 19.0.0
+    "react-dom": "^19.0.0"
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        let named = catalog.named.get("react19").expect("react19 catalog");
+        assert_eq!(named.get("react"), Some("19.0.0"));
+        assert_eq!(named.get("react-dom"), Some("^19.0.0"));
     }
 }
