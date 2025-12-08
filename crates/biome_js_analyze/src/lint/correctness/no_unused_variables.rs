@@ -114,13 +114,13 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic,use_options
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...other } = car;
-    /// console.log(brand);
+    /// console.log(other);
     /// ```
     ///
     /// ```js,use_options
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand: _, ...other } = car;
-    /// console.log(brand);
+    /// console.log(other);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
