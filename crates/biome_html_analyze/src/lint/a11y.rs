@@ -6,8 +6,9 @@ use biome_analyze::declare_lint_group;
 pub mod no_access_key;
 pub mod no_distracting_elements;
 pub mod no_header_scope;
+pub mod use_aria_props_for_role;
 pub mod use_button_type;
 pub mod use_html_lang;
 pub mod use_iframe_title;
 pub mod use_valid_aria_role;
-declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_distracting_elements :: NoDistractingElements , self :: no_header_scope :: NoHeaderScope , self :: use_button_type :: UseButtonType , self :: use_html_lang :: UseHtmlLang , self :: use_iframe_title :: UseIframeTitle , self :: use_valid_aria_role :: UseValidAriaRole ,] } }
+declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_access_key :: NoAccessKey , self :: no_distracting_elements :: NoDistractingElements , self :: no_header_scope :: NoHeaderScope , self :: use_aria_props_for_role :: UseAriaPropsForRole , self :: use_button_type :: UseButtonType , self :: use_html_lang :: UseHtmlLang , self :: use_iframe_title :: UseIframeTitle , self :: use_valid_aria_role :: UseValidAriaRole ,] } }
