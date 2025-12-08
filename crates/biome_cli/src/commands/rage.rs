@@ -22,11 +22,13 @@ use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
 
 /// Handler for the `rage` command
+#[expect(clippy::fn_params_excessive_bools)]
 pub(crate) fn rage(
     session: CliSession,
     daemon_logs: bool,
     formatter: bool,
     linter: bool,
+    files: bool,
 ) -> Result<(), CliDiagnostic> {
     let terminal_supports_colors = termcolor::BufferWriter::stdout(ColorChoice::Auto)
         .buffer()
@@ -49,7 +51,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter, files }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -196,6 +198,7 @@ struct RageConfiguration<'a> {
     fs: &'a dyn FsWithResolverProxy,
     formatter: bool,
     linter: bool,
+    files: bool,
 }
 
 impl Display for RageConfiguration<'_> {
@@ -360,6 +363,21 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
                             {RageConfigurationLintRules("Enabled rules", linter_configuration)}
+                        ).fmt(fmt)?;
+                    }
+
+                    if self.files {
+                        let files_configuration = configuration.get_files_configuration();
+                        let includes = files_configuration.includes.as_ref().map(|list| {
+                            list.iter()
+                                .map(|glob| glob.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        });
+                        markup! (
+                            {Section("Files")}
+                            {KeyValuePair("Ignore hidden", markup!({DisplayOption(files_configuration.ignore_unknown)}))}
+                            {KeyValuePair("Includes", markup!({DisplayOption(includes)}))}
                         ).fmt(fmt)?;
                     }
                 }
