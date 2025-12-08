@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 151
+expression: catalog.js
+---
+# Input
+```js
+/* should generate diagnostics with pnpm named catalog */
+
+import { forwardRef } from "react";
+
+const Component = forwardRef((props, ref) => {
+	return <div ref={ref} {...props} />;
+});
+
+```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
+# Diagnostics
+```
+catalog.js:5:19 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use of forwardRef is detected, which is deprecated.
+  
+    3 │ import { forwardRef } from "react";
+    4 │ 
+  > 5 │ const Component = forwardRef((props, ref) => {
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ 	return <div ref={ref} {...props} />;
+  > 7 │ });
+      │ ^^
+    8 │ 
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Replace the use of forwardRef with passing ref as a prop.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+    3 3 │   import { forwardRef } from "react";
+    4 4 │   
+    5   │ - const·Component·=·forwardRef((props,·ref)·=>·{
+      5 │ + const·Component·=·({·ref,·...props·})·=>·{
+    6 6 │   	return <div ref={ref} {...props} />;
+    7   │ - });
+      7 │ + };
+    8 8 │   
+  
+
+```
