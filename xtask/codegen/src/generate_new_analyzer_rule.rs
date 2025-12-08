@@ -543,12 +543,12 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
     } else {
         rule_kind
     };
-    let valid_contents = if matches!(kind, LanguageKind::HtmlVue) {
+    let valid_contents = if matches!(kind, LanguageKind::HtmlVue | LanguageKind::Html) {
         "<!-- should not generate diagnostics -->\n<div>ok</div>"
     } else {
         "/* should not generate diagnostics */\n// var a = 1;"
     };
-    let invalid_contents = if matches!(kind, LanguageKind::HtmlVue) {
+    let invalid_contents = if matches!(kind, LanguageKind::HtmlVue | LanguageKind::Html) {
         "<!-- should generate diagnostics -->\n<div></div>"
     } else {
         "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;"
