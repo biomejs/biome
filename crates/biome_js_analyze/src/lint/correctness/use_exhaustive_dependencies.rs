@@ -26,14 +26,16 @@ use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Enforce all dependencies are correctly specified in a React hook.
+    /// Enforce correct dependency usage within React hooks.
     ///
     /// React components have access to various [hooks](https://react.dev/reference/react/hooks) that can perform
     /// various actions like querying and updating state.
-    /// However, incorrectly specifying dependencies for a hook can lead to "stale closures" where old versions of state variables 
-    /// are used for subsequent page renders.
     /// 
-    /// This rule attempts to prevent such issues by diagnosing potentially incorrect usages of hook dependencies.
+    /// Notably, React is **unable** to capture changes to variables not included inside a hook's dependency array, resulting in
+    /// any such references being "locked" to their initial values even if updated later.
+    /// Such "stale closures" are a common pitfall among React developers.
+    /// 
+    /// This rule attempts to prevent such issues by diagnosing potentially incorrect or invalid usages of hook dependencies.
     /// 
     /// By default, the rule will inspect the following built-in React hooks (as well as their Preact counterparts):
     ///
@@ -67,14 +69,26 @@ declare_lint_rule! {
     ///   }, []);
     /// }
     /// ```
+    /// 
+    /// ```js,expect_diagnostic
+    /// import { useEffect } from "react";
+    ///
+    /// function badComponent() {
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, "not an array");
+    /// }
+    /// ```
+    ///
     ///
     /// ```js,expect_diagnostic
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let b = 1;
+    ///     let unused = 1;
     ///     useEffect(() => {
-    ///     }, [b]);
+    ///     }, [unused]);
     /// }
     /// ```
     ///
@@ -85,7 +99,7 @@ declare_lint_rule! {
     ///   const [name, setName] = useState();
     ///   useEffect(() => {
     ///     console.log(name);
-    ///     setName("");
+    ///     setName("shouldn't need to be here");
     ///   }, [name, setName]);
     /// }
     /// ```
@@ -121,6 +135,7 @@ declare_lint_rule! {
     /// function component() {
     ///   const a = 1;
     ///   useEffect(() => {
+    ///     // a is const here, so there is no mutable state to change 
     ///     console.log(a);
     ///   });
     /// }
@@ -199,8 +214,8 @@ declare_lint_rule! {
     /// {
     ///   "options": {
     ///     "hooks": [
-    ///       { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
-    ///       { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0}
+    ///       { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1 },
+    ///       { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
     ///     ]
     ///   }
     /// }
@@ -251,7 +266,7 @@ declare_lint_rule! {
     ///
     /// ```js,use_options
     /// const dispatch = useDispatch();
-    /// // No need to list `dispatch` as dependency if it doesn't change
+    /// // No need to list `dispatch` as dependency since it doesn't change
     /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
     /// 
@@ -274,7 +289,7 @@ declare_lint_rule! {
     /// ```jsx,use_options
     /// function Foo() {
     ///   let stateVar = 1;
-    ///   // not used but still OK
+    ///   // not used but still OK due to disabled rule
     ///   useEffect(() => {}, [stateVar]);
     /// }
     /// ```
@@ -297,7 +312,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,use_options,expect_diagnostic
-    /// function Foo() {
+    /// function NoArrayYesProblem() {
     ///   let stateVar = 1;
     ///   useEffect(() => {});
     /// }
@@ -919,7 +934,7 @@ impl Rule for UseExhaustiveDependencies {
             } => Some(RuleDiagnostic::new(
                 rule_category!(),
                 function_name_range,
-                markup! {"This hook does not have a dependencies array"},
+                markup! {"This hook does not have a dependencies array."},
             )),
             Fix::NonLiteralDependenciesArray { expr } => Some(
                 RuleDiagnostic::new(
@@ -940,7 +955,11 @@ impl Rule for UseExhaustiveDependencies {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {"This hook does not specify its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."},
+                    markup! {
+                        "This hook "<Emphasis>"does not specify"</Emphasis>" its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."
+                        "\nReact is unable to capture changes to variables not included inside hook dependencies, resulting in"<Emphasis>"outdated references"</Emphasis>"
+                        "\nthat can produce unexpected results."
+                    },
                 );
 
                 for range in captures_range {
@@ -1024,7 +1043,7 @@ impl Rule for UseExhaustiveDependencies {
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies a dependency more specific that its captures: "{dependency_text.as_ref()}""
+                        "This hook specifies a dependency more specific than its captures: "{dependency_text.as_ref()}""
                     },
                 )
                 .detail(capture_range, "This capture is more generic than...")
