@@ -132,6 +132,7 @@ CssSubSelectorList = AnyCssSubSelector*
 AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
+	| ScssParentSelector
 
 AnyCssSubSelector =
 	CssIdSelector
@@ -140,6 +141,7 @@ AnyCssSubSelector =
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
 	| CssBogusSubSelector
+	| ScssPlaceholderSelector
 
 // * {}
 // ^
@@ -524,6 +526,8 @@ CssDeclarationList = AnyCssDeclaration*
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
 	| CssEmptyDeclaration
+	| ScssVariableDeclaration
+	| ScssNestedPropertiesDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -603,6 +607,7 @@ CssGenericComponentValueList = AnyCssGenericComponentValue*
 AnyCssGenericComponentValue =
 	AnyCssValue
 	| CssGenericDelimiter
+	| ScssInterpolation
 
 // div {
 //	--bs-btn-focus-shadow-rgb: 33, 37, 41;
@@ -663,6 +668,22 @@ AnyCssAtRule =
 	| TwConfigAtRule
 	| TwPluginAtRule
 	| TwSlotAtRule
+	// Scss at rules
+	| ScssExtendAtRule
+	| ScssMixinAtRule
+	| ScssIncludeAtRule
+	| ScssFunctionAtRule
+	| ScssIfAtRule
+	| ScssEachAtRule
+	| ScssForAtRule
+	| ScssWhileAtRule
+	| ScssUseAtRule
+	| ScssForwardAtRule
+	| ScssAtRootAtRule
+	| ScssDebugAtRule
+	| ScssWarnAtRule
+	| ScssErrorAtRule
+
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
@@ -1755,6 +1776,10 @@ AnyCssValue =
 	| CssUnicodeRange
 	| CssMetavariable
 	| TwValueThemeReference
+	| ScssVariable
+	| ScssInterpolation
+	| ScssMap
+	| ScssList
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1997,6 +2022,7 @@ CssBracketedValueList = AnyCssCustomIdentifier*
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
 	| CssBogusCustomIdentifier
+	| ScssInterpolation
 
 // https://drafts.csswg.org/css-fonts/#unicode-range-desc
 // https://www.w3.org/TR/css-syntax-3/#typedef-urange
@@ -2168,3 +2194,296 @@ TwPluginAtRule =
 TwSlotAtRule =
 	'slot'
 	';'
+
+
+// Scss
+
+// Scss nested properties
+// .foo {
+//   font: {
+//     family: fantasy;
+//     size: 30em;
+//     weight: bold;
+//   }
+// }
+ScssNestedPropertiesDeclaration =
+	property: CssIdentifier
+	':'
+	block: ScssNestedPropertiesBlock
+
+ScssNestedPropertiesBlock =
+	'{'
+	declarations: CssDeclarationList
+	'}'
+
+// Scss parent selector reference
+// .foo {
+//   &:hover { }
+//   &-bar { }
+//   .bar & { }
+// }
+ScssParentSelector = '&'
+
+// Scss placeholder selector
+// %foo { }
+ScssPlaceholderSelector =
+	'%'
+	name: CssCustomIdentifier
+
+// Scss @extend directive
+// @extend .foo;
+// @extend %placeholder;
+// @extend .foo !optional;
+ScssExtendAtRule =
+	'extend'
+	selector: AnyCssSelector
+	optional: ScssOptionalFlag?
+	';'
+
+ScssOptionalFlag = '!' 'optional'
+
+// Scss @mixin directive
+// @mixin foo { }
+// @mixin foo($arg) { }
+// @mixin foo($arg: value) { }
+ScssMixinAtRule =
+	'mixin'
+	name: CssIdentifier
+	parameters: ScssMixinParameterList?
+	block: AnyCssDeclarationOrRuleBlock
+
+ScssMixinParameterList =
+	'('
+	parameters: (ScssMixinParameter (',' ScssMixinParameter)* ','?)?
+	')'
+
+ScssMixinParameter =
+	name: ScssVariable
+	default: ScssMixinParameterDefault?
+
+ScssMixinParameterDefault =
+	':'
+	value: AnyCssGenericComponentValue
+
+// Scss @include directive
+// @include foo;
+// @include foo($arg);
+// @include foo { }
+ScssIncludeAtRule =
+	'include'
+	name: CssIdentifier
+	arguments: ScssIncludeArgumentList?
+	block: AnyCssDeclarationOrRuleBlock?
+	';'?
+
+ScssIncludeArgumentList =
+	'('
+	arguments: (AnyCssGenericComponentValue (',' AnyCssGenericComponentValue)* ','?)?
+	')'
+
+// Scss @function directive
+// @function foo($arg) { @return $arg * 2; }
+ScssFunctionAtRule =
+	'function'
+	name: CssIdentifier
+	parameters: ScssMixinParameterList?
+	block: ScssFunctionBlock
+
+ScssFunctionBlock =
+	'{'
+	statements: ScssFunctionStatementList
+	'}'
+
+ScssFunctionStatementList = AnyScssFunctionStatement*
+
+AnyScssFunctionStatement =
+	ScssReturnStatement
+	| CssDeclarationWithSemicolon
+	| AnyCssRule
+
+// Scss @return directive
+// @return $value;
+ScssReturnStatement =
+	'return'
+	value: AnyCssGenericComponentValue
+	';'
+
+// Scss @if directive
+// @if $condition { }
+// @if $condition { } @else { }
+// @if $condition { } @else if $other { } @else { }
+ScssIfAtRule =
+	'if'
+	condition: AnyCssGenericComponentValue
+	block: AnyCssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+ScssElseClause =
+	'else'
+	if_clause: ScssElseIfClause?
+
+ScssElseIfClause =
+	if_rule: ScssIfAtRule
+	| else_block: AnyCssDeclarationOrRuleBlock
+
+// Scss @each directive
+// @each $item in $list { }
+// @each $key, $value in $map { }
+ScssEachAtRule =
+	'each'
+	variables: ScssEachVariableList
+	'in'
+	expression: AnyCssGenericComponentValue
+	block: AnyCssDeclarationOrRuleBlock
+
+ScssEachVariableList = ScssVariable (',' ScssVariable)*
+
+// Scss @for directive
+// @for $i from 1 through 10 { }
+// @for $i from 1 to 10 { }
+ScssForAtRule =
+	'for'
+	variable: ScssVariable
+	'from'
+	start: AnyCssGenericComponentValue
+	through: ('through' | 'to')
+	end: AnyCssGenericComponentValue
+	block: AnyCssDeclarationOrRuleBlock
+
+// Scss @while directive
+// @while $i > 0 { }
+ScssWhileAtRule =
+	'while'
+	condition: AnyCssGenericComponentValue
+	block: AnyCssDeclarationOrRuleBlock
+
+// Scss @use directive
+// @use "foo";
+// @use "foo" as bar;
+// @use "foo" as *;
+// @use "foo" with ($var: value);
+ScssUseAtRule =
+	'use'
+	path: CssString
+	alias: ScssUseAlias?
+	with: ScssUseWith?
+	';'
+
+ScssUseAlias =
+	'as'
+	name: (CssIdentifier | '*')
+
+ScssUseWith =
+	'with'
+	'('
+	configuration: (ScssMixinParameter (',' ScssMixinParameter)* ','?)?
+	')'
+
+// Scss @forward directive
+// @forward "foo";
+// @forward "foo" as bar-*;
+// @forward "foo" hide $var;
+// @forward "foo" show $var;
+ScssForwardAtRule =
+	'forward'
+	path: CssString
+	prefix: ScssForwardPrefix?
+	visibility: ScssForwardVisibility?
+	';'
+
+ScssForwardPrefix =
+	'as'
+	prefix: CssIdentifier
+	'-'
+	'*'
+
+ScssForwardVisibility =
+	visibility: ('hide' | 'show')
+	members: ScssForwardMemberList
+
+ScssForwardMemberList = (ScssVariable | CssIdentifier) (',' (ScssVariable | CssIdentifier))*
+
+// Scss @at-root directive
+// @at-root .foo { }
+// @at-root (with: rule) { .foo { } }
+// @at-root (without: media) { .foo { } }
+ScssAtRootAtRule =
+	'at-root'
+	selector: AnyCssSelector?
+	query: ScssAtRootQuery?
+	block: AnyCssDeclarationOrRuleBlock
+
+ScssAtRootQuery =
+	'('
+	type: ('with' | 'without')
+	':'
+	queries: ScssAtRootQueryList
+	')'
+
+ScssAtRootQueryList = CssIdentifier (',' CssIdentifier)*
+
+// Scss @debug, @warn, @error directives
+// @debug $value;
+// @warn "message";
+// @error "error message";
+ScssDebugAtRule =
+	'debug'
+	value: AnyCssGenericComponentValue
+	';'
+
+ScssWarnAtRule =
+	'warn'
+	value: AnyCssGenericComponentValue
+	';'
+
+ScssErrorAtRule =
+	'error'
+	value: AnyCssGenericComponentValue
+	';'
+
+// Scss variables
+// $var: value;
+// $var: value !default;
+// $var: value !global;
+ScssVariableDeclaration =
+	name: ScssVariable
+	':'
+	value: CssGenericComponentValueList
+	flags: ScssVariableFlags?
+	';'?
+
+ScssVariable = value: 'scss_variable'
+
+ScssVariableFlags = ScssVariableFlag+
+
+ScssVariableFlag =
+	'!'
+	flag: ('default' | 'global')
+
+// Scss interpolation
+// .foo-#{$bar} { }
+// content: "#{$var}";
+ScssInterpolation =
+	'#'
+	'{'
+	expression: AnyCssGenericComponentValue
+	'}'
+
+// Scss map
+// $map: (key: value, key2: value2);
+ScssMap =
+	'('
+	entries: ScssMapEntryList?
+	')'
+
+ScssMapEntryList = ScssMapEntry (',' ScssMapEntry)* ','?
+
+ScssMapEntry =
+	key: AnyCssGenericComponentValue
+	':'
+	value: AnyCssGenericComponentValue
+
+// Scss list
+// $list: (item1, item2, item3);
+// $list: item1 item2 item3;
+ScssList = AnyCssGenericComponentValue ((',' | ' ') AnyCssGenericComponentValue)*
