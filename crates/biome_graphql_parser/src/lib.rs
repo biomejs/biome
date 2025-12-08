@@ -165,7 +165,7 @@ pub fn parse_graphql_with_offset_and_cache(
     GraphqlOffsetParse::new(offset_node, parse_diagnostics)
 }
 
-/// A utility struct for managing the result of an offset-aware CSS parser job
+/// A utility struct for managing the result of an offset-aware GraphQL parser job
 #[derive(Clone, Debug)]
 pub struct GraphqlOffsetParse {
     root: SyntaxNodeWithOffset<GraphqlLanguage>,
