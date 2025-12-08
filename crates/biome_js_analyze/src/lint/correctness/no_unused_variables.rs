@@ -101,7 +101,7 @@ declare_lint_rule! {
     /// Default: `false`
     ///
     /// #### Example
-    /// 
+    ///
     /// ```json,options
     /// {
     ///   "options": {
