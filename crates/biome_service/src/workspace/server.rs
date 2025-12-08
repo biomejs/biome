@@ -1400,9 +1400,17 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        if settings.is_assist_enabled() || settings.is_assist_enabled() {
+            if document_source.is_css_like() {
+                services = CssDocumentServices::default()
+                    .with_css_semantic_model(&parsed.any_parse.tree())
+                    .into();
+            }
+        }
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
