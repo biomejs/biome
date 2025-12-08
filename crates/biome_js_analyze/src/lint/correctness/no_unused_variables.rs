@@ -95,21 +95,24 @@ declare_lint_rule! {
     ///
     /// ### `ignoreRestSiblings`
     ///
-    /// Whether to ignore unused variables from an object destructuring with a spread (i.e.: `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+    /// Whether to ignore unused variables from an object destructuring spread pattern
+    /// (such as `const { a, b, ...rest } = obj`.
     ///
-    /// Defaults to `true`.
+    /// Default: `false`
     ///
+    /// #### Example
+    /// 
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "ignoreRestSiblings": false
+    ///     "ignoreRestSiblings": true
     ///   }
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,use_options
     /// const { brand, ...other } = car;
-    /// console.log(brand);
+    /// console.log(other);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
