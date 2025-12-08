@@ -33,6 +33,7 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
+    pub catalog: Option<Dependencies>,
     pub license: Option<(Box<str>, TextRange)>,
 
     pub author: Option<Box<str>>,
@@ -93,7 +94,12 @@ impl PackageJson {
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
             if dependency_name.as_ref() == specifier
-                && Version::from(dependency_version.as_ref()).satisfies(range)
+                && dependency_satisfies(
+                    specifier,
+                    dependency_version.as_ref(),
+                    self.catalog.as_ref(),
+                    range,
+                )
             {
                 return true;
             }
@@ -101,6 +107,100 @@ impl PackageJson {
 
         false
     }
+
+    /// Extract the `catalog` entries from a pnpm workspace file.
+    ///
+    /// This parser is intentionally minimal and only supports the shape:
+    ///
+    /// ```yaml
+    /// catalog:
+    ///   react: 19.0.0
+    /// ```
+    ///
+    /// Extra keys or comments are ignored. Returns `None` when no catalog is
+    /// found or no entries are present.
+    pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Dependencies> {
+        let mut in_catalog = false;
+        let mut catalog_indent = 0usize;
+        let mut entries: Vec<(Box<str>, Box<str>)> = Vec::new();
+
+        for line in source.lines() {
+            let trimmed_start = line.trim_start();
+
+            if trimmed_start.is_empty() || trimmed_start.starts_with('#') {
+                continue;
+            }
+
+            let indent = line.len() - trimmed_start.len();
+
+            if !in_catalog {
+                if trimmed_start.starts_with("catalog:") {
+                    in_catalog = true;
+                    catalog_indent = indent;
+                }
+                continue;
+            }
+
+            // Stop if we reached another top-level key.
+            if indent <= catalog_indent {
+                break;
+            }
+
+            if let Some((raw_key, raw_value)) = trimmed_start.split_once(':') {
+                let key = raw_key.trim().trim_matches(['\'', '"']);
+                let mut value = raw_value.trim();
+
+                if value.starts_with('"') && value.ends_with('"') && value.len() >= 2 {
+                    value = &value[1..value.len() - 1];
+                } else if value.starts_with('\'') && value.ends_with('\'') && value.len() >= 2 {
+                    value = &value[1..value.len() - 1];
+                }
+
+                if !key.is_empty() && !value.is_empty() {
+                    entries.push((key.into(), value.into()));
+                }
+            }
+        }
+
+        if entries.is_empty() {
+            None
+        } else {
+            Some(Dependencies(entries.into_boxed_slice()))
+        }
+    }
+}
+
+fn dependency_satisfies(
+    specifier: &str,
+    version: &str,
+    catalog: Option<&Dependencies>,
+    range: &str,
+) -> bool {
+    let resolved_version = resolve_dependency_version(specifier, version, catalog);
+
+    Version::from(resolved_version).satisfies(range)
+}
+
+fn resolve_dependency_version<'a>(
+    specifier: &str,
+    version: &'a str,
+    catalog: Option<&'a Dependencies>,
+) -> &'a str {
+    if let Some(catalog) = catalog
+        && let Some(catalog_specifier) = version.strip_prefix("catalog:")
+    {
+        let catalog_key = if catalog_specifier.is_empty() {
+            specifier
+        } else {
+            catalog_specifier
+        };
+
+        if let Some(mapped_version) = catalog.get(catalog_key) {
+            return mapped_version;
+        }
+    }
+
+    version
 }
 
 impl Manifest for PackageJson {
@@ -188,6 +288,13 @@ impl Deref for Dependencies {
 impl Dependencies {
     pub fn contains(&self, specifier: &str) -> bool {
         self.0.iter().any(|(k, _)| k.as_ref() == specifier)
+    }
+
+    pub fn get(&self, specifier: &str) -> Option<&str> {
+        self.0
+            .iter()
+            .find(|(k, _)| k.as_ref() == specifier)
+            .map(|(_, v)| v.as_ref())
     }
 }
 
@@ -391,5 +498,33 @@ mod tests {
         let result = parse_range("~0.x.0");
 
         assert_eq!(result, Ok(Version::Literal("~0.x.0".to_string())));
+    }
+
+    #[test]
+    fn matches_dependency_with_pnpm_catalog() {
+        let package_json = PackageJson {
+            dependencies: Dependencies(Box::new([("react".into(), "catalog:".into())])),
+            catalog: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+            ..Default::default()
+        };
+
+        assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_minimal() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalog:
+  react: 19.0.0
+  "react-dom": "^19.0.0"
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        assert_eq!(catalog.get("react"), Some("19.0.0"));
+        assert_eq!(catalog.get("react-dom"), Some("^19.0.0"));
     }
 }

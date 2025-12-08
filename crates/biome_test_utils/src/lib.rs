@@ -16,7 +16,7 @@ use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
-use biome_package::{Manifest, PackageJson, TsConfigJson};
+use biome_package::{Dependencies, Manifest, PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -249,12 +249,27 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
+fn find_pnpm_workspace_catalog(input_file: &Utf8Path) -> Option<Dependencies> {
+    for dir in input_file.ancestors() {
+        let workspace_file = dir.join("pnpm-workspace.yaml");
+
+        if let Ok(content) = std::fs::read_to_string(&workspace_file) {
+            if let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content) {
+                return Some(catalog);
+            }
+        }
+    }
+
+    None
+}
+
 pub fn project_layout_for_test_file(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
+    let pnpm_catalog = find_pnpm_workspace_catalog(input_file);
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
@@ -273,12 +288,17 @@ pub fn project_layout_for_test_file(
                     }),
             );
         } else {
+            let mut manifest = deserialized.into_deserialized().unwrap_or_default();
+            if manifest.catalog.is_none() {
+                manifest.catalog = pnpm_catalog.clone();
+            }
+
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
                     .map(|dir_path| dir_path.to_path_buf())
                     .unwrap_or_default(),
-                deserialized.into_deserialized().unwrap_or_default(),
+                manifest,
             );
         }
     }
