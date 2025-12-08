@@ -31,13 +31,36 @@ declare_lint_rule! {
     /// React components have access to various [hooks](https://react.dev/reference/react/hooks) that can perform
     /// various actions like querying and updating state.
     /// 
-    /// Notably, React is **unable** to capture changes to variables not included inside a hook's dependency array, resulting in
-    /// any such references being "locked" to their initial values even if updated later.
-    /// Such "stale closures" are a common pitfall among React developers.
+    /// For hooks that trigger whenever a variable changes ( notably `useEffect`, `useMemo`, and `useCallback`),
+    /// React attempts
     /// 
+    /// However, React is **unable** to capture changes to variables not included inside a hook's dependency array, 
+    /// which can result in surprising behavior:
+    /// ```jsx,ignore
+    /// 
+    /// function ticker() {
+    ///   const [count, setCount] = useState(0);
+    ///
+    ///   /** Increment the count once per second. */
+    ///   function onTick() {
+	///     setCount(count + 1);
+	///   }
+	///
+	///   // React _thinks_ this code doesn't depend on anything else, so
+	///   // it will only use the initial version of `onTick` when rendering the component,
+	///   // making our normally-dynamic counter always display 1. 
+    ///   useEffect(() => {
+    ///     const id = setInterval(onTick, 1000);
+    ///     return () => clearInterval(id);
+    ///   }, []);
+    /// 
+    ///   return <h1>Counter: {count}</h1>;
+    /// }
+    /// ```
+    ///
     /// This rule attempts to prevent such issues by diagnosing potentially incorrect or invalid usages of hook dependencies.
     /// 
-    /// By default, the rule will inspect the following built-in React hooks (as well as their Preact counterparts):
+    /// By default, the following hooks (and their Preact counterparts) are checked by this rule:
     ///
     /// - `useEffect`
     /// - `useLayoutEffect`
@@ -45,16 +68,16 @@ declare_lint_rule! {
     /// - `useCallback`
     /// - `useMemo`
     /// - `useImperativeHandle`
-    /// - `useState`
-    /// - `useReducer`
-    /// - `useRef`
-    /// - `useDebugValue`
-    /// - `useDeferredValue`
-    /// - `useTransition`
-    /// - `useEffectEvent`
     ///
-    /// If you want to add more hooks to the rule's diagnostics, see the [options](#options) section for more.
+    /// If you want to add more hooks to the rule's diagnostics, see the [options](#options) section for information.
     ///
+    /// ### Stable results
+    /// When a hook is known to have a stable return value (one whose identity doesn't change across invocations), 
+    /// that value doesn't need to and should not be specified as a dependency.
+    /// For example, setters returned by React's `useState` hook will not change throughout the lifetime of a program,
+    /// and should be omitted as such - they will never change tho.
+    ///
+    /// 
     /// ## Examples
     ///
     /// ### Invalid
@@ -81,14 +104,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    ///
     /// ```js,expect_diagnostic
     /// import { useEffect } from "react";
     ///
     /// function component() {
     ///     let unused = 1;
-    ///     useEffect(() => {
-    ///     }, [unused]);
+    ///     useEffect(() => {}, [unused]);
     /// }
     /// ```
     ///
@@ -99,7 +120,7 @@ declare_lint_rule! {
     ///   const [name, setName] = useState();
     ///   useEffect(() => {
     ///     console.log(name);
-    ///     setName("shouldn't need to be here");
+    ///     setName("i am a beacon of stability");
     ///   }, [name, setName]);
     /// }
     /// ```
@@ -129,14 +150,15 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Constants and recognized stable results do not (and should not) be specified as dependencies:
+    /// 
     /// ```js
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///   const a = 1;
+    ///   const SECONDS_PER_DAY = 60 * 60 * 24;
     ///   useEffect(() => {
-    ///     // a is const here, so there is no mutable state to change 
-    ///     console.log(a);
+    ///     console.log(SECONDS_PER_DAY);
     ///   });
     /// }
     /// ```
@@ -150,16 +172,6 @@ declare_lint_rule! {
     ///     console.log(name);
     ///     setName("");
     ///   }, [name]);
-    /// }
-    /// ```
-    ///
-    /// ```js
-    /// import { useEffect } from "react";
-    /// let outer = false;
-    /// function component() {
-    ///   useEffect(() => {
-    ///     outer = true;
-    ///   }, []);
     /// }
     /// ```
     ///
@@ -199,6 +211,8 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// > When dependencies don’t match the code, there is a **very high risk** of introducing bugs. By suppressing the linter, you “lie” to React about the values your Effect depends on. 
+    /// 
     /// ## Options
     ///
     /// ### `hooks`
@@ -215,7 +229,7 @@ declare_lint_rule! {
     ///   "options": {
     ///     "hooks": [
     ///       { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1 },
-    ///       { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+    ///       { "name": "useQuery", "closureIndex": 2, "dependenciesIndex": 0 }
     ///     ]
     ///   }
     /// }
@@ -227,19 +241,16 @@ declare_lint_rule! {
     /// function Foo() {
     ///   let stateVar = 1;
     ///   const location = useLocation(() => {console.log(stateVar)}, []);
-    ///   const query = useQuery([], () => {console.log(stateVar)});
+    ///   const query = useQuery([], "ignored", () => {console.log(stateVar)});
     /// }
     /// ```
     ///
-    /// #### Stable results
+    /// #### Configuring stable results
     ///
-    /// When a hook is known to have a stable return value (its identity doesn't
-    /// change across invocations), that value doesn't need to be specified in
-    /// dependency arrays. For example, setters returned by React's `useState`
-    /// hook always have the same identity and should be omitted as such.
-    ///
-    /// You can configure custom hooks that return stable results in one of
-    /// four ways:
+    /// As previously discussed, the lint rule takes into account so-called ["stable results"](#stable-results)
+    /// and will ensure any such variables are _not_ specified as dependencies. 
+    /// 
+    /// You can configure custom hooks that return stable results in one of four ways:
     ///
     /// 1. `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
