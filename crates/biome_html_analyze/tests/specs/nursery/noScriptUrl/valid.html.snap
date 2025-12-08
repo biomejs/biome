@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: valid.html
+---
+# Input
+```html
+<!-- Valid cases - should NOT trigger the rule -->
+
+<a href="https://example.com">Link</a>
+
+<a href="/path/to/page">Link</a>
+
+<a href="#section">Link</a>
+
+<!-- Not applicable: element doesn't support href -->
+<span href="javascript:void(0)">Not applicable</span>
+
+```

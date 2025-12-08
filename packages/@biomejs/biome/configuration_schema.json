@@ -4205,6 +4205,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoScriptUrlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoScriptUrlOptions" }
+			]
+		},
+		"NoScriptUrlOptions": { "type": "object", "additionalProperties": false },
 		"NoSecretsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5222,6 +5229,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.\nSee <https://biomejs.dev/linter/rules/no-react-forward-ref>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noScriptUrl": {
+					"description": "Disallow javascript: URLs in HTML.\nSee <https://biomejs.dev/linter/rules/no-script-url>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScriptUrlConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7618,6 +7632,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRestrictedTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoScriptUrlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoScriptUrlOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -1,0 +1,71 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```html
+---
+// Astro invalid cases - should trigger the rule
+---
+
+<a href="javascript:void(0)">Void</a>
+<a href=" javascript:prompt('XSS') ">Prompt</a>
+<a href="JAVASCRIPT:doSomething()">Uppercase</a>
+
+```
+
+# Diagnostics
+```
+invalid.astro:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ ---
+    4 │ 
+  > 5 │ <a href="javascript:void(0)">Void</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+    7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.astro:6:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    5 │ <a href="javascript:void(0)">Void</a>
+  > 6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    8 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.astro:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    5 │ <a href="javascript:void(0)">Void</a>
+    6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+  > 7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```

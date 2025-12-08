@@ -1,0 +1,72 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- Vue invalid cases - should trigger the rule -->
+
+<template>
+  <a href="javascript:void(0)">Void</a>
+  <a href=" javascript:alert('XSS') ">Alert</a>
+  <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ <template>
+  > 4 │   <a href="javascript:void(0)">Void</a>
+      │          ^^^^^^^^^^^^^^^^^^^^^
+    5 │   <a href=" javascript:alert('XSS') ">Alert</a>
+    6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.vue:5:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    3 │ <template>
+    4 │   <a href="javascript:void(0)">Void</a>
+  > 5 │   <a href=" javascript:alert('XSS') ">Alert</a>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    7 │ </template>
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```
+
+```
+invalid.vue:6:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    4 │   <a href="javascript:void(0)">Void</a>
+    5 │   <a href=" javascript:alert('XSS') ">Alert</a>
+  > 6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+
+```

@@ -70,7 +70,17 @@ pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSy
 
     let m = p.start();
 
+    let pos = p.source().position();
     p.bump_with_context(T![@], HtmlLexContext::InsideTagVue);
+    // is there any trivia after the @ and before argument?
+    if let Some(last_trivia) = p.source().trivia_list.last()
+        && pos < last_trivia.text_range().start()
+    {
+        // `@ click="foo"` is not valid syntax
+        // but we want to recover gracefully
+        p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
+        return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
+    }
     parse_vue_dynamic_argument(p)
         .or_else(|| parse_vue_static_argument(p))
         .ok();
@@ -118,7 +128,17 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    let pos = p.source().position();
     p.bump_with_context(T![:], HtmlLexContext::InsideTagVue);
+    // is there any trivia after the colon and before argument?
+    if let Some(last_trivia) = p.source().trivia_list.last()
+        && pos < last_trivia.text_range().start()
+    {
+        // `: foo="5"` is not valid syntax
+        // but we want to recover gracefully
+        p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
+        return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
+    }
     parse_vue_dynamic_argument(p)
         .or_else(|| parse_vue_static_argument(p))
         .ok();

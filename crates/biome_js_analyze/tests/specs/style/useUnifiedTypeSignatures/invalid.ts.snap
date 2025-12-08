@@ -175,7 +175,7 @@ declare function f10(this: number): void;
 ```
 invalid.ts:1:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
   > 1 │ function f1(a: number): void;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -197,7 +197,7 @@ invalid.ts:1:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━�
 ```
 invalid.ts:5:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     3 │ function f1(a: number | string): void {}
     4 │ 
@@ -223,7 +223,7 @@ invalid.ts:5:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
      9 │ }
     10 │ 
@@ -249,7 +249,7 @@ invalid.ts:11:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:17:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     15 │ }
     16 │ 
@@ -275,7 +275,7 @@ invalid.ts:17:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:22:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     21 │ interface I1 {
   > 22 │     a0(): void;
@@ -300,7 +300,7 @@ invalid.ts:22:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:28:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     27 │ interface I2 {
   > 28 │     a1(): void;
@@ -324,7 +324,7 @@ invalid.ts:28:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:33:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     32 │ // Exported functions.
   > 33 │ export function f4(a: number): void;
@@ -352,7 +352,7 @@ invalid.ts:33:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:40:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     39 │ // Exported default functions.
   > 40 │ export default function f5(a: number): void;
@@ -380,7 +380,7 @@ invalid.ts:40:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:48:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     46 │ // The second signature is different by single required parameter.
     47 │ interface I3 {
@@ -405,7 +405,7 @@ invalid.ts:48:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:54:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     52 │ // The difference is the rest parameter.
     53 │ interface I4 {
@@ -428,7 +428,7 @@ invalid.ts:54:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:60:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     58 │ // Both parameters are optional.
     59 │ interface I5 {
@@ -453,7 +453,7 @@ invalid.ts:60:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:65:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     64 │ interface I6 {
   > 65 │     d(x: number): void;
@@ -477,7 +477,7 @@ invalid.ts:65:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:71:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     69 │ // Support call signatures in types.
     70 │ type T1 = {
@@ -502,7 +502,7 @@ invalid.ts:71:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:77:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     75 │ // Support call signatures in interfaces.
     76 │ interface I7 {
@@ -527,7 +527,7 @@ invalid.ts:77:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:83:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     81 │ // Supports private methods in classes.
     82 │ declare class Example {
@@ -550,7 +550,7 @@ invalid.ts:83:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:89:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     87 │ // Supports class constructors.
     88 │ declare class C {
@@ -575,7 +575,7 @@ invalid.ts:89:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:95:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     93 │ // Supports unions.
     94 │ interface I8 {
@@ -600,7 +600,7 @@ invalid.ts:95:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:101:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
      99 │ // Supports tuples.
     100 │ interface I9 {
@@ -625,7 +625,7 @@ invalid.ts:101:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:107:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     105 │ // Supports generics.
     106 │ interface Generic<T> {
@@ -650,7 +650,7 @@ invalid.ts:107:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:112:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     111 │ // Merges signatures when type parameters are the same.
   > 112 │ function f6<T extends number>(x: T[]): void;
@@ -678,7 +678,7 @@ invalid.ts:112:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:118:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     116 │ // Supports abstract methods.
     117 │ abstract class Foo {
@@ -703,7 +703,7 @@ invalid.ts:118:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:124:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     122 │ // Supports literal names.
     123 │ interface I10 {
@@ -728,7 +728,7 @@ invalid.ts:124:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:130:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     128 │ // Supports constructor signatures.
     129 │ interface Foo {
@@ -753,7 +753,7 @@ invalid.ts:130:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:136:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     134 │ // Supports computed property names.
     135 │ interface IFoo {
@@ -778,7 +778,7 @@ invalid.ts:136:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:141:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     140 │ declare module 'foo' {
   > 141 │     export default function (foo: number): string[];
@@ -800,7 +800,7 @@ invalid.ts:141:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:145:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     143 │ }
     144 │ 
@@ -826,7 +826,7 @@ invalid.ts:145:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:151:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     149 │ // Transfers JsDoc comments to signatures.
     150 │ /** JsDoc 1 */
@@ -858,7 +858,7 @@ invalid.ts:151:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:157:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     155 │ // Transfers JsDoc comments to signatures even if signatures are not adjacent.
     156 │ /** JsDoc 1 */
@@ -891,7 +891,7 @@ invalid.ts:157:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:163:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Overload signatures are hard to read and maintain.
+  i Multiple similar overload signatures are hard to read and maintain.
   
     162 │ // Merges "this" params.
   > 163 │ declare function f10(this: string): void;
