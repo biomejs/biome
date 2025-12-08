@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 151
 expression: jsxFactoryPreact.js
 ---
 # Input
@@ -17,3 +16,5 @@ function App() {
 
 
 ```
+
+_Note: The parser emitted 5 diagnostics which are not shown here._
