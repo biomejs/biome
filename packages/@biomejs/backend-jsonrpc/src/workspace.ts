@@ -7822,7 +7822,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type EmbeddingKind2 = "None" | "Styled";
+export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
 	* The style of CSS contained in the file.
 
@@ -7842,6 +7842,7 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
