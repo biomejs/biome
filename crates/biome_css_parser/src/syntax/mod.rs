@@ -66,7 +66,7 @@ pub(crate) fn parse_root(p: &mut CssParser) {
 
             m.complete(p, CSS_SNIPPET_ROOT);
         }
-        EmbeddingKind::None => {
+        EmbeddingKind::None | EmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
             RuleList::new(EOF).parse_list(p);

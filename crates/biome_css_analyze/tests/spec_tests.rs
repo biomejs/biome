@@ -2,7 +2,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
 use biome_css_analyze::CssAnalyzerServices;
-use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
@@ -56,7 +56,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let parser_options = if file_name.ends_with(".module.css") {
         CssParserOptions {
-            css_modules: true,
+            css_modules: CssModulesKind::Classic,
             ..CssParserOptions::default()
         }
     } else if file_name.ends_with(".tailwind.css") {
@@ -126,12 +126,6 @@ pub(crate) fn analyze_and_snap(
 ) {
     let mut diagnostics = Vec::new();
     let options = create_analyzer_options::<CssLanguage>(input_file, &mut diagnostics);
-
-    let parser_options = if options.css_modules() {
-        parser_options.allow_css_modules()
-    } else {
-        parser_options
-    };
 
     let parsed = parse_css(input_code, source_type, parser_options);
     let root = parsed.tree();

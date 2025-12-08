@@ -39,6 +39,9 @@ schema + sure();
 .class {
 	background: red;
 }
+:global(div) {
+	color: red;
+}
 </style>
 
 ```
@@ -79,8 +82,8 @@ file.astro:16:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━
     15 │ <style>
   > 16 │ #id { font-family: comic-sans } .class { background: red}
        │                    ^^^^^^^^^^
-    17 │ </style>
-    18 │ 
+    17 │ :global(div) {
+    18 │   color: red;
   
   i Consider adding a generic font family as a fallback.
   
