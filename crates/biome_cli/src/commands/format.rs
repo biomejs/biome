@@ -11,8 +11,8 @@ use biome_configuration::{Configuration, FilesConfiguration, FormatterConfigurat
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
-use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -49,18 +49,15 @@ impl CommandRunner for FormatCommandPayload {
 
     fn merge_configuration(
         &mut self,
-        loaded_configuration: LoadedConfiguration,
+        loaded_configuration: Configuration,
+        loaded_directory: Option<Utf8PathBuf>,
+        _loaded_file: Option<Utf8PathBuf>,
+
         fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let LoadedConfiguration {
-            configuration: biome_configuration,
-            directory_path: configuration_path,
-            ..
-        } = loaded_configuration;
-
         let mut configuration =
-            self.combine_configuration(configuration_path, biome_configuration, fs)?;
+            self.combine_configuration(loaded_directory, loaded_configuration, fs)?;
 
         // merge formatter options
         if configuration

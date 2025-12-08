@@ -11,11 +11,12 @@ use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRu
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, CssConfiguration, DEFAULT_SCANNER_IGNORE_ENTRIES,
-    FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration,
-    GritConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
+    DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -52,9 +53,7 @@ use std::sync::{Arc, RwLock};
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// The configuration that originated this setting, if applicable.
-    ///
-    /// It contains [Configuration] and the folder where it was found.
-    source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
+    source: Option<Arc<ConfigurationSource>>,
 
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
@@ -94,17 +93,15 @@ impl Settings {
     }
 
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref().map(|source| {
-            let (config, _) = source.deref().clone();
-            config
-        })
+        self.source.as_ref()?.source()
     }
 
     pub fn source_path(&self) -> Option<Utf8PathBuf> {
-        self.source.as_ref().and_then(|source| {
-            let (_, path) = source.deref().clone();
-            path
-        })
+        self.source.as_ref()?.source_path()
+    }
+
+    pub fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
+        self.source.clone()
     }
 
     /// Merges the [Configuration] into the settings.
@@ -113,27 +110,51 @@ impl Settings {
         &mut self,
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
+        extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     ) -> Result<(), WorkspaceError> {
-        self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
+        self.source = Some(Arc::new(ConfigurationSource {
+            source: Some((configuration.clone(), working_directory.clone())),
+            extended_configurations: ExtendedConfigurations::from(extended_configurations),
+        }));
 
         // formatter part§
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(working_directory.clone(), formatter)?;
+            self.formatter = to_format_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                formatter,
+            )?;
         }
 
         // linter part
         if let Some(linter) = configuration.linter {
-            self.linter = to_linter_settings(working_directory.clone(), linter)?;
+            self.linter = to_linter_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                linter,
+            )?;
         }
 
         // assist part
         if let Some(assist) = configuration.assist {
-            self.assist = to_assist_settings(working_directory.clone(), assist)?;
+            self.assist = to_assist_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                assist,
+            )?;
         }
 
         // Filesystem settings
         if let Some(files) = configuration.files {
-            self.files = to_file_settings(working_directory.clone(), files)?;
+            self.files = to_file_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                files,
+            )?;
         }
 
         // VCS settings
@@ -172,7 +193,13 @@ impl Settings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings = to_override_settings(working_directory, overrides, self)?;
+            self.override_settings = to_override_settings(
+                working_directory
+                    .as_ref()
+                    .map(|p| p.as_path().to_path_buf()),
+                overrides,
+                self,
+            )?;
         }
 
         Ok(())
@@ -368,13 +395,17 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
             .as_ref()
             .map(|editor| {
                 let mut settings = self.inner.read().unwrap().clone();
-                let workspace_directory = self
-                    .as_ref()
-                    .source
-                    .as_ref()
-                    .and_then(|source| source.1.clone());
+                let workspace_directory = self.as_ref().source.as_ref().and_then(|source| {
+                    source
+                        .as_ref()
+                        .source
+                        .as_ref()
+                        .and_then(|source| source.1.clone())
+                });
+
                 // TODO handle error
-                let _ = settings.merge_with_configuration(editor.clone(), workspace_directory);
+                let _ =
+                    settings.merge_with_configuration(editor.clone(), workspace_directory, vec![]);
 
                 settings
             })

@@ -3,3 +3,36 @@ source: crates/biome_service/src/workspace.tests.rs
 expression: result.unwrap()
 ---
 TypeId(0) => instanceof unresolved reference "Person" (scope ID: 0)
+
+TypeId(1) => Constructor {
+    type_parameters: [],
+    parameters: [
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "name",
+                    ty: Resolved(
+                        string,
+                    ),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            ),
+            accessibility: None,
+        },
+        ConstructorParameter {
+            parameter: Named(
+                NamedFunctionParameter {
+                    name: "age",
+                    ty: Resolved(
+                        number,
+                    ),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            ),
+            accessibility: None,
+        },
+    ],
+    return_type: None,
+}

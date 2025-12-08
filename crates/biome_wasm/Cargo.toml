@@ -28,7 +28,8 @@ js-sys             = "0.3.82"
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
 serde_json         = { workspace = true }
-wasm-bindgen       = { version = "0.2.105", features = ["serde-serialize"] }
+# IMPORTANT: if you update this package, you must update justfile and workflows so we install the same CLI version
+wasm-bindgen = { version = "0.2.105", features = ["serde-serialize"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

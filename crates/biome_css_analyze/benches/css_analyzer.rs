@@ -61,11 +61,16 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             AnalyzerConfiguration::default()
                                 .with_jsx_runtime(JsxRuntime::default()),
                         );
+                        let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
+                        let services = biome_css_analyze::CssAnalyzerServices::default()
+                            .with_file_source(CssFileSource::default())
+                            .with_semantic_model(&semantic_model);
                         b.iter(|| {
                             biome_css_analyze::analyze(
                                 &parse.tree(),
                                 filter,
                                 &options,
+                                services.clone(),
                                 &[],
                                 |event| {
                                     black_box(event.diagnostic());

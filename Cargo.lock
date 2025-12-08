@@ -69,12 +69,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
-name = "append-only-vec"
-version = "0.1.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2114736faba96bcd79595c700d03183f61357b9fbce14852515e59f3bee4ed4a"
-
-[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1064,6 +1058,7 @@ dependencies = [
  "camino",
  "hashbrown 0.15.5",
  "insta",
+ "paste",
  "rustc-hash 2.1.1",
 ]
 
@@ -1092,6 +1087,7 @@ name = "biome_json_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_diagnostics",
  "biome_json_factory",
@@ -1515,7 +1511,6 @@ dependencies = [
 name = "biome_service"
 version = "0.0.0"
 dependencies = [
- "append-only-vec",
  "biome_analyze",
  "biome_configuration",
  "biome_console",
@@ -1562,6 +1557,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
+ "boxcar",
  "bpaf",
  "camino",
  "crossbeam",
@@ -1949,6 +1945,12 @@ dependencies = [
  "ryu-js",
  "static_assertions",
 ]
+
+[[package]]
+name = "boxcar"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36f64beae40a84da1b4b26ff2761a5b895c12adc41dc25aaee1c4f2bbfe97a6e"
 
 [[package]]
 name = "bpaf"
@@ -4504,6 +4506,7 @@ dependencies = [
  "biome_console",
  "biome_css_analyze",
  "biome_css_parser",
+ "biome_css_semantic",
  "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",

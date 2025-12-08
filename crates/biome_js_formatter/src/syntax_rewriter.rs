@@ -465,7 +465,7 @@ fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
 mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::{JsFormatOptions, TextRange, format_node};
-    use biome_formatter::{SourceMarker, TransformSourceMap};
+    use biome_formatter::{SourceMapGeneration, SourceMarker, TransformSourceMap};
     use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
@@ -851,7 +851,9 @@ mod tests {
             false,
         )
         .unwrap();
-        let printed = formatted.print().unwrap();
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap();
 
         assert_eq!(printed.as_code(), "(a * b * c) / 3;\n");
 

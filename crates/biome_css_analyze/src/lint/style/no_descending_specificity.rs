@@ -3,7 +3,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
-use biome_css_syntax::{AnyCssSelector, CssRoot};
+use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
@@ -125,6 +125,7 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 /// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
+    root: &AnyCssRoot,
     rule: &CssSemanticRule,
     model: &SemanticModel,
     visited_rules: &mut FxHashSet<RuleId>,
@@ -136,7 +137,8 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node(root).syntax().clone())
+        else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
@@ -148,13 +150,13 @@ fn find_descending_selector(
             if last_specificity > &selector.specificity() {
                 descending_selectors.push(DescendingSelector {
                     high: (*last_text_range, *last_specificity),
-                    low: (selector.range(), selector.specificity()),
+                    low: (selector.range(root), selector.specificity()),
                 });
             }
         } else {
             visited_selectors.insert(
                 tail_selector_str,
-                (selector.range(), selector.specificity()),
+                (selector.range(root), selector.specificity()),
             );
         }
     }
@@ -162,6 +164,7 @@ fn find_descending_selector(
     for child_id in rule.child_ids() {
         if let Some(child_rule) = model.get_rule_by_id(child_id) {
             find_descending_selector(
+                root,
                 child_rule,
                 model,
                 visited_rules,
@@ -173,18 +176,20 @@ fn find_descending_selector(
 }
 
 impl Rule for NoDescendingSpecificity {
-    type Query = Semantic<CssRoot>;
+    type Query = Semantic<AnyCssRoot>;
     type State = DescendingSelector;
     type Signals = Box<[Self::State]>;
     type Options = NoDescendingSpecificityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
+        let root = ctx.root();
         let mut visited_rules = FxHashSet::default();
         let mut visited_selectors = FxHashMap::default();
         let mut descending_selectors = Vec::new();
         for rule in model.rules() {
             find_descending_selector(
+                &root,
                 rule,
                 model,
                 &mut visited_rules,

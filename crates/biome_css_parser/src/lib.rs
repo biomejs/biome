@@ -5,7 +5,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
-use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
@@ -161,8 +161,8 @@ impl CssOffsetParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> CssRoot {
-        CssRoot::unwrap_cast(self.root.inner().clone())
+    pub fn tree(&self) -> AnyCssRoot {
+        AnyCssRoot::unwrap_cast(self.root.inner().clone())
     }
 
     /// Get the base offset applied to this parse result

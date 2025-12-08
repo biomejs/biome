@@ -83,3 +83,5 @@ a: { --test: attr(data-test type(length)); }
 a: { --test: attr(data-test type(<color>)); }
 
 ```
+
+_Note: The parser emitted 9 diagnostics which are not shown here._

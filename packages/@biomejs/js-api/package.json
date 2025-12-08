@@ -11,12 +11,12 @@
     "check:apply": "cargo biome-cli-dev check --apply-unsafe .",
     "build:wasm-dev": "pnpm run \"/^build:wasm-.+-dev$/\"",
     "build:wasm": "pnpm run \"/^build:wasm-.+(?<!dev)$/\"",
-    "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --dev --scope biomejs ../../../crates/biome_wasm",
-    "build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomejs ../../../crates/biome_wasm",
-    "build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --dev --scope biomejs ../../../crates/biome_wasm",
-    "build:wasm-node": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomejs ../../../crates/biome_wasm",
-    "build:wasm-web-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --dev --scope biomejs ../../../crates/biome_wasm",
-    "build:wasm-web": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs ../../../crates/biome_wasm",
+    "build:wasm-bundler-dev": "just build-wasm-bundler-dev",
+    "build:wasm-bundler": "just build-wasm-bundler",
+    "build:wasm-node-dev": "just build-wasm-node-dev",
+    "build:wasm-node": "just build-wasm-node",
+    "build:wasm-web-dev": "just build-wasm-web-dev",
+    "build:wasm-web": "just build-wasm-web",
     "test": "vitest",
     "test:ci": "vitest run",
     "build": "tsc"
@@ -73,9 +73,9 @@
     "vitest": "4.0.9"
   },
   "peerDependencies": {
-    "@biomejs/wasm-bundler": "^2.3.7",
-    "@biomejs/wasm-nodejs": "^2.3.7",
-    "@biomejs/wasm-web": "^2.3.7"
+    "@biomejs/wasm-bundler": "^2.3.8",
+    "@biomejs/wasm-nodejs": "^2.3.8",
+    "@biomejs/wasm-web": "^2.3.8"
   },
   "peerDependenciesMeta": {
     "@biomejs/wasm-bundler": {

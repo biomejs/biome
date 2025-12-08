@@ -147,3 +147,5 @@ class DemoProperty {
 }
 
 ```
+
+_Note: The parser emitted 6 diagnostics which are not shown here._

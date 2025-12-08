@@ -104,7 +104,7 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
 
 ## Sponsors
 
-### Sponsors Oro
+### Sponsors Platino
 
 <table>
   <tbody>
@@ -114,7 +114,7 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot logo" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot logo" />
           </picture>
         </a>
       </td>

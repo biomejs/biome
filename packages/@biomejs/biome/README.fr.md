@@ -107,7 +107,7 @@ Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonction
 
 ## Sponsors
 
-### Sponsors Or
+### Sponsors Platine
 
 <table>
   <tbody>
@@ -117,7 +117,7 @@ Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonction
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot" />
           </picture>
         </a>
       </td>

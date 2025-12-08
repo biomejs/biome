@@ -199,6 +199,8 @@ function useRecursiveHookB() {
 
 ```
 
+_Note: The parser emitted 3 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.js:4:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
