@@ -126,7 +126,7 @@ impl From<GraphqlParse> for AnyParse {
 /// use biome_graphql_parser::parse_graphql_with_offset;
 /// use biome_rowan::TextSize;
 ///
-/// // Parsing embedded CSS starting at position 50 in an HTML document
+/// // Parsing embedded GraphQL starting at position 50 in a JavaScript document
 /// let graphql_code = "query {}";
 /// let offset = TextSize::from(50);
 /// let parse = parse_graphql_with_offset(graphql_code, offset);
