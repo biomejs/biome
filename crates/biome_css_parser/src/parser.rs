@@ -29,7 +29,7 @@ pub struct CssParserOptions {
 
     /// Enables parsing of CSS Modules specific features.
     /// Defaults to `false`.
-    pub css_modules: bool,
+    pub css_modules: CssModulesKind,
 
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
@@ -38,6 +38,16 @@ pub struct CssParserOptions {
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     /// Defaults to `false`.
     pub tailwind_directives: bool,
+}
+
+#[derive(Default, Debug, Clone, Copy)]
+pub enum CssModulesKind {
+    #[default]
+    None,
+    /// The classic CSS modules, which enable things like `:local` and `:global`
+    Classic,
+    /// Enhanced version of CSS modules, which supports `:deep` and `:slotted` too.
+    Vue,
 }
 
 impl CssParserOptions {
@@ -49,7 +59,7 @@ impl CssParserOptions {
 
     /// Enables parsing of css modules selectors.
     pub fn allow_css_modules(mut self) -> Self {
-        self.css_modules = true;
+        self.css_modules = CssModulesKind::Classic;
         self
     }
 
@@ -67,7 +77,7 @@ impl CssParserOptions {
 
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
-        !self.css_modules
+        !self.is_css_modules_enabled()
     }
 
     /// Checks if parsing of Grit metavariables is enabled.
@@ -78,6 +88,17 @@ impl CssParserOptions {
     /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
     pub fn is_tailwind_directives_enabled(&self) -> bool {
         self.tailwind_directives
+    }
+
+    pub fn is_css_modules_enabled(&self) -> bool {
+        matches!(
+            self.css_modules,
+            CssModulesKind::Classic | CssModulesKind::Vue
+        )
+    }
+
+    pub fn is_css_modules_vue_enabled(&self) -> bool {
+        matches!(self.css_modules, CssModulesKind::Vue)
     }
 }
 
@@ -181,7 +202,7 @@ impl From<&CssFileSource> for CssParserOptions {
     fn from(file_source: &CssFileSource) -> Self {
         let mut options = Self::default();
         if file_source.is_css_modules() {
-            options.css_modules = true;
+            options.css_modules = CssModulesKind::Classic;
         }
         if file_source.is_tailwind_css() {
             options.tailwind_directives = true;

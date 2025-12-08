@@ -493,6 +493,12 @@ schema + sure()
 
 <style>
 #id { font-family: comic-sans } .class { background: red}
+:slotted(div) {
+  color: red;
+}
+:global(div) {
+  color: red;
+}
 </style>
 "#
         .as_bytes(),

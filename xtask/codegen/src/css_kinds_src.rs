@@ -59,6 +59,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "dir",
         "local",
         "global",
+        "slotted",
+        "deep",
         "any",
         "current",
         "past",

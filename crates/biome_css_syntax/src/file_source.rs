@@ -71,6 +71,17 @@ impl CssFileSource {
         &self.embedding_kind
     }
 
+    pub fn new_css_modules() -> Self {
+        Self {
+            variant: CssVariant::CssModules,
+        }
+    }
+
+    pub fn with_css_modules(mut self) -> Self {
+        self.variant = CssVariant::CssModules;
+        self
+    }
+
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
     }
