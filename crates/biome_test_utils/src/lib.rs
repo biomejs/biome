@@ -249,9 +249,14 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-fn find_pnpm_workspace_catalog(input_file: &Utf8Path) -> Option<Catalogs> {
-    for dir in input_file.ancestors() {
+fn find_pnpm_workspace_catalog() -> Option<Catalogs> {
+    let cwd = std::env::current_dir().ok()?;
+
+    for dir in cwd.ancestors() {
         let workspace_file = dir.join("pnpm-workspace.yaml");
+        if !workspace_file.is_file() {
+            continue;
+        }
 
         if let Ok(content) = std::fs::read_to_string(&workspace_file) {
             if let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content) {
@@ -269,7 +274,7 @@ pub fn project_layout_for_test_file(
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
-    let pnpm_catalog = find_pnpm_workspace_catalog(input_file);
+    let pnpm_catalog = find_pnpm_workspace_catalog();
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
