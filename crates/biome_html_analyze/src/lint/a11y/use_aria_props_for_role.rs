@@ -11,6 +11,9 @@ use biome_rule_options::use_aria_props_supported_by_role::UseAriaPropsSupportedB
 declare_lint_rule! {
     /// Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
     ///
+    /// Remember that this rule only supports static values for the `role` attribute.
+    /// Dynamic `role` values are not checked.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
