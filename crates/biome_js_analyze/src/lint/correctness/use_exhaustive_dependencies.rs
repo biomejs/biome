@@ -28,13 +28,14 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
     ///
-    /// _This rule should be used only in **React** projects._
-    ///
-    /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
-    ///
-    /// If your project _doesn't_ use React (or Preact), **you shouldn't use this rule**.
-    ///
-    /// The rule will inspect the following **known** hooks:
+    /// React components have access to various [hooks](https://react.dev/reference/react/hooks) that can perform
+    /// various actions like querying and updating state.
+    /// However, incorrectly specifying dependencies for a hook can lead to "stale closures" where old versions of state variables 
+    /// are used for subsequent page renders.
+    /// 
+    /// This rule attempts to prevent such issues by diagnosing potentially incorrect usages of hook dependencies.
+    /// 
+    /// By default, the rule will inspect the following built-in React hooks (as well as their Preact counterparts):
     ///
     /// - `useEffect`
     /// - `useLayoutEffect`
@@ -50,7 +51,7 @@ declare_lint_rule! {
     /// - `useTransition`
     /// - `useEffectEvent`
     ///
-    /// If you want to add more hooks to the rule, check the [options](#options).
+    /// If you want to add more hooks to the rule's diagnostics, see the [options](#options) section for more.
     ///
     /// ## Examples
     ///
@@ -60,10 +61,10 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, []);
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -81,11 +82,11 @@ declare_lint_rule! {
     /// import { useEffect, useState } from "react";
     ///
     /// function component() {
-    ///     const [name, setName] = useState();
-    ///     useEffect(() => {
-    ///         console.log(name);
-    ///         setName("");
-    ///     }, [name, setName]);
+    ///   const [name, setName] = useState();
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///     setName("");
+    ///   }, [name, setName]);
     /// }
     /// ```
     ///
@@ -93,11 +94,11 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     const b = a + 1;
-    ///     useEffect(() => {
-    ///         console.log(b);
-    ///     }, []);
+    ///   let a = 1;
+    ///   const b = a + 1;
+    ///   useEffect(() => {
+    ///     console.log(b);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -107,10 +108,10 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, [a]);
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, [a]);
     /// }
     /// ```
     ///
@@ -118,10 +119,10 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     const a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     });
+    ///   const a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   });
     /// }
     /// ```
     ///
@@ -129,11 +130,11 @@ declare_lint_rule! {
     /// import { useEffect, useState } from "react";
     ///
     /// function component() {
-    ///     const [name, setName] = useState();
-    ///     useEffect(() => {
-    ///         console.log(name);
-    ///         setName("");
-    ///     }, [name]);
+    ///   const [name, setName] = useState();
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///     setName("");
+    ///   }, [name]);
     /// }
     /// ```
     ///
@@ -141,9 +142,9 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     /// let outer = false;
     /// function component() {
-    ///     useEffect(() => {
-    ///         outer = true;
-    ///     }, []);
+    ///   useEffect(() => {
+    ///     outer = true;
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -158,11 +159,11 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, []);
+    ///   let a = 1;
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -173,51 +174,49 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     let b = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
-    ///     useEffect(() => {
-    ///         console.log(a, b);
-    ///     }, []);
+    ///   let a = 1;
+    ///   let b = 1;
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
+    ///   useEffect(() => {
+    ///     console.log(a, b);
+    ///   }, []);
     /// }
     /// ```
     ///
     /// ## Options
     ///
-    /// Allows specifying custom hooks - from libraries or internal projects -
-    /// for which dependencies should be checked and/or which are known to have
-    /// stable return values.
+    /// ### `hooks`
+    /// Allows specifying custom hooks (from libraries or internal projects) whose dependencies
+    /// should be checked and/or which are known to have stable return values.
     ///
-    /// ### Validating dependencies
+    /// For every hook whose dependencies you want validated, you must specify the index of both the closure
+    /// using the dependencies and the dependencies array to validate it against.
     ///
-    /// For every hook for which you want the dependencies to be validated, you
-    /// should specify the index of the closure and the index of the
-    /// dependencies array to validate against.
-    ///
-    /// #### Example
+    /// ##### Example
     ///
     /// ```json, options
     /// {
-    ///     "options": {
-    ///         "hooks": [
-    ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
-    ///             { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0}
-    ///         ]
-    ///     }
+    ///   "options": {
+    ///     "hooks": [
+    ///       { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
+    ///       { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0}
+    ///     ]
+    ///   }
     /// }
     /// ```
     ///
-    /// Given the previous example, your hooks can be used like this:
+    /// This would enable diagnostics on the aforementioned hooks, as follows:
     ///
-    /// ```js
+    /// ```js,options,expect_diagnostic
     /// function Foo() {
-    ///     const location = useLocation(() => {}, []);
-    ///     const query = useQuery([], () => {});
+    ///   let stateVar = 1;
+    ///   const location = useLocation(() => {console.log(stateVar)}, []);
+    ///   const query = useQuery([], () => {console.log(stateVar)});
     /// }
     /// ```
     ///
-    /// ### Stable results
+    /// #### Stable results
     ///
     /// When a hook is known to have a stable return value (its identity doesn't
     /// change across invocations), that value doesn't need to be specified in
@@ -227,40 +226,83 @@ declare_lint_rule! {
     /// You can configure custom hooks that return stable results in one of
     /// four ways:
     ///
-    /// * `"stableResult": true` -- marks the return value as stable. An example
+    /// 1. `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
-    /// * `"stableResult": [1]` -- expects the return value to be an array and
-    ///   marks the given index or indices to be stable. An example of a React
-    ///   hook that would be configured like this is `useState()`.
-    /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
-    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
-    ///   object and marks the given property or properties to be stable.
+    /// 2. `"stableResult": [1]` -- expects the return value to be an array and
+    ///    marks the given index or indices to be stable. An example of a React
+    ///    hook that would be configured like this is `useState()`.
+    /// 3. `"stableResult": 1` -- shorthand for option 2 (`"stableResult": [1]`).
+    /// 4. `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///    object and marks the given property or properties to be stable.
     ///
-    /// #### Example
+    /// ##### Example
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "options": {
-    ///         "hooks": [
-    ///             { "name": "useDispatch", "stableResult": true }
-    ///         ]
-    ///     }
+    ///   "options": {
+    ///     "hooks": [
+    ///       { "name": "useDispatch", "stableResult": true }
+    ///     ]
+    ///   }
     /// }
     /// ```
     ///
     /// With this configuration, the following is valid:
     ///
-    /// ```js
+    /// ```js,use_options
     /// const dispatch = useDispatch();
-    /// // No need to list `dispatch` as dependency:
+    /// // No need to list `dispatch` as dependency if it doesn't change
     /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
+    /// 
+    /// ### `reportUnnecessaryDependencies`
+    /// 
+    /// If enabled, the rule will also trigger diagnostics for unused dependencies passed to hooks that do not use them.
+    /// 
+    /// Default: `true`
+    /// 
+    /// ##### Example
     ///
-    /// ## Preact support
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "reportUnnecessaryDependencies": false
+    ///   }
+    /// }
+    /// ```
     ///
-    /// This rule recognizes rules imported from `preact/compat` and
-    /// `preact/hooks` and applies the same rules as for React hooks.
+    /// ```jsx,use_options
+    /// function Foo() {
+    ///   let stateVar = 1;
+    ///   // not used but still OK
+    ///   useEffect(() => {}, [stateVar]);
+    /// }
+    /// ```
+    /// 
+    /// ### `reportMissingDependenciesArray`
+    /// 
+    /// If enabled, the rule will also trigger diagnostics for hooks that lack dependency arrays altogether,
+    /// requiring any hooks lacking dependencies to explicitly state as such.
+    /// 
+    /// Default: `false`
+    /// 
+    /// ##### Example
     ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "reportMissingDependenciesArray": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options,expect_diagnostic
+    /// function Foo() {
+    ///   let stateVar = 1;
+    ///   useEffect(() => {});
+    /// }
+    /// ```
+    /// 
     pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
