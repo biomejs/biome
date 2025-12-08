@@ -795,8 +795,8 @@ pub enum FileContent {
 impl Display for FileContent {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            FileContent::FromClient { .. } => f.write_str("FromClient"),
-            FileContent::FromServer => f.write_str("FromServer"),
+            Self::FromClient { .. } => f.write_str("FromClient"),
+            Self::FromServer => f.write_str("FromServer"),
         }
     }
 }

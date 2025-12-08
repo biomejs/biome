@@ -506,9 +506,13 @@ impl WorkspaceServer {
                 },
             );
 
-            // We check both reason OP if the path is indexed.
-            // This is required due to the check at line 441
-            reason.is_index() || self.is_indexed(&path)
+                if biome_path.is_dependency() {
+                    true
+                } else {
+                    // We check both reason OP if the path is indexed.
+                    // This is required due to the check at line 441
+                    reason.is_index() || self.is_indexed(&path)
+                }
         };
 
         // Manifest files need to update the module graph
