@@ -42,8 +42,8 @@ importers:
   crates/biome_formatter_test/src/prettier:
     dependencies:
       prettier:
-        specifier: 3.7.1
-        version: 3.7.1
+        specifier: 3.7.4
+        version: 3.7.4
 
   packages/@biomejs/backend-jsonrpc:
     devDependencies:
@@ -1290,11 +1290,6 @@ packages:
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
-    hasBin: true
-
-  prettier@3.7.1:
-    resolution: {integrity: sha512-RWKXE4qB3u5Z6yz7omJkjWwmTfLdcbv44jUVHC5NpfXwFGzvpQM798FGv/6WNK879tc+Cn0AAyherCl1KjbyZQ==}
-    engines: {node: '>=14'}
     hasBin: true
 
   prettier@3.7.4:
@@ -2699,8 +2694,6 @@ snapshots:
   prelude-ls@1.2.1: {}
 
   prettier@2.8.8: {}
-
-  prettier@3.7.1: {}
 
   prettier@3.7.4: {}
 
