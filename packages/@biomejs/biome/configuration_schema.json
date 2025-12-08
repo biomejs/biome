@@ -1981,6 +1981,10 @@
 						{ "type": "null" }
 					]
 				},
+				"experimentalEmbeddedSnippetsEnabled": {
+					"description": "Enables support for embedding snippets.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [

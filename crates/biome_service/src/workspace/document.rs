@@ -2,7 +2,7 @@ use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::FormatEmbedNode;
 use crate::settings::ServiceLanguage;
 use crate::workspace::DocumentFileSource;
-use biome_css_syntax::{CssLanguage, CssRoot};
+use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_syntax::JsLanguage;
@@ -294,7 +294,7 @@ pub struct CssDocumentServices {
 }
 
 impl CssDocumentServices {
-    pub fn with_css_semantic_model(mut self, root: &CssRoot) -> Self {
+    pub fn with_css_semantic_model(mut self, root: &AnyCssRoot) -> Self {
         self.semantic_model = Some(biome_css_semantic::semantic_model(root));
         self
     }

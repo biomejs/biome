@@ -9,7 +9,7 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::block::parse_declaration_or_rule_list_block;
+use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
     expected_any_rule, expected_non_css_wide_keyword_identifier, tailwind_disabled,
 };
@@ -23,7 +23,7 @@ use crate::syntax::value::function::{
     BINARY_OPERATION_TOKEN, parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -51,11 +51,20 @@ impl SyntaxFeature for CssSyntaxFeatures {
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
-    p.eat(UNICODE_BOM);
+    match p.source_type.as_embedding_kind() {
+        EmbeddingKind::Styled => {
+            DeclarationOrRuleList::new(EOF).parse_list(p);
 
-    RuleList::new(EOF).parse_list(p);
+            m.complete(p, CSS_SNIPPET_ROOT);
+        }
+        EmbeddingKind::None => {
+            p.eat(UNICODE_BOM);
 
-    m.complete(p, CSS_ROOT);
+            RuleList::new(EOF).parse_list(p);
+
+            m.complete(p, CSS_ROOT);
+        }
+    }
 }
 
 struct RuleList {
@@ -252,12 +261,12 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
 
     parse_declaration(p).ok();
 
-    // If the next token is a closing brace ('}'), the semicolon is optional.
+    // If the next token is a closing brace ('}') or an EOF, the semicolon is optional.
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }
     // div { color: red }
-    if !p.at(T!['}']) {
-        if p.nth_at(1, T!['}']) {
+    if !p.at(T!['}']) || p.at(EOF) {
+        if p.nth_at(1, T!['}']) || p.nth_at(1, EOF) {
             p.eat(T![;]);
         } else {
             p.expect(T![;]);
@@ -660,7 +669,7 @@ pub(crate) fn try_parse<T, E>(
 #[cfg(test)]
 mod tests {
     use crate::{CssParserOptions, parser::CssParser};
-    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_css_syntax::{CssFileSource, CssSyntaxKind, T};
     use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
@@ -668,7 +677,11 @@ mod tests {
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {
-        let mut p = CssParser::new("width: blue;", CssParserOptions::default());
+        let mut p = CssParser::new(
+            "width: blue;",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {
@@ -693,7 +706,11 @@ mod tests {
 
     #[test]
     fn try_parse_preserves_position_on_success() {
-        let mut p = CssParser::new("width: 100;", CssParserOptions::default());
+        let mut p = CssParser::new(
+            "width: 100;",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {

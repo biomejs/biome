@@ -43,7 +43,11 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
-                        let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
+                        let parse = biome_css_parser::parse_css(
+                            code,
+                            CssFileSource::css(),
+                            CssParserOptions::default(),
+                        );
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()

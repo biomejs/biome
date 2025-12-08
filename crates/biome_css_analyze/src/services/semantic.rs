@@ -3,7 +3,7 @@ use biome_analyze::{
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_css_semantic::model::SemanticModel;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_rowan::AstNode;
 
 pub struct SemanticServices {
@@ -70,7 +70,7 @@ where
     type Language = CssLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &CssRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &AnyCssRoot) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);
     }
 

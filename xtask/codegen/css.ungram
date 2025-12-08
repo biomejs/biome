@@ -67,9 +67,17 @@ CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
 
+AnyCssRoot =
+	CssRoot
+	| CssSnippetRoot
+
 CssRoot =
 	bom: 'UNICODE_BOM'?
 	rules: CssRuleList
+	eof: 'EOF'
+
+CssSnippetRoot =
+	items: CssDeclarationOrRuleList
 	eof: 'EOF'
 
 CssRuleList = AnyCssRule*

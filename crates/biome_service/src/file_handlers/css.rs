@@ -27,7 +27,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
 use biome_css_semantic::semantic_model;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
@@ -397,7 +397,7 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -435,7 +435,9 @@ fn parse(
         .override_settings
         .apply_override_css_parser_options(biome_path, &mut options);
 
-    let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
+
     ParseResult {
         any_parse: parse.into(),
         language: None,
@@ -467,7 +469,7 @@ fn debug_formatter_ir(
 }
 
 fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
-    let tree: CssRoot = parse.tree();
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
@@ -680,7 +682,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: CssRoot = params.parse.tree();
+    let mut tree: AnyCssRoot = params.parse.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(FixFileResult::default());
@@ -736,7 +738,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         );
 
         let result = process_fix_all.process_action(action, |root| {
-            tree = match CssRoot::cast(root) {
+            tree = match AnyCssRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
             };

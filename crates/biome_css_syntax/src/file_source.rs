@@ -6,9 +6,25 @@ use camino::Utf8Path;
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+pub enum EmbeddingKind {
+    /// styled-components or Emotion embedded CSS
+    Styled,
+
+    #[default]
+    None,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct CssFileSource {
     variant: CssVariant,
+
+    /// Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
+    /// For example, if inside a styled`` literal, a top-level declaration is allowed.
+    embedding_kind: EmbeddingKind,
 }
 
 /// The style of CSS contained in the file.
@@ -35,13 +51,24 @@ impl CssFileSource {
     pub fn css() -> Self {
         Self {
             variant: CssVariant::Standard,
+            embedding_kind: EmbeddingKind::None,
         }
     }
 
     pub fn tailwind_css() -> Self {
         Self {
             variant: CssVariant::TailwindCss,
+            embedding_kind: EmbeddingKind::None,
         }
+    }
+
+    pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
+        self.embedding_kind = kind;
+        self
+    }
+
+    pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
+        &self.embedding_kind
     }
 
     pub fn is_css_modules(&self) -> bool {

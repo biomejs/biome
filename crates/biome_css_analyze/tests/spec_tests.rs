@@ -126,7 +126,7 @@ pub(crate) fn analyze_and_snap(
         parser_options
     };
 
-    let parsed = parse_css(input_code, parser_options);
+    let parsed = parse_css(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
@@ -205,7 +205,7 @@ pub(crate) fn analyze_and_snap(
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
-    _source_type: CssFileSource,
+    source_type: CssFileSource,
     action: &AnalyzerAction<CssLanguage>,
     options: CssParserOptions,
 ) {
@@ -234,7 +234,7 @@ fn check_code_action(
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_css(&output, options);
+    let re_parse = parse_css(&output, source_type, options);
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 

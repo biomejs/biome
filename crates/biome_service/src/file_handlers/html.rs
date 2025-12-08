@@ -575,6 +575,7 @@ pub(crate) fn parse_embedded_style(
             let content = child.value_token().ok()?;
             let parse = parse_css_with_offset_and_cache(
                 content.text(),
+                file_source.to_css_file_source().unwrap_or_default(),
                 content.text_range().start(),
                 cache,
                 options,
