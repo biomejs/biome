@@ -57,7 +57,7 @@ where
             preferred_indentation,
             jsx_runtime,
             jsx_factory,
-            jsx_fragment_factory
+            jsx_fragment_factory,
         })
     }
 
