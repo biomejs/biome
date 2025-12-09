@@ -635,6 +635,7 @@ catalog:
         let default = catalog.default.expect("default catalog");
         assert_eq!(default.get("react"), Some("19.0.0"));
         assert_eq!(default.get("react-dom"), Some("^19.0.0"));
+        assert!(catalog.named.is_empty());
     }
 
     #[test]
@@ -654,5 +655,70 @@ catalogs:
         let named = catalog.named.get("react19").expect("react19 catalog");
         assert_eq!(named.get("react"), Some("19.0.0"));
         assert_eq!(named.get("react-dom"), Some("^19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_default_and_named() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalog:
+  react: 19.0.0
+catalogs:
+  legacy:
+    react: 18.3.1
+"#;
+
+        let catalog =
+            PackageJson::parse_pnpm_workspace_catalog(yaml).expect("catalog should be parsed");
+
+        let default = catalog.default.expect("default catalog");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+
+        let legacy = catalog.named.get("legacy").expect("legacy catalog");
+        assert_eq!(legacy.get("react"), Some("18.3.1"));
+    }
+
+    #[test]
+    fn resolve_dependency_version_prefers_named_catalog() {
+        let catalog = Catalogs {
+            default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+            named: FxHashMap::from_iter([(
+                "legacy".into(),
+                Dependencies(Box::new([("react".into(), "18.3.1".into())])),
+            )]),
+        };
+
+        let resolved_default =
+            super::resolve_dependency_version("react", "catalog:", Some(&catalog));
+        assert_eq!(resolved_default, "19.0.0");
+
+        let resolved_named =
+            super::resolve_dependency_version("react", "catalog:legacy", Some(&catalog));
+        assert_eq!(resolved_named, "18.3.1");
+    }
+
+    #[test]
+    fn parse_pnpm_catalog_entry_accepts_variants() {
+        assert_eq!(
+            super::parse_pnpm_catalog_entry("react: 19.0.0"),
+            Some(("react".into(), "19.0.0".into()))
+        );
+        assert_eq!(
+            super::parse_pnpm_catalog_entry("\"react-dom\": \"^19.0.0\""),
+            Some(("react-dom".into(), "^19.0.0".into()))
+        );
+        assert_eq!(
+            super::parse_pnpm_catalog_entry("react : '19.0.0'"),
+            Some(("react".into(), "19.0.0".into()))
+        );
+    }
+
+    #[test]
+    fn parse_pnpm_catalog_entry_rejects_invalid() {
+        assert!(super::parse_pnpm_catalog_entry("react").is_none());
+        assert!(super::parse_pnpm_catalog_entry(":").is_none());
+        assert!(super::parse_pnpm_catalog_entry("react: ").is_none());
+        assert!(super::parse_pnpm_catalog_entry(": 19.0.0").is_none());
     }
 }
