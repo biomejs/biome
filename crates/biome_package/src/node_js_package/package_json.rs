@@ -214,7 +214,9 @@ impl PackageJson {
 
 #[derive(Debug, Default, Clone)]
 pub struct Catalogs {
+    /// Dependencies listed under the top-level `catalog:` key in pnpm-workspace.yaml.
     pub default: Option<Dependencies>,
+    /// Named catalogs listed under `catalogs:` in pnpm-workspace.yaml, keyed by catalog name.
     pub named: FxHashMap<Box<str>, Dependencies>,
 }
 
@@ -250,6 +252,8 @@ fn parse_entry(value: &str) -> Option<(Box<str>, Box<str>)> {
     Some((key.into(), val.into()))
 }
 
+/// Checks if a manifest dependency satisfies a semver range, resolving pnpm
+/// `catalog:` specifiers (default or named) through the provided `Catalogs`.
 fn dependency_satisfies(
     specifier: &str,
     version: &str,
@@ -261,6 +265,9 @@ fn dependency_satisfies(
     Version::from(resolved_version).satisfies(range)
 }
 
+/// Resolves a dependency version, expanding pnpm `catalog:` references (default
+/// or named) using the provided `Catalogs`. Falls back to the literal version
+/// string if no catalog match is found.
 fn resolve_dependency_version<'a>(
     specifier: &str,
     version: &'a str,
@@ -370,6 +377,7 @@ impl Dependencies {
         self.0.iter().any(|(k, _)| k.as_ref() == specifier)
     }
 
+    /// Returns the version string for a dependency if present.
     pub fn get(&self, specifier: &str) -> Option<&str> {
         self.0
             .iter()
