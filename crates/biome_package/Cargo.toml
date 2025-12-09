@@ -25,6 +25,8 @@ biome_json_value         = { workspace = true }
 biome_parser             = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
+biome_yaml_parser        = { workspace = true }
+biome_yaml_syntax        = { workspace = true }
 camino                   = { workspace = true }
 indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
