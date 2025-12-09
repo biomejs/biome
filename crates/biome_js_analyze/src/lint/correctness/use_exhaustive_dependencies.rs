@@ -30,13 +30,13 @@ declare_lint_rule! {
     ///
     /// React components have access to various [hooks](https://react.dev/reference/react/hooks) that can perform
     /// various actions like querying and updating state.
-    /// 
+    ///
     /// For hooks that trigger whenever a variable changes (such as `useEffect` and `useMemo`),
     /// React relies on the hook's listed dependencies array to determine when to re-compute Effects and re-render the page.
-    /// 
+    ///
     /// This can lead to unexpected behavior when dependencies are incorrectly specified:
     /// ```jsx,ignore
-    /// 
+    ///
     /// function ticker() {
     ///   const [count, setCount] = useState(0);
     ///
@@ -48,12 +48,12 @@ declare_lint_rule! {
 	///   // React _thinks_ this code doesn't depend on anything else, so
 	///   // it will only use the _initial_ version of `onTick` when rendering the component.
 	///   // As a result, our normally-dynamic counter will always display 1!
-	///   // This is referred to as a "stale closure", and is a common pitfall for beginners. 
+	///   // This is referred to as a "stale closure", and is a common pitfall for beginners.
     ///   useEffect(() => {
     ///     const id = setInterval(onTick, 1000);
     ///     return () => clearInterval(id);
     ///   }, []);
-    /// 
+    ///
     ///   return <h1>Counter: {count}</h1>;
     /// }
     /// ```
@@ -69,12 +69,12 @@ declare_lint_rule! {
     ///   useEffect(() => {
     ///     setMessage(`We have ${count} apples!`)
     ///   }, [count, message]);
-    /// 
+    ///
     /// }
     /// ```
     ///
     /// This rule attempts to prevent such issues by diagnosing potentially incorrect or invalid usages of hook dependencies.
-    /// 
+    ///
     /// ### Default Behavior
     /// By default, the following hooks (and their Preact counterparts) will have their arguments checked by this rule:
     ///
@@ -86,7 +86,7 @@ declare_lint_rule! {
     /// - `useImperativeHandle`
     ///
     /// #### Stable results
-    /// When a hook is known to have a stable return value (one whose identity doesn't change across invocations), 
+    /// When a hook is known to have a stable return value (one whose identity doesn't change across invocations),
     /// that value doesn't need to and _should not_ be specified as a dependency.
     /// For example, setters returned by React's `useState` hook will not change throughout the lifetime of a program
     /// and should therefore be omitted.
@@ -97,10 +97,10 @@ declare_lint_rule! {
     /// - `useReducer` (index 1)
     /// - `useTransition`
     /// - `useEffectEvent`
-    /// 
+    ///
     /// If you want to add custom hooks to the rule's diagnostics or specify your own functions with stable results,
     /// see the [options](#options) section for more information.
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -115,7 +115,7 @@ declare_lint_rule! {
     ///   }, []);
     /// }
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { useEffect } from "react";
     ///
@@ -147,7 +147,7 @@ declare_lint_rule! {
     ///   }, [name, setName]);
     /// }
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { useEffect, useState } from "react";
     ///
@@ -184,7 +184,7 @@ declare_lint_rule! {
     ///   }, [a]);
     /// }
     /// ```
-    /// 
+    ///
     /// ```js
     /// import { useEffect } from "react";
     ///
@@ -245,11 +245,11 @@ declare_lint_rule! {
     /// ```
     ///
     /// :::caution
-    /// Mismatching code & dependencies has a **very high risk** of creating bugs in your components. 
+    /// Mismatching code & dependencies has a **very high risk** of creating bugs in your components.
     /// By suppressing the linter, you “lie” to React about the values your Effect depends on,
-    /// so prefer changing the code over suppressing the rule where possible. 
+    /// so prefer changing the code over suppressing the rule where possible.
     /// :::
-    /// 
+    ///
     /// ## Options
     ///
     /// ### `hooks`
@@ -274,7 +274,7 @@ declare_lint_rule! {
     ///
     /// This would enable diagnostics on the following code snippet:
     ///
-    /// ```js,options,expect_diagnostic
+    /// ```js,use_options,expect_diagnostic
     /// function Foo() {
     ///   let stateVar = 1;
     ///   const location = useLocation(() => {console.log(stateVar)}, []);
@@ -285,8 +285,8 @@ declare_lint_rule! {
     /// #### Configuring stable results
     ///
     /// As previously discussed, the lint rule takes into account so-called ["stable results"](#stable-results)
-    /// and will ensure any such variables are _not_ specified as dependencies. 
-    /// 
+    /// and will ensure any such variables are _not_ specified as dependencies.
+    ///
     /// You can specify custom hooks that return stable results in one of four ways:
     ///
     /// 1. `"stableResult": true` -- marks the return value as stable. An example
@@ -317,14 +317,14 @@ declare_lint_rule! {
     /// // No need to list `dispatch` as dependency since it doesn't change
     /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
-    /// 
+    ///
     /// ### `reportUnnecessaryDependencies`
-    /// 
+    ///
     /// If disabled, the rule will not trigger diagnostics for unused dependencies passed to hooks that do not use them. \
     /// Note that this can reduce performance and potentially cause infinite loops, so caution is advised.
-    /// 
+    ///
     /// Default: `true`
-    /// 
+    ///
     /// ##### Example
     ///
     /// ```json,options
@@ -342,14 +342,14 @@ declare_lint_rule! {
     ///   useEffect(() => {}, [stateVar]);
     /// }
     /// ```
-    /// 
+    ///
     /// ### `reportMissingDependenciesArray`
-    /// 
+    ///
     /// If enabled, the rule will also trigger diagnostics for hooks that lack dependency arrays altogether,
     /// requiring any hooks lacking dependencies to explicitly specify an empty array.
-    /// 
+    ///
     /// Default: `false`
-    /// 
+    ///
     /// ##### Example
     ///
     /// ```json,options
@@ -366,7 +366,7 @@ declare_lint_rule! {
     ///   useEffect(() => {});
     /// }
     /// ```
-    /// 
+    ///
     pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
@@ -1045,7 +1045,7 @@ impl Rule for UseExhaustiveDependencies {
                         "This hook specifies "<Emphasis>"more dependencies than necessary"</Emphasis>": "{deps_joined_with_comma}"."
                     },
                 )
-                .note(markup! {                        
+                .note(markup! {
                         "\nReact relies on hook dependencies to determine when to re-compute Effects."
                         "\nSpecifying more dependencies than required can lead to "<Emphasis>"unnecessary re-rendering"</Emphasis>
                         " and "<Emphasis>"degraded performance"</Emphasis>"."
