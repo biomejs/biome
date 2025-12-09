@@ -254,7 +254,7 @@ fn find_pnpm_workspace_catalog(fs: &dyn FileSystem) -> Option<Catalogs> {
 
     for dir in working_directory.ancestors() {
         let workspace_file = dir.join("pnpm-workspace.yaml");
-        if !workspace_file.is_file() {
+        if !fs.path_is_file(&workspace_file) {
             continue;
         }
 
@@ -337,17 +337,14 @@ pub fn project_layout_for_test_file(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_fs::TemporaryFs;
+    use biome_fs::MemoryFileSystem;
 
     #[test]
     fn finds_catalog_from_workspace_file() {
-        let fs = TemporaryFs::new("pnpm_workspace_catalog");
-        fs.create_file(
-            "pnpm-workspace.yaml",
-            r#"
-catalog:
-  react: 19.0.0
-"#,
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8Path::new("pnpm-workspace.yaml").into(),
+            b"catalog:\n  react: 19.0.0\n".to_vec(),
         );
 
         let catalog = find_pnpm_workspace_catalog(&fs).expect("catalog should be parsed");
@@ -357,7 +354,7 @@ catalog:
 
     #[test]
     fn no_catalog_when_workspace_missing() {
-        let fs = TemporaryFs::new("pnpm_workspace_catalog_missing");
+        let fs = MemoryFileSystem::default();
         assert!(find_pnpm_workspace_catalog(&fs).is_none());
     }
 }

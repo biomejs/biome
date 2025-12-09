@@ -137,25 +137,26 @@ impl PackageJson {
 
             let indent = line.len() - trimmed_start.len();
 
-            if !in_default && catalogs_indent.is_none() {
-                if trimmed_start.starts_with("catalog:") {
-                    in_default = true;
-                    default_indent = indent;
-                    continue;
-                }
-
-                if trimmed_start.starts_with("catalogs:") {
-                    catalogs_indent = Some(indent);
-                    continue;
-                }
-            }
-
             if in_default {
                 if indent <= default_indent {
                     in_default = false;
                 } else if let Some(entry) = parse_pnpm_catalog_entry(trimmed_start) {
                     default_entries.push(entry);
                 }
+
+                if in_default {
+                    continue;
+                }
+            }
+
+            if !in_default && catalogs_indent.is_none() && trimmed_start.starts_with("catalog:") {
+                in_default = true;
+                default_indent = indent;
+                continue;
+            }
+
+            if catalogs_indent.is_none() && trimmed_start.starts_with("catalogs:") {
+                catalogs_indent = Some(indent);
                 continue;
             }
 
