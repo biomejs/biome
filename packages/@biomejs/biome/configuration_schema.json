@@ -1350,7 +1350,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features.",
+					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {

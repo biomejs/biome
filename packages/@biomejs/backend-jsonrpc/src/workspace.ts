@@ -444,7 +444,8 @@ export interface CssParserConfiguration {
 	 */
 	allowWrongLineComments?: Bool;
 	/**
-	 * Enables parsing of CSS Modules specific features.
+	* Enables parsing of CSS Modules specific features. Enable this feature only
+when your files don't end in `.module.css`. 
 	 */
 	cssModules?: Bool;
 	/**
