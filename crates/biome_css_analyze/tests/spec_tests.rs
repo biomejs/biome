@@ -54,7 +54,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
     let mut diagnostics = vec![];
-    let parser_options = create_parser_options::<CssLanguage>(&input_file, &mut diagnostics);
+    let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));

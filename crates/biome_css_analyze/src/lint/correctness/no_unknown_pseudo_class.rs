@@ -177,7 +177,6 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        dbg!(&file_source.is_css_modules());
         if is_valid_class || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
         {
             None

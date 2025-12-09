@@ -156,7 +156,6 @@ impl ServiceLanguage for CssLanguage {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        dbg!("css resolve_parse_options");
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
@@ -186,8 +185,6 @@ impl ServiceLanguage for CssLanguage {
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
-
-        dbg!(&options);
 
         options
     }
