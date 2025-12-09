@@ -49,7 +49,8 @@ pub struct CssParserConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
 
-    /// Enables parsing of CSS Modules specific features.
+    /// Enables parsing of CSS Modules specific features. Enable this feature only
+    /// when your files don't end in `.module.css`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("css-parse-css-modules"), argument("true|false"))]
     pub css_modules: Option<CssModulesEnabled>,
