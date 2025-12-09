@@ -10259,7 +10259,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
+					"description": "Disallow use of @value rule in CSS modules.\nSee <https://biomejs.dev/linter/rules/no-value-at-rule>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }

@@ -2397,7 +2397,7 @@ See <https://biomejs.dev/linter/rules/no-useless-else>
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
-	* Disallow use of @value rule in css modules.
+	* Disallow use of @value rule in CSS modules.
 See <https://biomejs.dev/linter/rules/no-value-at-rule> 
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
