@@ -42,13 +42,13 @@ declare_lint_rule! {
     ///
     ///   /** Increment the count once per second. */
     ///   function onTick() {
-	///     setCount(count + 1);
-	///   }
-	///
-	///   // React _thinks_ this code doesn't depend on anything else, so
-	///   // it will only use the _initial_ version of `onTick` when rendering the component.
-	///   // As a result, our normally-dynamic counter will always display 1!
-	///   // This is referred to as a "stale closure", and is a common pitfall for beginners.
+    ///     setCount(count + 1);
+    ///   }
+    ///
+    ///   // React _thinks_ this code doesn't depend on anything else, so
+    ///   // it will only use the _initial_ version of `onTick` when rendering the component.
+    ///   // As a result, our normally-dynamic counter will always display 1!
+    ///   // This is referred to as a "stale closure", and is a common pitfall for beginners.
     ///   useEffect(() => {
     ///     const id = setInterval(onTick, 1000);
     ///     return () => clearInterval(id);
@@ -63,9 +63,9 @@ declare_lint_rule! {
     ///   const [count, setCount] = useState(0);
     ///   const [message, setMessage] = useState("We have 0 apples!");
     ///
-	///   // React _thinks_ this code depends on BOTH `count` and `message`, and will re-run the hook whenever
-	///   // `message` is changed despite it not actually being used inside the closure.
-	///   // In fact, this will create an infinite loop due to our hook updating `message` and triggering itself again!
+    ///   // React _thinks_ this code depends on BOTH `count` and `message`, and will re-run the hook whenever
+    ///   // `message` is changed despite it not actually being used inside the closure.
+    ///   // In fact, this will create an infinite loop due to our hook updating `message` and triggering itself again!
     ///   useEffect(() => {
     ///     setMessage(`We have ${count} apples!`)
     ///   }, [count, message]);

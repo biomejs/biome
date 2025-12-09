@@ -1136,7 +1136,7 @@
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified in a React hook.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
+					"description": "Enforce correct dependency usage within React hooks.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveDependenciesConfiguration" },
 						{ "type": "null" }

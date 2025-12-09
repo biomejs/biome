@@ -1777,7 +1777,7 @@ See <https://biomejs.dev/linter/rules/no-void-type-return>
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce all dependencies are correctly specified in a React hook.
+	* Enforce correct dependency usage within React hooks.
 See <https://biomejs.dev/linter/rules/use-exhaustive-dependencies> 
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
