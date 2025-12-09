@@ -338,7 +338,7 @@ declare_lint_rule! {
     /// ```jsx,use_options
     /// function Foo() {
     ///   let stateVar = 1;
-    ///   // not used but still OK due to disabled rule
+    ///   // not used but still OK
     ///   useEffect(() => {}, [stateVar]);
     /// }
     /// ```
@@ -1008,7 +1008,7 @@ impl Rule for UseExhaustiveDependencies {
                         "This hook "<Emphasis>"does not specify"</Emphasis>" its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."
                     },
                 ).note(markup! {
-                    "\nReact relies on hook dependencies to determine when to re-compute Effects."
+                    "React relies on hook dependencies to determine when to re-compute Effects."
                     "\nFailing to specify dependencies can result in Effects "<Emphasis>"not updating correctly"</Emphasis>" when state changes."
                     "\nThese \"stale closures\" are a common source of surprising bugs."
                     },
@@ -1046,9 +1046,9 @@ impl Rule for UseExhaustiveDependencies {
                     },
                 )
                 .note(markup! {
-                        "\nReact relies on hook dependencies to determine when to re-compute Effects."
+                        "React relies on hook dependencies to determine when to re-compute Effects."
                         "\nSpecifying more dependencies than required can lead to "<Emphasis>"unnecessary re-rendering"</Emphasis>
-                        " and "<Emphasis>"degraded performance"</Emphasis>"."
+                        "\nand "<Emphasis>"degraded performance"</Emphasis>"."
                     },
                 );
 

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reportMissingDependenciesArray.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -24,7 +23,7 @@ function ReportMissingDependenciesArray() {
 ```
 reportMissingDependenciesArray.js:7:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not have a dependencies array
+  × This hook does not have a dependencies array.
   
     5 │     const [a] = useState(1);
     6 │ 
