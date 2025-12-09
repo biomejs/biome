@@ -44,8 +44,9 @@ use tokio::sync::watch;
 use tokio::task::spawn_blocking;
 use tower_lsp_server::Client;
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, Diagnostic, MessageType, Registration, Unregistration, Uri,
-    WorkspaceFolder,
+    self as lsp, ClientCapabilities, Diagnostic, MessageType, ProgressToken, Registration,
+    Unregistration, Uri, WorkDoneProgressCreateParams, WorkspaceFolder,
+    request::WorkDoneProgressCreate,
 };
 use tracing::{debug, error, info, instrument, warn};
 use uuid::Uuid;
@@ -112,7 +113,7 @@ pub(crate) struct Session {
 
 /// The parameters provided by the client in the "initialize" request
 struct InitializeParams {
-    /// The capabilities provided by the client as part of [`lsp_types::InitializeParams`]
+    /// The capabilities provided by the client as part of [`ls_types::InitializeParams`]
     client_capabilities: ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Uri>,
@@ -706,7 +707,7 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
-        let progress_token = lsp_types::ProgressToken::String(Uuid::new_v4().to_string());
+        let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
         let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
             params
                 .client_capabilities
@@ -719,11 +720,9 @@ impl Session {
         let progress = if is_work_done_progress_supported
             && self
                 .client
-                .send_request::<lsp_types::request::WorkDoneProgressCreate>(
-                    lsp_types::WorkDoneProgressCreateParams {
-                        token: progress_token.clone(),
-                    },
-                )
+                .send_request::<WorkDoneProgressCreate>(WorkDoneProgressCreateParams {
+                    token: progress_token.clone(),
+                })
                 .await
                 .is_ok()
         {
