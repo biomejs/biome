@@ -161,7 +161,6 @@ pub fn create_parser_options<L: ServiceLanguage>(
                 .collect::<Vec<_>>(),
         );
 
-        dbg!("create_parse_options");
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
