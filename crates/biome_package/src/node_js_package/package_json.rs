@@ -273,9 +273,7 @@ fn resolve_dependency_version<'a>(
     version: &'a str,
     catalog: Option<&'a Catalogs>,
 ) -> &'a str {
-    if let Some(catalogs) = catalog
-        && let Some(rest) = version.strip_prefix("catalog:")
-    {
+    if let (Some(catalogs), Some(rest)) = (catalog, version.strip_prefix("catalog:")) {
         let (catalog_name, package_name) = if rest.is_empty() {
             (None, specifier)
         } else {
