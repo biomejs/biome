@@ -164,13 +164,25 @@ where
             // When colors are disabled on non-Windows systems, we need to balance two concerns:
             // 1. Convert diagnostic UI symbols (✔ ℹ ⚠ ✖) to ASCII for better readability
             // 2. Preserve source code fidelity for multi-codepoint graphemes
-            // We do this by only converting single-codepoint graphemes that match known symbols.
-            if cfg!(windows) || !self.writer.supports_color() {
-                let is_ascii = grapheme.is_ascii();
+            let is_ascii = grapheme.is_ascii();
 
-                if !is_ascii {
-                    // Only convert if this is a single-codepoint grapheme (diagnostic symbol)
-                    // Multi-codepoint graphemes (like emoji with modifiers) are preserved
+            if !is_ascii {
+                if cfg!(windows) {
+                    // On Windows, always convert all non-ASCII graphemes due to poor terminal support
+                    let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
+
+                    replacement.encode_utf8(&mut buffer);
+
+                    if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
+                        self.error = Err(err);
+                        return Err(fmt::Error);
+                    }
+
+                    continue;
+                } else if !self.writer.supports_color() {
+                    // On non-Windows with colors disabled:
+                    // Only convert single-codepoint graphemes (diagnostic symbols)
+                    // Multi-codepoint graphemes (like emoji with modifiers) are preserved for source code fidelity
                     let chars: Vec<char> = grapheme.chars().collect();
                     if chars.len() == 1 {
                         let replacement = unicode_to_ascii(chars[0]);
@@ -186,7 +198,7 @@ where
                     }
                     // Multi-codepoint graphemes fall through to be written as-is below
                 }
-            };
+            }
 
             for char in grapheme.chars() {
                 char.encode_utf8(&mut buffer);
