@@ -134,6 +134,55 @@ pub fn load_configuration_for_test_file(
     }
 }
 
+pub fn create_parser_options<L: ServiceLanguage>(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> Option<L::ParserOptions> {
+    let Ok((source, loaded_configuration)) = load_configuration_for_test_file(input_file) else {
+        return None;
+    };
+
+    let projects = Projects::default();
+    let key = projects.insert_project(Utf8PathBuf::from(""));
+
+    if loaded_configuration.has_errors() {
+        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        diagnostics.extend(
+            loaded_configuration
+                .diagnostics
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(
+                        configuration_path.file_stem().unwrap(),
+                        &source,
+                        diagnostic,
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        dbg!("create_parse_options");
+        Default::default()
+    } else {
+        let configuration = loaded_configuration.configuration;
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        settings
+            .merge_with_configuration(
+                configuration,
+                None,
+                loaded_configuration.extended_configurations,
+            )
+            .unwrap();
+
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
+        let handle = SettingsHandle::new(&settings, None);
+        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+    }
+}
+
 pub fn create_formatting_options<L>(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,

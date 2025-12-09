@@ -103,6 +103,11 @@ impl CssFileSource {
         self
     }
 
+    pub fn with_tailwind_directives(mut self) -> Self {
+        self.variant = CssVariant::TailwindCss;
+        self
+    }
+
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
     }
@@ -123,9 +128,18 @@ impl CssFileSource {
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName)
+    pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        // Be careful with definition files, because `Path::extension()` only
+        // returns the extension after the _last_ dot:
+        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        if file_name.ends_with(".module.css") {
+            return Self::try_from_extension("module.css");
+        }
+
+        match path.extension() {
+            Some(extension) => Self::try_from_extension(extension),
+            None => Err(FileSourceError::MissingFileExtension),
+        }
     }
 
     /// Try to return the CSS file source corresponding to this file extension
@@ -133,6 +147,7 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
+            "module.css" => Ok(Self::new_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }

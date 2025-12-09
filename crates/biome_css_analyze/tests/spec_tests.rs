@@ -2,7 +2,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
 use biome_css_analyze::CssAnalyzerServices;
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
@@ -11,7 +11,7 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -53,22 +53,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
-
-    let parser_options = if file_name.ends_with(".module.css") {
-        CssParserOptions {
-            css_modules: CssModulesKind::Classic,
-            ..CssParserOptions::default()
-        }
-    } else if file_name.ends_with(".tailwind.css") {
-        // HACK: Our infra doesn't support loading parser options from test files yet,
-        // so we hardcode enabling tailwind directives for files named *.tailwind.css
-        CssParserOptions {
-            tailwind_directives: true,
-            ..CssParserOptions::default()
-        }
-    } else {
-        CssParserOptions::default()
-    };
+    let mut diagnostics = vec![];
+    let parser_options = create_parser_options::<CssLanguage>(&input_file, &mut diagnostics);
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
@@ -83,14 +69,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                parser_options,
+                parser_options.unwrap_or_default(),
                 &[],
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(source_type): Result<CssFileSource, _> = input_file.try_into() else {
             return;
         };
+
+        let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
+
         analyze_and_snap(
             &mut snapshot,
             &input_code,

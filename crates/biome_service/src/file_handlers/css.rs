@@ -156,6 +156,7 @@ impl ServiceLanguage for CssLanguage {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
+        dbg!("css resolve_parse_options");
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
@@ -181,10 +182,12 @@ impl ServiceLanguage for CssLanguage {
                 })
                 .unwrap_or_default(),
             grit_metavariables: false,
-            tailwind_directives: language.tailwind_directives_enabled(),
+            tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
+
+        dbg!(&options);
 
         options
     }
@@ -412,43 +415,7 @@ fn parse(
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = CssParserOptions {
-        allow_wrong_line_comments: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .allow_wrong_line_comments
-            .unwrap_or_default()
-            .into(),
-        css_modules: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .css_modules_enabled
-            .map_or(CssModulesKind::None, |bool| {
-                if bool.value() {
-                    CssModulesKind::Classic
-                } else {
-                    CssModulesKind::None
-                }
-            }),
-        grit_metavariables: false,
-        tailwind_directives: settings
-            .as_ref()
-            .languages
-            .css
-            .parser
-            .tailwind_directives
-            .unwrap_or_default()
-            .into(),
-    };
-
-    settings
-        .as_ref()
-        .override_settings
-        .apply_override_css_parser_options(biome_path, &mut options);
+    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
 
     let source_type = file_source.to_css_file_source().unwrap_or_default();
     let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
