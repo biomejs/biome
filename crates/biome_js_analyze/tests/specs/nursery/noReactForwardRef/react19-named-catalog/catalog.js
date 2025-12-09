@@ -1,4 +1,4 @@
-/* should generate diagnostics with pnpm named catalog */
+/* should generate diagnostics */
 
 import { forwardRef } from "react";
 
