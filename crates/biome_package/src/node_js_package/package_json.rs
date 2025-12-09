@@ -9,7 +9,13 @@ use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_json_value::JsonValue;
+use biome_rowan::AstNodeList;
 use biome_text_size::TextRange;
+use biome_yaml_parser::parse_yaml;
+use biome_yaml_syntax::{
+    AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
+    AnyYamlMappingImplicitKey, YamlBlockMapping,
+};
 use camino::Utf8Path;
 use rustc_hash::FxHashMap;
 use std::{ops::Deref, str::FromStr};
@@ -118,97 +124,53 @@ impl PackageJson {
     /// Extract catalog entries from a pnpm workspace file, supporting both the
     /// default `catalog:` and named catalogs under `catalogs:`.
     pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Catalogs> {
+        let parsed = parse_yaml(source);
+        if parsed.has_errors() {
+            return None;
+        }
+
         let mut catalogs = Catalogs::default();
+        let root = parsed.tree();
+        let document = root
+            .documents()
+            .into_iter()
+            .find_map(|doc| doc.as_yaml_document().cloned())?;
+        let top_node = document.node()?;
+        let mapping = as_catalog_block_mapping(&top_node)?;
 
-        let mut in_default = false;
-        let mut default_indent = 0usize;
-        let mut default_entries: Vec<(Box<str>, Box<str>)> = Vec::new();
-
-        let mut catalogs_indent = None;
-        let mut current_catalog: Option<(Box<str>, Vec<(Box<str>, Box<str>)>)> = None;
-        let mut current_catalog_indent = 0usize;
-
-        for line in source.lines() {
-            let trimmed_start = line.trim_start();
-
-            if trimmed_start.is_empty() || trimmed_start.starts_with('#') {
+        for entry in mapping.entries() {
+            let Some((key, value_node)) = parse_catalog_mapping_entry(entry) else {
                 continue;
-            }
+            };
 
-            let indent = line.len() - trimmed_start.len();
-
-            if in_default {
-                if indent <= default_indent {
-                    in_default = false;
-                } else if let Some(entry) = parse_pnpm_catalog_entry(trimmed_start) {
-                    default_entries.push(entry);
-                }
-
-                if in_default {
-                    continue;
-                }
-            }
-
-            if !in_default && catalogs_indent.is_none() && trimmed_start.starts_with("catalog:") {
-                in_default = true;
-                default_indent = indent;
-                continue;
-            }
-
-            if catalogs_indent.is_none() && trimmed_start.starts_with("catalogs:") {
-                catalogs_indent = Some(indent);
-                continue;
-            }
-
-            if let Some(cat_indent) = catalogs_indent {
-                if indent <= cat_indent {
-                    if let Some((name, entries)) = current_catalog.take() {
-                        catalogs
-                            .named
-                            .insert(name, Dependencies(entries.into_boxed_slice()));
-                    }
-                    continue;
-                }
-
-                if let Some((name, entries)) = &mut current_catalog {
-                    if indent <= current_catalog_indent {
-                        let entries = std::mem::take(entries);
-                        catalogs
-                            .named
-                            .insert(name.clone(), Dependencies(entries.into_boxed_slice()));
-                        current_catalog = None;
-                    }
-                }
-
-                if current_catalog.is_none() {
-                    if let Some((raw_name, _)) = trimmed_start.split_once(':') {
-                        let name = raw_name.trim().trim_matches(['\'', '"']);
-                        if !name.is_empty() {
-                            current_catalog = Some((name.into(), Vec::new()));
-                            current_catalog_indent = indent;
-                        }
-                    }
-                    continue;
-                }
-
-                if let Some((_, entries)) = &mut current_catalog {
-                    if indent > current_catalog_indent {
-                        if let Some(entry) = parse_pnpm_catalog_entry(trimmed_start) {
-                            entries.push(entry);
+            match key.as_ref() {
+                "catalog" => {
+                    if let Some(deps_map) = as_catalog_block_mapping(&value_node) {
+                        let deps = collect_catalog_dependencies(&deps_map);
+                        if !deps.is_empty() {
+                            catalogs.default = Some(deps);
                         }
                     }
                 }
+                "catalogs" => {
+                    if let Some(named_map) = as_catalog_block_mapping(&value_node) {
+                        for catalog_entry in named_map.entries() {
+                            let Some((name, catalog_node)) = parse_catalog_mapping_entry(catalog_entry) else {
+                                continue;
+                            };
+
+                            if let Some(deps_map) = as_catalog_block_mapping(&catalog_node)
+                            {
+                                let deps = collect_catalog_dependencies(&deps_map);
+                                if !deps.is_empty() {
+                                    catalogs.named.insert(name, deps);
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
             }
-        }
-
-        if let Some((name, entries)) = current_catalog.take() {
-            catalogs
-                .named
-                .insert(name, Dependencies(entries.into_boxed_slice()));
-        }
-
-        if !default_entries.is_empty() {
-            catalogs.default = Some(Dependencies(default_entries.into_boxed_slice()));
         }
 
         if catalogs.is_empty() {
@@ -241,24 +203,150 @@ impl Catalogs {
     }
 }
 
-/// Parses a single `key: value` line from a pnpm catalog section, stripping
-/// surrounding quotes and whitespace. Returns `None` for malformed pairs.
-fn parse_pnpm_catalog_entry(value: &str) -> Option<(Box<str>, Box<str>)> {
-    let (raw_key, raw_value) = value.split_once(':')?;
-    let key = raw_key.trim().trim_matches(['\'', '"']);
-    let mut val = raw_value.trim();
-
-    if val.starts_with('"') && val.ends_with('"') && val.len() >= 2 {
-        val = &val[1..val.len() - 1];
-    } else if val.starts_with('\'') && val.ends_with('\'') && val.len() >= 2 {
-        val = &val[1..val.len() - 1];
+/// Parses a catalog mapping entry into a `(key, value node)` pair, keeping only
+/// scalar keys and cloning the value node; returns `None` when the key or value
+/// is missing or non-scalar.
+fn parse_catalog_mapping_entry(entry: AnyYamlBlockMapEntry) -> Option<(Box<str>, AnyYamlBlockNode)> {
+    if let Some(explicit) = entry.as_yaml_block_map_explicit_entry() {
+        let key = explicit.key()?;
+        let value = explicit.value()?.clone();
+        return extract_catalog_scalar_from_block_node(&key).map(|key| (key, value));
     }
 
-    if key.is_empty() || val.is_empty() {
+    if let Some(implicit) = entry.as_yaml_block_map_implicit_entry() {
+        let key = extract_catalog_scalar_from_implicit_key(&implicit.key()?)?;
+        let value = implicit.value()?.clone();
+        return Some((key, value));
+    }
+
+    None
+}
+
+/// Narrows a block node to a `YamlBlockMapping` if it represents a mapping.
+fn as_catalog_block_mapping(node: &AnyYamlBlockNode) -> Option<YamlBlockMapping> {
+    node.as_any_yaml_block_in_block_node()?
+        .as_yaml_block_mapping()
+        .cloned()
+}
+
+/// Builds `Dependencies` from a YAML mapping, reading only scalar
+/// `key: value` pairs and skipping any complex structures.
+fn collect_catalog_dependencies(mapping: &YamlBlockMapping) -> Dependencies {
+    let mut deps = Vec::new();
+    for entry in mapping.entries() {
+        if let Some((name, version_node)) = parse_catalog_mapping_entry(entry) {
+            if let Some(version) = extract_catalog_scalar_from_block_node(&version_node) {
+                deps.push((name, version));
+            }
+        }
+    }
+
+    Dependencies(deps.into_boxed_slice())
+}
+
+/// Extracts a scalar string from an implicit mapping key (flow YAML/JSON node).
+fn extract_catalog_scalar_from_implicit_key(
+    key: &AnyYamlMappingImplicitKey,
+) -> Option<Box<str>> {
+    if let Some(flow_yaml) = key.as_yaml_flow_yaml_node() {
+        return flow_yaml
+            .content()?
+            .value_token()
+            .ok()
+            .and_then(|token| normalize_catalog_scalar_text(token.text()));
+    }
+
+    if let Some(flow_json) = key.as_yaml_flow_json_node() {
+        if let Some(content) = flow_json.content() {
+            return match content {
+                AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                    .value_token()
+                    .ok()
+                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
+                AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                    .value_token()
+                    .ok()
+                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
+                AnyYamlJsonContent::YamlFlowMapping(_)
+                | AnyYamlJsonContent::YamlFlowSequence(_) => None,
+            };
+        }
+    }
+
+    None
+}
+
+/// Extracts a scalar string from a flow node (plain/double/single quoted).
+fn extract_catalog_scalar_from_flow_node(node: &AnyYamlFlowNode) -> Option<Box<str>> {
+    if let Some(flow_yaml) = node.as_yaml_flow_yaml_node() {
+        return flow_yaml
+            .content()?
+            .value_token()
+            .ok()
+            .and_then(|token| normalize_catalog_scalar_text(token.text()));
+    }
+
+    if let Some(flow_json) = node.as_yaml_flow_json_node() {
+        if let Some(content) = flow_json.content() {
+            return match content {
+                AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                    .value_token()
+                    .ok()
+                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
+                AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                    .value_token()
+                    .ok()
+                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
+                AnyYamlJsonContent::YamlFlowMapping(_)
+                | AnyYamlJsonContent::YamlFlowSequence(_) => None,
+            };
+        }
+    }
+
+    None
+}
+
+/// Extracts a scalar string from a block node when represented as a flow scalar
+/// in block context. Returns `None` for mapping/sequence content.
+fn extract_catalog_scalar_from_block_node(node: &AnyYamlBlockNode) -> Option<Box<str>> {
+    if let Some(flow) = node.as_yaml_flow_in_block_node() {
+        let flow_node = flow.flow().ok()?;
+        return extract_catalog_scalar_from_flow_node(&flow_node);
+    }
+
+    if let Some(block) = node.as_any_yaml_block_in_block_node() {
+        if let Some(mapping) = block.as_yaml_block_mapping() {
+            if mapping.entries().is_empty() {
+                return None;
+            }
+        }
+    }
+
+    None
+}
+
+/// Trims whitespace and surrounding quotes from a scalar token, returning `None`
+/// for empty values after normalization.
+fn normalize_catalog_scalar_text(value: &str) -> Option<Box<str>> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
         return None;
     }
 
-    Some((key.into(), val.into()))
+    let without_quotes = if trimmed.starts_with('"') && trimmed.ends_with('"') && trimmed.len() >= 2
+    {
+        &trimmed[1..trimmed.len() - 1]
+    } else if trimmed.starts_with('\'') && trimmed.ends_with('\'') && trimmed.len() >= 2 {
+        &trimmed[1..trimmed.len() - 1]
+    } else {
+        trimmed
+    };
+
+    if without_quotes.is_empty() {
+        None
+    } else {
+        Some(without_quotes.to_owned().into_boxed_str())
+    }
 }
 
 /// Checks if a manifest dependency satisfies a semver range, resolving pnpm
@@ -703,29 +791,5 @@ catalogs:
         let resolved_named =
             super::resolve_dependency_version("react", "catalog:legacy", Some(&catalog));
         assert_eq!(resolved_named, "18.3.1");
-    }
-
-    #[test]
-    fn parse_pnpm_catalog_entry_accepts_variants() {
-        assert_eq!(
-            super::parse_pnpm_catalog_entry("react: 19.0.0"),
-            Some(("react".into(), "19.0.0".into()))
-        );
-        assert_eq!(
-            super::parse_pnpm_catalog_entry("\"react-dom\": \"^19.0.0\""),
-            Some(("react-dom".into(), "^19.0.0".into()))
-        );
-        assert_eq!(
-            super::parse_pnpm_catalog_entry("react : '19.0.0'"),
-            Some(("react".into(), "19.0.0".into()))
-        );
-    }
-
-    #[test]
-    fn parse_pnpm_catalog_entry_rejects_invalid() {
-        assert!(super::parse_pnpm_catalog_entry("react").is_none());
-        assert!(super::parse_pnpm_catalog_entry(":").is_none());
-        assert!(super::parse_pnpm_catalog_entry("react: ").is_none());
-        assert!(super::parse_pnpm_catalog_entry(": 19.0.0").is_none());
     }
 }
