@@ -1,6 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-expression: validGlobal.css
+expression: validGlobal.module.css
 ---
 # Input
 ```css

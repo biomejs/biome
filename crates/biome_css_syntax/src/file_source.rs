@@ -10,8 +10,28 @@ pub enum EmbeddingKind {
     /// styled-components or Emotion embedded CSS
     Styled,
 
+    /// The CSS is embedded inside HTML-like files
+    Html(EmbeddingHtmlKind),
+
     #[default]
     None,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum EmbeddingHtmlKind {
+    #[default]
+    None,
+    /// `.html` files
+    Html,
+    /// `.vue` files
+    Vue,
+    /// `.astro` files
+    Astro,
+    /// `.svelte` files
+    Svelte,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -62,6 +82,13 @@ impl CssFileSource {
         }
     }
 
+    pub fn new_css_modules() -> Self {
+        Self {
+            variant: CssVariant::CssModules,
+            embedding_kind: EmbeddingKind::None,
+        }
+    }
+
     pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
         self.embedding_kind = kind;
         self
@@ -71,8 +98,25 @@ impl CssFileSource {
         &self.embedding_kind
     }
 
+    pub fn with_css_modules(mut self) -> Self {
+        self.variant = CssVariant::CssModules;
+        self
+    }
+
+    pub fn with_tailwind_directives(mut self) -> Self {
+        self.variant = CssVariant::TailwindCss;
+        self
+    }
+
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
+    }
+
+    pub fn is_vue_embedded(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Html(EmbeddingHtmlKind::Vue)
+        )
     }
 
     pub fn is_tailwind_css(&self) -> bool {
@@ -84,9 +128,18 @@ impl CssFileSource {
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName)
+    pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        // Be careful with definition files, because `Path::extension()` only
+        // returns the extension after the _last_ dot:
+        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        if file_name.ends_with(".module.css") {
+            return Self::try_from_extension("module.css");
+        }
+
+        match path.extension() {
+            Some(extension) => Self::try_from_extension(extension),
+            None => Err(FileSourceError::MissingFileExtension),
+        }
     }
 
     /// Try to return the CSS file source corresponding to this file extension
@@ -94,6 +147,7 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
+            "module.css" => Ok(Self::new_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }

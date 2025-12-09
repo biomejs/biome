@@ -408,7 +408,6 @@ impl<L: Language + Default> RegistryRule<L> {
             let jsx_runtime = params.options.jsx_runtime();
             let jsx_factory = params.options.jsx_factory();
             let jsx_fragment_factory = params.options.jsx_fragment_factory();
-            let css_modules = params.options.css_modules();
             let options = params.options.rule_options::<R>().unwrap_or_default();
             let ctx = RuleContext::new(
                 &query_result,
@@ -423,7 +422,6 @@ impl<L: Language + Default> RegistryRule<L> {
                 jsx_runtime,
                 jsx_factory,
                 jsx_fragment_factory,
-                css_modules,
             )?;
 
             for result in R::run(&ctx) {

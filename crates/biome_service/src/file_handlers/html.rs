@@ -20,7 +20,7 @@ use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
-use biome_css_parser::parse_css_with_offset_and_cache;
+use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
@@ -437,7 +437,8 @@ fn parse_embedded_nodes(
                 }
             }
         } else if element.is_style_tag() {
-            let result = parse_embedded_style(element.clone(), cache, biome_path, settings);
+            let result =
+                parse_embedded_style(element.clone(), cache, biome_path, file_source, settings);
             if let Some((content, services, file_source)) = result {
                 nodes.push(((content, services).into(), file_source));
             }
@@ -550,12 +551,14 @@ pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
+    html_file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
 ) -> Option<(
     EmbeddedSnippet<CssLanguage>,
     DocumentServices,
     DocumentFileSource,
 )> {
+    let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
@@ -567,11 +570,20 @@ pub(crate) fn parse_embedded_style(
             return None;
         }
 
-        let file_source = DocumentFileSource::Css(CssFileSource::css());
+        let file_source = if html_file_source.is_html() {
+            DocumentFileSource::Css(CssFileSource::css())
+        } else {
+            DocumentFileSource::Css(CssFileSource::new_css_modules())
+        };
         let (snippet, services) = element.children().iter().next().and_then(|child| {
             let child = child.as_any_html_content()?;
             let child = child.as_html_embedded_content()?;
-            let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            let mut options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            if html_file_source.is_vue() {
+                options.css_modules = CssModulesKind::Vue
+            } else if !html_file_source.is_html() {
+                options.css_modules = CssModulesKind::Classic
+            }
             let content = child.value_token().ok()?;
             let parse = parse_css_with_offset_and_cache(
                 content.text(),

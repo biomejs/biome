@@ -11,7 +11,7 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -53,15 +53,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
-
-    let parser_options = if file_name.ends_with(".module.css") {
-        CssParserOptions {
-            css_modules: true,
-            ..CssParserOptions::default()
-        }
-    } else {
-        CssParserOptions::default()
-    };
+    let mut diagnostics = vec![];
+    let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
@@ -76,14 +69,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                parser_options,
+                parser_options.unwrap_or_default(),
                 &[],
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(source_type): Result<CssFileSource, _> = input_file.try_into() else {
             return;
         };
+
+        let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
+
         analyze_and_snap(
             &mut snapshot,
             &input_code,
@@ -119,12 +115,6 @@ pub(crate) fn analyze_and_snap(
 ) {
     let mut diagnostics = Vec::new();
     let options = create_analyzer_options::<CssLanguage>(input_file, &mut diagnostics);
-
-    let parser_options = if options.css_modules() {
-        parser_options.allow_css_modules()
-    } else {
-        parser_options
-    };
 
     let parsed = parse_css(input_code, source_type, parser_options);
     let root = parsed.tree();

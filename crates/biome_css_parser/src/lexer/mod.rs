@@ -749,6 +749,8 @@ impl<'src> CssLexer<'src> {
             b"dir" => DIR_KW,
             b"global" => GLOBAL_KW,
             b"local" => LOCAL_KW,
+            b"slotted" => SLOTTED_KW,
+            b"deep" => DEEP_KW,
             b"-moz-any" => ANY_KW,
             b"-webkit-any" => ANY_KW,
             b"past" => PAST_KW,

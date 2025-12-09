@@ -19,7 +19,7 @@ use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
@@ -1790,7 +1790,11 @@ impl OverrideSettingPattern {
             options.allow_wrong_line_comments = allow_wrong_line_comments.value();
         }
         if let Some(css_modules) = css_parser.css_modules_enabled {
-            options.css_modules = css_modules.value();
+            options.css_modules = if css_modules.value() {
+                CssModulesKind::Classic
+            } else {
+                CssModulesKind::None
+            };
         }
         if let Some(tailwind_directives) = css_parser.tailwind_directives {
             options.tailwind_directives = tailwind_directives.value();
