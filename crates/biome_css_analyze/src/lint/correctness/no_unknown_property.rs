@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::CssGenericProperty;
+use biome_css_syntax::{CssGenericProperty, TwPluginAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
@@ -76,6 +76,14 @@ impl Rule for NoUnknownProperty {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+        let is_inside_plugin_at_rule = node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .any(|ancestor| TwPluginAtRule::can_cast(ancestor.kind()));
+        if is_inside_plugin_at_rule {
+            return None;
+        }
         let property_name = node.name().ok()?.to_trimmed_text();
         let property_name_lower = property_name.to_ascii_lowercase_cow();
         if !property_name_lower.starts_with("--")
