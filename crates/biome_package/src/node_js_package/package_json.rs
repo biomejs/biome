@@ -34,6 +34,12 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
+    /// Optional pnpm workspace catalogs (`catalog:` and `catalogs:`) resolved from
+    /// a `pnpm-workspace.yaml`. When present, dependency versions declared as
+    /// `catalog:` or `catalog:<name>` are looked up via `Catalogs`; when `None`,
+    /// no catalog resolution is applied and literal versions are used. This field
+    /// is typically populated by parsing the workspace file rather than
+    /// directly from `package.json`.
     pub catalog: Option<Catalogs>,
     pub license: Option<(Box<str>, TextRange)>,
 
