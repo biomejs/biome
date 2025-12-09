@@ -249,20 +249,17 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-fn find_pnpm_workspace_catalog(fs: &dyn FileSystem) -> Option<Catalogs> {
-    let working_directory = fs.working_directory().unwrap_or_default();
+fn find_pnpm_workspace_catalog(
+    fs: &dyn FileSystem,
+    input_file: &Utf8Path,
+) -> Option<Catalogs> {
+    let workspace_file = input_file.with_file_name("pnpm-workspace.yaml");
+    if !fs.path_is_file(&workspace_file) {
+        return None;
+    }
 
-    for dir in working_directory.ancestors() {
-        let workspace_file = dir.join("pnpm-workspace.yaml");
-        if !fs.path_is_file(&workspace_file) {
-            continue;
-        }
-
-        if let Ok(content) = fs.read_file_from_path(&workspace_file) {
-            if let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content) {
-                return Some(catalog);
-            }
-        }
+    if let Ok(content) = fs.read_file_from_path(&workspace_file) {
+        return PackageJson::parse_pnpm_workspace_catalog(&content);
     }
 
     None
@@ -274,7 +271,7 @@ pub fn project_layout_for_test_file(
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
-    let pnpm_catalog = find_pnpm_workspace_catalog(&fs);
+    let pnpm_catalog = find_pnpm_workspace_catalog(&fs, input_file);
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
@@ -343,11 +340,15 @@ mod tests {
     fn finds_catalog_from_workspace_file() {
         let fs = MemoryFileSystem::default();
         fs.insert(
-            Utf8Path::new("pnpm-workspace.yaml").into(),
+            Utf8Path::new("project/src/pnpm-workspace.yaml").into(),
             b"catalog:\n  react: 19.0.0\n".to_vec(),
         );
 
-        let catalog = find_pnpm_workspace_catalog(&fs).expect("catalog should be parsed");
+        let catalog = find_pnpm_workspace_catalog(
+            &fs,
+            Utf8Path::new("project/src/input.js"),
+        )
+        .expect("catalog should be parsed");
         let default = catalog.default.expect("default catalog present");
         assert_eq!(default.get("react"), Some("19.0.0"));
     }
@@ -355,7 +356,11 @@ mod tests {
     #[test]
     fn no_catalog_when_workspace_missing() {
         let fs = MemoryFileSystem::default();
-        assert!(find_pnpm_workspace_catalog(&fs).is_none());
+        assert!(find_pnpm_workspace_catalog(
+            &fs,
+            Utf8Path::new("project/src/input.js")
+        )
+        .is_none());
     }
 }
 
