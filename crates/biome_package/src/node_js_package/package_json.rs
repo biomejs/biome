@@ -147,7 +147,7 @@ impl PackageJson {
             if in_default {
                 if indent <= default_indent {
                     in_default = false;
-                } else if let Some(entry) = parse_entry(trimmed_start) {
+                } else if let Some(entry) = parse_pnpm_catalog_entry(trimmed_start) {
                     default_entries.push(entry);
                 }
                 continue;
@@ -186,7 +186,7 @@ impl PackageJson {
 
                 if let Some((_, entries)) = &mut current_catalog {
                     if indent > current_catalog_indent {
-                        if let Some(entry) = parse_entry(trimmed_start) {
+                        if let Some(entry) = parse_pnpm_catalog_entry(trimmed_start) {
                             entries.push(entry);
                         }
                     }
@@ -234,7 +234,9 @@ impl Catalogs {
     }
 }
 
-fn parse_entry(value: &str) -> Option<(Box<str>, Box<str>)> {
+/// Parses a single `key: value` line from a pnpm catalog section, stripping
+/// surrounding quotes and whitespace. Returns `None` for malformed pairs.
+fn parse_pnpm_catalog_entry(value: &str) -> Option<(Box<str>, Box<str>)> {
     let (raw_key, raw_value) = value.split_once(':')?;
     let key = raw_key.trim().trim_matches(['\'', '"']);
     let mut val = raw_value.trim();
