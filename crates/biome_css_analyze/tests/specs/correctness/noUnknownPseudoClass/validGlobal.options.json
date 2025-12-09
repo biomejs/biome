@@ -1,7 +1,0 @@
-{
-  "css": {
-    "parser": {
-      "cssModules": true
-    }
-  }
-}
