@@ -24,7 +24,9 @@ use biome_formatter::{
     TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxNode, GraphqlSyntaxToken};
+use biome_graphql_syntax::{
+    GraphqlLanguage, GraphqlSyntaxNode, GraphqlSyntaxNodeWithOffset, GraphqlSyntaxToken,
+};
 use biome_rowan::{AstNode, SyntaxNode, SyntaxToken, TextRange};
 
 /// Used to get an object that knows how to format this object.
@@ -349,6 +351,16 @@ pub fn format_node(
     root: &GraphqlSyntaxNode,
 ) -> FormatResult<Formatted<GraphqlFormatContext>> {
     biome_formatter::format_node(root, GraphqlFormatLanguage::new(options), false)
+}
+
+/// Formats a GraphQL syntax tree.
+///
+/// It returns the [Formatted] document that can be printed to a string.
+pub fn format_node_with_offset(
+    options: GraphqlFormatOptions,
+    root: &GraphqlSyntaxNodeWithOffset,
+) -> FormatResult<Formatted<GraphqlFormatContext>> {
+    biome_formatter::format_node_with_offset(root, GraphqlFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.
