@@ -334,6 +334,34 @@ pub fn project_layout_for_test_file(
     Arc::new(project_layout)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::TemporaryFs;
+
+    #[test]
+    fn finds_catalog_from_workspace_file() {
+        let fs = TemporaryFs::new("pnpm_workspace_catalog");
+        fs.create_file(
+            "pnpm-workspace.yaml",
+            r#"
+catalog:
+  react: 19.0.0
+"#,
+        );
+
+        let catalog = find_pnpm_workspace_catalog(&fs).expect("catalog should be parsed");
+        let default = catalog.default.expect("default catalog present");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+    }
+
+    #[test]
+    fn no_catalog_when_workspace_missing() {
+        let fs = TemporaryFs::new("pnpm_workspace_catalog_missing");
+        assert!(find_pnpm_workspace_catalog(&fs).is_none());
+    }
+}
+
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
     markup_to_string(biome_console::markup! {
