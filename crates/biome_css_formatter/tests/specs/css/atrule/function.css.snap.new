@@ -6,15 +6,7 @@ info: css/atrule/function.css
 # Input
 
 ```css
-@function  --test     ( --param1     ) { }
-@function  --test     ( --param1   <string>  ) { }
-@function  --test     ( --param1   <string>   : rem  ) { }
-@function  --test     ( --param1   <string>   : rem  )    returns    <string> { }
-
-
-@function  --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param
-
-) { }
+@function --test(--param1   <string>   : rem) {}
 
 ```
 
@@ -34,44 +26,6 @@ Quote style: Double Quotes
 -----
 
 ```css
-@function --test(--param1) {
-}
-@function --test(--param1 <string>) {
-}
 @function --test(--param1 <string>: rem) {
-}
-@function --test(--param1 <string>: rem) returns <string> {
-}
-
-@function --test(
-	--param: rem,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param,
-	--param
-) {
 }
 ```

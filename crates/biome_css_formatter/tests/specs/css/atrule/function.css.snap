@@ -5,7 +5,24 @@ info: css/atrule/function.css
 # Input
 
 ```css
-@function --test() { }
+@function  --test     ( --param1     ) { }
+@function  --test     ( --param1   <string>  ) { }
+@function  --test     ( --param1   <string>   : rem  ) { }
+@function  --test     ( --param1   <string>   : rem  )    returns    <string> { }
+
+
+
+@function  --test     ( --param1   <string>   : rem , --param2 )    returns    <string> { }
+
+
+@function  --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param) { }
+
+@function --test(
+	--param: type(
+
+	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+)
+) { }
 
 ```
 
@@ -25,6 +42,34 @@ Quote style: Double Quotes
 -----
 
 ```css
-@function --test() {
+@function --test(--param1) {
 }
+@function --test(--param1 <string>) {
+}
+@function --test(--param1 <string>: rem) {
+}
+@function --test(--param1 <string>: rem) returns <string> {
+}
+
+@function --test(--param1   <string>   : rem , --param2) returns <string> {
+}
+
+@function --test(
+	--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,
+) {
+}
+
+@function --test(
+	--param: type(
+
+	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+),
+) {
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   14: 	--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,
+   21: 	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
 ```

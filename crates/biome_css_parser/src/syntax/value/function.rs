@@ -324,15 +324,15 @@ fn parse_coma_separated_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['{']);
-    ComaSeparatedValueValueList.parse_list(p);
+    CommaSeparatedValueValueList.parse_list(p);
     p.expect(T!['}']);
 
-    Present(m.complete(p, CSS_COMA_SEPARATED_VALUE))
+    Present(m.complete(p, CSS_COMMA_SEPARATED_VALUE))
 }
 
-struct ComaSeparatedValueValueList;
+struct CommaSeparatedValueValueList;
 
-impl ParseNodeList for ComaSeparatedValueValueList {
+impl ParseNodeList for CommaSeparatedValueValueList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;

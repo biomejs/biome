@@ -189,7 +189,7 @@ impl ParseSeparatedList for CssFunctionParameterList {
         T![,]
     }
 
-    fn allow_empty(&self) -> bool {
+    fn allow_trailing_separating_element(&self) -> bool {
         true
     }
 }
@@ -224,10 +224,5 @@ impl ParseSeparatedList for CssFunctionParameterDefaultValueList {
 
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
-    }
-
-    // TODO: double check this
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
     }
 }
