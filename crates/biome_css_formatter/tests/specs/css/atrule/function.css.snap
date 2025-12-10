@@ -5,24 +5,60 @@ info: css/atrule/function.css
 # Input
 
 ```css
-@function  --test     ( --param1     ) { }
-@function  --test     ( --param1   <string>  ) { }
-@function  --test     ( --param1   <string>   : rem  ) { }
-@function  --test     ( --param1   <string>   : rem  )    returns    <string> { }
+@function --test  ( ) { }
+@function --test  (--param  ) { }
+@function --test  ( --param <string> ) { }
+@function --test  ( --param   <string>: rem ) {}
+@function --test  ( --param <string>: rem ) returns <string> { }
+@function --test  ( --param <string>: rem , --param2) {}
+@function --test  ( --param     <string>: rem , --param2: red ) {         }
 
+@function --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param) { }
 
-
-@function  --test     ( --param1   <string>   : rem , --param2 )    returns    <string> { }
-
-
-@function  --test(--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param) { }
-
-@function --test(
-	--param: type(
-
-	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+@function --test(--param1 type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
 )
 ) { }
+
+@function --test(
+--param,
+--param,
+--param type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+),
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param,
+--param type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+)
+) {
+}
+
+@function --test() returns type(
+<string> | <color> | <length> | <length-percentage> | <number> | <percentage> | <transform-function> | <url>
+) {
+}
+
+
+@function --transparent(--color <color>, --alpha type(<number> | <percentage>))
+  returns <color> {
+  result: oklch(from var(--color) l c h / var(--alpha));
+}
 
 ```
 
@@ -42,34 +78,126 @@ Quote style: Double Quotes
 -----
 
 ```css
-@function --test(--param1) {
+@function --test() {
 }
-@function --test(--param1 <string>) {
+@function --test(--param) {
 }
-@function --test(--param1 <string>: rem) {
+@function --test(--param <string>) {
 }
-@function --test(--param1 <string>: rem) returns <string> {
+@function --test(--param <string>: rem) {
 }
-
-@function --test(--param1   <string>   : rem , --param2) returns <string> {
+@function --test(--param <string>: rem) returns <string> {
+}
+@function --test(--param <string>: rem, --param2) {
+}
+@function --test(--param <string>: rem, --param2: red) {
 }
 
 @function --test(
-	--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,
+	--param: rem,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param
 ) {
 }
 
 @function --test(
-	--param: type(
-
-	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
-),
+	--param1 type(
+		<string>
+		| <color>
+		| <length>
+		| <length-percentage>
+		| <number>
+		| <percentage>
+		| <transform-function>
+		| <url>
+	)
 ) {
 }
-```
 
-# Lines exceeding max width of 80 characters
-```
-   14: 	--param   : rem     ,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,--param,
-   21: 	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+@function --test(
+	--param,
+	--param,
+	--param type(
+		<string>
+		| <color>
+		| <length>
+		| <length-percentage>
+		| <number>
+		| <percentage>
+		| <transform-function>
+		| <url>
+	),
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param,
+	--param type(
+		<string>
+		| <color>
+		| <length>
+		| <length-percentage>
+		| <number>
+		| <percentage>
+		| <transform-function>
+		| <url>
+	)
+) {
+}
+
+@function --test() returns type(
+	<string>
+	| <color>
+	| <length>
+	| <length-percentage>
+	| <number>
+	| <percentage>
+	| <transform-function>
+	| <url>
+) {
+}
+
+@function --transparent(
+	--color <color>,
+	--alpha type(<number> | <percentage>)
+) returns <color> {
+	result: oklch(from var(--color) l c h / var(--alpha));
+}
 ```

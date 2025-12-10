@@ -108,6 +108,7 @@ p {
   background-color: wheat;
 }
 
+@function --test(--param1   <string>   : rem , --param2) {}
 
 ```
 
@@ -642,11 +643,9 @@ CssRoot {
                             },
                             default_value: CssFunctionParameterDefaultValue {
                                 colon_token: COLON@515..517 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@517..520 "0.8" [] [],
-                                    },
-                                ],
+                                value: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@517..520 "0.8" [] [],
+                                },
                             },
                         },
                     ],
@@ -1019,7 +1018,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@842..843 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
-                                                any_css_expression: CssComaSeparatedValue {
+                                                any_css_expression: CssCommaSeparatedValue {
                                                     l_curly_token: L_CURLY@843..844 "{" [] [],
                                                     items: CssGenericComponentValueList [
                                                         CssRegularDimension {
@@ -1101,7 +1100,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@921..922 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
-                                                any_css_expression: CssComaSeparatedValue {
+                                                any_css_expression: CssCommaSeparatedValue {
                                                     l_curly_token: L_CURLY@922..923 "{" [] [],
                                                     items: CssGenericComponentValueList [
                                                         CssRegularDimension {
@@ -2430,17 +2429,67 @@ CssRoot {
                 r_curly_token: R_CURLY@2048..2050 "}" [Newline("\n")] [],
             },
         },
+        CssAtRule {
+            at_token: AT@2050..2053 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFunctionAtRule {
+                declarator: CssFunctionAtRuleDeclarator {
+                    function_token: FUNCTION_KW@2053..2062 "function" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@2062..2068 "--test" [] [],
+                    },
+                    l_paren_token: L_PAREN@2068..2069 "(" [] [],
+                    parameters: CssFunctionParameterList [
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@2069..2080 "--param1" [] [Whitespace("   ")],
+                            },
+                            ty: CssSyntaxComponent {
+                                component: CssSyntaxType {
+                                    l_angle_token: L_ANGLE@2080..2081 "<" [] [],
+                                    type_name: CssRegularSyntaxTypeName {
+                                        name_token: IDENT@2081..2087 "string" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@2087..2091 ">" [] [Whitespace("   ")],
+                                },
+                                multiplier: missing (optional),
+                            },
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@2091..2093 ":" [] [Whitespace(" ")],
+                                value: CssIdentifier {
+                                    value_token: IDENT@2093..2097 "rem" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        COMMA@2097..2099 "," [] [Whitespace(" ")],
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@2099..2107 "--param2" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@2107..2109 ")" [] [Whitespace(" ")],
+                    returns: missing (optional),
+                },
+                block: CssDeclarationOrAtRuleBlock {
+                    l_curly_token: L_CURLY@2109..2110 "{" [] [],
+                    items: CssDeclarationOrAtRuleList [],
+                    r_curly_token: R_CURLY@2110..2111 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@2050..2052 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@2111..2112 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..2052
+0: CSS_ROOT@0..2112
   0: (empty)
-  1: CSS_RULE_LIST@0..2050
+  1: CSS_RULE_LIST@0..2111
     0: CSS_AT_RULE@0..102
       0: AT@0..1 "@" [] []
       1: CSS_FUNCTION_AT_RULE@1..102
@@ -2784,9 +2833,8 @@ CssRoot {
                 1: (empty)
               2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@515..520
                 0: COLON@515..517 ":" [] [Whitespace(" ")]
-                1: CSS_GENERIC_COMPONENT_VALUE_LIST@517..520
-                  0: CSS_NUMBER@517..520
-                    0: CSS_NUMBER_LITERAL@517..520 "0.8" [] []
+                1: CSS_NUMBER@517..520
+                  0: CSS_NUMBER_LITERAL@517..520 "0.8" [] []
           4: R_PAREN@520..522 ")" [] [Whitespace(" ")]
           5: CSS_RETURNS_STATEMENT@522..538
             0: RETURNS_KW@522..530 "returns" [] [Whitespace(" ")]
@@ -3025,7 +3073,7 @@ CssRoot {
                     1: L_PAREN@842..843 "(" [] []
                     2: CSS_PARAMETER_LIST@843..863
                       0: CSS_PARAMETER@843..858
-                        0: CSS_COMA_SEPARATED_VALUE@843..858
+                        0: CSS_COMMA_SEPARATED_VALUE@843..858
                           0: L_CURLY@843..844 "{" [] []
                           1: CSS_GENERIC_COMPONENT_VALUE_LIST@844..857
                             0: CSS_REGULAR_DIMENSION@844..847
@@ -3079,7 +3127,7 @@ CssRoot {
                     1: L_PAREN@921..922 "(" [] []
                     2: CSS_PARAMETER_LIST@922..932
                       0: CSS_PARAMETER@922..927
-                        0: CSS_COMA_SEPARATED_VALUE@922..927
+                        0: CSS_COMMA_SEPARATED_VALUE@922..927
                           0: L_CURLY@922..923 "{" [] []
                           1: CSS_GENERIC_COMPONENT_VALUE_LIST@923..926
                             0: CSS_REGULAR_DIMENSION@923..926
@@ -3933,6 +3981,41 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@2047..2048 ";" [] []
         2: R_CURLY@2048..2050 "}" [Newline("\n")] []
-  2: EOF@2050..2052 "" [Newline("\n"), Newline("\n")] []
+    21: CSS_AT_RULE@2050..2111
+      0: AT@2050..2053 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FUNCTION_AT_RULE@2053..2111
+        0: CSS_FUNCTION_AT_RULE_DECLARATOR@2053..2109
+          0: FUNCTION_KW@2053..2062 "function" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@2062..2068
+            0: IDENT@2062..2068 "--test" [] []
+          2: L_PAREN@2068..2069 "(" [] []
+          3: CSS_FUNCTION_PARAMETER_LIST@2069..2107
+            0: CSS_FUNCTION_PARAMETER@2069..2097
+              0: CSS_DASHED_IDENTIFIER@2069..2080
+                0: IDENT@2069..2080 "--param1" [] [Whitespace("   ")]
+              1: CSS_SYNTAX_COMPONENT@2080..2091
+                0: CSS_SYNTAX_TYPE@2080..2091
+                  0: L_ANGLE@2080..2081 "<" [] []
+                  1: CSS_REGULAR_SYNTAX_TYPE_NAME@2081..2087
+                    0: IDENT@2081..2087 "string" [] []
+                  2: R_ANGLE@2087..2091 ">" [] [Whitespace("   ")]
+                1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@2091..2097
+                0: COLON@2091..2093 ":" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@2093..2097
+                  0: IDENT@2093..2097 "rem" [] [Whitespace(" ")]
+            1: COMMA@2097..2099 "," [] [Whitespace(" ")]
+            2: CSS_FUNCTION_PARAMETER@2099..2107
+              0: CSS_DASHED_IDENTIFIER@2099..2107
+                0: IDENT@2099..2107 "--param2" [] []
+              1: (empty)
+              2: (empty)
+          4: R_PAREN@2107..2109 ")" [] [Whitespace(" ")]
+          5: (empty)
+        1: CSS_DECLARATION_OR_AT_RULE_BLOCK@2109..2111
+          0: L_CURLY@2109..2110 "{" [] []
+          1: CSS_DECLARATION_OR_AT_RULE_LIST@2110..2110
+          2: R_CURLY@2110..2111 "}" [] []
+  2: EOF@2111..2112 "" [Newline("\n")] []
 
 ```
