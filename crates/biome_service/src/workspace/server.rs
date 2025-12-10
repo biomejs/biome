@@ -972,15 +972,14 @@ impl WorkspaceServer {
                         .insert_serialized_node_manifest(package_path.clone(), root);
 
                     if let Some(catalogs) = pnpm_catalog {
-                        if let Some(mut manifest) =
-                            self.project_layout.get_node_manifest_for_package(&package_path)
+                        if let Some(mut manifest) = self
+                            .project_layout
+                            .get_node_manifest_for_package(&package_path)
                         {
                             if manifest.catalog.is_none() {
                                 manifest.catalog = Some(catalogs);
-                                self.project_layout.insert_node_manifest(
-                                    package_path.clone(),
-                                    manifest,
-                                );
+                                self.project_layout
+                                    .insert_node_manifest(package_path.clone(), manifest);
                             }
                         }
                     }
@@ -1038,8 +1037,9 @@ impl WorkspaceServer {
                     continue;
                 }
 
-                if let Some(mut manifest) =
-                    self.project_layout.get_node_manifest_for_package(&package_path)
+                if let Some(mut manifest) = self
+                    .project_layout
+                    .get_node_manifest_for_package(&package_path)
                 {
                     manifest.catalog = pnpm_catalog.clone();
                     self.project_layout
