@@ -99,6 +99,81 @@ fn max_diagnostics_no_verbose() {
 }
 
 #[test]
+fn reads_pnpm_workspace_catalog() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("pnpm-workspace.yaml").into(),
+        r#"
+packages:
+  - "src"
+catalogs:
+  react19:
+    react: 19.0.0
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("package.json").into(),
+        r#"
+{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:react19"
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noReactForwardRef": "error"
+      }
+    }
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("src/input.jsx").into(),
+        r#"
+import { forwardRef } from "react";
+
+export const Component = forwardRef((props, ref) => {
+  return <div ref={ref} {...props} />;
+});
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "src/input.jsx"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reads_pnpm_workspace_catalog",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_fail_when_max_diagnostics_is_zero() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

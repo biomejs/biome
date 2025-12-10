@@ -35,7 +35,7 @@ use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
-use biome_package::PackageType;
+use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
@@ -818,6 +818,28 @@ impl WorkspaceServer {
         Ok(is_ignored)
     }
 
+    /// Attempts to load pnpm workspace catalogs by searching for a
+    /// `pnpm-workspace.yaml` starting from the package path and walking up its
+    /// ancestors.
+    fn load_pnpm_workspace_catalog(&self) -> Option<Catalogs> {
+        let working_dir = self.fs.working_directory()?;
+
+        for dir in working_dir.ancestors() {
+            let workspace_file = dir.join("pnpm-workspace.yaml");
+            if !self.fs.path_is_file(&workspace_file) {
+                continue;
+            }
+
+            if let Ok(content) = self.fs.read_file_from_path(&workspace_file) {
+                if let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content) {
+                    return Some(catalog);
+                }
+            }
+        }
+
+        None
+    }
+
     /// Updates the [ProjectLayout] for the given `path`.
     #[instrument(level = "debug", skip(self))]
     fn update_project_layout(
@@ -832,10 +854,26 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
+            let pnpm_catalog = self.load_pnpm_workspace_catalog();
+
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
                     self.project_layout
-                        .insert_serialized_node_manifest(package_path, root);
+                        .insert_serialized_node_manifest(package_path.clone(), root);
+
+                    if let Some(catalogs) = pnpm_catalog {
+                        if let Some(mut manifest) =
+                            self.project_layout.get_node_manifest_for_package(&package_path)
+                        {
+                            if manifest.catalog.is_none() {
+                                manifest.catalog = Some(catalogs);
+                                self.project_layout.insert_node_manifest(
+                                    package_path.clone(),
+                                    manifest,
+                                );
+                            }
+                        }
+                    }
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
