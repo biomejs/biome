@@ -507,7 +507,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_COLOR_PROFILE_AT_RULE_DECLARATOR, children)
             }
-            CSS_COMA_SEPARATED_VALUE => {
+            CSS_COMMA_SEPARATED_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -534,11 +534,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_COMA_SEPARATED_VALUE.to_bogus(),
+                        CSS_COMMA_SEPARATED_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_COMA_SEPARATED_VALUE, children)
+                slots.into_node(CSS_COMMA_SEPARATED_VALUE, children)
             }
             CSS_COMPLEX_SELECTOR => {
                 let mut elements = (&children).into_iter();

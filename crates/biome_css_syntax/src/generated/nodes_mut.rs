@@ -267,7 +267,7 @@ impl CssColorProfileAtRuleDeclarator {
         )
     }
 }
-impl CssComaSeparatedValue {
+impl CssCommaSeparatedValue {
     pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax

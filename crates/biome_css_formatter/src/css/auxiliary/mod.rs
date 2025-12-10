@@ -9,7 +9,7 @@ pub(crate) mod attribute_name;
 pub(crate) mod binary_expression;
 pub(crate) mod bracketed_value;
 pub(crate) mod color_profile_at_rule_declarator;
-pub(crate) mod coma_separated_value;
+pub(crate) mod comma_separated_value;
 pub(crate) mod composes_import_specifier;
 pub(crate) mod composes_property_value;
 pub(crate) mod container_and_query;

@@ -530,41 +530,41 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssColorProfileAtRuleDec
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: color_profile_at_rule_declarator :: FormatCssColorProfileAtRuleDeclarator :: default ())
     }
 }
-impl FormatRule<biome_css_syntax::CssComaSeparatedValue>
-    for crate::css::auxiliary::coma_separated_value::FormatCssComaSeparatedValue
+impl FormatRule<biome_css_syntax::CssCommaSeparatedValue>
+    for crate::css::auxiliary::comma_separated_value::FormatCssCommaSeparatedValue
 {
     type Context = CssFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_css_syntax::CssComaSeparatedValue,
+        node: &biome_css_syntax::CssCommaSeparatedValue,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssComaSeparatedValue>::fmt(self, node, f)
+        FormatNodeRule::<biome_css_syntax::CssCommaSeparatedValue>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssComaSeparatedValue {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCommaSeparatedValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssComaSeparatedValue,
-        crate::css::auxiliary::coma_separated_value::FormatCssComaSeparatedValue,
+        biome_css_syntax::CssCommaSeparatedValue,
+        crate::css::auxiliary::comma_separated_value::FormatCssCommaSeparatedValue,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::css::auxiliary::coma_separated_value::FormatCssComaSeparatedValue::default(),
+            crate::css::auxiliary::comma_separated_value::FormatCssCommaSeparatedValue::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComaSeparatedValue {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCommaSeparatedValue {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssComaSeparatedValue,
-        crate::css::auxiliary::coma_separated_value::FormatCssComaSeparatedValue,
+        biome_css_syntax::CssCommaSeparatedValue,
+        crate::css::auxiliary::comma_separated_value::FormatCssCommaSeparatedValue,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::css::auxiliary::coma_separated_value::FormatCssComaSeparatedValue::default(),
+            crate::css::auxiliary::comma_separated_value::FormatCssCommaSeparatedValue::default(),
         )
     }
 }

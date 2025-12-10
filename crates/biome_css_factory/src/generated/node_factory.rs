@@ -270,13 +270,13 @@ pub fn css_color_profile_at_rule_declarator(
         ],
     ))
 }
-pub fn css_coma_separated_value(
+pub fn css_comma_separated_value(
     l_curly_token: SyntaxToken,
     items: CssGenericComponentValueList,
     r_curly_token: SyntaxToken,
-) -> CssComaSeparatedValue {
-    CssComaSeparatedValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_COMA_SEPARATED_VALUE,
+) -> CssCommaSeparatedValue {
+    CssCommaSeparatedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMMA_SEPARATED_VALUE,
         [
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(items.into_syntax())),

@@ -663,10 +663,10 @@ pub struct CssColorProfileAtRuleDeclaratorFields {
     pub name: SyntaxResult<CssCustomIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssComaSeparatedValue {
+pub struct CssCommaSeparatedValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssComaSeparatedValue {
+impl CssCommaSeparatedValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -676,8 +676,8 @@ impl CssComaSeparatedValue {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssComaSeparatedValueFields {
-        CssComaSeparatedValueFields {
+    pub fn as_fields(&self) -> CssCommaSeparatedValueFields {
+        CssCommaSeparatedValueFields {
             l_curly_token: self.l_curly_token(),
             items: self.items(),
             r_curly_token: self.r_curly_token(),
@@ -693,7 +693,7 @@ impl CssComaSeparatedValue {
         support::required_token(&self.syntax, 2usize)
     }
 }
-impl Serialize for CssComaSeparatedValue {
+impl Serialize for CssCommaSeparatedValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -702,7 +702,7 @@ impl Serialize for CssComaSeparatedValue {
     }
 }
 #[derive(Serialize)]
-pub struct CssComaSeparatedValueFields {
+pub struct CssCommaSeparatedValueFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssGenericComponentValueList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
@@ -10309,7 +10309,7 @@ impl AnyCssDocumentMatcher {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
-    CssComaSeparatedValue(CssComaSeparatedValue),
+    CssCommaSeparatedValue(CssCommaSeparatedValue),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
 }
@@ -10320,9 +10320,9 @@ impl AnyCssExpression {
             _ => None,
         }
     }
-    pub fn as_css_coma_separated_value(&self) -> Option<&CssComaSeparatedValue> {
+    pub fn as_css_comma_separated_value(&self) -> Option<&CssCommaSeparatedValue> {
         match &self {
-            Self::CssComaSeparatedValue(item) => Some(item),
+            Self::CssCommaSeparatedValue(item) => Some(item),
             _ => None,
         }
     }
@@ -13067,12 +13067,12 @@ impl From<CssColorProfileAtRuleDeclarator> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssComaSeparatedValue {
+impl AstNode for CssCommaSeparatedValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMA_SEPARATED_VALUE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMMA_SEPARATED_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_COMA_SEPARATED_VALUE
+        kind == CSS_COMMA_SEPARATED_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -13088,13 +13088,13 @@ impl AstNode for CssComaSeparatedValue {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssComaSeparatedValue {
+impl std::fmt::Debug for CssCommaSeparatedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("CssComaSeparatedValue")
+            f.debug_struct("CssCommaSeparatedValue")
                 .field(
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),
@@ -13106,19 +13106,19 @@ impl std::fmt::Debug for CssComaSeparatedValue {
                 )
                 .finish()
         } else {
-            f.debug_struct("CssComaSeparatedValue").finish()
+            f.debug_struct("CssCommaSeparatedValue").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<CssComaSeparatedValue> for SyntaxNode {
-    fn from(n: CssComaSeparatedValue) -> Self {
+impl From<CssCommaSeparatedValue> for SyntaxNode {
+    fn from(n: CssCommaSeparatedValue) -> Self {
         n.syntax
     }
 }
-impl From<CssComaSeparatedValue> for SyntaxElement {
-    fn from(n: CssComaSeparatedValue) -> Self {
+impl From<CssCommaSeparatedValue> for SyntaxElement {
+    fn from(n: CssCommaSeparatedValue) -> Self {
         n.syntax.into()
     }
 }
@@ -26141,9 +26141,9 @@ impl From<CssBinaryExpression> for AnyCssExpression {
         Self::CssBinaryExpression(node)
     }
 }
-impl From<CssComaSeparatedValue> for AnyCssExpression {
-    fn from(node: CssComaSeparatedValue) -> Self {
-        Self::CssComaSeparatedValue(node)
+impl From<CssCommaSeparatedValue> for AnyCssExpression {
+    fn from(node: CssCommaSeparatedValue) -> Self {
+        Self::CssCommaSeparatedValue(node)
     }
 }
 impl From<CssListOfComponentValuesExpression> for AnyCssExpression {
@@ -26159,14 +26159,14 @@ impl From<CssParenthesizedExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
-        .union(CssComaSeparatedValue::KIND_SET)
+        .union(CssCommaSeparatedValue::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             CSS_BINARY_EXPRESSION
-                | CSS_COMA_SEPARATED_VALUE
+                | CSS_COMMA_SEPARATED_VALUE
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
         )
@@ -26174,8 +26174,8 @@ impl AstNode for AnyCssExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
-            CSS_COMA_SEPARATED_VALUE => {
-                Self::CssComaSeparatedValue(CssComaSeparatedValue { syntax })
+            CSS_COMMA_SEPARATED_VALUE => {
+                Self::CssCommaSeparatedValue(CssCommaSeparatedValue { syntax })
             }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 Self::CssListOfComponentValuesExpression(CssListOfComponentValuesExpression {
@@ -26192,7 +26192,7 @@ impl AstNode for AnyCssExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
-            Self::CssComaSeparatedValue(it) => it.syntax(),
+            Self::CssCommaSeparatedValue(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
         }
@@ -26200,7 +26200,7 @@ impl AstNode for AnyCssExpression {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
-            Self::CssComaSeparatedValue(it) => it.into_syntax(),
+            Self::CssCommaSeparatedValue(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
         }
@@ -26210,7 +26210,7 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssComaSeparatedValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCommaSeparatedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -26220,7 +26220,7 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
             AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
-            AnyCssExpression::CssComaSeparatedValue(it) => it.into_syntax(),
+            AnyCssExpression::CssCommaSeparatedValue(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
         }
@@ -32495,7 +32495,7 @@ impl std::fmt::Display for CssColorProfileAtRuleDeclarator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssComaSeparatedValue {
+impl std::fmt::Display for CssCommaSeparatedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

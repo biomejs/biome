@@ -77,8 +77,8 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssColorProfileAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_COMA_SEPARATED_VALUE => {
-                    let $pattern = unsafe { $crate::CssComaSeparatedValue::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_COMMA_SEPARATED_VALUE => {
+                    let $pattern = unsafe { $crate::CssCommaSeparatedValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR => {
