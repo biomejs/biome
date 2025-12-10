@@ -1,12 +1,12 @@
 use crate::syntax::at_rule::parse_error::expected_function_parameter;
 use crate::syntax::block::parse_declaration_or_at_rule_list_block;
-use crate::syntax::is_at_dashed_identifier;
 use crate::syntax::parse_error::{expected_component_value, expected_dashed_identifier};
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::value::r#type::{
     is_at_syntax_single_component, is_at_type_function, parse_any_syntax_component,
     parse_type_function,
 };
+use crate::syntax::{is_at_dashed_identifier, parse_any_value};
 use crate::{parser::CssParser, syntax::parse_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
@@ -121,7 +121,7 @@ fn parse_function_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![:]);
-    CssFunctionParameterDefaultValueList.parse_list(p);
+    parse_any_value(p).ok();
 
     Present(m.complete(p, CSS_FUNCTION_PARAMETER_DEFAULT_VALUE))
 }
@@ -191,38 +191,5 @@ impl ParseSeparatedList for CssFunctionParameterList {
 
     fn allow_trailing_separating_element(&self) -> bool {
         true
-    }
-}
-
-struct CssFunctionParameterDefaultValueList;
-
-impl ParseSeparatedList for CssFunctionParameterDefaultValueList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_generic_component_value(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set![T![,], T![')']])
-                .enable_recovery_on_line_break(),
-            expected_component_value,
-        )
-    }
-
-    fn separating_element_kind(&mut self) -> Self::Kind {
-        T![,]
     }
 }

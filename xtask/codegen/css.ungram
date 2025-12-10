@@ -1802,7 +1802,7 @@ CssFunctionParameter =
 //                                        ^^^^^                  ^^^^^
 CssFunctionParameterDefaultValue =
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssValue
 
 // returns <css-type>
 //

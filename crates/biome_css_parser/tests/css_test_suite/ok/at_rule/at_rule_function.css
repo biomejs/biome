@@ -101,3 +101,4 @@ p {
   background-color: wheat;
 }
 
+@function --test(--param1   <string>   : rem , --param2) {}

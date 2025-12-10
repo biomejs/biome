@@ -1,7 +1,6 @@
 use biome_css_formatter::format_node;
 use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::CssFileSource;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 
@@ -13,14 +12,8 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"
-.container {& [lang="ru"] {
-         color: blue;
-        } }
-
-
-"#;
-    let parse = parse_css(src, CssFileSource::css(), CssParserOptions::default());
+    let src = r#"@function --test(--param1   <string>   : rem , --param2) {}"#;
+    let parse = parse_css(src, CssParserOptions::default());
     println!("{parse:#?}");
 
     let options = CssFormatOptions::default()

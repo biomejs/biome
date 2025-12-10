@@ -893,9 +893,11 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
         }
     }
 
+    // "type" and "enum" are Rust keywords, add the "ts_"
+    // prefix to these modules to avoid parsing errors
     let stem = match stem.as_str() {
-        "type" => String::from("r#type"),
-        "enum" => String::from("r#enum"),
+        "type" => String::from("ts_type"),
+        "enum" => String::from("ts_enum"),
         _ => stem,
     };
 

@@ -972,7 +972,7 @@ impl CssFunctionParameterBuilder {
 }
 pub fn css_function_parameter_default_value(
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssValue,
 ) -> CssFunctionParameterDefaultValue {
     CssFunctionParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FUNCTION_PARAMETER_DEFAULT_VALUE,
