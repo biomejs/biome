@@ -1353,6 +1353,50 @@ The documentation needs to adhere to the following rules:
   /// ```
   ````
 
+- **Callout blocks (Asides)**
+
+  You can use Markdown asides (also known as "admonitions" or "callouts") to highlight important notes, warnings, or tips in your rule documentation.
+
+  The following types of asides are supported:
+
+  - `:::note` - General information or supplementary details
+  - `:::tip` - Helpful suggestions or best practices
+  - `:::caution` - Important warnings about potential issues or limitations
+  - `:::danger` - Critical warnings about dangerous behavior
+
+  Example usage from the `useNodejsImportProtocol` rule:
+
+  ````rust
+  /// The rule also isn't triggered if there are dependencies declared in the `package.json` that match
+  /// the name of a built-in Node.js module.
+  ///
+  /// :::caution
+  /// The rule doesn't support dependencies installed inside a monorepo.
+  /// :::
+  ///
+  /// ## Examples
+  ````
+
+  Example usage from the `noImportCycles` rule:
+
+  ````rust
+  /// :::note
+  /// This rule is computationally expensive. If you are particularly
+  /// pressed for lint time, or don't think you have an issue with dependency
+  /// cycles, you may not want this rule enabled.
+  /// :::
+  ````
+
+  You can also include a custom title for the aside:
+
+  ````rust
+  /// :::caution[Custom Title]
+  /// Your content here.
+  /// :::
+  ````
+
+  Unlike code blocks, asides are regular Markdown content and don't require any special properties or validation.
+
 - **Ordering of code block properties**
 
   In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
