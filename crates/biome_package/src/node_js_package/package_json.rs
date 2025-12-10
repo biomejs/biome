@@ -155,12 +155,13 @@ impl PackageJson {
                 "catalogs" => {
                     if let Some(named_map) = as_catalog_block_mapping(&value_node) {
                         for catalog_entry in named_map.entries() {
-                            let Some((name, catalog_node)) = parse_catalog_mapping_entry(catalog_entry) else {
+                            let Some((name, catalog_node)) =
+                                parse_catalog_mapping_entry(catalog_entry)
+                            else {
                                 continue;
                             };
 
-                            if let Some(deps_map) = as_catalog_block_mapping(&catalog_node)
-                            {
+                            if let Some(deps_map) = as_catalog_block_mapping(&catalog_node) {
                                 let deps = collect_catalog_dependencies(&deps_map);
                                 if !deps.is_empty() {
                                     catalogs.named.insert(name, deps);
@@ -206,7 +207,9 @@ impl Catalogs {
 /// Parses a catalog mapping entry into a `(key, value node)` pair, keeping only
 /// scalar keys and cloning the value node; returns `None` when the key or value
 /// is missing or non-scalar.
-fn parse_catalog_mapping_entry(entry: AnyYamlBlockMapEntry) -> Option<(Box<str>, AnyYamlBlockNode)> {
+fn parse_catalog_mapping_entry(
+    entry: AnyYamlBlockMapEntry,
+) -> Option<(Box<str>, AnyYamlBlockNode)> {
     if let Some(explicit) = entry.as_yaml_block_map_explicit_entry() {
         let key = explicit.key()?;
         let value = explicit.value()?.clone();
@@ -245,9 +248,7 @@ fn collect_catalog_dependencies(mapping: &YamlBlockMapping) -> Dependencies {
 }
 
 /// Extracts a scalar string from an implicit mapping key (flow YAML/JSON node).
-fn extract_catalog_scalar_from_implicit_key(
-    key: &AnyYamlMappingImplicitKey,
-) -> Option<Box<str>> {
+fn extract_catalog_scalar_from_implicit_key(key: &AnyYamlMappingImplicitKey) -> Option<Box<str>> {
     if let Some(flow_yaml) = key.as_yaml_flow_yaml_node() {
         return flow_yaml
             .content()?

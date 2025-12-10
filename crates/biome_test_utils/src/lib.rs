@@ -249,10 +249,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-fn find_pnpm_workspace_catalog(
-    fs: &dyn FileSystem,
-    input_file: &Utf8Path,
-) -> Option<Catalogs> {
+fn find_pnpm_workspace_catalog(fs: &dyn FileSystem, input_file: &Utf8Path) -> Option<Catalogs> {
     let workspace_file = input_file.with_file_name("pnpm-workspace.yaml");
     if !fs.path_is_file(&workspace_file) {
         return None;
@@ -344,11 +341,8 @@ mod tests {
             b"catalog:\n  react: 19.0.0\n".to_vec(),
         );
 
-        let catalog = find_pnpm_workspace_catalog(
-            &fs,
-            Utf8Path::new("project/src/input.js"),
-        )
-        .expect("catalog should be parsed");
+        let catalog = find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js"))
+            .expect("catalog should be parsed");
         let default = catalog.default.expect("default catalog present");
         assert_eq!(default.get("react"), Some("19.0.0"));
     }
@@ -356,11 +350,7 @@ mod tests {
     #[test]
     fn no_catalog_when_workspace_missing() {
         let fs = MemoryFileSystem::default();
-        assert!(find_pnpm_workspace_catalog(
-            &fs,
-            Utf8Path::new("project/src/input.js")
-        )
-        .is_none());
+        assert!(find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js")).is_none());
     }
 }
 
