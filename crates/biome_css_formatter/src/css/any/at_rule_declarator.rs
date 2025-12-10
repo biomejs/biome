@@ -7,22 +7,22 @@ pub(crate) struct FormatAnyCssAtRuleDeclarator;
 impl FormatRule<AnyCssAtRuleDeclarator> for FormatAnyCssAtRuleDeclarator {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssAtRuleDeclarator, f: &mut CssFormatter) -> FormatResult<()> {
-        todo!()
-        // match node {
-        //     AnyCssAtRuleDeclarator::CssColorProfileAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssContainerAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssCounterStyleAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssFontFaceAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(node) => {
-        //         node.format().fmt(f)
-        //     }
-        //     AnyCssAtRuleDeclarator::CssMediaAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssScopeAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssStartingStyleAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssSupportsAtRuleDeclarator(node) => node.format().fmt(f),
-        //     AnyCssAtRuleDeclarator::CssViewTransitionAtRuleDeclarator(node) => node.format().fmt(f),
-        // }
+        match node {
+            AnyCssAtRuleDeclarator::CssColorProfileAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssContainerAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssCounterStyleAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssFontFaceAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(node) => {
+                node.format().fmt(f)
+            }
+            AnyCssAtRuleDeclarator::CssFunctionAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssMediaAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssScopeAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssStartingStyleAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssSupportsAtRuleDeclarator(node) => node.format().fmt(f),
+            AnyCssAtRuleDeclarator::CssViewTransitionAtRuleDeclarator(node) => node.format().fmt(f),
+        }
     }
 }

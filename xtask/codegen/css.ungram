@@ -2040,11 +2040,11 @@ AnyCssExpression =
 	CssBinaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
-	| CssComaSeparatedValue
+	| CssCommaSeparatedValue
 
 CssListOfComponentValuesExpression = CssComponentValueList
 
-CssComaSeparatedValue =
+CssCommaSeparatedValue =
 	'{'
 	items: CssGenericComponentValueList
 	'}'

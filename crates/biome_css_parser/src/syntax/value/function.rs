@@ -207,7 +207,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 /// to decide if parsing should proceed for a general CSS expression.
 #[inline]
 pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
-    is_at_parenthesized(p) || is_at_any_value(p) || is_at_coma_separated_value(p)
+    is_at_parenthesized(p) || is_at_any_value(p) || is_at_comma_separated_value(p)
 }
 
 /// Parses any CSS expression from the current position in the CSS parser.
@@ -223,7 +223,7 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
 
     let param = if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
-    } else if is_at_coma_separated_value(p) {
+    } else if is_at_comma_separated_value(p) {
         parse_coma_separated_value(p)
     } else {
         parse_list_of_component_values_expression(p)
@@ -311,13 +311,13 @@ pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedS
 }
 
 #[inline]
-fn is_at_coma_separated_value(p: &mut CssParser) -> bool {
+fn is_at_comma_separated_value(p: &mut CssParser) -> bool {
     p.at(T!['{'])
 }
 
 #[inline]
 fn parse_coma_separated_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_coma_separated_value(p) {
+    if !is_at_comma_separated_value(p) {
         return Absent;
     }
 
