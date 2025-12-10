@@ -250,6 +250,11 @@ impl ProjectLayout {
             .unwrap_or_default()
     }
 
+    /// Returns all package paths currently tracked in the layout.
+    pub fn package_paths(&self) -> Vec<Utf8PathBuf> {
+        self.0.pin().keys().cloned().collect()
+    }
+
     /// Searches for the `tsconfig.json` file nearest to `path` and calls
     /// `query` on it if found.
     ///

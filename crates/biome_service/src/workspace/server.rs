@@ -895,6 +895,26 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
+        } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
+            let pnpm_catalog = self.load_pnpm_workspace_catalog();
+            let workspace_root = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+
+            for package_path in self.project_layout.package_paths() {
+                if !package_path.starts_with(&workspace_root) {
+                    continue;
+                }
+
+                if let Some(mut manifest) =
+                    self.project_layout.get_node_manifest_for_package(&package_path)
+                {
+                    manifest.catalog = pnpm_catalog.clone();
+                    self.project_layout
+                        .insert_node_manifest(package_path.clone(), manifest);
+                }
+            }
         }
 
         Ok(())
