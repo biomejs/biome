@@ -65,13 +65,13 @@ smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
 tokio                    = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing                  = { workspace = true }
-tracing-appender         = "0.2.3"
+tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
 tracing-tree             = "0.4.1"
 
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.177"
+libc  = "0.2.178"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
