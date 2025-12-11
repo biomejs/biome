@@ -1,5 +1,4 @@
 ---
-"@biomejs/backend-jsonrpc": patch
 "@biomejs/biome": patch
 ---
 
