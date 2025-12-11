@@ -4490,13 +4490,9 @@
 			"type": "object",
 			"properties": {
 				"allowedEnvVars": {
-					"description": "Environment variables that should always be allowed.\nUse this to specify environment variables that are always available\nin your environment, even when not declared in turbo.json.\nSupports regular expressions, e.g. `[\"^MY_ENV_.*$\"]`.",
+					"description": "Environment variables that should always be allowed.\nUse this to specify environment variables that are always available\nin your environment, even when not declared in turbo.json.\nSupports regular expressions, e.g. `[\"MY_ENV_.*\"]`.",
 					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"turboConfigPath": {
-					"description": "Path to the turbo.json file. If not specified, the rule will\nsearch for turbo.json in the project root and parent directories.",
-					"type": ["string", "null"]
+					"items": { "$ref": "#/$defs/Regex" }
 				}
 			},
 			"additionalProperties": false
