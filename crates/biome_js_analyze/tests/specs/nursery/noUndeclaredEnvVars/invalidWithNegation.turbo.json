@@ -1,0 +1,3 @@
+{
+	"globalEnv": ["*", "!SECRET_KEY", "!SECRET_*", "!PRIVATE_KEY"]
+}

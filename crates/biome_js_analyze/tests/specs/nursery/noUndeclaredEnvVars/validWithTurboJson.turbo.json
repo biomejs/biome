@@ -1,0 +1,8 @@
+{
+	"globalEnv": ["API_KEY", "SECRET_TOKEN", "FOO_*"],
+	"tasks": {
+		"build": {
+			"env": ["BUILD_VAR", "BUILD_SECRET"]
+		}
+	}
+}
