@@ -22,4 +22,7 @@
 	<svg role="">
 		<span>implicit role</span>
 	</svg>
+	<svg role="graphics-symbol">
+		<rect />
+	</svg>
 </>;
