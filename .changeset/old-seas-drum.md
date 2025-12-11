@@ -14,11 +14,7 @@ Previously, a logical error caused the rule to be unable to detect dependency ar
           "level": "error",
           "options": {
             "hooks": [
-              {
-                "name": "doSomething",
-                "closureIndex": 2,
-                "dependenciesIndex": 0
-              }
+              { "name": "doSomething", "closureIndex": 2, "dependenciesIndex": 0 }
             ]
           }
         }
@@ -31,9 +27,9 @@ Previously, a logical error caused the rule to be unable to detect dependency ar
 ```js
 function component() {
   let thing = 5;
-  // The rule will now correctly flag `thing` as missing instead of complaining about
-  // missing dependency arrays
-  doSomething([], "blah", () => {console.log(thing)})
+  // The rule will now correctly recognize `thing` as being specified
+  // instead of erroring about missing dependency arrays
+  doSomething([thing], "blah", () => {console.log(thing)})
 }
 ```
 

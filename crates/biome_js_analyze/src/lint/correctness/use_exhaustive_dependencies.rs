@@ -286,31 +286,37 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// This would enable diagnostics on the following code snippet:
+    /// This would enable checks on the following code snippets:
     ///
     /// ```js,expect_diagnostic,use_options
     /// function Foo() {
     ///   let stateVar = 1;
     ///   const location = useLocation(() => {console.log(stateVar)}, []);
-    ///   const query = useQuery([], "ignored", () => {console.log(stateVar)});
+    /// }
+    /// ```
+    /// ```js,use_options
+    /// function Foo() {
+    ///   let stateVar = 1;
+    ///   const query = useQuery([stateVar], "smthng", () => {console.log(stateVar)});
     /// }
     /// ```
     ///
     /// #### Configuring stable results
     ///
-    /// As previously discussed, the lint rule takes into account so-called ["stable results"](#stable-results)
+    /// As previously discussed, the lint rule takes into account so-called [stable results](#stable-results)
     /// and will ensure any such variables are _not_ specified as dependencies.
     ///
-    /// You can specify custom hooks that return stable results in one of four ways:
+    /// You can specify custom functions as returning stable results in one of four ways:
     ///
     /// 1. `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
     /// 2. `"stableResult": [1]` -- expects the return value to be an array and
-    ///    marks the given index or indices to be stable. An example of a React
+    ///    marks the given indices as stable. An example of a React
     ///    hook that would be configured like this is `useState()`.
     /// 3. `"stableResult": 1` -- shorthand for option 2 (`"stableResult": [1]`).
+    ///    Useful for hooks that only have a single stable return.
     /// 4. `"stableResult": ["setValue"]` -- expects the return value to be an
-    ///    object and marks the given property or properties to be stable.
+    ///    object and marks the properties with the given keys as stable.
     ///
     /// ##### Example
     ///
