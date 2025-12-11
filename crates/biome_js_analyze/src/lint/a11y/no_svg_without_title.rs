@@ -45,6 +45,10 @@ declare_lint_rule! {
     /// </svg>
     /// ```
     ///
+    /// ```jsx,expect_diagnostic
+    /// <svg role="graphics-symbol"><rect /></svg>
+    /// ```
+    ///
     /// ### Valid
     ///
     ///
@@ -66,8 +70,12 @@ declare_lint_rule! {
     ///     <span id="title">Pass</span>
     /// </svg>
     /// ```
+    ///
     /// ```jsx
-    /// <svg role="graphics-symbol"><rect /></svg>
+    /// <svg role="graphics-symbol">
+    ///     <title>Pass</title>
+    ///     <rect />
+    /// </svg>
     /// ```
     ///
     /// ```jsx
@@ -151,7 +159,7 @@ impl Rule for NoSvgWithoutTitle {
         };
 
         match role_attribute_text.to_ascii_lowercase_cow().as_ref() {
-            "img" => {
+            "img" | "graphics-document" | "graphics-symbol" => {
                 let [aria_label, aria_labelledby] = node
                     .attributes()
                     .find_by_names(["aria-label", "aria-labelledby"]);

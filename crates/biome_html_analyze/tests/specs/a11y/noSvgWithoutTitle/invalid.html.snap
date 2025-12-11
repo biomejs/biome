@@ -28,6 +28,9 @@ expression: invalid.html
 <svg role="">
 	<span>implicit role</span>
 </svg>
+<svg role="graphics-symbol">
+	<rect />
+</svg>
 
 ```
 
@@ -143,7 +146,27 @@ invalid.html:22:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   > 23 │ 	<span>implicit role</span>
   > 24 │ </svg>
        │ ^^^^^^
-    25 │ 
+    25 │ <svg role="graphics-symbol">
+    26 │ 	<rect />
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
+
+```
+invalid.html:25:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    23 │ 	<span>implicit role</span>
+    24 │ </svg>
+  > 25 │ <svg role="graphics-symbol">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │ 	<rect />
+  > 27 │ </svg>
+       │ ^^^^^^
+    28 │ 
   
   i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
   
