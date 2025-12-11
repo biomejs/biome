@@ -114,7 +114,7 @@ impl BiomePath {
             FileKinds::Config
         } else if matches!(
             file_name,
-            "package.json" | "tsconfig.json" | "jsconfig.json" | "turbo.json"
+            "package.json" | "tsconfig.json" | "jsconfig.json" | "turbo.json" | "turbo.jsonc"
         ) {
             FileKinds::Manifest
         } else if matches!(file_name, ".gitignore" | ".ignore") {
@@ -299,6 +299,7 @@ mod test {
         assert_eq!(biome_path.file_name(), Some("package.json"));
         assert_eq!(BiomePath::priority("package.json"), FileKinds::Manifest);
         assert_eq!(BiomePath::priority("turbo.json"), FileKinds::Manifest);
+        assert_eq!(BiomePath::priority("turbo.jsonc"), FileKinds::Manifest);
         assert_eq!(BiomePath::priority("biome.json"), FileKinds::Config);
         assert_eq!(BiomePath::priority("biome.jsonc"), FileKinds::Config);
         assert_eq!(BiomePath::priority(".gitignore"), FileKinds::Ignore);

@@ -63,8 +63,8 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to specify additional environment variables that should be allowed despite
-    /// not being incorporated into Turborepo's cache keys.
+    /// Use the options to specify additional environment variables that are not declared in `env`
+    /// or `passThroughEnv` in `turbo.json`.
     /// Supports regular expression patterns (anchors `^` and `$` are implicit).
     ///
     /// ```json,options
