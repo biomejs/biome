@@ -2,7 +2,7 @@ use crate::PositionEncoding;
 use anyhow::{Context, Result};
 use biome_line_index::{LineCol, LineIndex, WideLineCol};
 use biome_text_size::{TextRange, TextSize};
-use tower_lsp_server::lsp_types::{Position, Range};
+use tower_lsp_server::ls_types::{Position, Range};
 
 /// The function is used to convert a LSP position to TextSize.
 pub fn offset(

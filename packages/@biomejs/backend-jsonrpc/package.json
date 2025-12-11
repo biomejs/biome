@@ -38,8 +38,8 @@
   "devDependencies": {
     "@types/node": "24.10.1",
     "typescript": "5.9.3",
-    "vite": "7.2.2",
-    "vitest": "4.0.9"
+    "vite": "7.2.6",
+    "vitest": "4.0.15"
   },
   "publishConfig": {
     "provenance": true

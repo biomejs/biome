@@ -42,10 +42,11 @@ use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
 use tokio::sync::watch;
 use tokio::task::spawn_blocking;
-use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
-use tower_lsp_server::lsp_types::{MessageType, Registration};
-use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
-use tower_lsp_server::{Client, UriExt, lsp_types};
+use tower_lsp_server::Client;
+use tower_lsp_server::ls_types::{
+    self as lsp, ClientCapabilities, Diagnostic, MessageType, Registration, Unregistration, Uri,
+    WorkspaceFolder,
+};
 use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
@@ -941,7 +942,7 @@ impl Session {
     /// It must be done before loading workspace settings in [`Self::load_workspace_settings`].
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_extension_settings(&self) {
-        let item = lsp_types::ConfigurationItem {
+        let item = lsp::ConfigurationItem {
             scope_uri: match self.initialize_params.get() {
                 Some(params) => params.root_uri.clone(),
                 None => None,
