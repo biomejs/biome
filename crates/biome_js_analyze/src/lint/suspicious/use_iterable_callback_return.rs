@@ -94,18 +94,18 @@ declare_lint_rule! {
     ///
     /// When `checkForEach` is set to `true`, the following will trigger a diagnostic:
     ///
-    /// ```js,expect_diagnostic,use_options
-    /// [1, 2, 3].forEach((el) => {
-    ///     return el * 2;
-    /// });
-    /// ```
-    ///
-    /// ```json,use_options
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "checkForEach": true
     ///     }
     /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// [1, 2, 3].forEach((el) => {
+    ///     return el * 2;
+    /// });
     /// ```
     ///
     /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
