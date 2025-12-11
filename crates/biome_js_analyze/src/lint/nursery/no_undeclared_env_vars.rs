@@ -1,5 +1,3 @@
-use std::sync::LazyLock;
-
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,7 +6,6 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, global_identifier};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_undeclared_env_vars::NoUndeclaredEnvVarsOptions;
-use regex::Regex;
 
 use crate::services::turborepo::Turborepo;
 
@@ -183,49 +180,42 @@ fn is_import_meta_object(expr: &AnyJsExpression) -> bool {
     expr.as_js_import_meta_expression().is_some()
 }
 
-/// Default allowed environment variables that are commonly used
+/// Default allowed environment variables that are commonly used.
+/// Sorted alphabetically for binary search.
 const DEFAULT_ALLOWED_ENV_VARS: &[&str] = &[
-    "NODE_ENV", "CI", "TZ", "PATH", "HOME", "USER", "SHELL", "PWD",
+    "CI", "HOME", "NODE_ENV", "PATH", "PWD", "SHELL", "TZ", "USER",
 ];
 
-/// Pre-compiled regex patterns for framework and CI provider specific env vars (e.g., NEXT_PUBLIC_*, VITE_*, etc.)
-/// Using LazyLock ensures these are compiled only once and reused across all rule invocations.
-static NEXT_PUBLIC_PATTERN: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^NEXT_PUBLIC_.*$").unwrap());
-static VITE_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^VITE_.*$").unwrap());
-static REACT_APP_PATTERN: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^REACT_APP_.*$").unwrap());
-static VUE_APP_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^VUE_APP_.*$").unwrap());
-static NUXT_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^NUXT_.*$").unwrap());
-static GATSBY_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^GATSBY_.*$").unwrap());
-static EXPO_PUBLIC_PATTERN: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^EXPO_PUBLIC_.*$").unwrap());
-static VERCEL_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^VERCEL(_.*)?$").unwrap());
-
-/// All default allowed patterns combined for iteration
-static DEFAULT_ALLOWED_PATTERNS: &[&LazyLock<Regex>] = &[
+/// Default allowed prefixes for framework and CI provider specific env vars.
+/// These are checked using `starts_with` for better performance than regex.
+const DEFAULT_ALLOWED_PREFIXES: &[&str] = &[
     // Frameworks
-    &NEXT_PUBLIC_PATTERN,
-    &VITE_PATTERN,
-    &REACT_APP_PATTERN,
-    &VUE_APP_PATTERN,
-    &NUXT_PATTERN,
-    &GATSBY_PATTERN,
-    &EXPO_PUBLIC_PATTERN,
+    "NEXT_PUBLIC_",
+    "VITE_",
+    "REACT_APP_",
+    "VUE_APP_",
+    "NUXT_",
+    "GATSBY_",
+    "EXPO_PUBLIC_",
     // CI Providers
-    &VERCEL_PATTERN,
+    "VERCEL_",
 ];
 
 /// Checks if an environment variable is allowed based on default values and patterns
 fn is_env_var_allowed_by_defaults(env_var: &str) -> bool {
-    // Check against default allowed env vars
-    if DEFAULT_ALLOWED_ENV_VARS.contains(&env_var) {
+    // Check against default allowed env vars (sorted, so binary search is used)
+    if DEFAULT_ALLOWED_ENV_VARS.binary_search(&env_var).is_ok() {
         return true;
     }
 
-    // Check against pre-compiled default patterns
-    for pattern in DEFAULT_ALLOWED_PATTERNS {
-        if pattern.is_match(env_var) {
+    // Check for exact match "VERCEL" (CI provider)
+    if env_var == "VERCEL" {
+        return true;
+    }
+
+    // Check against default allowed prefixes
+    for prefix in DEFAULT_ALLOWED_PREFIXES {
+        if env_var.starts_with(prefix) {
             return true;
         }
     }
