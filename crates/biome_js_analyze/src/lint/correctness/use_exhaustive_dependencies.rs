@@ -208,7 +208,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// Functions not imported from React are ignored by default (unless specified inside [rule options](#options))
+    /// Hooks not imported from React are ignored by default (unless specified inside [rule options](#options))
     /// ```ts
     /// import type { EffectCallback, DependencyList } from "react";
     /// // custom useEffect function
@@ -804,174 +804,174 @@ impl Rule for UseExhaustiveDependencies {
         let options = ctx.options();
         let hook_config_maps = HookConfigMaps::new(options);
 
-        let mut signals = Vec::new();
-
         let call = ctx.query();
         let model = ctx.model();
 
-        if let Some(result) =
-            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model)
-        {
-            let Some(component_function) = function_of_hook_call(call) else {
-                return Vec::new().into_boxed_slice();
-            };
+        let (Some(result), Some(component_function)) = (
+            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model),
+            function_of_hook_call(call),
+        ) else {
+            return Vec::new().into_boxed_slice();
+        };
 
-            let dependencies_array = match &result.dependencies_node {
-                Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
-                Some(expr) => {
-                    return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
-                        .into_boxed_slice();
-                }
-                None => {
-                    return if options.report_missing_dependencies_array() {
-                        vec![Fix::MissingDependenciesArray {
-                            function_name_range: result.function_name_range,
-                        }]
-                        .into_boxed_slice()
-                    } else {
-                        Vec::new().into_boxed_slice()
-                    };
-                }
-            };
+        let mut signals = Vec::new();
 
-            let component_function_range = component_function.text_range_with_trivia();
-
-            let captures: Vec<_> = result
-                .all_captures(model)
-                .filter(|capture| {
-                    capture_needs_to_be_in_the_dependency_list(
-                        capture,
-                        &component_function_range,
-                        model,
-                        &hook_config_maps,
-                    )
-                })
-                .map(|capture| {
-                    get_whole_static_member_expression(capture.node())
-                        .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
-                })
-                .collect();
-
-            let deps: Vec<_> = result.all_dependencies().collect();
-            let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
-
-            // Evaluate all the captures
-            for capture in &captures {
-                let mut suggested_fix = None;
-                let mut is_captured_covered = false;
-                for dep in &deps {
-                    let (capture_contains_dep, dep_contains_capture) =
-                        compare_member_depth(capture, dep.syntax());
-
-                    match (capture_contains_dep, dep_contains_capture) {
-                        // capture == dependency
-                        (true, true) => {
-                            suggested_fix = None;
-                            is_captured_covered = true;
-                            break;
-                        }
-                        // example
-                        // capture: a.b.c
-                        // dependency: a
-                        // this is ok, but we may suggest performance improvements
-                        // in the future
-                        (true, false) => {
-                            // We need to continue, because it may still have a perfect match
-                            // in the dependency list
-                            is_captured_covered = true;
-                        }
-                        // example
-                        // capture: a.b
-                        // dependency: a.b.c
-                        // This can be valid in some cases. We will flag an error nonetheless.
-                        (false, true) => {
-                            // We need to continue, because it may still have a perfect match
-                            // in the dependency list
-                            suggested_fix = Some(Fix::DependencyTooDeep {
-                                function_name_range: result.function_name_range,
-                                capture_range: capture.text_trimmed_range(),
-                                dependency_range: dep.syntax().text_trimmed_range(),
-                                dependency_text: dep.syntax().text_trimmed().into_text().into(),
-                            });
-                        }
-                        _ => {}
-                    }
-                }
-
-                if let Some(fix) = suggested_fix {
-                    signals.push(fix);
-                }
-
-                if !is_captured_covered {
-                    let captures = add_deps
-                        .entry(capture.text_trimmed().into_text().into())
-                        .or_default();
-
-                    if !captures.iter().any(|existing| existing == capture) {
-                        captures.push(capture.clone());
-                    }
-                }
+        let dependencies_array = match &result.dependencies_node {
+            Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
+            Some(expr) => {
+                return vec![Fix::NonLiteralDependenciesArray {
+                    expr: expr.clone(),
+                }]
+                .into_boxed_slice();
             }
+            None => {
+                return if options.report_missing_dependencies_array() {
+                    vec![Fix::MissingDependenciesArray {
+                        function_name_range: result.function_name_range,
+                    }]
+                    .into_boxed_slice()
+                } else {
+                    Vec::new().into_boxed_slice()
+                };
+            }
+        };
 
-            // Split deps into correctly specified ones and unnecessary ones.
-            let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) =
-                deps.into_iter().partition(|dep| {
-                    captures.iter().any(|capture| {
-                        let (capture_contains_dep, dep_contains_capture) =
-                            compare_member_depth(capture, dep.syntax());
-                        capture_contains_dep || dep_contains_capture
-                    })
-                });
+        let component_function_range = component_function.text_range_with_trivia();
 
-            // Find duplicated deps from specified ones
-            {
-                let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
-                for dep in correct_deps.iter() {
-                    let expression_name = dep.to_string();
-                    if dep_list.contains_key(&expression_name) {
-                        signals.push(Fix::RemoveDependency {
+        let captures: Vec<_> = result
+            .all_captures(model)
+            .filter(|capture| {
+                capture_needs_to_be_in_the_dependency_list(
+                    capture,
+                    &component_function_range,
+                    model,
+                    &hook_config_maps,
+                )
+            })
+            .map(|capture| {
+                get_whole_static_member_expression(capture.node())
+                    .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
+            })
+            .collect();
+
+        let deps: Vec<_> = result.all_dependencies().collect();
+        let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
+
+        // Evaluate all the captures
+        for capture in &captures {
+            let mut suggested_fix = None;
+            let mut is_captured_covered = false;
+            for dep in &deps {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+
+                match (capture_contains_dep, dep_contains_capture) {
+                    // capture == dependency
+                    (true, true) => {
+                        suggested_fix = None;
+                        is_captured_covered = true;
+                        break;
+                    }
+                    // example
+                    // capture: a.b.c
+                    // dependency: a
+                    // this is ok, but we may suggest performance improvements
+                    // in the future
+                    (true, false) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        is_captured_covered = true;
+                    }
+                    // example
+                    // capture: a.b
+                    // dependency: a.b.c
+                    // This can be valid in some cases. We will flag an error nonetheless.
+                    (false, true) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        suggested_fix = Some(Fix::DependencyTooDeep {
                             function_name_range: result.function_name_range,
-                            component_function: component_function.clone(),
-                            dependencies: vec![dep.clone()].into_boxed_slice(),
-                            dependencies_array: dependencies_array.clone(),
+                            capture_range: capture.text_trimmed_range(),
+                            dependency_range: dep.syntax().text_trimmed_range(),
+                            dependency_text: dep.syntax().text_trimmed().into_text().into(),
                         });
-                        continue;
                     }
-                    dep_list.insert(expression_name, dep.clone());
+                    _ => {}
                 }
             }
 
-            // Find correctly specified dependencies with an unstable identity,
-            // since they would trigger re-evaluation on every render.
-            let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
-                determine_unstable_dependency(&dep, model).map(|kind| (dep, kind))
+            if let Some(fix) = suggested_fix {
+                signals.push(fix);
+            }
+
+            if !is_captured_covered {
+                let captures = add_deps
+                    .entry(capture.text_trimmed().into_text().into())
+                    .or_default();
+
+                if !captures.iter().any(|existing| existing == capture) {
+                    captures.push(capture.clone());
+                }
+            }
+        }
+
+        // Split deps into correctly specified ones and unnecessary ones.
+        let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) = deps.into_iter().partition(|dep| {
+            captures.iter().any(|capture| {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+                capture_contains_dep || dep_contains_capture
+            })
+        });
+
+        // Find duplicated deps from specified ones
+        {
+            let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
+            for dep in correct_deps.iter() {
+                let expression_name = dep.to_string();
+                if dep_list.contains_key(&expression_name) {
+                    signals.push(Fix::RemoveDependency {
+                        function_name_range: result.function_name_range,
+                        component_function: component_function.clone(),
+                        dependencies: vec![dep.clone()].into_boxed_slice(),
+                        dependencies_array: dependencies_array.clone(),
+                    });
+                    continue;
+                }
+                dep_list.insert(expression_name, dep.clone());
+            }
+        }
+
+        // Find correctly specified dependencies with an unstable identity,
+        // since they would trigger re-evaluation on every render.
+        let unstable_deps = correct_deps
+            .into_iter()
+            .filter_map(|dep| determine_unstable_dependency(&dep, model).map(|kind| (dep, kind)));
+
+        // Generate signals
+        for (name, nodes) in add_deps {
+            signals.push(Fix::AddDependency {
+                function_name_range: result.function_name_range,
+                captures: (name, nodes.into_boxed_slice()),
+                dependencies_array: dependencies_array.clone(),
             });
+        }
 
-            // Generate signals
-            for (name, nodes) in add_deps {
-                signals.push(Fix::AddDependency {
-                    function_name_range: result.function_name_range,
-                    captures: (name, nodes.into_boxed_slice()),
-                    dependencies_array: dependencies_array.clone(),
-                });
-            }
+        if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
+            signals.push(Fix::RemoveDependency {
+                function_name_range: result.function_name_range,
+                component_function,
+                dependencies: excessive_deps.into_boxed_slice(),
+                dependencies_array: dependencies_array.clone(),
+            });
+        }
 
-            if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
-                signals.push(Fix::RemoveDependency {
-                    function_name_range: result.function_name_range,
-                    component_function,
-                    dependencies: excessive_deps.into_boxed_slice(),
-                    dependencies_array: dependencies_array.clone(),
-                });
-            }
-
-            for (unstable_dep, kind) in unstable_deps {
-                signals.push(Fix::DependencyTooUnstable {
-                    dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
-                    dependency_range: unstable_dep.range(),
-                    kind,
-                });
-            }
+        for (unstable_dep, kind) in unstable_deps {
+            signals.push(Fix::DependencyTooUnstable {
+                dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
+                dependency_range: unstable_dep.range(),
+                kind,
+            });
         }
 
         signals.into_boxed_slice()
@@ -1011,8 +1011,10 @@ impl Rule for UseExhaustiveDependencies {
                     expr.range(),
                     markup! {"This dependencies list is not an array literal."},
                 )
-                .note(markup! {"Biome can't statically verify whether you've passed the correct dependencies."})
-                .note(markup! { "Replace with an array literal and list your dependencies within it."})
+                .note(markup! {
+                    "Biome can't statically verify whether you've passed the correct dependencies."
+                    "\nReplace the argument with an array literal and list your dependencies within it."
+                })
             ),
             Fix::AddDependency {
                 function_name_range,
@@ -1127,6 +1129,7 @@ impl Rule for UseExhaustiveDependencies {
                 .detail(dependency_range, "...this dependency.");
                 Some(diag)
             }
+            // TODO: Add fix for missing dependency array (which would simply add an empty one)
         }
     }
 
