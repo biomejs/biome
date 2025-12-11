@@ -10,19 +10,19 @@ use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_undeclared_env_vars::NoUndeclaredEnvVarsOptions;
 use regex::Regex;
 
-use crate::services::turbo::Turbo;
+use crate::services::turborepo::Turborepo;
 
 declare_lint_rule! {
     /// Disallow the use of undeclared environment variables.
     ///
     /// In Turborepo projects, environment variables used in tasks must be declared
-    /// in the `turbo.json` configuration file to ensure proper caching behavior.
+    /// in the `turbo.json(c)` configuration file to ensure proper caching behavior.
     /// Using undeclared environment variables can lead to incorrect cache hits
     /// and unpredictable build behavior.
     ///
     /// This rule checks for `process.env.VAR_NAME` and `import.meta.env.VAR_NAME`
     /// accesses and validates them against:
-    /// 1. Environment variables declared in `turbo.json` (`globalEnv` and task-level `env`)
+    /// 1. Environment variables declared in `turbo.json(c)` (`globalEnv`, `globalPassThroughEnv`, task-level `env`, and task-level `passThroughEnv`)
     /// 2. Environment variables specified in the rule's `allowedEnvVars` option
     /// 3. Default allowed variables (common system vars and framework-specific patterns)
     ///
@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// **Node.js:**
     /// - `NODE_ENV`
     ///
-    /// **Framework-specific patterns (all variables matching these prefixes):**
+    /// **Framework and provider-specific patterns (all variables matching these prefixes):**
     /// - `NEXT_PUBLIC_*` (Next.js)
     /// - `VITE_*` (Vite)
     /// - `REACT_APP_*` (Create React App)
@@ -44,6 +44,7 @@ declare_lint_rule! {
     /// - `NUXT_*` (Nuxt)
     /// - `GATSBY_*` (Gatsby)
     /// - `EXPO_PUBLIC_*` (Expo)
+    /// - `VERCEL`, `VERCEL_*` (Vercel)
     ///
     /// ## Examples
     ///
@@ -63,14 +64,14 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to specify additional environment variables that are not declared in `env`
-    /// or `passThroughEnv` in `turbo.json`.
+    /// Use the options to specify additional environment variables that are not declared in `globalEnv`,
+    /// `globalPassThroughEnv`, or task-level `env`/`passThroughEnv` in `turbo.json`.
     /// Supports regular expression patterns (anchors `^` and `$` are implicit).
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "allowedEnvVars": ["MY_APP_.*", "API_KEY"]
+    ///         "allowedEnvVars": ["MY_APP_.*", "ACME_TOKEN"]
     ///     }
     /// }
     /// ```
@@ -93,14 +94,14 @@ pub struct EnvVarAccess {
 }
 
 impl Rule for NoUndeclaredEnvVars {
-    type Query = Turbo<JsStaticMemberExpression>;
+    type Query = Turborepo<JsStaticMemberExpression>;
     type State = EnvVarAccess;
     type Signals = Option<Self::State>;
     type Options = NoUndeclaredEnvVarsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         // Skip the rule if no turbo.json was found - this rule only applies to Turborepo projects
-        if !ctx.has_turbo_config() {
+        if !ctx.has_turborepo_config() {
             return None;
         }
 
@@ -154,21 +155,13 @@ impl Rule for NoUndeclaredEnvVars {
         let node = ctx.query();
         let env_var = state.env_var_name.text();
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json."
-                },
-            )
-            .note(markup! {
-                "Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration."
-            })
-            .note(markup! {
-                "Undeclared environment variables can cause incorrect caching behavior in Turborepo."
-            }),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo."
+            },
+        ))
     }
 }
 
@@ -192,30 +185,10 @@ fn is_import_meta_object(expr: &AnyJsExpression) -> bool {
 
 /// Default allowed environment variables that are commonly used
 const DEFAULT_ALLOWED_ENV_VARS: &[&str] = &[
-    "NODE_ENV",
-    "VERCEL",
-    "VERCEL_ENV",
-    "VERCEL_URL",
-    "VERCEL_GIT_COMMIT_SHA",
-    "VERCEL_GIT_COMMIT_REF",
-    "VERCEL_GIT_COMMIT_MESSAGE",
-    "VERCEL_GIT_COMMIT_AUTHOR_LOGIN",
-    "VERCEL_GIT_COMMIT_AUTHOR_NAME",
-    "VERCEL_GIT_PROVIDER",
-    "VERCEL_GIT_REPO_ID",
-    "VERCEL_GIT_REPO_OWNER",
-    "VERCEL_GIT_REPO_SLUG",
-    "VERCEL_GIT_PULL_REQUEST_ID",
-    "CI",
-    "TZ",
-    "PATH",
-    "HOME",
-    "USER",
-    "SHELL",
-    "PWD",
+    "NODE_ENV", "CI", "TZ", "PATH", "HOME", "USER", "SHELL", "PWD",
 ];
 
-/// Pre-compiled regex patterns for framework-specific env vars (e.g., NEXT_PUBLIC_*, VITE_*, etc.)
+/// Pre-compiled regex patterns for framework and CI provider specific env vars (e.g., NEXT_PUBLIC_*, VITE_*, etc.)
 /// Using LazyLock ensures these are compiled only once and reused across all rule invocations.
 static NEXT_PUBLIC_PATTERN: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^NEXT_PUBLIC_.*$").unwrap());
@@ -227,9 +200,11 @@ static NUXT_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^NUXT_.*$")
 static GATSBY_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^GATSBY_.*$").unwrap());
 static EXPO_PUBLIC_PATTERN: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^EXPO_PUBLIC_.*$").unwrap());
+static VERCEL_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^VERCEL(_.*)?$").unwrap());
 
 /// All default allowed patterns combined for iteration
 static DEFAULT_ALLOWED_PATTERNS: &[&LazyLock<Regex>] = &[
+    // Frameworks
     &NEXT_PUBLIC_PATTERN,
     &VITE_PATTERN,
     &REACT_APP_PATTERN,
@@ -237,6 +212,8 @@ static DEFAULT_ALLOWED_PATTERNS: &[&LazyLock<Regex>] = &[
     &NUXT_PATTERN,
     &GATSBY_PATTERN,
     &EXPO_PUBLIC_PATTERN,
+    // CI Providers
+    &VERCEL_PATTERN,
 ];
 
 /// Checks if an environment variable is allowed based on default values and patterns

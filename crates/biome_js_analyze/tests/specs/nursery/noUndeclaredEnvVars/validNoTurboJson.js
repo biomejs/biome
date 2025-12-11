@@ -6,7 +6,7 @@
 // These would normally be flagged as undeclared
 const customVar = process.env.MY_CUSTOM_VAR;
 const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
-const secretKey = process.env.SECRET_KEY;
+const acmeSecret = process.env.ACME_SECRET;
 const databaseUrl = process.env.DATABASE_URL;
 
 // Also with import.meta.env

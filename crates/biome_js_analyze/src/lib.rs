@@ -159,7 +159,7 @@ where
         .find_node_manifest_for_path(file_path.as_ref())
         .map(|(path, manifest)| (path, Arc::new(manifest)));
 
-    let turbo_configs: Vec<Arc<TurboJson>> =
+    let turborepo_configs: Vec<Arc<TurboJson>> =
         project_layout.find_all_turbo_json_for_path(file_path.as_ref());
 
     let type_resolver = module_graph
@@ -171,7 +171,7 @@ where
     services.insert_service(source_type);
     services.insert_service(module_graph);
     services.insert_service(node_manifest);
-    services.insert_service(turbo_configs);
+    services.insert_service(turborepo_configs);
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);

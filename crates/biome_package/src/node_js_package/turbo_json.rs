@@ -34,6 +34,13 @@ pub struct TurboJson {
     #[deserializable(rename = "globalEnv")]
     pub global_env: Option<Vec<String>>,
 
+    /// Global pass-through environment variables.
+    /// These environment variables are available to all tasks but do not
+    /// contribute to the task's cache key. Useful for variables that should
+    /// be available at runtime but shouldn't invalidate caches when changed.
+    #[deserializable(rename = "globalPassThroughEnv")]
+    pub global_pass_through_env: Option<Vec<String>>,
+
     /// Global dependencies that affect all tasks.
     #[deserializable(rename = "globalDependencies")]
     pub global_dependencies: Option<Vec<String>>,
@@ -55,6 +62,7 @@ impl Clone for TurboJson {
         Self {
             path: self.path.clone(),
             global_env: self.global_env.clone(),
+            global_pass_through_env: self.global_pass_through_env.clone(),
             global_dependencies: self.global_dependencies.clone(),
             tasks: self.tasks.clone(),
             pipeline: self.pipeline.clone(),
@@ -150,6 +158,7 @@ impl TurboJson {
     ///
     /// This includes patterns from:
     /// - Global environment variables from `globalEnv`
+    /// - Global pass-through environment variables from `globalPassThroughEnv`
     /// - Task-specific environment variables from `tasks.*.env`
     /// - Task-specific pass-through environment variables from `tasks.*.passThroughEnv`
     /// - Legacy pipeline environment variables from `pipeline.*.env`
@@ -173,6 +182,13 @@ impl TurboJson {
             // Add global env vars
             if let Some(global_env) = &self.global_env {
                 for var in global_env {
+                    process_var(var);
+                }
+            }
+
+            // Add global pass-through env vars
+            if let Some(global_pass_through_env) = &self.global_pass_through_env {
+                for var in global_pass_through_env {
                     process_var(var);
                 }
             }
@@ -217,6 +233,7 @@ impl TurboJson {
     ///
     /// This includes:
     /// - Global environment variables from `globalEnv`
+    /// - Global pass-through environment variables from `globalPassThroughEnv`
     /// - Task-specific environment variables from `tasks.*.env`
     /// - Task-specific pass-through environment variables from `tasks.*.passThroughEnv`
     /// - Legacy pipeline environment variables from `pipeline.*.env`
@@ -252,7 +269,6 @@ impl TurboJson {
         }
 
         // Check for positive matches
-        // Exact match (O(1) lookup)
         if cache.positive.contains(env_var) {
             return true;
         }
@@ -277,6 +293,7 @@ mod tests {
         TurboJson {
             path: Utf8PathBuf::from("turbo.json"),
             global_env: Some(env_vars.into_iter().map(String::from).collect()),
+            global_pass_through_env: None,
             global_dependencies: None,
             tasks: None,
             pipeline: None,
@@ -368,11 +385,74 @@ mod tests {
         TurboJson {
             path: Utf8PathBuf::from("turbo.json"),
             global_env: None,
+            global_pass_through_env: None,
             global_dependencies: None,
             tasks: Some(tasks),
             pipeline: None,
             env_vars_cache: OnceLock::new(),
         }
+    }
+
+    fn create_turbo_json_with_global_pass_through_env(env_vars: Vec<&str>) -> TurboJson {
+        TurboJson {
+            path: Utf8PathBuf::from("turbo.json"),
+            global_env: None,
+            global_pass_through_env: Some(env_vars.into_iter().map(String::from).collect()),
+            global_dependencies: None,
+            tasks: None,
+            pipeline: None,
+            env_vars_cache: OnceLock::new(),
+        }
+    }
+
+    #[test]
+    fn test_global_pass_through_env_exact_match() {
+        let turbo =
+            create_turbo_json_with_global_pass_through_env(vec!["AWS_SECRET_KEY", "DATABASE_URL"]);
+        assert!(turbo.is_env_var_declared("AWS_SECRET_KEY"));
+        assert!(turbo.is_env_var_declared("DATABASE_URL"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_global_pass_through_env_wildcard_match() {
+        let turbo = create_turbo_json_with_global_pass_through_env(vec!["AWS_*"]);
+        assert!(turbo.is_env_var_declared("AWS_SECRET_KEY"));
+        assert!(turbo.is_env_var_declared("AWS_ACCESS_KEY"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_global_pass_through_env_combined_with_global_env() {
+        // Test that both globalEnv and globalPassThroughEnv are considered
+        let turbo = TurboJson {
+            path: Utf8PathBuf::from("turbo.json"),
+            global_env: Some(vec!["API_KEY".to_string()]),
+            global_pass_through_env: Some(vec!["AWS_SECRET".to_string()]),
+            global_dependencies: None,
+            tasks: None,
+            pipeline: None,
+            env_vars_cache: OnceLock::new(),
+        };
+        assert!(turbo.is_env_var_declared("API_KEY"));
+        assert!(turbo.is_env_var_declared("AWS_SECRET"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_global_pass_through_env_negation() {
+        // Test that negation works with globalPassThroughEnv
+        let turbo = TurboJson {
+            path: Utf8PathBuf::from("turbo.json"),
+            global_env: Some(vec!["*".to_string()]),
+            global_pass_through_env: Some(vec!["!SECRET_KEY".to_string()]),
+            global_dependencies: None,
+            tasks: None,
+            pipeline: None,
+            env_vars_cache: OnceLock::new(),
+        };
+        assert!(turbo.is_env_var_declared("ANY_VAR"));
+        assert!(!turbo.is_env_var_declared("SECRET_KEY"));
     }
 
     #[test]
@@ -411,6 +491,7 @@ mod tests {
         let turbo = TurboJson {
             path: Utf8PathBuf::from("turbo.json"),
             global_env: None,
+            global_pass_through_env: None,
             global_dependencies: None,
             tasks: Some(tasks),
             pipeline: None,
