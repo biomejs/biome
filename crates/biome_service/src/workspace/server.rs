@@ -857,7 +857,9 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
-        } else if let Some(turbo_filename) = filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc") {
+        } else if let Some(turbo_filename) =
+            filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
+        {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
@@ -865,8 +867,11 @@ impl WorkspaceServer {
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
-                    self.project_layout
-                        .insert_serialized_turbo_json(package_path, root, turbo_filename);
+                    self.project_layout.insert_serialized_turbo_json(
+                        package_path,
+                        root,
+                        turbo_filename,
+                    );
                 }
                 UpdateKind::Removed => {
                     self.project_layout
