@@ -291,13 +291,13 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic,use_options
     /// function Foo() {
     ///   let stateVar = 1;
-    ///   const location = useLocation(() => {console.log(stateVar)}, []);
+    ///   useLocation(() => {console.log(stateVar)}, []);
     /// }
     /// ```
     /// ```js,use_options
     /// function Foo() {
     ///   let stateVar = 1;
-    ///   const query = useQuery([stateVar], "smthng", () => {console.log(stateVar)});
+    ///   useQuery([stateVar], "smthng", () => {console.log(stateVar)});
     /// }
     /// ```
     ///
