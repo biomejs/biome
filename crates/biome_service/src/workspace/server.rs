@@ -857,7 +857,9 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
-        } else if filename.is_some_and(|filename| filename == "turbo.json" || filename == "turbo.jsonc") {
+        } else if filename
+            .is_some_and(|filename| filename == "turbo.json" || filename == "turbo.jsonc")
+        {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())

@@ -6423,14 +6423,9 @@ export interface NoUndeclaredEnvVarsOptions {
 	* Environment variables that should always be allowed.
 Use this to specify environment variables that are always available
 in your environment, even when not declared in turbo.json.
-Supports regular expressions, e.g. `["^MY_ENV_.*$"]`. 
+Supports regular expressions, e.g. `["MY_ENV_.*"]`. 
 	 */
-	allowedEnvVars?: string[];
-	/**
-	* Path to the turbo.json file. If not specified, the rule will
-search for turbo.json in the project root and parent directories. 
-	 */
-	turboConfigPath?: string;
+	allowedEnvVars?: Regex[];
 }
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
@@ -6901,6 +6896,7 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export type Regex = string;
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 /**
  * The GraphQL description style to enforce.
@@ -6918,7 +6914,6 @@ export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
-export type Regex = string;
 /**
  * The style to apply when importing types.
  */
