@@ -25,4 +25,7 @@
 	<svg role="graphics-symbol">
 		<rect />
 	</svg>
+	<svg role="presentation img">
+		<rect />
+	</svg>
 </>;

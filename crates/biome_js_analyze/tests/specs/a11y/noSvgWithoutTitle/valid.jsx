@@ -21,6 +21,10 @@
 		<title>Pass</title>
 		<rect />
 	</svg>
+	<svg role="graphics-symbol img">
+		<title>Pass</title>
+		<rect />
+	</svg>
 	<svg role="img" aria-labelledby="title">
 		<span id="title">Pass</span>
 	</svg>
