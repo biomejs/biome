@@ -11,7 +11,7 @@ use biome_rowan::AstNode;
 
 use crate::services::semantic::SemanticModelBuilderVisitor;
 
-/// Holds all turbo.json configurations that apply to a file.
+/// Holds all turbo.json(c) configurations that apply to a file.
 ///
 /// In a Turborepo monorepo, environment variables can be declared in:
 /// 1. The root `turbo.json` at the repository root
@@ -19,29 +19,29 @@ use crate::services::semantic::SemanticModelBuilderVisitor;
 ///
 /// Both are checked when validating environment variable declarations.
 #[derive(Debug, Clone)]
-pub struct TurboServices {
+pub struct TurborepoServices {
     /// All turbo.json configurations that apply to the current file,
     /// ordered from closest (package-level) to furthest (root).
-    pub(crate) turbo_configs: Vec<Arc<TurboJson>>,
+    pub(crate) turborepo_configs: Vec<Arc<TurboJson>>,
 
     /// Semantic model for resolving bindings.
     model: SemanticModel,
 }
 
-impl TurboServices {
+impl TurborepoServices {
     /// Checks if the given environment variable is declared in any turbo.json.
     ///
     /// This checks all turbo.json files in the hierarchy (package-level and root).
     /// The env var is considered declared if it appears in ANY of the configs.
     pub fn is_env_var_declared(&self, env_var: &str) -> bool {
-        self.turbo_configs
+        self.turborepo_configs
             .iter()
             .any(|config| config.is_env_var_declared(env_var))
     }
 
     /// Returns whether any turbo.json file was found for the current file.
-    pub fn has_turbo_config(&self) -> bool {
-        !self.turbo_configs.is_empty()
+    pub fn has_turborepo_config(&self) -> bool {
+        !self.turborepo_configs.is_empty()
     }
 
     /// Returns a reference to the semantic model.
@@ -50,13 +50,13 @@ impl TurboServices {
     }
 }
 
-impl FromServices for TurboServices {
+impl FromServices for TurborepoServices {
     fn from_services(
         rule_key: &RuleKey,
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
-        let turbo_configs: &Vec<Arc<TurboJson>> = services
+        let turborepo_configs: &Vec<Arc<TurboJson>> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["TurboJson"]))?;
 
@@ -65,13 +65,13 @@ impl FromServices for TurboServices {
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
 
         Ok(Self {
-            turbo_configs: turbo_configs.clone(),
+            turborepo_configs: turborepo_configs.clone(),
             model: model.clone(),
         })
     }
 }
 
-impl Phase for TurboServices {
+impl Phase for TurborepoServices {
     fn phase() -> Phases {
         Phases::Semantic
     }
@@ -80,9 +80,9 @@ impl Phase for TurboServices {
 /// Query type usable by lint rules **that use the turbo.json config** and matches on specific [AstNode] types.
 /// Also provides access to the semantic model for resolving bindings.
 #[derive(Clone)]
-pub struct Turbo<N>(pub N);
+pub struct Turborepo<N>(pub N);
 
-impl<N> Queryable for Turbo<N>
+impl<N> Queryable for Turborepo<N>
 where
     N: AstNode<Language = JsLanguage> + 'static,
 {
@@ -90,7 +90,7 @@ where
     type Output = N;
 
     type Language = JsLanguage;
-    type Services = TurboServices;
+    type Services = TurborepoServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
@@ -118,7 +118,6 @@ mod tests {
         turbo_json.unwrap_or_default()
     }
 
-    /// Tests monorepo scenario: env var declared in root turbo.json only
     #[test]
     fn test_monorepo_env_var_in_root_only() {
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR", "SHARED_VAR"] }"#);
@@ -136,24 +135,24 @@ mod tests {
         assert!(!configs.iter().any(|c| c.is_env_var_declared("UNDECLARED")));
     }
 
-    /// Tests monorepo scenario: env var declared in package turbo.json task
     #[test]
     fn test_monorepo_env_var_in_package_task() {
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR"] }"#);
         let package_turbo =
-            create_turbo_json(r#"{ "tasks": { "build": { "env": ["BUILD_SECRET"] } } }"#);
+            create_turbo_json(r#"{ "tasks": { "build": { "env": ["BUILD_OUTPUT"] } } }"#);
 
         let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
 
-        // BUILD_SECRET is declared in package turbo.json's task
-        assert!(configs
-            .iter()
-            .any(|c| c.is_env_var_declared("BUILD_SECRET")));
+        // BUILD_OUTPUT is declared in package turbo.json's task
+        assert!(
+            configs
+                .iter()
+                .any(|c| c.is_env_var_declared("BUILD_OUTPUT"))
+        );
         // ROOT_VAR is in root only
         assert!(configs.iter().any(|c| c.is_env_var_declared("ROOT_VAR")));
     }
 
-    /// Tests monorepo scenario: wildcard in root, specific vars in package
     #[test]
     fn test_monorepo_wildcard_inheritance() {
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["NEXT_PUBLIC_*"] }"#);
@@ -162,37 +161,39 @@ mod tests {
         let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
 
         // Wildcard from root applies
-        assert!(configs
-            .iter()
-            .any(|c| c.is_env_var_declared("NEXT_PUBLIC_API_URL")));
+        assert!(
+            configs
+                .iter()
+                .any(|c| c.is_env_var_declared("NEXT_PUBLIC_API_URL"))
+        );
         // Specific var from package applies
-        assert!(configs
-            .iter()
-            .any(|c| c.is_env_var_declared("DATABASE_URL")));
+        assert!(
+            configs
+                .iter()
+                .any(|c| c.is_env_var_declared("DATABASE_URL"))
+        );
         // Non-matching var is undeclared
-        assert!(!configs.iter().any(|c| c.is_env_var_declared("SECRET_KEY")));
+        assert!(!configs.iter().any(|c| c.is_env_var_declared("ACME_SECRET")));
     }
 
-    /// Tests monorepo scenario: negation in package doesn't affect root declarations
     #[test]
     fn test_monorepo_negation_scope() {
         // Root allows all vars
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["*"] }"#);
-        // Package excludes SECRET_KEY
-        let package_turbo = create_turbo_json(r#"{ "globalEnv": ["*", "!SECRET_KEY"] }"#);
+        // Package excludes ACME_SECRET
+        let package_turbo = create_turbo_json(r#"{ "globalEnv": ["*", "!ACME_SECRET"] }"#);
 
         let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
 
-        // SECRET_KEY is excluded in package but allowed in root
+        // ACME_SECRET is excluded in package but allowed in root
         // Since we use `any()`, if ANY config allows it, it's considered declared
         // This matches the current implementation behavior
-        assert!(configs.iter().any(|c| c.is_env_var_declared("SECRET_KEY")));
+        assert!(configs.iter().any(|c| c.is_env_var_declared("ACME_SECRET")));
 
         // Regular vars are allowed by both
-        assert!(configs.iter().any(|c| c.is_env_var_declared("API_KEY")));
+        assert!(configs.iter().any(|c| c.is_env_var_declared("ACME_TOKEN")));
     }
 
-    /// Tests monorepo scenario: empty configs
     #[test]
     fn test_monorepo_empty_configs() {
         let configs: Vec<Arc<TurboJson>> = vec![];
@@ -202,7 +203,6 @@ mod tests {
         assert!(!configs.iter().any(|c| c.is_env_var_declared("ANY_VAR")));
     }
 
-    /// Tests monorepo scenario: deeply nested package structure
     #[test]
     fn test_monorepo_multiple_levels() {
         // Simulates: root -> packages/shared -> packages/shared/utils

@@ -8,11 +8,11 @@ const dynamicVar = process.env[key];
 const computedVar = process.env["ANOTHER_VAR"];
 
 // Dynamic with template literal
-const prefix = "API";
-const templateVar = process.env[`${prefix}_KEY`];
+const prefix = "ACME";
+const templateVar = process.env[`${prefix}_TOKEN`];
 
 // Dynamic with concatenation
-const concatVar = process.env["SECRET" + "_KEY"];
+const concatVar = process.env["ACME" + "_SECRET"];
 
 // Dynamic access via variable
 function getEnvVar(name) {

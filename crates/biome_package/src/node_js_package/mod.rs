@@ -25,7 +25,6 @@ pub struct NodeJsPackage {
     pub tsconfig: Option<TsConfigJson>,
 
     /// The `turbo.json` manifest for Turborepo projects.
-    /// Wrapped in `Arc` to avoid expensive clones during lookups.
     pub turbo_json: Option<Arc<TurboJson>>,
 }
 

@@ -8,10 +8,10 @@ expression: validDestructuring.js
 
 // Destructuring from process.env is not detected by this rule
 // because it doesn't create a static member expression (process.env.VAR_NAME)
-const { MY_VAR, ANOTHER_VAR, SECRET_KEY } = process.env;
+const { MY_VAR, ANOTHER_VAR, ACME_SECRET } = process.env;
 
 // Destructuring with rename
-const { DATABASE_URL: dbUrl, API_KEY: apiKey } = process.env;
+const { DATABASE_URL: dbUrl, ACME_TOKEN: acmeToken } = process.env;
 
 // Nested destructuring (edge case)
 const { env: { CUSTOM_VAR } } = process;

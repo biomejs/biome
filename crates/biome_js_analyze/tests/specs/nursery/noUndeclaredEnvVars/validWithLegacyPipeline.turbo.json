@@ -2,7 +2,7 @@
 	"globalEnv": ["GLOBAL_VAR"],
 	"pipeline": {
 		"build": {
-			"env": ["PIPELINE_VAR", "PIPELINE_SECRET"]
+			"env": ["PIPELINE_VAR", "PIPELINE_OUTPUT"]
 		}
 	}
 }

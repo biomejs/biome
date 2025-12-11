@@ -9,7 +9,7 @@ expression: invalid.js
 // Undeclared environment variables should trigger diagnostics
 const myCustomVar = process.env.MY_CUSTOM_VAR;
 const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
-const secretKey = process.env.SECRET_KEY;
+const acmeSecret = process.env.ACME_SECRET;
 
 // Also invalid with import.meta.env
 const importMetaVar = import.meta.env.CUSTOM_META_VAR;
@@ -20,17 +20,13 @@ const importMetaVar = import.meta.env.CUSTOM_META_VAR;
 ```
 invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable MY_CUSTOM_VAR is not listed as a dependency in turbo.json.
+  ! The environment variable MY_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
     3 │ // Undeclared environment variables should trigger diagnostics
   > 4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
-    6 │ const secretKey = process.env.SECRET_KEY;
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+    6 │ const acmeSecret = process.env.ACME_SECRET;
   
 
 ```
@@ -38,37 +34,29 @@ invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
 ```
 invalid.js:5:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable ANOTHER_UNDECLARED_VAR is not listed as a dependency in turbo.json.
+  ! The environment variable ANOTHER_UNDECLARED_VAR is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
     3 │ // Undeclared environment variables should trigger diagnostics
     4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
   > 5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ const secretKey = process.env.SECRET_KEY;
+    6 │ const acmeSecret = process.env.ACME_SECRET;
     7 │ 
   
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
-  
 
 ```
 
 ```
-invalid.js:6:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable SECRET_KEY is not listed as a dependency in turbo.json.
+  ! The environment variable ACME_SECRET is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
     4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
     5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
-  > 6 │ const secretKey = process.env.SECRET_KEY;
-      │                   ^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ const acmeSecret = process.env.ACME_SECRET;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
     8 │ // Also invalid with import.meta.env
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
   
 
 ```
@@ -76,16 +64,12 @@ invalid.js:6:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━�
 ```
 invalid.js:9:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable CUSTOM_META_VAR is not listed as a dependency in turbo.json.
+  ! The environment variable CUSTOM_META_VAR is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
      8 │ // Also invalid with import.meta.env
    > 9 │ const importMetaVar = import.meta.env.CUSTOM_META_VAR;
        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
   
 
 ```

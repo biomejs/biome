@@ -1,17 +1,17 @@
 /* should generate diagnostics - negation patterns exclude vars from wildcard */
 
-// SECRET_KEY is excluded via "!SECRET_KEY" negation
-const secretKey = process.env.SECRET_KEY;
+// ACME_SECRET is excluded via "!ACME_SECRET" negation
+const acmeSecret = process.env.ACME_SECRET;
 
-// SECRET_TOKEN is excluded via "!SECRET_*" wildcard negation
-const secretToken = process.env.SECRET_TOKEN;
-const secretOther = process.env.SECRET_OTHER;
+// ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+const acmeToken = process.env.ACME_TOKEN;
+const acmeOther = process.env.ACME_OTHER;
 
-// PRIVATE_KEY is excluded via "!PRIVATE_KEY" negation
-const privateKey = process.env.PRIVATE_KEY;
+// INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+const internalToken = process.env.INTERNAL_TOKEN;
 
 // These should still be valid (not excluded by negation)
-// API_KEY matches the * wildcard
-const apiKey = process.env.API_KEY;
+// MY_VAR matches the * wildcard
+const myVar = process.env.MY_VAR;
 // PUBLIC_URL matches the * wildcard
 const publicUrl = process.env.PUBLIC_URL;

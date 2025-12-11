@@ -10,16 +10,16 @@ expression: validWithPassThroughEnv.js
 const buildVar = process.env.BUILD_VAR;
 
 // Task-level passThroughEnv from turbo.json tasks.build.passThroughEnv
-const awsKey = process.env.AWS_SECRET_KEY;
+const acmeToken = process.env.ACME_AUTH_TOKEN;
 const dbUrl = process.env.DATABASE_URL;
 
-// Wildcard patterns in passThroughEnv (REDIS_* matches any REDIS_ prefixed var)
-const redisHost = process.env.REDIS_HOST;
-const redisPort = process.env.REDIS_PORT;
-const redisPassword = process.env.REDIS_PASSWORD;
+// Wildcard patterns in passThroughEnv (ACME_CACHE_* matches any ACME_CACHE_ prefixed var)
+const cacheHost = process.env.ACME_CACHE_HOST;
+const cachePort = process.env.ACME_CACHE_PORT;
+const cacheCreds = process.env.ACME_CACHE_CREDS;
 
 // Also works with import.meta.env
-const awsKeyMeta = import.meta.env.AWS_SECRET_KEY;
-const redisHostMeta = import.meta.env.REDIS_HOST;
+const acmeTokenMeta = import.meta.env.ACME_AUTH_TOKEN;
+const cacheHostMeta = import.meta.env.ACME_CACHE_HOST;
 
 ```

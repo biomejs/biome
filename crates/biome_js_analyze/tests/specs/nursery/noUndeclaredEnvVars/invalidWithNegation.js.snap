@@ -6,19 +6,19 @@ expression: invalidWithNegation.js
 ```js
 /* should generate diagnostics - negation patterns exclude vars from wildcard */
 
-// SECRET_KEY is excluded via "!SECRET_KEY" negation
-const secretKey = process.env.SECRET_KEY;
+// ACME_SECRET is excluded via "!ACME_SECRET" negation
+const acmeSecret = process.env.ACME_SECRET;
 
-// SECRET_TOKEN is excluded via "!SECRET_*" wildcard negation
-const secretToken = process.env.SECRET_TOKEN;
-const secretOther = process.env.SECRET_OTHER;
+// ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+const acmeToken = process.env.ACME_TOKEN;
+const acmeOther = process.env.ACME_OTHER;
 
-// PRIVATE_KEY is excluded via "!PRIVATE_KEY" negation
-const privateKey = process.env.PRIVATE_KEY;
+// INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+const internalToken = process.env.INTERNAL_TOKEN;
 
 // These should still be valid (not excluded by negation)
-// API_KEY matches the * wildcard
-const apiKey = process.env.API_KEY;
+// MY_VAR matches the * wildcard
+const myVar = process.env.MY_VAR;
 // PUBLIC_URL matches the * wildcard
 const publicUrl = process.env.PUBLIC_URL;
 
@@ -26,74 +26,58 @@ const publicUrl = process.env.PUBLIC_URL;
 
 # Diagnostics
 ```
-invalidWithNegation.js:4:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidWithNegation.js:4:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable SECRET_KEY is not listed as a dependency in turbo.json.
+  ! The environment variable ACME_SECRET is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
-    3 │ // SECRET_KEY is excluded via "!SECRET_KEY" negation
-  > 4 │ const secretKey = process.env.SECRET_KEY;
-      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ // ACME_SECRET is excluded via "!ACME_SECRET" negation
+  > 4 │ const acmeSecret = process.env.ACME_SECRET;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
-    6 │ // SECRET_TOKEN is excluded via "!SECRET_*" wildcard negation
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+    6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
   
 
 ```
 
 ```
-invalidWithNegation.js:7:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidWithNegation.js:7:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable SECRET_TOKEN is not listed as a dependency in turbo.json.
+  ! The environment variable ACME_TOKEN is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
-    6 │ // SECRET_TOKEN is excluded via "!SECRET_*" wildcard negation
-  > 7 │ const secretToken = process.env.SECRET_TOKEN;
-      │                     ^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ const secretOther = process.env.SECRET_OTHER;
+    6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+  > 7 │ const acmeToken = process.env.ACME_TOKEN;
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const acmeOther = process.env.ACME_OTHER;
     9 │ 
   
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
-  
 
 ```
 
 ```
-invalidWithNegation.js:8:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidWithNegation.js:8:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable SECRET_OTHER is not listed as a dependency in turbo.json.
+  ! The environment variable ACME_OTHER is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
-     6 │ // SECRET_TOKEN is excluded via "!SECRET_*" wildcard negation
-     7 │ const secretToken = process.env.SECRET_TOKEN;
-   > 8 │ const secretOther = process.env.SECRET_OTHER;
-       │                     ^^^^^^^^^^^^^^^^^^^^^^^^
+     6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+     7 │ const acmeToken = process.env.ACME_TOKEN;
+   > 8 │ const acmeOther = process.env.ACME_OTHER;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^
      9 │ 
-    10 │ // PRIVATE_KEY is excluded via "!PRIVATE_KEY" negation
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+    10 │ // INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
   
 
 ```
 
 ```
-invalidWithNegation.js:11:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidWithNegation.js:11:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The environment variable PRIVATE_KEY is not listed as a dependency in turbo.json.
+  ! The environment variable INTERNAL_TOKEN is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
   
-    10 │ // PRIVATE_KEY is excluded via "!PRIVATE_KEY" negation
-  > 11 │ const privateKey = process.env.PRIVATE_KEY;
-       │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ // INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+  > 11 │ const internalToken = process.env.INTERNAL_TOKEN;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
     13 │ // These should still be valid (not excluded by negation)
-  
-  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
-  
-  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
   
 
 ```
