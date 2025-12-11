@@ -261,10 +261,10 @@ impl TurboJson {
         }
         // Wildcard negation (e.g., !SECRET_* excludes SECRET_KEY)
         for negated in &cache.negations {
-            if let Some(prefix) = negated.strip_suffix('*') {
-                if env_var.starts_with(prefix) {
-                    return false;
-                }
+            if let Some(prefix) = negated.strip_suffix('*')
+                && env_var.starts_with(prefix)
+            {
+                return false;
             }
         }
 
@@ -274,10 +274,10 @@ impl TurboJson {
         }
         // Wildcard pattern (e.g., FOO_* matches FOO_BAR)
         for pattern in &cache.positive {
-            if let Some(prefix) = pattern.strip_suffix('*') {
-                if env_var.starts_with(prefix) {
-                    return true;
-                }
+            if let Some(prefix) = pattern.strip_suffix('*')
+                && env_var.starts_with(prefix)
+            {
+                return true;
             }
         }
 

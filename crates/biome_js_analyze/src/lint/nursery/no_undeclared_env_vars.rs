@@ -47,8 +47,9 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// // When MY_VAR is not declared in turbo.json or allowed list
+    /// When `MY_VAR` is not declared in `turbo.json` or the allowed list:
+    ///
+    /// ```js,ignore
     /// const value = process.env.MY_VAR;
     /// ```
     ///
