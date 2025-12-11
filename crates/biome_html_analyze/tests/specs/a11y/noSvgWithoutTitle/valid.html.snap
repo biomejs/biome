@@ -9,19 +9,6 @@ expression: valid.html
 	<title>Pass</title>
 	<circle />
 </svg>
-<svg>
-	<rect />
-	<rect />
-	<g>
-		<circle />
-		<circle />
-		<g>
-			<title>Pass</title>
-			<circle />
-			<circle />
-		</g>
-	</g>
-</svg>
 <svg role="img" aria-label="title">
 	<title id="title">Pass</title>
 </svg>

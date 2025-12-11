@@ -41,23 +41,19 @@ declare_lint_rule! {
     /// </svg>
     /// ```
     ///
-    /// ### Valid
-    ///
-    /// ```html
+    /// ```html,expect_diagnostic
     /// <svg>
     ///     <rect />
     ///     <rect />
     ///     <g>
+    ///         <title>Pass</title>
     ///         <circle />
     ///         <circle />
-    ///         <g>
-    ///             <title>Pass</title>
-    ///             <circle />
-    ///             <circle />
-    ///         </g>
     ///     </g>
     /// </svg>
     /// ```
+    ///
+    /// ### Valid
     ///
     /// ```html
     /// <svg>
@@ -99,7 +95,6 @@ declare_lint_rule! {
     /// ```html
     /// <svg role="presentation">foo</svg>
     /// ```
-    ///
     ///
     ///
     /// ## Accessibility guidelines
@@ -197,19 +192,19 @@ impl Rule for NoSvgWithoutTitle {
     }
 }
 
-/// Checks if the given `HtmlElementList` has a valid `title` element.
+// Checks if the first element of the given `HtmlElementList` is a valid `title` element.
 fn has_valid_title_element(html_child_list: &HtmlElementList) -> Option<bool> {
-    html_child_list.into_iter().find_map(|child| {
-        let html_element = child.as_html_element()?;
-        let opening_element = html_element.opening_element().ok()?;
-        let name = opening_element.name().ok()?.value_token().ok()?;
-        let has_title_element = name.text_trimmed() == "title";
-        if !has_title_element {
-            return has_valid_title_element(&html_element.children());
-        }
-        let has_title_name = html_element.children().into_iter().count() > 0;
-        Some(has_title_element && has_title_name)
-    })
+    let first_child = html_child_list.into_iter().next()?;
+    let html_element = first_child.as_html_element()?;
+    let opening_element = html_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name = name.value_token().ok()?;
+    let has_title_name = name.text_trimmed() == "title";
+    if !has_title_name {
+        return Some(false);
+    }
+    let has_child = html_element.children().into_iter().count() > 0;
+    Some(has_child)
 }
 
 /// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
