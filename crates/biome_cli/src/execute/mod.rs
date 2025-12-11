@@ -1,7 +1,7 @@
 mod diagnostics;
 mod migrate;
 mod process_file;
-mod std_in;
+pub(crate) mod std_in;
 pub(crate) mod traverse;
 
 use crate::cli_options::{CliOptions, CliReporter};
@@ -65,11 +65,11 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    pub fn as_path(&self) -> &Utf8Path {
+    pub(crate) fn as_path(&self) -> &Utf8Path {
         self.0.as_path()
     }
 
-    fn as_content(&self) -> &str {
+    pub(crate) fn as_content(&self) -> &str {
         self.1.as_str()
     }
 }

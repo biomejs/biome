@@ -1,0 +1,52 @@
+use crate::runner::crawler::CrawlerContext;
+use crate::runner::execution::Execution;
+use crate::runner::process_file::Message;
+use biome_diagnostics::{DiagnosticTags, Error, Severity};
+use camino::Utf8PathBuf;
+use crossbeam::channel::Receiver;
+use std::time::Duration;
+
+pub(crate) trait Collector: Send + Sync {
+    type Result: Send + Sync;
+
+    fn should_collect(&self) -> bool;
+
+    fn diagnostic_level(&self) -> Severity;
+
+    fn verbose(&self) -> bool;
+
+    /// Checks if the diagnostic we received from the thread should be considered or not. Logic:
+    /// - it should not be considered if its severity level is lower than the one provided via CLI;
+    /// - it should not be considered if it's a verbose diagnostic and the CLI **didn't** request a `--verbose` option.
+    fn should_skip_diagnostic(&self, severity: Severity, diagnostic_tags: DiagnosticTags) -> bool {
+        if severity < self.diagnostic_level() {
+            return true;
+        }
+
+        if diagnostic_tags.is_verbose() && !self.verbose() {
+            return true;
+        }
+
+        false
+    }
+    fn run(
+        &self,
+        _receiver: Receiver<Message>,
+        _interner: Receiver<Utf8PathBuf>,
+        _execution: &dyn Execution,
+    );
+
+    fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result;
+}
+
+struct CollectorResult {
+    errors: u32,
+    warnings: u32,
+    infos: u32,
+    skipped_fixes: u32,
+    not_printed_diagnostics: u32,
+    changed: u32,
+    unchanged: u32,
+    matches: u32,
+    skipped: u32,
+}

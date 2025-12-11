@@ -21,6 +21,7 @@ mod execute;
 mod logging;
 mod panic;
 mod reporter;
+mod runner;
 mod service;
 
 use crate::cli_options::{CliOptions, ColorsArg};
