@@ -5,19 +5,6 @@
 		<title>Pass</title>
 		<circle />
 	</svg>
-	<svg>
-		<rect />
-		<rect />
-		<g>
-			<circle />
-			<circle />
-			<g>
-				<title>Pass</title>
-				<circle />
-				<circle />
-			</g>
-		</g>
-	</svg>
 	<svg role="img" aria-label="title">
 		<title id="title">Pass</title>
 	</svg>
@@ -39,10 +26,10 @@
 	</svg>
 
 	<svg aria-hidden="true">
-        <defs>
-          <pattern>
-            <path d="M.5 200V.5H200" fill="none" />
-          </pattern>
-        </defs>
-    </svg>
+		<defs>
+			<pattern>
+				<path d="M.5 200V.5H200" fill="none" />
+			</pattern>
+		</defs>
+	</svg>
 </>;

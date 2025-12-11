@@ -4,6 +4,15 @@
 		<title></title>
 		<circle />
 	</svg>
+	<svg>
+		<rect />
+		<rect />
+		<g>
+			<title>Pass</title>
+			<circle />
+			<circle />
+		</g>
+	</svg>
 	<svg role="img" title="title">
 		<span id="">foo</span>
 	</svg>
