@@ -40,7 +40,7 @@ declare_lint_rule! {
     ///     <rect />
     ///     <rect />
     ///     <g>
-    ///         <title>Pass</title>
+    ///         <title>foo</title>
     ///         <circle />
     ///         <circle />
     ///     </g>

@@ -8,7 +8,7 @@
 		<rect />
 		<rect />
 		<g>
-			<title>Pass</title>
+			<title>foo</title>
 			<circle />
 			<circle />
 		</g>
