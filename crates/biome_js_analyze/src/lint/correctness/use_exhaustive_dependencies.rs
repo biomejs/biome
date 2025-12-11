@@ -153,7 +153,7 @@ declare_lint_rule! {
     ///
     /// function component() {
     ///   const name = "foo"
-    ///   // name doesn't change, so specifying it is redundant`
+    ///   // name doesn't change, so specifying it is redundant
     ///   useEffect(() => {
     ///     console.log(name);
     ///   }, [name]);
@@ -205,6 +205,20 @@ declare_lint_rule! {
     ///     console.log(name);
     ///     setName("");
     ///   }, [name]);
+    /// }
+    /// ```
+    ///
+    /// Functions not imported from React are ignored by default (unless specified inside [rule options](#options))
+    /// ```ts
+    /// import type { EffectCallback, DependencyList } from "react";
+    /// // custom useEffect function
+    /// declare function useEffect(cb: EffectCallback, deps?: DependencyList): void;
+    ///
+    /// function component() {
+    ///   let name = "John Doe";
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -274,7 +288,7 @@ declare_lint_rule! {
     ///
     /// This would enable diagnostics on the following code snippet:
     ///
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,expect_diagnostic,use_options
     /// function Foo() {
     ///   let stateVar = 1;
     ///   const location = useLocation(() => {console.log(stateVar)}, []);
@@ -360,7 +374,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```jsx,use_options,expect_diagnostic
+    /// ```jsx,expect_diagnostic,use_options
     /// function noArrayYesProblem() {
     ///   let stateVar = 1;
     ///   useEffect(() => {});

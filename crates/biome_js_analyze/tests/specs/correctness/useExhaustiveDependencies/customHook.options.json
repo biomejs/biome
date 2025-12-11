@@ -11,6 +11,21 @@
 								"name": "useMyEffect",
 								"closureIndex": 0,
 								"dependenciesIndex": 1
+							},
+							{
+								"name": "useOtherEffect",
+								"closureIndex": 1,
+								"dependenciesIndex": 0
+							},
+							{
+								"name": "useEvenMoreEffect",
+								"closureIndex": 2,
+								"dependenciesIndex": 1
+							},
+							{
+								"name": "doSomething",
+								"closureIndex": 2,
+								"dependenciesIndex": 0
 							}
 						]
 					}
