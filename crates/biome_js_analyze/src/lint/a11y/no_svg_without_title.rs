@@ -6,6 +6,8 @@ use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 use biome_string_case::StrLikeExtension;
 
+const NAME_REQUIRED_ROLES: &[&str] = &["img", "graphics-document", "graphics-symbol"];
+
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
     ///
@@ -158,22 +160,29 @@ impl Rule for NoSvgWithoutTitle {
             return Some(());
         };
 
-        match role_attribute_text.to_ascii_lowercase_cow().as_ref() {
-            "img" | "graphics-document" | "graphics-symbol" => {
-                let [aria_label, aria_labelledby] = node
-                    .attributes()
-                    .find_by_names(["aria-label", "aria-labelledby"]);
-                let is_valid_a11y_attribute = aria_label.is_some()
-                    || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
-                        .unwrap_or(false);
-                if is_valid_a11y_attribute {
-                    return None;
-                }
-                Some(())
+        let role_text = role_attribute_text.to_ascii_lowercase_cow();
+        if role_text.trim().is_empty() {
+            return Some(());
+        }
+
+        // Check if any of the space-separated roles are valid
+        let has_name_required_role = role_text
+            .split_whitespace()
+            .any(|role| NAME_REQUIRED_ROLES.contains(&role));
+
+        if has_name_required_role {
+            let [aria_label, aria_labelledby] = node
+                .attributes()
+                .find_by_names(["aria-label", "aria-labelledby"]);
+            let is_valid_a11y_attribute = aria_label.is_some()
+                || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
+                    .unwrap_or(false);
+            if is_valid_a11y_attribute {
+                return None;
             }
-            // if role attribute is empty, the svg element should have title element
-            "" => Some(()),
-            _ => None,
+            Some(())
+        } else {
+            None
         }
     }
 
