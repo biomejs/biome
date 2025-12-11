@@ -17,7 +17,6 @@ use crate::services::semantic::SemanticModelBuilderVisitor;
 /// 1. The root `turbo.json` at the repository root
 /// 2. A package-level `turbo.json` in the package directory
 ///
-/// Both are checked when validating environment variable declarations.
 #[derive(Debug, Clone)]
 pub struct TurborepoServices {
     /// All turbo.json configurations that apply to the current file,
@@ -29,14 +28,17 @@ pub struct TurborepoServices {
 }
 
 impl TurborepoServices {
-    /// Checks if the given environment variable is declared in any turbo.json.
+    /// Checks if the given environment variable is declared in the root turbo.json.
     ///
-    /// This checks all turbo.json files in the hierarchy (package-level and root).
-    /// The env var is considered declared if it appears in ANY of the configs.
+    /// Turborepo treats `globalEnv` and `globalPassThroughEnv` as root-only, so this method only checks the
+    /// root-level configuration. The configs are ordered from closest (package-level)
+    /// to furthest (root), so the root config is the last element.
+    ///
+    /// Returns `false` if no root config exists.
     pub fn is_env_var_declared(&self, env_var: &str) -> bool {
         self.turborepo_configs
-            .iter()
-            .any(|config| config.is_env_var_declared(env_var))
+            .last()
+            .is_some_and(|root_config| root_config.is_env_var_declared(env_var))
     }
 
     /// Returns whether any turbo.json file was found for the current file.
@@ -110,6 +112,8 @@ where
 mod tests {
     use super::*;
     use biome_deserialize::json::deserialize_from_json_str;
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_js_syntax::JsFileSource;
 
     fn create_turbo_json(json: &str) -> TurboJson {
         let (turbo_json, _diagnostics) =
@@ -118,109 +122,123 @@ mod tests {
         turbo_json.unwrap_or_default()
     }
 
+    fn create_services(configs: Vec<Arc<TurboJson>>) -> TurborepoServices {
+        // Create a minimal semantic model for testing
+        let tree = biome_js_parser::parse("", JsFileSource::tsx(), Default::default());
+        let model = semantic_model(&tree.tree(), SemanticModelOptions::default());
+        TurborepoServices {
+            turborepo_configs: configs,
+            model,
+        }
+    }
+
     #[test]
-    fn test_monorepo_env_var_in_root_only() {
+    fn test_only_root_config_is_checked() {
+        // Root config declares ROOT_VAR, package config declares PACKAGE_VAR
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR", "SHARED_VAR"] }"#);
         let package_turbo = create_turbo_json(r#"{ "globalEnv": ["PACKAGE_VAR"] }"#);
 
-        let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
+        // Configs are ordered from closest (package) to furthest (root)
+        let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
 
-        // ROOT_VAR is declared in root turbo.json
-        assert!(configs.iter().any(|c| c.is_env_var_declared("ROOT_VAR")));
-        // PACKAGE_VAR is declared in package turbo.json
-        assert!(configs.iter().any(|c| c.is_env_var_declared("PACKAGE_VAR")));
-        // SHARED_VAR is declared in root turbo.json
-        assert!(configs.iter().any(|c| c.is_env_var_declared("SHARED_VAR")));
+        // ROOT_VAR is declared in root turbo.json (last config)
+        assert!(services.is_env_var_declared("ROOT_VAR"));
+        // SHARED_VAR is declared in root turbo.json (last config)
+        assert!(services.is_env_var_declared("SHARED_VAR"));
+        // PACKAGE_VAR is only in package config, but we only check root
+        assert!(!services.is_env_var_declared("PACKAGE_VAR"));
         // UNDECLARED is not in any config
-        assert!(!configs.iter().any(|c| c.is_env_var_declared("UNDECLARED")));
+        assert!(!services.is_env_var_declared("UNDECLARED"));
     }
 
     #[test]
-    fn test_monorepo_env_var_in_package_task() {
-        let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR"] }"#);
-        let package_turbo =
-            create_turbo_json(r#"{ "tasks": { "build": { "env": ["BUILD_OUTPUT"] } } }"#);
-
-        let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
-
-        // BUILD_OUTPUT is declared in package turbo.json's task
-        assert!(
-            configs
-                .iter()
-                .any(|c| c.is_env_var_declared("BUILD_OUTPUT"))
+    fn test_root_task_env_is_checked() {
+        // Root has both globalEnv and task-specific env
+        let root_turbo = create_turbo_json(
+            r#"{ "globalEnv": ["ROOT_VAR"], "tasks": { "build": { "env": ["BUILD_OUTPUT"] } } }"#,
         );
-        // ROOT_VAR is in root only
-        assert!(configs.iter().any(|c| c.is_env_var_declared("ROOT_VAR")));
+        let package_turbo =
+            create_turbo_json(r#"{ "tasks": { "build": { "env": ["PACKAGE_BUILD_VAR"] } } }"#);
+
+        let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
+
+        // ROOT_VAR is in root globalEnv
+        assert!(services.is_env_var_declared("ROOT_VAR"));
+        // BUILD_OUTPUT is in root task env
+        assert!(services.is_env_var_declared("BUILD_OUTPUT"));
+        // PACKAGE_BUILD_VAR is only in package config, not checked
+        assert!(!services.is_env_var_declared("PACKAGE_BUILD_VAR"));
     }
 
     #[test]
-    fn test_monorepo_wildcard_inheritance() {
+    fn test_root_wildcard_pattern() {
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["NEXT_PUBLIC_*"] }"#);
         let package_turbo = create_turbo_json(r#"{ "globalEnv": ["DATABASE_URL"] }"#);
 
-        let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
+        let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
 
         // Wildcard from root applies
-        assert!(
-            configs
-                .iter()
-                .any(|c| c.is_env_var_declared("NEXT_PUBLIC_API_URL"))
-        );
-        // Specific var from package applies
-        assert!(
-            configs
-                .iter()
-                .any(|c| c.is_env_var_declared("DATABASE_URL"))
-        );
+        assert!(services.is_env_var_declared("NEXT_PUBLIC_API_URL"));
+        // DATABASE_URL is only in package config, not checked
+        assert!(!services.is_env_var_declared("DATABASE_URL"));
         // Non-matching var is undeclared
-        assert!(!configs.iter().any(|c| c.is_env_var_declared("ACME_SECRET")));
+        assert!(!services.is_env_var_declared("ACME_SECRET"));
     }
 
     #[test]
-    fn test_monorepo_negation_scope() {
-        // Root allows all vars
-        let root_turbo = create_turbo_json(r#"{ "globalEnv": ["*"] }"#);
-        // Package excludes ACME_SECRET
-        let package_turbo = create_turbo_json(r#"{ "globalEnv": ["*", "!ACME_SECRET"] }"#);
+    fn test_root_negation() {
+        // Root allows all vars except SECRET_KEY
+        let root_turbo = create_turbo_json(r#"{ "globalEnv": ["*", "!SECRET_KEY"] }"#);
+        // Package would allow SECRET_KEY, but it's not checked
+        let package_turbo = create_turbo_json(r#"{ "globalEnv": ["SECRET_KEY"] }"#);
 
-        let configs = vec![Arc::new(package_turbo), Arc::new(root_turbo)];
+        let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
 
-        // ACME_SECRET is excluded in package but allowed in root
-        // Since we use `any()`, if ANY config allows it, it's considered declared
-        // This matches the current implementation behavior
-        assert!(configs.iter().any(|c| c.is_env_var_declared("ACME_SECRET")));
-
-        // Regular vars are allowed by both
-        assert!(configs.iter().any(|c| c.is_env_var_declared("ACME_TOKEN")));
+        // SECRET_KEY is negated in root config
+        assert!(!services.is_env_var_declared("SECRET_KEY"));
+        // Regular vars are allowed by root
+        assert!(services.is_env_var_declared("ACME_TOKEN"));
     }
 
     #[test]
-    fn test_monorepo_empty_configs() {
-        let configs: Vec<Arc<TurboJson>> = vec![];
+    fn test_empty_configs_returns_false() {
+        let services = create_services(vec![]);
 
-        // No configs means no turbo.json found
-        assert!(configs.is_empty());
-        assert!(!configs.iter().any(|c| c.is_env_var_declared("ANY_VAR")));
+        // No configs means no root config exists, should return false
+        assert!(!services.has_turborepo_config());
+        assert!(!services.is_env_var_declared("ANY_VAR"));
     }
 
     #[test]
-    fn test_monorepo_multiple_levels() {
+    fn test_single_config_is_root() {
+        // Single config is considered the root
+        let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR"] }"#);
+
+        let services = create_services(vec![Arc::new(root_turbo)]);
+
+        assert!(services.is_env_var_declared("ROOT_VAR"));
+        assert!(!services.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_multiple_levels_only_root_checked() {
         // Simulates: root -> packages/shared -> packages/shared/utils
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR"] }"#);
         let shared_turbo = create_turbo_json(r#"{ "globalEnv": ["SHARED_VAR"] }"#);
         let utils_turbo = create_turbo_json(r#"{ "globalEnv": ["UTILS_VAR"] }"#);
 
-        // Closest to furthest
-        let configs = vec![
+        // Closest to furthest (root is last)
+        let services = create_services(vec![
             Arc::new(utils_turbo),
             Arc::new(shared_turbo),
             Arc::new(root_turbo),
-        ];
+        ]);
 
-        // All vars from all levels should be accessible
-        assert!(configs.iter().any(|c| c.is_env_var_declared("ROOT_VAR")));
-        assert!(configs.iter().any(|c| c.is_env_var_declared("SHARED_VAR")));
-        assert!(configs.iter().any(|c| c.is_env_var_declared("UTILS_VAR")));
-        assert!(!configs.iter().any(|c| c.is_env_var_declared("UNDECLARED")));
+        // Only ROOT_VAR from the root config should be found
+        assert!(services.is_env_var_declared("ROOT_VAR"));
+        // SHARED_VAR and UTILS_VAR are in package configs, not checked
+        assert!(!services.is_env_var_declared("SHARED_VAR"));
+        assert!(!services.is_env_var_declared("UTILS_VAR"));
+        assert!(!services.is_env_var_declared("UNDECLARED"));
     }
 }

@@ -340,7 +340,14 @@ impl ProjectLayout {
 
     /// Inserts a `turbo.json` manifest for the package at the given `path`,
     /// parsing the manifest on demand.
-    pub fn insert_serialized_turbo_json(&self, path: Utf8PathBuf, manifest: &SendNode) {
+    ///
+    /// `filename` should be the actual filename (e.g., `"turbo.json"` or `"turbo.jsonc"`).
+    pub fn insert_serialized_turbo_json(
+        &self,
+        path: Utf8PathBuf,
+        manifest: &SendNode,
+        filename: &str,
+    ) {
         self.0.pin().update_or_insert_with(
             path.clone(),
             |data| {
@@ -358,7 +365,7 @@ impl ProjectLayout {
                 };
                 node_js_package.insert_serialized_turbo_json(
                     &manifest.to_language_root(),
-                    &path.join("turbo.json"),
+                    &path.join(filename),
                 );
 
                 PackageData {
@@ -369,7 +376,7 @@ impl ProjectLayout {
                 let mut node_js_package = NodeJsPackage::default();
                 node_js_package.insert_serialized_turbo_json(
                     &manifest.to_language_root(),
-                    &path.join("turbo.json"),
+                    &path.join(filename),
                 );
 
                 PackageData {
