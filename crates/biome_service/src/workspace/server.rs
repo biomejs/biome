@@ -857,7 +857,7 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
-        } else if filename.is_some_and(|filename| filename == "turbo.json") {
+        } else if filename.is_some_and(|filename| filename == "turbo.json" || filename == "turbo.jsonc") {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
@@ -2240,7 +2240,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
         match path.file_name() {
-            Some("package.json" | "tsconfig.json" | "turbo.json") => {
+            Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
                 self.project_layout.is_indexed(path)
             }
             _ => self.module_graph.contains(path),

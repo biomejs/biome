@@ -80,6 +80,11 @@ pub struct TurboTask {
     /// Changes to these variables will invalidate the cache for this task.
     pub env: Option<Vec<String>>,
 
+    /// Environment variables that are passed through to this task without
+    /// affecting the cache key. These are allowed but not used for cache invalidation.
+    #[deserializable(rename = "passThroughEnv")]
+    pub pass_through_env: Option<Vec<String>>,
+
     /// Task dependencies.
     #[deserializable(rename = "dependsOn")]
     pub depends_on: Option<Vec<String>>,
@@ -146,7 +151,9 @@ impl TurboJson {
     /// This includes patterns from:
     /// - Global environment variables from `globalEnv`
     /// - Task-specific environment variables from `tasks.*.env`
+    /// - Task-specific pass-through environment variables from `tasks.*.passThroughEnv`
     /// - Legacy pipeline environment variables from `pipeline.*.env`
+    /// - Legacy pipeline pass-through environment variables from `pipeline.*.passThroughEnv`
     ///
     /// The result is cached for subsequent calls, with patterns separated into
     /// positive and negation sets for efficient single-pass matching.
@@ -170,7 +177,7 @@ impl TurboJson {
                 }
             }
 
-            // Add task-specific env vars
+            // Add task-specific env vars and passThroughEnv
             if let Some(tasks) = &self.tasks {
                 for task in tasks.values() {
                     if let Some(env) = &task.env {
@@ -178,14 +185,24 @@ impl TurboJson {
                             process_var(var);
                         }
                     }
+                    if let Some(pass_through_env) = &task.pass_through_env {
+                        for var in pass_through_env {
+                            process_var(var);
+                        }
+                    }
                 }
             }
 
-            // Add legacy pipeline env vars
+            // Add legacy pipeline env vars and passThroughEnv
             if let Some(pipeline) = &self.pipeline {
                 for task in pipeline.values() {
                     if let Some(env) = &task.env {
                         for var in env {
+                            process_var(var);
+                        }
+                    }
+                    if let Some(pass_through_env) = &task.pass_through_env {
+                        for var in pass_through_env {
                             process_var(var);
                         }
                     }
@@ -201,7 +218,9 @@ impl TurboJson {
     /// This includes:
     /// - Global environment variables from `globalEnv`
     /// - Task-specific environment variables from `tasks.*.env`
+    /// - Task-specific pass-through environment variables from `tasks.*.passThroughEnv`
     /// - Legacy pipeline environment variables from `pipeline.*.env`
+    /// - Legacy pipeline pass-through environment variables from `pipeline.*.passThroughEnv`
     ///
     /// Note: This returns only positive patterns, not negation patterns.
     pub fn all_env_vars(&self) -> &FxHashSet<String> {
@@ -330,5 +349,75 @@ mod tests {
         assert!(!turbo2.is_env_var_declared("SECRET_KEY"));
         assert!(turbo1.is_env_var_declared("OTHER_VAR"));
         assert!(turbo2.is_env_var_declared("OTHER_VAR"));
+    }
+
+    fn create_turbo_json_with_task_pass_through_env(pass_through_env: Vec<&str>) -> TurboJson {
+        let mut tasks = TurboTasks::default();
+        tasks.insert(
+            "build".to_string(),
+            TurboTask {
+                env: None,
+                pass_through_env: Some(pass_through_env.into_iter().map(String::from).collect()),
+                depends_on: None,
+                outputs: None,
+                inputs: None,
+                cache: None,
+                persistent: None,
+            },
+        );
+        TurboJson {
+            path: Utf8PathBuf::from("turbo.json"),
+            global_env: None,
+            global_dependencies: None,
+            tasks: Some(tasks),
+            pipeline: None,
+            env_vars_cache: OnceLock::new(),
+        }
+    }
+
+    #[test]
+    fn test_pass_through_env_exact_match() {
+        let turbo =
+            create_turbo_json_with_task_pass_through_env(vec!["AWS_SECRET_KEY", "DATABASE_URL"]);
+        assert!(turbo.is_env_var_declared("AWS_SECRET_KEY"));
+        assert!(turbo.is_env_var_declared("DATABASE_URL"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_pass_through_env_wildcard_match() {
+        let turbo = create_turbo_json_with_task_pass_through_env(vec!["AWS_*"]);
+        assert!(turbo.is_env_var_declared("AWS_SECRET_KEY"));
+        assert!(turbo.is_env_var_declared("AWS_ACCESS_KEY"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
+    }
+
+    #[test]
+    fn test_pass_through_env_combined_with_env() {
+        // Test that both env and passThroughEnv are considered
+        let mut tasks = TurboTasks::default();
+        tasks.insert(
+            "build".to_string(),
+            TurboTask {
+                env: Some(vec!["API_KEY".to_string()]),
+                pass_through_env: Some(vec!["AWS_SECRET".to_string()]),
+                depends_on: None,
+                outputs: None,
+                inputs: None,
+                cache: None,
+                persistent: None,
+            },
+        );
+        let turbo = TurboJson {
+            path: Utf8PathBuf::from("turbo.json"),
+            global_env: None,
+            global_dependencies: None,
+            tasks: Some(tasks),
+            pipeline: None,
+            env_vars_cache: OnceLock::new(),
+        };
+        assert!(turbo.is_env_var_declared("API_KEY"));
+        assert!(turbo.is_env_var_declared("AWS_SECRET"));
+        assert!(!turbo.is_env_var_declared("OTHER_VAR"));
     }
 }

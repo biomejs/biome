@@ -393,7 +393,7 @@ impl ProjectLayout {
                     .map(|package| match path.file_name() {
                         Some("package.json") => package.manifest.is_some(),
                         Some("tsconfig.json") => package.tsconfig.is_some(),
-                        Some("turbo.json") => package.turbo_json.is_some(),
+                        Some("turbo.json" | "turbo.jsonc") => package.turbo_json.is_some(),
                         _ => false,
                     })
             })
