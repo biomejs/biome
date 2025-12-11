@@ -165,6 +165,8 @@ pub enum RuleSource {
     GraphqlSchemaLinter(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
+    /// Rules from [Eslint Plugin Turbo](https://github.com/vercel/turborepo/tree/main/packages/eslint-plugin-turbo)
+    EslintTurbo(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -215,6 +217,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
             Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
+            Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
         }
     }
 }
@@ -294,7 +297,8 @@ impl RuleSource {
             | Self::EslintVitest(rule_name)
             | Self::EslintVueJs(rule_name)
             | Self::GraphqlSchemaLinter(rule_name)
-            | Self::Stylelint(rule_name) => rule_name,
+            | Self::Stylelint(rule_name)
+            | Self::EslintTurbo(rule_name) => rule_name,
         }
     }
 
@@ -339,6 +343,7 @@ impl RuleSource {
             Self::EslintUnusedImports(rule_name) => format!("unused-imports/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
             Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
+            Self::EslintTurbo(rule_name) => format!("turbo/{rule_name}"),
         }
     }
 
@@ -379,6 +384,7 @@ impl RuleSource {
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
             Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
+            Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
         }
     }
 
@@ -464,6 +470,8 @@ pub enum RuleDomain {
     Project,
     /// Tailwind CSS rules
     Tailwind,
+    /// Turborepo build system rules
+    Turborepo,
 }
 
 impl Display for RuleDomain {
@@ -478,6 +486,7 @@ impl Display for RuleDomain {
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
+            Self::Turborepo => fmt.write_str("turborepo"),
         }
     }
 }
@@ -517,6 +526,7 @@ impl RuleDomain {
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
+            Self::Turborepo => &[&("turbo", ">=1.0.0")],
         }
     }
 
@@ -542,6 +552,7 @@ impl RuleDomain {
             Self::Vue => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
+            Self::Turborepo => &[],
         }
     }
 
@@ -555,6 +566,7 @@ impl RuleDomain {
             Self::Vue => "vue",
             Self::Project => "project",
             Self::Tailwind => "tailwind",
+            Self::Turborepo => "turborepo",
         }
     }
 }
@@ -572,6 +584,7 @@ impl FromStr for RuleDomain {
             "vue" => Ok(Self::Vue),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
+            "turborepo" => Ok(Self::Turborepo),
 
             _ => Err("Invalid rule domain"),
         }

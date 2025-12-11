@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Undeclared environment variables should trigger diagnostics
+const myCustomVar = process.env.MY_CUSTOM_VAR;
+const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+const secretKey = process.env.SECRET_KEY;
+
+// Also invalid with import.meta.env
+const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable MY_CUSTOM_VAR is not listed as a dependency in turbo.json.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+  > 4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+      │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+    6 │ const secretKey = process.env.SECRET_KEY;
+  
+  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
+  
+  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_UNDECLARED_VAR is not listed as a dependency in turbo.json.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+  > 5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const secretKey = process.env.SECRET_KEY;
+    7 │ 
+  
+  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
+  
+  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+  
+
+```
+
+```
+invalid.js:6:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable SECRET_KEY is not listed as a dependency in turbo.json.
+  
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+  > 6 │ const secretKey = process.env.SECRET_KEY;
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Also invalid with import.meta.env
+  
+  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
+  
+  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+  
+
+```
+
+```
+invalid.js:9:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable CUSTOM_META_VAR is not listed as a dependency in turbo.json.
+  
+     8 │ // Also invalid with import.meta.env
+   > 9 │ const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Add this environment variable to the 'env' or 'globalEnv' array in your turbo.json configuration.
+  
+  i Undeclared environment variables can cause incorrect caching behavior in Turborepo.
+  
+
+```
