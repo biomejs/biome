@@ -819,10 +819,8 @@ impl Rule for UseExhaustiveDependencies {
         let dependencies_array = match &result.dependencies_node {
             Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
             Some(expr) => {
-                return vec![Fix::NonLiteralDependenciesArray {
-                    expr: expr.clone(),
-                }]
-                .into_boxed_slice();
+                return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
+                    .into_boxed_slice();
             }
             None => {
                 return if options.report_missing_dependencies_array() {
