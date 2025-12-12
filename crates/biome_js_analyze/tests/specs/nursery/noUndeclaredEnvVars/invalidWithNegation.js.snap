@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithNegation.js
+---
+# Input
+```js
+/* should generate diagnostics - negation patterns exclude vars from wildcard */
+
+// ACME_SECRET is excluded via "!ACME_SECRET" negation
+const acmeSecret = process.env.ACME_SECRET;
+
+// ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+const acmeToken = process.env.ACME_TOKEN;
+const acmeOther = process.env.ACME_OTHER;
+
+// INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+const internalToken = process.env.INTERNAL_TOKEN;
+
+// These should still be valid (not excluded by negation)
+// MY_VAR matches the * wildcard
+const myVar = process.env.MY_VAR;
+// PUBLIC_URL matches the * wildcard
+const publicUrl = process.env.PUBLIC_URL;
+
+```
+
+# Diagnostics
+```
+invalidWithNegation.js:4:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ACME_SECRET is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // ACME_SECRET is excluded via "!ACME_SECRET" negation
+  > 4 │ const acmeSecret = process.env.ACME_SECRET;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+  
+
+```
+
+```
+invalidWithNegation.js:7:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ACME_TOKEN is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+  > 7 │ const acmeToken = process.env.ACME_TOKEN;
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const acmeOther = process.env.ACME_OTHER;
+    9 │ 
+  
+
+```
+
+```
+invalidWithNegation.js:8:19 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ACME_OTHER is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+     6 │ // ACME_TOKEN is excluded via "!ACME_*" wildcard negation
+     7 │ const acmeToken = process.env.ACME_TOKEN;
+   > 8 │ const acmeOther = process.env.ACME_OTHER;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+  
+
+```
+
+```
+invalidWithNegation.js:11:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable INTERNAL_TOKEN is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    10 │ // INTERNAL_TOKEN is excluded via "!INTERNAL_TOKEN" negation
+  > 11 │ const internalToken = process.env.INTERNAL_TOKEN;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // These should still be valid (not excluded by negation)
+  
+
+```

@@ -1,8 +1,9 @@
-use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson};
+use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson, TurboJson};
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
+use std::sync::Arc;
 
 /// The layout used across all open projects.
 ///
@@ -84,6 +85,60 @@ impl ProjectLayout {
             .cloned()
     }
 
+    /// Returns the `turbo.json` that should be used for the given `path`,
+    /// together with the absolute path of the package in which it was found.
+    ///
+    /// This function will look for the closest `turbo.json` file in the
+    /// ancestors of the given `path`, and returns the first one it finds.
+    pub fn find_turbo_json_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, Arc<TurboJson>)> {
+        let packages = self.0.pin();
+        path.ancestors().find_map(|package_path| {
+            packages
+                .get(package_path)
+                .and_then(|data| data.node_package.as_ref())
+                .and_then(|node_package| node_package.turbo_json.as_ref())
+                .map(|turbo_json| (package_path.to_path_buf(), Arc::clone(turbo_json)))
+        })
+    }
+
+    /// Returns ALL `turbo.json` files that apply to the given `path`.
+    ///
+    /// In a Turborepo monorepo, environment variables can be declared in:
+    /// 1. A package-level `turbo.json` in the package directory
+    /// 2. The root `turbo.json` at the repository root
+    ///
+    /// This function returns all turbo.json files found in the ancestors of
+    /// the given path, ordered from closest (package-level) to furthest (root).
+    pub fn find_all_turbo_json_for_path(&self, path: &Utf8Path) -> Vec<Arc<TurboJson>> {
+        let packages = self.0.pin();
+        path.ancestors()
+            .filter_map(|package_path| {
+                packages
+                    .get(package_path)
+                    .and_then(|data| data.node_package.as_ref())
+                    .and_then(|node_package| node_package.turbo_json.as_ref())
+                    .map(Arc::clone)
+            })
+            .collect()
+    }
+
+    /// Returns the `turbo.json` inside the given `package_path`.
+    ///
+    /// This function does not look for the closest `turbo.json` file in the
+    /// hierarchy, but only returns the one that is stored in the layout for
+    /// the given `package_path`.
+    pub fn get_turbo_json_for_package(&self, package_path: &Utf8Path) -> Option<Arc<TurboJson>> {
+        self.0
+            .pin()
+            .get(package_path)
+            .and_then(|data| data.node_package.as_ref())
+            .and_then(|node_package| node_package.turbo_json.as_ref())
+            .map(Arc::clone)
+    }
+
     /// Inserts a `package.json` manifest for the package at the given `path`.
     ///
     /// `path` refers to the package directory, not the `package.json` file
@@ -98,8 +153,11 @@ impl ProjectLayout {
                     tsconfig: data
                         .node_package
                         .as_ref()
-                        .map(|package| package.tsconfig.clone())
-                        .unwrap_or_default(),
+                        .and_then(|package| package.tsconfig.clone()),
+                    turbo_json: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.turbo_json.clone()),
                 };
 
                 PackageData {
@@ -134,6 +192,10 @@ impl ProjectLayout {
                         .and_then(|package| package.manifest.clone()),
                     diagnostics: Default::default(),
                     tsconfig: Some(tsconfig.clone()),
+                    turbo_json: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.turbo_json.clone()),
                 };
 
                 PackageData {
@@ -143,6 +205,45 @@ impl ProjectLayout {
             || {
                 let node_js_package = NodeJsPackage {
                     tsconfig: Some(tsconfig.clone()),
+                    ..Default::default()
+                };
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+        );
+    }
+
+    /// Inserts a `turbo.json` manifest for the package at the given `path`.
+    ///
+    /// `path` refers to the package directory, not the `turbo.json` file
+    /// itself.
+    pub fn insert_turbo_json(&self, path: Utf8PathBuf, turbo_json: TurboJson) {
+        let turbo_json = Arc::new(turbo_json);
+        self.0.pin().update_or_insert_with(
+            path,
+            |data| {
+                let node_js_package = NodeJsPackage {
+                    manifest: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.manifest.clone()),
+                    diagnostics: Default::default(),
+                    tsconfig: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.tsconfig.clone()),
+                    turbo_json: Some(Arc::clone(&turbo_json)),
+                };
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+            || {
+                let node_js_package = NodeJsPackage {
+                    turbo_json: Some(Arc::clone(&turbo_json)),
                     ..Default::default()
                 };
 
@@ -168,6 +269,10 @@ impl ProjectLayout {
                         .node_package
                         .as_ref()
                         .and_then(|package| package.tsconfig.clone()),
+                    turbo_json: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.turbo_json.clone()),
                 };
                 node_js_package.insert_serialized_manifest(
                     &manifest.to_language_root(),
@@ -202,10 +307,13 @@ impl ProjectLayout {
                     manifest: data
                         .node_package
                         .as_ref()
-                        .map(|package| package.manifest.clone())
-                        .unwrap_or_default(),
+                        .and_then(|package| package.manifest.clone()),
                     diagnostics: Default::default(),
                     tsconfig: Default::default(),
+                    turbo_json: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.turbo_json.clone()),
                 };
                 node_js_package.insert_serialized_tsconfig(
                     &manifest.to_language_root(),
@@ -230,10 +338,58 @@ impl ProjectLayout {
         );
     }
 
+    /// Inserts a `turbo.json` manifest for the package at the given `path`,
+    /// parsing the manifest on demand.
+    ///
+    /// `filename` should be the actual filename (e.g., `"turbo.json"` or `"turbo.jsonc"`).
+    pub fn insert_serialized_turbo_json(
+        &self,
+        path: Utf8PathBuf,
+        manifest: &SendNode,
+        filename: &str,
+    ) {
+        self.0.pin().update_or_insert_with(
+            path.clone(),
+            |data| {
+                let mut node_js_package = NodeJsPackage {
+                    manifest: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.manifest.clone()),
+                    diagnostics: Default::default(),
+                    tsconfig: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.tsconfig.clone()),
+                    turbo_json: Default::default(),
+                };
+                node_js_package.insert_serialized_turbo_json(
+                    &manifest.to_language_root(),
+                    &path.join(filename),
+                );
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+            || {
+                let mut node_js_package = NodeJsPackage::default();
+                node_js_package.insert_serialized_turbo_json(
+                    &manifest.to_language_root(),
+                    &path.join(filename),
+                );
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+        );
+    }
+
     /// Returns whether the manifest with the given `path` is indexed in the
     /// project layout.
     ///
-    /// Only returns `true` for `package.json` and `tsconfig.json` manifests.
+    /// Only returns `true` for `package.json`, `tsconfig.json`, and `turbo.json` manifests.
     pub fn is_indexed(&self, path: &Utf8Path) -> bool {
         path.parent()
             .and_then(|package_path| {
@@ -244,6 +400,7 @@ impl ProjectLayout {
                     .map(|package| match path.file_name() {
                         Some("package.json") => package.manifest.is_some(),
                         Some("tsconfig.json") => package.tsconfig.is_some(),
+                        Some("turbo.json" | "turbo.jsonc") => package.turbo_json.is_some(),
                         _ => false,
                     })
             })
@@ -277,6 +434,36 @@ impl ProjectLayout {
                 .node_package
                 .as_ref()
                 .map(NodeJsPackage::without_tsconfig),
+        });
+    }
+
+    /// Searches for the `turbo.json` file nearest to `path` and calls
+    /// `query` on it if found.
+    ///
+    /// Returns the result of `query` if it was executed.
+    pub fn query_turbo_json_for_path<F, R>(&self, path: &Utf8Path, query: F) -> Option<R>
+    where
+        F: Fn(&TurboJson) -> R,
+    {
+        let query = &query;
+        let packages = self.0.pin();
+        path.ancestors().find_map(|package_path| {
+            packages
+                .get(package_path)
+                .and_then(|data| data.node_package.as_ref())
+                .and_then(|node_package| node_package.turbo_json.as_ref())
+                .map(|turbo_json| query(turbo_json.as_ref()))
+        })
+    }
+
+    /// Removes a `turbo.json` manifest from the package with the given
+    /// `path`.
+    pub fn remove_turbo_json_from_package(&self, path: &Utf8Path) {
+        self.0.pin().update(path.to_path_buf(), |data| PackageData {
+            node_package: data
+                .node_package
+                .as_ref()
+                .map(NodeJsPackage::without_turbo_json),
         });
     }
 

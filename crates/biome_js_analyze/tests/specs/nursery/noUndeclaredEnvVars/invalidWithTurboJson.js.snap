@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithTurboJson.js
+---
+# Input
+```js
+/* should generate diagnostics - env vars NOT declared in turbo.json */
+
+// These vars are NOT in the turbo.json, so they should produce diagnostics
+const undeclaredVar = process.env.UNDECLARED_VAR;
+const anotherUndeclared = process.env.ANOTHER_UNDECLARED;
+
+// This doesn't match the FOO_* pattern (it's BAR_*)
+const barTest = process.env.BAR_TEST;
+
+// Also invalid with import.meta.env
+const undeclaredMeta = import.meta.env.UNDECLARED_META;
+
+```
+
+# Diagnostics
+```
+invalidWithTurboJson.js:4:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable UNDECLARED_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // These vars are NOT in the turbo.json, so they should produce diagnostics
+  > 4 │ const undeclaredVar = process.env.UNDECLARED_VAR;
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const anotherUndeclared = process.env.ANOTHER_UNDECLARED;
+    6 │ 
+  
+
+```
+
+```
+invalidWithTurboJson.js:5:27 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_UNDECLARED is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // These vars are NOT in the turbo.json, so they should produce diagnostics
+    4 │ const undeclaredVar = process.env.UNDECLARED_VAR;
+  > 5 │ const anotherUndeclared = process.env.ANOTHER_UNDECLARED;
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // This doesn't match the FOO_* pattern (it's BAR_*)
+  
+
+```
+
+```
+invalidWithTurboJson.js:8:17 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable BAR_TEST is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+     7 │ // This doesn't match the FOO_* pattern (it's BAR_*)
+   > 8 │ const barTest = process.env.BAR_TEST;
+       │                 ^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Also invalid with import.meta.env
+  
+
+```
+
+```
+invalidWithTurboJson.js:11:24 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable UNDECLARED_META is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    10 │ // Also invalid with import.meta.env
+  > 11 │ const undeclaredMeta = import.meta.env.UNDECLARED_META;
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+
+```

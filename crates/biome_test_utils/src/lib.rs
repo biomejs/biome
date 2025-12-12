@@ -16,7 +16,7 @@ use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
-use biome_package::{Manifest, PackageJson, TsConfigJson};
+use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -297,6 +297,41 @@ pub fn project_layout_for_test_file(
             );
         } else {
             project_layout.insert_tsconfig(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+        }
+    }
+
+    // Try turbo.json first, then turbo.jsonc
+    let turbo_json_file = input_file.with_extension("turbo.json");
+    let turbo_jsonc_file = input_file.with_extension("turbo.jsonc");
+    let turbo_file = if turbo_json_file.exists() {
+        Some(turbo_json_file)
+    } else if turbo_jsonc_file.exists() {
+        Some(turbo_jsonc_file)
+    } else {
+        None
+    };
+
+    if let Some(turbo_file) = turbo_file
+        && let Ok(json) = std::fs::read_to_string(&turbo_file)
+    {
+        let deserialized = TurboJson::read_manifest(&fs, &turbo_file);
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(turbo_file.file_stem().unwrap(), &json, diagnostic)
+                    }),
+            );
+        } else {
+            project_layout.insert_turbo_json(
                 input_file
                     .parent()
                     .map(|dir_path| dir_path.to_path_buf())

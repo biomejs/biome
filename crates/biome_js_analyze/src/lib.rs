@@ -12,6 +12,7 @@ use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
+use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -158,6 +159,9 @@ where
         .find_node_manifest_for_path(file_path.as_ref())
         .map(|(path, manifest)| (path, Arc::new(manifest)));
 
+    let turborepo_configs: Vec<Arc<TurboJson>> =
+        project_layout.find_all_turbo_json_for_path(file_path.as_ref());
+
     let type_resolver = module_graph
         .module_info_for_path(file_path.as_ref())
         .map(|module_info| ModuleResolver::for_module(module_info, module_graph.clone()))
@@ -167,6 +171,7 @@ where
     services.insert_service(source_type);
     services.insert_service(module_graph);
     services.insert_service(node_manifest);
+    services.insert_service(turborepo_configs);
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
