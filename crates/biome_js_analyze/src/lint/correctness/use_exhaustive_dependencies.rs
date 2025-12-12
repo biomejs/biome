@@ -93,9 +93,9 @@ declare_lint_rule! {
     ///
     /// By default, the following hooks are considered to have stable return values:
     /// - `useState` (index 1)
-    /// - `useRef` (index 1)
     /// - `useReducer` (index 1)
-    /// - `useTransition`
+    /// - `useTransition` (index 1)
+    /// - `useRef`
     /// - `useEffectEvent`
     ///
     /// If you want to add custom hooks to the rule's diagnostics or specify your own functions with stable results,
@@ -340,8 +340,11 @@ declare_lint_rule! {
     ///
     /// ### `reportUnnecessaryDependencies`
     ///
-    /// If disabled, the rule will not trigger diagnostics for unused dependencies passed to hooks that do not use them. \
-    /// Note that this can reduce performance and potentially cause infinite loops, so caution is advised.
+    /// If set to `false`, the rule will not trigger diagnostics for unused dependencies passed to hooks that do not use them.
+    ///
+    /// :::caution
+    /// Over-specifying dependencies can reduce application performance or even cause infinite loops, so caution is advised.
+    /// :::
     ///
     /// Default: `true`
     ///
@@ -1004,6 +1007,11 @@ impl Rule for UseExhaustiveDependencies {
                 rule_category!(),
                 function_name_range,
                 markup! {"This hook does not have a dependencies array."},
+            )
+            .note(markup! {
+                "React relies on hook dependencies to determine when to re-compute Effects."
+                "\nAdd an explicit array (i.e. "<Emphasis>"[]"</Emphasis>") and list the callback's dependencies inside it."
+                },
             )),
             Fix::NonLiteralDependenciesArray { expr } => Some(
                 RuleDiagnostic::new(
@@ -1129,7 +1137,6 @@ impl Rule for UseExhaustiveDependencies {
                 .detail(dependency_range, "...this dependency.");
                 Some(diag)
             }
-            // TODO: Add fix for missing dependency array (which would simply add an empty one)
         }
     }
 
