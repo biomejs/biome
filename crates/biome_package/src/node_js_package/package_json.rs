@@ -237,10 +237,10 @@ fn as_catalog_block_mapping(node: &AnyYamlBlockNode) -> Option<YamlBlockMapping>
 fn collect_catalog_dependencies(mapping: &YamlBlockMapping) -> Dependencies {
     let mut deps = Vec::new();
     for entry in mapping.entries() {
-        if let Some((name, version_node)) = parse_catalog_mapping_entry(entry) {
-            if let Some(version) = extract_catalog_scalar_from_block_node(&version_node) {
-                deps.push((name, version));
-            }
+        if let Some((name, version_node)) = parse_catalog_mapping_entry(entry)
+            && let Some(version) = extract_catalog_scalar_from_block_node(&version_node)
+        {
+            deps.push((name, version));
         }
     }
 
@@ -257,21 +257,22 @@ fn extract_catalog_scalar_from_implicit_key(key: &AnyYamlMappingImplicitKey) -> 
             .and_then(|token| normalize_catalog_scalar_text(token.text()));
     }
 
-    if let Some(flow_json) = key.as_yaml_flow_json_node() {
-        if let Some(content) = flow_json.content() {
-            return match content {
-                AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
-                    .value_token()
-                    .ok()
-                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
-                AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
-                    .value_token()
-                    .ok()
-                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
-                AnyYamlJsonContent::YamlFlowMapping(_)
-                | AnyYamlJsonContent::YamlFlowSequence(_) => None,
-            };
-        }
+    if let Some(flow_json) = key.as_yaml_flow_json_node()
+        && let Some(content) = flow_json.content()
+    {
+        return match content {
+            AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlFlowMapping(_) | AnyYamlJsonContent::YamlFlowSequence(_) => {
+                None
+            }
+        };
     }
 
     None
@@ -287,21 +288,22 @@ fn extract_catalog_scalar_from_flow_node(node: &AnyYamlFlowNode) -> Option<Box<s
             .and_then(|token| normalize_catalog_scalar_text(token.text()));
     }
 
-    if let Some(flow_json) = node.as_yaml_flow_json_node() {
-        if let Some(content) = flow_json.content() {
-            return match content {
-                AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
-                    .value_token()
-                    .ok()
-                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
-                AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
-                    .value_token()
-                    .ok()
-                    .and_then(|token| normalize_catalog_scalar_text(token.text())),
-                AnyYamlJsonContent::YamlFlowMapping(_)
-                | AnyYamlJsonContent::YamlFlowSequence(_) => None,
-            };
-        }
+    if let Some(flow_json) = node.as_yaml_flow_json_node()
+        && let Some(content) = flow_json.content()
+    {
+        return match content {
+            AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlSingleQuotedScalar(scalar) => scalar
+                .value_token()
+                .ok()
+                .and_then(|token| normalize_catalog_scalar_text(token.text())),
+            AnyYamlJsonContent::YamlFlowMapping(_) | AnyYamlJsonContent::YamlFlowSequence(_) => {
+                None
+            }
+        };
     }
 
     None
@@ -315,12 +317,11 @@ fn extract_catalog_scalar_from_block_node(node: &AnyYamlBlockNode) -> Option<Box
         return extract_catalog_scalar_from_flow_node(&flow_node);
     }
 
-    if let Some(block) = node.as_any_yaml_block_in_block_node() {
-        if let Some(mapping) = block.as_yaml_block_mapping() {
-            if mapping.entries().is_empty() {
-                return None;
-            }
-        }
+    if let Some(block) = node.as_any_yaml_block_in_block_node()
+        && let Some(mapping) = block.as_yaml_block_mapping()
+        && mapping.entries().is_empty()
+    {
+        return None;
     }
 
     None
@@ -334,10 +335,10 @@ fn normalize_catalog_scalar_text(value: &str) -> Option<Box<str>> {
         return None;
     }
 
-    let without_quotes = if trimmed.starts_with('"') && trimmed.ends_with('"') && trimmed.len() >= 2
+    let without_quotes = if trimmed.len() >= 2
+        && ((trimmed.starts_with('"') && trimmed.ends_with('"'))
+            || (trimmed.starts_with('\'') && trimmed.ends_with('\'')))
     {
-        &trimmed[1..trimmed.len() - 1]
-    } else if trimmed.starts_with('\'') && trimmed.ends_with('\'') && trimmed.len() >= 2 {
         &trimmed[1..trimmed.len() - 1]
     } else {
         trimmed
