@@ -1363,15 +1363,9 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, existing_version, services) = documents
+        let (index, existing_version) = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.version,
-                    document.services.clone(),
-                )
-            })
+            .map(|document| (document.file_source_index, document.version))
             .ok_or_else(WorkspaceError::not_found)?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
@@ -1400,9 +1394,17 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        if document_source.is_css_like()
+            && (settings.is_linter_enabled() || settings.is_assist_enabled())
+        {
+            services = CssDocumentServices::default()
+                .with_css_semantic_model(&parsed.any_parse.tree())
+                .into();
+        }
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let embedded_snippets = if DocumentFileSource::can_contain_embeds(
