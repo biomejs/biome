@@ -1949,8 +1949,12 @@
 		},
 		"IndentStyle": {
 			"oneOf": [
-				{ "description": "Tab", "type": "string", "const": "tab" },
-				{ "description": "Space", "type": "string", "const": "space" }
+				{ "description": "Indent with Tab", "type": "string", "const": "tab" },
+				{
+					"description": "Indent with Space",
+					"type": "string",
+					"const": "space"
+				}
 			]
 		},
 		"IndentWidth": {
