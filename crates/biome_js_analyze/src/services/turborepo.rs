@@ -28,17 +28,20 @@ pub struct TurborepoServices {
 }
 
 impl TurborepoServices {
-    /// Checks if the given environment variable is declared in the root turbo.json.
+    /// Checks if the given environment variable is declared in any turbo.json.
     ///
-    /// Turborepo treats `globalEnv` and `globalPassThroughEnv` as root-only, so this method only checks the
-    /// root-level configuration. The configs are ordered from closest (package-level)
-    /// to furthest (root), so the root config is the last element.
+    /// This method checks all turbo.json configurations that apply to the current file,
+    /// including both the root turbo.json and any package-level turbo.json files.
     ///
-    /// Returns `false` if no root config exists.
+    /// While Turborepo treats `globalEnv` and `globalPassThroughEnv` as root-only,
+    /// task-level `env` and `passThroughEnv` can be declared in package-level turbo.json files.
+    /// Therefore, we need to check all applicable configs.
+    ///
+    /// Returns `false` if no turbo.json configs exist or the env var is not declared in any of them.
     pub fn is_env_var_declared(&self, env_var: &str) -> bool {
         self.turborepo_configs
-            .last()
-            .is_some_and(|root_config| root_config.is_env_var_declared(env_var))
+            .iter()
+            .any(|config| config.is_env_var_declared(env_var))
     }
 
     /// Returns whether any turbo.json file was found for the current file.
@@ -133,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn test_only_root_config_is_checked() {
+    fn test_all_configs_are_checked() {
         // Root config declares ROOT_VAR, package config declares PACKAGE_VAR
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR", "SHARED_VAR"] }"#);
         let package_turbo = create_turbo_json(r#"{ "globalEnv": ["PACKAGE_VAR"] }"#);
@@ -141,18 +144,18 @@ mod tests {
         // Configs are ordered from closest (package) to furthest (root)
         let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
 
-        // ROOT_VAR is declared in root turbo.json (last config)
+        // ROOT_VAR is declared in root turbo.json
         assert!(services.is_env_var_declared("ROOT_VAR"));
-        // SHARED_VAR is declared in root turbo.json (last config)
+        // SHARED_VAR is declared in root turbo.json
         assert!(services.is_env_var_declared("SHARED_VAR"));
-        // PACKAGE_VAR is only in package config, but we only check root
-        assert!(!services.is_env_var_declared("PACKAGE_VAR"));
+        // PACKAGE_VAR is in package config, should be found
+        assert!(services.is_env_var_declared("PACKAGE_VAR"));
         // UNDECLARED is not in any config
         assert!(!services.is_env_var_declared("UNDECLARED"));
     }
 
     #[test]
-    fn test_root_task_env_is_checked() {
+    fn test_task_env_from_all_configs() {
         // Root has both globalEnv and task-specific env
         let root_turbo = create_turbo_json(
             r#"{ "globalEnv": ["ROOT_VAR"], "tasks": { "build": { "env": ["BUILD_OUTPUT"] } } }"#,
@@ -166,12 +169,12 @@ mod tests {
         assert!(services.is_env_var_declared("ROOT_VAR"));
         // BUILD_OUTPUT is in root task env
         assert!(services.is_env_var_declared("BUILD_OUTPUT"));
-        // PACKAGE_BUILD_VAR is only in package config, not checked
-        assert!(!services.is_env_var_declared("PACKAGE_BUILD_VAR"));
+        // PACKAGE_BUILD_VAR is in package config task env, should be found
+        assert!(services.is_env_var_declared("PACKAGE_BUILD_VAR"));
     }
 
     #[test]
-    fn test_root_wildcard_pattern() {
+    fn test_wildcard_pattern_from_all_configs() {
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["NEXT_PUBLIC_*"] }"#);
         let package_turbo = create_turbo_json(r#"{ "globalEnv": ["DATABASE_URL"] }"#);
 
@@ -179,23 +182,24 @@ mod tests {
 
         // Wildcard from root applies
         assert!(services.is_env_var_declared("NEXT_PUBLIC_API_URL"));
-        // DATABASE_URL is only in package config, not checked
-        assert!(!services.is_env_var_declared("DATABASE_URL"));
+        // DATABASE_URL is in package config, should be found
+        assert!(services.is_env_var_declared("DATABASE_URL"));
         // Non-matching var is undeclared
         assert!(!services.is_env_var_declared("ACME_SECRET"));
     }
 
     #[test]
-    fn test_root_negation() {
+    fn test_negation_and_positive_in_different_configs() {
         // Root allows all vars except SECRET_KEY
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["*", "!SECRET_KEY"] }"#);
-        // Package would allow SECRET_KEY, but it's not checked
+        // Package explicitly declares SECRET_KEY
         let package_turbo = create_turbo_json(r#"{ "globalEnv": ["SECRET_KEY"] }"#);
 
         let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
 
-        // SECRET_KEY is negated in root config
-        assert!(!services.is_env_var_declared("SECRET_KEY"));
+        // SECRET_KEY is negated in root config but declared in package config
+        // Since we check all configs and any positive match wins, this is declared
+        assert!(services.is_env_var_declared("SECRET_KEY"));
         // Regular vars are allowed by root
         assert!(services.is_env_var_declared("ACME_TOKEN"));
     }
@@ -221,7 +225,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_levels_only_root_checked() {
+    fn test_multiple_levels_all_checked() {
         // Simulates: root -> packages/shared -> packages/shared/utils
         let root_turbo = create_turbo_json(r#"{ "globalEnv": ["ROOT_VAR"] }"#);
         let shared_turbo = create_turbo_json(r#"{ "globalEnv": ["SHARED_VAR"] }"#);
@@ -234,11 +238,10 @@ mod tests {
             Arc::new(root_turbo),
         ]);
 
-        // Only ROOT_VAR from the root config should be found
+        // All vars from all configs should be found
         assert!(services.is_env_var_declared("ROOT_VAR"));
-        // SHARED_VAR and UTILS_VAR are in package configs, not checked
-        assert!(!services.is_env_var_declared("SHARED_VAR"));
-        assert!(!services.is_env_var_declared("UTILS_VAR"));
+        assert!(services.is_env_var_declared("SHARED_VAR"));
+        assert!(services.is_env_var_declared("UTILS_VAR"));
         assert!(!services.is_env_var_declared("UNDECLARED"));
     }
 }

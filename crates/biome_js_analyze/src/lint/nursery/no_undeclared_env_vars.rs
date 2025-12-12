@@ -157,7 +157,7 @@ impl Rule for NoUndeclaredEnvVars {
             rule_category!(),
             node.range(),
             markup! {
-                "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json. Add this environment variable to 'globalEnv', 'globalPassThroughEnv', or a task's 'env'/'passThroughEnv' array in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo."
+                "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo."
             },
         ))
     }
