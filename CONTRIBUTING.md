@@ -279,6 +279,16 @@ If you're debugging an LSP reproduction, make sure that the client allows to use
 }
 ```
 
+### Debugging
+
+By default, the `dev` profile of the project removes the debugging information during compilation, which means that some information such as stacktraces aren't available.
+
+If you need to debug the project, use the profile `debugging`. Running this profile might take some time as it will re-compile the dependencies by keeping certain information.
+
+```shell
+cargo t --profile debugging some_test
+```
+
 ## Production binaries
 
 _Usually_, the easiest way to create a production build is to use the `--release` flag, **however** Biome requires an environment variable called `BIOME_VERSION` to generate different code at compile time.
