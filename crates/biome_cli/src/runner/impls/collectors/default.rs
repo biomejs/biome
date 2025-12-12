@@ -6,7 +6,6 @@ use crate::runner::diagnostics::{CIFormatDiffDiagnostic, ContentDiffAdvice, Form
 use crate::runner::execution::Execution;
 use crate::runner::process_file::{DiffKind, Message};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Resource, Severity};
-use biome_fs::FileSystem;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Receiver;
 use rustc_hash::FxHashSet;
@@ -14,7 +13,7 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
-struct DefaultCollector<'ctx> {
+pub(crate) struct DefaultCollector {
     /// The maximum number of diagnostics the console thread is allowed to print
     max_diagnostics: u32,
     /// The approximate number of diagnostics the console will print before
@@ -44,13 +43,13 @@ struct DefaultCollector<'ctx> {
     total_skipped_suggested_fixes: AtomicU32,
 
     /// The current working directory, borrowed from [FileSystem]
-    working_directory: Option<&'ctx Utf8Path>,
+    working_directory: Option<Utf8PathBuf>,
 
     diagnostics_to_print: Mutex<Vec<Error>>,
 }
 
-impl<'ctx> DefaultCollector<'ctx> {
-    pub(crate) fn new(working_directory: Option<&'ctx Utf8Path>) -> Self {
+impl DefaultCollector {
+    pub(crate) fn new(working_directory: Option<&Utf8Path>) -> Self {
         Self {
             errors: AtomicU32::new(0),
             warnings: AtomicU32::new(0),
@@ -62,22 +61,22 @@ impl<'ctx> DefaultCollector<'ctx> {
             not_printed_diagnostics: AtomicU32::new(0),
             printed_diagnostics: AtomicU32::new(0),
             total_skipped_suggested_fixes: AtomicU32::new(0),
-            working_directory,
+            working_directory: working_directory.map(|wd| wd.to_path_buf()),
             diagnostics_to_print: Mutex::default(),
         }
     }
 
-    fn with_verbose(mut self, verbose: bool) -> Self {
+    pub(crate) fn with_verbose(mut self, verbose: bool) -> Self {
         self.verbose = verbose;
         self
     }
 
-    fn with_max_diagnostics(mut self, value: u32) -> Self {
+    pub(crate) fn with_max_diagnostics(mut self, value: u32) -> Self {
         self.max_diagnostics = value;
         self
     }
 
-    fn with_diagnostic_level(mut self, value: Severity) -> Self {
+    pub(crate) fn with_diagnostic_level(mut self, value: Severity) -> Self {
         self.diagnostic_level = value;
         self
     }
@@ -112,8 +111,8 @@ impl<'ctx> DefaultCollector<'ctx> {
     }
 }
 
-impl<'ctx> Collector for DefaultCollector<'ctx> {
-    type Result = TraverseResult;
+impl Collector for DefaultCollector {
+    type Result = CollectorSummary;
 
     fn should_collect(&self) -> bool {
         let printed_diagnostics = self.printed_diagnostics.load(Ordering::Relaxed);
@@ -316,30 +315,31 @@ impl<'ctx> Collector for DefaultCollector<'ctx> {
         let infos = self.infos();
         let suggested_fixes_skipped = self.skipped_fixes();
         let diagnostics_not_printed = self.not_printed_diagnostics();
-        let changed = ctx.changed();
-        let skipped = ctx.skipped();
-        let unchanged = ctx.unchanged();
-        let matches = ctx.matches();
-        let evaluated_paths = ctx.evaluated_paths();
         // last
         let diagnostics_to_print = self.diagnostics_to_print.into_inner().unwrap();
 
-        TraverseResult {
-            summary: TraversalSummary {
-                changed,
-                unchanged,
-                duration,
-                scanner_duration: None,
-                errors,
-                matches,
-                warnings,
-                infos,
-                skipped,
-                suggested_fixes_skipped,
-                diagnostics_not_printed,
-            },
-            evaluated_paths,
+        CollectorSummary {
+            duration,
+            scanner_duration: None,
+            errors,
+            warnings,
+            infos,
+            suggested_fixes_skipped,
+            diagnostics_not_printed,
             diagnostics: diagnostics_to_print,
         }
     }
+}
+
+pub(crate) struct CollectorSummary {
+    // We skip it during testing because the time isn't predictable
+    pub duration: Duration,
+    // We skip it during testing because the time isn't predictable
+    pub scanner_duration: Option<Duration>,
+    pub errors: u32,
+    pub warnings: u32,
+    pub infos: u32,
+    pub suggested_fixes_skipped: u32,
+    pub diagnostics_not_printed: u32,
+    pub diagnostics: Vec<Error>,
 }

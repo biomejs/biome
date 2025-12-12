@@ -12,15 +12,12 @@ use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::{CliDiagnostic, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::SerdeJsonError;
-use biome_fs::{BiomePath, FileSystem};
-use biome_service::Workspace;
-use biome_service::projects::ProjectKey;
+use biome_fs::BiomePath;
 use biome_service::workspace::{CloseFileParams, FileContent, FormatFileParams, OpenFileParams};
-use std::time::Duration;
 
-struct DefaultFinalizer;
+pub(crate) struct DefaultFinalizer;
 
 impl Finalizer for DefaultFinalizer {
     type Input = TraverseResult;
@@ -33,8 +30,9 @@ impl Finalizer for DefaultFinalizer {
             scan_duration,
             console,
             cli_options,
-            crawler_output,
+            crawler_output: result,
             execution,
+            paths,
         } = payload;
 
         let TraverseResult {

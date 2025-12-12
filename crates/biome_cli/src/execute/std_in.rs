@@ -2,7 +2,7 @@
 //!
 use crate::cli_options::CliOptions;
 use crate::diagnostics::StdinDiagnostic;
-use crate::execute::Execution;
+use crate::runner::execution::Execution;
 use crate::{CliDiagnostic, CliSession, TraversalMode};
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
@@ -21,7 +21,7 @@ use std::borrow::Cow;
 pub(crate) fn run<'a>(
     session: CliSession,
     project_key: ProjectKey,
-    mode: &'a Execution,
+    mode: &'a dyn Execution,
     biome_path: BiomePath,
     content: &'a str,
     cli_options: &CliOptions,

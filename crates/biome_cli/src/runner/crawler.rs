@@ -1,8 +1,8 @@
 use crate::CliDiagnostic;
 use crate::runner::collector::Collector;
 use crate::runner::execution::Execution;
-use crate::runner::inspector::Inspector;
-use crate::runner::process_file::Message;
+use crate::runner::handler::Handler;
+use crate::runner::process_file::{Message, ProcessFile};
 use biome_diagnostics::Error;
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
@@ -10,37 +10,36 @@ use biome_service::projects::ProjectKey;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
 use std::collections::BTreeSet;
+use std::marker::PhantomData;
 use std::sync::RwLock;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
 
-pub trait Crawler {
-    type Output;
-    type CollectorOutput;
-    type Inspector: Inspector;
+pub trait Crawler<Output> {
+    type Handler: Handler;
+    type ProcessFile: ProcessFile;
+    type Collector: Collector;
 
-    fn output<C>(
-        collector_result: C::Result,
+    fn output<Ctx>(
+        ctx: &Ctx,
+        collector_result: <Self::Collector as Collector>::Result,
         evaluated_paths: BTreeSet<BiomePath>,
         duration: Duration,
-    ) -> Self::Output
+    ) -> Output
     where
-        C: Collector;
+        Ctx: CrawlerContext;
 
-    fn crawl<C>(
-        execution: Box<dyn Execution>,
+    fn crawl(
+        execution: &dyn Execution,
         workspace: &dyn Workspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
         inputs: Vec<String>,
         configuration_files: Vec<BiomePath>,
-        collector: C,
-    ) -> Result<Self::Output, CliDiagnostic>
-    where
-        C: Collector,
-    {
+        collector: Self::Collector,
+    ) -> Result<Output, CliDiagnostic> {
         let (interner, recv_files) = PathInterner::new();
         let (sender, receiver) = unbounded();
 
@@ -53,21 +52,12 @@ pub trait Crawler {
         //     .with_diagnostic_level(cli_options.diagnostic_level)
         //     .with_max_diagnostics(max_diagnostics);
 
-        let ctx = CrawlerOptions::new(
-            fs,
-            workspace,
-            project_key,
-            interner,
-            sender,
-            execution.as_ref(),
-        );
+        let ctx = CrawlerOptions::new(fs, workspace, project_key, interner, sender, execution);
 
         let (duration, evaluated_paths) = thread::scope(|s| {
             let handler = thread::Builder::new()
                 .name(String::from("biome::console"))
-                .spawn_scoped(s, || {
-                    collector.run(receiver, recv_files, execution.as_ref())
-                })
+                .spawn_scoped(s, || collector.run(receiver, recv_files, execution))
                 .expect("failed to spawn console thread");
 
             // The traversal context is scoped to ensure all the channels it
@@ -88,11 +78,8 @@ pub trait Crawler {
         // }
 
         execution.on_post_crawl(workspace)?;
-        Ok(Self::output::<C>(
-            collector.result(duration.clone(), &ctx),
-            evaluated_paths,
-            duration,
-        ))
+        let result = collector.result(duration.clone(), &ctx);
+        Ok(Self::output(&ctx, result, evaluated_paths, duration))
     }
 
     /// Initiate the filesystem traversal tasks with the provided input paths and
@@ -100,7 +87,7 @@ pub trait Crawler {
     fn crawl_inputs(
         fs: &dyn FileSystem,
         inputs: Vec<String>,
-        ctx: &CrawlerOptions<Self::Inspector>,
+        ctx: &CrawlerOptions<Self::Handler, Self::ProcessFile>,
     ) -> (Duration, BTreeSet<BiomePath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
@@ -123,6 +110,7 @@ pub trait Crawler {
         // ProcessFile::default().process()
         Ok(())
     }
+    type CollectorOutput;
 }
 
 pub trait CrawlerContext: TraversalContext {
@@ -143,7 +131,7 @@ pub trait CrawlerContext: TraversalContext {
 }
 
 /// Context object shared between directory traversal tasks
-pub(crate) struct CrawlerOptions<'ctx, 'app, I> {
+pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     /// Shared instance of [FileSystem]
     pub(crate) fs: &'app dyn FileSystem,
     /// Instance of [Workspace] used by this instance of the CLI
@@ -167,12 +155,15 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, I> {
 
     execution: &'app dyn Execution,
 
-    inspector: I,
+    handler: H,
+
+    _p: PhantomData<P>,
 }
 
-impl<'ctx, 'app, I> CrawlerContext for CrawlerOptions<'ctx, 'app, I>
+impl<'ctx, 'app, H, P> CrawlerContext for CrawlerOptions<'ctx, 'app, H, P>
 where
-    I: Inspector,
+    H: Handler,
+    P: ProcessFile,
 {
     fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
@@ -227,9 +218,10 @@ where
     }
 }
 
-impl<'ctx, 'app, I> CrawlerOptions<'ctx, 'app, I>
+impl<'ctx, 'app, I, P> CrawlerOptions<'ctx, 'app, I, P>
 where
-    I: Inspector,
+    I: Handler,
+    P: ProcessFile,
 {
     pub(crate) fn new(
         fs: &'app dyn FileSystem,
@@ -246,19 +238,21 @@ where
             interner,
             messages: sender,
             evaluated_paths: RwLock::default(),
-            inspector: I::default(),
+            handler: I::default(),
             changed: AtomicUsize::new(0),
             unchanged: AtomicUsize::new(0),
             matches: AtomicUsize::new(0),
             skipped: AtomicUsize::new(0),
             execution,
+            _p: PhantomData::<P>::default(),
         }
     }
 }
 
-impl<I> TraversalContext for CrawlerOptions<'_, '_, I>
+impl<I, P> TraversalContext for CrawlerOptions<'_, '_, I, P>
 where
-    I: Inspector,
+    I: Handler,
+    P: ProcessFile,
 {
     fn interner(&self) -> &PathInterner {
         &self.interner
@@ -274,11 +268,11 @@ where
 
     #[instrument(level = "debug", skip(self, biome_path))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
-        self.inspector.can_handle(biome_path, self)
+        self.handler.can_handle(biome_path, self)
     }
 
     fn handle_path(&self, path: BiomePath) {
-        self.inspector.handle_path(&path, self)
+        self.handler.handle_path::<P, Self>(&path, self)
     }
 
     fn store_path(&self, path: BiomePath) {

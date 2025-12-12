@@ -1,18 +1,17 @@
-use crate::TraversalMode;
 use crate::cli_options::CliOptions;
 use crate::execute::Stdin;
+use crate::{CliDiagnostic, TraversalMode};
 use biome_configuration::Configuration;
-use biome_diagnostics::Category;
+use biome_console::Console;
+use biome_diagnostics::{Category, category};
 use biome_fs::BiomePath;
 use biome_service::configuration::ProjectScanComputer;
-use biome_service::workspace::{FeatureName, FeaturesSupported, ScanKind};
+use biome_service::workspace::{FeatureName, FeaturesSupported, ScanKind, SupportKind};
 use biome_service::{Workspace, WorkspaceError};
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use tracing::info;
 
 pub trait Execution: Send + Sync {
-    const DIAGNOSTICS_CATEGORY: &'static Category;
-
     fn to_feature(&self) -> FeatureName;
 
     fn can_handle(&self, features: FeaturesSupported) -> bool;
@@ -33,14 +32,10 @@ pub trait Execution: Send + Sync {
         }
     }
 
-    // TODO implement for commands that support it
-    fn get_stdin_file_path(&self) -> Option<&str> {
-        None
-    }
+    fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind>;
 
-    fn as_stdin_file(&self) -> Option<&Stdin> {
-        None
-    }
+    // TODO implement for commands that support it
+    fn get_stdin_file_path(&self) -> Option<&str>;
 
     // TODO: implement this for the linter which contains only and skip
     fn scan_kind_computer<'a>(&self, configuration: &'a Configuration) -> ProjectScanComputer<'a> {
@@ -84,7 +79,10 @@ pub trait Execution: Send + Sync {
         true
     }
 
-    fn as_diagnostic_category(&self) -> Category {
-        *Self::DIAGNOSTICS_CATEGORY.clone()
+    fn as_diagnostic_category(&self) -> &'static Category;
+
+    // TODO: implement this for check and lint
+    fn is_safe_fixes_enabled(&self) -> bool {
+        false
     }
 }

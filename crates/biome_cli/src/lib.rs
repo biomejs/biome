@@ -21,7 +21,7 @@ mod execute;
 mod logging;
 mod panic;
 mod reporter;
-mod runner;
+pub(crate) mod runner;
 mod service;
 
 use crate::cli_options::{CliOptions, ColorsArg};
@@ -34,6 +34,7 @@ use crate::commands::migrate::MigrateCommandPayload;
 pub use crate::commands::{BiomeCommand, biome_command};
 use crate::logging::LogOptions;
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
+use crate::runner::run::run_command_v2;
 pub use diagnostics::CliDiagnostic;
 pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
 pub use panic::setup_panic_handler;
@@ -225,7 +226,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
-            } => run_command(
+            } => run_command_v2(
                 self,
                 &log_options,
                 &cli_options,

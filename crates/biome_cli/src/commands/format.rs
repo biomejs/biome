@@ -1,6 +1,11 @@
+use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
-use crate::commands::{CommandRunner, LoadEditorConfig, get_files_to_process_with_cli_options};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::commands::get_files_to_process_with_cli_options;
+use crate::diagnostics::StdinDiagnostic;
+use crate::runner::crawler::CrawlerContext;
+use crate::runner::execution::Execution;
+use crate::runner::process_file::{FileStatus, Message, ProcessFile, ProcessStdinFilePayload};
+use crate::runner::runner_ext::{LoadEditorConfig, TraversalCommand};
 use biome_configuration::css::{CssFormatterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
 use biome_configuration::html::HtmlFormatterConfiguration;
@@ -8,9 +13,16 @@ use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::{JsonFormatterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
-use biome_console::Console;
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
-use biome_fs::FileSystem;
+use biome_diagnostics::{Category, Diagnostic, PrintDiagnostic, category};
+use biome_fs::{BiomePath, FileSystem};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::workspace::{
+    CloseFileParams, FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FileContent,
+    FileFeaturesResult, FormatFileParams, OpenFileParams, ScanKind, SupportKind,
+    SupportsFeatureParams,
+};
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
@@ -35,6 +47,32 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
+struct FormatExecution {
+    stdin_file_path: Option<String>,
+}
+
+impl Execution for FormatExecution {
+    fn to_feature(&self) -> FeatureName {
+        FeaturesBuilder::new().with_formatter().build()
+    }
+
+    fn can_handle(&self, features: FeaturesSupported) -> bool {
+        features.supports_format()
+    }
+
+    fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind> {
+        Some(file_features.support_kind_for(FeatureKind::Format))
+    }
+
+    fn as_diagnostic_category(&self) -> &'static Category {
+        category!("format")
+    }
+
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
+    }
+}
+
 impl LoadEditorConfig for FormatCommandPayload {
     fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool {
         self.formatter_configuration
@@ -44,8 +82,27 @@ impl LoadEditorConfig for FormatCommandPayload {
     }
 }
 
-impl CommandRunner for FormatCommandPayload {
-    const COMMAND_NAME: &'static str = "format";
+impl TraversalCommand for FormatCommandPayload {
+    type ProcessFile = FormatProcessFile;
+
+    fn command_name() -> &'static str {
+        "format"
+    }
+
+    fn scan_kind() -> ScanKind {
+        ScanKind::KnownFiles
+    }
+
+    fn get_execution(
+        &self,
+        _cli_options: &CliOptions,
+        _console: &mut dyn Console,
+        _workspace: &dyn Workspace,
+    ) -> Result<Box<dyn Execution>, CliDiagnostic> {
+        Ok(Box::new(FormatExecution {
+            stdin_file_path: self.stdin_file_path.clone(),
+        }))
+    }
 
     fn merge_configuration(
         &mut self,
@@ -115,6 +172,10 @@ impl CommandRunner for FormatCommandPayload {
         Ok(configuration)
     }
 
+    fn should_write(&self) -> bool {
+        self.write || self.fix
+    }
+
     fn get_files_to_process(
         &self,
         fs: &dyn FileSystem,
@@ -131,27 +192,97 @@ impl CommandRunner for FormatCommandPayload {
 
         Ok(paths)
     }
+}
 
-    fn get_stdin_file_path(&self) -> Option<&str> {
-        self.stdin_file_path.as_deref()
+pub struct FormatProcessFile;
+
+impl ProcessFile for FormatProcessFile {
+    fn process_file<Ctx>(ctx: &Ctx, path: &BiomePath) -> Result<FileStatus, Message>
+    where
+        Ctx: CrawlerContext,
+    {
+        todo!()
     }
 
-    fn should_write(&self) -> bool {
-        self.write || self.fix
-    }
+    fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
+        let ProcessStdinFilePayload {
+            workspace,
+            fs,
+            content,
+            project_key,
+            biome_path,
+            console,
+            cli_options,
+        } = payload;
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = workspace.file_features(SupportsFeatureParams {
+            project_key,
+            path: biome_path.clone(),
+            features: FeaturesBuilder::new().with_formatter().build(),
+            inline_config: None,
+        })?;
 
-    fn get_execution(
-        &self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-        _workspace: &dyn Workspace,
-    ) -> Result<Execution, CliDiagnostic> {
-        Ok(Execution::new(TraversalMode::Format {
-            skip_parse_errors: cli_options.skip_parse_errors,
-            write: self.should_write(),
-            stdin: self.get_stdin(console)?,
-            vcs_targeted: (self.staged, self.changed).into(),
-        })
-        .set_report(cli_options))
+        if file_features.is_ignored() {
+            console.append(markup! {{content}});
+            return Ok(());
+        }
+
+        if file_features.is_protected() {
+            let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
+            if protected_diagnostic.tags().is_verbose() {
+                if cli_options.verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+                }
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            }
+            console.append(markup! {{content}});
+            return Ok(());
+        };
+        if file_features.supports_format() {
+            workspace.open_file(OpenFileParams {
+                project_key,
+                path: biome_path.clone(),
+                content: FileContent::from_client(content),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+            })?;
+            let printed = workspace.format_file(FormatFileParams {
+                project_key,
+                path: biome_path.clone(),
+                inline_config: None,
+            })?;
+
+            let code = printed.into_code();
+            let output = if !file_features.supports_full_html_support() {
+                match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
+                    _ => code,
+                }
+            } else {
+                code
+            };
+            console.append(markup! {
+                {output}
+            });
+            workspace
+                .close_file(CloseFileParams {
+                    project_key,
+                    path: biome_path.clone(),
+                })
+                .map_err(|err| err.into())
+        } else {
+            console.append(markup! {
+                {content}
+            });
+            console.error(markup! {
+                <Warn>"The content was not formatted because the formatter is currently disabled."</Warn>
+            });
+            Err(StdinDiagnostic::new_not_formatted().into())
+        }
     }
 }

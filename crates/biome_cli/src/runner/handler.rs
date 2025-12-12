@@ -1,16 +1,12 @@
-use crate::TraversalMode;
-use crate::runner::crawler::{CrawlerContext, CrawlerOptions};
-use crate::runner::execution::Execution;
-use crate::runner::process_file::{FileStatus, Message, ProcessFile};
+use crate::runner::crawler::CrawlerContext;
+use crate::runner::process_file::{FileStatus, ProcessFile};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
 use biome_service::file_handlers::DocumentFileSource;
-use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };
-use biome_service::{Workspace, WorkspaceError, extension_error};
-use std::panic::catch_unwind;
+use biome_service::{WorkspaceError, extension_error};
 
 /// Path entries that we want to ignore during the OS traversal.
 pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
@@ -22,9 +18,7 @@ pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
     b"node_modules",
 ];
 
-pub trait Inspector: Default + Send + Sync + 'static {
-    type ProcessFile: ProcessFile;
-
+pub trait Handler: Default + Send + Sync {
     fn can_handle<Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx) -> bool
     where
         Ctx: CrawlerContext,
@@ -103,13 +97,14 @@ pub trait Inspector: Default + Send + Sync + 'static {
         execution.can_handle(file_features)
     }
 
-    fn handle_path<Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx)
+    fn handle_path<P, Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx)
     where
         Ctx: CrawlerContext,
+        P: ProcessFile,
     {
         // ProcessFile::process_file is generic over Ctx: TraversalContext
         // We pass &Ctx which should also implement TraversalContext
-        match Self::ProcessFile::process_file(ctx, biome_path.clone()) {
+        match P::execute(ctx, biome_path) {
             Ok(FileStatus::Changed) => {
                 ctx.increment_changed(biome_path);
             }
@@ -138,6 +133,8 @@ pub trait Inspector: Default + Send + Sync + 'static {
         }
     }
 }
+
+impl Handler for () {}
 
 pub(crate) fn miss_handler_err(
     ctx: &dyn TraversalContext,

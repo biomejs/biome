@@ -39,14 +39,30 @@ pub(crate) trait Collector: Send + Sync {
     fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result;
 }
 
-struct CollectorResult {
-    errors: u32,
-    warnings: u32,
-    infos: u32,
-    skipped_fixes: u32,
-    not_printed_diagnostics: u32,
-    changed: u32,
-    unchanged: u32,
-    matches: u32,
-    skipped: u32,
+impl Collector for () {
+    type Result = ();
+
+    fn should_collect(&self) -> bool {
+        false
+    }
+
+    fn diagnostic_level(&self) -> Severity {
+        Severity::Hint
+    }
+
+    fn verbose(&self) -> bool {
+        false
+    }
+
+    fn run(
+        &self,
+        _receiver: Receiver<Message>,
+        _interner: Receiver<Utf8PathBuf>,
+        _execution: &dyn Execution,
+    ) {
+    }
+
+    fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result {
+        ()
+    }
 }

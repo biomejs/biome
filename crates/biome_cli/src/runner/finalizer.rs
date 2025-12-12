@@ -28,12 +28,13 @@ pub trait Finalizer {
 }
 
 pub(crate) struct FinalizePayload<'a, I> {
-    project_key: ProjectKey,
-    fs: &'a dyn FileSystem,
-    workspace: &'a dyn Workspace,
-    scan_duration: Option<Duration>,
-    console: &'a mut dyn Console,
-    cli_options: &'a CliOptions,
-    crawler_output: I,
-    execution: &'a dyn Execution,
+    pub(crate) project_key: ProjectKey,
+    pub(crate) fs: &'a dyn FileSystem,
+    pub(crate) workspace: &'a dyn Workspace,
+    pub(crate) scan_duration: Option<Duration>,
+    pub(crate) console: &'a mut dyn Console,
+    pub(crate) cli_options: &'a CliOptions,
+    pub(crate) crawler_output: I,
+    pub(crate) execution: &'a dyn Execution,
+    pub(crate) paths: Vec<String>,
 }

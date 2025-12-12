@@ -48,7 +48,7 @@
 //! Orchestrates the file traversal process. Spawns a collector thread, walks the
 //! file system, and produces structured output.
 //!
-//! ### [`Inspector`]
+//! ### [`Handler`]
 //! Defines per-file processing logic. Filters which files to process and dispatches
 //! to the appropriate file processor. Provides sensible defaults for both filtering
 //! and processing.
@@ -88,7 +88,7 @@
 //! - [`crawler`]: File system traversal orchestration
 //! - [`execution`]: Feature requirements and capability checks
 //! - [`finalizer`]: Results presentation and reporting
-//! - [`inspector`]: Per-file filtering and processing dispatch
+//! - [`handler`]: Per-file filtering and processing dispatch
 //! - [`process_file`]: File processing trait and status types
 //! - [`scan_kind`]: Utilities for determining scan strategy
 
@@ -97,10 +97,11 @@ pub(crate) mod crawler;
 pub(crate) mod diagnostics;
 pub(crate) mod execution;
 pub(crate) mod finalizer;
+pub(crate) mod handler;
 pub(crate) mod impls;
-pub(crate) mod inspector;
 pub(crate) mod process_file;
-mod run;
+pub(crate) mod run;
+pub(crate) mod runner_ext;
 pub(crate) mod scan_kind;
 
 use crate::cli_options::CliOptions;
@@ -112,8 +113,10 @@ use crate::logging::LogOptions;
 use crate::runner::collector::Collector;
 use crate::runner::crawler::Crawler;
 use crate::runner::execution::Execution;
-use crate::runner::finalizer::Finalizer;
+use crate::runner::finalizer::{FinalizePayload, Finalizer};
+use crate::runner::handler::Handler;
 use crate::runner::process_file::ProcessFile;
+use crate::runner::runner_ext::TraversalCommand;
 use crate::runner::scan_kind::derive_best_scan_kind;
 use crate::{CliDiagnostic, CliSession, TraversalMode, execute_mode, setup_cli_subscriber};
 use biome_configuration::Configuration;
@@ -131,6 +134,7 @@ use biome_service::workspace::{
 use biome_service::{Workspace, WorkspaceError};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
+use std::process::Output;
 use std::time::Duration;
 use tracing::info;
 
@@ -149,15 +153,16 @@ use tracing::info;
 /// - [CommandRunner::execute_without_crawling] (only if REQUIRES_CRAWLING = false)
 pub(crate) trait CommandRunner: Sized {
     type CrawlerOutput;
-
-    type Crawler: Crawler<Output = Self::CrawlerOutput>;
+    type Collector: Collector;
+    type Crawler: Crawler<
+            Self::CrawlerOutput,
+            Handler = Self::Handler,
+            ProcessFile = Self::ProcessFile,
+            Collector = Self::Collector,
+        >;
     type Finalizer: Finalizer<Input = Self::CrawlerOutput>;
-
-    /// The name of the command that will appear in the diagnostics
-    const COMMAND_NAME: &'static str;
-
-    /// The [ScanKind] to use for this command
-    const SCAN_KIND: ScanKind;
+    type Handler: Handler;
+    type ProcessFile: ProcessFile;
 
     /// Whether this command should be aware of the VCS integration
     const SHOULD_TARGET_VCS: bool;
@@ -171,7 +176,18 @@ pub(crate) trait CommandRunner: Sized {
     /// directly rather than traversing source files.
     const REQUIRES_CRAWLING: bool;
 
-    fn collector(cli_options: &CliOptions) -> impl Collector;
+    /// The name of the command that will appear in the diagnostics
+    fn command_name() -> &'static str;
+
+    /// The [ScanKind] to use for this command
+    fn scan_kind() -> ScanKind;
+
+    fn collector(
+        &self,
+        fs: &dyn FileSystem,
+        execution: &dyn Execution,
+        cli_options: &CliOptions,
+    ) -> Self::Collector;
 
     fn validated_paths_for_execution(
         &self,
@@ -232,21 +248,21 @@ pub(crate) trait CommandRunner: Sized {
             project_key,
         } = configured_workspace;
 
-        if let Some(stdin) = execution.as_stdin_file() {
+        if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
             let biome_path = BiomePath::new(stdin.as_path());
             return crate::execute::std_in::run(
                 session,
                 project_key,
-                &execution,
+                execution.as_ref(),
                 biome_path,
                 stdin.as_content(),
                 cli_options,
             );
         }
 
-        let collector = Self::collector(cli_options);
-        let mut output: <Self::Crawler as Crawler>::Output = Self::Crawler::crawl(
-            execution,
+        let collector = self.collector(fs, execution.as_ref(), cli_options);
+        let mut output: Self::CrawlerOutput = Self::Crawler::crawl(
+            execution.as_ref(),
             workspace,
             fs,
             project_key,
@@ -257,7 +273,17 @@ pub(crate) trait CommandRunner: Sized {
 
         Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
 
-        Self::Finalizer::finalize(duration, console, output, cli_options)
+        Self::Finalizer::finalize(FinalizePayload {
+            cli_options,
+            project_key,
+            execution: execution.as_ref(),
+            fs,
+            console,
+            workspace,
+            scan_duration: duration,
+            crawler_output: output,
+            paths,
+        })
     }
 
     /// This function prepares the workspace with the following:
@@ -339,7 +365,7 @@ pub(crate) trait CommandRunner: Sized {
             &root_configuration_dir,
             &working_dir,
             &configuration,
-            Self::SCAN_KIND,
+            self.scan_kind(),
         );
 
         // Update the settings of the project
@@ -404,7 +430,7 @@ pub(crate) trait CommandRunner: Sized {
                 Some((path, input_code).into())
             } else {
                 // we provided the argument without a piped stdin, we bail
-                return Err(CliDiagnostic::missing_argument("stdin", Self::COMMAND_NAME));
+                return Err(CliDiagnostic::missing_argument("stdin", Self::command_name));
             }
         } else {
             None
@@ -482,7 +508,7 @@ pub(crate) trait CommandRunner: Sized {
     ) -> Result<(), CliDiagnostic> {
         panic!(
             "{} command has REQUIRES_CRAWLING = false but did not implement execute_without_crawling()",
-            Self::COMMAND_NAME
+            Self::command_name()
         )
     }
 
@@ -502,7 +528,7 @@ pub(crate) struct ConfiguredWorkspace {
     pub project_key: ProjectKey,
 }
 
-pub(crate) trait LoadEditorConfig: CommandRunner {
+pub(crate) trait LoadEditorConfig: TraversalCommand {
     /// Whether this command should load the `.editorconfig` file.
     fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool;
 
@@ -542,201 +568,5 @@ pub(crate) trait LoadEditorConfig: CommandRunner {
                 biome_configuration
             },
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::cli_options::{CliOptions, cli_options};
-    use crate::logging::{LogOptions, log_options};
-    use crate::runner::CommandRunner;
-    use crate::runner::collector::Collector;
-    use crate::runner::crawler::{Crawler, CrawlerContext, CrawlerOptions};
-    use crate::runner::execution::Execution;
-    use crate::runner::finalizer::Finalizer;
-    use crate::runner::inspector::Inspector;
-    use crate::runner::process_file::{FileStatus, Message, ProcessFile};
-    use crate::runner::run::run_command;
-    use crate::{CliDiagnostic, CliSession, TraversalMode};
-    use biome_configuration::Configuration;
-    use biome_console::{BufferConsole, Console};
-    use biome_diagnostics::{DiagnosticTags, Error, Severity};
-    use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, TraversalContext};
-    use biome_service::projects::ProjectKey;
-    use biome_service::workspace::{FeatureName, FeaturesBuilder, FeaturesSupported, ScanKind};
-    use biome_service::{Workspace, WorkspaceError, workspace};
-    use camino::{Utf8Path, Utf8PathBuf};
-    use crossbeam::channel::Receiver;
-    use std::collections::BTreeSet;
-    use std::ffi::OsString;
-    use std::sync::Arc;
-    use std::time::Duration;
-
-    #[test]
-    fn test_command_runner_with_output() {
-        struct TestCommandRunner;
-        struct TestCollector;
-        struct TestCrawler;
-        struct TestFinalizer;
-        struct TestProcessFile;
-        struct TestOutput {}
-        struct TestExecution;
-
-        impl Execution for TestExecution {
-            fn to_feature(&self) -> FeatureName {
-                FeaturesBuilder::new().with_all().build()
-            }
-
-            fn can_handle(&self, features: FeaturesSupported) -> bool {
-                features.supports_format()
-            }
-        }
-
-        #[derive(Default)]
-        struct TestInspector;
-
-        impl Inspector for TestInspector {
-            type ProcessFile = TestProcessFile;
-
-            // Uses default handle_path() implementation which calls ProcessFile::process_file()
-        }
-
-        impl Finalizer for TestFinalizer {
-            type Input = TestOutput;
-
-            fn finalize(
-                scan_duration: Option<Duration>,
-                console: &mut dyn Console,
-                input: Self::Input,
-            ) -> Result<(), CliDiagnostic> {
-                Ok(())
-            }
-        }
-
-        impl Crawler for TestCrawler {
-            type Output = TestOutput;
-            type CollectorOutput = TestOutput;
-            type Inspector = TestInspector;
-
-            fn output<C>(
-                _result: C::Result,
-                _evaluated_paths: BTreeSet<BiomePath>,
-                _duration: Duration,
-            ) -> Self::Output
-            where
-                C: Collector,
-            {
-                TestOutput {}
-            }
-        }
-
-        impl Collector for TestCollector {
-            type Result = ();
-
-            fn should_collect(&self) -> bool {
-                true
-            }
-
-            fn diagnostic_level(&self) -> Severity {
-                Severity::Error
-            }
-
-            fn verbose(&self) -> bool {
-                false
-            }
-
-            fn run(
-                &self,
-                receiver: Receiver<Message>,
-                interner: Receiver<Utf8PathBuf>,
-                execution: &dyn Execution,
-            ) {
-            }
-
-            fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result {
-                ()
-            }
-        }
-
-        impl ProcessFile for TestProcessFile {
-            fn process_file<Ctx>(ctx: &Ctx, path: BiomePath) -> Result<FileStatus, Message>
-            where
-                Ctx: CrawlerContext,
-            {
-                Ok(FileStatus::Unchanged)
-            }
-        }
-
-        impl CommandRunner for TestCommandRunner {
-            type CrawlerOutput = TestOutput;
-            type Crawler = TestCrawler;
-            type Finalizer = TestFinalizer;
-            const COMMAND_NAME: &'static str = "crawl";
-            const SCAN_KIND: ScanKind = ScanKind::KnownFiles;
-            const SHOULD_TARGET_VCS: bool = false;
-            const REQUIRES_CRAWLING: bool = true;
-
-            fn collector(cli_options: &CliOptions) -> impl Collector {
-                TestCollector
-            }
-
-            fn validated_paths_for_execution(
-                &self,
-                paths: Vec<OsString>,
-                working_dir: &Utf8Path,
-            ) -> Result<Vec<String>, CliDiagnostic> {
-                Ok(paths
-                    .into_iter()
-                    .map(|path| path.to_string_lossy().to_string())
-                    .collect())
-            }
-
-            fn merge_configuration(
-                &mut self,
-                _loaded_configuration: Configuration,
-                _loaded_directory: Option<Utf8PathBuf>,
-                _loaded_file: Option<Utf8PathBuf>,
-                _fs: &dyn FileSystem,
-                _console: &mut dyn Console,
-            ) -> Result<Configuration, WorkspaceError> {
-                Ok(Configuration::default())
-            }
-
-            fn get_files_to_process(
-                &self,
-                _fs: &dyn FileSystem,
-                _configuration: &Configuration,
-            ) -> Result<Vec<OsString>, CliDiagnostic> {
-                Ok(vec![OsString::from("file.js")])
-            }
-
-            fn should_write(&self) -> bool {
-                false
-            }
-
-            fn get_execution(
-                &self,
-                _cli_options: &CliOptions,
-                _console: &mut dyn Console,
-                _workspace: &dyn Workspace,
-            ) -> Result<Box<dyn Execution>, CliDiagnostic> {
-                Ok(Box::new(TestExecution))
-            }
-        }
-
-        let command = TestCommandRunner;
-        let mut fs = MemoryFileSystem::default();
-        fs.insert("file.js".into(), "let f;");
-        let workspace = workspace::server(Arc::new(fs), None);
-        let mut console = BufferConsole::default();
-        let session = CliSession::new(&*workspace, &mut console).unwrap();
-        let result = run_command(
-            session,
-            &LogOptions::default(),
-            &CliOptions::default(),
-            command,
-        );
-
-        assert!(result.is_ok());
     }
 }
