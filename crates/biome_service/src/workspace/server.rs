@@ -830,10 +830,10 @@ impl WorkspaceServer {
                 continue;
             }
 
-            if let Ok(content) = self.fs.read_file_from_path(&workspace_file) {
-                if let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content) {
-                    return Some(catalog);
-                }
+            if let Ok(content) = self.fs.read_file_from_path(&workspace_file)
+                && let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content)
+            {
+                return Some(catalog);
             }
         }
 
@@ -861,17 +861,15 @@ impl WorkspaceServer {
                     self.project_layout
                         .insert_serialized_node_manifest(package_path.clone(), root);
 
-                    if let Some(catalogs) = pnpm_catalog {
-                        if let Some(mut manifest) = self
+                    if let Some(catalogs) = pnpm_catalog
+                        && let Some(mut manifest) = self
                             .project_layout
                             .get_node_manifest_for_package(&package_path)
-                        {
-                            if manifest.catalog.is_none() {
-                                manifest.catalog = Some(catalogs);
-                                self.project_layout
-                                    .insert_node_manifest(package_path.clone(), manifest);
-                            }
-                        }
+                        && manifest.catalog.is_none()
+                    {
+                        manifest.catalog = Some(catalogs);
+                        self.project_layout
+                            .insert_node_manifest(package_path.clone(), manifest);
                     }
                 }
                 UpdateKind::Removed => {
@@ -910,7 +908,7 @@ impl WorkspaceServer {
                     .project_layout
                     .get_node_manifest_for_package(&package_path)
                 {
-                    manifest.catalog = pnpm_catalog.clone();
+                    manifest.catalog.clone_from(&pnpm_catalog);
                     self.project_layout
                         .insert_node_manifest(package_path.clone(), manifest);
                 }

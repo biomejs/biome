@@ -289,7 +289,7 @@ pub fn project_layout_for_test_file(
         } else {
             let mut manifest = deserialized.into_deserialized().unwrap_or_default();
             if manifest.catalog.is_none() {
-                manifest.catalog = pnpm_catalog.clone();
+                manifest.catalog.clone_from(&pnpm_catalog);
             }
 
             project_layout.insert_node_manifest(
