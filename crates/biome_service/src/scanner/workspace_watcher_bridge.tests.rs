@@ -76,7 +76,11 @@ fn close_modified_file_from_client_before_watcher() {
         module_graph
             .data
             .get(file_path.as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("fooo".to_string(), "fooo".to_string())])),
         "index should've updated to the client state"
     );
@@ -108,7 +112,11 @@ fn close_modified_file_from_client_before_watcher() {
         module_graph
             .data
             .get(file_path.as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("foo".to_string(), "foo".to_string())])),
         "index should've reverted to the filesystem state"
     );

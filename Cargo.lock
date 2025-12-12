@@ -1314,6 +1314,8 @@ name = "biome_module_graph"
 version = "0.0.1"
 dependencies = [
  "biome_console",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1652,6 +1654,8 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_console",
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",

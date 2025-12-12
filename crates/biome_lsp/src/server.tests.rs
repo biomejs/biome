@@ -3837,7 +3837,11 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         result
             .data
             .get(fs.working_directory.join("src").join("a.js").as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("foo".to_string(), "foo".to_string())]))
     );
 
@@ -3864,7 +3868,11 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         result
             .data
             .get(fs.working_directory.join("src").join("a.js").as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("bar".to_string(), "bar".to_string())]))
     );
 
