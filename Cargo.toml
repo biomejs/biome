@@ -270,6 +270,14 @@ opt-level = "s"
 debug     = false
 opt-level = 3
 
-#[patch.crates-io]
-#grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }
-#grit-util            = { path = "../gritql/crates/grit-util" }
+
+# Dev optimisations
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+debug    = true
+inherits = "dev"
