@@ -317,27 +317,27 @@ pub fn project_layout_for_test_file(
         None
     };
 
-    if let Some(turbo_file) = turbo_file {
-        if let Ok(json) = std::fs::read_to_string(&turbo_file) {
-            let deserialized = TurboJson::read_manifest(&fs, &turbo_file);
-            if deserialized.has_errors() {
-                diagnostics.extend(
-                    deserialized
-                        .into_diagnostics()
-                        .into_iter()
-                        .map(|diagnostic| {
-                            diagnostic_to_string(turbo_file.file_stem().unwrap(), &json, diagnostic)
-                        }),
-                );
-            } else {
-                project_layout.insert_turbo_json(
-                    input_file
-                        .parent()
-                        .map(|dir_path| dir_path.to_path_buf())
-                        .unwrap_or_default(),
-                    deserialized.into_deserialized().unwrap_or_default(),
-                );
-            }
+    if let Some(turbo_file) = turbo_file
+        && let Ok(json) = std::fs::read_to_string(&turbo_file)
+    {
+        let deserialized = TurboJson::read_manifest(&fs, &turbo_file);
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(turbo_file.file_stem().unwrap(), &json, diagnostic)
+                    }),
+            );
+        } else {
+            project_layout.insert_turbo_json(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
         }
     }
 
