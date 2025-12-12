@@ -1,3 +1,9 @@
+//! Service for checking environment variable declarations against Turborepo configuration.
+//!
+//! This module provides [`TurborepoServices`] which aggregates all applicable `turbo.json`
+//! configurations (root and package-level) and enables lint rules to verify that environment
+//! variables accessed in code are properly declared for Turborepo caching.
+
 use std::sync::Arc;
 
 use biome_analyze::{
