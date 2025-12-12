@@ -244,4 +244,60 @@ mod tests {
         assert!(services.is_env_var_declared("UTILS_VAR"));
         assert!(!services.is_env_var_declared("UNDECLARED"));
     }
+
+    /// This test explicitly validates the monorepo use case where:
+    /// - Root turbo.json declares global env vars
+    /// - Package-level turbo.json declares task-specific env vars
+    /// - A file in the package should have access to BOTH
+    ///
+    /// This is a regression test for the bug where only root config was checked.
+    #[test]
+    fn test_monorepo_package_env_vars_are_recognized() {
+        // Root turbo.json at /project/turbo.json
+        // Declares global env vars that apply to all packages
+        let root_turbo = create_turbo_json(
+            r#"{ "globalEnv": ["CI", "NODE_ENV"], "tasks": { "build": { "env": ["BUILD_ID"] } } }"#,
+        );
+
+        // Package turbo.json at /project/packages/web/turbo.json
+        // Declares package-specific task env vars
+        let package_turbo = create_turbo_json(
+            r#"{ "tasks": { "build": { "env": ["NEXT_PUBLIC_API_URL", "DATABASE_URL"] } } }"#,
+        );
+
+        // When linting /project/packages/web/src/index.ts, both configs apply
+        // Configs are ordered closest-to-furthest, so package config comes first
+        let services = create_services(vec![Arc::new(package_turbo), Arc::new(root_turbo)]);
+
+        // Vars from root turbo.json should be recognized
+        assert!(
+            services.is_env_var_declared("CI"),
+            "CI from root globalEnv should be declared"
+        );
+        assert!(
+            services.is_env_var_declared("NODE_ENV"),
+            "NODE_ENV from root globalEnv should be declared"
+        );
+        assert!(
+            services.is_env_var_declared("BUILD_ID"),
+            "BUILD_ID from root task env should be declared"
+        );
+
+        // CRITICAL: Vars from package turbo.json MUST also be recognized
+        // This was the bug - package-level env vars were being ignored
+        assert!(
+            services.is_env_var_declared("NEXT_PUBLIC_API_URL"),
+            "NEXT_PUBLIC_API_URL from package task env should be declared"
+        );
+        assert!(
+            services.is_env_var_declared("DATABASE_URL"),
+            "DATABASE_URL from package task env should be declared"
+        );
+
+        // Undeclared vars should still be rejected
+        assert!(
+            !services.is_env_var_declared("UNDECLARED_VAR"),
+            "UNDECLARED_VAR should not be declared"
+        );
+    }
 }
