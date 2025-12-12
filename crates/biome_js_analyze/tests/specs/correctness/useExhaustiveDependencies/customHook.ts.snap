@@ -131,8 +131,7 @@ customHook.ts:20:8 lint/correctness/useExhaustiveDependencies ━━━━━━
     22 │     useMyEffect(() => {
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
@@ -150,8 +149,7 @@ customHook.ts:34:20 lint/correctness/useExhaustiveDependencies ━━━━━�
     36 │     });
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
@@ -172,8 +170,7 @@ customHook.ts:38:20 lint/correctness/useExhaustiveDependencies ━━━━━�
     42 │ 
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
@@ -287,8 +284,7 @@ customHook.ts:50:39 lint/correctness/useExhaustiveDependencies ━━━━━�
     52 │     });
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
@@ -470,8 +466,7 @@ customHook.ts:67:17 lint/correctness/useExhaustiveDependencies ━━━━━�
     69 │     });
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
@@ -524,8 +519,7 @@ customHook.ts:74:17 lint/correctness/useExhaustiveDependencies ━━━━━�
     78 │ 
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```
