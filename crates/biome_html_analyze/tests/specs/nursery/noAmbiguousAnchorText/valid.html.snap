@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+/* should not generate diagnostics */
+<a>documentation</a>
+
+<a aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+
+<a><span aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+
+<a><img alt="documentation" /></a>
+
+```

@@ -1,0 +1,26 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+/* should generate diagnostics */
+<a>a disallowed word</a>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <a>a disallowed word</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
