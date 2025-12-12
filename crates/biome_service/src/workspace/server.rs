@@ -819,12 +819,10 @@ impl WorkspaceServer {
     }
 
     /// Attempts to load pnpm workspace catalogs by searching for a
-    /// `pnpm-workspace.yaml` starting from the package path and walking up its
+    /// `pnpm-workspace.yaml` starting from the given path and walking up its
     /// ancestors.
-    fn load_pnpm_workspace_catalog(&self) -> Option<Catalogs> {
-        let working_dir = self.fs.working_directory()?;
-
-        for dir in working_dir.ancestors() {
+    fn load_pnpm_workspace_catalog(&self, start_dir: &Utf8Path) -> Option<Catalogs> {
+        for dir in start_dir.ancestors() {
             let workspace_file = dir.join("pnpm-workspace.yaml");
             if !self.fs.path_is_file(&workspace_file) {
                 continue;
@@ -854,7 +852,7 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
-            let pnpm_catalog = self.load_pnpm_workspace_catalog();
+            let pnpm_catalog = self.load_pnpm_workspace_catalog(&package_path);
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
@@ -893,11 +891,11 @@ impl WorkspaceServer {
                 }
             }
         } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
-            let pnpm_catalog = self.load_pnpm_workspace_catalog();
             let workspace_root = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
                 .unwrap_or_default();
+            let pnpm_catalog = self.load_pnpm_workspace_catalog(&workspace_root);
 
             for package_path in self.project_layout.package_paths() {
                 if !package_path.starts_with(&workspace_root) {
