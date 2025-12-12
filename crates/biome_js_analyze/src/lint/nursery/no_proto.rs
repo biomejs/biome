@@ -9,26 +9,26 @@ use biome_rule_options::no_proto::NoProtoOptions;
 declare_lint_rule! {
     /// Disallow the use of the deprecated `__proto__` object property.
     ///
-    /// [`Object.prototype.__proto__`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto) 
+    /// [`Object.prototype.__proto__`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto)
     /// is a special accessor used to get or set the prototype of an object. \
-    /// 
-    /// However, it has been **deprecated** since _ECMAScript 2009_, being much slower and much less reliable than its 
-    /// modern counterparts [`Object.getPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf) 
+    ///
+    /// However, it has been **deprecated** since _ECMAScript 2009_, being much slower and much less reliable than its
+    /// modern counterparts [`Object.getPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf)
     /// and [`Object.setPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf).
-    /// 
+    ///
     /// Since it is a regular property on `Object.prototype`,
     /// `__proto__` **will not work** on `null`-prototype objects that do not extend from `Object.prototype`
     /// nor ones having created their own `__proto__` properties via `Object.defineProperty`.
     ///
     /// As such, this rule encourages the use of `Object.getPrototypeOf()` and `Object.setPrototypeOf()`
     /// in lieu of directly accessing `__proto__`.
-    /// 
+    ///
     /// :::info
-    /// Note that this does **not** check for the use of `__proto__` inside object literal definitions 
-    /// to set a newly created object's prototype, \  
+    /// Note that this does **not** check for the use of `__proto__` inside object literal definitions
+    /// to set a newly created object's prototype, \
     /// which is standard practice and well-optimized in modern browsers.
     /// :::
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid

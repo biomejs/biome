@@ -1937,7 +1937,7 @@ See <https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion>
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
-	* Disallow the use of the __proto__ property.
+	* Disallow the use of the deprecated __proto__ object property.
 See <https://biomejs.dev/linter/rules/no-proto> 
 	 */
 	noProto?: NoProtoConfiguration;
