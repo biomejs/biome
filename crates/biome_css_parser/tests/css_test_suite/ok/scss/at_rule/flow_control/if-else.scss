@@ -1,0 +1,34 @@
+@use "sass:math";
+
+@mixin triangle($size, $color, $direction) {
+	height: 0;
+	width: 0;
+
+	border-color: transparent;
+	border-style: solid;
+	border-width: math.div($size, 2);
+
+	@if $direction ==up {
+		border-bottom-color: $color;
+	}
+
+	@else if $direction ==right {
+		border-left-color: $color;
+	}
+
+	@else if $direction ==down {
+		border-top-color: $color;
+	}
+
+	@else if $direction ==left {
+		border-right-color: $color;
+	}
+
+	@else {
+		@error "Unknown direction #{$direction}.";
+	}
+}
+
+.next {
+	@include triangle(5px, black, right);
+}
