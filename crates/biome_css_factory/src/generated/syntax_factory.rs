@@ -2071,7 +2071,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_IMPORT_AT_RULE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![import]
@@ -2103,6 +2103,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && CssMediaQueryList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssUnknownAtRuleComponentList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

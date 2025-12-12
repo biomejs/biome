@@ -997,12 +997,14 @@ pub fn css_import_at_rule(
     import_token: SyntaxToken,
     url: AnyCssImportUrl,
     media: CssMediaQueryList,
+    extra: CssUnknownAtRuleComponentList,
     semicolon_token: SyntaxToken,
 ) -> CssImportAtRuleBuilder {
     CssImportAtRuleBuilder {
         import_token,
         url,
         media,
+        extra,
         semicolon_token,
         layer: None,
         supports: None,
@@ -1012,6 +1014,7 @@ pub struct CssImportAtRuleBuilder {
     import_token: SyntaxToken,
     url: AnyCssImportUrl,
     media: CssMediaQueryList,
+    extra: CssUnknownAtRuleComponentList,
     semicolon_token: SyntaxToken,
     layer: Option<AnyCssImportLayer>,
     supports: Option<CssImportSupports>,
@@ -1036,6 +1039,7 @@ impl CssImportAtRuleBuilder {
                 self.supports
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.media.into_syntax())),
+                Some(SyntaxElement::Node(self.extra.into_syntax())),
                 Some(SyntaxElement::Token(self.semicolon_token)),
             ],
         ))

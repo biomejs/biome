@@ -172,6 +172,9 @@ CssRoot {
                 layer: missing (optional),
                 supports: missing (optional),
                 media: CssMediaQueryList [],
+                extra: CssUnknownAtRuleComponentList {
+                    items: [],
+                },
                 semicolon_token: SEMICOLON@21..22 ";" [] [],
             },
         },
@@ -4453,7 +4456,8 @@ CssRoot {
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@21..21
-        5: SEMICOLON@21..22 ";" [] []
+        5: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@21..21
+        6: SEMICOLON@21..22 ";" [] []
     1: CSS_AT_RULE@22..54
       0: AT@22..25 "@" [Newline("\n"), Newline("\n")] []
       1: TW_PLUGIN_AT_RULE@25..54
