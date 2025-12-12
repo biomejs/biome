@@ -5215,7 +5215,7 @@
 					]
 				},
 				"noProto": {
-					"description": "Disallow the use of the __proto__ property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
+					"description": "Disallow the use of the deprecated __proto__ object property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
 						{ "type": "null" }
