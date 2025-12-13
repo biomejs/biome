@@ -160,11 +160,15 @@ where
             }
 
             // Unicode is currently poorly supported on most Windows
-            // terminal clients, so we always strip emojis in Windows
-            if cfg!(windows) || !self.writer.supports_color() {
-                let is_ascii = grapheme.is_ascii();
+            // terminal clients, so we always strip emojis in Windows.
+            // When colors are disabled on non-Windows systems, we need to balance two concerns:
+            // 1. Convert diagnostic UI symbols (✔ ℹ ⚠ ✖) to ASCII for better readability
+            // 2. Preserve source code fidelity for multi-codepoint graphemes
+            let is_ascii = grapheme.is_ascii();
 
-                if !is_ascii {
+            if !is_ascii {
+                if cfg!(windows) {
+                    // On Windows, always convert all non-ASCII graphemes due to poor terminal support
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
 
                     replacement.encode_utf8(&mut buffer);
@@ -175,8 +179,26 @@ where
                     }
 
                     continue;
+                } else if !self.writer.supports_color() {
+                    // On non-Windows with colors disabled:
+                    // Only convert single-codepoint graphemes (diagnostic symbols)
+                    // Multi-codepoint graphemes (like emoji with modifiers) are preserved for source code fidelity
+                    let chars: Vec<char> = grapheme.chars().collect();
+                    if chars.len() == 1 {
+                        let replacement = unicode_to_ascii(chars[0]);
+
+                        replacement.encode_utf8(&mut buffer);
+
+                        if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
+                            self.error = Err(err);
+                            return Err(fmt::Error);
+                        }
+
+                        continue;
+                    }
+                    // Multi-codepoint graphemes fall through to be written as-is below
                 }
-            };
+            }
 
             for char in grapheme.chars() {
                 char.encode_utf8(&mut buffer);
@@ -287,6 +309,48 @@ mod tests {
             assert_eq!(from_utf8(&buffer).unwrap(), WINDOWS_OUTPUT);
         } else {
             assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+        }
+    }
+
+    #[test]
+    fn test_preserve_multi_codepoint_graphemes_without_colors() {
+        // Test that multi-codepoint graphemes are preserved when colors are disabled
+        // while single-codepoint diagnostic symbols are still converted for readability.
+        // This is critical for source code fidelity when using --colors off.
+        const INPUT: &str = "⚠️ â ｶﾞ 👨🏻‍🦱 ⚠";
+
+        let mut buffer = Vec::new();
+
+        {
+            let writer = termcolor::NoColor::new(&mut buffer);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        let actual = from_utf8(&buffer).unwrap();
+
+        if cfg!(windows) {
+            // On Windows, all non-ASCII are converted due to poor Unicode support
+            assert_eq!(
+                actual, "! â ｶ 👨 !",
+                "On Windows, all emojis should be converted.\nExpected: {:?}\nActual: {:?}",
+                "! â ｶ 👨 !", actual
+            );
+        } else {
+            // On non-Windows:
+            // - Multi-codepoint graphemes like ⚠️ (U+26A0 + U+FE0F) are preserved
+            // - Single-codepoint symbols like ⚠ (U+26A0 only) are converted to !
+            const EXPECTED: &str = "⚠️ â ｶﾞ 👨🏻‍🦱 !";
+            assert_eq!(
+                actual, EXPECTED,
+                "Multi-codepoint graphemes should be preserved, single symbols converted.\nExpected: {:?}\nActual: {:?}",
+                EXPECTED, actual
+            );
         }
     }
 }
