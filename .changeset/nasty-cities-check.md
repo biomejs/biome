@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Supported pnpm catalogs (default and named) when resolving dependencies for linting.
+Biome now supports pnpm catalogs (default and named) when resolving dependencies for linting.
