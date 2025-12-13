@@ -1364,6 +1364,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_text_size",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
  "codspeed-divan-compat",
  "indexmap",
