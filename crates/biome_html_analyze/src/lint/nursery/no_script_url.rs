@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoScriptUrl {
-        version: "next",
+        version: "2.3.9",
         name: "noScriptUrl",
         language: "html",
         // Show equivalents from related ecosystems

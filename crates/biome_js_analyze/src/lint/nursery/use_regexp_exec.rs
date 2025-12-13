@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseRegexpExec {
-        version: "next",
+        version: "2.3.9",
         name: "useRegexpExec",
         language: "js",
         recommended: false,
