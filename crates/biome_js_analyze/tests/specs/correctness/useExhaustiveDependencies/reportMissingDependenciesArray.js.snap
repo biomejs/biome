@@ -6,7 +6,7 @@ expression: reportMissingDependenciesArray.js
 ```js
 import {useEffect} from "react";
 
-// should not report errors for the unused `b` when the reportMissingDependenciesArray option is false
+// should not report errors for unused `a` when the reportMissingDependenciesArray option is false
 function ReportMissingDependenciesArray() {
     const [a] = useState(1);
 
@@ -24,16 +24,16 @@ function ReportMissingDependenciesArray() {
 reportMissingDependenciesArray.js:7:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
 
   × This hook does not have a dependencies array.
-
+  
     5 │     const [a] = useState(1);
-    6 │
+    6 │ 
   > 7 │     useEffect(() => {
       │     ^^^^^^^^^
     8 │         console.log(a);
     9 │     });
-
+  
   i React relies on hook dependencies to determine when to re-compute Effects.
     Add an explicit array (i.e. []) and list the callback's dependencies inside it.
-
+  
 
 ```
