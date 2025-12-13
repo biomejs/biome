@@ -184,7 +184,7 @@ impl Rule for UseConsistentArrowReturn {
                         biome_js_syntax::TriviaPieceKind::Whitespace,
                         " ",
                     )]))
-                    .with_argument(expr_to_return)
+                    .with_argument(expr_to_return.trim_leading_trivia()?)
                     .with_semicolon_token(make::token(T![;]))
                     .build();
 
