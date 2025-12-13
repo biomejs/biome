@@ -171,11 +171,14 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 //   A parameter can override a previous parameter.
                 // - when both are type parameter in different declarations.
                 //   A type parameter can be redeclared if they are in different declarations.
+                // - when both are infer types.
+                //   An infer type can be redeclared in the same conditional type.
                 if !(first_decl.is_mergeable(&decl)
                     || first_decl.is_parameter_like() && decl.is_parameter_like()
                     || first_decl.is_type_parameter()
                         && decl.is_type_parameter()
-                        && first_decl.syntax().parent() != decl.syntax().parent())
+                        && first_decl.syntax().parent() != decl.syntax().parent()
+                    || first_decl.is_infer_type() && decl.is_infer_type())
                 {
                     redeclarations.push(Redeclaration {
                         name: name.text().into(),
