@@ -39,6 +39,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 path: path.clone(),
                 content: FileContent::from_client(&input),
                 persist_node_cache: false,
+                inline_config: None,
             },
         )
         .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;

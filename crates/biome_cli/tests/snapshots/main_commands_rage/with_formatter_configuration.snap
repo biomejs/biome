@@ -61,10 +61,14 @@ Platform:
   OS:                           **PLACEHOLDER**
 
 Environment:
-  BIOME_LOG_PATH:               **PLACEHOLDER**
-  BIOME_LOG_PREFIX_NAME:        unset
-  BIOME_CONFIG_PATH:            unset
-  BIOME_THREADS:                unset
+  BIOME_LOG_PATH:                    **PLACEHOLDER**
+  BIOME_LOG_PREFIX_NAME:             unset
+  BIOME_LOG_LEVEL:                   unset
+  BIOME_LOG_KIND:                    unset
+  BIOME_CONFIG_PATH:                 unset
+  BIOME_THREADS:                     unset
+  BIOME_WATCHER_KIND:                unset
+  BIOME_WATCHER_POLLING_INTERVAL:    unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset

@@ -2,35 +2,11 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
 export type FeatureName = FeatureKind[];
-export type BiomePath = string;
-export type ProjectKey = number;
-export type FeatureKind =
-	| "format"
-	| "lint"
-	| "search"
-	| "assist"
-	| "debug"
-	| "htmlFullSupport";
-export interface FileFeaturesResult {
-	featuresSupported: FeaturesSupported;
-}
-export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
-export type SupportKind =
-	| "supported"
-	| "ignored"
-	| "protected"
-	| "featureNotEnabled"
-	| "fileNotSupported";
-export interface UpdateSettingsParams {
-	configuration: Configuration;
-	extendedConfigurations?: [BiomePath, Configuration][];
-	projectKey: ProjectKey;
-	workspaceDirectory?: BiomePath;
-}
 /**
  * The configuration that is contained inside the file `biome.json`
  */
@@ -101,6 +77,15 @@ project. By default, this is `true`.
 	 */
 	vcs?: VcsConfiguration;
 }
+export type BiomePath = string;
+export type ProjectKey = number;
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export type Schema = string;
 export interface AssistConfiguration {
 	/**
@@ -291,6 +276,10 @@ export interface JsConfiguration {
 	 * Assist options
 	 */
 	assist?: JsAssistConfiguration;
+	/**
+	 * Enables support for embedding snippets.
+	 */
+	experimentalEmbeddedSnippetsEnabled?: Bool;
 	/**
 	 * Formatting options
 	 */
@@ -912,6 +901,11 @@ See <https://biomejs.dev/assist/actions/use-sorted-attributes>
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
+	* Sort interface members by key.
+See <https://biomejs.dev/assist/actions/use-sorted-interface-members> 
+	 */
+	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
+	/**
 	* Sort the keys of a JSON object in natural order.
 See <https://biomejs.dev/assist/actions/use-sorted-keys> 
 	 */
@@ -1078,6 +1072,9 @@ export type OrganizeImportsConfiguration =
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedInterfaceMembersConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedInterfaceMembersOptions;
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
@@ -1090,7 +1087,7 @@ export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
  */
 export interface A11y {
 	/**
-	* Enforce that the accessKey attribute is not used on any HTML element.
+	* Enforce that the accesskey attribute is not used on any HTML element.
 See <https://biomejs.dev/linter/rules/no-access-key> 
 	 */
 	noAccessKey?: NoAccessKeyConfiguration;
@@ -1199,7 +1196,7 @@ See <https://biomejs.dev/linter/rules/use-aria-props-supported-by-role>
 	 */
 	useAriaPropsSupportedByRole?: UseAriaPropsSupportedByRoleConfiguration;
 	/**
-	* Enforces the usage of the attribute type for the element button.
+	* Enforces the usage and validity of the attribute type for the element button.
 See <https://biomejs.dev/linter/rules/use-button-type> 
 	 */
 	useButtonType?: UseButtonTypeConfiguration;
@@ -3137,6 +3134,10 @@ export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
 }
+export interface RuleAssistWithUseSortedInterfaceMembersOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedInterfaceMembersOptions;
+}
 export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
@@ -4332,7 +4333,14 @@ export interface OrganizeImportsOptions {
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
+	/**
+	* When enabled, groups object keys by their value's nesting depth before sorting.
+Simple values (primitives, single-line arrays, single-line objects) are sorted first,
+followed by nested values (multi-line objects, multi-line arrays). 
+	 */
+	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
 export type UseSortedPropertiesOptions = {};
@@ -6326,6 +6334,11 @@ export type UseHookAtTopLevelOptions = {};
 export type UseImageSizeOptions = null;
 export interface UseImportExtensionsOptions {
 	/**
+	* A map of file extensions to their suggested replacements.
+For example, `{"ts": "js"}` would suggest `.js` extensions for TypeScript imports. 
+	 */
+	extensionMappings?: Record<string, string>;
+	/**
 	* If `true`, the suggested extension is always `.js` regardless of what
 extension the source file has in your project. 
 	 */
@@ -7052,6 +7065,22 @@ export type RestrictedModifier =
 	| "protected"
 	| "readonly"
 	| "static";
+export interface FileFeaturesResult {
+	featuresSupported: FeaturesSupported;
+}
+export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
+export interface UpdateSettingsParams {
+	configuration: Configuration;
+	extendedConfigurations?: [BiomePath, Configuration][];
+	projectKey: ProjectKey;
+	workspaceDirectory?: BiomePath;
+}
 export interface UpdateSettingsResult {
 	diagnostics: Diagnostic[];
 }
@@ -7488,6 +7517,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
@@ -7703,6 +7733,7 @@ export interface Duration {
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	/**
 	* Set to `true` to persist the node cache used during parsing, in order to
@@ -7743,6 +7774,11 @@ export interface JsonFileSource {
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
+	/**
+	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
+For example, if inside a styled`` literal, a top-level declaration is allowed. 
+	 */
+	embeddingKind: EmbeddingKind2;
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
@@ -7786,6 +7822,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
+export type EmbeddingKind2 = "None" | "Styled";
 /**
 	* The style of CSS contained in the file.
 
@@ -7811,6 +7848,7 @@ export interface OpenFileResult {
 }
 export interface ChangeFileParams {
 	content: string;
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	version: number;
@@ -7934,6 +7972,7 @@ export interface PullDiagnosticsParams {
 	 * Rules to apply on top of the configuration
 	 */
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -7954,6 +7993,7 @@ export interface PullDiagnosticsResult {
 export interface PullActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8023,6 +8063,7 @@ export type Applicability = "always" | "maybeIncorrect";
 export interface PullDiagnosticsAndActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8032,6 +8073,7 @@ export interface PullDiagnosticsAndActionsResult {
 	diagnostics: [Diagnostic, CodeAction[]][];
 }
 export interface FormatFileParams {
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
@@ -8055,11 +8097,13 @@ export interface SourceMarker {
 	source: TextSize;
 }
 export interface FormatRangeParams {
+	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
+	inlineConfig?: Configuration;
 	offset: TextSize;
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8070,6 +8114,7 @@ export interface FixFileParams {
 	 */
 	enabledRules?: AnalyzerSelector[];
 	fixFileMode: FixFileMode;
+	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;

@@ -45,6 +45,7 @@ pub(crate) fn run<'a>(
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
+            inline_config: None,
         })?;
 
         if file_features.is_ignored() {
@@ -71,10 +72,12 @@ pub(crate) fn run<'a>(
                 content: FileContent::from_client(content),
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             })?;
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
                 path: biome_path.clone(),
+                inline_config: None,
             })?;
 
             let code = printed.into_code();
@@ -113,6 +116,7 @@ pub(crate) fn run<'a>(
             content: FileContent::from_client(content),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })?;
 
         // apply fix file of the linter
@@ -126,6 +130,7 @@ pub(crate) fn run<'a>(
                 .with_assist()
                 .with_formatter()
                 .build(),
+            inline_config: None,
         })?;
 
         if file_features.is_ignored() {
@@ -176,6 +181,7 @@ pub(crate) fn run<'a>(
                 suppression_reason: None,
                 enabled_rules: vec![],
                 rule_categories: rule_categories.build(),
+                inline_config: None,
             })?;
             let code = fix_file_result.code;
             let output = if !file_features.supports_full_html_support() {
@@ -195,6 +201,7 @@ pub(crate) fn run<'a>(
                     content: output.clone(),
                     path: biome_path.clone(),
                     version,
+                    inline_config: None,
                 })?;
                 new_content = Cow::Owned(output);
             }
@@ -204,6 +211,7 @@ pub(crate) fn run<'a>(
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
                 path: biome_path.clone(),
+                inline_config: None,
             })?;
             let code = printed.into_code();
             let output = if !file_features.supports_full_html_support() {

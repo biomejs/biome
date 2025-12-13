@@ -61,6 +61,7 @@ biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }
 biome_text_edit         = { workspace = true }
 boxcar                  = { workspace = true }
+bpaf                    = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
 either                  = { workspace = true }

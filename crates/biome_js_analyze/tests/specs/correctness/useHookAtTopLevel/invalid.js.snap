@@ -216,7 +216,7 @@ invalid.js:4:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -235,7 +235,7 @@ invalid.js:9:13 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -253,7 +253,7 @@ invalid.js:14:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -271,7 +271,7 @@ invalid.js:18:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -289,7 +289,7 @@ invalid.js:22:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -307,7 +307,7 @@ invalid.js:26:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -325,7 +325,7 @@ invalid.js:30:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -344,7 +344,7 @@ invalid.js:33:10 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -363,7 +363,7 @@ invalid.js:35:17 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -403,7 +403,7 @@ invalid.js:40:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -422,7 +422,7 @@ invalid.js:55:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -441,7 +441,7 @@ invalid.js:61:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -460,7 +460,7 @@ invalid.js:67:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -479,7 +479,7 @@ invalid.js:77:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -498,7 +498,7 @@ invalid.js:83:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -517,7 +517,7 @@ invalid.js:86:42 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -535,7 +535,7 @@ invalid.js:90:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -554,7 +554,7 @@ invalid.js:91:10 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -584,7 +584,7 @@ invalid.js:97:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -613,7 +613,7 @@ invalid.js:105:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -641,7 +641,7 @@ invalid.js:114:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -681,7 +681,7 @@ invalid.js:119:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -700,7 +700,7 @@ invalid.js:132:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -719,7 +719,7 @@ invalid.js:139:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -737,7 +737,7 @@ invalid.js:144:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -756,7 +756,7 @@ invalid.js:147:68 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -775,7 +775,7 @@ invalid.js:152:13 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -793,7 +793,7 @@ invalid.js:156:19 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -812,7 +812,7 @@ invalid.js:163:13 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -831,7 +831,7 @@ invalid.js:173:20 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -850,7 +850,7 @@ invalid.js:181:20 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -881,7 +881,7 @@ invalid.js:187:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i This means recursive calls are not allowed, because they require a condition in order to terminate.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -912,7 +912,7 @@ invalid.js:191:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i This means recursive calls are not allowed, because they require a condition in order to terminate.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```

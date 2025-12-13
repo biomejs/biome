@@ -53,6 +53,7 @@ fn debug_control_flow() {
             content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -75,6 +76,7 @@ fn recognize_typescript_definition_file() {
             content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -95,6 +97,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -109,6 +112,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -123,6 +127,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -137,6 +142,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -151,6 +157,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -165,6 +172,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -179,6 +187,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -193,6 +202,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -211,6 +221,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -242,6 +253,7 @@ type User {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -268,6 +280,7 @@ fn correctly_pulls_lint_diagnostics() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -298,6 +311,7 @@ fn pull_grit_debug_info() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -363,6 +377,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -425,6 +440,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -484,6 +500,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -496,6 +513,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             skip: Vec::new(),
             enabled_rules: Vec::new(),
             pull_code_actions: true,
+            inline_config: None,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -552,6 +570,7 @@ language css;
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -564,6 +583,7 @@ language css;
             skip: Vec::new(),
             enabled_rules: Vec::new(),
             pull_code_actions: true,
+            inline_config: None,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -616,6 +636,7 @@ fn plugins_may_use_invalid_span() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -628,6 +649,7 @@ fn plugins_may_use_invalid_span() {
             skip: Vec::new(),
             enabled_rules: Vec::new(),
             pull_code_actions: true,
+            inline_config: None,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -745,6 +767,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             })
             .unwrap();
 
@@ -757,6 +780,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
                 pull_code_actions: true,
+                inline_config: None,
             })
             .unwrap();
         // Filter only diagnostics with category name "plugin"
@@ -804,6 +828,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -838,6 +863,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -872,6 +898,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         },
     )
     .unwrap();
@@ -907,6 +934,7 @@ async function test() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -924,6 +952,7 @@ export const debounce = function debounce() {};
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -939,6 +968,7 @@ export const squash = function squash() {};
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 

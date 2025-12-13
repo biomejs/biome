@@ -581,7 +581,7 @@ fn full_support_enabled_and_scss_is_skipped() {
     let astro_file_path = Utf8Path::new("file.vue");
     fs.insert(
         astro_file_path.into(),
-        r#"<html><head><title>Svelte</title></head><body></body></html>
+        r#"<html lang="en"><head><title>Vue</title></head><body></body></html>
 
 <style lang="scss">
 #id { font-family: comic-sans } .class { background: red}

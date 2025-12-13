@@ -10,7 +10,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
     CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -27,7 +27,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
 use biome_css_semantic::semantic_model;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
@@ -379,31 +379,32 @@ impl ExtensionHandler for CssFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.formatter_enabled_for_file_path::<CssLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.linter_enabled_for_file_path::<CssLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<CssLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
 fn parse(
     biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let mut options = CssParserOptions {
         allow_wrong_line_comments: settings
+            .as_ref()
             .languages
             .css
             .parser
@@ -411,6 +412,7 @@ fn parse(
             .unwrap_or_default()
             .into(),
         css_modules: settings
+            .as_ref()
             .languages
             .css
             .parser
@@ -419,6 +421,7 @@ fn parse(
             .into(),
         grit_metavariables: false,
         tailwind_directives: settings
+            .as_ref()
             .languages
             .css
             .parser
@@ -428,10 +431,13 @@ fn parse(
     };
 
     settings
+        .as_ref()
         .override_settings
         .apply_override_css_parser_options(biome_path, &mut options);
 
-    let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
+
     ParseResult {
         any_parse: parse.into(),
         language: None,
@@ -451,7 +457,7 @@ fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
@@ -463,7 +469,7 @@ fn debug_formatter_ir(
 }
 
 fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
-    let tree: CssRoot = parse.tree();
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
@@ -473,7 +479,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
@@ -490,7 +496,7 @@ fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
@@ -504,7 +510,7 @@ fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
@@ -555,7 +561,7 @@ fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.path.as_path())
@@ -626,7 +632,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings.analyzer_options::<CssLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)
             .with_skip(skip)
             .with_path(path.as_path())
@@ -676,20 +682,23 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: CssRoot = params.parse.tree();
+    let mut tree: AnyCssRoot = params.parse.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(FixFileResult::default());
     };
     // Compute final rules (taking `overrides` into account)
-    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let rules = params
+        .settings
+        .as_ref()
+        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(params.only)
             .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
@@ -729,7 +738,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         );
 
         let result = process_fix_all.process_action(action, |root| {
-            tree = match CssRoot::cast(root) {
+            tree = match AnyCssRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
             };

@@ -662,10 +662,12 @@ pub fn execute_mode(
                     path: report_file.clone(),
                     document_file_source: None,
                     persist_node_cache: false,
+                    inline_config: None,
                 })?;
                 let code = session.app.workspace.format_file(FormatFileParams {
                     project_key,
                     path: report_file.clone(),
+                    inline_config: None,
                 })?;
                 console.log(markup! {
                     {code.as_code()}

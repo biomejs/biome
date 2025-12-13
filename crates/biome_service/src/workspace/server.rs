@@ -10,11 +10,12 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
-use crate::projects::Projects;
+use crate::projects::{GetFileFeaturesParams, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
+use crate::settings::{SettingsHandle, SettingsWithEditor};
 use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
@@ -47,7 +48,6 @@ use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::time::Duration;
-use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
 pub struct WorkspaceServer {
@@ -138,6 +138,14 @@ impl WorkspaceServer {
             fs,
             notification_tx,
         }
+    }
+
+    fn settings_handle<'a>(
+        &self,
+        settings: &'a Settings,
+        editor: Option<Configuration>,
+    ) -> SettingsWithEditor<'a> {
+        SettingsHandle::new(settings, editor)
     }
 
     /// Starts the watcher.
@@ -289,6 +297,7 @@ impl WorkspaceServer {
             content,
             document_file_source,
             persist_node_cache,
+            inline_config,
         } = params;
         let path: Utf8PathBuf = biome_path.clone().into();
 
@@ -379,7 +388,7 @@ impl WorkspaceServer {
 
         let size = content.len();
         let limit = settings.get_max_file_size(&path);
-
+        let settings_handle = self.settings_handle(&settings, inline_config);
         let (syntax, services) = if size > limit {
             (
                 Some(Err(FileTooLarge { size, limit })),
@@ -392,7 +401,7 @@ impl WorkspaceServer {
             let parsed = self.parse(
                 &path,
                 &content,
-                &settings,
+                &settings_handle,
                 file_source_index,
                 &mut node_cache,
             )?;
@@ -440,7 +449,7 @@ impl WorkspaceServer {
                 &source,
                 any_parse,
                 &mut node_cache,
-                &settings,
+                &settings_handle,
             )?
         } else {
             Default::default()
@@ -592,11 +601,13 @@ impl WorkspaceServer {
         source: &DocumentFileSource,
         root: &AnyParse,
         cache: &mut NodeCache,
-        settings: &Settings,
+        settings: &SettingsWithEditor,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
-        let capabilities =
-            self.get_file_capabilities(path, settings.experimental_full_html_support_enabled());
+        let capabilities = self.get_file_capabilities(
+            path,
+            settings.as_ref().experimental_full_html_support_enabled(),
+        );
         let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -615,7 +626,7 @@ impl WorkspaceServer {
         &self,
         path: &Utf8Path,
         content: &str,
-        settings: &Settings,
+        settings: &SettingsWithEditor,
         file_source_index: usize,
         node_cache: &mut NodeCache,
     ) -> Result<ParseResult, WorkspaceError> {
@@ -1163,14 +1174,16 @@ impl Workspace for WorkspaceServer {
         );
         let capabilities = self.features.get_capabilities(language);
 
-        self.projects.get_file_features(
-            self.fs.as_ref(),
-            params.project_key,
-            &params.path,
-            params.features,
+        let settings = self.settings_handle(&settings, params.inline_config);
+        self.projects.get_file_features(GetFileFeaturesParams {
+            fs: self.fs.as_ref(),
+            project_key: params.project_key,
+            path: &params.path,
+            features: params.features,
             language,
-            &capabilities,
-        )
+            capabilities: &capabilities,
+            handle: &settings,
+        })
     }
 
     fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
@@ -1264,7 +1277,8 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
-
+        // Currently we don't inject inline configuration for debugging methods, review if we need it
+        let settings = self.settings_handle(&settings, None);
         debug_formatter_ir(&params.path, &document_file_source, parse, &settings)
     }
 
@@ -1360,6 +1374,7 @@ impl Workspace for WorkspaceServer {
             path,
             content,
             version,
+            inline_config,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
@@ -1380,6 +1395,7 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
+        let settings_handle = self.settings_handle(&settings, inline_config);
 
         // We remove the node cache for the document, if it exists.
         // This is done so that we need to hold the lock as short as possible
@@ -1393,7 +1409,7 @@ impl Workspace for WorkspaceServer {
         let persist_node_cache = node_cache.is_some();
         let mut node_cache = node_cache.unwrap_or_default();
 
-        let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        let parsed = self.parse(&path, &content, &settings_handle, index, &mut node_cache)?;
         let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
@@ -1418,7 +1434,7 @@ impl Workspace for WorkspaceServer {
                 &document_source,
                 &parsed.any_parse,
                 &mut node_cache,
-                &settings,
+                &settings_handle,
             )?
         } else {
             vec![]
@@ -1500,6 +1516,7 @@ impl Workspace for WorkspaceServer {
             skip,
             enabled_rules,
             pull_code_actions,
+            inline_config,
         } = params;
         let settings = self
             .projects
@@ -1523,6 +1540,7 @@ impl Workspace for WorkspaceServer {
             } else {
                 Vec::new()
             };
+            let settings = self.settings_handle(&settings, inline_config);
             let results = lint(LintParams {
                 parse,
                 settings: &settings,
@@ -1546,7 +1564,7 @@ impl Workspace for WorkspaceServer {
                 mut errors,
                 mut skipped_diagnostics,
             } = results;
-            for embedded_node in embedded_snippets {
+            for embedded_node in &embedded_snippets {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
@@ -1629,6 +1647,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
+            inline_config,
         } = params;
         let settings = self
             .projects
@@ -1652,9 +1671,10 @@ impl Workspace for WorkspaceServer {
             } else {
                 Vec::new()
             };
+            let handle = self.settings_handle(&settings, inline_config);
             let mut final_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
                 parse,
-                settings: &settings,
+                settings: &handle,
                 path: &path,
                 only: &only,
                 skip: &skip,
@@ -1682,7 +1702,7 @@ impl Workspace for WorkspaceServer {
 
                 let snippet_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
                     parse: embedded_node.parse().clone(),
-                    settings: &settings,
+                    settings: &handle,
                     path: &path,
                     only: &only,
                     skip: &skip,
@@ -1732,6 +1752,7 @@ impl Workspace for WorkspaceServer {
             skip,
             enabled_rules,
             categories,
+            inline_config,
         } = params;
         let settings = self
             .projects
@@ -1748,6 +1769,8 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        let settings = self.settings_handle(&settings, inline_config);
+
         let mut result = code_actions(CodeActionsParams {
             parse,
             range,
@@ -1837,6 +1860,8 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
+        let settings = self.settings_handle(&settings, params.inline_config);
+
         if !embedded_nodes.is_empty() {
             let format_embedded =
                 format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
@@ -1875,6 +1900,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
+        let settings = self.settings_handle(&settings, params.inline_config);
         format_range(
             &params.path,
             &document_file_source,
@@ -1909,7 +1935,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
-
+        let settings = self.settings_handle(&settings, params.inline_config);
         format_on_type(
             &params.path,
             &document_file_source,
@@ -1941,6 +1967,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             rule_categories,
             suppression_reason,
+            inline_config,
         } = params;
 
         let settings = self
@@ -1975,6 +2002,7 @@ impl Workspace for WorkspaceServer {
         let mut errors = 0;
         let mut actions = vec![];
         let mut skipped_suggested_fixes = 0;
+        let settings = self.settings_handle(&settings, inline_config);
 
         if let Some(update_snippets) = capabilities.analyzer.update_snippets {
             let mut new_snippets = vec![];
@@ -2156,6 +2184,7 @@ impl Workspace for WorkspaceServer {
 
         let document_file_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        let settings = self.settings_handle(&settings, None);
         let matches = search(&path, &document_file_source, parse, query, &settings)?;
 
         Ok(SearchResults { path, matches })
@@ -2243,6 +2272,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                // TODO: review here, it feels wrong that we can't pass the inline config
+                inline_config: None,
             },
         )
         .map(|result| (result.dependencies, result.diagnostics))
