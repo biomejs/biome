@@ -5,11 +5,12 @@ use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
-    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
-    JsArrowFunctionExpression, JsCallExpression, JsConstructorClassMember, JsFileSource,
-    JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
+    JsArrayExpression, JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression,
+    JsConditionalExpression, JsConstructorClassMember, JsFileSource, JsFormalParameter,
+    JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
+    JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
     JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
     JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
     JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
@@ -194,12 +195,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following example is considered incorrect because `arg` has `any` type.
-    ///
-    /// ```ts,expect_diagnostic
-    /// var arrowFn = (arg: any): string => `test ${arg}`;
-    /// ```
-    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -355,7 +350,6 @@ declare_node_union! {
 
 pub enum ViolationKind {
     UntypedParameter,
-    AnyParameter,
     UntypedFunction,
     UntypedMember,
     UntypedDeclaration,
@@ -367,9 +361,6 @@ impl ViolationKind {
         match self {
             Self::UntypedParameter => markup! {
                 "The parameter doesn't have a type defined."
-            },
-            Self::AnyParameter => markup! {
-                "The parameter has an "<Emphasis>"any"</Emphasis>" type."
             },
             Self::UntypedVariable => markup! {
                 "The variable doesn't have a type defined."
@@ -390,9 +381,6 @@ impl ViolationKind {
         match self {
             Self::UntypedParameter => markup! {
                 "Add a type to the parameter."
-            },
-            Self::AnyParameter => markup! {
-                "Replace "<Emphasis>"any"</Emphasis>" with "<Emphasis>"unknown"</Emphasis>" or a more specific type."
             },
             Self::UntypedVariable => markup! {
                 "Add a type to the variable."
@@ -1008,6 +996,107 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
     ))
 }
 
+/// Checks if a binary expression has trivially inferrable operands.
+///
+/// This returns true for binary expressions where both operands are literals or other
+/// trivially inferrable expressions (e.g., `1 + 1`, `2 * 3`, `"hello" + "world"`).
+/// It also returns true for comparison expressions (e.g., `'test' === 'test'`, `42 !== 0`,
+/// `process.env.NODE_ENV === 'test'`), as they always return a boolean type regardless
+/// of the operand types.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_binary_expression(
+    binary_expr: &JsBinaryExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(left) = binary_expr.left() else {
+        return false;
+    };
+    let Ok(right) = binary_expr.right() else {
+        return false;
+    };
+
+    // Comparison operators always return boolean, which is trivially inferrable
+    // regardless of the operand types (e.g., `process.env.NODE_ENV === 'test'`)
+    if binary_expr.is_comparison_operator() {
+        return true;
+    }
+
+    // Both operands must be trivially inferrable
+    is_allowed_in_untyped_expression(&left, allow_placeholders)
+        && is_allowed_in_untyped_expression(&right, allow_placeholders)
+}
+
+/// Checks if a logical expression has trivially inferrable operands.
+///
+/// This returns true for logical expressions where both operands are literals or other
+/// trivially inferrable expressions (e.g., `true && false`, `true || false`).
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_logical_expression(
+    logical_expr: &JsLogicalExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(left) = logical_expr.left() else {
+        return false;
+    };
+    let Ok(right) = logical_expr.right() else {
+        return false;
+    };
+
+    // Both operands must be trivially inferrable
+    is_allowed_in_untyped_expression(&left, allow_placeholders)
+        && is_allowed_in_untyped_expression(&right, allow_placeholders)
+}
+
+/// Checks if an array expression has trivially inferrable element types.
+///
+/// This returns true for array literals where all elements are literals or other
+/// trivially inferrable expressions (e.g., `[1, 2, 3]`, `['a', 'b', 'c']`).
+/// Spread elements make type inference more complex, so arrays with spreads return false.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_array_expression(array_expr: &JsArrayExpression, allow_placeholders: bool) -> bool {
+    array_expr.elements().iter().all(|element| {
+        let Ok(element) = element else {
+            return true;
+        };
+
+        match element {
+            AnyJsArrayElement::AnyJsExpression(expr) => {
+                is_allowed_in_untyped_expression(&expr, allow_placeholders)
+            }
+            // Spread elements make type inference more complex
+            AnyJsArrayElement::JsSpread(_) => false,
+            // Array holes are fine
+            AnyJsArrayElement::JsArrayHole(_) => true,
+        }
+    })
+}
+
+/// Checks if a conditional expression has trivially inferrable branches.
+///
+/// This returns true for ternary expressions where both branches are literals or other
+/// trivially inferrable expressions (e.g., `true ? 'yes' : 'no'`, `x > 5 ? 1 : 0`).
+/// TypeScript can infer a union type from the two branches.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_trivial_conditional_expression(
+    conditional_expr: &JsConditionalExpression,
+    allow_placeholders: bool,
+) -> bool {
+    let Ok(consequent) = conditional_expr.consequent() else {
+        return false;
+    };
+    let Ok(alternate) = conditional_expr.alternate() else {
+        return false;
+    };
+
+    // Both branches must be trivially inferrable for TypeScript to infer a union type
+    is_allowed_in_untyped_expression(&consequent, allow_placeholders)
+        && is_allowed_in_untyped_expression(&alternate, allow_placeholders)
+}
+
 /// Checks if an expression can be part of an untyped expression or will be checked separately.
 ///
 /// This returns true for constructs that are trivially understood by the reader and the compiler
@@ -1034,6 +1123,53 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
         AnyJsExpression::JsArrowFunctionExpression(_) | AnyJsExpression::JsFunctionExpression(_)
     ) {
         // We'll check functions separately
+        return true;
+    }
+
+    // Allow parenthesized expressions - check the inner expression recursively
+    if let AnyJsExpression::JsParenthesizedExpression(paren_expr) = expr
+        && let Ok(inner_expr) = paren_expr.expression()
+    {
+        return is_allowed_in_untyped_expression(&inner_expr, allow_placeholders);
+    }
+
+    // Allow new expressions (class instantiation) as they have inferrable types
+    // e.g., `const foo = new Foo();`, `const date = new Date();`
+    if matches!(expr, AnyJsExpression::JsNewExpression(_)) {
+        return true;
+    }
+
+    // Allow call expressions as they typically have inferrable return types
+    // e.g., `Math.random()`, `someFunction()`, `obj.method()`, `"hello".toUpperCase()`
+    if matches!(expr, AnyJsExpression::JsCallExpression(_)) {
+        return true;
+    }
+
+    // Allow binary expressions with trivially inferrable operands (e.g., `1 + 1`, `2 * 3`)
+    if let AnyJsExpression::JsBinaryExpression(binary_expr) = expr
+        && is_trivial_binary_expression(binary_expr, allow_placeholders)
+    {
+        return true;
+    }
+
+    // Allow logical expressions with trivially inferrable operands (e.g., `true && false`, `true || false`)
+    if let AnyJsExpression::JsLogicalExpression(logical_expr) = expr
+        && is_trivial_logical_expression(logical_expr, allow_placeholders)
+    {
+        return true;
+    }
+
+    // Allow array expressions with trivially inferrable elements (e.g., `[1, 2, 3]`, `['a', 'b']`)
+    if let AnyJsExpression::JsArrayExpression(array_expr) = expr
+        && is_trivial_array_expression(array_expr, allow_placeholders)
+    {
+        return true;
+    }
+
+    // Allow conditional expressions with trivially inferrable branches (e.g., `true ? 'yes' : 'no'`)
+    if let AnyJsExpression::JsConditionalExpression(conditional_expr) = expr
+        && is_trivial_conditional_expression(conditional_expr, allow_placeholders)
+    {
         return true;
     }
 
@@ -1091,20 +1227,19 @@ fn has_untyped_parameter(parameters: &JsParameters) -> Option<State> {
     None
 }
 
-/// The formal parameter is triggered if:
-/// - it doesn't have any type
-/// - it its type is `any`
+/// The formal parameter is triggered if it doesn't have any type.
 fn parameter_has_not_type(parameter: &JsFormalParameter) -> Option<State> {
-    let ty = parameter.type_annotation();
-
-    if let Some(ty) = ty {
-        let ty = ty.ty().ok()?;
-        if matches!(ty, AnyTsType::TsAnyType(_)) {
-            Some((ty.range(), ViolationKind::AnyParameter))
-        } else {
-            None
-        }
-    } else {
-        Some((parameter.range(), ViolationKind::UntypedParameter))
+    // If parameter has explicit type annotation, it's valid
+    if parameter.type_annotation().is_some() {
+        return None;
     }
+
+    // If parameter has an initializer (default value), TypeScript can infer
+    // the type from it, regardless of what expression it is.
+    // e.g., `const fn = (max = MAX_ATTEMPTS): void => {}` - TypeScript infers `max: number`
+    if parameter.initializer().is_some() {
+        return None;
+    }
+
+    Some((parameter.range(), ViolationKind::UntypedParameter))
 }
