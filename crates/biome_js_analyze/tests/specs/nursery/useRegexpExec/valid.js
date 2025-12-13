@@ -20,3 +20,4 @@ new RegExp(/thing/).exec('something');
 
 'some things are just things'.match(new RegExp(/thing/g));
 'some things are just things'.match(new RegExp(/thing/, "g"));
+'some things are just things'.match(new RegExp("thing", "g"));

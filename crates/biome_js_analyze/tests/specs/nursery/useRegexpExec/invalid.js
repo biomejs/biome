@@ -4,6 +4,8 @@
 
 'something'.match(new RegExp(/thing/));
 
+'something'.match(new RegExp(/thing/g, ''));
+
 const text = 'something';
 const search = /thing/;
 text.match(search);
