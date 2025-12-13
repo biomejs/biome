@@ -410,7 +410,17 @@ fn contains_only_spaces(literal: &JsStringLiteralExpression) -> bool {
         .is_ok_and(|text| text.bytes().all(|b| b == b' '))
 }
 
-const FORBIDDEN_CHARS: [char; 4] = ['>', '"', '\'', '}'];
+/// Characters that would cause parsing issues or semantic changes if a JSX expression
+/// child is converted to plain JSX text. When a string literal contains any of these,
+/// we must NOT suggest removing the curly braces.
+///
+/// - `{` `}` - would be parsed as expression delimiters
+/// - `<` `>` - would be parsed as tag delimiters
+/// - `&` - would be parsed as HTML entity start
+/// - `"` `'` - included for consistency, though mainly relevant in attribute contexts
+///
+/// See: https://github.com/biomejs/biome/issues/8011
+const FORBIDDEN_CHARS: [char; 7] = ['{', '}', '<', '>', '&', '"', '\''];
 
 fn contains_forbidden_chars(str_literal: &JsStringLiteralExpression) -> bool {
     str_literal.inner_string_text().is_ok_and(|text| {
