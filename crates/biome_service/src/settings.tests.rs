@@ -207,33 +207,25 @@ fn override_inherits_global_formatter_when_not_specified() {
         .expect("valid configuration");
 
     // For .vue files, linter should be disabled (from override)
-    let linter_enabled = JsLanguage::linter_enabled_for_file_path(
-        &settings,
-        Utf8Path::new("test.vue"),
-    );
+    let linter_enabled =
+        JsLanguage::linter_enabled_for_file_path(&settings, Utf8Path::new("test.vue"));
     assert!(!linter_enabled, "Linter should be disabled for .vue files");
 
     // For .vue files, formatter should be enabled (inherited from global)
-    let formatter_enabled = JsLanguage::formatter_enabled_for_file_path(
-        &settings,
-        Utf8Path::new("test.vue"),
-    );
+    let formatter_enabled =
+        JsLanguage::formatter_enabled_for_file_path(&settings, Utf8Path::new("test.vue"));
     assert!(
         formatter_enabled,
         "Formatter should be enabled for .vue files (inherited from global)"
     );
 
     // For non .vue files, both should be enabled (from global)
-    let linter_enabled_js = JsLanguage::linter_enabled_for_file_path(
-        &settings,
-        Utf8Path::new("test.js"),
-    );
+    let linter_enabled_js =
+        JsLanguage::linter_enabled_for_file_path(&settings, Utf8Path::new("test.js"));
     assert!(linter_enabled_js, "Linter should be enabled for .js files");
 
-    let formatter_enabled_js = JsLanguage::formatter_enabled_for_file_path(
-        &settings,
-        Utf8Path::new("test.js"),
-    );
+    let formatter_enabled_js =
+        JsLanguage::formatter_enabled_for_file_path(&settings, Utf8Path::new("test.js"));
     assert!(
         formatter_enabled_js,
         "Formatter should be enabled for .js files"
