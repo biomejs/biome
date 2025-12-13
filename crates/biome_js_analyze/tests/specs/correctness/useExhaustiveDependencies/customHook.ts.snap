@@ -1,0 +1,525 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: customHook.ts
+---
+# Input
+```ts
+import { useEffect } from "react";
+
+declare function useMyEffect(cb: Function, args?: any[]): void;
+declare function useOtherEffect(args: any[], cb: Function): void;
+declare function useEvenMoreEffect(blank: any, args: any[], cb: Function): void;
+declare function doSomething(args: any[],blank: any, cb: Function): void;
+
+function MyComponent() {
+    let a = 1;
+    useMyEffect(() => {
+        console.log(a);
+    }, [a]);
+
+    useMyEffect(() => {
+        console.log(a);
+    }, []);
+
+    useMyEffect(() => {
+       console.log(a);
+    }, "i'm not an array" as any);
+
+    useMyEffect(() => {
+       console.log(a);
+    });
+}
+
+function OtherComponent() {
+    let a = 1;
+    let b = 1;
+    useOtherEffect([a, b], () => {
+        console.log(a, b);
+    });
+
+    useOtherEffect("also not an array" as any, () => {
+       console.log(a-b);
+    });
+    // @ts-expect-error - biome should be able to lint incorrectly typed code
+    useOtherEffect(() => {
+       console.log(b);
+    });
+}
+
+function EvenMoreComponent() {
+    let a = 1;
+    let b = 112345;
+    useEvenMoreEffect([], ["foo"], () => {
+        console.log(a % b);
+    });
+
+    useEvenMoreEffect("not an array", "also not an array" as any, () => {
+       console.log(a);
+    });
+    useEvenMoreEffect([], [a, b], () => {
+       console.log(a);
+    });
+}
+
+function SomethingComponent() {
+    let a = "1";
+    let b = 112345;
+    doSomething([], "apple", () => {
+        console.log(a + b);
+    });
+    doSomething(["a b"], [a], () => {
+       console.log(a);
+    });
+    doSomething("apple" as any, [], () => {
+       console.log(a);
+    });
+    doSomething([a, b], [], () => {
+       console.log(a);
+    });
+    // swap around the callback and array indices
+    doSomething((() => {
+       console.log(a);
+    }) as any, [], [a, b] as any);
+}
+
+```
+
+# Diagnostics
+```
+customHook.ts:14:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+    12 │     }, [a]);
+    13 │ 
+  > 14 │     useMyEffect(() => {
+       │     ^^^^^^^^^^^
+    15 │         console.log(a);
+    16 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    14 │     useMyEffect(() => {
+  > 15 │         console.log(a);
+       │                     ^
+    16 │     }, []);
+    17 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    16 │ ····},·[a]);
+       │         +   
+
+```
+
+```
+customHook.ts:20:8 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    18 │     useMyEffect(() => {
+    19 │        console.log(a);
+  > 20 │     }, "i'm not an array" as any);
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │     useMyEffect(() => {
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```
+
+```
+customHook.ts:34:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    32 │     });
+    33 │ 
+  > 34 │     useOtherEffect("also not an array" as any, () => {
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │        console.log(a-b);
+    36 │     });
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```
+
+```
+customHook.ts:38:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    36 │     });
+    37 │     // @ts-expect-error - biome should be able to lint incorrectly typed code
+  > 38 │     useOtherEffect(() => {
+       │                    ^^^^^^^
+  > 39 │        console.log(b);
+  > 40 │     });
+       │     ^
+    41 │ }
+    42 │ 
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```
+
+```
+customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+    44 │     let a = 1;
+    45 │     let b = 112345;
+  > 46 │     useEvenMoreEffect([], ["foo"], () => {
+       │     ^^^^^^^^^^^^^^^^^
+    47 │         console.log(a % b);
+    48 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    45 │     let b = 112345;
+    46 │     useEvenMoreEffect([], ["foo"], () => {
+  > 47 │         console.log(a % b);
+       │                     ^
+    48 │     });
+    49 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    46 │ ····useEvenMoreEffect([],·["foo",·a],·()·=>·{
+       │                                 +++          
+
+```
+
+```
+customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on b.
+  
+    44 │     let a = 1;
+    45 │     let b = 112345;
+  > 46 │     useEvenMoreEffect([], ["foo"], () => {
+       │     ^^^^^^^^^^^^^^^^^
+    47 │         console.log(a % b);
+    48 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    45 │     let b = 112345;
+    46 │     useEvenMoreEffect([], ["foo"], () => {
+  > 47 │         console.log(a % b);
+       │                         ^
+    48 │     });
+    49 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    46 │ ····useEvenMoreEffect([],·["foo",·b],·()·=>·{
+       │                                 +++          
+
+```
+
+```
+customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: "foo".
+  
+    44 │     let a = 1;
+    45 │     let b = 112345;
+  > 46 │     useEvenMoreEffect([], ["foo"], () => {
+       │     ^^^^^^^^^^^^^^^^^
+    47 │         console.log(a % b);
+    48 │     });
+  
+  i This dependency can be removed from the list.
+  
+    44 │     let a = 1;
+    45 │     let b = 112345;
+  > 46 │     useEvenMoreEffect([], ["foo"], () => {
+       │                            ^^^^^
+    47 │         console.log(a % b);
+    48 │     });
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    46 │ ····useEvenMoreEffect([],·["foo"],·()·=>·{
+       │                            -----          
+
+```
+
+```
+customHook.ts:50:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    48 │     });
+    49 │ 
+  > 50 │     useEvenMoreEffect("not an array", "also not an array" as any, () => {
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │        console.log(a);
+    52 │     });
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```
+
+```
+customHook.ts:53:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: b.
+  
+    51 │        console.log(a);
+    52 │     });
+  > 53 │     useEvenMoreEffect([], [a, b], () => {
+       │     ^^^^^^^^^^^^^^^^^
+    54 │        console.log(a);
+    55 │     });
+  
+  i This dependency can be removed from the list.
+  
+    51 │        console.log(a);
+    52 │     });
+  > 53 │     useEvenMoreEffect([], [a, b], () => {
+       │                               ^
+    54 │        console.log(a);
+    55 │     });
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    53 │ ····useEvenMoreEffect([],·[a,·b],·()·=>·{
+       │                             ---          
+
+```
+
+```
+customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+    59 │     let a = "1";
+    60 │     let b = 112345;
+  > 61 │     doSomething([], "apple", () => {
+       │     ^^^^^^^^^^^
+    62 │         console.log(a + b);
+    63 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    60 │     let b = 112345;
+    61 │     doSomething([], "apple", () => {
+  > 62 │         console.log(a + b);
+       │                     ^
+    63 │     });
+    64 │     doSomething(["a b"], [a], () => {
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    61 │ ····doSomething([a],·"apple",·()·=>·{
+       │                  +                   
+
+```
+
+```
+customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on b.
+  
+    59 │     let a = "1";
+    60 │     let b = 112345;
+  > 61 │     doSomething([], "apple", () => {
+       │     ^^^^^^^^^^^
+    62 │         console.log(a + b);
+    63 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    60 │     let b = 112345;
+    61 │     doSomething([], "apple", () => {
+  > 62 │         console.log(a + b);
+       │                         ^
+    63 │     });
+    64 │     doSomething(["a b"], [a], () => {
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    61 │ ····doSomething([b],·"apple",·()·=>·{
+       │                  +                   
+
+```
+
+```
+customHook.ts:64:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+    62 │         console.log(a + b);
+    63 │     });
+  > 64 │     doSomething(["a b"], [a], () => {
+       │     ^^^^^^^^^^^
+    65 │        console.log(a);
+    66 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    63 │     });
+    64 │     doSomething(["a b"], [a], () => {
+  > 65 │        console.log(a);
+       │                    ^
+    66 │     });
+    67 │     doSomething("apple" as any, [], () => {
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    64 │ ····doSomething(["a·b",·a],·[a],·()·=>·{
+       │                       +++               
+
+```
+
+```
+customHook.ts:64:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: "a b".
+  
+    62 │         console.log(a + b);
+    63 │     });
+  > 64 │     doSomething(["a b"], [a], () => {
+       │     ^^^^^^^^^^^
+    65 │        console.log(a);
+    66 │     });
+  
+  i This dependency can be removed from the list.
+  
+    62 │         console.log(a + b);
+    63 │     });
+  > 64 │     doSomething(["a b"], [a], () => {
+       │                  ^^^^^
+    65 │        console.log(a);
+    66 │     });
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    64 │ ····doSomething(["a·b"],·[a],·()·=>·{
+       │                  -----               
+
+```
+
+```
+customHook.ts:67:17 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    65 │        console.log(a);
+    66 │     });
+  > 67 │     doSomething("apple" as any, [], () => {
+       │                 ^^^^^^^^^^^^^^
+    68 │        console.log(a);
+    69 │     });
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```
+
+```
+customHook.ts:70:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: b.
+  
+    68 │        console.log(a);
+    69 │     });
+  > 70 │     doSomething([a, b], [], () => {
+       │     ^^^^^^^^^^^
+    71 │        console.log(a);
+    72 │     });
+  
+  i This dependency can be removed from the list.
+  
+    68 │        console.log(a);
+    69 │     });
+  > 70 │     doSomething([a, b], [], () => {
+       │                     ^
+    71 │        console.log(a);
+    72 │     });
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    70 │ ····doSomething([a,·b],·[],·()·=>·{
+       │                   ---              
+
+```
+
+```
+customHook.ts:74:17 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+    72 │     });
+    73 │     // swap around the callback and array indices
+  > 74 │     doSomething((() => {
+       │                 ^^^^^^^^
+  > 75 │        console.log(a);
+  > 76 │     }) as any, [], [a, b] as any);
+       │     ^^^^^^^^^
+    77 │ }
+    78 │ 
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+    Replace the argument with an array literal and list your dependencies within it.
+  
+
+```

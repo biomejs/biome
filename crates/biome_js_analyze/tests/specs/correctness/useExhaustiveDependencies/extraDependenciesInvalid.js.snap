@@ -50,7 +50,7 @@ function MyComponent3() {
 ```
 extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: a
+  × This hook specifies more dependencies than necessary: a.
   
     3 │ function MyComponent() {
     4 │   let a = 1;
@@ -68,6 +68,10 @@ extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies  FIXA
     6 │ }
     7 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
   i Unsafe fix: Remove the extra dependencies from the list.
   
     5 │ ··useEffect(()·=>·{},·[a]);
@@ -78,7 +82,7 @@ extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies  FIXA
 ```
 extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: a, b
+  × This hook specifies more dependencies than necessary: a, b.
   
     10 │ function MyComponent2() {
     11 │   let a = 1, b = 1;
@@ -105,6 +109,10 @@ extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies  FIX
     13 │ }
     14 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
   i Unsafe fix: Remove the extra dependencies from the list.
   
     12 │ ··useEffect(()·=>·{},·[a,·b]);
@@ -115,7 +123,7 @@ extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies  FIX
 ```
 extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: a
+  × This hook specifies more dependencies than necessary: a.
   
     17 │ function MyComponent2() {
     18 │   const a = 1;
@@ -133,6 +141,10 @@ extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIX
     20 │ }
     21 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
   i Unsafe fix: Remove the extra dependencies from the list.
   
     19 │ ··useEffect(()·=>·{},·[a]);
@@ -143,7 +155,7 @@ extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIX
 ```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook specifies a dependency more specific that its captures: someObj.id
+  × This hook specifies a dependency more specific than its captures: someObj.id
   
     26 │ function MyComponent1() {
     27 │   let someObj = getObj();
@@ -194,6 +206,10 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIX
     30 │   }, [someObj.id]);
     31 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Unsafe fix: Add the missing dependency to the list.
   
     30 │ ··},·[someObj.id,·someObj]);
@@ -204,7 +220,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIX
 ```
 extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: outer
+  × This hook specifies more dependencies than necessary: outer.
   
     34 │ // Dependencies from outer scope should not be valid
     35 │ function MyComponent3() {
@@ -221,6 +237,10 @@ extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies  FIX
        │       ^^^^^
     39 │ }
     40 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
   
   i Unsafe fix: Remove the extra dependencies from the list.
   
