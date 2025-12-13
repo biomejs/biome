@@ -4,7 +4,9 @@ use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};
-use crate::syntax::{is_at_declaration, is_at_string, parse_declaration, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_declaration, is_at_string, parse_declaration, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -57,7 +59,23 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_import_supports(p).ok();
     }
 
-    MediaQueryList::new(T![;]).parse_list(p);
+    // HACK: Accept anything until the semicolon to be able to accept tailwind's extremely loose syntax
+    // see: https://github.com/biomejs/biome/issues/7920
+    // This does have the downside of accepting invalid media queries when tailwind syntax is enabled
+    if CssSyntaxFeatures::Tailwind.is_supported(p) {
+        // Intentionally, we don't use parse_exclusive_syntax here
+        // because otherwise we would emit an error when tailwind syntax is disabled
+
+        p.start().complete(p, CSS_MEDIA_QUERY_LIST);
+        let m = p.start();
+        while !(p.at(EOF) || p.at(T!['{']) || p.at(T![;])) {
+            p.bump_any();
+        }
+        m.complete(p, CSS_UNKNOWN_AT_RULE_COMPONENT_LIST);
+    } else {
+        MediaQueryList::new(T![;]).parse_list(p);
+        p.start().complete(p, CSS_UNKNOWN_AT_RULE_COMPONENT_LIST);
+    }
 
     p.expect(T![;]);
 

@@ -2928,6 +2928,7 @@ impl CssImportAtRule {
             layer: self.layer(),
             supports: self.supports(),
             media: self.media(),
+            extra: self.extra(),
             semicolon_token: self.semicolon_token(),
         }
     }
@@ -2946,8 +2947,11 @@ impl CssImportAtRule {
     pub fn media(&self) -> CssMediaQueryList {
         support::list(&self.syntax, 4usize)
     }
+    pub fn extra(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
+        support::required_node(&self.syntax, 5usize)
+    }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 6usize)
     }
 }
 impl Serialize for CssImportAtRule {
@@ -2965,6 +2969,7 @@ pub struct CssImportAtRuleFields {
     pub layer: Option<AnyCssImportLayer>,
     pub supports: Option<CssImportSupports>,
     pub media: CssMediaQueryList,
+    pub extra: SyntaxResult<CssUnknownAtRuleComponentList>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -14685,6 +14690,7 @@ impl std::fmt::Debug for CssImportAtRule {
                 .field("layer", &support::DebugOptionalElement(self.layer()))
                 .field("supports", &support::DebugOptionalElement(self.supports()))
                 .field("media", &self.media())
+                .field("extra", &support::DebugSyntaxResult(self.extra()))
                 .field(
                     "semicolon_token",
                     &support::DebugSyntaxResult(self.semicolon_token()),

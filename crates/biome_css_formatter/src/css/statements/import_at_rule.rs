@@ -12,13 +12,18 @@ impl FormatNodeRule<CssImportAtRule> for FormatCssImportAtRule {
             layer,
             supports,
             media,
+            extra,
             semicolon_token,
         } = node.as_fields();
 
         write!(f, [import_token.format(), space()])?;
 
+        let extra = extra?;
         // Determine if there are any modifiers present.
-        let has_any_modifiers = layer.is_some() || supports.is_some() || media.len() > 0;
+        let has_any_modifiers = layer.is_some()
+            || supports.is_some()
+            || !media.is_empty()
+            || extra.syntax().first_child_or_token().is_some();
 
         if has_any_modifiers {
             // If there are, we need to group them together and try to fill them.
@@ -39,6 +44,8 @@ impl FormatNodeRule<CssImportAtRule> for FormatCssImportAtRule {
                 if media.len() > 0 {
                     fill.entry(&separator, &media.format());
                 }
+
+                fill.entry(&separator, &extra.format());
 
                 fill.finish()
             });
