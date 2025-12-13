@@ -328,32 +328,6 @@ pub fn project_layout_for_test_file(
     Arc::new(project_layout)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use biome_fs::MemoryFileSystem;
-
-    #[test]
-    fn finds_catalog_from_workspace_file() {
-        let fs = MemoryFileSystem::default();
-        fs.insert(
-            Utf8Path::new("project/src/pnpm-workspace.yaml").into(),
-            b"catalog:\n  react: 19.0.0\n".to_vec(),
-        );
-
-        let catalog = find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js"))
-            .expect("catalog should be parsed");
-        let default = catalog.default.expect("default catalog present");
-        assert_eq!(default.get("react"), Some("19.0.0"));
-    }
-
-    #[test]
-    fn no_catalog_when_workspace_missing() {
-        let fs = MemoryFileSystem::default();
-        assert!(find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js")).is_none());
-    }
-}
-
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
     markup_to_string(biome_console::markup! {
@@ -699,5 +673,31 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    #[test]
+    fn finds_catalog_from_workspace_file() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8Path::new("project/src/pnpm-workspace.yaml").into(),
+            b"catalog:\n  react: 19.0.0\n".to_vec(),
+        );
+
+        let catalog = find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js"))
+            .expect("catalog should be parsed");
+        let default = catalog.default.expect("default catalog present");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+    }
+
+    #[test]
+    fn no_catalog_when_workspace_missing() {
+        let fs = MemoryFileSystem::default();
+        assert!(find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js")).is_none());
     }
 }
