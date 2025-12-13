@@ -203,7 +203,7 @@ fn override_inherits_global_formatter_when_not_specified() {
 
     let mut settings = Settings::default();
     settings
-        .merge_with_configuration(configuration, None)
+        .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
 
     // For .vue files, linter should be disabled (from override)
