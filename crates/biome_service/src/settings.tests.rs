@@ -6,7 +6,7 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
-    Configuration, JsConfiguration, JsonConfiguration, LinterConfiguration,
+    Configuration, FormatterConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
     OverrideFilesConfiguration, OverrideGlobs, OverrideLinterConfiguration, OverridePattern,
     Overrides, RuleConfiguration, RulePlainConfiguration, Rules,
 };
@@ -173,4 +173,61 @@ fn json_to_settings_includes_linter_and_assist() {
 
     assert_eq!(settings.linter.enabled, Some(true.into()));
     assert_eq!(settings.assist.enabled, Some(true.into()));
+}
+
+#[test]
+fn override_inherits_global_formatter_when_not_specified() {
+    // the formatter should inherit from global settings instead of being disabled
+    let configuration = Configuration {
+        formatter: Some(FormatterConfiguration {
+            enabled: Some(true.into()),
+            ..FormatterConfiguration::default()
+        }),
+        linter: Some(LinterConfiguration {
+            enabled: Some(true.into()),
+            ..LinterConfiguration::default()
+        }),
+        overrides: Some(Overrides(vec![OverridePattern {
+            includes: Some(OverrideGlobs::Globs(Box::new([
+                biome_glob::NormalizedGlob::from_str("*.vue").unwrap(),
+            ]))),
+            // Override only specifies linter, not formatter
+            linter: Some(OverrideLinterConfiguration {
+                enabled: Some(false.into()),
+                ..OverrideLinterConfiguration::default()
+            }),
+            ..OverridePattern::default()
+        }])),
+        ..Default::default()
+    };
+
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(configuration, None, vec![])
+        .expect("valid configuration");
+
+    // For .vue files, linter should be disabled (from override)
+    let linter_enabled =
+        JsLanguage::linter_enabled_for_file_path(&settings, Utf8Path::new("test.vue"));
+    assert!(!linter_enabled, "Linter should be disabled for .vue files");
+
+    // For .vue files, formatter should be enabled (inherited from global)
+    let formatter_enabled =
+        JsLanguage::formatter_enabled_for_file_path(&settings, Utf8Path::new("test.vue"));
+    assert!(
+        formatter_enabled,
+        "Formatter should be enabled for .vue files (inherited from global)"
+    );
+
+    // For non .vue files, both should be enabled (from global)
+    let linter_enabled_js =
+        JsLanguage::linter_enabled_for_file_path(&settings, Utf8Path::new("test.js"));
+    assert!(linter_enabled_js, "Linter should be enabled for .js files");
+
+    let formatter_enabled_js =
+        JsLanguage::formatter_enabled_for_file_path(&settings, Utf8Path::new("test.js"));
+    assert!(
+        formatter_enabled_js,
+        "Formatter should be enabled for .js files"
+    );
 }

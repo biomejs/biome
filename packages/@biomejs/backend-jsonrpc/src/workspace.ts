@@ -1777,7 +1777,7 @@ See <https://biomejs.dev/linter/rules/no-void-type-return>
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce all dependencies are correctly specified in a React hook.
+	* Enforce correct dependency usage within React hooks.
 See <https://biomejs.dev/linter/rules/use-exhaustive-dependencies> 
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
@@ -1937,7 +1937,7 @@ See <https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion>
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
-	* Disallow the use of the __proto__ property.
+	* Disallow the use of the deprecated __proto__ object property.
 See <https://biomejs.dev/linter/rules/no-proto> 
 	 */
 	noProto?: NoProtoConfiguration;

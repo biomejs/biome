@@ -121,7 +121,7 @@ test.jsx:6:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
 ```block
 test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: local
+  × This hook specifies more dependencies than necessary: local.
   
     4 │ function Component2() {
     5 │     const [local,SetLocal] = useState(0);
@@ -138,6 +138,10 @@ test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━�
        │                ^^^^^
      9 │ }
     10 │     
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
   
   i Unsafe fix: Remove the extra dependencies from the list.
   

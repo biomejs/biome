@@ -285,12 +285,12 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     TreeSitterPattern {
         name: "jsx_self_closing_element",
         biome_kind: "JSX_SELF_CLOSING_ELEMENT",
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     TreeSitterPattern {
         name: "jsx_opening_element",
         biome_kind: "JSX_OPENING_ELEMENT",
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     TreeSitterPattern {
         name: "jsx_closing_element",

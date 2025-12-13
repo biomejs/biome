@@ -27,7 +27,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
-use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
+use tower_lsp_server::{ClientSocket, ls_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
 use tracing::{debug, error, info, instrument, warn};
 

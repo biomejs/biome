@@ -1,4 +1,3 @@
-#![expect(clippy::mutable_key_type)]
 use std::any::type_name;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Display;
@@ -28,7 +27,7 @@ use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
 use tower_lsp_server::LspService;
 use tower_lsp_server::jsonrpc::{self, Request, Response};
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,

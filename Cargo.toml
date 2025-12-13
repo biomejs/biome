@@ -247,7 +247,7 @@ terminal_size        = "0.4.3"
 tikv-jemallocator    = "0.6.1"
 tokio                = "1.48.0"
 tower                = "0.5.2"
-tower-lsp-server     = "0.22.1"
+tower-lsp-server     = "0.23.0"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
@@ -270,6 +270,14 @@ opt-level = "s"
 debug     = false
 opt-level = 3
 
-#[patch.crates-io]
-#grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }
-#grit-util            = { path = "../gritql/crates/grit-util" }
+
+# Dev optimisations
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+debug    = true
+inherits = "dev"

@@ -9,7 +9,7 @@ use biome_service::workspace::{
 };
 use camino::Utf8PathBuf;
 use std::sync::Arc;
-use tower_lsp_server::{UriExt, lsp_types};
+use tower_lsp_server::ls_types as lsp;
 use tracing::{debug, error, field, info, trace};
 
 /// Handler for `textDocument/didOpen` LSP notification
@@ -23,7 +23,7 @@ use tracing::{debug, error, field, info, trace};
 )]
 pub(crate) async fn did_open(
     session: &Arc<Session>,
-    params: lsp_types::DidOpenTextDocumentParams,
+    params: lsp::DidOpenTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
     let version = params.text_document.version;
@@ -138,7 +138,7 @@ pub(crate) async fn did_open(
 #[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
     session: &Session,
-    params: lsp_types::DidChangeTextDocumentParams,
+    params: lsp::DidChangeTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
     let version = params.text_document.version;
@@ -193,7 +193,7 @@ pub(crate) async fn did_change(
 #[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str())), err)]
 pub(crate) async fn did_save(
     session: &Session,
-    params: lsp_types::DidSaveTextDocumentParams,
+    params: lsp::DidSaveTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
 
@@ -230,7 +230,7 @@ pub(crate) async fn did_save(
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) async fn did_close(
     session: &Session,
-    params: lsp_types::DidCloseTextDocumentParams,
+    params: lsp::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
     let uri = params.text_document.uri;
     let path = session.file_path(&uri)?;

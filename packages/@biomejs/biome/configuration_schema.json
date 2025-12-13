@@ -1136,7 +1136,7 @@
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified in a React hook.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
+					"description": "Enforce correct dependency usage within React hooks.\nSee <https://biomejs.dev/linter/rules/use-exhaustive-dependencies>",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveDependenciesConfiguration" },
 						{ "type": "null" }
@@ -1949,8 +1949,12 @@
 		},
 		"IndentStyle": {
 			"oneOf": [
-				{ "description": "Tab", "type": "string", "const": "tab" },
-				{ "description": "Space", "type": "string", "const": "space" }
+				{ "description": "Indent with Tab", "type": "string", "const": "tab" },
+				{
+					"description": "Indent with Space",
+					"type": "string",
+					"const": "space"
+				}
 			]
 		},
 		"IndentWidth": {
@@ -5215,7 +5219,7 @@
 					]
 				},
 				"noProto": {
-					"description": "Disallow the use of the __proto__ property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
+					"description": "Disallow the use of the deprecated __proto__ object property.\nSee <https://biomejs.dev/linter/rules/no-proto>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
 						{ "type": "null" }
