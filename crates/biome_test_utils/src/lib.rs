@@ -249,6 +249,10 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
+/// Searches for a `pnpm-workspace.yaml` file adjacent to the input file
+/// and parses its catalog section if present.
+///
+/// Returns `None` if the workspace file is not found or parsing fails.
 fn find_pnpm_workspace_catalog(fs: &dyn FileSystem, input_file: &Utf8Path) -> Option<Catalogs> {
     let workspace_file = input_file.with_file_name("pnpm-workspace.yaml");
     if !fs.path_is_file(&workspace_file) {
