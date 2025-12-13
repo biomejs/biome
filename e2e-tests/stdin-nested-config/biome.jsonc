@@ -1,0 +1,16 @@
+{
+    "root": true,
+    "vcs": {
+        "enabled": false
+    },
+    "files": {
+        "ignoreUnknown": false,
+        // Include .js recursively, but not .ts
+        "includes": ["**/biome.jsonc", "**/*.js"]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4
+    }
+}
