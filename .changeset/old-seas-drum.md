@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-[`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) now correctly validate custom hooks whose dependency arrays come before their callbacks.
+[`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) now correctly validates custom hooks whose dependency arrays come before their callbacks.
 
 Previously, a logical error caused the rule to be unable to detect dependency arrays placed before hook callbacks, producing spurious errors and blocking further diagnostics.
 ```json
