@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, JsAssignmentExpression, JsPropertyClassMember, JsVariableDeclarator,
+    AnyJsExpression, JsAssignmentExpression, JsExpressionStatement, JsPropertyClassMember,
+    JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_multi_assign::NoMultiAssignOptions;
@@ -60,8 +61,9 @@ impl Rule for NoMultiAssign {
                 }
             }
             NoMultiAssignQuery::JsAssignmentExpression(node) => {
+                let parent = node.parent::<JsExpressionStatement>().is_some();
                 let expr = node.right().ok()?;
-                if matches!(expr, AnyJsExpression::JsAssignmentExpression(_)) {
+                if parent && matches!(expr, AnyJsExpression::JsAssignmentExpression(_)) {
                     return Some(());
                 }
             }
