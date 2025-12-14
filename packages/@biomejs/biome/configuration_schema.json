@@ -12016,6 +12016,13 @@
 		},
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
+			"properties": {
+				"checkForEach": {
+					"description": "Whether to check `forEach` callbacks for unexpected return values.\n\nWhen `true`, the rule will report `forEach` callbacks that return a value,\nsince `forEach` ignores return values.\n\nDefault: `false`",
+					"type": "boolean",
+					"default": false
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseJsonImportAttributesConfiguration": {
