@@ -2,6 +2,12 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
+	/**
+	* When true, skip ignore and `includes` pattern checks. Used for stdin
+input where the path is only used for language detection. Stdin content
+is explicitly provided, so VCS ignore and includes patterns should not apply. 
+	 */
+	isStdin?: boolean;
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
