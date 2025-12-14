@@ -5150,7 +5150,7 @@ pub const MEDIA_FEATURE_NAMES: [&str; 60] = [
     "prefers-contrast",
     "prefers-reduced-data",
     "prefers-reduced-motion",
-    "prefers-reduded-transparency",
+    "prefers-reduced-transparency",
     "resolution",
     "scan",
     "screen-spanning",
