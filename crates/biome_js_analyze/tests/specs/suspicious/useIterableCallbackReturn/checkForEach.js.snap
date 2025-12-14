@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checkForEach.js
+---
+# Input
+```js
+// These should be invalid when checkForEach is true
+
+// Block body with return
+[].forEach((a) => {
+    return a.fn();
+});
+[].forEach(function(a) {
+    return a.fn();
+});
+
+// Concise body (expression body) - returns implicitly
+[].forEach(a => a.fn());
+
+// Conditional returns
+[].forEach((a) => {
+    if (a) {
+        return a.fn();
+    }
+});
+[].forEach((a) => {
+    if (a) {
+        return;
+    }
+    return a.fn();
+});
+[].forEach((a) => {
+    if (a) {
+        throw new Error();
+    }
+    return a.fn();
+});
+
+```
+
+# Diagnostics
+```
+checkForEach.js:4:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    3 │ // Block body with return
+  > 4 │ [].forEach((a) => {
+      │    ^^^^^^^
+    5 │     return a.fn();
+    6 │ });
+  
+  i Either remove this return or remove the returned value.
+  
+    3 │ // Block body with return
+  > 4 │ [].forEach((a) => {
+      │                    
+  > 5 │     return a.fn();
+      │     ^^^^^^^
+    6 │ });
+    7 │ [].forEach(function(a) {
+  
+
+```
+
+```
+checkForEach.js:7:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    5 │     return a.fn();
+    6 │ });
+  > 7 │ [].forEach(function(a) {
+      │    ^^^^^^^
+    8 │     return a.fn();
+    9 │ });
+  
+  i Either remove this return or remove the returned value.
+  
+     5 │     return a.fn();
+     6 │ });
+   > 7 │ [].forEach(function(a) {
+       │                         
+   > 8 │     return a.fn();
+       │     ^^^^^^^
+     9 │ });
+    10 │ 
+  
+
+```
+
+```
+checkForEach.js:12:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    11 │ // Concise body (expression body) - returns implicitly
+  > 12 │ [].forEach(a => a.fn());
+       │    ^^^^^^^
+    13 │ 
+    14 │ // Conditional returns
+  
+  i Either remove this return or remove the returned value.
+  
+    11 │ // Concise body (expression body) - returns implicitly
+  > 12 │ [].forEach(a => a.fn());
+       │                 ^^^^^^
+    13 │ 
+    14 │ // Conditional returns
+  
+
+```
+
+```
+checkForEach.js:15:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    14 │ // Conditional returns
+  > 15 │ [].forEach((a) => {
+       │    ^^^^^^^
+    16 │     if (a) {
+    17 │         return a.fn();
+  
+  i Either remove this return or remove the returned value.
+  
+    14 │ // Conditional returns
+    15 │ [].forEach((a) => {
+  > 16 │     if (a) {
+       │             
+  > 17 │         return a.fn();
+       │         ^^^^^^^
+    18 │     }
+    19 │ });
+  
+
+```
+
+```
+checkForEach.js:20:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    18 │     }
+    19 │ });
+  > 20 │ [].forEach((a) => {
+       │    ^^^^^^^
+    21 │     if (a) {
+    22 │         return;
+  
+  i Either remove this return or remove the returned value.
+  
+    21 │     if (a) {
+    22 │         return;
+  > 23 │     }
+       │      
+  > 24 │     return a.fn();
+       │     ^^^^^^^
+    25 │ });
+    26 │ [].forEach((a) => {
+  
+
+```
+
+```
+checkForEach.js:26:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    24 │     return a.fn();
+    25 │ });
+  > 26 │ [].forEach((a) => {
+       │    ^^^^^^^
+    27 │     if (a) {
+    28 │         throw new Error();
+  
+  i Either remove this return or remove the returned value.
+  
+    27 │     if (a) {
+    28 │         throw new Error();
+  > 29 │     }
+       │      
+  > 30 │     return a.fn();
+       │     ^^^^^^^
+    31 │ });
+    32 │ 
+  
+
+```
