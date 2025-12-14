@@ -3666,6 +3666,76 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 }
 
 #[test]
+fn should_skip_nonexistent_changed_files() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    // Git reports "deleted.js" as changed, but it doesn't exist in the working directory
+    fs.set_on_get_changed_files(Box::new(|| {
+        vec![String::from("exists.js"), String::from("deleted.js")]
+    }));
+
+    // Only "exists.js" exists in the file system
+    fs.insert(
+        Utf8Path::new("exists.js").into(),
+        r#"console.log('exists');"#.as_bytes(),
+    );
+    // Note: "deleted.js" is NOT inserted - simulating a deleted file
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--changed", "--since=main"].as_slice()),
+    );
+
+    // Should succeed without "No such file or directory" error
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_skip_nonexistent_changed_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_skip_nonexistent_staged_files() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    // Git reports "deleted.js" as staged, but it doesn't exist in the working directory
+    fs.set_on_get_staged_files(Box::new(|| {
+        vec![String::from("exists.js"), String::from("deleted.js")]
+    }));
+
+    // Only "exists.js" exists in the file system
+    fs.insert(
+        Utf8Path::new("exists.js").into(),
+        r#"console.log('exists');"#.as_bytes(),
+    );
+    // Note: "deleted.js" is NOT inserted - simulating a deleted file
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--staged"].as_slice()),
+    );
+
+    // Should succeed without "No such file or directory" error
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_skip_nonexistent_staged_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn linter_shows_the_default_severity_of_rule_on() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
