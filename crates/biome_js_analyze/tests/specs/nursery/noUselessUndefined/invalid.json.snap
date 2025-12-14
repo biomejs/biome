@@ -119,30 +119,6 @@ invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━�
 
 # Input
 ```cjs
-const foo = () => undefined;
-```
-
-# Diagnostics
-```
-invalid.json:1:19 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Don't use unnecessary undefined.
-  
-  > 1 │ const foo = () => undefined;
-      │                   ^^^^^^^^^
-  
-  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
-  
-  i Safe fix: Remove the undefined.
-  
-  - const·foo·=·()·=>·undefined;
-  + const·foo·=·()·=>·{};
-  
-
-```
-
-# Input
-```cjs
 const foo = () => {return undefined;};
 ```
 
