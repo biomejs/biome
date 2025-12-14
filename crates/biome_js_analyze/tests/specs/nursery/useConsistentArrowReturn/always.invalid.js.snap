@@ -8,6 +8,15 @@ const returnsSequenceArrow = () => (a, b)
 
 const returnsAwaitArrow = async () => await fetchData()
 
+// Issue #8179: multiline expressions should not cause ASI issues
+const getSchemaRowTypes = (l) =>
+  l
+    .split("\n")
+
+const multilineChain = () =>
+  foo
+    .bar()
+    .baz()
 
 ```
 
@@ -24,12 +33,12 @@ always.invalid.js:1:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   
   i Safe fix: Add braces to the arrow function body.
   
-    1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
-      1 │ + const·returnsSequenceArrow·=·()·=>·{
-      2 │ + → return·a,·b;
-      3 │ + }
-    2 4 │   
-    3 5 │   const returnsAwaitArrow = async () => await fetchData()
+     1    │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
+        1 │ + const·returnsSequenceArrow·=·()·=>·{
+        2 │ + → return·a,·b;
+        3 │ + }
+     2  4 │   
+     3  5 │   const returnsAwaitArrow = async () => await fetchData()
   
 
 ```
@@ -44,17 +53,79 @@ always.invalid.js:3:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   > 3 │ const returnsAwaitArrow = async () => await fetchData()
       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+    5 │ // Issue #8179: multiline expressions should not cause ASI issues
   
   i Safe fix: Add braces to the arrow function body.
   
-    1 1 │   const returnsSequenceArrow = () => (a, b)
-    2 2 │   
-    3   │ - const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
-      3 │ + const·returnsAwaitArrow·=·async·()·=>·{
-      4 │ + → return·await·fetchData();
-      5 │ + }
-    4 6 │   
-    5 7 │   
+     1  1 │   const returnsSequenceArrow = () => (a, b)
+     2  2 │   
+     3    │ - const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
+        3 │ + const·returnsAwaitArrow·=·async·()·=>·{
+        4 │ + → return·await·fetchData();
+        5 │ + }
+     4  6 │   
+     5  7 │   // Issue #8179: multiline expressions should not cause ASI issues
+  
+
+```
+
+```
+always.invalid.js:6:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+     5 │ // Issue #8179: multiline expressions should not cause ASI issues
+   > 6 │ const getSchemaRowTypes = (l) =>
+       │                           ^^^^^^
+   > 7 │   l
+   > 8 │     .split("\n")
+       │     ^^^^^^^^^^^^
+     9 │ 
+    10 │ const multilineChain = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     5  5 │   // Issue #8179: multiline expressions should not cause ASI issues
+     6  6 │   const getSchemaRowTypes = (l) =>
+     7    │ - ··l
+     8    │ - ····.split("\n")
+        7 │ + ··{
+        8 │ + → return·l
+        9 │ + ····.split("\n");
+       10 │ + }
+     9 11 │   
+    10 12 │   const multilineChain = () =>
+  
+
+```
+
+```
+always.invalid.js:10:24 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+     8 │     .split("\n")
+     9 │ 
+  > 10 │ const multilineChain = () =>
+       │                        ^^^^^
+  > 11 │   foo
+  > 12 │     .bar()
+  > 13 │     .baz()
+       │     ^^^^^^
+    14 │ 
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     9  9 │   
+    10 10 │   const multilineChain = () =>
+    11    │ - ··foo
+       11 │ + ··{
+       12 │ + → return·foo
+    12 13 │       .bar()
+    13    │ - ····.baz()
+       14 │ + ····.baz();
+       15 │ + }
+    14 16 │   
   
 
 ```

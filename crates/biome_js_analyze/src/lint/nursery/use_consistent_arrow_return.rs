@@ -179,6 +179,11 @@ impl Rule for UseConsistentArrowReturn {
                     expr.clone()
                 };
 
+                // Remove leading trivia (newlines/whitespace) from the expression to prevent
+                // ASI issues where `return\n expr` would return undefined instead of expr.
+                // See: https://github.com/biomejs/biome/issues/8179
+                let expr_to_return = expr_to_return.trim_leading_trivia()?;
+
                 let return_statement =
                     make::js_return_statement(make::token(T![return]).with_trailing_trivia([(
                         biome_js_syntax::TriviaPieceKind::Whitespace,
