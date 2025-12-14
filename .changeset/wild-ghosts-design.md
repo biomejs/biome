@@ -6,19 +6,17 @@ Fixed [#8179](https://github.com/biomejs/biome/issues/8179): The [`useConsistent
 
 Previously, the autofix would incorrectly place a newline after the `return` keyword, causing unexpected behavior.
 
+Example:
+```js
+const foo = (l) =>
+  l
+    .split('\n')
+```
+Now correctly autofixes to:
 ```diff
-  const foo = (l) =>
-    l
-      .split('\n')
-
-- // Incorrectly fixed to:
-- const foo = (l) => {
+const foo = (l) => {
 -   return
 -   l.split('\n');
-- }
-
-+ // Now correctly produces:
-+ const foo = (l) => {
 +   return l.split('\n');
-+ }
+}
 ```
