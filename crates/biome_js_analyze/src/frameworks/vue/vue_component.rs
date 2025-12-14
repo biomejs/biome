@@ -694,6 +694,26 @@ declare_node_union! {
         | JsPropertyObjectMember
 }
 
+impl AnyVueSetupDeclaration {
+    pub fn is_assigned_to_props(&self, model: &SemanticModel) -> bool {
+        if let Self::JsIdentifierBinding(binding) = self
+            && let Some(declarator) = binding
+                .syntax()
+                .ancestors()
+                .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
+            && let Some(initializer) = declarator.initializer()
+            && let Some(expression) = initializer
+                .expression()
+                .ok()
+                .and_then(|expression| expression.inner_expression())
+            && let AnyJsExpression::JsCallExpression(call) = expression
+        {
+            return is_vue_compiler_macro_call(&call, model, "defineProps");
+        }
+        false
+    }
+}
+
 impl VueDeclarationName for AnyVueSetupDeclaration {
     fn declaration_name(&self) -> Option<TokenText> {
         match self {
