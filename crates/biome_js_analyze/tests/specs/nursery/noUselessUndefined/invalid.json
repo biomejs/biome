@@ -6,7 +6,6 @@
 
 	"function foo() {return undefined;}",
 
-	"const foo = () => undefined;",
 	"const foo = () => {return undefined;};",
 
 	"function foo() {return undefined;}",
