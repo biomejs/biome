@@ -28,6 +28,10 @@ a { font: message-box; }
 a { font: small-caption; }
 a { font: status-bar; }
 a { font-family: var(--font); }
+a { font-family: "Noto Serif", var(--serif); }
+a { font-family: Arial, var(--fallback); }
+a { font: 1em "Noto Serif", var(--serif); }
+a { font: 14px/1.5 Arial, var(--fallback); }
 a { font-family: revert }
 a { font-family: revert-layer }
 ```
