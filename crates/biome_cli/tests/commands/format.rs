@@ -1294,6 +1294,52 @@ fn format_stdin_does_not_error_with_ignore_unknown_file_extensions() {
 }
 
 #[test]
+fn format_stdin_ignores_includes_pattern() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Set up a config with includes that doesn't match our stdin path
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "formatter": { "includes": ["apps/**"] } }"#.as_bytes(),
+    );
+
+    // stdin path is "mock.js" which doesn't match "apps/**"
+    // But stdin should bypass includes check
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "mock.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    // Verify the content was formatted despite not matching includes pattern
+    assert_eq!(content, "function f() {\n\treturn {};\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_ignores_includes_pattern",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_format_if_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

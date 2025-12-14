@@ -1,0 +1,24 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "formatter": { "includes": ["apps/**"] } }
+```
+
+# Input messages
+
+```block
+function f() {return{}}
+```
+
+# Emitted Messages
+
+```block
+function f() {
+	return {};
+}
+
+```

@@ -116,6 +116,11 @@ pub struct SupportsFeatureParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
+    /// When true, skip ignore and `includes` pattern checks. Used for stdin
+    /// input where the path is only used for language detection. Stdin content
+    /// is explicitly provided, so VCS ignore and includes patterns should not apply.
+    #[serde(default)]
+    pub is_stdin: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]

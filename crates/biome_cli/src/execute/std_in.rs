@@ -45,6 +45,7 @@ pub(crate) fn run<'a>(
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
+            is_stdin: true,
         })?;
 
         if file_features.is_ignored() {
@@ -126,6 +127,7 @@ pub(crate) fn run<'a>(
                 .with_assist()
                 .with_formatter()
                 .build(),
+            is_stdin: true,
         })?;
 
         if file_features.is_ignored() {

@@ -198,6 +198,7 @@ impl Projects {
         is_ignored_by_top_level_config || is_ignored_by_features
     }
 
+    #[expect(clippy::too_many_arguments)]
     #[inline(always)]
     pub fn get_file_features(
         &self,
@@ -207,6 +208,7 @@ impl Projects {
         features: FeatureName,
         language: DocumentFileSource,
         capabilities: &Capabilities,
+        is_stdin: bool,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
         let project_data = data
@@ -231,9 +233,15 @@ impl Projects {
             .is_some_and(|dir_path| dir_path == project_data.path)
         {
             // Never ignore Biome's top-level config file
-        } else if self.is_ignored(fs, project_key, path, features, IgnoreKind::Ancestors) {
+        } else if !is_stdin
+            && self.is_ignored(fs, project_key, path, features, IgnoreKind::Ancestors)
+        {
+            // Skip ignore checks for stdin - the path is only used for language detection,
+            // not for path matching. Stdin content is explicitly provided, so VCS ignore
+            // and includes patterns should not apply.
             file_features.set_ignored_for_all_features();
-        } else {
+        } else if !is_stdin {
+            // Skip feature-specific includes check for stdin.
             for feature in features.iter() {
                 if project_data
                     .root_settings
