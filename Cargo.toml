@@ -205,7 +205,7 @@ anyhow               = "1.0.100"
 boa_engine           = "0.21.0"
 boxcar               = "0.2.14"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.2.1"
+camino               = "1.2.2"
 cfg-if               = "1.0.4"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
