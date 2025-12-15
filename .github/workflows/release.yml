@@ -284,8 +284,12 @@ jobs:
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ matrix.target }}-artefact
+          # Important: the paths are specified like this so the uploaded artifacts
+          # can be directly placed into the `packages/@biomejs` folder when downloaded
           path: |
-            ./packages/@biomejs/${{ matrix.target }}
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
           if-no-files-found: error
 
   build-js-api:
