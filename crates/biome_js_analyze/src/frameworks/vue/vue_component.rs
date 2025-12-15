@@ -286,7 +286,10 @@ impl VueComponentDeclarations for VueSetupComponent {
         &self,
         filter: BitFlags<VueDeclarationCollectionFilter>,
     ) -> Vec<VueDeclaration> {
-        if !filter.contains(VueDeclarationCollectionFilter::Prop) {
+        if !filter.contains(VueDeclarationCollectionFilter::Prop)
+            && !filter.contains(VueDeclarationCollectionFilter::Setup)
+            && !filter.contains(VueDeclarationCollectionFilter::SetupImport)
+        {
             return vec![];
         }
         let model = &self.model;
