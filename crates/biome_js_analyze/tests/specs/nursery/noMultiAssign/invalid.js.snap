@@ -1,0 +1,455 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+{var a = b = c;}
+{var a = b = c = d;}
+{let foo = bar = cee = 100;}
+{a=b=c=d=e}
+{a=b=c}
+{a
+=b
+=c}
+{var a = (b) = (((c)))}
+{var a = ((b)) = (c)}
+{var a = b = ( (c * 12) + 2)}
+{var a =
+((b))
+ = (c)}
+{a = b = '=' + c + 'foo';}
+{a = b = 7 * 12 + 5;}
+{const x = {};
+const y = x.one = 1;}
+{let a, b;a = b = 1}
+{let x, y;x = y = 'baz'}
+{const a = b = 1}
+{class C { field = foo = 0 }}
+{class C { field = foo = 0 }}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ {var a = b = c;}
+      │      ^^^^^^^^^
+    3 │ {var a = b = c = d;}
+    4 │ {let foo = bar = cee = 100;}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:3:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    1 │ /* should generate diagnostics */
+    2 │ {var a = b = c;}
+  > 3 │ {var a = b = c = d;}
+      │      ^^^^^^^^^^^^^
+    4 │ {let foo = bar = cee = 100;}
+    5 │ {a=b=c=d=e}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:3:10 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    1 │ /* should generate diagnostics */
+    2 │ {var a = b = c;}
+  > 3 │ {var a = b = c = d;}
+      │          ^^^^^^^^^
+    4 │ {let foo = bar = cee = 100;}
+    5 │ {a=b=c=d=e}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:4:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    2 │ {var a = b = c;}
+    3 │ {var a = b = c = d;}
+  > 4 │ {let foo = bar = cee = 100;}
+      │      ^^^^^^^^^^^^^^^^^^^^^
+    5 │ {a=b=c=d=e}
+    6 │ {a=b=c}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:4:12 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    2 │ {var a = b = c;}
+    3 │ {var a = b = c = d;}
+  > 4 │ {let foo = bar = cee = 100;}
+      │            ^^^^^^^^^^^^^^^
+    5 │ {a=b=c=d=e}
+    6 │ {a=b=c}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:5:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    3 │ {var a = b = c = d;}
+    4 │ {let foo = bar = cee = 100;}
+  > 5 │ {a=b=c=d=e}
+      │  ^^^^^^^^^
+    6 │ {a=b=c}
+    7 │ {a
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:5:4 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    3 │ {var a = b = c = d;}
+    4 │ {let foo = bar = cee = 100;}
+  > 5 │ {a=b=c=d=e}
+      │    ^^^^^^^
+    6 │ {a=b=c}
+    7 │ {a
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:5:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    3 │ {var a = b = c = d;}
+    4 │ {let foo = bar = cee = 100;}
+  > 5 │ {a=b=c=d=e}
+      │      ^^^^^
+    6 │ {a=b=c}
+    7 │ {a
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:6:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    4 │ {let foo = bar = cee = 100;}
+    5 │ {a=b=c=d=e}
+  > 6 │ {a=b=c}
+      │  ^^^^^
+    7 │ {a
+    8 │ =b
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+     5 │ {a=b=c=d=e}
+     6 │ {a=b=c}
+   > 7 │ {a
+       │  ^
+   > 8 │ =b
+   > 9 │ =c}
+       │ ^^
+    10 │ {var a = (b) = (((c)))}
+    11 │ {var a = ((b)) = (c)}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:10:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+     8 │ =b
+     9 │ =c}
+  > 10 │ {var a = (b) = (((c)))}
+       │      ^^^^^^^^^^^^^^^^^
+    11 │ {var a = ((b)) = (c)}
+    12 │ {var a = b = ( (c * 12) + 2)}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:11:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+     9 │ =c}
+    10 │ {var a = (b) = (((c)))}
+  > 11 │ {var a = ((b)) = (c)}
+       │      ^^^^^^^^^^^^^^^
+    12 │ {var a = b = ( (c * 12) + 2)}
+    13 │ {var a =
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:12:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    10 │ {var a = (b) = (((c)))}
+    11 │ {var a = ((b)) = (c)}
+  > 12 │ {var a = b = ( (c * 12) + 2)}
+       │      ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ {var a =
+    14 │ ((b))
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:13:6 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    11 │ {var a = ((b)) = (c)}
+    12 │ {var a = b = ( (c * 12) + 2)}
+  > 13 │ {var a =
+       │      ^^^
+  > 14 │ ((b))
+  > 15 │  = (c)}
+       │  ^^^^^
+    16 │ {a = b = '=' + c + 'foo';}
+    17 │ {a = b = 7 * 12 + 5;}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:16:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    14 │ ((b))
+    15 │  = (c)}
+  > 16 │ {a = b = '=' + c + 'foo';}
+       │  ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ {a = b = 7 * 12 + 5;}
+    18 │ {const x = {};
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:17:2 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    15 │  = (c)}
+    16 │ {a = b = '=' + c + 'foo';}
+  > 17 │ {a = b = 7 * 12 + 5;}
+       │  ^^^^^^^^^^^^^^^^^^
+    18 │ {const x = {};
+    19 │ const y = x.one = 1;}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    17 │ {a = b = 7 * 12 + 5;}
+    18 │ {const x = {};
+  > 19 │ const y = x.one = 1;}
+       │       ^^^^^^^^^^^^^
+    20 │ {let a, b;a = b = 1}
+    21 │ {let x, y;x = y = 'baz'}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:20:11 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    18 │ {const x = {};
+    19 │ const y = x.one = 1;}
+  > 20 │ {let a, b;a = b = 1}
+       │           ^^^^^^^^^
+    21 │ {let x, y;x = y = 'baz'}
+    22 │ {const a = b = 1}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:21:11 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    19 │ const y = x.one = 1;}
+    20 │ {let a, b;a = b = 1}
+  > 21 │ {let x, y;x = y = 'baz'}
+       │           ^^^^^^^^^^^^^
+    22 │ {const a = b = 1}
+    23 │ {class C { field = foo = 0 }}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:22:8 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    20 │ {let a, b;a = b = 1}
+    21 │ {let x, y;x = y = 'baz'}
+  > 22 │ {const a = b = 1}
+       │        ^^^^^^^^^
+    23 │ {class C { field = foo = 0 }}
+    24 │ {class C { field = foo = 0 }}
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:23:12 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    21 │ {let x, y;x = y = 'baz'}
+    22 │ {const a = b = 1}
+  > 23 │ {class C { field = foo = 0 }}
+       │            ^^^^^^^^^^^^^^^
+    24 │ {class C { field = foo = 0 }}
+    25 │ 
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```
+
+```
+invalid.js:24:12 lint/nursery/noMultiAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected chained assignment.
+  
+    22 │ {const a = b = 1}
+    23 │ {class C { field = foo = 0 }}
+  > 24 │ {class C { field = foo = 0 }}
+       │            ^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i Variables with chained assignments in declarations may cause unintended implicit globals or unexpected scoping.
+  
+  i Split into separate assignments.
+  
+
+```

@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+{
+var a, b, c,
+d = 0;
+}
+
+{
+var a = 1;
+var b = 2;
+var c = 3;
+var d = 0;
+}
+
+{
+var a = 1 + (b === 10 ? 5 : 4);
+}
+
+{const a = 1, b = 2, c = 3;}
+{const a = 1;
+const b = 2;
+ const c = 3;}
+{for(var a = 0, b = 0;;){}}
+{for(let a = 0, b = 0;;){}}
+{for(const a = 0, b = 0;;){}}
+{export let a, b;}
+{export let a,
+ b = 0;}
+{class C { [foo = 0] = 0 }}
+
+```
