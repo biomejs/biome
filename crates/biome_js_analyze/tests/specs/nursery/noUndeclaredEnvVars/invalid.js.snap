@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Undeclared environment variables should trigger diagnostics
+const myCustomVar = process.env.MY_CUSTOM_VAR;
+const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+const acmeSecret = process.env.ACME_SECRET;
+
+// Also invalid with import.meta.env
+const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable MY_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+  > 4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+      │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+    6 │ const acmeSecret = process.env.ACME_SECRET;
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_UNDECLARED_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+  > 5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const acmeSecret = process.env.ACME_SECRET;
+    7 │ 
+  
+
+```
+
+```
+invalid.js:6:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ACME_SECRET is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+  > 6 │ const acmeSecret = process.env.ACME_SECRET;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Also invalid with import.meta.env
+  
+
+```
+
+```
+invalid.js:9:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable CUSTOM_META_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+     8 │ // Also invalid with import.meta.env
+   > 9 │ const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+
+```

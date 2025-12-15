@@ -4480,6 +4480,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUndeclaredEnvVarsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredEnvVarsOptions" }
+			]
+		},
+		"NoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedEnvVars": {
+					"description": "Environment variables that should always be allowed.\nUse this to specify environment variables that are always available\nin your environment, even when not declared in turbo.json.\nSupports regular expressions, e.g. `[\"MY_ENV_.*\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/Regex" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoUndeclaredVariablesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5260,6 +5277,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredEnvVars": {
+					"description": "Disallow the use of undeclared environment variables.\nSee <https://biomejs.dev/linter/rules/no-undeclared-env-vars>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredEnvVarsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAttribute": {
 					"description": "Disallow unknown DOM properties.\nSee <https://biomejs.dev/linter/rules/no-unknown-attribute>",
 					"anyOf": [
@@ -5996,6 +6020,11 @@
 					"description": "Tailwind CSS rules",
 					"type": "string",
 					"const": "tailwind"
+				},
+				{
+					"description": "Turborepo build system rules",
+					"type": "string",
+					"const": "turborepo"
 				}
 			]
 		},
@@ -7875,6 +7904,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredDependenciesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredEnvVarsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredEnvVarsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
