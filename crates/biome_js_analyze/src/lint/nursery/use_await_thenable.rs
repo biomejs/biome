@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAwaitThenable {
-        version: "next",
+        version: "2.3.9",
         name: "useAwaitThenable",
         language: "js",
         recommended: false,
