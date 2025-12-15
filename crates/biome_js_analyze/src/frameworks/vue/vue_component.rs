@@ -51,11 +51,9 @@ pub enum VueDeclarationCollectionFilter {
     SetupImport = 1 << 2,
     /// Data properties in a Vue component.
     /// Can be defined via `data` option in Options API.
-    /// TODO: Support data() method, need control flow analysis for that.
     Data = 1 << 3,
     /// Nuxt.js Async Data properties in a Vue component.
     /// Can be defined via `asyncData` option in Options API.
-    /// TODO: Support asyncData() method, need control flow analysis for that.
     AsyncData = 1 << 4,
     /// Methods in a Vue component.
     Method = 1 << 5,
