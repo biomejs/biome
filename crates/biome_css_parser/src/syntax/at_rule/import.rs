@@ -3,6 +3,7 @@ use crate::syntax::at_rule::layer::LayerNameList;
 use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
+use crate::syntax::util::skip_possible_tailwind_syntax;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};
 use crate::syntax::{is_at_declaration, is_at_string, parse_declaration, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -44,6 +45,8 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
+    skip_possible_tailwind_syntax(p);
+
     //  An optional cascade layer name, or for an anonymous layer.
     if is_at_import_named_layer(p) {
         parse_import_named_layer(p).ok();
@@ -51,11 +54,15 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_import_anonymous_layer(p).ok();
     }
 
+    skip_possible_tailwind_syntax(p);
+
     if is_at_import_supports(p) {
         // An optional supports condition, we don't have an error here
         // is_at_import_supports validates the supports condition
         parse_import_supports(p).ok();
     }
+
+    skip_possible_tailwind_syntax(p);
 
     MediaQueryList::new(T![;]).parse_list(p);
 
