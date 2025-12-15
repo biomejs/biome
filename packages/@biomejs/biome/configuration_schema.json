@@ -5205,7 +5205,7 @@
 					]
 				},
 				"noMultiAssign": {
-					"description": "Disallow use of chained assignment expressions.\nSee https://biomejs.dev/linter/rules/no-multi-assign",
+					"description": "Disallow use of chained assignment expressions.\nSee <https://biomejs.dev/linter/rules/no-multi-assign>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMultiAssignConfiguration" },
 						{ "type": "null" }

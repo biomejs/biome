@@ -1923,7 +1923,7 @@ See <https://biomejs.dev/linter/rules/no-misused-promises>
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
 	* Disallow use of chained assignment expressions.
-See https://biomejs.dev/linter/rules/no-multi-assign 
+See <https://biomejs.dev/linter/rules/no-multi-assign> 
 	 */
 	noMultiAssign?: NoMultiAssignConfiguration;
 	/**
