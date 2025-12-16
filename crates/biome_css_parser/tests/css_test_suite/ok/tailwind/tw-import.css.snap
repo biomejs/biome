@@ -1,0 +1,294 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@import "tailwindcss/theme.css" layer(theme) supports(display: flex) screen prefix(tw);
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+@import "tailwindcss/utilities.css" prefix(tw) layer(utilities);
+@import "tailwindcss" source("../src");
+@import "tailwindcss/utilities.css" layer(utilities) important;
+@import "tailwindcss/theme.css" layer(theme) theme(static);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@8..32 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")],
+                },
+                layer: CssImportNamedLayer {
+                    layer_token: LAYER_KW@32..37 "layer" [] [],
+                    l_paren_token: L_PAREN@37..38 "(" [] [],
+                    name: CssLayerNameList [
+                        CssIdentifier {
+                            value_token: IDENT@38..43 "theme" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
+                },
+                supports: CssImportSupports {
+                    supports_token: SUPPORTS_KW@45..53 "supports" [] [],
+                    l_paren_token: L_PAREN@53..54 "(" [] [],
+                    condition: CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@54..61 "display" [] [],
+                            },
+                            colon_token: COLON@61..63 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@63..67 "flex" [] [],
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                    r_paren_token: R_PAREN@67..69 ")" [] [Whitespace(" ")],
+                },
+                media: CssMediaQueryList [
+                    CssMediaTypeQuery {
+                        modifier: missing (optional),
+                        ty: CssMediaType {
+                            value: CssIdentifier {
+                                value_token: IDENT@69..76 "screen" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                semicolon_token: SEMICOLON@76..87 ";" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@87..89 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@89..96 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@96..120 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")],
+                },
+                layer: CssImportNamedLayer {
+                    layer_token: LAYER_KW@120..125 "layer" [] [],
+                    l_paren_token: L_PAREN@125..126 "(" [] [],
+                    name: CssLayerNameList [
+                        CssIdentifier {
+                            value_token: IDENT@126..131 "theme" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@131..133 ")" [] [Whitespace(" ")],
+                },
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@133..144 ";" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@144..146 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@146..153 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@153..181 "\"tailwindcss/utilities.css\"" [] [Whitespace(" ")],
+                },
+                layer: CssImportNamedLayer {
+                    layer_token: LAYER_KW@181..197 "layer" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")"), Whitespace(" ")] [],
+                    l_paren_token: L_PAREN@197..198 "(" [] [],
+                    name: CssLayerNameList [
+                        CssIdentifier {
+                            value_token: IDENT@198..207 "utilities" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@207..208 ")" [] [],
+                },
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@208..209 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@209..211 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@211..218 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@218..232 "\"tailwindcss\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@232..249 ";" [Skipped("source"), Skipped("("), Skipped("\"../src\""), Skipped(")")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@249..251 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@251..258 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@258..286 "\"tailwindcss/utilities.css\"" [] [Whitespace(" ")],
+                },
+                layer: CssImportNamedLayer {
+                    layer_token: LAYER_KW@286..291 "layer" [] [],
+                    l_paren_token: L_PAREN@291..292 "(" [] [],
+                    name: CssLayerNameList [
+                        CssIdentifier {
+                            value_token: IDENT@292..301 "utilities" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@301..303 ")" [] [Whitespace(" ")],
+                },
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@303..313 ";" [Skipped("important")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@313..315 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@315..322 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@322..346 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")],
+                },
+                layer: CssImportNamedLayer {
+                    layer_token: LAYER_KW@346..351 "layer" [] [],
+                    l_paren_token: L_PAREN@351..352 "(" [] [],
+                    name: CssLayerNameList [
+                        CssIdentifier {
+                            value_token: IDENT@352..357 "theme" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@357..359 ")" [] [Whitespace(" ")],
+                },
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@359..373 ";" [Skipped("theme"), Skipped("("), Skipped("static"), Skipped(")")] [],
+            },
+        },
+    ],
+    eof_token: EOF@373..374 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..374
+  0: (empty)
+  1: CSS_RULE_LIST@0..373
+    0: CSS_AT_RULE@0..87
+      0: AT@0..1 "@" [] []
+      1: CSS_IMPORT_AT_RULE@1..87
+        0: IMPORT_KW@1..8 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@8..32
+          0: CSS_STRING_LITERAL@8..32 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")]
+        2: CSS_IMPORT_NAMED_LAYER@32..45
+          0: LAYER_KW@32..37 "layer" [] []
+          1: L_PAREN@37..38 "(" [] []
+          2: CSS_LAYER_NAME_LIST@38..43
+            0: CSS_IDENTIFIER@38..43
+              0: IDENT@38..43 "theme" [] []
+          3: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+        3: CSS_IMPORT_SUPPORTS@45..69
+          0: SUPPORTS_KW@45..53 "supports" [] []
+          1: L_PAREN@53..54 "(" [] []
+          2: CSS_DECLARATION@54..67
+            0: CSS_GENERIC_PROPERTY@54..67
+              0: CSS_IDENTIFIER@54..61
+                0: IDENT@54..61 "display" [] []
+              1: COLON@61..63 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@63..67
+                0: CSS_IDENTIFIER@63..67
+                  0: IDENT@63..67 "flex" [] []
+            1: (empty)
+          3: R_PAREN@67..69 ")" [] [Whitespace(" ")]
+        4: CSS_MEDIA_QUERY_LIST@69..76
+          0: CSS_MEDIA_TYPE_QUERY@69..76
+            0: (empty)
+            1: CSS_MEDIA_TYPE@69..76
+              0: CSS_IDENTIFIER@69..76
+                0: IDENT@69..76 "screen" [] [Whitespace(" ")]
+        5: SEMICOLON@76..87 ";" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")")] []
+    1: CSS_AT_RULE@87..144
+      0: AT@87..89 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@89..144
+        0: IMPORT_KW@89..96 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@96..120
+          0: CSS_STRING_LITERAL@96..120 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")]
+        2: CSS_IMPORT_NAMED_LAYER@120..133
+          0: LAYER_KW@120..125 "layer" [] []
+          1: L_PAREN@125..126 "(" [] []
+          2: CSS_LAYER_NAME_LIST@126..131
+            0: CSS_IDENTIFIER@126..131
+              0: IDENT@126..131 "theme" [] []
+          3: R_PAREN@131..133 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@133..133
+        5: SEMICOLON@133..144 ";" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")")] []
+    2: CSS_AT_RULE@144..209
+      0: AT@144..146 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@146..209
+        0: IMPORT_KW@146..153 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@153..181
+          0: CSS_STRING_LITERAL@153..181 "\"tailwindcss/utilities.css\"" [] [Whitespace(" ")]
+        2: CSS_IMPORT_NAMED_LAYER@181..208
+          0: LAYER_KW@181..197 "layer" [Skipped("prefix"), Skipped("("), Skipped("tw"), Skipped(")"), Whitespace(" ")] []
+          1: L_PAREN@197..198 "(" [] []
+          2: CSS_LAYER_NAME_LIST@198..207
+            0: CSS_IDENTIFIER@198..207
+              0: IDENT@198..207 "utilities" [] []
+          3: R_PAREN@207..208 ")" [] []
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@208..208
+        5: SEMICOLON@208..209 ";" [] []
+    3: CSS_AT_RULE@209..249
+      0: AT@209..211 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@211..249
+        0: IMPORT_KW@211..218 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@218..232
+          0: CSS_STRING_LITERAL@218..232 "\"tailwindcss\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@232..232
+        5: SEMICOLON@232..249 ";" [Skipped("source"), Skipped("("), Skipped("\"../src\""), Skipped(")")] []
+    4: CSS_AT_RULE@249..313
+      0: AT@249..251 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@251..313
+        0: IMPORT_KW@251..258 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@258..286
+          0: CSS_STRING_LITERAL@258..286 "\"tailwindcss/utilities.css\"" [] [Whitespace(" ")]
+        2: CSS_IMPORT_NAMED_LAYER@286..303
+          0: LAYER_KW@286..291 "layer" [] []
+          1: L_PAREN@291..292 "(" [] []
+          2: CSS_LAYER_NAME_LIST@292..301
+            0: CSS_IDENTIFIER@292..301
+              0: IDENT@292..301 "utilities" [] []
+          3: R_PAREN@301..303 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@303..303
+        5: SEMICOLON@303..313 ";" [Skipped("important")] []
+    5: CSS_AT_RULE@313..373
+      0: AT@313..315 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@315..373
+        0: IMPORT_KW@315..322 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@322..346
+          0: CSS_STRING_LITERAL@322..346 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")]
+        2: CSS_IMPORT_NAMED_LAYER@346..359
+          0: LAYER_KW@346..351 "layer" [] []
+          1: L_PAREN@351..352 "(" [] []
+          2: CSS_LAYER_NAME_LIST@352..357
+            0: CSS_IDENTIFIER@352..357
+              0: IDENT@352..357 "theme" [] []
+          3: R_PAREN@357..359 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@359..359
+        5: SEMICOLON@359..373 ";" [Skipped("theme"), Skipped("("), Skipped("static"), Skipped(")")] []
+  2: EOF@373..374 "" [Newline("\n")] []
+
+```

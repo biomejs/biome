@@ -109,6 +109,7 @@ impl JsonFileSource {
         // Just strip comments
         // https://github.com/vercel/turbo/blob/0f327961157a5ab07bbb353ac6ecb9a9df7e29b3/crates/turborepo-lib/src/turbo_json/mod.rs#L963
         "turbo.json",
+        "turbo.jsonc",
     ];
 
     // Well-known folder where file with the `.json` extension support comments

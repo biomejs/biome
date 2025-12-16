@@ -53,3 +53,7 @@ arr1[0]!! ^= arr1[1];
 
 const arr2: number[] = [1, 2, 3];
 arr2[0] ^= arr2[1]!!;
+
+// Test case for issue #8475
+const _d2 = (blob.b!)!.d!.length;
+const _d2 = ((blob.b!))!.d!.length;

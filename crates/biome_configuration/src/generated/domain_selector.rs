@@ -85,6 +85,8 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noFocusedTests"),
     ]
 });
+static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
@@ -105,6 +107,7 @@ impl DomainSelector {
             "react" => REACT_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
+            "turborepo" => TURBOREPO_FILTERS.clone(),
             "vue" => VUE_FILTERS.clone(),
             _ => unreachable!("DomainFilter::as_rule_filters: domain {} not found", self.0),
         }
@@ -122,6 +125,9 @@ impl DomainSelector {
             "react" => REACT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "turborepo" => TURBOREPO_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "vue" => VUE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             _ => false,
         }

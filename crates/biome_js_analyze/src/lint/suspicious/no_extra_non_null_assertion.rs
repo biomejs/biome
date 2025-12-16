@@ -84,18 +84,16 @@ impl Rule for NoExtraNonNullAssertion {
             AnyTsNonNullAssertion::TsNonNullAssertionExpression(_) => {
                 // First check if this is nested within another non-null assertion (always invalid)
 
-                let mut is_nested_in_non_null_assertion = false;
-                for ancestor in node.syntax().ancestors().skip(1) {
-                    if JsParenthesizedExpression::can_cast(ancestor.kind()) {
-                        continue;
-                    }
-                    if TsNonNullAssertionExpression::can_cast(ancestor.kind()) {
-                        is_nested_in_non_null_assertion = true;
-                        break;
-                    }
-                }
-
-                if is_nested_in_non_null_assertion {
+                if let Some(parent) = node
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .filter(|ancestor| !JsParenthesizedExpression::can_cast(ancestor.kind()))
+                    // Consider only the first immediate ancestor that is not a parenthesized expression
+                    .take(1)
+                    .next()
+                    && TsNonNullAssertionExpression::can_cast(parent.kind())
+                {
                     return Some(());
                 }
 

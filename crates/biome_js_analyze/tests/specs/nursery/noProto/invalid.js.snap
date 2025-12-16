@@ -15,16 +15,17 @@ const d = obj["__proto__"];
 ```
 invalid.js:1:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of __proto__.
+  i Avoid use of the deprecated __proto__ accessor.
   
   > 1 │ obj.__proto__ = a;
       │ ^^^^^^^^^^^^^
     2 │ obj["__proto__"] = b;
     3 │ const c = obj.__proto__;
   
-  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
   
-  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
 
 ```
@@ -32,7 +33,7 @@ invalid.js:1:1 lint/nursery/noProto ━━━━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of __proto__.
+  i Avoid use of the deprecated __proto__ accessor.
   
     1 │ obj.__proto__ = a;
   > 2 │ obj["__proto__"] = b;
@@ -40,9 +41,10 @@ invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━�
     3 │ const c = obj.__proto__;
     4 │ const d = obj["__proto__"];
   
-  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
   
-  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
 
 ```
@@ -50,7 +52,7 @@ invalid.js:2:1 lint/nursery/noProto ━━━━━━━━━━━━━━�
 ```
 invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of __proto__.
+  i Avoid use of the deprecated __proto__ accessor.
   
     1 │ obj.__proto__ = a;
     2 │ obj["__proto__"] = b;
@@ -59,9 +61,10 @@ invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━�
     4 │ const d = obj["__proto__"];
     5 │ 
   
-  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
   
-  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
 
 ```
@@ -69,7 +72,7 @@ invalid.js:3:11 lint/nursery/noProto ━━━━━━━━━━━━━━�
 ```
 invalid.js:4:11 lint/nursery/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of __proto__.
+  i Avoid use of the deprecated __proto__ accessor.
   
     2 │ obj["__proto__"] = b;
     3 │ const c = obj.__proto__;
@@ -77,9 +80,10 @@ invalid.js:4:11 lint/nursery/noProto ━━━━━━━━━━━━━━�
       │           ^^^^^^^^^^^^^^^^
     5 │ 
   
-  i The use of __proto__ for getting or setting the prototype of an object is deprecated.
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
   
-  i Use Object.getPrototypeOf() or Object.setPrototypeOf() instead.
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
   
 
 ```

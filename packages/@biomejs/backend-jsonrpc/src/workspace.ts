@@ -982,7 +982,8 @@ export type RuleDomain =
 	| "qwik"
 	| "vue"
 	| "project"
-	| "tailwind";
+	| "tailwind"
+	| "turborepo";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -1777,7 +1778,7 @@ See <https://biomejs.dev/linter/rules/no-void-type-return>
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce all dependencies are correctly specified in a React hook.
+	* Enforce correct dependency usage within React hooks.
 See <https://biomejs.dev/linter/rules/use-exhaustive-dependencies> 
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
@@ -1942,7 +1943,7 @@ See <https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion>
 	 */
 	noParametersOnlyUsedInRecursion?: NoParametersOnlyUsedInRecursionConfiguration;
 	/**
-	* Disallow the use of the __proto__ property.
+	* Disallow the use of the deprecated __proto__ object property.
 See <https://biomejs.dev/linter/rules/no-proto> 
 	 */
 	noProto?: NoProtoConfiguration;
@@ -1971,6 +1972,11 @@ See <https://biomejs.dev/linter/rules/no-sync-scripts>
 See <https://biomejs.dev/linter/rules/no-ternary> 
 	 */
 	noTernary?: NoTernaryConfiguration;
+	/**
+	* Disallow the use of undeclared environment variables.
+See <https://biomejs.dev/linter/rules/no-undeclared-env-vars> 
+	 */
+	noUndeclaredEnvVars?: NoUndeclaredEnvVarsConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See <https://biomejs.dev/linter/rules/no-unknown-attribute> 
@@ -3663,6 +3669,9 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoUndeclaredEnvVarsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredEnvVarsOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
@@ -5104,6 +5113,10 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoUndeclaredEnvVarsOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredEnvVarsOptions;
+}
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnknownAttributeOptions;
@@ -6423,6 +6436,15 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+export interface NoUndeclaredEnvVarsOptions {
+	/**
+	* Environment variables that should always be allowed.
+Use this to specify environment variables that are always available
+in your environment, even when not declared in turbo.json.
+Supports regular expressions, e.g. `["MY_ENV_.*"]`. 
+	 */
+	allowedEnvVars?: Regex[];
+}
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
@@ -6892,6 +6914,7 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export type Regex = string;
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 /**
  * The GraphQL description style to enforce.
@@ -6909,7 +6932,6 @@ export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentTypeDefinition = "interface" | "type";
 export type FilenameCases = FilenameCase[];
-export type Regex = string;
 /**
  * The style to apply when importing types.
  */
@@ -7267,9 +7289,11 @@ export type Category =
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
@@ -7335,7 +7359,6 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/nursery/noScriptUrl"
 	| "lint/security/noSecrets"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
