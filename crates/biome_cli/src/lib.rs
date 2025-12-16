@@ -20,7 +20,7 @@ mod diagnostics;
 mod execute;
 mod logging;
 mod panic;
-mod reporter;
+pub(crate) mod reporter;
 pub(crate) mod runner;
 mod service;
 
@@ -37,7 +37,7 @@ use crate::runner::impls::commands::traversal::TraversalCommandImpl;
 use crate::runner::run::run_command_v2;
 pub use diagnostics::CliDiagnostic;
 pub use panic::setup_panic_handler;
-pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
+pub use reporter::{DiagnosticsPayload, TraversalSummary};
 pub use service::{SocketTransport, open_transport};
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {

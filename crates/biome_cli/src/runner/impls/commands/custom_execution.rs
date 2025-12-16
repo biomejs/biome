@@ -96,9 +96,7 @@ where
         self.deref().minimal_scan_kind()
     }
 
-    fn collector(&self, _: &dyn FileSystem, _: &dyn Execution, _: &CliOptions) -> Self::Collector {
-        ()
-    }
+    fn collector(&self, _: &dyn FileSystem, _: &dyn Execution, _: &CliOptions) -> Self::Collector {}
 
     fn merge_configuration(
         &mut self,

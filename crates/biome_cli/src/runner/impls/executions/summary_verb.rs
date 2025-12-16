@@ -1,12 +1,11 @@
-use crate::runner::execution::Execution;
 use biome_console::fmt::Formatter;
 use biome_console::{MarkupBuf, fmt, markup};
 use std::io;
 use std::time::Duration;
 
-pub(crate) struct SummaryVerbExecution<'a, E: Execution>(pub(crate) &'a E);
+pub(crate) struct SummaryVerbExecution;
 
-impl<'a, E: Execution> SummaryVerbExecution<'a, E> {
+impl SummaryVerbExecution {
     /// Prints "<verb> <files> in <duration>"
     pub(crate) fn summary_verb(&self, verb: &str, files: usize, duration: &Duration) -> MarkupBuf {
         let files = Files(files);

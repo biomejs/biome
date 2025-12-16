@@ -4,14 +4,13 @@ use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, ResultIoExt, UnhandledDiagnostic};
 use crate::runner::execution::Execution;
 use biome_console::Console;
-use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
-use biome_fs::{BiomePath, File, FileSystem, OpenOptions};
+use biome_fs::{BiomePath, File, OpenOptions};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    CodeAction, FeaturesSupported, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
@@ -111,7 +110,6 @@ pub(crate) type FileResult = Result<FileStatus, Message>;
 pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) content: &'a str,
-    pub(crate) fs: &'a dyn FileSystem,
     pub(crate) project_key: ProjectKey,
     pub(crate) workspace: &'a dyn Workspace,
     pub(crate) console: &'a mut dyn Console,
@@ -119,7 +117,7 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) execution: &'a dyn Execution,
 }
 
-pub(crate) trait ProcessFile: Send + Sync {
+pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
     fn process_file<Ctx>(
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
@@ -130,7 +128,7 @@ pub(crate) trait ProcessFile: Send + Sync {
 
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic>;
 
-    fn execute<Ctx>(ctx: &Ctx, biome_path: &BiomePath) -> Result<FileStatus, Message>
+    fn execute<Ctx>(ctx: &Ctx, biome_path: &BiomePath) -> FileResult
     where
         Ctx: CrawlerContext,
     {

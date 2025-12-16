@@ -103,7 +103,7 @@ pub(crate) mod process_file;
 pub(crate) mod run;
 pub(crate) mod scan_kind;
 
-use crate::cli_options::{CliOptions, cli_options};
+use crate::cli_options::CliOptions;
 use crate::commands::{
     print_diagnostics_from_workspace_result, validate_configuration_diagnostics,
 };
@@ -221,7 +221,7 @@ pub(crate) trait CommandRunner {
     /// The main command to use.
     fn run(
         &mut self,
-        mut session: CliSession,
+        session: CliSession,
         log_options: &LogOptions,
         cli_options: &CliOptions,
     ) -> Result<(), CliDiagnostic> {
@@ -243,7 +243,7 @@ pub(crate) trait CommandRunner {
             execution,
             paths,
             duration,
-            configuration_files,
+            configuration_files: _,
             project_key,
         } = configured_workspace;
 
@@ -264,7 +264,6 @@ pub(crate) trait CommandRunner {
                 execution: execution.as_ref(),
                 content: stdin.as_content(),
                 cli_options,
-                fs,
                 console,
             });
         }
@@ -276,7 +275,6 @@ pub(crate) trait CommandRunner {
             fs,
             project_key,
             paths.clone(),
-            configuration_files,
             collector,
         )?;
 

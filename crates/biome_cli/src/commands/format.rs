@@ -100,9 +100,9 @@ impl Execution for FormatExecution {
 
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
         if self.requires_write_access() {
-            SummaryVerbExecution(self).summary_verb("Formatted", files, duration)
+            SummaryVerbExecution.summary_verb("Formatted", files, duration)
         } else {
-            SummaryVerbExecution(self).summary_verb("Checked", files, duration)
+            SummaryVerbExecution.summary_verb("Checked", files, duration)
         }
     }
 }

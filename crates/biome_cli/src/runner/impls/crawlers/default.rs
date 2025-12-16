@@ -64,11 +64,5 @@ impl Crawler<()> for () {
     type ProcessFile = ();
     type Collector = ();
 
-    fn output(
-        _: <Self::Collector as Collector>::Result,
-        _: BTreeSet<BiomePath>,
-        _: Duration,
-    ) -> () {
-        ()
-    }
+    fn output(_: <Self::Collector as Collector>::Result, _: BTreeSet<BiomePath>, _: Duration) {}
 }

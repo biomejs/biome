@@ -46,13 +46,13 @@ pub struct TraversalSummary {
 }
 
 /// When using this trait, the type that implements this trait is the one that holds the read-only information to pass around
-pub trait Reporter: Sized {
+pub(crate) trait Reporter: Sized {
     /// Writes the summary using the underling visitor
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()>;
 }
 
 /// When using this trait, the type that implements this trait is the one that will **write** the data, ideally inside a buffer
-pub trait ReporterVisitor {
+pub(crate) trait ReporterVisitor {
     /// Writes the summary in the underling writer
     fn report_summary(
         &mut self,

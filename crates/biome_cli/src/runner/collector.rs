@@ -1,7 +1,6 @@
-use crate::runner::crawler::CrawlerContext;
 use crate::runner::execution::Execution;
 use crate::runner::process_file::Message;
-use biome_diagnostics::{DiagnosticTags, Error, Severity};
+use biome_diagnostics::{DiagnosticTags, Severity};
 use camino::Utf8PathBuf;
 use crossbeam::channel::Receiver;
 use std::time::Duration;
@@ -62,7 +61,5 @@ impl Collector for () {
     ) {
     }
 
-    fn result(self, _duration: Duration) -> Self::Result {
-        ()
-    }
+    fn result(self, _duration: Duration) -> Self::Result {}
 }

@@ -144,7 +144,7 @@ impl Execution for LintExecution {
     }
 
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
-        SummaryVerbExecution(self).summary_verb("Checked", files, duration)
+        SummaryVerbExecution.summary_verb("Checked", files, duration)
     }
 
     fn is_lint(&self) -> bool {

@@ -13,7 +13,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::time::Duration;
 use tracing::info;
 
-pub trait Execution: Send + Sync {
+pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     fn to_feature(&self) -> FeatureName;
 
     fn can_handle(&self, features: FeaturesSupported) -> bool;

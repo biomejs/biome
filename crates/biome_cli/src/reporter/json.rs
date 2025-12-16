@@ -1,5 +1,6 @@
+use crate::reporter::{Reporter, ReporterVisitor};
 use crate::runner::execution::Execution;
-use crate::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::Formatter;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
@@ -59,7 +60,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         _verbose: bool,
     ) -> std::io::Result<()> {
         self.summary = summary;
-        self.command = format!("{}", execution.as_diagnostic_category().name());
+        self.command = execution.as_diagnostic_category().name().to_string();
 
         Ok(())
     }

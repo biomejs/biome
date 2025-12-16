@@ -34,7 +34,6 @@ pub trait Crawler<Output> {
         fs: &dyn FileSystem,
         project_key: ProjectKey,
         inputs: Vec<String>,
-        configuration_files: Vec<BiomePath>,
         collector: Self::Collector,
     ) -> Result<Output, CliDiagnostic> {
         let (interner, recv_files) = PathInterner::new();
@@ -68,7 +67,7 @@ pub trait Crawler<Output> {
         // }
 
         execution.on_post_crawl(workspace)?;
-        let result = collector.result(duration.clone());
+        let result = collector.result(duration);
         Ok(Self::output(result, evaluated_paths, duration))
     }
 
@@ -108,11 +107,6 @@ pub trait CrawlerContext: TraversalContext {
     fn workspace(&self) -> &dyn Workspace;
     fn project_key(&self) -> ProjectKey;
     fn execution(&self) -> &dyn Execution;
-
-    fn changed(&self) -> usize;
-    fn unchanged(&self) -> usize;
-    fn matches(&self) -> usize;
-    fn skipped(&self) -> usize;
 }
 
 /// Context object shared between directory traversal tasks
@@ -193,22 +187,6 @@ where
     fn execution(&self) -> &dyn Execution {
         self.execution
     }
-
-    fn changed(&self) -> usize {
-        self.changed.load(Ordering::Relaxed)
-    }
-
-    fn unchanged(&self) -> usize {
-        self.unchanged.load(Ordering::Relaxed)
-    }
-
-    fn matches(&self) -> usize {
-        self.matches.load(Ordering::Relaxed)
-    }
-
-    fn skipped(&self) -> usize {
-        self.skipped.load(Ordering::Relaxed)
-    }
 }
 
 impl<'ctx, 'app, I, P> CrawlerOptions<'ctx, 'app, I, P>
@@ -237,7 +215,7 @@ where
             matches: AtomicUsize::new(0),
             skipped: AtomicUsize::new(0),
             execution,
-            _p: PhantomData::<P>::default(),
+            _p: PhantomData::<P>,
         }
     }
 }

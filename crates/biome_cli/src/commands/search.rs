@@ -102,7 +102,7 @@ impl Execution for SearchExecution {
     }
 
     fn search_language(&self) -> Option<GritTargetLanguage> {
-        self.language.as_ref().map(|language| language.clone())
+        self.language.clone()
     }
 
     fn search_pattern(&self) -> Option<&PatternId> {
@@ -110,7 +110,7 @@ impl Execution for SearchExecution {
     }
 
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
-        SummaryVerbExecution(self).summary_verb("Searched", files, duration)
+        SummaryVerbExecution.summary_verb("Searched", files, duration)
     }
 }
 
@@ -136,7 +136,7 @@ impl ProcessFile for SearchProcessFile {
     fn process_file<Ctx>(
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
-        features_supported: &FeaturesSupported,
+        _features_supported: &FeaturesSupported,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
@@ -156,7 +156,7 @@ impl ProcessFile for SearchProcessFile {
 
         let result = workspace_file
             .guard()
-            .search_pattern(&pattern)
+            .search_pattern(pattern)
             .with_file_path_and_code(workspace_file.path.to_string(), category!("search"))?;
 
         let input = workspace_file.input()?;
@@ -177,8 +177,8 @@ impl ProcessFile for SearchProcessFile {
         Ok(FileStatus::SearchResult(matches_len, search_results))
     }
 
-    fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
-        todo!()
+    fn process_std_in(_payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
+        Ok(())
     }
 }
 

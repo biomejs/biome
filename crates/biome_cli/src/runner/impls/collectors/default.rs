@@ -263,7 +263,6 @@ impl Collector for DefaultCollector {
                         || (execution.is_format()
                             || execution.is_check() && !execution.requires_write_access());
                     if is_error {
-                        dbg!("diff error");
                         self.errors.fetch_add(1, Ordering::Relaxed);
                     }
 
@@ -274,7 +273,6 @@ impl Collector for DefaultCollector {
                         Severity::Hint
                     };
 
-                    dbg!(&severity);
                     if self.should_skip_diagnostic(severity, DiagnosticTags::empty()) {
                         continue;
                     }

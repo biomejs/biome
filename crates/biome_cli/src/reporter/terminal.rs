@@ -1,6 +1,5 @@
-use crate::Reporter;
 use crate::reporter::{
-    DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
+    DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, Reporter, ReporterVisitor,
     TraversalSummary,
 };
 use crate::runner::execution::Execution;

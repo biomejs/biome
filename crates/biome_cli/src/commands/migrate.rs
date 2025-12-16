@@ -4,7 +4,6 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::runner::ConfiguredWorkspace;
 use crate::runner::execution::{AnalyzerSelectors, Execution};
 use crate::runner::impls::commands::custom_execution::CustomExecutionCmd;
-use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
 use crate::{CliDiagnostic, CliSession};
 use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
@@ -27,8 +26,6 @@ pub(crate) struct MigrateCommandPayload {
 
 pub(crate) struct MigrateExecution {
     write: bool,
-    configuration_file_path: Utf8PathBuf,
-    sub_command: Option<MigrateSubCommand>,
 }
 
 impl Execution for MigrateExecution {
@@ -101,11 +98,9 @@ impl CustomExecutionCmd for MigrateCommandPayload {
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Box<dyn Execution>, CliDiagnostic> {
-        if let Some(path) = self.configuration_file_path.clone() {
+        if self.configuration_file_path.is_some() {
             Ok(Box::new(MigrateExecution {
                 write: self.should_write(),
-                configuration_file_path: path,
-                sub_command: self.sub_command.clone(),
             }))
         } else {
             console.log(markup! {
@@ -148,7 +143,7 @@ impl CustomExecutionCmd for MigrateCommandPayload {
             session,
             project_key,
             write: self.should_write(),
-            // SAFETY: checked during merge_configuration
+            // SAFETY: checked during get_execution
             configuration_file_path: self.configuration_file_path.clone().unwrap(),
             sub_command: self.sub_command.clone(),
             nested_configuration_files: configuration_files,

@@ -124,7 +124,6 @@ impl ProcessFile for FormatProcessFile {
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
         let ProcessStdinFilePayload {
             workspace,
-            fs: _,
             content,
             project_key,
             biome_path,

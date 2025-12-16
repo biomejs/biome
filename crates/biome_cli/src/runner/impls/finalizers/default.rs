@@ -1,5 +1,6 @@
 use crate::cli_options::CliReporter;
 use crate::diagnostics::ReportDiagnostic;
+use crate::reporter::Reporter;
 use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
@@ -10,7 +11,7 @@ use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::impls::commands::traversal::TraverseResult;
-use crate::{CliDiagnostic, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE};
+use crate::{CliDiagnostic, DiagnosticsPayload, TEMPORARY_INTERNAL_REPORTER_FILE};
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Resource, SerdeJsonError};
 use biome_fs::BiomePath;

@@ -1,12 +1,11 @@
 use crate::CliDiagnostic;
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::check::CheckProcessFile;
 use crate::runner::LoadEditorConfig;
 use crate::runner::execution::{AnalyzerSelectors, Execution, ExecutionEnvironment, VcsTargeted};
 use crate::runner::impls::commands::traversal::TraversalCommand;
 use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
-use crate::runner::impls::process_file::lint_and_assist::LintAssistProcessFile;
+use crate::runner::impls::process_file::check::CheckProcessFile;
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::css::CssParserConfiguration;
@@ -20,8 +19,7 @@ use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
 use biome_service::workspace::{
-    FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
-    SupportKind,
+    FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, ScanKind, SupportKind,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
@@ -44,7 +42,7 @@ pub(crate) struct CiCommandPayload {
 
 struct CiExecution {
     /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
-    environment: Option<ExecutionEnvironment>,
+    _environment: Option<ExecutionEnvironment>,
     /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
     vcs_targeted: VcsTargeted,
     /// Whether assist diagnostics should be promoted to error, and fail the CLI
@@ -109,12 +107,11 @@ impl Execution for CiExecution {
     }
 
     fn should_enforce_assist(&self) -> bool {
-        dbg!(self.enforce_assist);
         self.enforce_assist
     }
 
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
-        SummaryVerbExecution(self).summary_verb("Checked", files, duration)
+        SummaryVerbExecution.summary_verb("Checked", files, duration)
     }
 }
 
@@ -150,7 +147,7 @@ impl TraversalCommand for CiCommandPayload {
             .is_some_and(|value| value == "true");
 
         Ok(Box::new(CiExecution {
-            environment: if is_github {
+            _environment: if is_github {
                 Some(ExecutionEnvironment::GitHub)
             } else {
                 None

@@ -1,4 +1,5 @@
 use crate::runner::crawler::CrawlerContext;
+use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
@@ -8,6 +9,7 @@ use biome_service::workspace::{
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::fmt::Debug;
+use std::panic::catch_unwind;
 
 /// Path entries that we want to ignore during the OS traversal.
 pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
@@ -19,7 +21,7 @@ pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
     b"node_modules",
 ];
 
-pub trait Handler: Default + Send + Sync + Debug {
+pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
     fn can_handle<Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx) -> bool
     where
         Ctx: CrawlerContext,
@@ -98,39 +100,57 @@ pub trait Handler: Default + Send + Sync + Debug {
         execution.can_handle(file_features)
     }
 
+    /// This function wraps the [process_file] function implementing the traversal
+    /// in a [catch_unwind] block and emit diagnostics in case of error (either the
+    /// traversal function returns Err or panics)
     fn handle_path<P, Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx)
     where
-        Ctx: CrawlerContext,
-        P: ProcessFile,
+        Ctx: CrawlerContext + std::panic::RefUnwindSafe,
+        P: ProcessFile + std::panic::RefUnwindSafe,
     {
         // ProcessFile::process_file is generic over Ctx: TraversalContext
         // We pass &Ctx which should also implement TraversalContext
-        match P::execute(ctx, biome_path) {
-            Ok(FileStatus::Changed) => {
+
+        match catch_unwind(move || P::execute(ctx, biome_path)) {
+            Ok(Ok(FileStatus::Changed)) => {
                 ctx.increment_changed(biome_path);
             }
-            Ok(FileStatus::Unchanged) => {
+            Ok(Ok(FileStatus::Unchanged)) => {
                 ctx.increment_unchanged();
             }
-            Ok(FileStatus::SearchResult(num_matches, msg)) => {
+            Ok(Ok(FileStatus::SearchResult(num_matches, msg))) => {
                 ctx.increment_unchanged();
                 ctx.increment_matches(num_matches);
                 ctx.push_message(msg);
             }
-            Ok(FileStatus::Message(msg)) => {
+            Ok(Ok(FileStatus::Message(msg))) => {
                 ctx.increment_unchanged();
                 ctx.push_message(msg);
             }
-            Ok(FileStatus::Protected(file_path)) => {
+            Ok(Ok(FileStatus::Protected(file_path))) => {
                 ctx.increment_unchanged();
                 ctx.push_diagnostic(WorkspaceError::protected_file(file_path).into());
             }
-            Ok(FileStatus::Ignored) => {}
-            Err(err) => {
+            Ok(Ok(FileStatus::Ignored)) => {}
+            Ok(Err(err)) => {
                 ctx.increment_unchanged();
                 ctx.increment_skipped();
-                // TODO: add skipped counter to CrawlerContext
                 ctx.push_message(err);
+            }
+            Err(err) => {
+                let message = match err.downcast::<String>() {
+                    Ok(msg) => format!("processing panicked: {msg}"),
+                    Err(err) => match err.downcast::<&'static str>() {
+                        Ok(msg) => format!("processing panicked: {msg}"),
+                        Err(_) => String::from("processing panicked"),
+                    },
+                };
+
+                ctx.push_message(
+                    PanicDiagnostic { message }
+                        .with_file_path(biome_path.to_string())
+                        .into(),
+                );
             }
         }
     }

@@ -38,7 +38,7 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
 use biome_service::workspace::FixFileMode;
-use biome_service::{WatcherOptions, Workspace, watcher_options};
+use biome_service::{WatcherOptions, watcher_options};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 

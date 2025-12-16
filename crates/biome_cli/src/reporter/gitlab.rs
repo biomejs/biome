@@ -1,5 +1,6 @@
+use crate::reporter::{Reporter, ReporterVisitor};
 use crate::runner::execution::Execution;
-use crate::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;

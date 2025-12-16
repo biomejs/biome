@@ -55,6 +55,7 @@ impl ProcessFile for CheckProcessFile {
             } else {
                 let format_result =
                     FormatProcessFile::process_file(ctx, workspace_file, features_supported);
+
                 match format_result {
                     Ok(status) => {
                         if status.is_changed() {
