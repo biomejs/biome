@@ -375,7 +375,7 @@ impl CliDiagnostic {
         })
     }
 
-    /// Emitted when errors were emitted while running `check` command
+    /// Emitted when errors were emitted while running `format` command
     pub fn format_error(category: &'static Category) -> Self {
         Self::CheckError(CheckError {
             category,
