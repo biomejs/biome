@@ -1,16 +1,13 @@
-use crate::TraversalSummary;
-use crate::execute::traverse::TraverseResult;
 use crate::runner::collector::Collector;
-use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{CIFormatDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::runner::execution::Execution;
-use crate::runner::process_file::{DiffKind, Message};
+use crate::runner::process_file::{DiffKind, Message, MessageStat};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Resource, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Receiver;
 use rustc_hash::FxHashSet;
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::RwLock;
+use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 use std::time::Duration;
 
 pub(crate) struct DefaultCollector {
@@ -45,7 +42,12 @@ pub(crate) struct DefaultCollector {
     /// The current working directory, borrowed from [FileSystem]
     working_directory: Option<Utf8PathBuf>,
 
-    diagnostics_to_print: Mutex<Vec<Error>>,
+    diagnostics_to_print: RwLock<Vec<Error>>,
+
+    changed: AtomicUsize,
+    unchanged: AtomicUsize,
+    matches: AtomicUsize,
+    skipped: AtomicUsize,
 }
 
 impl DefaultCollector {
@@ -62,8 +64,17 @@ impl DefaultCollector {
             printed_diagnostics: AtomicU32::new(0),
             total_skipped_suggested_fixes: AtomicU32::new(0),
             working_directory: working_directory.map(|wd| wd.to_path_buf()),
-            diagnostics_to_print: Mutex::default(),
+            diagnostics_to_print: RwLock::default(),
+            changed: AtomicUsize::new(0),
+            unchanged: AtomicUsize::new(0),
+            matches: AtomicUsize::new(0),
+            skipped: AtomicUsize::new(0),
         }
+    }
+
+    fn push_diagnostic(&self, diagnostic: Error) {
+        let mut diagnostics_to_print = self.diagnostics_to_print.write().unwrap();
+        diagnostics_to_print.push(diagnostic);
     }
 
     pub(crate) fn with_verbose(mut self, verbose: bool) -> Self {
@@ -167,9 +178,9 @@ impl Collector for DefaultCollector {
                     if err.severity() == Severity::Warning {
                         self.warnings.fetch_add(1, Ordering::Relaxed);
                     }
-                    // if err.severity() == Severity::Information {
-                    //     self.infos.fetch_add(1, Ordering::Relaxed);
-                    // }
+                    if err.severity() == Severity::Information {
+                        self.infos.fetch_add(1, Ordering::Relaxed);
+                    }
                     if let Some(Resource::File(file_path)) = location.resource.as_ref() {
                         // Retrieves the file name from the file ID cache, if it's a miss
                         // flush entries from the interner channel until it's found
@@ -200,9 +211,7 @@ impl Collector for DefaultCollector {
                     let should_collect = self.should_collect();
 
                     if should_collect {
-                        let mut diagnostics_to_print = self.diagnostics_to_print.lock().unwrap();
-
-                        diagnostics_to_print.push(err);
+                        self.push_diagnostic(err)
                     }
                 }
 
@@ -238,9 +247,7 @@ impl Collector for DefaultCollector {
                             .with_file_path(file_path.as_str())
                             .with_file_source_code(&content);
                         if should_collect || execution.is_ci() {
-                            let mut diagnostics_to_print =
-                                self.diagnostics_to_print.lock().unwrap();
-                            diagnostics_to_print.push(diag)
+                            self.push_diagnostic(diag);
                         }
                     }
                 }
@@ -251,9 +258,12 @@ impl Collector for DefaultCollector {
                     diff_kind,
                 } => {
                     let file_path = self.to_relative_file_path(&file_name);
-                    // A diff is an error in CI mode and in format check mode
-                    let is_error = execution.is_ci() || !execution.is_check();
+                    // A diff is an error in CI mode and in format/check command in non-write mode
+                    let is_error = execution.is_ci()
+                        || (execution.is_format()
+                            || execution.is_check() && !execution.requires_write_access());
                     if is_error {
+                        dbg!("diff error");
                         self.errors.fetch_add(1, Ordering::Relaxed);
                     }
 
@@ -264,10 +274,10 @@ impl Collector for DefaultCollector {
                         Severity::Hint
                     };
 
+                    dbg!(&severity);
                     if self.should_skip_diagnostic(severity, DiagnosticTags::empty()) {
                         continue;
                     }
-
                     let should_collect = self.should_collect();
 
                     if should_collect {
@@ -295,26 +305,40 @@ impl Collector for DefaultCollector {
                                     .with_file_path(file_path.clone())
                                 };
                                 if should_collect || execution.is_ci() {
-                                    let mut diagnostics_to_print =
-                                        self.diagnostics_to_print.lock().unwrap();
-
-                                    diagnostics_to_print.push(diag);
+                                    self.push_diagnostic(diag);
                                 }
                             }
                         }
                     }
                 }
-                Message::DiagnosticsWithActions { .. } => {}
+                Message::Stats(stats) => match stats {
+                    MessageStat::Changed => {
+                        self.changed.fetch_add(1, Ordering::Relaxed);
+                    }
+                    MessageStat::Unchanged => {
+                        self.unchanged.fetch_add(1, Ordering::Relaxed);
+                    }
+                    MessageStat::Matches => {
+                        self.matches.fetch_add(1, Ordering::Relaxed);
+                    }
+                    MessageStat::Skipped => {
+                        self.skipped.fetch_add(1, Ordering::Relaxed);
+                    }
+                },
             }
         }
     }
 
-    fn result(self, duration: Duration, ctx: &dyn CrawlerContext) -> Self::Result {
+    fn result(self, duration: Duration) -> Self::Result {
         let errors = self.errors();
         let warnings = self.warnings();
         let infos = self.infos();
         let suggested_fixes_skipped = self.skipped_fixes();
         let diagnostics_not_printed = self.not_printed_diagnostics();
+        let changed = self.changed.load(Ordering::Relaxed);
+        let unchanged = self.unchanged.load(Ordering::Relaxed);
+        let matches = self.matches.load(Ordering::Relaxed);
+        let skipped = self.skipped.load(Ordering::Relaxed);
         // last
         let diagnostics_to_print = self.diagnostics_to_print.into_inner().unwrap();
 
@@ -327,6 +351,10 @@ impl Collector for DefaultCollector {
             suggested_fixes_skipped,
             diagnostics_not_printed,
             diagnostics: diagnostics_to_print,
+            changed,
+            skipped,
+            matches,
+            unchanged,
         }
     }
 }
@@ -342,4 +370,8 @@ pub(crate) struct CollectorSummary {
     pub suggested_fixes_skipped: u32,
     pub diagnostics_not_printed: u32,
     pub diagnostics: Vec<Error>,
+    pub changed: usize,
+    pub unchanged: usize,
+    pub matches: usize,
+    pub skipped: usize,
 }

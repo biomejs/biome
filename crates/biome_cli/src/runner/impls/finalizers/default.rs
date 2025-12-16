@@ -1,7 +1,5 @@
-use crate::cli_options::{CliOptions, CliReporter};
+use crate::cli_options::CliReporter;
 use crate::diagnostics::ReportDiagnostic;
-use crate::execute::ReportMode;
-use crate::execute::traverse::TraverseResult;
 use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
@@ -11,11 +9,13 @@ use crate::reporter::rdjson::{RdJsonReporter, RdJsonReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
+use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::{CliDiagnostic, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE};
 use biome_console::{ConsoleExt, markup};
-use biome_diagnostics::SerdeJsonError;
+use biome_diagnostics::{Resource, SerdeJsonError};
 use biome_fs::BiomePath;
 use biome_service::workspace::{CloseFileParams, FileContent, FormatFileParams, OpenFileParams};
+use std::cmp::Ordering;
 
 pub(crate) struct DefaultFinalizer;
 
@@ -40,6 +40,21 @@ impl Finalizer for DefaultFinalizer {
             evaluated_paths,
             mut diagnostics,
         } = result;
+
+        diagnostics.sort_unstable_by(|a, b| match a.severity().cmp(&b.severity()) {
+            Ordering::Equal => {
+                let a = a.location();
+                let b = b.location();
+                match (a.resource, b.resource) {
+                    (Some(Resource::File(a)), Some(Resource::File(b))) => a.cmp(b),
+                    (Some(Resource::File(_)), None) => Ordering::Greater,
+                    (None, Some(Resource::File(_))) => Ordering::Less,
+                    _ => Ordering::Equal,
+                }
+            }
+            result => result,
+        });
+
         // We join the duration of the scanning with the duration of the traverse.
         summary.scanner_duration = scan_duration;
         let errors = summary.errors;
@@ -52,7 +67,7 @@ impl Finalizer for DefaultFinalizer {
             max_diagnostics: cli_options.max_diagnostics,
         };
 
-        let reporter_mode = ReportMode::from(cli_options.reporter);
+        let reporter_mode = ReportMode::from(&cli_options.reporter);
 
         match reporter_mode {
             ReportMode::Terminal { with_summary } => {
@@ -60,7 +75,7 @@ impl Finalizer for DefaultFinalizer {
                     let reporter = SummaryReporter {
                         summary,
                         diagnostics_payload,
-                        execution: execution.clone(),
+                        execution,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
                         evaluated_paths,
@@ -70,7 +85,7 @@ impl Finalizer for DefaultFinalizer {
                     let reporter = ConsoleReporter {
                         summary,
                         diagnostics_payload,
-                        execution: execution.clone(),
+                        execution,
                         evaluated_paths,
                         verbose: cli_options.verbose,
                         working_directory: fs.working_directory().clone(),
@@ -85,7 +100,7 @@ impl Finalizer for DefaultFinalizer {
                 let reporter = JsonReporter {
                     summary,
                     diagnostics: diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -127,7 +142,7 @@ impl Finalizer for DefaultFinalizer {
             ReportMode::GitHub => {
                 let reporter = GithubReporter {
                     diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -136,7 +151,7 @@ impl Finalizer for DefaultFinalizer {
             ReportMode::GitLab => {
                 let reporter = GitLabReporter {
                     diagnostics: diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -149,7 +164,7 @@ impl Finalizer for DefaultFinalizer {
                 let reporter = JunitReporter {
                     summary,
                     diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -159,7 +174,7 @@ impl Finalizer for DefaultFinalizer {
                 let reporter = CheckstyleReporter {
                     summary,
                     diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -170,7 +185,7 @@ impl Finalizer for DefaultFinalizer {
             ReportMode::RdJson => {
                 let reporter = RdJsonReporter {
                     diagnostics_payload,
-                    execution: execution.clone(),
+                    execution,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                 };
@@ -199,6 +214,60 @@ impl Finalizer for DefaultFinalizer {
             }
         } else {
             Ok(())
+        }
+    }
+}
+
+impl Finalizer for () {
+    type Input = ();
+
+    fn finalize(_: FinalizePayload<'_, Self::Input>) -> Result<(), CliDiagnostic> {
+        Ok(())
+    }
+}
+
+/// Tells to the execution of the traversal how the information should be reported
+#[derive(Copy, Clone, Debug)]
+pub enum ReportMode {
+    /// Reports information straight to the console, it's the default mode
+    Terminal { with_summary: bool },
+    /// Reports information in JSON format
+    Json { pretty: bool },
+    /// Reports information for GitHub
+    GitHub,
+    /// JUnit output
+    /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
+    Junit,
+    /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
+    GitLab,
+    /// Reports diagnostics in [Checkstyle XML format](https://checkstyle.org/).
+    Checkstyle,
+    /// Reports information in [reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
+    RdJson,
+}
+
+impl Default for ReportMode {
+    fn default() -> Self {
+        Self::Terminal {
+            with_summary: false,
+        }
+    }
+}
+
+impl From<&CliReporter> for ReportMode {
+    fn from(value: &CliReporter) -> Self {
+        match value {
+            CliReporter::Default => Self::Terminal {
+                with_summary: false,
+            },
+            CliReporter::Summary => Self::Terminal { with_summary: true },
+            CliReporter::Json => Self::Json { pretty: false },
+            CliReporter::JsonPretty => Self::Json { pretty: true },
+            CliReporter::GitHub => Self::GitHub,
+            CliReporter::Junit => Self::Junit,
+            CliReporter::GitLab => Self::GitLab {},
+            CliReporter::Checkstyle => Self::Checkstyle,
+            CliReporter::RdJson => Self::RdJson,
         }
     }
 }

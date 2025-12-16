@@ -1,9 +1,9 @@
 use crate::Reporter;
-use crate::execute::{Execution, TraversalMode};
 use crate::reporter::{
     DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
     TraversalSummary,
 };
+use crate::runner::execution::Execution;
 use biome_console::fmt::Formatter;
 use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::PrintDiagnostic;
@@ -14,19 +14,19 @@ use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
-pub(crate) struct ConsoleReporter {
+pub(crate) struct ConsoleReporter<'a> {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
-    pub(crate) execution: Execution,
+    pub(crate) execution: &'a dyn Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
 
-impl Reporter for ConsoleReporter {
+impl<'a> Reporter for ConsoleReporter<'a> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         visitor.report_diagnostics(
-            &self.execution,
+            self.execution,
             self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
@@ -35,7 +35,7 @@ impl Reporter for ConsoleReporter {
             visitor
                 .report_handled_paths(self.evaluated_paths, self.working_directory.as_deref())?;
         }
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
@@ -45,7 +45,7 @@ pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 impl ReporterVisitor for ConsoleReporterVisitor<'_> {
     fn report_summary(
         &mut self,
-        execution: &Execution,
+        execution: &dyn Execution,
         summary: TraversalSummary,
         verbose: bool,
     ) -> io::Result<()> {
@@ -64,7 +64,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
+            {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
 
         Ok(())
@@ -124,7 +124,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
-        execution: &Execution,
+        execution: &dyn Execution,
         diagnostics_payload: DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
@@ -163,14 +163,17 @@ impl fmt::Display for Files {
     }
 }
 
-struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
+struct SummaryDetail<'a>(pub(crate) &'a dyn Execution, usize);
 
 impl fmt::Display for SummaryDetail<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let Self(mode, files) = self;
-        if let TraversalMode::Search { .. } = mode {
+        let Self(execution, files) = self;
+
+        if execution.is_search() {
             return Ok(());
         }
+        // For now, we'll assume all executions except search can have fixes
+        // This can be refined later when we have more specific execution types
 
         if *files > 0 {
             fmt.write_markup(markup! {
@@ -194,57 +197,27 @@ impl fmt::Display for ScanSummary<'_> {
     }
 }
 
-struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
+struct SummaryTotal<'a>(&'a dyn Execution, usize, &'a Duration);
 
 impl fmt::Display for SummaryTotal<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let Self(mode, files, duration) = self;
-        let files = Files(*files);
-        match mode {
-            TraversalMode::Check { .. } | TraversalMode::Lint { .. } | TraversalMode::CI { .. } => {
-                fmt.write_markup(markup! {
-                    "Checked "{files}" in "{duration}"."
-                })
-            }
-            TraversalMode::Format { write, .. } => {
-                if *write {
-                    fmt.write_markup(markup! {
-                        "Formatted "{files}" in "{duration}"."
-                    })
-                } else {
-                    fmt.write_markup(markup! {
-                        "Checked "{files}" in "{duration}"."
-                    })
-                }
-            }
+        let Self(execution, files, duration) = self;
+        let summary_phrase = execution.summary_phrase(*files, duration);
 
-            TraversalMode::Migrate { write, .. } => {
-                if *write {
-                    fmt.write_markup(markup! {
-                      "Migrated your configuration file in "{duration}"."
-                    })
-                } else {
-                    fmt.write_markup(markup! {
-                        "Checked your configuration file in "{duration}"."
-                    })
-                }
-            }
-
-            TraversalMode::Search { .. } => fmt.write_markup(markup! {
-                "Searched "{files}" in "{duration}"."
-            }),
-        }
+        fmt.write_markup(markup! {
+            {summary_phrase}
+        })
     }
 }
 
 pub(crate) struct ConsoleTraversalSummary<'a>(
-    pub(crate) &'a TraversalMode,
+    pub(crate) &'a dyn Execution,
     pub(crate) &'a TraversalSummary,
     pub(crate) bool,
 );
 impl fmt::Display for ConsoleTraversalSummary<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let Self(mode, summary, verbose) = *self;
+        let Self(execution, summary, verbose) = *self;
         let mut duration = summary.duration;
         if !verbose {
             if let Some(scanner_duration) = summary.scanner_duration {
@@ -255,12 +228,14 @@ impl fmt::Display for ConsoleTraversalSummary<'_> {
             fmt.write_markup(markup!(<Info>{scanned}</Info>))?;
             fmt.write_str("\n")?;
         }
-        let total = SummaryTotal(mode, summary.changed + summary.unchanged, &duration);
-        let detail = SummaryDetail(mode, summary.changed);
+        let total = SummaryTotal(execution, summary.changed + summary.unchanged, &duration);
+        let detail = SummaryDetail(execution, summary.changed);
         fmt.write_markup(markup!(<Info>{total}{detail}</Info>))?;
 
         // The search emits info diagnostics, so we use if control-flow to print a different message
-        if let TraversalMode::Search { .. } = mode {
+        // For now, we'll assume this is a search command if there are matches
+        // This can be refined later when we have more specific execution types
+        if summary.matches > 0 {
             if summary.matches == 1 {
                 fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" match."</Info>))?
             } else {

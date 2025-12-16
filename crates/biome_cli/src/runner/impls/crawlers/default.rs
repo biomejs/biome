@@ -1,7 +1,8 @@
 use crate::TraversalSummary;
-use crate::execute::traverse::TraverseResult;
-use crate::runner::crawler::{Crawler, CrawlerContext};
+use crate::runner::collector::Collector;
+use crate::runner::crawler::Crawler;
 use crate::runner::impls::collectors::default::{CollectorSummary, DefaultCollector};
+use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::runner::impls::handlers::default::DefaultHandler;
 use crate::runner::process_file::ProcessFile;
 use biome_fs::BiomePath;
@@ -18,15 +19,11 @@ where
     type ProcessFile = P;
     type Collector = DefaultCollector;
 
-    fn output<Ctx>(
-        ctx: &Ctx,
+    fn output(
         collector_result: CollectorSummary,
         evaluated_paths: BTreeSet<BiomePath>,
         _duration: Duration,
-    ) -> TraverseResult
-    where
-        Ctx: CrawlerContext,
-    {
+    ) -> TraverseResult {
         let CollectorSummary {
             duration,
             scanner_duration,
@@ -36,12 +33,11 @@ where
             suggested_fixes_skipped,
             diagnostics_not_printed,
             diagnostics,
+            changed,
+            unchanged,
+            matches,
+            skipped,
         } = collector_result;
-
-        let changed = ctx.changed();
-        let unchanged = ctx.unchanged();
-        let matches = ctx.matches();
-        let skipped = ctx.skipped();
 
         TraverseResult {
             summary: TraversalSummary {
@@ -61,6 +57,18 @@ where
             evaluated_paths,
         }
     }
+}
 
-    type CollectorOutput = ();
+impl Crawler<()> for () {
+    type Handler = ();
+    type ProcessFile = ();
+    type Collector = ();
+
+    fn output(
+        _: <Self::Collector as Collector>::Result,
+        _: BTreeSet<BiomePath>,
+        _: Duration,
+    ) -> () {
+        ()
+    }
 }

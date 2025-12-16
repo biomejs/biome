@@ -8,7 +8,7 @@ pub(crate) mod summary;
 pub(crate) mod terminal;
 
 use crate::cli_options::MaxDiagnostics;
-use crate::execute::Execution;
+use crate::runner::execution::Execution;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
@@ -56,7 +56,7 @@ pub trait ReporterVisitor {
     /// Writes the summary in the underling writer
     fn report_summary(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         _summary: TraversalSummary,
         _verbose: bool,
     ) -> io::Result<()>;
@@ -73,7 +73,7 @@ pub trait ReporterVisitor {
     /// Writes a diagnostics
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
         _working_directory: Option<&Utf8Path>,

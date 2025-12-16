@@ -7,6 +7,7 @@ use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
+use std::fmt::Debug;
 
 /// Path entries that we want to ignore during the OS traversal.
 pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
@@ -18,7 +19,7 @@ pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
     b"node_modules",
 ];
 
-pub trait Handler: Default + Send + Sync {
+pub trait Handler: Default + Send + Sync + Debug {
     fn can_handle<Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx) -> bool
     where
         Ctx: CrawlerContext,
@@ -127,6 +128,7 @@ pub trait Handler: Default + Send + Sync {
             Ok(FileStatus::Ignored) => {}
             Err(err) => {
                 ctx.increment_unchanged();
+                ctx.increment_skipped();
                 // TODO: add skipped counter to CrawlerContext
                 ctx.push_message(err);
             }

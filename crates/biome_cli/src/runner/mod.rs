@@ -101,27 +101,27 @@ pub(crate) mod handler;
 pub(crate) mod impls;
 pub(crate) mod process_file;
 pub(crate) mod run;
-pub(crate) mod runner_ext;
 pub(crate) mod scan_kind;
 
-use crate::cli_options::CliOptions;
+use crate::cli_options::{CliOptions, cli_options};
 use crate::commands::{
     print_diagnostics_from_workspace_result, validate_configuration_diagnostics,
 };
-use crate::execute::Stdin;
+use crate::diagnostics::StdinDiagnostic;
 use crate::logging::LogOptions;
 use crate::runner::collector::Collector;
 use crate::runner::crawler::Crawler;
-use crate::runner::execution::Execution;
+use crate::runner::execution::{Execution, Stdin};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
-use crate::runner::process_file::ProcessFile;
-use crate::runner::runner_ext::TraversalCommand;
+use crate::runner::impls::commands::traversal::TraversalCommand;
+use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
 use crate::runner::scan_kind::derive_best_scan_kind;
-use crate::{CliDiagnostic, CliSession, TraversalMode, execute_mode, setup_cli_subscriber};
+use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
 use biome_configuration::Configuration;
-use biome_console::Console;
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
+use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{
@@ -134,7 +134,6 @@ use biome_service::workspace::{
 use biome_service::{Workspace, WorkspaceError};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
-use std::process::Output;
 use std::time::Duration;
 use tracing::info;
 
@@ -151,7 +150,7 @@ use tracing::info;
 /// Optional methods:
 /// - [CommandRunner::check_incompatible_arguments]
 /// - [CommandRunner::execute_without_crawling] (only if REQUIRES_CRAWLING = false)
-pub(crate) trait CommandRunner: Sized {
+pub(crate) trait CommandRunner {
     type CrawlerOutput;
     type Collector: Collector;
     type Crawler: Crawler<
@@ -164,9 +163,6 @@ pub(crate) trait CommandRunner: Sized {
     type Handler: Handler;
     type ProcessFile: ProcessFile;
 
-    /// Whether this command should be aware of the VCS integration
-    const SHOULD_TARGET_VCS: bool;
-
     /// Whether this command requires file crawling.
     ///
     /// If `false`, the command must implement [CommandRunner::execute_without_crawling]
@@ -177,10 +173,11 @@ pub(crate) trait CommandRunner: Sized {
     const REQUIRES_CRAWLING: bool;
 
     /// The name of the command that will appear in the diagnostics
-    fn command_name() -> &'static str;
+    fn command_name(&self) -> &'static str;
 
-    /// The [ScanKind] to use for this command
-    fn scan_kind() -> ScanKind;
+    /// The [ScanKind] that could be used for this command. Some commands shouldn't implement this
+    /// because it should be derived from the configuration.
+    fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
     fn collector(
         &self,
@@ -193,6 +190,7 @@ pub(crate) trait CommandRunner: Sized {
         &self,
         paths: Vec<OsString>,
         working_dir: &Utf8Path,
+        execution: &dyn Execution,
     ) -> Result<Vec<String>, CliDiagnostic> {
         let mut paths = paths
             .into_iter()
@@ -200,9 +198,10 @@ pub(crate) trait CommandRunner: Sized {
             .collect::<Result<Vec<_>, _>>()?;
 
         if paths.is_empty() {
-            if Self::SHOULD_TARGET_VCS {
+            if execution.is_vcs_targeted() {
                 // If `--staged` or `--changed` is specified, it's
                 // acceptable for them to be empty, so ignore it.
+            } else {
                 paths.push(working_dir.to_string());
             }
         }
@@ -250,14 +249,24 @@ pub(crate) trait CommandRunner: Sized {
 
         if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
             let biome_path = BiomePath::new(stdin.as_path());
-            return crate::execute::std_in::run(
-                session,
+            if biome_path.extension().is_none() {
+                console.error(markup! {
+                    {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
+                });
+                console.append(markup! {{stdin.as_content()}});
+                return Ok(());
+            }
+
+            return Self::ProcessFile::process_std_in(ProcessStdinFilePayload {
+                biome_path: &biome_path,
                 project_key,
-                execution.as_ref(),
-                biome_path,
-                stdin.as_content(),
+                workspace,
+                execution: execution.as_ref(),
+                content: stdin.as_content(),
                 cli_options,
-            );
+                fs,
+                console,
+            });
         }
 
         let collector = self.collector(fs, execution.as_ref(), cli_options);
@@ -348,7 +357,7 @@ pub(crate) trait CommandRunner: Sized {
         };
 
         let paths = self.get_files_to_process(fs, &configuration)?;
-        let paths = self.validated_paths_for_execution(paths, &working_dir)?;
+        let paths = self.validated_paths_for_execution(paths, &working_dir, execution.as_ref())?;
 
         // Open the project
         let open_project_result = workspace.open_project(OpenProjectParams {
@@ -356,16 +365,17 @@ pub(crate) trait CommandRunner: Sized {
             open_uninitialized: true,
         })?;
 
-        let scan_kind_computer = execution.scan_kind_computer(&configuration);
-
         let stdin = self.get_stdin(console, execution.as_ref())?;
+        let computed_scan_kind =
+            execution.scan_kind_computer(ProjectScanComputer::new(&configuration));
+
         let scan_kind = derive_best_scan_kind(
-            scan_kind_computer.compute(),
+            computed_scan_kind,
             stdin.as_ref(),
             &root_configuration_dir,
             &working_dir,
             &configuration,
-            self.scan_kind(),
+            self.minimal_scan_kind(),
         );
 
         // Update the settings of the project
@@ -389,6 +399,7 @@ pub(crate) trait CommandRunner: Sized {
         // Scan the project
         let scan_kind =
             execution.compute_scan_kind(paths.as_slice(), working_dir.as_path(), scan_kind);
+
         let result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,
             watch: cli_options.use_server,
@@ -430,7 +441,10 @@ pub(crate) trait CommandRunner: Sized {
                 Some((path, input_code).into())
             } else {
                 // we provided the argument without a piped stdin, we bail
-                return Err(CliDiagnostic::missing_argument("stdin", Self::command_name));
+                return Err(CliDiagnostic::missing_argument(
+                    "stdin",
+                    self.command_name(),
+                ));
             }
         } else {
             None
@@ -459,9 +473,6 @@ pub(crate) trait CommandRunner: Sized {
         fs: &dyn FileSystem,
         configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic>;
-
-    /// Whether the command should write the files.
-    fn should_write(&self) -> bool;
 
     /// Returns the [Execution] mode.
     fn get_execution(
@@ -508,7 +519,7 @@ pub(crate) trait CommandRunner: Sized {
     ) -> Result<(), CliDiagnostic> {
         panic!(
             "{} command has REQUIRES_CRAWLING = false but did not implement execute_without_crawling()",
-            Self::command_name()
+            self.command_name()
         )
     }
 

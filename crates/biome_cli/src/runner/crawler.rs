@@ -2,7 +2,7 @@ use crate::CliDiagnostic;
 use crate::runner::collector::Collector;
 use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
-use crate::runner::process_file::{Message, ProcessFile};
+use crate::runner::process_file::{Message, MessageStat, ProcessFile};
 use biome_diagnostics::Error;
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
@@ -22,14 +22,11 @@ pub trait Crawler<Output> {
     type ProcessFile: ProcessFile;
     type Collector: Collector;
 
-    fn output<Ctx>(
-        ctx: &Ctx,
+    fn output(
         collector_result: <Self::Collector as Collector>::Result,
         evaluated_paths: BTreeSet<BiomePath>,
         duration: Duration,
-    ) -> Output
-    where
-        Ctx: CrawlerContext;
+    ) -> Output;
 
     fn crawl(
         execution: &dyn Execution,
@@ -43,17 +40,6 @@ pub trait Crawler<Output> {
         let (interner, recv_files) = PathInterner::new();
         let (sender, receiver) = unbounded();
 
-        // TODO implement this
-        // let max_diagnostics = execution.get_max_diagnostics();
-        //
-        // let working_directory = fs.working_directory();
-        // let collector = crate::execute::traverse::DiagnosticsCollector::new(execution, working_directory.as_deref())
-        //     .with_verbose(cli_options.verbose)
-        //     .with_diagnostic_level(cli_options.diagnostic_level)
-        //     .with_max_diagnostics(max_diagnostics);
-
-        let ctx = CrawlerOptions::new(fs, workspace, project_key, interner, sender, execution);
-
         let (duration, evaluated_paths) = thread::scope(|s| {
             let handler = thread::Builder::new()
                 .name(String::from("biome::console"))
@@ -62,7 +48,11 @@ pub trait Crawler<Output> {
 
             // The traversal context is scoped to ensure all the channels it
             // contains are properly closed once the traversal finishes
-            let (elapsed, evaluated_paths) = Self::crawl_inputs(fs, inputs, &ctx);
+            let (elapsed, evaluated_paths) = Self::crawl_inputs(
+                fs,
+                inputs,
+                &CrawlerOptions::new(fs, workspace, project_key, interner, sender, execution),
+            );
             // wait for the main thread to finish
             handler.join().unwrap();
 
@@ -78,8 +68,8 @@ pub trait Crawler<Output> {
         // }
 
         execution.on_post_crawl(workspace)?;
-        let result = collector.result(duration.clone(), &ctx);
-        Ok(Self::output(&ctx, result, evaluated_paths, duration))
+        let result = collector.result(duration.clone());
+        Ok(Self::output(result, evaluated_paths, duration))
     }
 
     /// Initiate the filesystem traversal tasks with the provided input paths and
@@ -105,18 +95,13 @@ pub trait Crawler<Output> {
 
         (start.elapsed(), ctx.evaluated_paths())
     }
-
-    fn process_file() -> Result<(), CliDiagnostic> {
-        // ProcessFile::default().process()
-        Ok(())
-    }
-    type CollectorOutput;
 }
 
 pub trait CrawlerContext: TraversalContext {
     fn increment_changed(&self, path: &BiomePath);
     fn increment_unchanged(&self);
     fn increment_matches(&self, num_matches: usize);
+    fn increment_skipped(&self);
     /// Send a message to the display thread
     fn push_message(&self, msg: Message);
     fn fs(&self) -> &dyn FileSystem;
@@ -171,13 +156,21 @@ where
             .write()
             .unwrap()
             .replace(path.to_written());
+        self.push_message(Message::Stats(MessageStat::Changed));
     }
     fn increment_unchanged(&self) {
+        self.push_message(Message::Stats(MessageStat::Unchanged));
         self.unchanged.fetch_add(1, Ordering::Relaxed);
     }
 
     fn increment_matches(&self, num_matches: usize) {
+        self.push_message(Message::Stats(MessageStat::Matches));
         self.matches.fetch_add(num_matches, Ordering::Relaxed);
+    }
+
+    fn increment_skipped(&self) {
+        self.push_message(Message::Stats(MessageStat::Skipped));
+        self.skipped.fetch_add(1, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread

@@ -1,17 +1,20 @@
 use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
 use crate::runner::crawler::CrawlerContext;
-use crate::runner::diagnostics::{ResultExt, UnhandledDiagnostic};
+use crate::runner::diagnostics::{ResultExt, ResultIoExt, UnhandledDiagnostic};
+use crate::runner::execution::Execution;
 use biome_console::Console;
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
-use biome_fs::{BiomePath, FileSystem};
-use biome_service::Workspace;
+use biome_fs::{BiomePath, File, FileSystem, OpenOptions};
+use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    CodeAction, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    CodeAction, FeaturesSupported, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
+use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
+use biome_service::{Workspace, WorkspaceError};
 
 #[derive(Debug)]
 pub(crate) enum FileStatus {
@@ -29,9 +32,24 @@ pub(crate) enum FileStatus {
     Protected(String),
 }
 
+impl FileStatus {
+    pub const fn is_changed(&self) -> bool {
+        matches!(self, Self::Changed)
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum MessageStat {
+    Changed,
+    Unchanged,
+    Matches,
+    Skipped,
+}
+
 /// Wrapper type for messages that can be printed during the traversal process
 #[derive(Debug)]
 pub(crate) enum Message {
+    Stats(MessageStat),
     SkippedFixes {
         /// Suggested fixes skipped during the lint traversal
         skipped_suggested_fixes: u32,
@@ -44,12 +62,12 @@ pub(crate) enum Message {
         diagnostics: Vec<Error>,
         skipped_diagnostics: u32,
     },
-    DiagnosticsWithActions {
-        file_path: String,
-        content: String,
-        diagnostics_with_actions: Vec<(Diagnostic, Vec<CodeAction>)>,
-        skipped_diagnostics: u32,
-    },
+    // DiagnosticsWithActions {
+    //     file_path: String,
+    //     content: String,
+    //     diagnostics_with_actions: Vec<(Diagnostic, Vec<CodeAction>)>,
+    //     skipped_diagnostics: u32,
+    // },
     Diff {
         file_name: String,
         old: String,
@@ -98,10 +116,15 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) workspace: &'a dyn Workspace,
     pub(crate) console: &'a mut dyn Console,
     pub(crate) cli_options: &'a CliOptions,
+    pub(crate) execution: &'a dyn Execution,
 }
 
 pub(crate) trait ProcessFile: Send + Sync {
-    fn process_file<Ctx>(ctx: &Ctx, path: &BiomePath) -> Result<FileStatus, Message>
+    fn process_file<Ctx>(
+        ctx: &Ctx,
+        workspace_file: &mut WorkspaceFile,
+        features_supported: &FeaturesSupported,
+    ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext;
 
@@ -172,12 +195,27 @@ pub(crate) trait ProcessFile: Send + Sync {
             };
         }
 
-        Self::process_file(ctx, biome_path)
+        let mut workspace_file = WorkspaceFile::new(ctx, biome_path.clone())?;
+        let result = workspace_file.guard().check_file_size()?;
+        if result.is_too_large() {
+            ctx.push_diagnostic(
+                FileTooLarge::from(result)
+                    .with_file_path(workspace_file.path.to_string())
+                    .with_category(ctx.execution().as_diagnostic_category()),
+            );
+            return Ok(FileStatus::Ignored);
+        }
+
+        Self::process_file(ctx, &mut workspace_file, &file_features)
     }
 }
 
 impl ProcessFile for () {
-    fn process_file<Ctx>(_ctx: &Ctx, _path: &BiomePath) -> Result<FileStatus, Message>
+    fn process_file<Ctx>(
+        _: &Ctx,
+        _: &mut WorkspaceFile,
+        _: &FeaturesSupported,
+    ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
     {
@@ -185,6 +223,74 @@ impl ProcessFile for () {
     }
 
     fn process_std_in(_payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
+        Ok(())
+    }
+}
+
+/// Small wrapper that holds information and operations around the current processed file
+pub(crate) struct WorkspaceFile<'ctx, 'app> {
+    guard: FileGuard<'app, dyn Workspace + 'ctx>,
+    file: Box<dyn File>,
+    pub(crate) path: BiomePath,
+}
+
+impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
+    /// It attempts to read the file from disk, creating a [FileGuard] and
+    /// saving these information internally
+    pub(crate) fn new<Ctx>(ctx: &'ctx Ctx, path: BiomePath) -> Result<Self, Error>
+    where
+        Ctx: CrawlerContext,
+    {
+        let open_options = OpenOptions::default()
+            .read(true)
+            .write(ctx.execution().requires_write_access());
+
+        let mut file = ctx
+            .fs()
+            .open_with_options(path.as_path(), open_options)
+            .with_file_path(path.to_string())?;
+
+        let mut input = String::new();
+        file.read_to_string(&mut input)
+            .with_file_path(path.to_string())?;
+
+        let guard = FileGuard::open(
+            ctx.workspace(),
+            OpenFileParams {
+                project_key: ctx.project_key(),
+                document_file_source: None,
+                path: path.clone(),
+                content: FileContent::from_client(&input),
+                persist_node_cache: false,
+                inline_config: None,
+            },
+        )
+        .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
+
+        Ok(Self { file, guard, path })
+    }
+
+    pub(crate) fn guard(&self) -> &FileGuard<'app, dyn Workspace + 'ctx> {
+        &self.guard
+    }
+
+    pub(crate) fn input(&self) -> Result<String, WorkspaceError> {
+        self.guard().get_file_content()
+    }
+
+    pub(crate) fn as_extension(&self) -> Option<&str> {
+        self.path.extension()
+    }
+
+    /// It updates the workspace file with `new_content`
+    pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
+        let new_content = new_content.into();
+
+        self.file
+            .set_content(new_content.as_bytes())
+            .with_file_path(self.path.to_string())?;
+        self.guard
+            .change_file(self.file.file_version(), new_content)?;
         Ok(())
     }
 }

@@ -1,7 +1,4 @@
-use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
-use crate::commands::format::FormatProcessFile;
-use crate::execute::traverse::TraverseResult;
 use crate::runner::CommandRunner;
 use crate::runner::execution::Execution;
 use crate::runner::impls::collectors::default::DefaultCollector;
@@ -9,15 +6,19 @@ use crate::runner::impls::crawlers::default::DefaultCrawler;
 use crate::runner::impls::finalizers::default::DefaultFinalizer;
 use crate::runner::impls::handlers::default::DefaultHandler;
 use crate::runner::process_file::ProcessFile;
+use crate::{CliDiagnostic, TraversalSummary};
 use biome_configuration::Configuration;
 use biome_console::Console;
 use biome_deserialize::Merge;
-use biome_fs::FileSystem;
+use biome_diagnostics::Error;
+use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::load_editorconfig;
 use biome_service::workspace::ScanKind;
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
+use std::collections::BTreeSet;
 use std::ffi::OsString;
+use std::ops::{Deref, DerefMut};
 
 pub trait LoadEditorConfig: TraversalCommand {
     /// Whether this command should load the `.editorconfig` file.
@@ -61,17 +62,44 @@ pub trait LoadEditorConfig: TraversalCommand {
         )
     }
 }
-
 /// A trait that returns a [TraverseResult] from a traversal command.
+pub(crate) struct TraversalCommandImpl<C, P>(pub C)
+where
+    P: ProcessFile,
+    C: TraversalCommand<ProcessFile = P>;
+
+impl<C, P> Deref for TraversalCommandImpl<C, P>
+where
+    P: ProcessFile,
+    C: TraversalCommand<ProcessFile = P>,
+{
+    type Target = C;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<C, P> DerefMut for TraversalCommandImpl<C, P>
+where
+    P: ProcessFile,
+    C: TraversalCommand<ProcessFile = P>,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 pub(crate) trait TraversalCommand {
     type ProcessFile: ProcessFile;
 
-    /// The name of the command that will appear in the diagnostics
-    fn command_name() -> &'static str;
+    /// Alias of [CommandRunner::command_name]
+    fn command_name(&self) -> &'static str;
 
-    /// The [ScanKind] to use for this command
-    fn scan_kind() -> ScanKind;
+    /// Alias of [CommandRunner::minimal_scan_kind]
+    fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
+    /// Alias of [CommandRunner::get_execution]
     fn get_execution(
         &self,
         cli_options: &CliOptions,
@@ -79,6 +107,7 @@ pub(crate) trait TraversalCommand {
         workspace: &dyn Workspace,
     ) -> Result<Box<dyn Execution>, CliDiagnostic>;
 
+    /// Alias of [CommandRunner::merge_configuration]
     fn merge_configuration(
         &mut self,
         loaded_configuration: Configuration,
@@ -88,19 +117,23 @@ pub(crate) trait TraversalCommand {
         console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError>;
 
-    fn should_write(&self) -> bool;
-
+    /// Alias of [CommanderRunner::get_files_to_process]
     fn get_files_to_process(
         &self,
         fs: &dyn FileSystem,
         configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic>;
+
+    /// Alias of [CommandRunner::check_incompatible_arguments]
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        Ok(())
+    }
 }
 
-impl<TC, P> CommandRunner for TC
+impl<C, P> CommandRunner for TraversalCommandImpl<C, P>
 where
     P: ProcessFile,
-    TC: TraversalCommand<ProcessFile = P>,
+    C: TraversalCommand<ProcessFile = P>,
 {
     type CrawlerOutput = TraverseResult;
     type Collector = DefaultCollector;
@@ -109,17 +142,15 @@ where
     type Handler = DefaultHandler;
     type ProcessFile = P;
 
-    const SHOULD_TARGET_VCS: bool = true;
-
     const REQUIRES_CRAWLING: bool = true;
 
     /// The name of the command that will appear in the diagnostics
-    fn command_name() -> &'static str {
-        Self::command_name()
+    fn command_name(&self) -> &'static str {
+        self.deref().command_name()
     }
     /// The [ScanKind] to use for this command
-    fn scan_kind() -> ScanKind {
-        Self::scan_kind()
+    fn minimal_scan_kind(&self) -> Option<ScanKind> {
+        self.deref().minimal_scan_kind()
     }
 
     fn collector(
@@ -142,7 +173,7 @@ where
         fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        self.merge_configuration(
+        self.deref_mut().merge_configuration(
             loaded_configuration,
             loaded_directory,
             loaded_file,
@@ -156,11 +187,7 @@ where
         fs: &dyn FileSystem,
         configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
-        self.get_files_to_process(fs, configuration)
-    }
-
-    fn should_write(&self) -> bool {
-        self.should_write()
+        self.deref().get_files_to_process(fs, configuration)
     }
 
     fn get_execution(
@@ -169,6 +196,16 @@ where
         console: &mut dyn Console,
         workspace: &dyn Workspace,
     ) -> Result<Box<dyn Execution>, CliDiagnostic> {
-        self.get_execution(cli_options, console, workspace)
+        self.deref().get_execution(cli_options, console, workspace)
     }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        self.deref().check_incompatible_arguments()
+    }
+}
+
+pub(crate) struct TraverseResult {
+    pub(crate) summary: TraversalSummary,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) diagnostics: Vec<Error>,
 }

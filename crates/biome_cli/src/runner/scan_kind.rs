@@ -1,4 +1,4 @@
-use crate::execute::Stdin;
+use crate::runner::execution::Stdin;
 use biome_configuration::Configuration;
 use biome_fs::BiomePath;
 use biome_service::workspace::ScanKind;
@@ -9,7 +9,7 @@ fn get_forced_scan_kind(
     stdin: Option<&Stdin>,
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
-    default_scan_kind: ScanKind,
+    maybe_scan_kind: Option<ScanKind>,
 ) -> Option<ScanKind> {
     if let Some(stdin) = stdin {
         let path = stdin.as_path();
@@ -26,7 +26,7 @@ fn get_forced_scan_kind(
         }
     }
 
-    Some(default_scan_kind)
+    maybe_scan_kind
 }
 
 /// Figures out the best (as in, most efficient) scan kind for the given execution.
@@ -47,13 +47,13 @@ pub(crate) fn derive_best_scan_kind(
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
     configuration: &Configuration,
-    default_scan_kind: ScanKind,
+    command_scan_kind: Option<ScanKind>,
 ) -> ScanKind {
     get_forced_scan_kind(
         stdin,
         root_configuration_dir,
         working_dir,
-        default_scan_kind,
+        command_scan_kind,
     )
     .unwrap_or({
         let required_minimum_scan_kind =

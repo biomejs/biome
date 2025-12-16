@@ -1,4 +1,5 @@
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
@@ -14,17 +15,17 @@ use std::{
     path::Path,
 };
 
-pub struct GitLabReporter {
-    pub(crate) execution: Execution,
+pub struct GitLabReporter<'a> {
+    pub(crate) execution: &'a dyn Execution,
     pub(crate) diagnostics: DiagnosticsPayload,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
-impl Reporter for GitLabReporter {
+impl Reporter for GitLabReporter<'_> {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
         visitor.report_diagnostics(
-            &self.execution,
+            self.execution,
             self.diagnostics,
             self.verbose,
             self.working_directory.as_deref(),
@@ -69,7 +70,7 @@ impl<'a> GitLabReporterVisitor<'a> {
 impl ReporterVisitor for GitLabReporterVisitor<'_> {
     fn report_summary(
         &mut self,
-        _: &Execution,
+        _: &dyn Execution,
         _: TraversalSummary,
         _verbose: bool,
     ) -> std::io::Result<()> {
@@ -78,7 +79,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
+        _execution: &dyn Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,

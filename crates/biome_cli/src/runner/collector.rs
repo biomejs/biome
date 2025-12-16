@@ -36,7 +36,7 @@ pub(crate) trait Collector: Send + Sync {
         _execution: &dyn Execution,
     );
 
-    fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result;
+    fn result(self, _duration: Duration) -> Self::Result;
 }
 
 impl Collector for () {
@@ -62,7 +62,7 @@ impl Collector for () {
     ) {
     }
 
-    fn result(self, _duration: Duration, _ctx: &dyn CrawlerContext) -> Self::Result {
+    fn result(self, _duration: Duration) -> Self::Result {
         ()
     }
 }
