@@ -51,7 +51,7 @@ struct CiExecution {
 }
 
 impl Execution for CiExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new()
             .with_linter()
             .with_formatter()
@@ -84,13 +84,6 @@ impl Execution for CiExecution {
 
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("ci")
-    }
-
-    fn should_report(&self, category: &Category) -> bool {
-        category.name().starts_with("lint/")
-            || category.name().starts_with("suppressions/")
-            || category.name().starts_with("assist/")
-            || category.name().starts_with("plugin")
     }
 
     fn should_skip_parse_errors(&self) -> bool {

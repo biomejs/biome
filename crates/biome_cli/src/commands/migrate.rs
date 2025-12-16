@@ -29,7 +29,7 @@ pub(crate) struct MigrateExecution {
 }
 
 impl Execution for MigrateExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new().build()
     }
 
@@ -51,10 +51,6 @@ impl Execution for MigrateExecution {
 
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("migrate")
-    }
-
-    fn should_report(&self, category: &Category) -> bool {
-        category.name() == "migrate"
     }
 
     fn requires_write_access(&self) -> bool {

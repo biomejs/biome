@@ -50,6 +50,9 @@ pub trait Crawler<Output> {
             let (elapsed, evaluated_paths) = Self::crawl_inputs(
                 fs,
                 inputs,
+                // Don't move it. If ctx is declared outside of this function, it doesn't
+                // go out of scope, causing a deadlock because the main thread waits for
+                // ctx to be dropped
                 &CrawlerOptions::new(fs, workspace, project_key, interner, sender, execution),
             );
             // wait for the main thread to finish
@@ -57,14 +60,6 @@ pub trait Crawler<Output> {
 
             (elapsed, evaluated_paths)
         });
-
-        // TODO implement this
-        // Make sure patterns are always cleaned up at the end of traversal.
-        // if let TraversalMode::Search { pattern, .. } = execution.traversal_mode() {
-        //     let _ = session.app.workspace.drop_pattern(DropPatternParams {
-        //         pattern: pattern.clone(),
-        //     });
-        // }
 
         execution.on_post_crawl(workspace)?;
         let result = collector.result(duration);

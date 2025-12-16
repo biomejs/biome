@@ -55,7 +55,7 @@ struct SearchExecution {
 }
 
 impl Execution for SearchExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new().with_search().build()
     }
 
@@ -87,10 +87,6 @@ impl Execution for SearchExecution {
 
     fn is_search(&self) -> bool {
         true
-    }
-
-    fn should_report(&self, _category: &Category) -> bool {
-        false
     }
 
     fn requires_write_access(&self) -> bool {

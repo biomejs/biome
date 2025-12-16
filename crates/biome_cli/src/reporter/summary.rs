@@ -151,7 +151,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                 if diagnostic.tags().is_verbose() {
                     if verbose {
                         if let Some(category) = category
-                            && execution.should_report(category)
+                            && should_report_lint_diagnostic(category)
                         {
                             files_to_diagnostics.insert_rule_for_file(
                                 category.name(),
@@ -172,7 +172,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 
                 if (execution.is_check() || execution.is_lint() || execution.is_ci())
                     && let Some(category) = category
-                    && execution.should_report(category)
+                    && should_report_lint_diagnostic(category)
                 {
                     files_to_diagnostics.insert_rule_for_file(category.name(), severity, location);
                 }
@@ -189,6 +189,13 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 
         Ok(())
     }
+}
+
+fn should_report_lint_diagnostic(category: &Category) -> bool {
+    category.name().starts_with("lint/")
+        || category.name().starts_with("suppressions/")
+        || category.name().starts_with("assist/")
+        || category.name().starts_with("plugin")
 }
 
 #[derive(Debug, Default)]

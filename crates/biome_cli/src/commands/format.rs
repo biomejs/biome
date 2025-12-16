@@ -54,16 +54,16 @@ struct FormatExecution {
 }
 
 impl Execution for FormatExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new().with_formatter().build()
-    }
-
-    fn is_vcs_targeted(&self) -> bool {
-        self.vcs_targeted.changed || self.vcs_targeted.staged
     }
 
     fn can_handle(&self, features: FeaturesSupported) -> bool {
         features.supports_format()
+    }
+
+    fn is_vcs_targeted(&self) -> bool {
+        self.vcs_targeted.changed || self.vcs_targeted.staged
     }
 
     fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind> {
@@ -76,10 +76,6 @@ impl Execution for FormatExecution {
 
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("format")
-    }
-
-    fn should_report(&self, category: &Category) -> bool {
-        category.name() == "format"
     }
 
     fn should_skip_parse_errors(&self) -> bool {

@@ -64,7 +64,7 @@ struct CheckExecution {
 }
 
 impl Execution for CheckExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new()
             .with_linter()
             .with_formatter()
@@ -107,13 +107,6 @@ impl Execution for CheckExecution {
     fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
         self.fix_file_mode
             .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
-    }
-
-    fn should_report(&self, category: &Category) -> bool {
-        category.name().starts_with("lint/")
-            || category.name().starts_with("suppressions/")
-            || category.name().starts_with("assist/")
-            || category.name().starts_with("plugin")
     }
 
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {

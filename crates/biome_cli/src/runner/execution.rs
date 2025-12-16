@@ -14,10 +14,13 @@ use std::time::Duration;
 use tracing::info;
 
 pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
-    fn to_feature(&self) -> FeatureName;
+    /// The features that this command requires to be enabled.
+    fn features(&self) -> FeatureName;
 
+    /// Whether this command can handle the incoming file given its features.
     fn can_handle(&self, features: FeaturesSupported) -> bool;
 
+    /// Hook used after the crawling, and before processing the final output.
     fn on_post_crawl(&self, _workspace: &dyn Workspace) -> Result<(), WorkspaceError> {
         Ok(())
     }
@@ -37,19 +40,17 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// Whether this command should be aware of the VCS integration
     fn is_vcs_targeted(&self) -> bool;
 
+    /// Used by [crate::runner::ProcessFile::execute] to determine which kind of support kind the file has
     fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind>;
 
-    // TODO implement for commands that support it
+    /// It should returns the value of `--stdin-file-path`
     fn get_stdin_file_path(&self) -> Option<&str>;
-
-    // TODO: implement this for the linter which contains only and skip
 
     /// Derives the [ScanKind] for this execution
     fn scan_kind_computer(&self, computer: ProjectScanComputer) -> ScanKind {
         computer.compute()
     }
 
-    // TODO: implement this for migrate
     fn compute_scan_kind(
         &self,
         target_known_paths: &[String],
@@ -75,85 +76,79 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// Otherwise, it will return false.
     ///
     /// At the moment, CI is equal to `biome ci`
-    // TODO: implement for `biome ci`
     fn is_ci(&self) -> bool {
         false
     }
 
-    /// Whether the command is running in check mode e.g., no `--write`
-    // TODO: implement for `check`, `format` and `lint`
+    /// `biome check` command
     fn is_check(&self) -> bool {
         false
     }
 
+    /// `biome lint` command
     fn is_lint(&self) -> bool {
         false
     }
 
+    /// The [Category] that should be used when running the command.
     fn as_diagnostic_category(&self) -> &'static Category;
 
-    // TODO: implement this for check and lint
+    /// Whether the execution should apply safe fixes
     fn is_safe_fixes_enabled(&self) -> bool {
         false
     }
 
-    // TODO: implement this for check and lint
+    /// Whether the execution should apply safe and unsafe fixes
     fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
         false
     }
 
-    // TODO: implement this for search command
+    /// `biome search` command
     fn is_search(&self) -> bool {
         false
     }
 
-    // TODO: implement this for all commands
-    // || category.name().starts_with("lint/")
-    // || category.name().starts_with("suppressions/")
-    //                         || category.name().starts_with("assist/")
-    //                         || category.name().starts_with("plugin")
-    // category.name() == "parse"
-    // category.name() == "format"
-    fn should_report(&self, category: &Category) -> bool;
-
-    // TODO: implement for check and lint
+    /// The kind of fix mode to apply
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {
         None
     }
 
+    /// The value of `--skip-parse-errors`
     fn should_skip_parse_errors(&self) -> bool {
         false
     }
 
-    // TODO: implement for check and lint
-
+    /// The value of `--suppress`
     fn suppress(&self) -> bool {
         false
     }
-    // TODO: implement for check and lint
 
+    /// The value of `--suppression-reason`
     fn suppression_reason(&self) -> Option<&str> {
         None
     }
 
-    // TODO implement this for all commands
+    /// Whether this command needs to write on the file system
     fn requires_write_access(&self) -> bool;
 
-    // TODO implement for lint and check commands
+    /// Values of `--only` and `--skip`
     fn analyzer_selectors(&self) -> AnalyzerSelectors;
 
-    // TODO implement for the check command
+    /// Whether assists should be enforced
     fn should_enforce_assist(&self) -> bool {
         false
     }
 
+    /// `biome format` command
     fn is_format(&self) -> bool {
         false
     }
 
+    /// The search target language
     fn search_language(&self) -> Option<GritTargetLanguage> {
         None
     }
+    /// The search pattern to search for.
     fn search_pattern(&self) -> Option<&PatternId> {
         None
     }

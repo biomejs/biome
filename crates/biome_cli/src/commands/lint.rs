@@ -79,7 +79,7 @@ struct LintExecution {
 }
 
 impl Execution for LintExecution {
-    fn to_feature(&self) -> FeatureName {
+    fn features(&self) -> FeatureName {
         FeaturesBuilder::new().with_linter().build()
     }
 
@@ -107,13 +107,6 @@ impl Execution for LintExecution {
 
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("lint")
-    }
-
-    fn should_report(&self, category: &Category) -> bool {
-        category.name().starts_with("lint/")
-            || category.name().starts_with("suppressions/")
-            || category.name().starts_with("assist/")
-            || category.name().starts_with("plugin")
     }
 
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {
