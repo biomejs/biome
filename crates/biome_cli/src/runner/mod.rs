@@ -150,9 +150,7 @@ use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{
-    LoadedConfiguration, ProjectScanComputer, load_configuration,
-};
+use biome_service::configuration::{LoadedConfiguration, ProjectScanComputer, load_configuration};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
@@ -563,4 +561,3 @@ pub(crate) struct ConfiguredWorkspace {
     /// The unique identifier of the project
     pub project_key: ProjectKey,
 }
-
