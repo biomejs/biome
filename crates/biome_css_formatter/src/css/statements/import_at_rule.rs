@@ -18,7 +18,7 @@ impl FormatNodeRule<CssImportAtRule> for FormatCssImportAtRule {
         write!(f, [import_token.format(), space()])?;
 
         // Determine if there are any modifiers present.
-        let has_any_modifiers = layer.is_some() || supports.is_some() || media.len() > 0;
+        let has_any_modifiers = layer.is_some() || supports.is_some() || !media.is_empty();
 
         if has_any_modifiers {
             // If there are, we need to group them together and try to fill them.

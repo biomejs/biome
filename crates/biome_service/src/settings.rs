@@ -1813,7 +1813,7 @@ pub fn to_override_settings(
         let formatter = pattern
             .formatter
             .map(|formatter| OverrideFormatSettings {
-                enabled: formatter.enabled,
+                enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
                     .or(current_settings.formatter.format_with_errors),
@@ -1830,7 +1830,7 @@ pub fn to_override_settings(
         let linter = pattern
             .linter
             .map(|linter| OverrideLinterSettings {
-                enabled: linter.enabled,
+                enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
             })
@@ -1838,7 +1838,7 @@ pub fn to_override_settings(
         let assist = pattern
             .assist
             .map(|assist| OverrideAssistSettings {
-                enabled: assist.enabled,
+                enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
             })
             .unwrap_or_default();

@@ -2,11 +2,10 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_factory::make::{self, js_function_body};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, JsArrayBindingPatternElement, JsArrowFunctionExpression,
-    JsFormalParameter, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
-    JsVariableStatement, JsYieldArgument, T,
+    AnyJsExpression, JsArrayBindingPatternElement, JsFormalParameter,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsVariableStatement,
+    JsYieldArgument,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_useless_undefined::NoUselessUndefinedOptions;
@@ -28,10 +27,6 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const {foo = undefined} = bar;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const noop = () => undefined;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -81,12 +76,14 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
+    /// Note: `JsArrowFunctionExpression` is intentionally excluded.
+    /// Flagging `() => undefined` would suggest `() => {}`, which conflicts
+    /// with `noEmptyBlockStatements`. See: https://github.com/biomejs/biome/issues/6577
     pub AnyUndefinedNode = JsVariableStatement
         | JsObjectBindingPatternShorthandProperty
         | JsYieldArgument
         | JsReturnStatement
         | JsArrayBindingPatternElement
-        | JsArrowFunctionExpression
         | JsFormalParameter
 }
 
@@ -199,18 +196,6 @@ impl Rule for NoUselessUndefined {
                     });
                 }
             }
-            // const noop = () => undefined
-            AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
-                if let Ok(body) = js_arrow_function_expression.body() {
-                    let expr = body.as_any_js_expression();
-                    if let Some(range) = find_undefined_range(expr) {
-                        signals.push(RuleState {
-                            binding_text: None,
-                            diagnostic_range: range,
-                        });
-                    }
-                }
-            }
             // function foo(bar = undefined) {}
             AnyUndefinedNode::JsFormalParameter(js_formal_parameter) => {
                 if let Some(init) = js_formal_parameter.initializer() {
@@ -278,19 +263,6 @@ impl Rule for NoUselessUndefined {
             AnyUndefinedNode::JsArrayBindingPatternElement(pattern_element) => {
                 let init = pattern_element.init()?;
                 mutation.remove_node(init)
-            }
-            AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
-                let undefined_body = js_arrow_function_expression.body().ok()?;
-                let next_node = js_function_body(
-                    make::token(T!['{']),
-                    make::js_directive_list(None),
-                    make::js_statement_list(None),
-                    make::token(T!['}']),
-                );
-                mutation.replace_node_discard_trivia(
-                    undefined_body,
-                    AnyJsFunctionBody::JsFunctionBody(next_node),
-                );
             }
             AnyUndefinedNode::JsFormalParameter(js_formal_parameter) => {
                 let init = js_formal_parameter.initializer()?;

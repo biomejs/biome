@@ -26,15 +26,57 @@ use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Enforce all dependencies are correctly specified in a React hook.
+    /// Enforce correct dependency usage within React hooks.
     ///
-    /// _This rule should be used only in **React** projects._
+    /// React components have access to various [hooks](https://react.dev/reference/react/hooks) that can perform
+    /// various actions like querying and updating state.
     ///
-    /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
+    /// For hooks that trigger whenever a variable changes (such as `useEffect` and `useMemo`),
+    /// React relies on the hook's listed dependencies array to determine when to re-compute Effects and re-render the page.
     ///
-    /// If your project _doesn't_ use React (or Preact), **you shouldn't use this rule**.
+    /// This can lead to unexpected behavior when dependencies are incorrectly specified:
+    /// ```jsx,ignore
     ///
-    /// The rule will inspect the following **known** hooks:
+    /// function ticker() {
+    ///   const [count, setCount] = useState(0);
+    ///
+    ///   /** Increment the count once per second. */
+    ///   function onTick() {
+    ///     setCount(count + 1);
+    ///   }
+    ///
+    ///   // React _thinks_ this code doesn't depend on anything else, so
+    ///   // it will only use the _initial_ version of `onTick` when rendering the component.
+    ///   // As a result, our normally-dynamic counter will always display 1!
+    ///   // This is referred to as a "stale closure", and is a common pitfall for beginners.
+    ///   useEffect(() => {
+    ///     const id = setInterval(onTick, 1000);
+    ///     return () => clearInterval(id);
+    ///   }, []);
+    ///
+    ///   return <h1>Counter: {count}</h1>;
+    /// }
+    /// ```
+    ///
+    /// ```jsx,ignore
+    /// function apples() {
+    ///   const [count, setCount] = useState(0);
+    ///   const [message, setMessage] = useState("We have 0 apples!");
+    ///
+    ///   // React _thinks_ this code depends on BOTH `count` and `message`, and will re-run the hook whenever
+    ///   // `message` is changed despite it not actually being used inside the closure.
+    ///   // In fact, this will create an infinite loop due to our hook updating `message` and triggering itself again!
+    ///   useEffect(() => {
+    ///     setMessage(`We have ${count} apples!`)
+    ///   }, [count, message]);
+    ///
+    /// }
+    /// ```
+    ///
+    /// This rule attempts to prevent such issues by diagnosing potentially incorrect or invalid usages of hook dependencies.
+    ///
+    /// ### Default Behavior
+    /// By default, the following hooks (and their Preact counterparts) will have their arguments checked by this rule:
     ///
     /// - `useEffect`
     /// - `useLayoutEffect`
@@ -42,15 +84,22 @@ declare_lint_rule! {
     /// - `useCallback`
     /// - `useMemo`
     /// - `useImperativeHandle`
-    /// - `useState`
-    /// - `useReducer`
+    ///
+    /// #### Stable results
+    /// When a hook is known to have a stable return value (one whose identity doesn't change across invocations),
+    /// that value doesn't need to and _should not_ be specified as a dependency.
+    /// For example, setters returned by React's `useState` hook will not change throughout the lifetime of a program
+    /// and should therefore be omitted.
+    ///
+    /// By default, the following hooks are considered to have stable return values:
+    /// - `useState` (index 1)
+    /// - `useReducer` (index 1)
+    /// - `useTransition` (index 1)
     /// - `useRef`
-    /// - `useDebugValue`
-    /// - `useDeferredValue`
-    /// - `useTransition`
     /// - `useEffectEvent`
     ///
-    /// If you want to add more hooks to the rule, check the [options](#options).
+    /// If you want to add custom hooks to the rule's diagnostics or specify your own functions with stable results,
+    /// see the [options](#options) section for more information.
     ///
     /// ## Examples
     ///
@@ -60,10 +109,21 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, []);
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, []);
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// import { useEffect } from "react";
+    ///
+    /// function badComponent() {
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, "not an array");
     /// }
     /// ```
     ///
@@ -71,9 +131,8 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let b = 1;
-    ///     useEffect(() => {
-    ///     }, [b]);
+    ///     let unused = 1;
+    ///     useEffect(() => {}, [unused]);
     /// }
     /// ```
     ///
@@ -81,11 +140,23 @@ declare_lint_rule! {
     /// import { useEffect, useState } from "react";
     ///
     /// function component() {
-    ///     const [name, setName] = useState();
-    ///     useEffect(() => {
-    ///         console.log(name);
-    ///         setName("");
-    ///     }, [name, setName]);
+    ///   const [name, setName] = useState();
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///     setName("i never change and don't need to be here");
+    ///   }, [name, setName]);
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// import { useEffect, useState } from "react";
+    ///
+    /// function component() {
+    ///   const name = "foo"
+    ///   // name doesn't change, so specifying it is redundant
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///   }, [name]);
     /// }
     /// ```
     ///
@@ -93,11 +164,11 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     const b = a + 1;
-    ///     useEffect(() => {
-    ///         console.log(b);
-    ///     }, []);
+    ///   let a = 1;
+    ///   const b = a + 1;
+    ///   useEffect(() => {
+    ///     console.log(b);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -107,10 +178,10 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, [a]);
+    ///   let a = 1;
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, [a]);
     /// }
     /// ```
     ///
@@ -118,10 +189,10 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     const a = 1;
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     });
+    ///   const SECONDS_PER_DAY = 60 * 60 * 24;
+    ///   useEffect(() => {
+    ///     console.log(SECONDS_PER_DAY);
+    ///   });
     /// }
     /// ```
     ///
@@ -129,21 +200,25 @@ declare_lint_rule! {
     /// import { useEffect, useState } from "react";
     ///
     /// function component() {
-    ///     const [name, setName] = useState();
-    ///     useEffect(() => {
-    ///         console.log(name);
-    ///         setName("");
-    ///     }, [name]);
+    ///   const [name, setName] = useState();
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///     setName("");
+    ///   }, [name]);
     /// }
     /// ```
     ///
-    /// ```js
-    /// import { useEffect } from "react";
-    /// let outer = false;
+    /// Hooks not imported from React are ignored by default (unless specified inside [rule options](#options))
+    /// ```ts
+    /// import type { EffectCallback, DependencyList } from "react";
+    /// // custom useEffect function
+    /// declare function useEffect(cb: EffectCallback, deps?: DependencyList): void;
+    ///
     /// function component() {
-    ///     useEffect(() => {
-    ///         outer = true;
-    ///     }, []);
+    ///   let name = "John Doe";
+    ///   useEffect(() => {
+    ///     console.log(name);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -158,11 +233,11 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
-    ///     useEffect(() => {
-    ///         console.log(a);
-    ///     }, []);
+    ///   let a = 1;
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///   useEffect(() => {
+    ///     console.log(a);
+    ///   }, []);
     /// }
     /// ```
     ///
@@ -173,93 +248,149 @@ declare_lint_rule! {
     /// import { useEffect } from "react";
     ///
     /// function component() {
-    ///     let a = 1;
-    ///     let b = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
-    ///     useEffect(() => {
-    ///         console.log(a, b);
-    ///     }, []);
+    ///   let a = 1;
+    ///   let b = 1;
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///   // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
+    ///   useEffect(() => {
+    ///     console.log(a, b);
+    ///   }, []);
     /// }
     /// ```
+    ///
+    /// :::caution
+    /// Mismatching code & dependencies has a **very high risk** of creating bugs in your components.
+    /// By suppressing the linter, you “lie” to React about the values your Effect depends on,
+    /// so prefer changing the code over suppressing the rule where possible.
+    /// :::
     ///
     /// ## Options
     ///
-    /// Allows specifying custom hooks - from libraries or internal projects -
-    /// for which dependencies should be checked and/or which are known to have
-    /// stable return values.
+    /// ### `hooks`
+    /// Allows specifying custom hooks (from libraries or internal projects) whose dependencies
+    /// should be checked and/or which are known to have stable return values.
     ///
-    /// ### Validating dependencies
+    /// For every hook whose dependencies you want validated, you must specify the index of both the closure
+    /// using the dependencies and the dependencies array to validate it against.
     ///
-    /// For every hook for which you want the dependencies to be validated, you
-    /// should specify the index of the closure and the index of the
-    /// dependencies array to validate against.
+    /// ##### Example
     ///
-    /// #### Example
-    ///
-    /// ```json, options
+    /// ```json,options
     /// {
-    ///     "options": {
-    ///         "hooks": [
-    ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
-    ///             { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0}
-    ///         ]
-    ///     }
+    ///   "options": {
+    ///     "hooks": [
+    ///       { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1 },
+    ///       { "name": "useQuery", "closureIndex": 2, "dependenciesIndex": 0 }
+    ///     ]
+    ///   }
     /// }
     /// ```
     ///
-    /// Given the previous example, your hooks can be used like this:
+    /// This would enable checks on the following code snippets:
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,use_options
     /// function Foo() {
-    ///     const location = useLocation(() => {}, []);
-    ///     const query = useQuery([], () => {});
+    ///   let stateVar = 1;
+    ///   useLocation(() => {console.log(stateVar)}, []);
+    /// }
+    /// ```
+    /// ```js,use_options
+    /// function Foo() {
+    ///   let stateVar = 1;
+    ///   useQuery([stateVar], "smthng", () => {console.log(stateVar)});
     /// }
     /// ```
     ///
-    /// ### Stable results
+    /// #### Configuring stable results
     ///
-    /// When a hook is known to have a stable return value (its identity doesn't
-    /// change across invocations), that value doesn't need to be specified in
-    /// dependency arrays. For example, setters returned by React's `useState`
-    /// hook always have the same identity and should be omitted as such.
+    /// As previously discussed, the lint rule takes into account so-called [stable results](#stable-results)
+    /// and will ensure any such variables are _not_ specified as dependencies.
     ///
-    /// You can configure custom hooks that return stable results in one of
-    /// four ways:
+    /// You can specify custom functions as returning stable results in one of four ways:
     ///
-    /// * `"stableResult": true` -- marks the return value as stable. An example
+    /// 1. `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
-    /// * `"stableResult": [1]` -- expects the return value to be an array and
-    ///   marks the given index or indices to be stable. An example of a React
-    ///   hook that would be configured like this is `useState()`.
-    /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
-    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
-    ///   object and marks the given property or properties to be stable.
+    /// 2. `"stableResult": [1]` -- expects the return value to be an array and
+    ///    marks the given indices as stable. An example of a React
+    ///    hook that would be configured like this is `useState()`.
+    /// 3. `"stableResult": 1` -- shorthand for option 2 (`"stableResult": [1]`).
+    ///    Useful for hooks that only have a single stable return.
+    /// 4. `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///    object and marks the properties with the given keys as stable.
     ///
-    /// #### Example
+    /// ##### Example
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "options": {
-    ///         "hooks": [
-    ///             { "name": "useDispatch", "stableResult": true }
-    ///         ]
-    ///     }
+    ///   "options": {
+    ///     "hooks": [
+    ///       { "name": "useDispatch", "stableResult": true }
+    ///     ]
+    ///   }
     /// }
     /// ```
     ///
     /// With this configuration, the following is valid:
     ///
-    /// ```js
+    /// ```js,use_options
     /// const dispatch = useDispatch();
-    /// // No need to list `dispatch` as dependency:
+    /// // No need to list `dispatch` as dependency since it doesn't change
     /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
     ///
-    /// ## Preact support
+    /// ### `reportUnnecessaryDependencies`
     ///
-    /// This rule recognizes rules imported from `preact/compat` and
-    /// `preact/hooks` and applies the same rules as for React hooks.
+    /// If set to `false`, the rule will not trigger diagnostics for unused dependencies passed to hooks that do not use them.
+    ///
+    /// :::caution
+    /// Over-specifying dependencies can reduce application performance or even cause infinite loops, so caution is advised.
+    /// :::
+    ///
+    /// Default: `true`
+    ///
+    /// ##### Example
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "reportUnnecessaryDependencies": false
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// import { useEffect } from "react";
+    ///
+    /// function Foo() {
+    ///   let stateVar = 1;
+    ///   // not used but still OK
+    ///   useEffect(() => {}, [stateVar]);
+    /// }
+    /// ```
+    ///
+    /// ### `reportMissingDependenciesArray`
+    ///
+    /// If enabled, the rule will also trigger diagnostics for hooks that lack dependency arrays altogether,
+    /// requiring any hooks lacking dependencies to explicitly specify an empty array.
+    ///
+    /// Default: `false`
+    ///
+    /// ##### Example
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "reportMissingDependenciesArray": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// function noArrayYesProblem() {
+    ///   let stateVar = 1;
+    ///   React.useEffect(() => {});
+    /// }
+    /// ```
     ///
     pub UseExhaustiveDependencies {
         version: "1.0.0",
@@ -678,174 +809,172 @@ impl Rule for UseExhaustiveDependencies {
         let options = ctx.options();
         let hook_config_maps = HookConfigMaps::new(options);
 
-        let mut signals = Vec::new();
-
         let call = ctx.query();
         let model = ctx.model();
 
-        if let Some(result) =
-            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model)
-        {
-            let Some(component_function) = function_of_hook_call(call) else {
-                return Vec::new().into_boxed_slice();
-            };
+        let (Some(result), Some(component_function)) = (
+            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model),
+            function_of_hook_call(call),
+        ) else {
+            return Vec::new().into_boxed_slice();
+        };
 
-            let dependencies_array = match &result.dependencies_node {
-                Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
-                Some(expr) => {
-                    return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
-                        .into_boxed_slice();
-                }
-                None => {
-                    return if options.report_missing_dependencies_array() {
-                        vec![Fix::MissingDependenciesArray {
-                            function_name_range: result.function_name_range,
-                        }]
-                        .into_boxed_slice()
-                    } else {
-                        Vec::new().into_boxed_slice()
-                    };
-                }
-            };
+        let mut signals = Vec::new();
 
-            let component_function_range = component_function.text_range_with_trivia();
-
-            let captures: Vec<_> = result
-                .all_captures(model)
-                .filter(|capture| {
-                    capture_needs_to_be_in_the_dependency_list(
-                        capture,
-                        &component_function_range,
-                        model,
-                        &hook_config_maps,
-                    )
-                })
-                .map(|capture| {
-                    get_whole_static_member_expression(capture.node())
-                        .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
-                })
-                .collect();
-
-            let deps: Vec<_> = result.all_dependencies().collect();
-            let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
-
-            // Evaluate all the captures
-            for capture in &captures {
-                let mut suggested_fix = None;
-                let mut is_captured_covered = false;
-                for dep in &deps {
-                    let (capture_contains_dep, dep_contains_capture) =
-                        compare_member_depth(capture, dep.syntax());
-
-                    match (capture_contains_dep, dep_contains_capture) {
-                        // capture == dependency
-                        (true, true) => {
-                            suggested_fix = None;
-                            is_captured_covered = true;
-                            break;
-                        }
-                        // example
-                        // capture: a.b.c
-                        // dependency: a
-                        // this is ok, but we may suggest performance improvements
-                        // in the future
-                        (true, false) => {
-                            // We need to continue, because it may still have a perfect match
-                            // in the dependency list
-                            is_captured_covered = true;
-                        }
-                        // example
-                        // capture: a.b
-                        // dependency: a.b.c
-                        // This can be valid in some cases. We will flag an error nonetheless.
-                        (false, true) => {
-                            // We need to continue, because it may still have a perfect match
-                            // in the dependency list
-                            suggested_fix = Some(Fix::DependencyTooDeep {
-                                function_name_range: result.function_name_range,
-                                capture_range: capture.text_trimmed_range(),
-                                dependency_range: dep.syntax().text_trimmed_range(),
-                                dependency_text: dep.syntax().text_trimmed().into_text().into(),
-                            });
-                        }
-                        _ => {}
-                    }
-                }
-
-                if let Some(fix) = suggested_fix {
-                    signals.push(fix);
-                }
-
-                if !is_captured_covered {
-                    let captures = add_deps
-                        .entry(capture.text_trimmed().into_text().into())
-                        .or_default();
-
-                    if !captures.iter().any(|existing| existing == capture) {
-                        captures.push(capture.clone());
-                    }
-                }
+        let dependencies_array = match &result.dependencies_node {
+            Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
+            Some(expr) => {
+                return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
+                    .into_boxed_slice();
             }
+            None => {
+                return if options.report_missing_dependencies_array() {
+                    vec![Fix::MissingDependenciesArray {
+                        function_name_range: result.function_name_range,
+                    }]
+                    .into_boxed_slice()
+                } else {
+                    Vec::new().into_boxed_slice()
+                };
+            }
+        };
 
-            // Split deps into correctly specified ones and unnecessary ones.
-            let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) =
-                deps.into_iter().partition(|dep| {
-                    captures.iter().any(|capture| {
-                        let (capture_contains_dep, dep_contains_capture) =
-                            compare_member_depth(capture, dep.syntax());
-                        capture_contains_dep || dep_contains_capture
-                    })
-                });
+        let component_function_range = component_function.text_range_with_trivia();
 
-            // Find duplicated deps from specified ones
-            {
-                let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
-                for dep in correct_deps.iter() {
-                    let expression_name = dep.to_string();
-                    if dep_list.contains_key(&expression_name) {
-                        signals.push(Fix::RemoveDependency {
+        let captures: Vec<_> = result
+            .all_captures(model)
+            .filter(|capture| {
+                capture_needs_to_be_in_the_dependency_list(
+                    capture,
+                    &component_function_range,
+                    model,
+                    &hook_config_maps,
+                )
+            })
+            .map(|capture| {
+                get_whole_static_member_expression(capture.node())
+                    .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
+            })
+            .collect();
+
+        let deps: Vec<_> = result.all_dependencies().collect();
+        let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
+
+        // Evaluate all the captures
+        for capture in &captures {
+            let mut suggested_fix = None;
+            let mut is_captured_covered = false;
+            for dep in &deps {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+
+                match (capture_contains_dep, dep_contains_capture) {
+                    // capture == dependency
+                    (true, true) => {
+                        suggested_fix = None;
+                        is_captured_covered = true;
+                        break;
+                    }
+                    // example
+                    // capture: a.b.c
+                    // dependency: a
+                    // this is ok, but we may suggest performance improvements
+                    // in the future
+                    (true, false) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        is_captured_covered = true;
+                    }
+                    // example
+                    // capture: a.b
+                    // dependency: a.b.c
+                    // This can be valid in some cases. We will flag an error nonetheless.
+                    (false, true) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        suggested_fix = Some(Fix::DependencyTooDeep {
                             function_name_range: result.function_name_range,
-                            component_function: component_function.clone(),
-                            dependencies: vec![dep.clone()].into_boxed_slice(),
-                            dependencies_array: dependencies_array.clone(),
+                            capture_range: capture.text_trimmed_range(),
+                            dependency_range: dep.syntax().text_trimmed_range(),
+                            dependency_text: dep.syntax().text_trimmed().into_text().into(),
                         });
-                        continue;
                     }
-                    dep_list.insert(expression_name, dep.clone());
+                    _ => {}
                 }
             }
 
-            // Find correctly specified dependencies with an unstable identity,
-            // since they would trigger re-evaluation on every render.
-            let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
-                determine_unstable_dependency(&dep, model).map(|kind| (dep, kind))
+            if let Some(fix) = suggested_fix {
+                signals.push(fix);
+            }
+
+            if !is_captured_covered {
+                let captures = add_deps
+                    .entry(capture.text_trimmed().into_text().into())
+                    .or_default();
+
+                if !captures.iter().any(|existing| existing == capture) {
+                    captures.push(capture.clone());
+                }
+            }
+        }
+
+        // Split deps into correctly specified ones and unnecessary ones.
+        let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) = deps.into_iter().partition(|dep| {
+            captures.iter().any(|capture| {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+                capture_contains_dep || dep_contains_capture
+            })
+        });
+
+        // Find duplicated deps from specified ones
+        {
+            let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
+            for dep in correct_deps.iter() {
+                let expression_name = dep.to_string();
+                if dep_list.contains_key(&expression_name) {
+                    signals.push(Fix::RemoveDependency {
+                        function_name_range: result.function_name_range,
+                        component_function: component_function.clone(),
+                        dependencies: vec![dep.clone()].into_boxed_slice(),
+                        dependencies_array: dependencies_array.clone(),
+                    });
+                    continue;
+                }
+                dep_list.insert(expression_name, dep.clone());
+            }
+        }
+
+        // Find correctly specified dependencies with an unstable identity,
+        // since they would trigger re-evaluation on every render.
+        let unstable_deps = correct_deps
+            .into_iter()
+            .filter_map(|dep| determine_unstable_dependency(&dep, model).map(|kind| (dep, kind)));
+
+        // Generate signals
+        for (name, nodes) in add_deps {
+            signals.push(Fix::AddDependency {
+                function_name_range: result.function_name_range,
+                captures: (name, nodes.into_boxed_slice()),
+                dependencies_array: dependencies_array.clone(),
             });
+        }
 
-            // Generate signals
-            for (name, nodes) in add_deps {
-                signals.push(Fix::AddDependency {
-                    function_name_range: result.function_name_range,
-                    captures: (name, nodes.into_boxed_slice()),
-                    dependencies_array: dependencies_array.clone(),
-                });
-            }
+        if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
+            signals.push(Fix::RemoveDependency {
+                function_name_range: result.function_name_range,
+                component_function,
+                dependencies: excessive_deps.into_boxed_slice(),
+                dependencies_array: dependencies_array.clone(),
+            });
+        }
 
-            if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
-                signals.push(Fix::RemoveDependency {
-                    function_name_range: result.function_name_range,
-                    component_function,
-                    dependencies: excessive_deps.into_boxed_slice(),
-                    dependencies_array: dependencies_array.clone(),
-                });
-            }
-
-            for (unstable_dep, kind) in unstable_deps {
-                signals.push(Fix::DependencyTooUnstable {
-                    dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
-                    dependency_range: unstable_dep.range(),
-                    kind,
-                });
-            }
+        for (unstable_dep, kind) in unstable_deps {
+            signals.push(Fix::DependencyTooUnstable {
+                dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
+                dependency_range: unstable_dep.range(),
+                kind,
+            });
         }
 
         signals.into_boxed_slice()
@@ -877,7 +1006,12 @@ impl Rule for UseExhaustiveDependencies {
             } => Some(RuleDiagnostic::new(
                 rule_category!(),
                 function_name_range,
-                markup! {"This hook does not have a dependencies array"},
+                markup! {"This hook does not have a dependencies array."},
+            )
+            .note(markup! {
+                "React relies on hook dependencies to determine when to re-compute Effects."
+                "\nAdd an explicit array (i.e. "<Emphasis>"[]"</Emphasis>") and list the callback's dependencies inside it."
+                },
             )),
             Fix::NonLiteralDependenciesArray { expr } => Some(
                 RuleDiagnostic::new(
@@ -885,8 +1019,10 @@ impl Rule for UseExhaustiveDependencies {
                     expr.range(),
                     markup! {"This dependencies list is not an array literal."},
                 )
-                .note(markup! {"Biome can't statically verify whether you've passed the correct dependencies."})
-                .note(markup! { "Replace with an array literal and list your dependencies within it."})
+                .note(markup! {
+                    "Biome can't statically verify whether you've passed the correct dependencies."
+                    "\nReplace the argument with an array literal and list your dependencies within it."
+                })
             ),
             Fix::AddDependency {
                 function_name_range,
@@ -898,7 +1034,14 @@ impl Rule for UseExhaustiveDependencies {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {"This hook does not specify its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."},
+                    markup! {
+                        "This hook "<Emphasis>"does not specify"</Emphasis>" its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."
+                    },
+                ).note(markup! {
+                    "React relies on hook dependencies to determine when to re-compute Effects."
+                    "\nFailing to specify dependencies can result in Effects "<Emphasis>"not updating correctly"</Emphasis>" when state changes."
+                    "\nThese \"stale closures\" are a common source of surprising bugs."
+                    },
                 );
 
                 for range in captures_range {
@@ -929,7 +1072,13 @@ impl Rule for UseExhaustiveDependencies {
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies more dependencies than necessary: "{deps_joined_with_comma}""
+                        "This hook specifies "<Emphasis>"more dependencies than necessary"</Emphasis>": "{deps_joined_with_comma}"."
+                    },
+                )
+                .note(markup! {
+                        "React relies on hook dependencies to determine when to re-compute Effects."
+                        "\nSpecifying more dependencies than required can lead to "<Emphasis>"unnecessary re-rendering"</Emphasis>
+                        "\nand "<Emphasis>"degraded performance"</Emphasis>"."
                     },
                 );
 
@@ -939,7 +1088,6 @@ impl Rule for UseExhaustiveDependencies {
                         diag = diag.detail(
                             dep.syntax().text_trimmed_range(),
                             "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.",
-
                         );
                     } else {
                         diag = diag.detail(
@@ -982,7 +1130,7 @@ impl Rule for UseExhaustiveDependencies {
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies a dependency more specific that its captures: "{dependency_text.as_ref()}""
+                        "This hook specifies a dependency more specific than its captures: "{dependency_text.as_ref()}""
                     },
                 )
                 .detail(capture_range, "This capture is more generic than...")

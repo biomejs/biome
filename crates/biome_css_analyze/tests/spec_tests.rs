@@ -59,6 +59,13 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             css_modules: true,
             ..CssParserOptions::default()
         }
+    } else if file_name.ends_with(".tailwind.css") {
+        // HACK: Our infra doesn't support loading parser options from test files yet,
+        // so we hardcode enabling tailwind directives for files named *.tailwind.css
+        CssParserOptions {
+            tailwind_directives: true,
+            ..CssParserOptions::default()
+        }
     } else {
         CssParserOptions::default()
     };

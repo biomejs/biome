@@ -199,9 +199,15 @@ pub(crate) fn react_hook_with_dependency(
     let closure_index = hook.closure_index as usize;
     let dependencies_index = hook.dependencies_index as usize;
 
+    // Sort the indices to avoid triggering a panic, but reverse them
+    // afterwards to avoid breaking results
     let mut indices = [closure_index, dependencies_index];
     indices.sort_unstable();
-    let [closure_node, dependencies_node] = call.arguments().ok()?.get_arguments_by_index(indices);
+    let args = call.arguments().ok()?.get_arguments_by_index(indices);
+    let [mut closure_node, mut dependencies_node] = args;
+    if closure_index > dependencies_index {
+        (closure_node, dependencies_node) = (dependencies_node, closure_node);
+    }
 
     Some(ReactCallWithDependencyResult {
         function_name_range,

@@ -205,7 +205,7 @@ anyhow               = "1.0.100"
 boa_engine           = "0.21.0"
 boxcar               = "0.2.14"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.2.1"
+camino               = "1.2.2"
 cfg-if               = "1.0.4"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
@@ -271,6 +271,14 @@ opt-level = "s"
 debug     = false
 opt-level = 3
 
-#[patch.crates-io]
-#grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }
-#grit-util            = { path = "../gritql/crates/grit-util" }
+
+# Dev optimisations
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+debug    = true
+inherits = "dev"
