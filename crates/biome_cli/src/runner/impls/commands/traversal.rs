@@ -142,12 +142,15 @@ where
     type Handler = DefaultHandler;
     type ProcessFile = P;
 
-    const REQUIRES_CRAWLING: bool = true;
-
     /// The name of the command that will appear in the diagnostics
     fn command_name(&self) -> &'static str {
         self.deref().command_name()
     }
+
+    fn requires_crawling(&self) -> bool {
+        true
+    }
+
     /// The [ScanKind] to use for this command
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         self.deref().minimal_scan_kind()

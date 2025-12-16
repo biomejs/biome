@@ -3,7 +3,7 @@ use crate::logging::LogOptions;
 use crate::runner::CommandRunner;
 use crate::{CliDiagnostic, CliSession};
 
-pub(crate) fn run_command_v2(
+pub(crate) fn run_command(
     session: CliSession,
     log_options: &LogOptions,
     cli_options: &CliOptions,

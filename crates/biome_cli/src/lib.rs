@@ -34,7 +34,7 @@ pub use crate::commands::{BiomeCommand, biome_command};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 use crate::runner::impls::commands::custom_execution::CustomExecutionCmdImpl;
 use crate::runner::impls::commands::traversal::TraversalCommandImpl;
-use crate::runner::run::run_command_v2;
+use crate::runner::run::run_command;
 pub use diagnostics::CliDiagnostic;
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, TraversalSummary};
@@ -97,7 +97,7 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 css_parser,
                 log_options,
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,
@@ -144,7 +144,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,
@@ -187,7 +187,7 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 log_options,
                 ..
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,
@@ -225,7 +225,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,
@@ -262,7 +262,7 @@ impl<'app> CliSession<'app> {
                 write,
                 fix,
                 sub_command,
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,
@@ -283,7 +283,7 @@ impl<'app> CliSession<'app> {
                 language,
                 stdin_file_path,
                 vcs_configuration,
-            } => run_command_v2(
+            } => run_command(
                 self,
                 &log_options,
                 &cli_options,

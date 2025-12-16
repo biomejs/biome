@@ -87,11 +87,15 @@ where
     type Finalizer = ();
     type Handler = ();
     type ProcessFile = ();
-    const REQUIRES_CRAWLING: bool = false;
 
     fn command_name(&self) -> &'static str {
         self.deref().command_name()
     }
+
+    fn requires_crawling(&self) -> bool {
+        false
+    }
+
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         self.deref().minimal_scan_kind()
     }

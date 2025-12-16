@@ -16,20 +16,20 @@
 //!   │                                  ├─ execution context
 //!   │                                  └─ paths to process
 //!   │
-//!   ├─→ [if REQUIRES_CRAWLING = false]
+//!   ├─→ [if requires_crawling() = false]
 //!   │    └─→ execute_without_crawling() ──→ Custom logic (e.g., migrate)
 //!   │
-//!   └─→ [if REQUIRES_CRAWLING = true]
+//!   └─→ [if requires_crawling() = true]
 //!        │
 //!        ├─→ Crawler::crawl()
 //!        │    │
 //!        │    ├─→ spawns Collector thread ──→ Collects diagnostics/messages
 //!        │    │
-//!        │    └─→ traverses files via Inspector
+//!        │    └─→ traverses files via Handler
 //!        │         │
-//!        │         ├─→ Inspector::can_handle() ──→ Filter files
+//!        │         ├─→ Handler::can_handle() ──→ Filter files
 //!        │         │
-//!        │         └─→ Inspector::handle_path()
+//!        │         └─→ Handler::handle_path()
 //!        │              │
 //!        │              └─→ ProcessFile::process_file()
 //!        │                   └─→ Calls workspace APIs
@@ -41,8 +41,21 @@
 //! ## Core Traits
 //!
 //! ### [`CommandRunner`]
-//! The main trait that orchestrates command execution. Commands implement this to
-//! define their behavior, configure the workspace, and specify which files to process.
+//! The main trait that orchestrates command execution. Commands typically don't implement
+//! this directly, but instead use one of the helper traits below that provide automatic
+//! `CommandRunner` implementations.
+//!
+//! ### [`impls::commands::traversal::TraversalCommand`]
+//! High-level trait for commands that traverse files. Commands implement this trait
+//! and wrap their implementation in [`impls::commands::traversal::TraversalCommandImpl`]
+//! to automatically get a `CommandRunner` implementation with sensible defaults.
+//! Used for commands like `format`, `lint`, and `check`.
+//!
+//! ### [`impls::commands::custom_execution::CustomExecutionCmd`]
+//! High-level trait for commands that don't traverse files but need custom execution.
+//! Commands implement this trait and wrap their implementation in
+//! [`impls::commands::custom_execution::CustomExecutionCmdImpl`] to automatically get a
+//! `CommandRunner` implementation that bypasses file crawling. Used for commands like `migrate`.
 //!
 //! ### [`Crawler`]
 //! Orchestrates the file traversal process. Spawns a collector thread, walks the
@@ -76,11 +89,19 @@
 //! - **Type Safety**: Associated types ensure components fit together correctly
 //! - **Sensible Defaults**: Most traits provide default implementations that work for common cases
 //! - **Flexibility**: Override only what you need for command-specific behavior
+//! - **Wrapper Pattern**: High-level traits use wrapper types to provide automatic implementations
 //!
-//! ## Non-Crawling Commands
+//! ## Implementing Commands
 //!
-//! Commands that don't traverse files (like `migrate`) can set `REQUIRES_CRAWLING = false`
-//! and implement `execute_without_crawling()` to bypass the standard traversal flow.
+//! ### For file-traversing commands (format, lint, check):
+//! 1. Implement [`impls::commands::traversal::TraversalCommand`] for your command type
+//! 2. Wrap it in [`impls::commands::traversal::TraversalCommandImpl`]
+//! 3. Call `run()` on the wrapper to execute the command
+//!
+//! ### For custom execution commands (migrate):
+//! 1. Implement [`impls::commands::custom_execution::CustomExecutionCmd`] for your command type
+//! 2. Wrap it in [`impls::commands::custom_execution::CustomExecutionCmdImpl`]
+//! 3. Call `run()` on the wrapper to execute the command
 //!
 //! ## Module Organization
 //!
@@ -91,6 +112,13 @@
 //! - [`handler`]: Per-file filtering and processing dispatch
 //! - [`process_file`]: File processing trait and status types
 //! - [`scan_kind`]: Utilities for determining scan strategy
+//! - [`impls`]: Concrete implementations and helper traits
+//!   - [`impls::commands`]: High-level command traits with automatic `CommandRunner` implementations
+//!   - [`impls::collectors`]: Collector implementations
+//!   - [`impls::crawlers`]: Crawler implementations
+//!   - [`impls::finalizers`]: Finalizer implementations
+//!   - [`impls::handlers`]: Handler implementations
+//!   - [`impls::process_file`]: ProcessFile implementations
 
 pub(crate) mod collector;
 pub(crate) mod crawler;
@@ -114,18 +142,16 @@ use crate::runner::crawler::Crawler;
 use crate::runner::execution::{Execution, Stdin};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
-use crate::runner::impls::commands::traversal::TraversalCommand;
 use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
 use crate::runner::scan_kind::derive_best_scan_kind;
 use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
 use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, markup};
-use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{
-    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
+    LoadedConfiguration, ProjectScanComputer, load_configuration,
 };
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -149,7 +175,7 @@ use tracing::info;
 ///
 /// Optional methods:
 /// - [CommandRunner::check_incompatible_arguments]
-/// - [CommandRunner::execute_without_crawling] (only if REQUIRES_CRAWLING = false)
+/// - [CommandRunner::execute_without_crawling] (only if requires_crawling() = false)
 pub(crate) trait CommandRunner {
     type CrawlerOutput;
     type Collector: Collector;
@@ -163,6 +189,9 @@ pub(crate) trait CommandRunner {
     type Handler: Handler;
     type ProcessFile: ProcessFile;
 
+    /// The name of the command that will appear in the diagnostics
+    fn command_name(&self) -> &'static str;
+
     /// Whether this command requires file crawling.
     ///
     /// If `false`, the command must implement [CommandRunner::execute_without_crawling]
@@ -170,15 +199,13 @@ pub(crate) trait CommandRunner {
     ///
     /// This is useful for commands like `migrate` that operate on configuration files
     /// directly rather than traversing source files.
-    const REQUIRES_CRAWLING: bool;
-
-    /// The name of the command that will appear in the diagnostics
-    fn command_name(&self) -> &'static str;
+    fn requires_crawling(&self) -> bool;
 
     /// The [ScanKind] that could be used for this command. Some commands shouldn't implement this
     /// because it should be derived from the configuration.
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
+    /// Generates the collector to use for this command.
     fn collector(
         &self,
         fs: &dyn FileSystem,
@@ -235,7 +262,7 @@ pub(crate) trait CommandRunner {
         let configured_workspace = self.configure_workspace(fs, console, workspace, cli_options)?;
 
         // Commands that don't require crawling can implement custom execution logic
-        if !Self::REQUIRES_CRAWLING {
+        if !self.requires_crawling() {
             return self.execute_without_crawling(session, configured_workspace);
         }
 
@@ -496,7 +523,7 @@ pub(crate) trait CommandRunner {
 
     /// Custom execution for commands that don't require file crawling.
     ///
-    /// This method is only called when [CommandRunner::REQUIRES_CRAWLING] is `false`.
+    /// This method is only called when [CommandRunner::requires_crawling] returns `false`.
     /// Commands like `migrate` can implement this to bypass the standard
     /// crawler/collector/finalizer flow and execute their custom logic directly.
     ///
@@ -509,14 +536,14 @@ pub(crate) trait CommandRunner {
     ///
     /// # Default implementation
     ///
-    /// Panics if called, as commands with `REQUIRES_CRAWLING = true` should never reach this code path.
+    /// Panics if called, as commands with `requires_crawling() = true` should never reach this code path.
     fn execute_without_crawling(
         &mut self,
         _session: CliSession,
         _configured_workspace: ConfiguredWorkspace,
     ) -> Result<(), CliDiagnostic> {
         panic!(
-            "{} command has REQUIRES_CRAWLING = false but did not implement execute_without_crawling()",
+            "{} command has requires_crawling() = false but did not implement execute_without_crawling()",
             self.command_name()
         )
     }
@@ -537,45 +564,3 @@ pub(crate) struct ConfiguredWorkspace {
     pub project_key: ProjectKey,
 }
 
-pub(crate) trait LoadEditorConfig: TraversalCommand {
-    /// Whether this command should load the `.editorconfig` file.
-    fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool;
-
-    /// It loads the `.editorconfig` from the file system, parses it and deserialize it into a [Configuration]
-    fn load_editor_config(
-        &self,
-        configuration_path: Option<Utf8PathBuf>,
-        fs_configuration: &Configuration,
-        fs: &dyn FileSystem,
-    ) -> Result<Option<Configuration>, WorkspaceError> {
-        Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, _editorconfig_diagnostics) = {
-                let search_path = fs.working_directory().unwrap_or_default();
-
-                load_editorconfig(fs, search_path, configuration_path)?
-            };
-            editorconfig
-        } else {
-            Default::default()
-        })
-    }
-
-    fn combine_configuration(
-        &self,
-        configuration_path: Option<Utf8PathBuf>,
-        biome_configuration: Configuration,
-        fs: &dyn FileSystem,
-    ) -> Result<Configuration, WorkspaceError> {
-        Ok(
-            if let Some(mut fs_configuration) =
-                self.load_editor_config(configuration_path, &biome_configuration, fs)?
-            {
-                // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
-                fs_configuration.merge_with(biome_configuration);
-                fs_configuration
-            } else {
-                biome_configuration
-            },
-        )
-    }
-}

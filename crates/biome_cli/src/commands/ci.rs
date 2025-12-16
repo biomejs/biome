@@ -1,9 +1,8 @@
 use crate::CliDiagnostic;
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::runner::LoadEditorConfig;
 use crate::runner::execution::{AnalyzerSelectors, Execution, ExecutionEnvironment, VcsTargeted};
-use crate::runner::impls::commands::traversal::TraversalCommand;
+use crate::runner::impls::commands::traversal::{LoadEditorConfig, TraversalCommand};
 use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
 use crate::runner::impls::process_file::check::CheckProcessFile;
 use biome_configuration::analyzer::LinterEnabled;
