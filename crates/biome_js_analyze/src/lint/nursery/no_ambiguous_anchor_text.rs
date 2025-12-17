@@ -14,7 +14,7 @@ use crate::a11y::is_hidden_from_screen_reader;
 declare_lint_rule! {
     /// Disallow ambiguous anchor descriptions.
     ///
-    /// Enforces <a> values are not exact matches for the phrases "click here", "here", "link", "a link", or "learn more".
+    /// Enforces `<a>` values are not exact matches for the phrases "click here", "here", "link", "a link", or "learn more".
     /// Screen readers announce tags as links/interactive, but rely on values for context.
     /// Ambiguous anchor descriptions do not provide sufficient context for users.
     ///
