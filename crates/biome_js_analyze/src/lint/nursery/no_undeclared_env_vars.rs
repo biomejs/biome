@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUndeclaredEnvVars {
-        version: "next",
+        version: "2.3.10",
         name: "noUndeclaredEnvVars",
         language: "js",
         sources: &[RuleSource::EslintTurbo("no-undeclared-env-vars").same()],

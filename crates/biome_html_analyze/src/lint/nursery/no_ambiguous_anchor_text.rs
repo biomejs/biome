@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAmbiguousAnchorText {
-        version: "next",
+        version: "2.3.10",
         name: "noAmbiguousAnchorText",
         language: "html",
         recommended: false,
