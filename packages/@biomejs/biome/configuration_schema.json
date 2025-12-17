@@ -2474,6 +2474,24 @@
 			]
 		},
 		"NoAlertOptions": { "type": "object", "additionalProperties": false },
+		"NoAmbiguousAnchorTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAmbiguousAnchorTextOptions" }
+			]
+		},
+		"NoAmbiguousAnchorTextOptions": {
+			"type": "object",
+			"properties": {
+				"words": {
+					"description": "It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages",
+					"type": ["array", "null"],
+					"default": null,
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoApproximativeNumericConstantConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5123,6 +5141,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAmbiguousAnchorText": {
+					"description": "Disallow ambiguous anchor descriptions.\nSee <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text>",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAmbiguousAnchorTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noContinue": {
 					"description": "Disallow continue statements.\nSee <https://biomejs.dev/linter/rules/no-continue>",
 					"anyOf": [
@@ -6111,6 +6136,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAlertOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAmbiguousAnchorTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAmbiguousAnchorTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

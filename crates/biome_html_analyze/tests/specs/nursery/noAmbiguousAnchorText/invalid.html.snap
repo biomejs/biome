@@ -1,0 +1,465 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+/* should generate diagnostics */
+
+<a>here</a>
+
+<a>HERE</a>
+
+<a>click here</a>
+
+<a>learn more</a>
+
+<a>learn      more</a>
+
+<a>learn more.</a>
+
+<a>learn more?</a>
+
+<a>learn more,</a>
+
+<a>learn more!</a>
+
+<a>learn more;</a>
+
+<a>learn more:</a>
+
+<a>link</a>
+
+<a>a link</a>
+
+<a aria-label="click here">something</a>
+
+<a> a link </a>
+
+<a>a<i></i> link</a>
+
+<a><i></i>a link</a>
+
+<a><span>click</span> here</a>
+
+<a><span> click </span> here</a>
+
+<a><span aria-hidden>more text</span>learn more</a>
+
+<a><span aria-hidden="true">more text</span>learn more</a>
+
+<a><img alt="click here" /></a>
+
+<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+
+<a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+
+```
+
+# Diagnostics
+```
+invalid.html:3:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ <a>here</a>
+      │ ^^^^^^^^^^^
+    4 │ 
+    5 │ <a>HERE</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:5:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    3 │ <a>here</a>
+    4 │ 
+  > 5 │ <a>HERE</a>
+      │ ^^^^^^^^^^^
+    6 │ 
+    7 │ <a>click here</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:7:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    5 │ <a>HERE</a>
+    6 │ 
+  > 7 │ <a>click here</a>
+      │ ^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <a>learn more</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:9:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+     7 │ <a>click here</a>
+     8 │ 
+   > 9 │ <a>learn more</a>
+       │ ^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <a>learn      more</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:11:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+     9 │ <a>learn more</a>
+    10 │ 
+  > 11 │ <a>learn      more</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ <a>learn more.</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:13:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    11 │ <a>learn      more</a>
+    12 │ 
+  > 13 │ <a>learn more.</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <a>learn more?</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:15:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    13 │ <a>learn more.</a>
+    14 │ 
+  > 15 │ <a>learn more?</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ <a>learn more,</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:17:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    15 │ <a>learn more?</a>
+    16 │ 
+  > 17 │ <a>learn more,</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ <a>learn more!</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:19:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    17 │ <a>learn more,</a>
+    18 │ 
+  > 19 │ <a>learn more!</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ <a>learn more;</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:21:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    19 │ <a>learn more!</a>
+    20 │ 
+  > 21 │ <a>learn more;</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ <a>learn more:</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:23:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    21 │ <a>learn more;</a>
+    22 │ 
+  > 23 │ <a>learn more:</a>
+       │ ^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <a>link</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:25:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    23 │ <a>learn more:</a>
+    24 │ 
+  > 25 │ <a>link</a>
+       │ ^^^^^^^^^^^
+    26 │ 
+    27 │ <a>a link</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:27:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    25 │ <a>link</a>
+    26 │ 
+  > 27 │ <a>a link</a>
+       │ ^^^^^^^^^^^^^
+    28 │ 
+    29 │ <a aria-label="click here">something</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:29:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    27 │ <a>a link</a>
+    28 │ 
+  > 29 │ <a aria-label="click here">something</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ <a> a link </a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:31:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    29 │ <a aria-label="click here">something</a>
+    30 │ 
+  > 31 │ <a> a link </a>
+       │ ^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ <a>a<i></i> link</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:33:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    31 │ <a> a link </a>
+    32 │ 
+  > 33 │ <a>a<i></i> link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ <a><i></i>a link</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:35:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    33 │ <a>a<i></i> link</a>
+    34 │ 
+  > 35 │ <a><i></i>a link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ <a><span>click</span> here</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:37:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    35 │ <a><i></i>a link</a>
+    36 │ 
+  > 37 │ <a><span>click</span> here</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ <a><span> click </span> here</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:39:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    37 │ <a><span>click</span> here</a>
+    38 │ 
+  > 39 │ <a><span> click </span> here</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ <a><span aria-hidden>more text</span>learn more</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:41:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    39 │ <a><span> click </span> here</a>
+    40 │ 
+  > 41 │ <a><span aria-hidden>more text</span>learn more</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ <a><span aria-hidden="true">more text</span>learn more</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:43:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    41 │ <a><span aria-hidden>more text</span>learn more</a>
+    42 │ 
+  > 43 │ <a><span aria-hidden="true">more text</span>learn more</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ <a><img alt="click here" /></a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:45:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    43 │ <a><span aria-hidden="true">more text</span>learn more</a>
+    44 │ 
+  > 45 │ <a><img alt="click here" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 
+    47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:47:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    45 │ <a><img alt="click here" /></a>
+    46 │ 
+  > 47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.html:49:1 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+    48 │ 
+  > 49 │ <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```

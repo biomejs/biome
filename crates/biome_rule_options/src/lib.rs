@@ -6,6 +6,7 @@ pub mod no_access_key;
 pub mod no_accumulating_spread;
 pub mod no_adjacent_spaces_in_regex;
 pub mod no_alert;
+pub mod no_ambiguous_anchor_text;
 pub mod no_approximative_numeric_constant;
 pub mod no_arguments;
 pub mod no_aria_hidden_on_focusable;

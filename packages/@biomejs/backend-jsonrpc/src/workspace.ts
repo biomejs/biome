@@ -1858,6 +1858,11 @@ See <https://biomejs.dev/linter/rules/use-yield>
  */
 export interface Nursery {
 	/**
+	* Disallow ambiguous anchor descriptions.
+See <https://biomejs.dev/linter/rules/no-ambiguous-anchor-text> 
+	 */
+	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
+	/**
 	* Disallow continue statements.
 See <https://biomejs.dev/linter/rules/no-continue> 
 	 */
@@ -3595,6 +3600,9 @@ export type UseValidTypeofConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAmbiguousAnchorTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAmbiguousAnchorTextOptions;
 export type NoContinueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoContinueOptions;
@@ -5008,6 +5016,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAmbiguousAnchorTextOptions {
+	level: RulePlainConfiguration;
+	options?: NoAmbiguousAnchorTextOptions;
+}
 export interface RuleWithNoContinueOptions {
 	level: RulePlainConfiguration;
 	options?: NoContinueOptions;
@@ -6365,6 +6377,12 @@ to a DOM element id.
 export type UseValidForDirectionOptions = {};
 export type UseValidTypeofOptions = {};
 export type UseYieldOptions = {};
+export interface NoAmbiguousAnchorTextOptions {
+	/**
+	 * It allows users to modify the strings that can be checked for in the anchor text. Useful for specifying other words in other languages
+	 */
+	words?: string[];
+}
 export type NoContinueOptions = {};
 export type NoDeprecatedImportsOptions = {};
 export type NoDuplicateDependenciesOptions = {};
@@ -7249,6 +7267,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedImports"
