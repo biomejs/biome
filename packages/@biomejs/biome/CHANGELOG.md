@@ -1,5 +1,33 @@
 # @biomejs/biome
 
+## 2.3.10
+
+### Patch Changes
+
+- [#8417](https://github.com/biomejs/biome/pull/8417) [`c3a2557`](https://github.com/biomejs/biome/commit/c3a255709cdbdb8e2281eac5bb65848eafeaa366) Thanks [@taga3s](https://github.com/taga3s)! - Fixed [#7809](https://github.com/biomejs/biome/issues/7809): [`noRedeclare`](https://biomejs.dev/linter/rules/no-redeclare/) no longer reports redeclarations for `infer` type in conditional types.
+
+- [#8477](https://github.com/biomejs/biome/pull/8477) [`90e8684`](https://github.com/biomejs/biome/commit/90e86848a9dd63b63b6a91766620657ae04b5c2d) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8475](https://github.com/biomejs/biome/issues/8475): fixed a regression in how `noExtraNonNullAssertion` flags extra non-null assertions
+
+- [#8479](https://github.com/biomejs/biome/pull/8479) [`250b519`](https://github.com/biomejs/biome/commit/250b51974f833f17b0e0e4f5d71bf93461cf3324) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8473](https://github.com/biomejs/biome/issues/8473): The semantic model now indexes typescript constructor method definitions, and no longer panics if you use one (a regression in 2.3.9).
+
+- [#8448](https://github.com/biomejs/biome/pull/8448) [`2af85c1`](https://github.com/biomejs/biome/commit/2af85c16ae3cfcd460645d83fe5789c75031967a) Thanks [@mdevils](https://github.com/mdevils)! - Improved handling of `defineProps()` macro in Vue components. The [`noVueReservedKeys`](https://biomejs.dev/linter/rules/no-vue-reserved-keys/) rule now avoids false positives in non-setup scripts.
+
+- [#8420](https://github.com/biomejs/biome/pull/8420) [`42033b0`](https://github.com/biomejs/biome/commit/42033b041f473badfcc6d1a0f52324b5388c570b) Thanks [@vsn4ik](https://github.com/vsn4ik)! - Fixed the nursery rule [`noLeakedRender`](https://biomejs.dev/linter/rules/no-leaked-render/).
+
+  The `biome migrate eslint` command now correctly detects the rule `react/jsx-no-leaked-render` in your eslint configurations.
+
+- [#8426](https://github.com/biomejs/biome/pull/8426) [`285d932`](https://github.com/biomejs/biome/commit/285d9321d8701e86f39b3a747563fc14e129b459) Thanks [@anthonyshew](https://github.com/anthonyshew)! - Added a Turborepo domain and a new "noUndeclaredEnvVars" rule in it for warning users of unsafe environment variable usage in Turborepos.
+
+- [#8410](https://github.com/biomejs/biome/pull/8410) [`a21db74`](https://github.com/biomejs/biome/commit/a21db74bc02ac7ae7e0bd96de242588c6c4108e8) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#2988](https://github.com/biomejs/biome/issues/2988) where Biome couldn't handle properly characters that contain multiple code points when running in `stdin` mode.
+
+- [#8372](https://github.com/biomejs/biome/pull/8372) [`b352ee4`](https://github.com/biomejs/biome/commit/b352ee4759f7c3b09a2bf2084de5991e935bce4d) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noAmbiguousAnchorText`](https://biomejs.dev/linter/rules/no-ambiguous-anchor-text/), which disallows ambiguous anchor descriptions.
+
+  #### Invalid
+
+  ```html
+  <a>learn more</a>
+  ```
+
 ## 2.3.9
 
 ### Patch Changes
