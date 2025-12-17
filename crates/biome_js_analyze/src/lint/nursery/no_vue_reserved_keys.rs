@@ -125,7 +125,11 @@ impl Rule for NoVueReservedKeys {
             return Box::new([]);
         };
         component
-            .declarations(VueDeclarationCollectionFilter::all())
+            .declarations(
+                VueDeclarationCollectionFilter::all()
+                    & !(VueDeclarationCollectionFilter::Setup
+                        | VueDeclarationCollectionFilter::SetupImport),
+            )
             .into_iter()
             .filter_map(|declaration| {
                 if let Some(name) = declaration.declaration_name() {

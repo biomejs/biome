@@ -195,6 +195,11 @@ impl HtmlElement {
         self.is_script_tag() && self.has_attribute("lang", "ts")
     }
 
+    /// Returns `true` if the element is a `<script setup>` tag.
+    pub fn is_script_with_setup_attribute(&self) -> bool {
+        self.is_script_tag() && self.find_attribute_by_name("setup").is_some()
+    }
+
     /// Returns `true` if the element is a `<script lang="jsx">`
     pub fn is_jsx_lang(&self) -> bool {
         self.is_script_tag() && self.has_attribute("lang", "jsx")

@@ -1,4 +1,4 @@
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -68,8 +68,11 @@ impl SvelteFileHandler {
         SVELTE_FENCE
             .captures(text)
             .and_then(|captures| {
-                let (language, variant) =
-                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                let ParsedLangAndSetup {
+                    language, variant, ..
+                } = parse_lang_and_setup_from_script_opening_tag(
+                    captures.name("opening")?.as_str(),
+                );
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)

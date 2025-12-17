@@ -7778,7 +7778,6 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EmbeddingKind =
-	| "Vue"
 	| "Svelte"
 	| "None"
 	| {
@@ -7787,6 +7786,14 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+			};
+	  }
+	| {
+			Vue: {
+				/**
+				 * Whether the script is inside script tag with setup attribute
+				 */
+				setup: boolean;
 			};
 	  };
 export type Language =

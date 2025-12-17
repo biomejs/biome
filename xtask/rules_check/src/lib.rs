@@ -305,7 +305,7 @@ fn assert_lint(
                     biome_service::file_handlers::SvelteFileHandler::input(code),
                     biome_service::file_handlers::SvelteFileHandler::file_source(code),
                 ),
-                EmbeddingKind::Vue => (
+                EmbeddingKind::Vue { .. } => (
                     biome_service::file_handlers::VueFileHandler::input(code),
                     biome_service::file_handlers::VueFileHandler::file_source(code),
                 ),

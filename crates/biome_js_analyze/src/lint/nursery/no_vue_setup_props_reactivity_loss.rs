@@ -84,6 +84,7 @@ impl Rule for NoVueSetupPropsReactivityLoss {
             AnyPotentialVueComponent::JsCallExpression(call_expr) => {
                 check_call_expression_setup(call_expr)
             }
+            _ => Self::Signals::default(),
         }
     }
 
