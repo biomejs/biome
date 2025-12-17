@@ -1,10 +1,23 @@
 use crate::prelude::*;
-use biome_html_syntax::SvelteEachBlock;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{SvelteEachBlock, SvelteEachBlockFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatSvelteEachBlock;
 impl FormatNodeRule<SvelteEachBlock> for FormatSvelteEachBlock {
     fn fmt_fields(&self, node: &SvelteEachBlock, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        let SvelteEachBlockFields {
+            opening_block,
+            children,
+            else_clause,
+            closing_block,
+        } = node.as_fields();
+
+        write!(f, [opening_block.format(), children.format(),])?;
+
+        if let Some(else_clause) = else_clause {
+            write!(f, [else_clause.format()])?;
+        }
+
+        write!(f, [closing_block.format()])
     }
 }

@@ -195,12 +195,12 @@ AnyHtmlAttributeInitializer =
 AnySvelteBlock =
 	SvelteDebugBlock
 	| SvelteKeyBlock
-	| SvelteBogusBlock
 	| SvelteRenderBlock
 	| SvelteHtmlBlock
 	| SvelteConstBlock
 	| SvelteIfBlock
 	| SvelteEachBlock
+	| SvelteBogusBlock
 
 // {@debug}
 // ^^^^^^^^
@@ -319,18 +319,46 @@ SvelteIfClosingBlock =
 SvelteEachBlock =
 	opening_block: SvelteEachOpeningBlock
 	children: HtmlElementList
+	else_clause: SvelteElseClause?
 	closing_block: SvelteEachClosingBlock
 
-// {#each ... as item, i} ... {/each}
-// ^^^^^^^^^^^^^^^^^^^^^^
+// {#each items as item, index (key)} ... {/each}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SvelteEachOpeningBlock =
 	'{#'
 	'each'
 	list: HtmlTextExpression
-	'as'
-	item: HtmlTextExpression
+	item: AnySvelteBlockItem?
 	'}'
 
+AnySvelteBlockItem =
+	SvelteEachAsKeyedItem
+	| SvelteEachKeyedItem
+
+
+// {#each items as item, index (key)} ... {/each}
+//              ^^^^^^^^^^^^^^^^^^^^
+SvelteEachAsKeyedItem =
+	'as'
+	name: HtmlTextExpression
+	index: SvelteEachIndex?
+	key: SvelteEachKey?
+
+// {#each items, index} ... {/each}
+//             ^^^^^^^^
+SvelteEachKeyedItem =
+		index: SvelteEachIndex?
+
+// {#each items as item, index} ... {/each}
+//                     ^^^^^^^^
+SvelteEachIndex =
+	','
+	value: HtmlTextExpression
+
+// {#each items as item (key)} ... {/each}
+//                      ^^^^^
+SvelteEachKey =
+	expression: HtmlTextExpression
 
 // {#each ... as item, i} ... {/each}
 //                            ^^^^^^^

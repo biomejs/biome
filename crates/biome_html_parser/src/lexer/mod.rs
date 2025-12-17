@@ -1,7 +1,8 @@
 mod tests;
 
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionKind,
+    TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
     AS_KW, ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN,
@@ -335,6 +336,74 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
+    /// Consumes a restricted single text expression that stops at specific keywords
+    /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
+    /// encountering a keyword at the top level.
+    fn consume_restricted_single_text_expression(
+        &mut self,
+        kind: RestrictedExpressionKind,
+    ) -> HtmlSyntaxKind {
+        let start_pos = self.position;
+        let mut brackets_stack = 0;
+
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'}' => {
+                    if brackets_stack == 0 {
+                        // Reached the closing brace
+                        break;
+                    } else {
+                        brackets_stack -= 1;
+                        self.advance(1);
+                    }
+                }
+                b'{' => {
+                    brackets_stack += 1;
+                    self.advance(1);
+                }
+                b',' if brackets_stack == 0 => {
+                    // Stop at comma (for index-only each syntax)
+                    let should_stop = match kind {
+                        RestrictedExpressionKind::StopAtAsOrComma => true,
+                    };
+                    if should_stop {
+                        break;
+                    }
+                    self.advance(1);
+                }
+                _ if brackets_stack == 0 && is_at_start_identifier(current) => {
+                    // Check if we're at a stop keyword
+                    let checkpoint_pos = self.position;
+                    if let Some(keyword_kind) = self.consume_language_identifier(current) {
+                        // Check if this keyword is in our stop list
+                        let should_stop = match kind {
+                            RestrictedExpressionKind::StopAtAsOrComma => keyword_kind == AS_KW,
+                        };
+
+                        if should_stop {
+                            // Rewind - don't consume the keyword
+                            self.position = checkpoint_pos;
+                            break;
+                        }
+                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                    } else {
+                        // Not a keyword, advance one byte (position was reset by consume_language_identifier)
+                        self.advance_byte_or_char(current);
+                    }
+                }
+                _ => {
+                    self.advance(1);
+                }
+            }
+        }
+
+        if self.position > start_pos {
+            HTML_LITERAL
+        } else {
+            EOF
+        }
+    }
+
     /// Consumes an HTML comment starting with '<!--' until the closing '-->' is found.
     /// Returns COMMENT token type.
     fn consume_comment(&mut self) -> HtmlSyntaxKind {
@@ -401,9 +470,25 @@ impl<'src> HtmlLexer<'src> {
             b'{' => self.consume_byte(T!['{']),
             _ if is_at_start_identifier(current) => self
                 .consume_language_identifier(current)
-                .unwrap_or_else(|| self.consume_single_text_expression()),
+                .unwrap_or_else(|| self.consume_svelte_identifier(current)),
             _ => self.consume_single_text_expression(),
         }
+    }
+
+    /// Consumes a Svelte identifier (alphanumeric + underscore only)
+    fn consume_svelte_identifier(&mut self, first: u8) -> HtmlSyntaxKind {
+        self.assert_current_char_boundary();
+        self.advance_byte_or_char(first);
+
+        while let Some(byte) = self.current_byte() {
+            if is_at_continue_identifier(byte) {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        IDENT
     }
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
@@ -991,6 +1076,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
                         TextExpressionKind::Single => self.consume_single_text_expression(),
                     },
+                    HtmlLexContext::RestrictedSingleExpression(kind) => {
+                        self.consume_restricted_single_text_expression(kind)
+                    }
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {
                         self.consume_astro_frontmatter(current, context)
@@ -1071,7 +1159,6 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::SingleTextExpression => self.consume_single_text_expression(),
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
             },
             None => EOF,

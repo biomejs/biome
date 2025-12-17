@@ -77,8 +77,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_ELSE_IF_CLAUSE",
         "SVELTE_EACH_BLOCK",
         "SVELTE_EACH_OPENING_BLOCK",
-        "SVELTE_EACH_ITEM",
+        "SVELTE_EACH_AS_KEYED_ITEM",
+        "SVELTE_EACH_KEYED_ITEM",
         "SVELTE_EACH_INDEX",
+        "SVELTE_EACH_KEY",
         "SVELTE_EACH_CLOSING_BLOCK",
         // Vue nodes
         "VUE_DIRECTIVE",
