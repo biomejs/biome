@@ -208,7 +208,9 @@ fn extract_from_computed_member(
     let member = member.omit_parentheses();
 
     // Check if it's a string literal
-    let string_literal = member.as_any_js_literal_expression()?.as_js_string_literal_expression()?;
+    let string_literal = member
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
     let string_token = string_literal.value_token().ok()?;
     let env_var_name = inner_string_text(&string_token);
 
@@ -216,10 +218,7 @@ fn extract_from_computed_member(
 }
 
 /// Checks if the object is a global env object (`process` or `Bun`, not shadowed by a local binding)
-fn is_global_env_object(
-    expr: &AnyJsExpression,
-    model: &biome_js_semantic::SemanticModel,
-) -> bool {
+fn is_global_env_object(expr: &AnyJsExpression, model: &biome_js_semantic::SemanticModel) -> bool {
     let Some((reference, name)) = global_identifier(expr) else {
         return false;
     };
