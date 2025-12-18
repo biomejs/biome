@@ -5509,6 +5509,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTailwindShorthandClasses": {
+					"description": "Succinct description of the rule.\nSee <https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes>",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindShorthandClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueGraphqlOperationName": {
 					"description": "Enforce unique operation names across a GraphQL document.\nSee <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>",
 					"anyOf": [
@@ -9584,6 +9591,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTailwindShorthandClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindShorthandClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTemplateOptions": {
 			"type": "object",
 			"properties": {
@@ -12586,6 +12602,16 @@
 			]
 		},
 		"UseSymbolDescriptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindShorthandClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindShorthandClassesOptions" }
+			]
+		},
+		"UseTailwindShorthandClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

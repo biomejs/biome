@@ -99,11 +99,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
-        for script in scripts {
+        for (script, source_type) in scripts {
             analyze_and_snap(
                 &mut snapshot,
                 &script,
-                JsFileSource::js_script(),
+                source_type,
                 filter,
                 file_name,
                 input_file,

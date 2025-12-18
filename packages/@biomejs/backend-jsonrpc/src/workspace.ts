@@ -2122,6 +2122,11 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes> 
+	 */
+	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
+	/**
 	* Enforce unique operation names across a GraphQL document.
 See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name> 
 	 */
@@ -3756,6 +3761,9 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseTailwindShorthandClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindShorthandClassesOptions;
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
@@ -5236,6 +5244,10 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseTailwindShorthandClassesOptions {
+	level: RulePlainConfiguration;
+	options?: UseTailwindShorthandClassesOptions;
+}
 export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
@@ -6519,6 +6531,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseTailwindShorthandClassesOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
 	/**
@@ -7330,6 +7343,7 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"

@@ -167,6 +167,8 @@ pub enum RuleSource {
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin Turbo](https://github.com/vercel/turborepo/tree/main/packages/eslint-plugin-turbo)
     EslintTurbo(&'static str),
+    /// Rules from [Eslint Plugin Better Tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)
+    EslintBetterTailwindCss(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -218,6 +220,9 @@ impl std::fmt::Display for RuleSource {
             Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
+            Self::EslintBetterTailwindCss(_) => {
+                write!(f, "eslint-plugin-better-tailwindcss")
+            }
         }
     }
 }
@@ -298,7 +303,8 @@ impl RuleSource {
             | Self::EslintVueJs(rule_name)
             | Self::GraphqlSchemaLinter(rule_name)
             | Self::Stylelint(rule_name)
-            | Self::EslintTurbo(rule_name) => rule_name,
+            | Self::EslintTurbo(rule_name)
+            | Self::EslintBetterTailwindCss(rule_name) => rule_name,
         }
     }
 
@@ -344,6 +350,7 @@ impl RuleSource {
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
             Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
             Self::EslintTurbo(rule_name) => format!("turbo/{rule_name}"),
+            Self::EslintBetterTailwindCss(rule_name) => format!("better-tailwindcss/{rule_name}"),
         }
     }
 
@@ -385,6 +392,7 @@ impl RuleSource {
             Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
+            Self::EslintBetterTailwindCss(rule_name) => format!("https://github.com/schoero/eslint-plugin-better-tailwindcss/blob/main/docs/rules/{}.md", rule_name),
         }
     }
 

@@ -1,0 +1,7 @@
+[
+  { "lang": "jsx", "code": "() => <div className=\"px-4 py-4\"></div>;"},
+  { "lang": "jsx", "code": "let div = <div class=\"ml-4 mr-4\"></div>;"},
+  { "lang": "jsx", "code": "let foo = cn(\"w-4 h-4 pt-1 pb-1\");"},
+  { "lang": "jsx", "code": "let foo = tw(\"rounded-tl rounded-tr rounded-bl rounded-br\");"},
+  { "lang": "jsx", "code": "const bar = clsx(\"pt-5 pb-5 pl-5 pr-5\");"}
+]

@@ -46,6 +46,8 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
+biome_tailwind_parser	= {workspace = true }
+biome_tailwind_syntax	= {workspace = true }
 
 
 [dev-dependencies]
