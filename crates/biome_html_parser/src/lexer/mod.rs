@@ -405,7 +405,7 @@ impl<'src> HtmlLexer<'src> {
         if self.position > start_pos {
             HTML_LITERAL
         } else {
-            EOF
+            ERROR_TOKEN
         }
     }
 
