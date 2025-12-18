@@ -51,15 +51,30 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
-            analyze_and_snap(
-                &mut snapshot,
-                &script,
-                HtmlFileSource::html(),
-                filter,
-                file_name,
-                input_file,
-                CheckActionType::Lint,
-            );
+            match script {
+                biome_test_utils::JsonCase::String(code) => analyze_and_snap(
+                    &mut snapshot,
+                    &code,
+                    HtmlFileSource::html(),
+                    filter,
+                    file_name,
+                    input_file,
+                    CheckActionType::Lint,
+                ),
+                biome_test_utils::JsonCase::CaseWithLanguage { code, lang } => {
+                    let file_source =
+                        HtmlFileSource::try_from_extension(&lang).unwrap_or(HtmlFileSource::html());
+                    analyze_and_snap(
+                        &mut snapshot,
+                        &code,
+                        file_source,
+                        filter,
+                        file_name,
+                        input_file,
+                        CheckActionType::Lint,
+                    )
+                }
+            }
         }
     } else {
         let Ok(source_type) = input_file.try_into() else {

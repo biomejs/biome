@@ -100,6 +100,7 @@ biome_suppression            = { path = "./crates/biome_suppression", version = 
 biome_tailwind_factory       = { path = "./crates/biome_tailwind_factory", version = "0.0.1" }
 biome_tailwind_parser        = { path = "./crates/biome_tailwind_parser", version = "0.0.1" }
 biome_tailwind_syntax        = { path = "./crates/biome_tailwind_syntax", version = "0.0.1" }
+biome_tailwind_logic         = { path = "./crates/biome_tailwind_logic", version = "0.0.1" }
 biome_test_utils             = { path = "./crates/biome_test_utils" }
 biome_text_edit              = { path = "./crates/biome_text_edit", version = "0.5.7" }
 biome_text_size              = { path = "./crates/biome_text_size", version = "0.5.7" }

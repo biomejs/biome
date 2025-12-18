@@ -103,17 +103,34 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
-            analyze_and_snap(
-                &mut snapshot,
-                &script,
-                JsFileSource::js_script(),
-                filter,
-                file_name,
-                input_file,
-                CheckActionType::Lint,
-                JsParserOptions::default(),
-                &[],
-            );
+            match script {
+                biome_test_utils::JsonCase::String(code) => analyze_and_snap(
+                    &mut snapshot,
+                    &code,
+                    JsFileSource::js_script(),
+                    filter,
+                    file_name,
+                    input_file,
+                    CheckActionType::Lint,
+                    JsParserOptions::default(),
+                    &[],
+                ),
+                biome_test_utils::JsonCase::CaseWithLanguage { code, lang } => {
+                    let file_source = JsFileSource::try_from_extension(&lang)
+                        .unwrap_or(JsFileSource::js_script());
+                    analyze_and_snap(
+                        &mut snapshot,
+                        &code,
+                        file_source,
+                        filter,
+                        file_name,
+                        input_file,
+                        CheckActionType::Lint,
+                        JsParserOptions::default(),
+                        &[],
+                    )
+                }
+            }
         }
     } else {
         let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into() else {

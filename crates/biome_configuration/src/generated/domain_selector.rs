@@ -87,6 +87,8 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
+static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "useTailwindShorthandClasses")]);
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
@@ -138,6 +140,7 @@ impl DomainSelector {
             "qwik" => QWIK_FILTERS.clone(),
             "react" => REACT_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
+            "tailwind" => TAILWIND_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -160,6 +163,9 @@ impl DomainSelector {
             "qwik" => QWIK_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "react" => REACT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "tailwind" => TAILWIND_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "turborepo" => TURBOREPO_FILTERS
                 .iter()

@@ -1,0 +1,5 @@
+[
+  { "lang": "jsx", "code": "let div = <div className=\"ml-8 mr-4\"></div>;"},
+  { "lang": "jsx", "code": "() => <div class=\"ml-4 text-sm mr-4\"></div>;"},
+  { "lang": "jsx", "code": "() => <div class=\"overflow-hidden bg-red-400 text-ellipsis whitespace-nowrap\"></div>;"}
+]

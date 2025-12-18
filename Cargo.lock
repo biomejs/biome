@@ -817,6 +817,7 @@ dependencies = [
  "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_logic",
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",
@@ -936,6 +937,9 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_logic",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
  "bitvec",
@@ -1710,6 +1714,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_tailwind_logic"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_rowan",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
+]
+
+[[package]]
 name = "biome_tailwind_parser"
 version = "0.0.1"
 dependencies = [
@@ -1769,6 +1783,7 @@ dependencies = [
  "countme",
  "json_comments",
  "owo-colors",
+ "serde",
  "serde_json",
  "similar",
  "ureq",

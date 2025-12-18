@@ -1,0 +1,20 @@
+[package]
+name = "biome_tailwind_logic"
+description = "Shared logic for Tailwind lint rules"
+version = "0.0.1"
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+biome_analyze = { workspace = true }
+biome_tailwind_parser = { workspace = true }
+biome_tailwind_syntax = { workspace = true }
+biome_rowan = { workspace = true }
+
+[lints]
+workspace = true
