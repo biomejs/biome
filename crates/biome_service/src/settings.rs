@@ -80,6 +80,9 @@ pub struct Settings {
 
     // TODO: remove once embedded snippets support is stable
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+
+    /// Configuration for embedded-only languages.
+    pub embedded: EmbeddedSettings,
 }
 
 impl Settings {
@@ -674,6 +677,65 @@ pub struct OverrideAssistSettings {
 #[derive(Clone, Debug, Default)]
 pub struct OverrideFilesSettings {
     pub max_size: Option<MaxSize>,
+}
+
+/// Configuration controlling which strings are detected as Tailwind class lists.
+///
+/// Hard-coded defaults; the struct is `pub` so it can be exposed in user-facing
+/// configuration later (once `biome_configuration` is extended for Tailwind).
+#[derive(Clone, Debug)]
+pub struct TailwindClassDetectionConfig {
+    /// HTML/JSX attribute names treated as Tailwind class lists.
+    /// Default: `["class", "className"]`
+    pub attributes: Vec<String>,
+    /// JS function names whose string arguments are treated as Tailwind class lists.
+    /// Default: `["clsx", "tw", "twMerge", "twJoin", "cva", "tv", "cn", "cc", "cnb", "ctl"]`
+    pub functions: Vec<String>,
+}
+
+/// Internal settings for Tailwind as an embedded-only language.
+///
+/// This sits outside `LanguageListSettings` because Tailwind does not correspond to
+/// a user-selectable top-level file language.
+#[derive(Clone, Debug, Default)]
+pub struct TailwindEmbeddedSettings {
+    pub class_detection: TailwindClassDetectionConfig,
+}
+
+/// Internal settings bucket for embedded-only languages.
+///
+/// These settings are owned by `biome_service` and are not yet part of the public
+/// configuration schema.
+#[derive(Clone, Debug, Default)]
+pub struct EmbeddedSettings {
+    pub tailwind: TailwindEmbeddedSettings,
+}
+
+impl Default for TailwindClassDetectionConfig {
+    fn default() -> Self {
+        Self {
+            attributes: vec!["class".into(), "className".into()],
+            functions: vec![
+                "clsx".into(),
+                "tw".into(),
+                // tailwind merge
+                "twMerge".into(),
+                "twJoin".into(),
+                // class variance authority
+                "cva".into(),
+                // tailwind variants
+                "tv".into(),
+                // shadcn
+                "cn".into(),
+                // classcat
+                "cc".into(),
+                // class list builder
+                "cnb".into(),
+                // classnames template literals
+                "ctl".into(),
+            ],
+        }
+    }
 }
 
 /// Static map of language names to language-specific settings

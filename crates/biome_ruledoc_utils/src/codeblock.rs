@@ -1,10 +1,12 @@
 use std::str::FromStr;
 
 use anyhow::{Result, bail};
+use biome_analyze::AnalyzerConfiguration;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::Configuration;
 use biome_fs::BiomePath;
 use biome_service::{
+    configuration::to_analyzer_rules,
     settings::{ServiceLanguage, Settings},
     workspace::DocumentFileSource,
 };
@@ -94,6 +96,32 @@ impl CodeBlock {
         ))
     }
 
+    pub fn create_tailwind_analyzer_options(
+        &self,
+        config: Option<Configuration>,
+    ) -> Result<AnalyzerOptions> {
+        let mut settings = Settings::default();
+
+        if self.use_options {
+            let Some(config) = config else {
+                bail!(
+                    "Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block."
+                );
+            };
+
+            settings.merge_with_configuration(config, None, vec![])?;
+        }
+
+        let configuration = AnalyzerConfiguration::default().with_rules(to_analyzer_rules(
+            &settings,
+            BiomePath::new(self.file_path()).as_path(),
+        ));
+
+        Ok(AnalyzerOptions::default()
+            .with_file_path(self.file_path())
+            .with_configuration(configuration))
+    }
+
     pub fn document_file_source(&self) -> DocumentFileSource {
         // Always use the JS-first resolution path (experimental full HTML support disabled)
         DocumentFileSource::from_extension(&self.tag, false)
@@ -145,9 +173,11 @@ impl FromStr for CodeBlock {
                         }
                         code_block.file_path = Some(normalize_file_path(path));
                     } else {
-                        if DocumentFileSource::from_extension(token, false)
-                            == DocumentFileSource::Unknown
-                        {
+                        let is_known = token == "tailwind"
+                            || DocumentFileSource::from_extension(token, false)
+                                != DocumentFileSource::Unknown;
+
+                        if !is_known {
                             bail!("Unrecognised attribute in code block: {token}");
                         }
 

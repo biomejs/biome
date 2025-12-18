@@ -1,3 +1,5 @@
+use crate::embed::languages::EmbeddedLanguageId;
+use crate::settings::TailwindClassDetectionConfig;
 use crate::workspace::DocumentFileSource;
 use biome_css_syntax::CssFileSource;
 use biome_graphql_syntax::GraphqlFileSource;
@@ -25,21 +27,43 @@ pub(crate) enum GuestLanguage {
     Css,
     GraphQL,
     Json,
+    Tailwind,
 }
 
-impl From<GuestLanguage> for DocumentFileSource {
-    fn from(value: GuestLanguage) -> Self {
-        match value {
-            GuestLanguage::JsModule => JsFileSource::js_module().into(),
-            GuestLanguage::JsScript => JsFileSource::js_script().into(),
-            GuestLanguage::Jsx => JsFileSource::jsx().into(),
-            GuestLanguage::Ts => JsFileSource::ts().into(),
-            GuestLanguage::Tsx => JsFileSource::tsx().into(),
-            GuestLanguage::Css => CssFileSource::css().into(),
-            GuestLanguage::GraphQL => GraphqlFileSource::graphql().into(),
-            GuestLanguage::Json => JsonFileSource::json().into(),
+impl GuestLanguage {
+    /// Returns the runtime embedded-language identity for this guest language.
+    pub(crate) fn embedded_language_id(self) -> EmbeddedLanguageId {
+        match self {
+            Self::JsModule | Self::JsScript | Self::Jsx | Self::Ts | Self::Tsx => {
+                EmbeddedLanguageId::Js
+            }
+            Self::Css => EmbeddedLanguageId::Css,
+            Self::GraphQL => EmbeddedLanguageId::Graphql,
+            Self::Json => EmbeddedLanguageId::Json,
+            Self::Tailwind => EmbeddedLanguageId::Tailwind,
         }
     }
+
+    /// Maps detector guest languages back to top-level file sources when one exists.
+    pub(crate) fn document_file_source(self) -> Option<DocumentFileSource> {
+        match self {
+            Self::JsModule => Some(JsFileSource::js_module().into()),
+            Self::JsScript => Some(JsFileSource::js_script().into()),
+            Self::Jsx => Some(JsFileSource::jsx().into()),
+            Self::Ts => Some(JsFileSource::ts().into()),
+            Self::Tsx => Some(JsFileSource::tsx().into()),
+            Self::Css => Some(CssFileSource::css().into()),
+            Self::GraphQL => Some(GraphqlFileSource::graphql().into()),
+            Self::Json => Some(JsonFileSource::json().into()),
+            Self::Tailwind => None,
+        }
+    }
+}
+
+/// Shared context used while matching embed candidates.
+pub(crate) struct EmbedDetectionContext<'a> {
+    pub file_source: &'a DocumentFileSource,
+    pub tailwind_class_detection_config: &'a TailwindClassDetectionConfig,
 }
 
 /// Describes where a potential embedded language can be found inside an host language.
@@ -85,6 +109,17 @@ pub(crate) enum EmbedCandidate {
         /// Affects `EmbeddingKind::Vue { event_handler }`.
         is_event_handler: bool,
     },
+
+    /// A quoted string attribute value that may host an embedded snippet.
+    /// Used for Tailwind class-like attributes in HTML and JSX.
+    AttributeValue { name: String, content: EmbedContent },
+
+    /// A quoted string literal passed as a call argument.
+    /// Used for Tailwind helper calls such as `clsx("...")`.
+    CallArgument {
+        callee: String,
+        content: EmbedContent,
+    },
 }
 
 /// The text content and position information for an embed site.
@@ -111,7 +146,9 @@ impl EmbedCandidate {
             | Self::Frontmatter { content }
             | Self::TaggedTemplate { content, .. }
             | Self::TextExpression { content }
-            | Self::Directive { content, .. } => content,
+            | Self::Directive { content, .. }
+            | Self::AttributeValue { content, .. }
+            | Self::CallArgument { content, .. } => content,
         }
     }
 
@@ -149,6 +186,22 @@ impl EmbedCandidate {
                         .is_some_and(|v| v.text().eq_ignore_ascii_case(value))
             }),
             _ => false,
+        }
+    }
+
+    /// Returns the attribute name for `AttributeValue` candidates.
+    pub fn attribute_name(&self) -> Option<&str> {
+        match self {
+            Self::AttributeValue { name, .. } => Some(name.as_str()),
+            _ => None,
+        }
+    }
+
+    /// Returns the callee name for `CallArgument` candidates.
+    pub fn call_argument_callee(&self) -> Option<&str> {
+        match self {
+            Self::CallArgument { callee, .. } => Some(callee.as_str()),
+            _ => None,
         }
     }
 }

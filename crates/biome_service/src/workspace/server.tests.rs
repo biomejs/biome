@@ -1,12 +1,16 @@
 use super::*;
+use crate::embed::languages::EmbeddedLanguageId;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
-    FormatterConfiguration, JsConfiguration,
+    Configuration, FormatterConfiguration, JsConfiguration,
+    bool::Bool,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
+use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
+use biome_js_syntax::JsLanguage;
 use biome_rowan::TextSize;
 
 #[test]
@@ -104,12 +108,12 @@ fn store_embedded_nodes_with_current_ranges() {
     let scripts: Vec<_> = document
         .embedded_snippets
         .iter()
-        .filter_map(|node| node.as_js_embedded_snippet())
+        .filter(|node| node.language() == EmbeddedLanguageId::Js)
         .collect();
     let styles: Vec<_> = document
         .embedded_snippets
         .iter()
-        .filter_map(|node| node.as_css_embedded_snippet())
+        .filter(|node| node.language() == EmbeddedLanguageId::Css)
         .collect();
     assert_eq!(scripts.len(), 1);
     assert_eq!(styles.len(), 1);
@@ -117,10 +121,16 @@ fn store_embedded_nodes_with_current_ranges() {
     let script = scripts.first().unwrap();
     let style = styles.first().unwrap();
 
-    let script_node = script.node();
+    let script_node = script
+        .parse()
+        .unwrap_as_embedded_syntax_node()
+        .into_node::<JsLanguage>();
     assert!(script_node.text_range_with_trivia().start() > TextSize::from(0));
 
-    let style_node = style.node();
+    let style_node = style
+        .parse()
+        .unwrap_as_embedded_syntax_node()
+        .into_node::<CssLanguage>();
     assert!(style_node.text_range_with_trivia().start() > TextSize::from(0));
 }
 
