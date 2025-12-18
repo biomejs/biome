@@ -1146,7 +1146,7 @@ See <https://biomejs.dev/linter/rules/no-noninteractive-tabindex>
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
 	/**
-	* Prevent the usage of positive integers on tabIndex property.
+	* Prevent the usage of positive integers on tabindex attribute.
 See <https://biomejs.dev/linter/rules/no-positive-tabindex> 
 	 */
 	noPositiveTabindex?: NoPositiveTabindexConfiguration;

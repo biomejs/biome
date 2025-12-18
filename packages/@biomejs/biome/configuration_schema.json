@@ -162,7 +162,7 @@
 					]
 				},
 				"noPositiveTabindex": {
-					"description": "Prevent the usage of positive integers on tabIndex property.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
+					"description": "Prevent the usage of positive integers on tabindex attribute.\nSee <https://biomejs.dev/linter/rules/no-positive-tabindex>",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPositiveTabindexConfiguration" },
 						{ "type": "null" }

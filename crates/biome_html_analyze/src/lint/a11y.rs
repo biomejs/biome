@@ -4,4 +4,5 @@
 
 use biome_analyze::declare_lint_group;
 pub mod no_header_scope;
-declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_header_scope :: NoHeaderScope ,] } }
+pub mod no_positive_tabindex;
+declare_lint_group! { pub A11y { name : "a11y" , rules : [self :: no_header_scope :: NoHeaderScope , self :: no_positive_tabindex :: NoPositiveTabindex ,] } }
