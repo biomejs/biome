@@ -19,7 +19,7 @@ impl FormatNodeRule<SvelteEachAsKeyedItem> for FormatSvelteEachAsKeyedItem {
         }
 
         if let Some(key) = key {
-            write!(f, [key.format()])?;
+            write!(f, [space(), key.format()])?;
         }
 
         Ok(())

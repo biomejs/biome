@@ -16,7 +16,7 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
@@ -73,7 +73,7 @@ impl HtmlLexContext {
     }
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) enum TextExpressionKind {
     // {{ expr }}
     #[default]
@@ -82,13 +82,17 @@ pub(crate) enum TextExpressionKind {
     Single,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum RestrictedExpressionKind {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     StopAtAsOrComma,
+    /// Stops at `(`
+    StopAtOpeningParenOrComma,
+    /// Stops at `)`
+    StopAtClosingParen,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,

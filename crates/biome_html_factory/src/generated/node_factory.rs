@@ -494,10 +494,18 @@ pub fn svelte_each_index(comma_token: SyntaxToken, value: HtmlTextExpression) ->
         ],
     ))
 }
-pub fn svelte_each_key(expression: HtmlTextExpression) -> SvelteEachKey {
+pub fn svelte_each_key(
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> SvelteEachKey {
     SvelteEachKey::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_EACH_KEY,
-        [Some(SyntaxElement::Node(expression.into_syntax()))],
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
     ))
 }
 pub fn svelte_each_keyed_item() -> SvelteEachKeyedItemBuilder {

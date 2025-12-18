@@ -361,10 +361,13 @@ impl<'src> HtmlLexer<'src> {
                     brackets_stack += 1;
                     self.advance(1);
                 }
-                b',' if brackets_stack == 0 => {
-                    // Stop at comma (for index-only each syntax)
+                _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
                     let should_stop = match kind {
-                        RestrictedExpressionKind::StopAtAsOrComma => true,
+                        RestrictedExpressionKind::StopAtAsOrComma => current == b',',
+                        RestrictedExpressionKind::StopAtOpeningParenOrComma => {
+                            current == b'(' || current == b','
+                        }
+                        RestrictedExpressionKind::StopAtClosingParen => current == b')',
                     };
                     if should_stop {
                         break;
@@ -378,6 +381,8 @@ impl<'src> HtmlLexer<'src> {
                         // Check if this keyword is in our stop list
                         let should_stop = match kind {
                             RestrictedExpressionKind::StopAtAsOrComma => keyword_kind == AS_KW,
+                            RestrictedExpressionKind::StopAtOpeningParenOrComma => false,
+                            RestrictedExpressionKind::StopAtClosingParen => false,
                         };
 
                         if should_stop {
@@ -466,6 +471,8 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'}' => self.consume_byte(T!['}']),
             b',' => self.consume_byte(T![,]),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => self.consume_byte(T!['{']),
             _ if is_at_start_identifier(current) => self

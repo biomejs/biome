@@ -350,15 +350,17 @@ SvelteEachKeyedItem =
 		index: SvelteEachIndex?
 
 // {#each items as item, index} ... {/each}
-//                     ^^^^^^^^
+//                     ^^^^^^^
 SvelteEachIndex =
 	','
 	value: HtmlTextExpression
 
-// {#each items as item (key)} ... {/each}
-//                      ^^^^^
+// {#each items as item, item (key)} ... {/each}
+//                            ^^^^^
 SvelteEachKey =
+	'('
 	expression: HtmlTextExpression
+	')'
 
 // {#each ... as item, i} ... {/each}
 //                            ^^^^^^^

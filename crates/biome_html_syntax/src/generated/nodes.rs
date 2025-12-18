@@ -1200,11 +1200,19 @@ impl SvelteEachKey {
     }
     pub fn as_fields(&self) -> SvelteEachKeyFields {
         SvelteEachKeyFields {
+            l_paren_token: self.l_paren_token(),
             expression: self.expression(),
+            r_paren_token: self.r_paren_token(),
         }
     }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
     pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 0usize)
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for SvelteEachKey {
@@ -1217,7 +1225,9 @@ impl Serialize for SvelteEachKey {
 }
 #[derive(Serialize)]
 pub struct SvelteEachKeyFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteEachKeyedItem {
@@ -3986,7 +3996,15 @@ impl std::fmt::Debug for SvelteEachKey {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("SvelteEachKey")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
                 .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("SvelteEachKey").finish()

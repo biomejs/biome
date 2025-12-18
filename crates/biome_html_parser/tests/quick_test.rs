@@ -4,8 +4,8 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{#each users   ,    i}
-  <div>{item}</div>
+    let code = r#"{#each items as item, i (item.id)}
+  <div>{i}: {item.name}</div>
 {/each}
 
     "#;

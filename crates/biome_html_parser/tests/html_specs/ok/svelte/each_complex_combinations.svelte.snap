@@ -45,10 +45,16 @@ HtmlRoot {
                     index: SvelteEachIndex {
                         comma_token: COMMA@20..21 "," [] [],
                         value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@21..33 " i (item.id)" [] [],
+                            html_literal_token: HTML_LITERAL@21..24 " i " [] [],
                         },
                     },
-                    key: missing (optional),
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@24..25 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@25..32 "item.id" [] [],
+                        },
+                        r_paren_token: R_PAREN@32..33 ")" [] [],
+                    },
                 },
                 r_curly_token: R_CURLY@33..34 "}" [] [],
             },
@@ -193,10 +199,16 @@ HtmlRoot {
                 item: SvelteEachAsKeyedItem {
                     as_token: AS_KW@179..181 "as" [] [],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@181..203 " product (product.sku)" [] [],
+                        html_literal_token: HTML_LITERAL@181..190 " product " [] [],
                     },
                     index: missing (optional),
-                    key: missing (optional),
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@190..191 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@191..202 "product.sku" [] [],
+                        },
+                        r_paren_token: R_PAREN@202..203 ")" [] [],
+                    },
                 },
                 r_curly_token: R_CURLY@203..204 "}" [] [],
             },
@@ -259,11 +271,15 @@ HtmlRoot {
           0: AS_KW@13..15 "as" [] []
           1: HTML_TEXT_EXPRESSION@15..20
             0: HTML_LITERAL@15..20 " item" [] []
-          2: SVELTE_EACH_INDEX@20..33
+          2: SVELTE_EACH_INDEX@20..24
             0: COMMA@20..21 "," [] []
-            1: HTML_TEXT_EXPRESSION@21..33
-              0: HTML_LITERAL@21..33 " i (item.id)" [] []
-          3: (empty)
+            1: HTML_TEXT_EXPRESSION@21..24
+              0: HTML_LITERAL@21..24 " i " [] []
+          3: SVELTE_EACH_KEY@24..33
+            0: L_PAREN@24..25 "(" [] []
+            1: HTML_TEXT_EXPRESSION@25..32
+              0: HTML_LITERAL@25..32 "item.id" [] []
+            2: R_PAREN@32..33 ")" [] []
         4: R_CURLY@33..34 "}" [] []
       1: HTML_ELEMENT_LIST@34..64
         0: HTML_ELEMENT@34..64
@@ -364,10 +380,14 @@ HtmlRoot {
           0: HTML_LITERAL@169..179 " products " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@179..203
           0: AS_KW@179..181 "as" [] []
-          1: HTML_TEXT_EXPRESSION@181..203
-            0: HTML_LITERAL@181..203 " product (product.sku)" [] []
+          1: HTML_TEXT_EXPRESSION@181..190
+            0: HTML_LITERAL@181..190 " product " [] []
           2: (empty)
-          3: (empty)
+          3: SVELTE_EACH_KEY@190..203
+            0: L_PAREN@190..191 "(" [] []
+            1: HTML_TEXT_EXPRESSION@191..202
+              0: HTML_LITERAL@191..202 "product.sku" [] []
+            2: R_PAREN@202..203 ")" [] []
         4: R_CURLY@203..204 "}" [] []
       1: HTML_ELEMENT_LIST@204..233
         0: HTML_ELEMENT@204..233

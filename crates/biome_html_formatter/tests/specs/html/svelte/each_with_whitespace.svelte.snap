@@ -47,7 +47,7 @@ Self close void elements: never
 	<div>{item}</div>
 {/each}
 
-{#each items as item ( item.id )}
+{#each items as item (item.id)}
 	<div>{item}</div>
 {/each}
 ```

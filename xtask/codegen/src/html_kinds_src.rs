@@ -26,6 +26,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("[", "L_BRACKET"),
         ("]", "R_BRACKET"),
         ("#", "HASH"),
+        ("(", "L_PAREN"),
+        (")", "R_PAREN"),
     ],
     keywords: &[
         "null", "true", "false", "doctype", "html", // Svelte keywords

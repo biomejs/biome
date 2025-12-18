@@ -5,7 +5,7 @@ use crate::syntax::parse_error::{
 use crate::syntax::{parse_html_element, parse_single_text_expression_content};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, HTML_LITERAL, IDENT, SVELTE_ATTACH_ATTRIBUTE,
+    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, IDENT, SVELTE_ATTACH_ATTRIBUTE,
     SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK,
     SVELTE_EACH_AS_KEYED_ITEM, SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK, SVELTE_EACH_INDEX,
     SVELTE_EACH_KEY, SVELTE_EACH_KEYED_ITEM, SVELTE_EACH_OPENING_BLOCK, SVELTE_ELSE_CLAUSE,
@@ -193,7 +193,7 @@ fn parse_each_as_keyed_item(p: &mut HtmlParser) -> ParsedSyntax {
     // Consume 'as' and switch context for name (stop at comma for optional index)
     p.bump_with_context(
         T![as],
-        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtAsOrComma),
+        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtOpeningParenOrComma),
     );
 
     // Parse name (required)
@@ -213,23 +213,33 @@ fn parse_each_as_keyed_item(p: &mut HtmlParser) -> ParsedSyntax {
 
     // Parse optional key: (key_expression)
     // The key expression includes parentheses as part of the literal
-    if p.at(HTML_LITERAL) && p.cur_text().trim_start().starts_with('(') {
-        let key_m = p.start();
-        let key_text = p.cur_text().to_string();
-        parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
-            p.err_builder("Expected a key expression in parentheses", range)
-        });
-
-        // Validate that the key expression has matching parentheses
-        let trimmed = key_text.trim();
-        if !trimmed.ends_with(')') {
-            p.error(p.err_builder("Expected closing ')' for key expression", p.cur_range()));
-        }
-
-        key_m.complete(p, SVELTE_EACH_KEY);
-    }
+    parse_each_key(p).ok();
 
     Present(m.complete(p, SVELTE_EACH_AS_KEYED_ITEM))
+}
+
+/// Parse the `( key )` inside the `#each` block
+fn parse_each_key(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(
+        T!['('],
+        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtClosingParen),
+    );
+
+    parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
+        p.err_builder("Expected a key expression in parentheses", range)
+    });
+
+    // Re-lex to Svelte context to recognize ',) and other tokens
+    p.re_lex(HtmlReLexContext::Svelte);
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, SVELTE_EACH_KEY))
 }
 
 /// Parses the ", index" part for index-only syntax (without 'as')
@@ -255,7 +265,10 @@ fn parse_each_index(p: &mut HtmlParser) -> ParsedSyntax {
     }
     // Parse the index
     let m = p.start();
-    p.bump_with_context(T![,], HtmlLexContext::single_expression());
+    p.bump_with_context(
+        T![,],
+        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtOpeningParenOrComma),
+    );
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
         p.err_builder("Expected an index binding after ','", range)
     });
