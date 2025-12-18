@@ -4,17 +4,14 @@ use biome_analyze::{
 };
 #[cfg(feature = "configuration")]
 use biome_configuration::{ConfigurationSource, ExtendedConfigurationIterator};
-#[cfg(not(feature = "configuration"))]
-pub struct ConfigurationSource;
-#[cfg(not(feature = "configuration"))]
-pub struct ExtendedConfigurationIterator<'a>(std::iter::Empty<()>);
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_rowan::AstNode;
+#[cfg(feature = "configuration")]
 use std::sync::Arc;
 
 #[cfg(feature = "configuration")]
 #[derive(Debug, Default)]
-pub struct ConfigurationSourceService(Option<Arc<ConfigurationSource>>);
+pub struct ConfigurationSourceService(Option<std::sync::Arc<ConfigurationSource>>);
 
 #[cfg(not(feature = "configuration"))]
 #[derive(Debug, Default)]
@@ -26,13 +23,6 @@ impl ConfigurationSourceService {
         self.0
             .as_ref()
             .map(|source| source.extended_configurations())
-    }
-}
-
-#[cfg(not(feature = "configuration"))]
-impl ConfigurationSourceService {
-    pub(crate) fn extends(&self) -> Option<ExtendedConfigurationIterator<'_>> {
-        None
     }
 }
 

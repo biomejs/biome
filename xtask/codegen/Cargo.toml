@@ -32,7 +32,9 @@ biome_js_factory      = { workspace = true, optional = true }
 biome_js_formatter    = { workspace = true, optional = true }
 biome_js_parser       = { workspace = true, optional = true }
 biome_js_syntax       = { workspace = true, optional = true }
-biome_json_analyze    = { workspace = true, optional = true, default-features = false }
+# HACK: This is a path dependency and not a workspace dependency because
+# `default-features` is not allowed to override the workspace default, for whatever reason.
+biome_json_analyze    = { path = "../../crates/biome_json_analyze", optional = true, default-features = false }
 biome_json_formatter  = { workspace = true, optional = true }
 biome_json_parser     = { workspace = true, optional = true }
 biome_json_syntax     = { workspace = true, optional = true }
