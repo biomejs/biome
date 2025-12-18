@@ -2,14 +2,25 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+#[cfg(feature = "configuration")]
 use biome_configuration::{ConfigurationSource, ExtendedConfigurationIterator};
+#[cfg(not(feature = "configuration"))]
+pub struct ConfigurationSource;
+#[cfg(not(feature = "configuration"))]
+pub struct ExtendedConfigurationIterator<'a>(std::iter::Empty<()>);
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_rowan::AstNode;
 use std::sync::Arc;
 
+#[cfg(feature = "configuration")]
 #[derive(Debug, Default)]
 pub struct ConfigurationSourceService(Option<Arc<ConfigurationSource>>);
 
+#[cfg(not(feature = "configuration"))]
+#[derive(Debug, Default)]
+pub struct ConfigurationSourceService;
+
+#[cfg(feature = "configuration")]
 impl ConfigurationSourceService {
     pub(crate) fn extends(&self) -> Option<ExtendedConfigurationIterator<'_>> {
         self.0
@@ -18,6 +29,14 @@ impl ConfigurationSourceService {
     }
 }
 
+#[cfg(not(feature = "configuration"))]
+impl ConfigurationSourceService {
+    pub(crate) fn extends(&self) -> Option<ExtendedConfigurationIterator<'_>> {
+        None
+    }
+}
+
+#[cfg(feature = "configuration")]
 impl FromServices for ConfigurationSourceService {
     fn from_services(
         rule_key: &RuleKey,
@@ -30,6 +49,17 @@ impl FromServices for ConfigurationSourceService {
             })?;
 
         Ok(Self(source.clone()))
+    }
+}
+
+#[cfg(not(feature = "configuration"))]
+impl FromServices for ConfigurationSourceService {
+    fn from_services(
+        _rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+        _services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        Ok(Self)
     }
 }
 
