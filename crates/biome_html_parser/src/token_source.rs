@@ -45,7 +45,7 @@ pub(crate) enum HtmlLexContext {
     /// - `attr={ foo }`
     TextExpression(TextExpressionKind),
     /// Single expression that stops at certain keywords (e.g., 'as' in Svelte each blocks)
-    RestrictedSingleExpression(RestrictedExpressionKind),
+    RestrictedSingleExpression(RestrictedExpressionStopAt),
     /// Enables the `html` keyword token.
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
@@ -68,7 +68,7 @@ impl HtmlLexContext {
         Self::TextExpression(TextExpressionKind::Double)
     }
 
-    pub fn restricted_expression(kind: RestrictedExpressionKind) -> Self {
+    pub fn restricted_expression(kind: RestrictedExpressionStopAt) -> Self {
         Self::RestrictedSingleExpression(kind)
     }
 }
@@ -83,13 +83,13 @@ pub(crate) enum TextExpressionKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum RestrictedExpressionKind {
+pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
-    StopAtAsOrComma,
+    AsOrComma,
     /// Stops at `(`
-    StopAtOpeningParenOrComma,
+    OpeningParenOrComma,
     /// Stops at `)`
-    StopAtClosingParen,
+    ClosingParen,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

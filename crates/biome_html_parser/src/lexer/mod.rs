@@ -1,7 +1,7 @@
 mod tests;
 
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionKind,
+    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt,
     TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
@@ -341,7 +341,7 @@ impl<'src> HtmlLexer<'src> {
     /// encountering a keyword at the top level.
     fn consume_restricted_single_text_expression(
         &mut self,
-        kind: RestrictedExpressionKind,
+        kind: RestrictedExpressionStopAt,
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
@@ -363,11 +363,11 @@ impl<'src> HtmlLexer<'src> {
                 }
                 _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
                     let should_stop = match kind {
-                        RestrictedExpressionKind::StopAtAsOrComma => current == b',',
-                        RestrictedExpressionKind::StopAtOpeningParenOrComma => {
+                        RestrictedExpressionStopAt::AsOrComma => current == b',',
+                        RestrictedExpressionStopAt::OpeningParenOrComma => {
                             current == b'(' || current == b','
                         }
-                        RestrictedExpressionKind::StopAtClosingParen => current == b')',
+                        RestrictedExpressionStopAt::ClosingParen => current == b')',
                     };
                     if should_stop {
                         break;
@@ -380,9 +380,9 @@ impl<'src> HtmlLexer<'src> {
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
                         // Check if this keyword is in our stop list
                         let should_stop = match kind {
-                            RestrictedExpressionKind::StopAtAsOrComma => keyword_kind == AS_KW,
-                            RestrictedExpressionKind::StopAtOpeningParenOrComma => false,
-                            RestrictedExpressionKind::StopAtClosingParen => false,
+                            RestrictedExpressionStopAt::AsOrComma => keyword_kind == AS_KW,
+                            RestrictedExpressionStopAt::OpeningParenOrComma => false,
+                            RestrictedExpressionStopAt::ClosingParen => false,
                         };
 
                         if should_stop {

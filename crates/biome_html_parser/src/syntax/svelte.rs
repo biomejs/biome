@@ -3,7 +3,7 @@ use crate::syntax::parse_error::{
     expected_child_or_block, expected_svelte_closing_block, expected_text_expression,
 };
 use crate::syntax::{parse_html_element, parse_single_text_expression_content};
-use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionKind};
+use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::{
     EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, IDENT, SVELTE_ATTACH_ATTRIBUTE,
     SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK,
@@ -193,7 +193,7 @@ fn parse_each_as_keyed_item(p: &mut HtmlParser) -> ParsedSyntax {
     // Consume 'as' and switch context for name (stop at comma for optional index)
     p.bump_with_context(
         T![as],
-        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtOpeningParenOrComma),
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::OpeningParenOrComma),
     );
 
     // Parse name (required)
@@ -227,7 +227,7 @@ fn parse_each_key(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(
         T!['('],
-        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtClosingParen),
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::ClosingParen),
     );
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
@@ -267,7 +267,7 @@ fn parse_each_index(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(
         T![,],
-        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtOpeningParenOrComma),
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::OpeningParenOrComma),
     );
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
         p.err_builder("Expected an index binding after ','", range)
@@ -299,7 +299,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
 
     p.bump_with_context(
         T![each],
-        HtmlLexContext::restricted_expression(RestrictedExpressionKind::StopAtAsOrComma),
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
     );
     // Flags used to track possible errors so that the final block can be emitted as a bogus node
     let mut has_errors = false;
