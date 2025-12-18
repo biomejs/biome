@@ -8,9 +8,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, JsClassExpression, JsExport, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsImport, JsModule, JsModuleItemList,
+    JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule,
+    TsInferType, TsInterfaceDeclaration, TsModuleDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -305,6 +306,11 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        // Top-level interfaces/namespaces in a script file are exempt
+        if is_script_declaration(binding) {
+            return None;
+        }
+
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
         if !is_underscore_prefixed && is_unused(model, binding) {
@@ -402,6 +408,40 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if the file is considered a script
+/// and is an interface or namespace
+fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .find_map(JsModuleItemList::cast)
+        .is_some_and(|module_list| {
+            // Only check top-level declarations
+            let is_top_level = module_list.parent::<JsModule>().is_some();
+
+            if !is_top_level {
+                return false;
+            }
+
+            // Presence of imports/exports means its a module
+            let has_import_or_export = (&module_list).into_iter().any(|item| {
+                let kind = item.syntax().kind();
+                JsImport::can_cast(kind) || JsExport::can_cast(kind)
+            });
+
+            if has_import_or_export {
+                return false;
+            }
+
+            // We can't determine if an interface/namespace augments a global just from syntax
+            // so all of them are treated the same
+            module_list.into_iter().any(|item| {
+                let kind = item.syntax().kind();
+                TsInterfaceDeclaration::can_cast(kind) || TsModuleDeclaration::can_cast(kind)
+            })
+        })
 }
 
 /// Returns `true` if `binding` is considered as unused.

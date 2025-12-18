@@ -68,6 +68,10 @@ impl RegistryVisitor<JsLanguage> for NeedsModuleGraph<'_> {
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
+    if input.starts_with(".././") {
+        println!("Shouldn't print just for rebuild LOL")
+    }
+
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
