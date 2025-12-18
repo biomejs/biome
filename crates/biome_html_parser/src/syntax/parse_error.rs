@@ -112,3 +112,8 @@ pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic 
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("vue directive argument", range, p).into_diagnostic(p)
 }
+
+pub(crate) fn expected_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected an expression, instead none was found.", range)
+        .into_diagnostic(p)
+}

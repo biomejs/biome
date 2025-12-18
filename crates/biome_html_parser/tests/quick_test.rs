@@ -4,13 +4,19 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"{#each items as item, i (item.id)}
-  <div>{i}: {item.name}</div>
-{/each}
+    let code = r#"{#await promise}
+        <p>Loading...</p>
+{:catch error}
+        <p>Error: {error.message}</p>
+{:then value}
+        <p>The value is {value}</p>
+{/await}
+
+
 
     "#;
 
-    let options = HtmlParseOptions::default().with_vue();
+    let options = HtmlParseOptions::default().with_single_text_expression();
     let root = parse_html(code, options);
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());

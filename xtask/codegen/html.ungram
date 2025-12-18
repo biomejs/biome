@@ -200,6 +200,7 @@ AnySvelteBlock =
 	| SvelteConstBlock
 	| SvelteIfBlock
 	| SvelteEachBlock
+	| SvelteAwaitBlock
 	| SvelteBogusBlock
 
 // {@debug}
@@ -369,6 +370,63 @@ SvelteEachClosingBlock =
 	'each'
 	'}'
 
+// {#await ...} {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteAwaitBlock =
+	opening_block: SvelteAwaitOpeningBlock
+	then_block: SvelteAwaitThenBlock?
+	catch_block: SvelteAwaitCatchBlock?
+	closing_block: SvelteAwaitClosingBlock
+
+
+// {#await ... } {:then} {:catch} {/await}
+// ^^^^^^^^^^^^^
+SvelteAwaitOpeningBlock =
+	'{#'
+	'await'
+	expression: HtmlTextExpression
+	then_clause: SvelteAwaitThenClause?
+	catch_clause: SvelteAwaitCatchClause?
+	'}'
+	children: HtmlElementList
+
+// {#await ... then value}
+//             ^^^^^^^^^^
+SvelteAwaitThenClause =
+	'then'
+	name: HtmlTextExpression
+
+// {#await ... catch value}
+//             ^^^^^^^^^^^
+SvelteAwaitCatchClause =
+	'catch'
+	name: HtmlTextExpression
+
+// {#await ... } {:then name} .. {:catch} {/await}
+//               ^^^^^^^^^^^^^^^
+SvelteAwaitThenBlock =
+	'{:'
+	'then'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+
+// {#await ... } {:then} .. {:catch name} .. {/await}
+//                          ^^^^^^^^^^^^^^^^
+SvelteAwaitCatchBlock =
+	'{:'
+	'catch'
+	name: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#await ... } {:then} {:catch} {/await}
+//                                ^^^^^^^^
+SvelteAwaitClosingBlock =
+	'{/'
+	'await'
+	'}'
 
 // Keep it different just for svelte
 SvelteName = 'ident'

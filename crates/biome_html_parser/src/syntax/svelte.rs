@@ -1,17 +1,20 @@
 use crate::parser::HtmlParser;
 use crate::syntax::parse_error::{
-    expected_child_or_block, expected_svelte_closing_block, expected_text_expression,
+    expected_child_or_block, expected_expression, expected_svelte_closing_block,
+    expected_text_expression,
 };
 use crate::syntax::{parse_html_element, parse_single_text_expression_content};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, IDENT, SVELTE_ATTACH_ATTRIBUTE,
-    SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK, SVELTE_DEBUG_BLOCK,
-    SVELTE_EACH_AS_KEYED_ITEM, SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK, SVELTE_EACH_INDEX,
-    SVELTE_EACH_KEY, SVELTE_EACH_KEYED_ITEM, SVELTE_EACH_OPENING_BLOCK, SVELTE_ELSE_CLAUSE,
-    SVELTE_ELSE_IF_CLAUSE, SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK, SVELTE_IF_BLOCK,
-    SVELTE_IF_CLOSING_BLOCK, SVELTE_IF_OPENING_BLOCK, SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK,
-    SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME, SVELTE_RENDER_BLOCK,
+    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, HTML_LITERAL, IDENT, SVELTE_ATTACH_ATTRIBUTE,
+    SVELTE_AWAIT_BLOCK, SVELTE_AWAIT_CATCH_BLOCK, SVELTE_AWAIT_CATCH_CLAUSE,
+    SVELTE_AWAIT_CLOSING_BLOCK, SVELTE_AWAIT_OPENING_BLOCK, SVELTE_AWAIT_THEN_BLOCK,
+    SVELTE_AWAIT_THEN_CLAUSE, SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CONST_BLOCK,
+    SVELTE_DEBUG_BLOCK, SVELTE_EACH_AS_KEYED_ITEM, SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK,
+    SVELTE_EACH_INDEX, SVELTE_EACH_KEY, SVELTE_EACH_KEYED_ITEM, SVELTE_EACH_OPENING_BLOCK,
+    SVELTE_ELSE_CLAUSE, SVELTE_ELSE_IF_CLAUSE, SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK,
+    SVELTE_IF_BLOCK, SVELTE_IF_CLOSING_BLOCK, SVELTE_IF_OPENING_BLOCK, SVELTE_KEY_BLOCK,
+    SVELTE_KEY_CLOSING_BLOCK, SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME, SVELTE_RENDER_BLOCK,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -19,6 +22,7 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Marker, Parser, TokenSet, token_set};
+use biome_rowan::TextRange;
 use std::ops::Sub;
 
 pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
@@ -31,13 +35,12 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![key] => parse_key_block(p, m),
         T![if] => parse_if_block(p, m),
         T![each] => parse_each_block(p, m),
+        T![await] => parse_await_block(p, m),
         _ => {
             m.abandon(p);
             Absent
         }
     }
-    // NOTE: use or_else chain here to parse
-    // other possible hash blocks
 }
 
 pub(crate) fn parse_key_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
@@ -87,10 +90,7 @@ fn parse_if_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSy
     p.bump_with_context(T![if], HtmlLexContext::single_expression());
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
-        p.err_builder(
-            "Expected an expression, instead none was found.",
-            range.sub_start(parent_marker.start()),
-        )
+        expected_expression(p, range.sub_start(parent_marker.start()))
     });
 
     p.expect(T!['}']);
@@ -123,10 +123,7 @@ pub(crate) fn parse_else_if_clause(p: &mut HtmlParser) -> ParsedSyntax {
     p.expect_with_context(T![if], HtmlLexContext::single_expression());
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
-        p.err_builder(
-            "Expected an expression, instead none was found.",
-            range.sub_start(m.start()),
-        )
+        expected_expression(p, range.sub_start(m.start()))
     });
 
     p.expect(T!['}']);
@@ -312,6 +309,14 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         )
     });
 
+    if p.at(T!['}']) {
+        has_errors |= true;
+        p.error(p.err_builder(
+            "Expected 'as' keyword for item binding or ',' for index-only syntax",
+            p.cur_range(),
+        ));
+    }
+
     // In case there's nothing parsed, it's possible we have whitespaces or noice.
     // We consume any possible token, so we can recover and resume normal parsing.
     if result.is_none() {
@@ -324,7 +329,9 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
     p.re_lex(HtmlReLexContext::Svelte);
 
     // Parse the optional item binding (either 'as item...' or ', index')
-    parse_svelte_block_item(p).ok();
+    if p.at(T![as]) || p.at(T![,]) {
+        parse_svelte_block_item(p).ok();
+    }
 
     p.expect(T!['}']);
 
@@ -332,6 +339,205 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         Present(parent_marker.complete(p, SVELTE_EACH_OPENING_BLOCK)),
         has_errors,
     )
+}
+
+fn parse_await_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
+    if !p.at(T![await]) {
+        parent_marker.abandon(p);
+        return Absent;
+    }
+    let ParseAwaitResult {
+        result,
+        has_then_clause,
+        has_catch_clause,
+    } = parse_await_opening_block(p, parent_marker);
+    let m = result.precede(p);
+
+    if p.at(T!["{:"]) {
+        parse_await_then_bock(p, has_then_clause).ok();
+        parse_await_catch_bock(p, has_catch_clause).ok();
+    }
+
+    dbg!(p.cur_text());
+    dbg!(p.cur());
+    parse_closing_block(p, T![await], SVELTE_AWAIT_CLOSING_BLOCK).or_add_diagnostic(
+        p,
+        |p, range| {
+            expected_svelte_closing_block(p, range)
+                .with_detail(range.sub(m.start()), "This is where the block started.")
+        },
+    );
+
+    Present(m.complete(p, SVELTE_AWAIT_BLOCK))
+}
+
+struct ParseAwaitResult {
+    result: ParsedSyntax,
+    has_then_clause: Option<TextRange>,
+    has_catch_clause: Option<TextRange>,
+}
+
+/// Parses a `{#await expression}` block.
+fn parse_await_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParseAwaitResult {
+    if !p.at(T![await]) {
+        parent_marker.abandon(p);
+        return ParseAwaitResult {
+            result: Absent,
+            has_then_clause: None,
+            has_catch_clause: None,
+        };
+    }
+    let mut has_then_clause = None;
+    let mut has_catch_clause = None;
+
+    p.bump_with_context(
+        T![await],
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::ThenOrCatch),
+    );
+
+    parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
+        expected_expression(p, range.sub_start(parent_marker.start()))
+    });
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        p.error(p.err_builder("Expected an expression after 'await'", p.cur_range()));
+    }
+
+    if p.at(T![then]) {
+        if let Present(m) = parse_await_then_clause(p) {
+            has_then_clause = Some(m.range(p));
+        }
+    }
+    if p.at(T![catch]) {
+        if let Present(m) = parse_await_catch_clause(p) {
+            has_catch_clause = Some(m.range(p));
+        }
+    }
+
+    p.expect(T!['}']);
+
+    SvelteElementList::new()
+        .with_stop_at_curly_colon()
+        .parse_list(p);
+
+    ParseAwaitResult {
+        result: Present(parent_marker.complete(p, SVELTE_AWAIT_OPENING_BLOCK)),
+        has_catch_clause,
+        has_then_clause,
+    }
+}
+
+fn parse_await_then_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![then]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T![then], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+    }
+
+    Present(m.complete(p, SVELTE_AWAIT_THEN_CLAUSE))
+}
+
+fn parse_await_catch_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![catch]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T![catch], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+    }
+    Present(m.complete(p, SVELTE_AWAIT_CATCH_CLAUSE))
+}
+
+fn parse_await_then_bock(p: &mut HtmlParser, has_then_clause: Option<TextRange>) -> ParsedSyntax {
+    if !p.at(T!["{:"]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T!["{:"]);
+
+    if !p.at(T![then]) {
+        m.abandon(p);
+        return Absent;
+    }
+    p.bump_with_context(T![then], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        p.error(p.err_builder("Expected an expression after 'then'", p.cur_range()));
+    }
+
+    p.expect(T!['}']);
+
+    SvelteElementList::new()
+        .with_stop_at_curly_colon()
+        .parse_list(p);
+
+    if let Some(range) = has_then_clause {
+        p.error(
+            p.err_builder(
+                "{:then} cannot appear more than once within a block.",
+                p.cur_range(),
+            )
+            .with_detail(range, "This is where the block started."),
+        )
+    }
+
+    Present(m.complete(p, SVELTE_AWAIT_THEN_BLOCK))
+}
+
+fn parse_await_catch_bock(p: &mut HtmlParser, has_catch_clause: Option<TextRange>) -> ParsedSyntax {
+    if !p.at(T!["{:"]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T!["{:"]);
+
+    if !p.at(T![catch]) {
+        m.abandon(p);
+        return Absent;
+    }
+    p.bump_with_context(T![catch], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        p.error(p.err_builder("Expected an expression after 'catch'", p.cur_range()));
+    }
+
+    p.expect(T!['}']);
+
+    SvelteElementList::new()
+        .with_stop_at_curly_colon()
+        .parse_list(p);
+
+    if let Some(range) = has_catch_clause {
+        p.error(
+            p.err_builder(
+                "{:catch} cannot appear more than once within a block.",
+                p.cur_range(),
+            )
+            .with_detail(range, "This is where the block started."),
+        );
+    }
+
+    Present(m.complete(p, SVELTE_AWAIT_CATCH_BLOCK))
 }
 
 /// Parses a `{#<keyword> expression }` block.
@@ -350,10 +556,7 @@ pub(crate) fn parse_opening_block(
 
     p.bump_with_context(keyword, HtmlLexContext::single_expression());
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
-        p.err_builder(
-            "Expected an expression, instead none was found.",
-            range.sub_start(m.start()),
-        )
+        expected_expression(p, range.sub_start(m.start()))
     });
 
     p.expect(T!['}']);
@@ -618,6 +821,9 @@ pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
             | T![render]
             | T![key]
             | T![as]
+            | T![await]
+            | T![catch]
+            | T![then]
     )
 }
 

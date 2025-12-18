@@ -363,6 +363,172 @@ pub fn svelte_attach_attribute(
         ],
     ))
 }
+pub fn svelte_await_block(
+    opening_block: SvelteAwaitOpeningBlock,
+    closing_block: SvelteAwaitClosingBlock,
+) -> SvelteAwaitBlockBuilder {
+    SvelteAwaitBlockBuilder {
+        opening_block,
+        closing_block,
+        then_block: None,
+        catch_block: None,
+    }
+}
+pub struct SvelteAwaitBlockBuilder {
+    opening_block: SvelteAwaitOpeningBlock,
+    closing_block: SvelteAwaitClosingBlock,
+    then_block: Option<SvelteAwaitThenBlock>,
+    catch_block: Option<SvelteAwaitCatchBlock>,
+}
+impl SvelteAwaitBlockBuilder {
+    pub fn with_then_block(mut self, then_block: SvelteAwaitThenBlock) -> Self {
+        self.then_block = Some(then_block);
+        self
+    }
+    pub fn with_catch_block(mut self, catch_block: SvelteAwaitCatchBlock) -> Self {
+        self.catch_block = Some(catch_block);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitBlock {
+        SvelteAwaitBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                self.then_block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.catch_block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.closing_block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_await_catch_block(
+    sv_curly_colon_token: SyntaxToken,
+    catch_token: SyntaxToken,
+    name: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitCatchBlock {
+    SvelteAwaitCatchBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(catch_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_catch_clause(
+    catch_token: SyntaxToken,
+    name: HtmlTextExpression,
+) -> SvelteAwaitCatchClause {
+    SvelteAwaitCatchClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_CLAUSE,
+        [
+            Some(SyntaxElement::Token(catch_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteAwaitClosingBlock {
+    SvelteAwaitClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(await_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_await_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitOpeningBlockBuilder {
+    SvelteAwaitOpeningBlockBuilder {
+        sv_curly_hash_token,
+        await_token,
+        expression,
+        r_curly_token,
+        children,
+        then_clause: None,
+        catch_clause: None,
+    }
+}
+pub struct SvelteAwaitOpeningBlockBuilder {
+    sv_curly_hash_token: SyntaxToken,
+    await_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    then_clause: Option<SvelteAwaitThenClause>,
+    catch_clause: Option<SvelteAwaitCatchClause>,
+}
+impl SvelteAwaitOpeningBlockBuilder {
+    pub fn with_then_clause(mut self, then_clause: SvelteAwaitThenClause) -> Self {
+        self.then_clause = Some(then_clause);
+        self
+    }
+    pub fn with_catch_clause(mut self, catch_clause: SvelteAwaitCatchClause) -> Self {
+        self.catch_clause = Some(catch_clause);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitOpeningBlock {
+        SvelteAwaitOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_OPENING_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.sv_curly_hash_token)),
+                Some(SyntaxElement::Token(self.await_token)),
+                Some(SyntaxElement::Node(self.expression.into_syntax())),
+                self.then_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.catch_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_await_then_block(
+    sv_curly_colon_token: SyntaxToken,
+    then_token: SyntaxToken,
+    name: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteAwaitThenBlock {
+    SvelteAwaitThenBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_colon_token)),
+            Some(SyntaxElement::Token(then_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_await_then_clause(
+    then_token: SyntaxToken,
+    name: HtmlTextExpression,
+) -> SvelteAwaitThenClause {
+    SvelteAwaitThenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_THEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(then_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_const_block(
     sv_curly_at_token: SyntaxToken,
     const_token: SyntaxToken,

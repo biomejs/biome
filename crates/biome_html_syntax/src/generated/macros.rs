@@ -97,6 +97,34 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteAttachAttribute::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteAwaitBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteAwaitCatchBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_CATCH_CLAUSE => {
+                    let $pattern = unsafe { $crate::SvelteAwaitCatchClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_CLOSING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteAwaitClosingBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_OPENING_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteAwaitOpeningBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteAwaitThenBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_AWAIT_THEN_CLAUSE => {
+                    let $pattern = unsafe { $crate::SvelteAwaitThenClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_CONST_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteConstBlock::new_unchecked(node) };
                     $body

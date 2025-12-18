@@ -20,51 +20,52 @@ HtmlRoot {
     frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        SvelteEachBlock {
-            opening_block: SvelteEachOpeningBlock {
-                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                each_token: EACH_KW@2..6 "each" [] [],
-                list: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@6..17 " items item" [] [],
+        SvelteBogusBlock {
+            items: [
+                SvelteEachOpeningBlock {
+                    sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                    each_token: EACH_KW@2..6 "each" [] [],
+                    list: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@6..17 " items item" [] [],
+                    },
+                    item: missing (optional),
+                    r_curly_token: R_CURLY@17..18 "}" [] [],
                 },
-                item: missing (optional),
-                r_curly_token: R_CURLY@17..18 "}" [] [],
-            },
-            children: HtmlElementList [
-                HtmlElement {
-                    opening_element: HtmlOpeningElement {
-                        l_angle_token: L_ANGLE@18..22 "<" [Newline("\n"), Whitespace("  ")] [],
-                        name: HtmlTagName {
-                            value_token: HTML_LITERAL@22..25 "div" [] [],
-                        },
-                        attributes: HtmlAttributeList [],
-                        r_angle_token: R_ANGLE@25..26 ">" [] [],
-                    },
-                    children: HtmlElementList [
-                        HtmlSingleTextExpression {
-                            l_curly_token: L_CURLY@26..27 "{" [] [],
-                            expression: HtmlTextExpression {
-                                html_literal_token: HTML_LITERAL@27..31 "item" [] [],
+                HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@18..22 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@22..25 "div" [] [],
                             },
-                            r_curly_token: R_CURLY@31..32 "}" [] [],
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@25..26 ">" [] [],
                         },
-                    ],
-                    closing_element: HtmlClosingElement {
-                        l_angle_token: L_ANGLE@32..33 "<" [] [],
-                        slash_token: SLASH@33..34 "/" [] [],
-                        name: HtmlTagName {
-                            value_token: HTML_LITERAL@34..37 "div" [] [],
+                        children: HtmlElementList [
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@26..27 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@27..31 "item" [] [],
+                                },
+                                r_curly_token: R_CURLY@31..32 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@32..33 "<" [] [],
+                            slash_token: SLASH@33..34 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@34..37 "div" [] [],
+                            },
+                            r_angle_token: R_ANGLE@37..38 ">" [] [],
                         },
-                        r_angle_token: R_ANGLE@37..38 ">" [] [],
                     },
+                ],
+                SvelteEachClosingBlock {
+                    sv_curly_slash_token: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] [],
+                    each_token: EACH_KW@41..45 "each" [] [],
+                    r_curly_token: R_CURLY@45..46 "}" [] [],
                 },
             ],
-            else_clause: missing (optional),
-            closing_block: SvelteEachClosingBlock {
-                sv_curly_slash_token: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] [],
-                each_token: EACH_KW@41..45 "each" [] [],
-                r_curly_token: R_CURLY@45..46 "}" [] [],
-            },
         },
     ],
     eof_token: EOF@46..47 "" [Newline("\n")] [],
@@ -79,7 +80,7 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..46
-    0: SVELTE_EACH_BLOCK@0..46
+    0: SVELTE_BOGUS_BLOCK@0..46
       0: SVELTE_EACH_OPENING_BLOCK@0..18
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
@@ -107,8 +108,7 @@ HtmlRoot {
             2: HTML_TAG_NAME@34..37
               0: HTML_LITERAL@34..37 "div" [] []
             3: R_ANGLE@37..38 ">" [] []
-      2: (empty)
-      3: SVELTE_EACH_CLOSING_BLOCK@38..46
+      2: SVELTE_EACH_CLOSING_BLOCK@38..46
         0: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] []
         1: EACH_KW@41..45 "each" [] []
         2: R_CURLY@45..46 "}" [] []

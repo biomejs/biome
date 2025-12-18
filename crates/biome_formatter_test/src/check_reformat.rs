@@ -59,6 +59,7 @@ where
                     .expect("failed to emit diagnostic");
             }
 
+            println!("{}", self.text);
             panic!(
                 "formatter output had syntax errors where input had none:\n{}",
                 std::str::from_utf8(buffer.as_slice()).expect("non utf8 in error buffer")

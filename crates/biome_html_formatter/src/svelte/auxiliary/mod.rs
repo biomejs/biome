@@ -1,6 +1,13 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod attach_attribute;
+pub(crate) mod await_block;
+pub(crate) mod await_catch_block;
+pub(crate) mod await_catch_clause;
+pub(crate) mod await_closing_block;
+pub(crate) mod await_opening_block;
+pub(crate) mod await_then_block;
+pub(crate) mod await_then_clause;
 pub(crate) mod const_block;
 pub(crate) mod debug_block;
 pub(crate) mod each_as_keyed_item;
