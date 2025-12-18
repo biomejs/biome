@@ -35,6 +35,8 @@ biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true, features = ["biome_rowan"] }
 biome_suppression        = { workspace = true }
+biome_tailwind_parser    = { workspace = true }
+biome_tailwind_syntax    = { workspace = true }
 biome_unicode_table      = { workspace = true }
 bitvec                   = "1.0.1"
 camino                   = { workspace = true }
@@ -46,8 +48,6 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
-biome_tailwind_parser	= {workspace = true }
-biome_tailwind_syntax	= {workspace = true }
 
 
 [dev-dependencies]

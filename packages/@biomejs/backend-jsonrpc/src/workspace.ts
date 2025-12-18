@@ -2122,7 +2122,7 @@ See <https://biomejs.dev/linter/rules/use-spread>
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforce using less Tailwind utilities instead of multiple utilities that are functionally the same.
 See <https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes> 
 	 */
 	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
@@ -5245,6 +5245,7 @@ export interface RuleWithUseSpreadOptions {
 	options?: UseSpreadOptions;
 }
 export interface RuleWithUseTailwindShorthandClassesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseTailwindShorthandClassesOptions;
 }
