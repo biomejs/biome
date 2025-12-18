@@ -23,6 +23,7 @@ impl FormatNodeRule<SvelteElseIfClause> for FormatSvelteElseIfClause {
                 else_token.format(),
                 space(),
                 if_token.format(),
+                space(),
                 expression.format(),
                 r_curly_token.format()
             ]

@@ -195,11 +195,12 @@ AnyHtmlAttributeInitializer =
 AnySvelteBlock =
 	SvelteDebugBlock
 	| SvelteKeyBlock
-	| SvelteBogusBlock
 	| SvelteRenderBlock
 	| SvelteHtmlBlock
 	| SvelteConstBlock
 	| SvelteIfBlock
+	| SvelteEachBlock
+	| SvelteBogusBlock
 
 // {@debug}
 // ^^^^^^^^
@@ -234,7 +235,6 @@ SvelteKeyClosingBlock =
 
 SvelteBindingList = (SvelteName (',' SvelteName)*)
 
-SvelteName = 'svelte_ident'
 
 // {@render ...}
 // ^^^^^^^^^^^^^
@@ -313,6 +313,65 @@ SvelteIfClosingBlock =
 	'if'
 	'}'
 
+
+// {#each ... as ...} ... {/each}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteEachBlock =
+	opening_block: SvelteEachOpeningBlock
+	children: HtmlElementList
+	else_clause: SvelteElseClause?
+	closing_block: SvelteEachClosingBlock
+
+// {#each items as item, index (key)} ... {/each}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteEachOpeningBlock =
+	'{#'
+	'each'
+	list: HtmlTextExpression
+	item: AnySvelteBlockItem?
+	'}'
+
+AnySvelteBlockItem =
+	SvelteEachAsKeyedItem
+	| SvelteEachKeyedItem
+
+
+// {#each items as item, index (key)} ... {/each}
+//              ^^^^^^^^^^^^^^^^^^^^
+SvelteEachAsKeyedItem =
+	'as'
+	name: HtmlTextExpression
+	index: SvelteEachIndex?
+	key: SvelteEachKey?
+
+// {#each items, index} ... {/each}
+//             ^^^^^^^^
+SvelteEachKeyedItem =
+		index: SvelteEachIndex?
+
+// {#each items as item, index} ... {/each}
+//                     ^^^^^^^
+SvelteEachIndex =
+	','
+	value: HtmlTextExpression
+
+// {#each items as item, item (key)} ... {/each}
+//                            ^^^^^
+SvelteEachKey =
+	'('
+	expression: HtmlTextExpression
+	')'
+
+// {#each ... as item, i} ... {/each}
+//                            ^^^^^^^
+SvelteEachClosingBlock =
+	'{/'
+	'each'
+	'}'
+
+
+// Keep it different just for svelte
+SvelteName = 'ident'
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
@@ -335,7 +394,7 @@ AnyVueDirective =
 // <div v-bind:href="url" />
 //      ^^^^^^^^^^^^^^^^^
 VueDirective =
-  name: 'vue_ident'
+  name: 'ident'
   arg: VueDirectiveArgument?
   modifiers: VueModifierList
 	initializer: HtmlAttributeInitializerClause?

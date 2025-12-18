@@ -39,7 +39,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@16..20 "v-if" [] [],
+                                name_token: IDENT@16..20 "v-if" [] [],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: HtmlAttributeInitializerClause {
@@ -85,7 +85,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@56..63 "v-else" [] [Whitespace(" ")],
+                                name_token: IDENT@56..63 "v-else" [] [Whitespace(" ")],
                                 arg: missing (optional),
                                 modifiers: VueModifierList [],
                                 initializer: missing (optional),
@@ -156,7 +156,7 @@ HtmlRoot {
               0: HTML_LITERAL@14..16 "p" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@16..40
               0: VUE_DIRECTIVE@16..28
-                0: VUE_IDENT@16..20 "v-if" [] []
+                0: IDENT@16..20 "v-if" [] []
                 1: (empty)
                 2: VUE_MODIFIER_LIST@20..20
                 3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..28
@@ -187,7 +187,7 @@ HtmlRoot {
               0: HTML_LITERAL@54..56 "p" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@56..75
               0: VUE_DIRECTIVE@56..63
-                0: VUE_IDENT@56..63 "v-else" [] [Whitespace(" ")]
+                0: IDENT@56..63 "v-else" [] [Whitespace(" ")]
                 1: (empty)
                 2: VUE_MODIFIER_LIST@63..63
                 3: (empty)

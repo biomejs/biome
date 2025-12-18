@@ -38,7 +38,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@17..23 "v-bind" [] [],
+                                name_token: IDENT@17..23 "v-bind" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@23..24 ":" [] [],
                                     arg: VueStaticArgument {
@@ -104,7 +104,7 @@ HtmlRoot {
               0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@17..32
               0: VUE_DIRECTIVE@17..32
-                0: VUE_IDENT@17..23 "v-bind" [] []
+                0: IDENT@17..23 "v-bind" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@23..28
                   0: COLON@23..24 ":" [] []
                   1: VUE_STATIC_ARGUMENT@24..28

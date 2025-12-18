@@ -395,6 +395,179 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_each_as_keyed_item(
+    as_token: SyntaxToken,
+    name: HtmlTextExpression,
+) -> SvelteEachAsKeyedItemBuilder {
+    SvelteEachAsKeyedItemBuilder {
+        as_token,
+        name,
+        index: None,
+        key: None,
+    }
+}
+pub struct SvelteEachAsKeyedItemBuilder {
+    as_token: SyntaxToken,
+    name: HtmlTextExpression,
+    index: Option<SvelteEachIndex>,
+    key: Option<SvelteEachKey>,
+}
+impl SvelteEachAsKeyedItemBuilder {
+    pub fn with_index(mut self, index: SvelteEachIndex) -> Self {
+        self.index = Some(index);
+        self
+    }
+    pub fn with_key(mut self, key: SvelteEachKey) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn build(self) -> SvelteEachAsKeyedItem {
+        SvelteEachAsKeyedItem::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_EACH_AS_KEYED_ITEM,
+            [
+                Some(SyntaxElement::Token(self.as_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.index
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.key
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_each_block(
+    opening_block: SvelteEachOpeningBlock,
+    children: HtmlElementList,
+    closing_block: SvelteEachClosingBlock,
+) -> SvelteEachBlockBuilder {
+    SvelteEachBlockBuilder {
+        opening_block,
+        children,
+        closing_block,
+        else_clause: None,
+    }
+}
+pub struct SvelteEachBlockBuilder {
+    opening_block: SvelteEachOpeningBlock,
+    children: HtmlElementList,
+    closing_block: SvelteEachClosingBlock,
+    else_clause: Option<SvelteElseClause>,
+}
+impl SvelteEachBlockBuilder {
+    pub fn with_else_clause(mut self, else_clause: SvelteElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> SvelteEachBlock {
+        SvelteEachBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_EACH_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.closing_block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_each_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    each_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteEachClosingBlock {
+    SvelteEachClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_each_index(comma_token: SyntaxToken, value: HtmlTextExpression) -> SvelteEachIndex {
+    SvelteEachIndex::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_INDEX,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_each_key(
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> SvelteEachKey {
+    SvelteEachKey::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_EACH_KEY,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn svelte_each_keyed_item() -> SvelteEachKeyedItemBuilder {
+    SvelteEachKeyedItemBuilder { index: None }
+}
+pub struct SvelteEachKeyedItemBuilder {
+    index: Option<SvelteEachIndex>,
+}
+impl SvelteEachKeyedItemBuilder {
+    pub fn with_index(mut self, index: SvelteEachIndex) -> Self {
+        self.index = Some(index);
+        self
+    }
+    pub fn build(self) -> SvelteEachKeyedItem {
+        SvelteEachKeyedItem::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_EACH_KEYED_ITEM,
+            [self
+                .index
+                .map(|token| SyntaxElement::Node(token.into_syntax()))],
+        ))
+    }
+}
+pub fn svelte_each_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    each_token: SyntaxToken,
+    list: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteEachOpeningBlockBuilder {
+    SvelteEachOpeningBlockBuilder {
+        sv_curly_hash_token,
+        each_token,
+        list,
+        r_curly_token,
+        item: None,
+    }
+}
+pub struct SvelteEachOpeningBlockBuilder {
+    sv_curly_hash_token: SyntaxToken,
+    each_token: SyntaxToken,
+    list: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    item: Option<AnySvelteBlockItem>,
+}
+impl SvelteEachOpeningBlockBuilder {
+    pub fn with_item(mut self, item: AnySvelteBlockItem) -> Self {
+        self.item = Some(item);
+        self
+    }
+    pub fn build(self) -> SvelteEachOpeningBlock {
+        SvelteEachOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_EACH_OPENING_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.sv_curly_hash_token)),
+                Some(SyntaxElement::Token(self.each_token)),
+                Some(SyntaxElement::Node(self.list.into_syntax())),
+                self.item
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
 pub fn svelte_else_clause(
     sv_curly_colon_token: SyntaxToken,
     else_token: SyntaxToken,
@@ -559,10 +732,10 @@ pub fn svelte_key_opening_block(
         ],
     ))
 }
-pub fn svelte_name(svelte_ident_token: SyntaxToken) -> SvelteName {
+pub fn svelte_name(ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
-        [Some(SyntaxElement::Token(svelte_ident_token))],
+        [Some(SyntaxElement::Token(ident_token))],
     ))
 }
 pub fn svelte_render_block(
