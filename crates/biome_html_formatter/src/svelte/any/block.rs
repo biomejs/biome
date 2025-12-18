@@ -17,6 +17,7 @@ impl FormatRule<AnySvelteBlock> for FormatAnySvelteBlock {
             AnySvelteBlock::SvelteIfBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteKeyBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteRenderBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteSnippetBlock(node) => node.format().fmt(f),
         }
     }
 }

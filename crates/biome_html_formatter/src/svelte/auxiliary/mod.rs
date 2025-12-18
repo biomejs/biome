@@ -28,3 +28,6 @@ pub(crate) mod key_closing_block;
 pub(crate) mod key_opening_block;
 pub(crate) mod name;
 pub(crate) mod render_block;
+pub(crate) mod snippet_block;
+pub(crate) mod snippet_closing_block;
+pub(crate) mod snippet_opening_block;

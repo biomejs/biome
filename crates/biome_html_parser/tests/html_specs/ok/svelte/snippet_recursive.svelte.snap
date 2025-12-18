@@ -1,0 +1,199 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#snippet countdown(n)}
+  {#if n > 0}
+    <p>{n}</p>
+  {:else}
+    <p>Liftoff!</p>
+  {/if}
+{/snippet}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteSnippetBlock {
+            opening_block: SvelteSnippetOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@9..22 " countdown(n)" [] [],
+                },
+                r_curly_token: R_CURLY@22..23 "}" [] [],
+                children: HtmlElementList [
+                    SvelteIfBlock {
+                        opening_block: SvelteIfOpeningBlock {
+                            sv_curly_hash_token: SV_CURLY_HASH@23..28 "{#" [Newline("\n"), Whitespace("  ")] [],
+                            if_token: IF_KW@28..30 "if" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@30..36 " n > 0" [] [],
+                            },
+                            r_curly_token: R_CURLY@36..37 "}" [] [],
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@37..43 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@43..44 "p" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@44..45 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@45..46 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@46..47 "n" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@47..48 "}" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@48..49 "<" [] [],
+                                        slash_token: SLASH@49..50 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@50..51 "p" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@51..52 ">" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        else_if_clauses: SvelteElseIfClauseList [],
+                        else_clause: SvelteElseClause {
+                            sv_curly_colon_token: SV_CURLY_COLON@52..57 "{:" [Newline("\n"), Whitespace("  ")] [],
+                            else_token: ELSE_KW@57..61 "else" [] [],
+                            r_curly_token: R_CURLY@61..62 "}" [] [],
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@62..68 "<" [Newline("\n"), Whitespace("    ")] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@68..69 "p" [] [],
+                                        },
+                                        attributes: HtmlAttributeList [],
+                                        r_angle_token: R_ANGLE@69..70 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlContent {
+                                            value_token: HTML_LITERAL@70..78 "Liftoff!" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@78..79 "<" [] [],
+                                        slash_token: SLASH@79..80 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: HTML_LITERAL@80..81 "p" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@81..82 ">" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        closing_block: SvelteIfClosingBlock {
+                            sv_curly_slash_token: SV_CURLY_SLASH@82..87 "{/" [Newline("\n"), Whitespace("  ")] [],
+                            if_token: IF_KW@87..89 "if" [] [],
+                            r_curly_token: R_CURLY@89..90 "}" [] [],
+                        },
+                    },
+                ],
+            },
+            closing_block: SvelteSnippetClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@90..93 "{/" [Newline("\n")] [],
+                snippet_token: SNIPPET_KW@93..100 "snippet" [] [],
+                r_curly_token: R_CURLY@100..101 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@101..102 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..102
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..101
+    0: SVELTE_SNIPPET_BLOCK@0..101
+      0: SVELTE_SNIPPET_OPENING_BLOCK@0..90
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: SNIPPET_KW@2..9 "snippet" [] []
+        2: HTML_TEXT_EXPRESSION@9..22
+          0: HTML_LITERAL@9..22 " countdown(n)" [] []
+        3: R_CURLY@22..23 "}" [] []
+        4: HTML_ELEMENT_LIST@23..90
+          0: SVELTE_IF_BLOCK@23..90
+            0: SVELTE_IF_OPENING_BLOCK@23..52
+              0: SV_CURLY_HASH@23..28 "{#" [Newline("\n"), Whitespace("  ")] []
+              1: IF_KW@28..30 "if" [] []
+              2: HTML_TEXT_EXPRESSION@30..36
+                0: HTML_LITERAL@30..36 " n > 0" [] []
+              3: R_CURLY@36..37 "}" [] []
+              4: HTML_ELEMENT_LIST@37..52
+                0: HTML_ELEMENT@37..52
+                  0: HTML_OPENING_ELEMENT@37..45
+                    0: L_ANGLE@37..43 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@43..44
+                      0: HTML_LITERAL@43..44 "p" [] []
+                    2: HTML_ATTRIBUTE_LIST@44..44
+                    3: R_ANGLE@44..45 ">" [] []
+                  1: HTML_ELEMENT_LIST@45..48
+                    0: HTML_SINGLE_TEXT_EXPRESSION@45..48
+                      0: L_CURLY@45..46 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@46..47
+                        0: HTML_LITERAL@46..47 "n" [] []
+                      2: R_CURLY@47..48 "}" [] []
+                  2: HTML_CLOSING_ELEMENT@48..52
+                    0: L_ANGLE@48..49 "<" [] []
+                    1: SLASH@49..50 "/" [] []
+                    2: HTML_TAG_NAME@50..51
+                      0: HTML_LITERAL@50..51 "p" [] []
+                    3: R_ANGLE@51..52 ">" [] []
+            1: SVELTE_ELSE_IF_CLAUSE_LIST@52..52
+            2: SVELTE_ELSE_CLAUSE@52..82
+              0: SV_CURLY_COLON@52..57 "{:" [Newline("\n"), Whitespace("  ")] []
+              1: ELSE_KW@57..61 "else" [] []
+              2: R_CURLY@61..62 "}" [] []
+              3: HTML_ELEMENT_LIST@62..82
+                0: HTML_ELEMENT@62..82
+                  0: HTML_OPENING_ELEMENT@62..70
+                    0: L_ANGLE@62..68 "<" [Newline("\n"), Whitespace("    ")] []
+                    1: HTML_TAG_NAME@68..69
+                      0: HTML_LITERAL@68..69 "p" [] []
+                    2: HTML_ATTRIBUTE_LIST@69..69
+                    3: R_ANGLE@69..70 ">" [] []
+                  1: HTML_ELEMENT_LIST@70..78
+                    0: HTML_CONTENT@70..78
+                      0: HTML_LITERAL@70..78 "Liftoff!" [] []
+                  2: HTML_CLOSING_ELEMENT@78..82
+                    0: L_ANGLE@78..79 "<" [] []
+                    1: SLASH@79..80 "/" [] []
+                    2: HTML_TAG_NAME@80..81
+                      0: HTML_LITERAL@80..81 "p" [] []
+                    3: R_ANGLE@81..82 ">" [] []
+            3: SVELTE_IF_CLOSING_BLOCK@82..90
+              0: SV_CURLY_SLASH@82..87 "{/" [Newline("\n"), Whitespace("  ")] []
+              1: IF_KW@87..89 "if" [] []
+              2: R_CURLY@89..90 "}" [] []
+      1: SVELTE_SNIPPET_CLOSING_BLOCK@90..101
+        0: SV_CURLY_SLASH@90..93 "{/" [Newline("\n")] []
+        1: SNIPPET_KW@93..100 "snippet" [] []
+        2: R_CURLY@100..101 "}" [] []
+  4: EOF@101..102 "" [Newline("\n")] []
+
+```

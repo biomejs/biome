@@ -920,6 +920,50 @@ pub fn svelte_render_block(
         ],
     ))
 }
+pub fn svelte_snippet_block(
+    opening_block: SvelteSnippetOpeningBlock,
+    closing_block: SvelteSnippetClosingBlock,
+) -> SvelteSnippetBlock {
+    SvelteSnippetBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_snippet_closing_block(
+    sv_curly_slash_token: SyntaxToken,
+    snippet_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteSnippetClosingBlock {
+    SvelteSnippetClosingBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_CLOSING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_slash_token)),
+            Some(SyntaxElement::Token(snippet_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_snippet_opening_block(
+    sv_curly_hash_token: SyntaxToken,
+    snippet_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+) -> SvelteSnippetOpeningBlock {
+    SvelteSnippetOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(sv_curly_hash_token)),
+            Some(SyntaxElement::Token(snippet_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn vue_directive(name_token: SyntaxToken, modifiers: VueModifierList) -> VueDirectiveBuilder {
     VueDirectiveBuilder {
         name_token,

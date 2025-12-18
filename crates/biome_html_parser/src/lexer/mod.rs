@@ -7,7 +7,7 @@ use crate::token_source::{
 use biome_html_syntax::HtmlSyntaxKind::{
     AS_KW, ATTACH_KW, AWAIT_KW, CATCH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW,
     ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW,
-    NEWLINE, RENDER_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    NEWLINE, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -569,6 +569,7 @@ impl<'src> HtmlLexer<'src> {
             b"await" => AWAIT_KW,
             b"then" => THEN_KW,
             b"catch" => CATCH_KW,
+            b"snippet" => SNIPPET_KW,
             _ => {
                 self.position = starting_position;
                 return None;

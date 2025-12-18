@@ -15,6 +15,7 @@ use biome_html_syntax::HtmlSyntaxKind::{
     SVELTE_ELSE_CLAUSE, SVELTE_ELSE_IF_CLAUSE, SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK,
     SVELTE_IF_BLOCK, SVELTE_IF_CLOSING_BLOCK, SVELTE_IF_OPENING_BLOCK, SVELTE_KEY_BLOCK,
     SVELTE_KEY_CLOSING_BLOCK, SVELTE_KEY_OPENING_BLOCK, SVELTE_NAME, SVELTE_RENDER_BLOCK,
+    SVELTE_SNIPPET_BLOCK, SVELTE_SNIPPET_CLOSING_BLOCK, SVELTE_SNIPPET_OPENING_BLOCK,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -36,6 +37,7 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![if] => parse_if_block(p, m),
         T![each] => parse_each_block(p, m),
         T![await] => parse_await_block(p, m),
+        T![snippet] => parse_snippet_block(p, m),
         _ => {
             m.abandon(p);
             Absent
@@ -288,6 +290,8 @@ fn parse_svelte_block_item(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
+// #region await parsing functions
+
 fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (ParsedSyntax, bool) {
     if !p.at(T![each]) {
         parent_marker.abandon(p);
@@ -358,8 +362,6 @@ fn parse_await_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax 
         parse_await_catch_bock(p, has_catch_clause).ok();
     }
 
-    dbg!(p.cur_text());
-    dbg!(p.cur());
     parse_closing_block(p, T![await], SVELTE_AWAIT_CLOSING_BLOCK).or_add_diagnostic(
         p,
         |p, range| {
@@ -373,7 +375,9 @@ fn parse_await_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax 
 
 struct ParseAwaitResult {
     result: ParsedSyntax,
+    /// Used to signal possible parse errors in case there's a then block
     has_then_clause: Option<TextRange>,
+    /// Used to signal possible parse errors in case there's a catch block
     has_catch_clause: Option<TextRange>,
 }
 
@@ -540,6 +544,53 @@ fn parse_await_catch_bock(p: &mut HtmlParser, has_catch_clause: Option<TextRange
     Present(m.complete(p, SVELTE_AWAIT_CATCH_BLOCK))
 }
 
+// #endregion
+
+// #region snippet parsing functions
+fn parse_snippet_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
+    if !p.at(T![snippet]) {
+        parent_marker.abandon(p);
+        return Absent;
+    }
+    let result = parse_snippet_opening_block(p, parent_marker);
+    let m = result.precede(p);
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        p.error(p.err_builder("Expected an expression after 'snippet'", p.cur_range()));
+    }
+
+    parse_closing_block(p, T![snippet], SVELTE_SNIPPET_CLOSING_BLOCK).or_add_diagnostic(
+        p,
+        |p, range| {
+            expected_svelte_closing_block(p, range)
+                .with_detail(range.sub(m.start()), "This is where the block started.")
+        },
+    );
+
+    Present(m.complete(p, SVELTE_SNIPPET_BLOCK))
+}
+
+fn parse_snippet_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
+    if !p.at(T![snippet]) {
+        parent_marker.abandon(p);
+        return Absent;
+    }
+    p.bump_with_context(T![snippet], HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
+        expected_expression(p, range.sub_start(parent_marker.start()))
+    });
+    p.expect(T!['}']);
+
+    SvelteElementList::new()
+        .with_stop_at_curly_colon()
+        .parse_list(p);
+
+    Present(parent_marker.complete(p, SVELTE_SNIPPET_OPENING_BLOCK))
+}
+
+// #endregion
 /// Parses a `{#<keyword> expression }` block.
 ///
 /// `node` is the name of the node to emit
@@ -824,6 +875,7 @@ pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
             | T![await]
             | T![catch]
             | T![then]
+            | T![snippet]
     )
 }
 

@@ -1776,6 +1776,108 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenderBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteSnippetBlock>
+    for crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteSnippetBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteSnippetBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteSnippetBlock,
+        crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteSnippetBlock,
+        crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteSnippetClosingBlock>
+    for crate::svelte::auxiliary::snippet_closing_block::FormatSvelteSnippetClosingBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteSnippetClosingBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteSnippetClosingBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetClosingBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteSnippetClosingBlock,
+        crate::svelte::auxiliary::snippet_closing_block::FormatSvelteSnippetClosingBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: svelte :: auxiliary :: snippet_closing_block :: FormatSvelteSnippetClosingBlock :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetClosingBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteSnippetClosingBlock,
+        crate::svelte::auxiliary::snippet_closing_block::FormatSvelteSnippetClosingBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: svelte :: auxiliary :: snippet_closing_block :: FormatSvelteSnippetClosingBlock :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteSnippetOpeningBlock>
+    for crate::svelte::auxiliary::snippet_opening_block::FormatSvelteSnippetOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteSnippetOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteSnippetOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteSnippetOpeningBlock,
+        crate::svelte::auxiliary::snippet_opening_block::FormatSvelteSnippetOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: svelte :: auxiliary :: snippet_opening_block :: FormatSvelteSnippetOpeningBlock :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteSnippetOpeningBlock,
+        crate::svelte::auxiliary::snippet_opening_block::FormatSvelteSnippetOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: svelte :: auxiliary :: snippet_opening_block :: FormatSvelteSnippetOpeningBlock :: default ())
+    }
+}
 impl FormatRule<biome_html_syntax::VueDirective>
     for crate::vue::auxiliary::directive::FormatVueDirective
 {

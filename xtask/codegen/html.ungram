@@ -201,6 +201,7 @@ AnySvelteBlock =
 	| SvelteIfBlock
 	| SvelteEachBlock
 	| SvelteAwaitBlock
+	| SvelteSnippetBlock
 	| SvelteBogusBlock
 
 // {@debug}
@@ -426,6 +427,28 @@ SvelteAwaitCatchBlock =
 SvelteAwaitClosingBlock =
 	'{/'
 	'await'
+	'}'
+
+// {#snippt f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteSnippetBlock =
+	opening_block: SvelteSnippetOpeningBlock
+	closing_block: SvelteSnippetClosingBlock
+
+// {#snippt f()} ... {/snippet}
+// ^^^^^^^^^^^^^^^^^
+SvelteSnippetOpeningBlock =
+	'{#'
+	'snippet'
+	expression: HtmlTextExpression
+	'}'
+	children: HtmlElementList
+
+// {#snippt f()} ... {/snippet}
+//                   ^^^^^^^^^^
+SvelteSnippetClosingBlock =
+	'{/'
+	'snippet'
 	'}'
 
 // Keep it different just for svelte

@@ -51,6 +51,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "then",
         "await",
         "catch",
+        "snippet",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
@@ -110,6 +111,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_AWAIT_CLOSING_BLOCK",
         "SVELTE_AWAIT_THEN_CLAUSE",
         "SVELTE_AWAIT_CATCH_CLAUSE",
+        "SVELTE_SNIPPET_BLOCK",
+        "SVELTE_SNIPPET_OPENING_BLOCK",
+        "SVELTE_SNIPPET_CLOSING_BLOCK",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",
