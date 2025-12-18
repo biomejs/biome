@@ -32,7 +32,7 @@ biome_js_factory      = { workspace = true, optional = true }
 biome_js_formatter    = { workspace = true, optional = true }
 biome_js_parser       = { workspace = true, optional = true }
 biome_js_syntax       = { workspace = true, optional = true }
-biome_json_analyze    = { workspace = true, optional = true, no-default-features = true }
+biome_json_analyze    = { workspace = true, optional = true, default-features = false }
 biome_json_formatter  = { workspace = true, optional = true }
 biome_json_parser     = { workspace = true, optional = true }
 biome_json_syntax     = { workspace = true, optional = true }
