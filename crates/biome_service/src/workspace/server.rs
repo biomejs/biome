@@ -446,76 +446,74 @@ impl WorkspaceServer {
             Default::default()
         };
 
-        let is_indexed =
-            // Dependency files can be skipped altoghether
-            if biome_path.is_dependency() && !biome_path.is_manifest() {
-                true
-            }
-            // If the request is for indexing, we don't insert any document
-            // unless the document isn't ignored.
-            // That's usually the case when we want to index a manifest file that belongs to the project.
-            else if reason.is_index()
-                && self.is_path_ignored(PathIsIgnoredParams {
-                project_key,
-                path: biome_path.clone(),
-                features: FeaturesBuilder::new().with_all().build(),
-                ignore_kind: IgnoreKind::Ancestors,
-            })?
-            {
-                true
-            } else {
-                self.documents.pin().update_or_insert_with(
-                    path.clone(),
-                    |current| {
-                        let version = match (current.version, version) {
-                            (Some(current_version), Some(new_version)) => {
-                                // This is awkward. It most likely means we have
-                                // two clients independently specifying their
-                                // own version, with no way for us to
-                                // distinguish them. Or it is a bug. The safest
-                                // thing to do seems to use the _minimum_ of the
-                                // versions specified, so that updates coming
-                                // from either will be accepted.
-                                Some(current_version.min(new_version))
-                            }
-                            (Some(current_version), None) => {
-                                // It appears the document is open in a client,
-                                // and the scanner also wants to open/update the
-                                // document. We stick with the version from the
-                                // client and ignore this request.
-                                Some(current_version)
-                            }
-                            (None, new_version) => {
-                                // The document was only opened by the scanner,
-                                // so whatever's the new version will do.
-                                new_version
-                            }
-                        };
-
-                        Document {
-                            content: content.clone(),
-                            version,
-                            file_source_index,
-                            syntax: syntax.clone(),
-                            embedded_snippets: embedded_snippets.clone(),
-                            services: services.clone(),
+        let is_indexed = if
+        // Dependency files can be skipped altoghether
+        (biome_path.is_dependency() && !biome_path.is_manifest())
+            || (
+                // If the request is for indexing, we don't insert any document
+                // unless the document isn't ignored.
+                // That's usually the case when we want to index a manifest file that belongs to the project.
+                reason.is_index()
+                    && self.is_path_ignored(PathIsIgnoredParams {
+                        project_key,
+                        path: biome_path.clone(),
+                        features: FeaturesBuilder::new().with_all().build(),
+                        ignore_kind: IgnoreKind::Ancestors,
+                    })?
+            ) {
+            true
+        } else {
+            self.documents.pin().update_or_insert_with(
+                path.clone(),
+                |current| {
+                    let version = match (current.version, version) {
+                        (Some(current_version), Some(new_version)) => {
+                            // This is awkward. It most likely means we have
+                            // two clients independently specifying their
+                            // own version, with no way for us to
+                            // distinguish them. Or it is a bug. The safest
+                            // thing to do seems to use the _minimum_ of the
+                            // versions specified, so that updates coming
+                            // from either will be accepted.
+                            Some(current_version.min(new_version))
                         }
-                    },
-                    || Document {
+                        (Some(current_version), None) => {
+                            // It appears the document is open in a client,
+                            // and the scanner also wants to open/update the
+                            // document. We stick with the version from the
+                            // client and ignore this request.
+                            Some(current_version)
+                        }
+                        (None, new_version) => {
+                            // The document was only opened by the scanner,
+                            // so whatever's the new version will do.
+                            new_version
+                        }
+                    };
+
+                    Document {
                         content: content.clone(),
                         version,
                         file_source_index,
                         syntax: syntax.clone(),
                         embedded_snippets: embedded_snippets.clone(),
                         services: services.clone(),
-                    },
-                );
+                    }
+                },
+                || Document {
+                    content: content.clone(),
+                    version,
+                    file_source_index,
+                    syntax: syntax.clone(),
+                    embedded_snippets: embedded_snippets.clone(),
+                    services: services.clone(),
+                },
+            );
 
-
-                // We check both reason or if the path is indexed.
-                // This is required due to the check at line 441
-                reason.is_index() || self.is_indexed(&path)
-            };
+            // We check both reason or if the path is indexed.
+            // This is required due to the check at line 441
+            reason.is_index() || self.is_indexed(&path)
+        };
 
         // Manifest files need to update the module graph
         if is_indexed
