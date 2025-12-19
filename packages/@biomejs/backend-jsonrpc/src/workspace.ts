@@ -2132,6 +2132,11 @@ See <https://biomejs.dev/linter/rules/use-unique-graphql-operation-name>
 	 */
 	useUniqueGraphqlOperationName?: UseUniqueGraphqlOperationNameConfiguration;
 	/**
+	* Succinct description of the rule.
+See <https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration> 
+	 */
+	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
+	/**
 	* Enforce specific order of Vue compiler macros.
 See <https://biomejs.dev/linter/rules/use-vue-define-macros-order> 
 	 */
@@ -3767,6 +3772,9 @@ export type UseSpreadConfiguration =
 export type UseUniqueGraphqlOperationNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUniqueGraphqlOperationNameOptions;
+export type UseVueConsistentDefinePropsDeclarationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
 export type UseVueDefineMacrosOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineMacrosOrderOptions;
@@ -5252,6 +5260,10 @@ export interface RuleWithUseUniqueGraphqlOperationNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseUniqueGraphqlOperationNameOptions;
 }
+export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentDefinePropsDeclarationOptions;
+}
 export interface RuleWithUseVueDefineMacrosOrderOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6533,6 +6545,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseUniqueGraphqlOperationNameOptions = {};
+export type UseVueConsistentDefinePropsDeclarationOptions = {};
 export interface UseVueDefineMacrosOrderOptions {
 	/**
 	 * The order of the Vue define macros.
@@ -7345,6 +7358,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUniqueGraphqlOperationName"
+	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
