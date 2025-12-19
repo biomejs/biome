@@ -239,7 +239,14 @@ fn match_deno_env_get(
 
     let object = static_expr.object().ok()?.omit_parentheses();
     let env_member = object.as_js_static_member_expression()?;
-    if env_member.member().ok()?.as_js_name()?.to_trimmed_text().text() != "env" {
+    if env_member
+        .member()
+        .ok()?
+        .as_js_name()?
+        .to_trimmed_text()
+        .text()
+        != "env"
+    {
         return None;
     }
 
