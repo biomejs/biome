@@ -6231,7 +6231,13 @@ export type UseArrowFunctionOptions = {};
 export type UseDateNowOptions = {};
 export type UseFlatMapOptions = {};
 export type UseIndexOfOptions = {};
-export type UseLiteralKeysOptions = {};
+export interface UseLiteralKeysOptions {
+	/**
+	* When `true`, properties accessed via index signatures must use bracket notation.
+This mirrors TypeScript's `noPropertyAccessFromIndexSignature` compiler option. 
+	 */
+	noPropertyAccessFromIndexSignature?: boolean;
+}
 export type UseNumericLiteralsOptions = {};
 export type UseOptionalChainOptions = {};
 export type UseRegexLiteralsOptions = {};
