@@ -90,7 +90,7 @@ declare_lint_rule! {
         language: "jsx",
         domains: &[RuleDomain::React],
         sources: &[
-            RuleSource::EslintReact("no-leaked-render").inspired(),
+            RuleSource::EslintReact("jsx-no-leaked-render").inspired(),
         ],
         recommended: false,
     }

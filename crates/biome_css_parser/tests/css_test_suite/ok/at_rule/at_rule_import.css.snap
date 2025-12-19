@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -6804,5 +6803,3 @@ CssRoot {
   2: EOF@6505..6506 "" [Newline("\n")] []
 
 ```
-
-

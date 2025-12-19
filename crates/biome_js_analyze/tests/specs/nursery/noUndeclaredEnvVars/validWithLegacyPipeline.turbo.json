@@ -1,0 +1,8 @@
+{
+	"globalEnv": ["GLOBAL_VAR"],
+	"pipeline": {
+		"build": {
+			"env": ["PIPELINE_VAR", "PIPELINE_OUTPUT"]
+		}
+	}
+}

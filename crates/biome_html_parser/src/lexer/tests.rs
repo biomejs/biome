@@ -338,28 +338,32 @@ fn svelte_openings() {
         HtmlLexContext::Regular,
         "{@debug}",
         SV_CURLY_AT: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{/debug}",
         SV_CURLY_SLASH: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{:debug}",
         SV_CURLY_COLON: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{#debug}",
         SV_CURLY_HASH: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 }
 

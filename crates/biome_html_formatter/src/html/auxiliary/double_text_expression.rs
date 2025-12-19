@@ -20,7 +20,9 @@ impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression
             f,
             [
                 l_double_curly_token.format(),
+                space(),
                 expression.format(),
+                space(),
                 r_double_curly_token.format(),
             ]
         )

@@ -111,7 +111,7 @@ declare_source_rule! {
     /// The line `import { C } from "c"` forms the second chunk.
     /// The blank line between the first two imports is ignored so they form a single chunk.
     ///
-    /// The sorter ensures that chunks are separated from each other with a blank lines.
+    /// The sorter ensures that chunks are separated from each other with blank lines.
     /// Only side-effect imports adjacent to a chunk of imports are not separated by a blank line.
     /// The following code...
     ///
@@ -267,7 +267,7 @@ declare_source_rule! {
     ///
     /// Let's take an example.
     /// In the default configuration, Node.js modules without the `node:` protocol are separated from those with a protocol.
-    /// To groups them together, you can use the predefined group `:NODE:`.
+    /// To group them together, you can use the predefined group `:NODE:`.
     /// Given the following configuration...
     ///
     /// ```json,full_options
@@ -604,7 +604,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// Note that you can want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
+    /// Note that you may want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
     ///
     /// ### Placing `import type` and `export type` at the end of the chunks
     ///
@@ -633,7 +633,7 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Change the sorting of import identifiers to logical sorting
-    /// This is the default behavior incase you do not override. This only applies to the named import/exports and not the source itself.
+    /// This is the default behavior in case you do not override. This only applies to the named import/exports and not the source itself.
     ///
     /// ```json,options
     /// {

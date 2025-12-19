@@ -55,7 +55,7 @@ HtmlRoot {
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
-                            name_token: VUE_IDENT@46..52 "v-bind" [] [],
+                            name_token: IDENT@46..52 "v-bind" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@52..53 ":" [] [],
                                 arg: VueStaticArgument {
@@ -111,7 +111,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@171..177 "v-bind" [] [],
+                                name_token: IDENT@171..177 "v-bind" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@177..178 ":" [] [],
                                     arg: VueDynamicArgument {
@@ -186,7 +186,7 @@ HtmlRoot {
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
-                                name_token: VUE_IDENT@343..349 "v-bind" [] [],
+                                name_token: IDENT@343..349 "v-bind" [] [],
                                 arg: VueDirectiveArgument {
                                     colon_token: COLON@349..350 ":" [] [],
                                     arg: VueDynamicArgument {
@@ -243,7 +243,7 @@ HtmlRoot {
                             },
                         },
                         VueDirective {
-                            name_token: VUE_IDENT@453..459 "v-bind" [] [],
+                            name_token: IDENT@453..459 "v-bind" [] [],
                             arg: VueDirectiveArgument {
                                 colon_token: COLON@459..460 ":" [] [],
                                 arg: VueDynamicArgument {
@@ -333,7 +333,7 @@ HtmlRoot {
             0: HTML_LITERAL@40..46 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@46..62
             0: VUE_DIRECTIVE@46..62
-              0: VUE_IDENT@46..52 "v-bind" [] []
+              0: IDENT@46..52 "v-bind" [] []
               1: VUE_DIRECTIVE_ARGUMENT@52..62
                 0: COLON@52..53 ":" [] []
                 1: VUE_STATIC_ARGUMENT@53..62
@@ -372,7 +372,7 @@ HtmlRoot {
               0: HTML_LITERAL@167..171 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@171..199
               0: VUE_DIRECTIVE@171..199
-                0: VUE_IDENT@171..177 "v-bind" [] []
+                0: IDENT@171..177 "v-bind" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@177..187
                   0: COLON@177..178 ":" [] []
                   1: VUE_DYNAMIC_ARGUMENT@178..187
@@ -425,7 +425,7 @@ HtmlRoot {
               0: HTML_LITERAL@333..343 "component" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@343..372
               0: VUE_DIRECTIVE@343..372
-                0: VUE_IDENT@343..349 "v-bind" [] []
+                0: IDENT@343..349 "v-bind" [] []
                 1: VUE_DIRECTIVE_ARGUMENT@349..360
                   0: COLON@349..350 ":" [] []
                   1: VUE_DYNAMIC_ARGUMENT@350..360
@@ -464,7 +464,7 @@ HtmlRoot {
                 1: HTML_STRING@444..453
                   0: HTML_STRING_LITERAL@444..453 "\"imgSrc\"" [] [Whitespace(" ")]
             1: VUE_DIRECTIVE@453..479
-              0: VUE_IDENT@453..459 "v-bind" [] []
+              0: IDENT@453..459 "v-bind" [] []
               1: VUE_DIRECTIVE_ARGUMENT@459..468
                 0: COLON@459..460 ":" [] []
                 1: VUE_DYNAMIC_ARGUMENT@460..468

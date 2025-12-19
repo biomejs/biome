@@ -1,0 +1,510 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid1 = () => {
+	return <a>here</a>;
+}
+
+const Invalid2 = () => {
+	return <a>HERE</a>;
+}
+
+const Invalid3 = () => {
+	return <a>click here</a>;
+}
+
+const Invalid4 = () => {
+	return <a>learn more</a>;
+}
+
+const Invalid5 = () => {
+	return <a>learn      more</a>;
+}
+
+const Invalid6 = () => {
+	return <a>learn more.</a>;
+}
+
+const Invalid7 = () => {
+	return <a>learn more?</a>;
+}
+
+const Invalid8 = () => {
+	return <a>learn more,</a>;
+}
+
+const Invalid9 = () => {
+	return <a>learn more!</a>;
+}
+
+const Invalid10 = () => {
+	return <a>learn more;</a>;
+}
+
+const Invalid11 = () => {
+	return <a>learn more:</a>;
+}
+
+const Invalid12 = () => {
+	return <a>link</a>;
+}
+
+const Invalid13 = () => {
+	return <a>a link</a>;
+}
+
+const Invalid14 = () => {
+	return <a aria-label="click here">something</a>;
+}
+
+const Invalid15 = () => {
+	return <a> a link </a>;
+}
+
+const Invalid16 = () => {
+	return <a>a<i></i> link</a>;
+}
+
+const Invalid17 = () => {
+	return <a><i></i>a link</a>;
+}
+
+const Invalid18 = () => {
+	return <a><span>click</span> here</a>;
+}
+
+const Invalid19 = () => {
+	return <a><span> click </span> here</a>;
+}
+
+const Invalid20 = () => {
+	return <a><span aria-hidden>more text</span>learn more</a>;
+}
+
+const Invalid21 = () => {
+	return <a><span aria-hidden="true">more text</span>learn more</a>;
+}
+
+const Invalid22 = () => {
+	return <a><img alt="click here" /></a>;
+}
+
+const Invalid23 = () => {
+	return <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>;
+}
+
+const Invalid24 = () => {
+	return <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>;
+}
+
+const Invalid25 = () => {
+	return <a><CustomElement>click</CustomElement> here</a>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const Invalid1 = () => {
+  > 3 │ 	return <a>here</a>;
+      │ 	       ^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:7:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    6 │ const Invalid2 = () => {
+  > 7 │ 	return <a>HERE</a>;
+      │ 	       ^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:11:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    10 │ const Invalid3 = () => {
+  > 11 │ 	return <a>click here</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:15:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    14 │ const Invalid4 = () => {
+  > 15 │ 	return <a>learn more</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:19:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    18 │ const Invalid5 = () => {
+  > 19 │ 	return <a>learn      more</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:23:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    22 │ const Invalid6 = () => {
+  > 23 │ 	return <a>learn more.</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:27:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    26 │ const Invalid7 = () => {
+  > 27 │ 	return <a>learn more?</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:31:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    30 │ const Invalid8 = () => {
+  > 31 │ 	return <a>learn more,</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:35:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    34 │ const Invalid9 = () => {
+  > 35 │ 	return <a>learn more!</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:39:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    38 │ const Invalid10 = () => {
+  > 39 │ 	return <a>learn more;</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:43:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    42 │ const Invalid11 = () => {
+  > 43 │ 	return <a>learn more:</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    44 │ }
+    45 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:47:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    46 │ const Invalid12 = () => {
+  > 47 │ 	return <a>link</a>;
+       │ 	       ^^^^^^^^^^^
+    48 │ }
+    49 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:51:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    50 │ const Invalid13 = () => {
+  > 51 │ 	return <a>a link</a>;
+       │ 	       ^^^^^^^^^^^^^
+    52 │ }
+    53 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:55:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    54 │ const Invalid14 = () => {
+  > 55 │ 	return <a aria-label="click here">something</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ }
+    57 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:59:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    58 │ const Invalid15 = () => {
+  > 59 │ 	return <a> a link </a>;
+       │ 	       ^^^^^^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:63:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    62 │ const Invalid16 = () => {
+  > 63 │ 	return <a>a<i></i> link</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^
+    64 │ }
+    65 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:67:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    66 │ const Invalid17 = () => {
+  > 67 │ 	return <a><i></i>a link</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^
+    68 │ }
+    69 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:71:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    70 │ const Invalid18 = () => {
+  > 71 │ 	return <a><span>click</span> here</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ }
+    73 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:75:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    74 │ const Invalid19 = () => {
+  > 75 │ 	return <a><span> click </span> here</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ }
+    77 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:79:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    78 │ const Invalid20 = () => {
+  > 79 │ 	return <a><span aria-hidden>more text</span>learn more</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ }
+    81 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:83:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    82 │ const Invalid21 = () => {
+  > 83 │ 	return <a><span aria-hidden="true">more text</span>learn more</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ }
+    85 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:87:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    86 │ const Invalid22 = () => {
+  > 87 │ 	return <a><img alt="click here" /></a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ }
+    89 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:91:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    90 │ const Invalid23 = () => {
+  > 91 │ 	return <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ }
+    93 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:95:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+    94 │ const Invalid24 = () => {
+  > 95 │ 	return <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │ }
+    97 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```
+
+```
+invalid.jsx:99:9 lint/nursery/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No ambiguous anchor descriptions allowed.
+  
+     98 │ const Invalid25 = () => {
+   > 99 │ 	return <a><CustomElement>click</CustomElement> here</a>;
+        │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ }
+    101 │ 
+  
+  i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
+  
+
+```

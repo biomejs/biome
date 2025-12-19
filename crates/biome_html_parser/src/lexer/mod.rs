@@ -1,12 +1,13 @@
 mod tests;
 
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt,
+    TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
-    ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, ELSE_KW, EOF, ERROR_TOKEN, HTML_KW,
-    HTML_LITERAL, HTML_STRING_LITERAL, IF_KW, KEY_KW, NEWLINE, RENDER_KW, SVELTE_IDENT, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    AS_KW, ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN,
+    HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW, NEWLINE, RENDER_KW,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -33,7 +34,6 @@ pub(crate) struct HtmlLexer<'src> {
 enum IdentifierContext {
     None,
     Doctype,
-    Svelte,
     Vue,
     VueDirectiveArgument,
 }
@@ -41,10 +41,6 @@ enum IdentifierContext {
 impl IdentifierContext {
     const fn is_doctype(&self) -> bool {
         matches!(self, Self::Doctype)
-    }
-
-    const fn is_svelte(&self) -> bool {
-        matches!(self, Self::Svelte)
     }
 }
 
@@ -96,9 +92,9 @@ impl<'src> HtmlLexer<'src> {
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::None)
             }
-            _ if is_at_svelte_start_identifier(current) => {
-                self.consume_identifier(current, IdentifierContext::Svelte)
-            }
+            _ if is_at_start_identifier(current) => self
+                .consume_language_identifier(current)
+                .unwrap_or_else(|| self.consume_unexpected_character()),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -201,6 +197,9 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(HTML_LITERAL)
                 }
             }
+            _ if is_at_start_identifier(current) => self
+                .consume_language_identifier(current)
+                .unwrap_or_else(|| self.consume_html_text(current)),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -337,6 +336,79 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
+    /// Consumes a restricted single text expression that stops at specific keywords
+    /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
+    /// encountering a keyword at the top level.
+    fn consume_restricted_single_text_expression(
+        &mut self,
+        kind: RestrictedExpressionStopAt,
+    ) -> HtmlSyntaxKind {
+        let start_pos = self.position;
+        let mut brackets_stack = 0;
+
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'}' => {
+                    if brackets_stack == 0 {
+                        // Reached the closing brace
+                        break;
+                    } else {
+                        brackets_stack -= 1;
+                        self.advance(1);
+                    }
+                }
+                b'{' => {
+                    brackets_stack += 1;
+                    self.advance(1);
+                }
+                _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
+                    let should_stop = match kind {
+                        RestrictedExpressionStopAt::AsOrComma => current == b',',
+                        RestrictedExpressionStopAt::OpeningParenOrComma => {
+                            current == b'(' || current == b','
+                        }
+                        RestrictedExpressionStopAt::ClosingParen => current == b')',
+                    };
+                    if should_stop {
+                        break;
+                    }
+                    self.advance(1);
+                }
+                _ if brackets_stack == 0 && is_at_start_identifier(current) => {
+                    // Check if we're at a stop keyword
+                    let checkpoint_pos = self.position;
+                    if let Some(keyword_kind) = self.consume_language_identifier(current) {
+                        // Check if this keyword is in our stop list
+                        let should_stop = match kind {
+                            RestrictedExpressionStopAt::AsOrComma => keyword_kind == AS_KW,
+                            RestrictedExpressionStopAt::OpeningParenOrComma => false,
+                            RestrictedExpressionStopAt::ClosingParen => false,
+                        };
+
+                        if should_stop {
+                            // Rewind - don't consume the keyword
+                            self.position = checkpoint_pos;
+                            break;
+                        }
+                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                    } else {
+                        // Not a keyword, advance one byte (position was reset by consume_language_identifier)
+                        self.advance_byte_or_char(current);
+                    }
+                }
+                _ => {
+                    self.advance(1);
+                }
+            }
+        }
+
+        if self.position > start_pos {
+            HTML_LITERAL
+        } else {
+            ERROR_TOKEN
+        }
+    }
+
     /// Consumes an HTML comment starting with '<!--' until the closing '-->' is found.
     /// Returns COMMENT token type.
     fn consume_comment(&mut self) -> HtmlSyntaxKind {
@@ -399,13 +471,31 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'}' => self.consume_byte(T!['}']),
             b',' => self.consume_byte(T![,]),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
             b'{' if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             b'{' => self.consume_byte(T!['{']),
-            _ if is_at_svelte_start_identifier(current) => {
-                self.consume_identifier(current, IdentifierContext::Svelte)
-            }
+            _ if is_at_start_identifier(current) => self
+                .consume_language_identifier(current)
+                .unwrap_or_else(|| self.consume_svelte_identifier(current)),
             _ => self.consume_single_text_expression(),
         }
+    }
+
+    /// Consumes a Svelte identifier (alphanumeric + underscore only)
+    fn consume_svelte_identifier(&mut self, first: u8) -> HtmlSyntaxKind {
+        self.assert_current_char_boundary();
+        self.advance_byte_or_char(first);
+
+        while let Some(byte) = self.current_byte() {
+            if is_at_continue_identifier(byte) {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        IDENT
     }
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
@@ -434,6 +524,48 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
+    /// Attempts to consume HTML-ish languages identifiers. If none is found, the function
+    /// restores the position of the lexer and returns [None].
+    fn consume_language_identifier(&mut self, first: u8) -> Option<HtmlSyntaxKind> {
+        self.assert_current_char_boundary();
+        let starting_position = self.position;
+        const BUFFER_SIZE: usize = 14;
+        let mut buffer = [0u8; BUFFER_SIZE];
+        buffer[0] = first;
+        let mut len = 1;
+
+        self.advance_byte_or_char(first);
+
+        while let Some(byte) = self.current_byte() {
+            if is_at_continue_identifier(byte) {
+                if len < BUFFER_SIZE {
+                    buffer[len] = byte;
+                    len += 1;
+                }
+                self.advance(1)
+            } else {
+                break;
+            }
+        }
+
+        Some(match &buffer[..len] {
+            b"debug" => DEBUG_KW,
+            b"attach" => ATTACH_KW,
+            b"const" => CONST_KW,
+            b"render" => RENDER_KW,
+            b"html" => HTML_KW,
+            b"key" => KEY_KW,
+            b"if" => IF_KW,
+            b"else" => ELSE_KW,
+            b"each" => EACH_KW,
+            b"as" => AS_KW,
+            _ => {
+                self.position = starting_position;
+                return None;
+            }
+        })
+    }
+
     fn consume_identifier(&mut self, first: u8, context: IdentifierContext) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
@@ -458,17 +590,7 @@ impl<'src> HtmlLexer<'src> {
                         break;
                     }
                 }
-                IdentifierContext::Svelte => {
-                    if is_at_svelte_continue_identifier(byte) {
-                        if len < BUFFER_SIZE {
-                            buffer[len] = byte;
-                            len += 1;
-                        }
-                        self.advance(1)
-                    } else {
-                        break;
-                    }
-                }
+
                 IdentifierContext::Vue => {
                     if is_attribute_name_byte_vue(byte) {
                         if len < BUFFER_SIZE {
@@ -497,19 +619,8 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" if !context.is_svelte() => DOCTYPE_KW,
+            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
             b"html" | b"HTML" if context.is_doctype() => HTML_KW,
-            buffer if context.is_svelte() => match buffer {
-                b"debug" => DEBUG_KW,
-                b"attach" => ATTACH_KW,
-                b"const" => CONST_KW,
-                b"render" => RENDER_KW,
-                b"html" => HTML_KW,
-                b"key" => KEY_KW,
-                b"if" => IF_KW,
-                b"else" => ELSE_KW,
-                _ => SVELTE_IDENT,
-            },
             _ => HTML_LITERAL,
         }
     }
@@ -972,6 +1083,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
                         TextExpressionKind::Single => self.consume_single_text_expression(),
                     },
+                    HtmlLexContext::RestrictedSingleExpression(kind) => {
+                        self.consume_restricted_single_text_expression(kind)
+                    }
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {
                         self.consume_astro_frontmatter(current, context)
@@ -1052,7 +1166,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::SingleTextExpression => self.consume_single_text_expression(),
+                HtmlReLexContext::HtmlText => self.consume_html_text(current),
             },
             None => EOF,
         };
@@ -1096,12 +1210,12 @@ fn is_attribute_name_byte_vue(byte: u8) -> bool {
 }
 
 /// Identifiers can contain letters, numbers and `_`
-fn is_at_svelte_continue_identifier(byte: u8) -> bool {
+fn is_at_continue_identifier(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
 }
 
 /// Identifiers should start with letters or `_`
-fn is_at_svelte_start_identifier(byte: u8) -> bool {
+fn is_at_start_identifier(byte: u8) -> bool {
     byte.is_ascii_alphabetic() || byte == b'_'
 }
 

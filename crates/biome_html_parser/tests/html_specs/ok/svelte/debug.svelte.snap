@@ -32,7 +32,7 @@ HtmlRoot {
             debug_token: DEBUG_KW@11..17 "debug" [] [Whitespace(" ")],
             bindings: SvelteBindingList [
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@17..26 "something" [] [],
+                    ident_token: IDENT@17..26 "something" [] [],
                 },
             ],
             r_curly_token: R_CURLY@26..27 "}" [] [],
@@ -42,7 +42,7 @@ HtmlRoot {
             debug_token: DEBUG_KW@30..36 "debug" [] [Whitespace(" ")],
             bindings: SvelteBindingList [
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@36..41 "debug" [] [],
+                    ident_token: IDENT@36..41 "debug" [] [],
                 },
             ],
             r_curly_token: R_CURLY@41..42 "}" [] [],
@@ -52,15 +52,15 @@ HtmlRoot {
             debug_token: DEBUG_KW@45..51 "debug" [] [Whitespace(" ")],
             bindings: SvelteBindingList [
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@51..60 "something" [] [],
+                    ident_token: IDENT@51..60 "something" [] [],
                 },
                 COMMA@60..62 "," [] [Whitespace(" ")],
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@62..71 "something" [] [],
+                    ident_token: IDENT@62..71 "something" [] [],
                 },
                 COMMA@71..73 "," [] [Whitespace(" ")],
                 SvelteName {
-                    svelte_ident_token: SVELTE_IDENT@73..82 "something" [] [],
+                    ident_token: IDENT@73..82 "something" [] [],
                 },
             ],
             r_curly_token: R_CURLY@82..83 "}" [] [],
@@ -88,27 +88,27 @@ HtmlRoot {
       1: DEBUG_KW@11..17 "debug" [] [Whitespace(" ")]
       2: SVELTE_BINDING_LIST@17..26
         0: SVELTE_NAME@17..26
-          0: SVELTE_IDENT@17..26 "something" [] []
+          0: IDENT@17..26 "something" [] []
       3: R_CURLY@26..27 "}" [] []
     2: SVELTE_DEBUG_BLOCK@27..42
       0: SV_CURLY_AT@27..30 "{@" [Newline("\n")] []
       1: DEBUG_KW@30..36 "debug" [] [Whitespace(" ")]
       2: SVELTE_BINDING_LIST@36..41
         0: SVELTE_NAME@36..41
-          0: SVELTE_IDENT@36..41 "debug" [] []
+          0: IDENT@36..41 "debug" [] []
       3: R_CURLY@41..42 "}" [] []
     3: SVELTE_DEBUG_BLOCK@42..83
       0: SV_CURLY_AT@42..45 "{@" [Newline("\n")] []
       1: DEBUG_KW@45..51 "debug" [] [Whitespace(" ")]
       2: SVELTE_BINDING_LIST@51..82
         0: SVELTE_NAME@51..60
-          0: SVELTE_IDENT@51..60 "something" [] []
+          0: IDENT@51..60 "something" [] []
         1: COMMA@60..62 "," [] [Whitespace(" ")]
         2: SVELTE_NAME@62..71
-          0: SVELTE_IDENT@62..71 "something" [] []
+          0: IDENT@62..71 "something" [] []
         3: COMMA@71..73 "," [] [Whitespace(" ")]
         4: SVELTE_NAME@73..82
-          0: SVELTE_IDENT@73..82 "something" [] []
+          0: IDENT@73..82 "something" [] []
       3: R_CURLY@82..83 "}" [] []
   4: EOF@83..84 "" [Newline("\n")] []
 

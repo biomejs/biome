@@ -20,6 +20,7 @@ impl FormatNodeRule<SvelteIfOpeningBlock> for FormatSvelteIfOpeningBlock {
             [
                 sv_curly_hash_token.format(),
                 if_token.format(),
+                space(),
                 expression.format(),
                 r_curly_token.format(),
             ]

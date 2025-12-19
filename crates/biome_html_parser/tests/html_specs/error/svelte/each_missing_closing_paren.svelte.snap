@@ -1,0 +1,115 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#each items as item, index (key}
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..13 " items " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@13..15 "as" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@15..20 " item" [] [],
+                    },
+                    index: SvelteEachIndex {
+                        comma_token: COMMA@20..21 "," [] [],
+                        value: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@21..28 " index " [] [],
+                        },
+                    },
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@28..29 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@29..32 "key" [] [],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                r_curly_token: R_CURLY@32..33 "}" [] [],
+            },
+            children: HtmlElementList [],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@33..36 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@36..40 "each" [] [],
+                r_curly_token: R_CURLY@40..41 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..42
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..41
+    0: SVELTE_EACH_BLOCK@0..41
+      0: SVELTE_EACH_OPENING_BLOCK@0..33
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..13
+          0: HTML_LITERAL@6..13 " items " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@13..32
+          0: AS_KW@13..15 "as" [] []
+          1: HTML_TEXT_EXPRESSION@15..20
+            0: HTML_LITERAL@15..20 " item" [] []
+          2: SVELTE_EACH_INDEX@20..28
+            0: COMMA@20..21 "," [] []
+            1: HTML_TEXT_EXPRESSION@21..28
+              0: HTML_LITERAL@21..28 " index " [] []
+          3: SVELTE_EACH_KEY@28..32
+            0: L_PAREN@28..29 "(" [] []
+            1: HTML_TEXT_EXPRESSION@29..32
+              0: HTML_LITERAL@29..32 "key" [] []
+            2: (empty)
+        4: R_CURLY@32..33 "}" [] []
+      1: HTML_ELEMENT_LIST@33..33
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@33..41
+        0: SV_CURLY_SLASH@33..36 "{/" [Newline("\n")] []
+        1: EACH_KW@36..40 "each" [] []
+        2: R_CURLY@40..41 "}" [] []
+  4: EOF@41..42 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+each_missing_closing_paren.svelte:1:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `}`
+  
+  > 1 │ {#each items as item, index (key}
+      │                                 ^
+    2 │ {/each}
+    3 │ 
+  
+  i Remove }
+  
+```

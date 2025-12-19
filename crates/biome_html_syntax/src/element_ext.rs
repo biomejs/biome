@@ -1,6 +1,7 @@
 use crate::{
-    AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlEmbeddedContent,
-    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
+    AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList, HtmlElement,
+    HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
+    ScriptType, inner_string_text,
 };
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
@@ -88,25 +89,29 @@ impl HtmlSelfClosingElement {
     }
 }
 
+impl HtmlOpeningElement {
+    pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
+        self.attributes().iter().find_map(|attr| {
+            let attribute = attr.as_html_attribute()?;
+            let name = attribute.name().ok()?;
+            let name_token = name.value_token().ok()?;
+            if name_token
+                .text_trimmed()
+                .eq_ignore_ascii_case(name_to_lookup)
+            {
+                Some(attribute.clone())
+            } else {
+                None
+            }
+        })
+    }
+}
+
 impl HtmlElement {
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
         self.opening_element()
             .ok()?
-            .attributes()
-            .iter()
-            .find_map(|attr| {
-                let attribute = attr.as_html_attribute()?;
-                let name = attribute.name().ok()?;
-                let name_token = name.value_token().ok()?;
-                if name_token
-                    .text_trimmed()
-                    .eq_ignore_ascii_case(name_to_lookup)
-                {
-                    Some(attribute.clone())
-                } else {
-                    None
-                }
-            })
+            .find_attribute_by_name(name_to_lookup)
     }
 
     pub fn is_javascript_tag(&self) -> bool {
@@ -195,6 +200,11 @@ impl HtmlElement {
         self.is_script_tag() && self.has_attribute("lang", "ts")
     }
 
+    /// Returns `true` if the element is a `<script setup>` tag.
+    pub fn is_script_with_setup_attribute(&self) -> bool {
+        self.is_script_tag() && self.find_attribute_by_name("setup").is_some()
+    }
+
     /// Returns `true` if the element is a `<script lang="jsx">`
     pub fn is_jsx_lang(&self) -> bool {
         self.is_script_tag() && self.has_attribute("lang", "jsx")
@@ -222,6 +232,48 @@ impl HtmlTagName {
         self.value_token()
             .ok()
             .map(|token| token.token_text_trimmed())
+    }
+}
+
+declare_node_union! {
+    pub AnyHtmlTagElement = HtmlOpeningElement | HtmlSelfClosingElement
+}
+
+impl AnyHtmlTagElement {
+    pub fn name(&self) -> SyntaxResult<HtmlTagName> {
+        match self {
+            Self::HtmlOpeningElement(element) => element.name(),
+            Self::HtmlSelfClosingElement(element) => element.name(),
+        }
+    }
+
+    pub fn attributes(&self) -> HtmlAttributeList {
+        match self {
+            Self::HtmlOpeningElement(element) => element.attributes(),
+            Self::HtmlSelfClosingElement(element) => element.attributes(),
+        }
+    }
+
+    pub fn name_value_token(&self) -> SyntaxResult<HtmlSyntaxToken> {
+        self.name()?.value_token()
+    }
+
+    pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
+        match self {
+            Self::HtmlOpeningElement(element) => element.find_attribute_by_name(name_to_lookup),
+            Self::HtmlSelfClosingElement(element) => element.find_attribute_by_name(name_to_lookup),
+        }
+    }
+
+    pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
+        self.find_attribute_by_name(name_to_lookup)
+            .is_some_and(|attribute| {
+                attribute
+                    .initializer()
+                    .and_then(|init| init.value().ok())
+                    .and_then(|value| value.string_value())
+                    .is_none_or(|value| value != "false")
+            })
     }
 }
 

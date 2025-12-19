@@ -37,7 +37,8 @@ use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
-    EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
+    AnyJsModuleItem, EmbeddingKind, JsFileSource, JsLanguage, JsxAttribute, JsxAttributeList,
+    Language, LanguageVariant, TextRange, TextSize,
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
@@ -45,7 +46,7 @@ use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode};
+use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use either::Either;
@@ -1055,7 +1056,7 @@ impl Features {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
-                EmbeddingKind::Vue => self.vue.capabilities(),
+                EmbeddingKind::Vue { .. } => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
@@ -1095,56 +1096,89 @@ pub(crate) fn is_diagnostic_error(
     severity >= Severity::Error
 }
 
-/// Parse the "lang" attribute from the opening tag of the "\<script\>" block in Svelte or Vue files.
+#[derive(Default)]
+pub struct ParsedLangAndSetup {
+    language: Language,
+    variant: LanguageVariant,
+    setup: bool,
+}
+
+fn get_module_item_attributes(item: AnyJsModuleItem) -> Option<JsxAttributeList> {
+    let expression = item
+        .as_any_js_statement()?
+        .as_js_expression_statement()?
+        .expression()
+        .ok()?;
+    let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
+    let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
+    Some(opening_element.attributes())
+}
+
+fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
+    let attribute_value = attribute.initializer()?.value().ok()?;
+    let attribute_inner_string = attribute_value.as_jsx_string()?.inner_string_text().ok()?;
+    Some(attribute_inner_string)
+}
+
+/// Parse the "lang" and "setup" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
 /// This function will return the language based on the existence or the value of the "lang" attribute.
 /// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
 /// matched by regular expressions.
 ///
 // TODO: We should change the parser when HTMLish languages are supported.
-pub(crate) fn parse_lang_from_script_opening_tag(
+pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
     script_opening_tag: &str,
-) -> (Language, LanguageVariant) {
-    parse(
+) -> ParsedLangAndSetup {
+    let Some(tree) = parse(
         script_opening_tag,
         JsFileSource::jsx(),
         JsParserOptions::default(),
     )
-    .try_tree()
-    .and_then(|tree| {
-        tree.as_js_module()?.items().into_iter().find_map(|item| {
-            let expression = item
-                .as_any_js_statement()?
-                .as_js_expression_statement()?
-                .expression()
-                .ok()?;
-            let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
-            let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
-            let lang_attribute = opening_element.attributes().find_by_name("lang")?;
-            let attribute_value = lang_attribute.initializer()?.value().ok()?;
-            let attribute_inner_string =
-                attribute_value.as_jsx_string()?.inner_string_text().ok()?;
-            match attribute_inner_string.text() {
-                "ts" => Some((
-                    Language::TypeScript {
+    .try_tree() else {
+        return ParsedLangAndSetup::default();
+    };
+
+    let Some(js_module) = tree.as_js_module() else {
+        return ParsedLangAndSetup::default();
+    };
+
+    let mut lang_and_setup = ParsedLangAndSetup::default();
+    for item in js_module.items() {
+        let Some(attributes) = get_module_item_attributes(item) else {
+            continue;
+        };
+        if attributes.find_by_name("setup").is_some() {
+            lang_and_setup.setup = true;
+        }
+        if let Some(lang_attribute) = attributes.find_by_name("lang")
+            && let Some(lang_value) = get_attribute_value(&lang_attribute)
+        {
+            match lang_value.text() {
+                "ts" => {
+                    lang_and_setup.language = Language::TypeScript {
                         definition_file: false,
-                    },
-                    LanguageVariant::Standard,
-                )),
-                "tsx" => Some((
-                    Language::TypeScript {
+                    };
+                    lang_and_setup.variant = LanguageVariant::Standard;
+                }
+                "tsx" => {
+                    lang_and_setup.language = Language::TypeScript {
                         definition_file: false,
-                    },
-                    LanguageVariant::Jsx,
-                )),
-                "jsx" => Some((Language::JavaScript, LanguageVariant::Jsx)),
-                "js" => Some((Language::JavaScript, LanguageVariant::Standard)),
-                _ => None,
+                    };
+                    lang_and_setup.variant = LanguageVariant::Jsx;
+                }
+                "jsx" => {
+                    lang_and_setup.language = Language::JavaScript;
+                    lang_and_setup.variant = LanguageVariant::Jsx;
+                }
+                "js" => {
+                    lang_and_setup.language = Language::JavaScript;
+                    lang_and_setup.variant = LanguageVariant::Standard;
+                }
+                _ => {}
             }
-        })
-    })
-    .map_or((Language::JavaScript, LanguageVariant::Standard), |lang| {
-        lang
-    })
+        }
+    }
+    lang_and_setup
 }
 
 pub(crate) fn search(
