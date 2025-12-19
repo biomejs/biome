@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: templateLiteralSpace.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -27,6 +26,8 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
   i Unsafe fix: Sort the classes.
   
     1 1 │   <>
@@ -49,6 +50,8 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
       │ 	             ^^^^^^^^^^^^^^^^^
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -74,6 +77,8 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
   i Unsafe fix: Sort the classes.
   
     2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
@@ -97,6 +102,8 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
       │ 	             ^^^^^^^^^^^^^
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 │ </>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
@@ -122,6 +129,8 @@ templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     7 │ </>
     8 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
   i Unsafe fix: Sort the classes.
   
     4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
@@ -145,6 +154,8 @@ templateLiteralSpace.jsx:6:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
       │ 	                                                     ^^^^^^^^^
     7 │ </>
     8 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

@@ -20,6 +20,7 @@ The analyzer allows implementors to create **three different** types of rules:
       - [Naming Conventions for Rules](#naming-conventions-for-rules)
       - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
       - [Placement of New Rules](#placement-of-new-rules)
+    + [Mark a rule as a work in progress](#mark-a-rule-as-a-work-in-progress)
     + [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
     + [Coding Tips for Rules](#coding-tips-for-rules)
       - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
@@ -218,6 +219,26 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 > As a developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay out a plan and to split the work into multiple PRs.
 >
 > If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
+
+### Mark a rule as a work in progress
+
+Sometimes nursery rules aren't completed yet – missing use cases, code actions, etc. – and you might want to communicate that to your users.
+
+You can add `issue_number` to the rule macro, and Biome will:
+- Add a footnote to the diagnostic of the rule with a link to the issue, e.g. `https://github.com/biomejs/biome/issues/1111`
+- Add a note on the website, with a link to the issue.
+
+```rust
+declare_lint_rule! {
+    /// Docs
+    pub(crate) NoVar {
+        version: "next",
+        name: "noVar",
+        language: "js",
+        issue_number: Some("1111"),
+    }
+}
+```
 
 ### Creating and Implementing the Rule
 

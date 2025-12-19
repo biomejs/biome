@@ -20,6 +20,8 @@ issue_4855.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     2 │ <div class='top-0 absolute'>Hello</div>;
     3 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
   i Unsafe fix: Sort the classes.
   
     1   │ - <div·class="content-['']·absolute">Hello</div>;
@@ -39,6 +41,8 @@ issue_4855.jsx:2:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   > 2 │ <div class='top-0 absolute'>Hello</div>;
       │            ^^^^^^^^^^^^^^^^
     3 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

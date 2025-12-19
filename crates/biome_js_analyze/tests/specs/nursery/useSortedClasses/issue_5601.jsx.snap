@@ -37,6 +37,8 @@ issue_5601.jsx:11:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     12 │ 
     13 │ {
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
   i Unsafe fix: Sort the classes.
   
      9  9 │   	- with double quotes outside and single quotes inside */
@@ -59,6 +61,8 @@ issue_5601.jsx:17:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   > 17 │ <div class='flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center' />;
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_3394.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -22,6 +21,8 @@ issue_3394.jsx:3:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   > 3 │   <div class={`${variable}-bar    ${variable}`}></div>
       │                               ^^^^
     4 │ </>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   

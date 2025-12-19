@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: sorted.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -76,6 +75,8 @@ sorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
        │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │ 	<div class="py-4 text-black checked:visited:bg-yellow-300 hover:text-red-400 focus:bg-sky-100 group-first:text-yellow-400 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900" />
     27 │ 	<div class="group-target:font-bold group-[:visited]:text-red-400 group-aria-disabled:bg-red-50" />
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i Unsafe fix: Sort the classes.
   
