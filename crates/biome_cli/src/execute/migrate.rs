@@ -1,6 +1,6 @@
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
-use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
+use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::AnalysisFilter;
 use biome_configuration::Configuration;

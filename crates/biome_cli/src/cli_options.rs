@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 /// Global options applied to all commands
-#[derive(Debug, Clone, Bpaf)]
+#[derive(Debug, Default, Clone, Bpaf)]
 pub struct CliOptions {
     /// Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
     #[bpaf(long("colors"), argument("off|force"))]
