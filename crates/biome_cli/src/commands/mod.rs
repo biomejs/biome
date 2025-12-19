@@ -181,6 +181,10 @@ pub enum BiomeCommand {
         /// Also, if you have overrides configured and/or nested configurations,
         /// the path may determine the settings being applied.
         ///
+        /// If the path doesn't exist on disk (virtual path), `files.includes`
+        /// won't block stdin processing. If the path exists, `files.includes`
+        /// applies as usual.
+        ///
         /// Example:
         /// ```shell
         /// echo 'let a;' | biome check --stdin-file-path=file.js --write
@@ -287,6 +291,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to lint the code.
         ///
+        /// If the path doesn't exist on disk (virtual path), `files.includes`
+        /// won't block stdin processing. If the path exists, `files.includes`
+        /// applies as usual.
+        ///
         /// Example:
         /// ```shell
         /// echo 'let a;' | biome lint --stdin-file-path=file.js --write
@@ -344,6 +352,10 @@ pub enum BiomeCommand {
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
+        ///
+        /// If the path doesn't exist on disk (virtual path), `files.includes`
+        /// won't block stdin processing. If the path exists, `files.includes`
+        /// applies as usual.
         ///
         /// Example:
         /// ```shell
