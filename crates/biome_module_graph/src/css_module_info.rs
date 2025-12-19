@@ -43,15 +43,10 @@ impl CssModuleInfo {
 pub struct CssModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
-    /// Maps from the local imported name to a [JsImport] with the absolute path
+    /// Maps from the import specifier to a [CssImport] with the absolute path
     /// it resolves to. The resolved path may be looked up as key in the
     /// [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    ///
-    /// Note that re-exports may introduce additional dependencies, because they
-    /// import another module and immediately re-export from that module.
-    /// Re-exports are tracked as part of [Self::exports] and
-    /// [Self::blanket_reexports].
     pub imports: CssImports,
 }
 
