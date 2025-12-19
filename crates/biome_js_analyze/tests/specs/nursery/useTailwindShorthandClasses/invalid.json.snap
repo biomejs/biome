@@ -1,0 +1,220 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```jsx
+() => <div className="px-4 py-4"></div>;
+```
+
+# Diagnostics
+```
+invalid.json:1:22 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ () => <div className="px-4 py-4"></div>;
+      │                      ^^^^^^^^^^^
+  
+  i Longhand utility px-4 used here.
+  
+  > 1 │ () => <div className="px-4 py-4"></div>;
+      │                       ^^^^
+  
+  i Longhand utility py-4 used here.
+  
+  > 1 │ () => <div className="px-4 py-4"></div>;
+      │                            ^^^^
+  
+  i You can replace them with the shorthand p-4 to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+  - ()·=>·<div·className="px-4·py-4"></div>;
+  + ()·=>·<div·className="p-4"></div>;
+  
+
+```
+
+# Input
+```jsx
+let div = <div class="ml-4 mr-4"></div>;
+```
+
+# Diagnostics
+```
+invalid.json:1:22 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ let div = <div class="ml-4 mr-4"></div>;
+      │                      ^^^^^^^^^^^
+  
+  i Longhand utility ml-4 used here.
+  
+  > 1 │ let div = <div class="ml-4 mr-4"></div>;
+      │                       ^^^^
+  
+  i Longhand utility mr-4 used here.
+  
+  > 1 │ let div = <div class="ml-4 mr-4"></div>;
+      │                            ^^^^
+  
+  i You can replace them with the shorthand mx-4 to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+  - let·div·=·<div·class="ml-4·mr-4"></div>;
+  + let·div·=·<div·class="mx-4"></div>;
+  
+
+```
+
+# Input
+```jsx
+let foo = cn("w-4 h-4 pt-1 pb-1");
+```
+
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │              ^^^^^^^^^^^^^^^^^^^
+  
+  i Longhand utility w-4 used here.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │               ^^^
+  
+  i Longhand utility h-4 used here.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │                   ^^^
+  
+  i You can replace them with the shorthand size-4 to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+  - let·foo·=·cn("w-4·h-4·pt-1·pb-1");
+  + let·foo·=·cn("size-4·pt-1·pb-1");
+  
+
+```
+
+```
+invalid.json:1:14 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │              ^^^^^^^^^^^^^^^^^^^
+  
+  i Longhand utility pt-1 used here.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │                       ^^^^
+  
+  i Longhand utility pb-1 used here.
+  
+  > 1 │ let foo = cn("w-4 h-4 pt-1 pb-1");
+      │                            ^^^^
+  
+  i You can replace them with the shorthand py-1 to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+  - let·foo·=·cn("w-4·h-4·pt-1·pb-1");
+  + let·foo·=·cn("w-4·h-4·py-1");
+  
+
+```
+
+# Input
+```jsx
+let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+```
+
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Longhand utility rounded-tl used here.
+  
+  > 1 │ let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+      │               ^^^^^^^^^^
+  
+  i Longhand utility rounded-tr used here.
+  
+  > 1 │ let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+      │                          ^^^^^^^^^^
+  
+  i Longhand utility rounded-bl used here.
+  
+  > 1 │ let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+      │                                     ^^^^^^^^^^
+  
+  i Longhand utility rounded-br used here.
+  
+  > 1 │ let foo = tw("rounded-tl rounded-tr rounded-bl rounded-br");
+      │                                                ^^^^^^^^^^
+  
+  i You can replace them with the shorthand rounded to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+    1 │ let·foo·=·tw("rounded-tl·rounded-tr·rounded-bl·rounded-br");
+      │                      ------------------------------------   
+
+```
+
+# Input
+```jsx
+const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+```
+
+# Diagnostics
+```
+invalid.json:1:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+      │                  ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Longhand utility pl-5 used here.
+  
+  > 1 │ const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+      │                             ^^^^
+  
+  i Longhand utility pr-5 used here.
+  
+  > 1 │ const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+      │                                  ^^^^
+  
+  i Longhand utility pt-5 used here.
+  
+  > 1 │ const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+      │                   ^^^^
+  
+  i Longhand utility pb-5 used here.
+  
+  > 1 │ const bar = clsx("pt-5 pb-5 pl-5 pr-5");
+      │                        ^^^^
+  
+  i You can replace them with the shorthand p-5 to reduce duplication and improve readability.
+  
+  i Safe fix: Replace longhand Tailwind utilities with the shorthand.
+  
+  - const·bar·=·clsx("pt-5·pb-5·pl-5·pr-5");
+  + const·bar·=·clsx("p-5");
+  
+
+```

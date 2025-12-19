@@ -33,14 +33,37 @@ pub use bench_case::BenchCase;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 
-pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
+pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<(String, JsFileSource)>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());
-        let scripts: Vec<String> = serde_json::from_reader(input_code).ok()?;
+        let scripts: Vec<JsJsonCase> = serde_json::from_reader(input_code).ok()?;
+        let scripts = scripts
+            .into_iter()
+            .map(|case| match case {
+                JsJsonCase::String(code) => (code, JsFileSource::js_script()),
+                JsJsonCase::CaseWithLanguage { code, lang } => {
+                    let file_source = match lang.as_str() {
+                        "js" => JsFileSource::js_script(),
+                        "jsx" => JsFileSource::jsx(),
+                        "ts" => JsFileSource::ts(),
+                        "tsx" => JsFileSource::tsx(),
+                        _ => todo!("unknown language for json cases"),
+                    };
+                    (code, file_source)
+                }
+            })
+            .collect();
         Some(scripts)
     } else {
         None
     }
+}
+
+#[derive(serde::Deserialize)]
+#[serde(untagged)]
+enum JsJsonCase {
+    String(String),
+    CaseWithLanguage { code: String, lang: String },
 }
 
 pub fn create_analyzer_options<L: ServiceLanguage>(
