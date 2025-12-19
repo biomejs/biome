@@ -207,6 +207,7 @@ impl Projects {
         features: FeatureName,
         language: DocumentFileSource,
         capabilities: &Capabilities,
+        ignore_includes: bool,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
         let project_data = data
@@ -231,7 +232,27 @@ impl Projects {
             .is_some_and(|dir_path| dir_path == project_data.path)
         {
             // Never ignore Biome's top-level config file
-        } else if self.is_ignored(fs, project_key, path, features, IgnoreKind::Ancestors) {
+        } else if {
+            let is_ignored_by_top_level_config = if ignore_includes {
+                project_data
+                    .root_settings
+                    .vcs_settings
+                    .is_ignored(path, Some(project_data.path.as_path()))
+            } else {
+                is_ignored_by_top_level_config(fs, project_data, path, IgnoreKind::Ancestors)
+            };
+
+            // If there are specific features enabled, but all of them ignore the
+            // path, then we treat the path as ignored too.
+            let is_ignored_by_features = !features.is_empty()
+                && features.iter().all(|feature| {
+                    project_data
+                        .root_settings
+                        .is_path_ignored_for_feature(path, feature)
+                });
+
+            is_ignored_by_top_level_config || is_ignored_by_features
+        } {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in features.iter() {

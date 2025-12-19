@@ -78,6 +78,7 @@ pub(crate) fn code_actions(
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        ignore_includes: false,
     })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -315,6 +316,7 @@ fn fix_all(
             .with_linter()
             .with_assist()
             .build(),
+        ignore_includes: false,
     })?;
     let should_format = file_features.supports_format();
 

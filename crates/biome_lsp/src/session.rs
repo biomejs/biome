@@ -422,6 +422,7 @@ impl Session {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
+            ignore_includes: false,
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
