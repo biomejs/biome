@@ -2221,34 +2221,7 @@ fn resolves_css_imports_correctly() {
         .expect("package.json must parse")
     });
 
-    // project_layout.insert_node_manifest(format!("{fixtures_path}/shared").into(), {
-    //     let path = Utf8PathBuf::from(format!("{fixtures_path}/shared/package.json"));
-    //     deserialize_from_json_str::<PackageJson>(
-    //         &fs.read_file_from_path(&path)
-    //             .expect("package.json must be readable"),
-    //         JsonParserOptions::default(),
-    //         "package.json",
-    //     )
-    //         .into_deserialized()
-    //         .expect("package.json must parse")
-    // });
 
-    // project_layout.insert_node_manifest(
-    //     format!("{fixtures_path}/frontend/node_modules/shared").into(),
-    //     {
-    //         let path = Utf8PathBuf::from(format!(
-    //             "{fixtures_path}/frontend/node_modules/shared/package.json"
-    //         ));
-    //         deserialize_from_json_str::<PackageJson>(
-    //             &fs.read_file_from_path(&path)
-    //                 .expect("package.json must be readable"),
-    //             JsonParserOptions::default(),
-    //             "package.json",
-    //         )
-    //             .into_deserialized()
-    //             .expect("package.json must parse")
-    //     },
-    // );
 
     let added_paths = [
         BiomePath::new(format!("{fixtures_path}/css/index.css")),

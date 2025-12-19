@@ -180,9 +180,8 @@ impl ModuleGraph {
 
     pub fn update_graph_for_removed_paths(&self, removed_paths: &[&BiomePath]) {
         let modules = self.data.pin();
-        // Make sure all directories are registered for the added/updated paths.
+        // Clean up removed paths from the module graph and path info cache.
         let path_info = self.path_info.pin();
-
         // Clean up removed paths.
         for removed_path in removed_paths {
             modules.remove(removed_path.as_path());

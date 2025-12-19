@@ -865,7 +865,7 @@ impl SendNode {
         N: AstNode,
         N::Language: 'static,
     {
-        self.clone().into_node().map(|node| N::unwrap_cast(node))
+        self.into_node().map(|node| N::unwrap_cast(node))
     }
 
     /// Downcasts this node to a language-specific root node.
