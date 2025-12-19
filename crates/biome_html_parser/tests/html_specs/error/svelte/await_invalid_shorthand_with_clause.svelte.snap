@@ -1,0 +1,215 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```svelte
+{#await promise then value}
+  <p>{value}</p>
+{:then anotherValue}
+  <p>{anotherValue}</p>
+{/await}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@7..16 " promise " [] [],
+                },
+                then_clause: SvelteAwaitThenClause {
+                    then_token: THEN_KW@16..20 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@20..26 " value" [] [],
+                    },
+                },
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@26..27 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@31..32 "p" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@32..33 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlSingleTextExpression {
+                                l_curly_token: L_CURLY@33..34 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@34..39 "value" [] [],
+                                },
+                                r_curly_token: R_CURLY@39..40 "}" [] [],
+                            },
+                        ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@40..41 "<" [] [],
+                            slash_token: SLASH@41..42 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@42..43 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@43..44 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            clauses: SvelteAwaitClausesList [
+                SvelteAwaitThenBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@44..47 "{:" [Newline("\n")] [],
+                    then_token: THEN_KW@47..51 "then" [] [],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@51..64 " anotherValue" [] [],
+                    },
+                    r_curly_token: R_CURLY@64..65 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@69..70 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@70..71 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlSingleTextExpression {
+                                    l_curly_token: L_CURLY@71..72 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@72..84 "anotherValue" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@84..85 "}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@85..86 "<" [] [],
+                                slash_token: SLASH@86..87 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@87..88 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@88..89 ">" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@89..92 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@92..97 "await" [] [],
+                r_curly_token: R_CURLY@97..98 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@98..99 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..99
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..98
+    0: SVELTE_AWAIT_BLOCK@0..98
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..44
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: AWAIT_KW@2..7 "await" [] []
+        2: HTML_TEXT_EXPRESSION@7..16
+          0: HTML_LITERAL@7..16 " promise " [] []
+        3: SVELTE_AWAIT_THEN_CLAUSE@16..26
+          0: THEN_KW@16..20 "then" [] []
+          1: HTML_TEXT_EXPRESSION@20..26
+            0: HTML_LITERAL@20..26 " value" [] []
+        4: (empty)
+        5: R_CURLY@26..27 "}" [] []
+        6: HTML_ELEMENT_LIST@27..44
+          0: HTML_ELEMENT@27..44
+            0: HTML_OPENING_ELEMENT@27..33
+              0: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@31..32
+                0: HTML_LITERAL@31..32 "p" [] []
+              2: HTML_ATTRIBUTE_LIST@32..32
+              3: R_ANGLE@32..33 ">" [] []
+            1: HTML_ELEMENT_LIST@33..40
+              0: HTML_SINGLE_TEXT_EXPRESSION@33..40
+                0: L_CURLY@33..34 "{" [] []
+                1: HTML_TEXT_EXPRESSION@34..39
+                  0: HTML_LITERAL@34..39 "value" [] []
+                2: R_CURLY@39..40 "}" [] []
+            2: HTML_CLOSING_ELEMENT@40..44
+              0: L_ANGLE@40..41 "<" [] []
+              1: SLASH@41..42 "/" [] []
+              2: HTML_TAG_NAME@42..43
+                0: HTML_LITERAL@42..43 "p" [] []
+              3: R_ANGLE@43..44 ">" [] []
+      1: SVELTE_AWAIT_CLAUSES_LIST@44..89
+        0: SVELTE_AWAIT_THEN_BLOCK@44..89
+          0: SV_CURLY_COLON@44..47 "{:" [Newline("\n")] []
+          1: THEN_KW@47..51 "then" [] []
+          2: HTML_TEXT_EXPRESSION@51..64
+            0: HTML_LITERAL@51..64 " anotherValue" [] []
+          3: R_CURLY@64..65 "}" [] []
+          4: HTML_ELEMENT_LIST@65..89
+            0: HTML_ELEMENT@65..89
+              0: HTML_OPENING_ELEMENT@65..71
+                0: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@69..70
+                  0: HTML_LITERAL@69..70 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@70..70
+                3: R_ANGLE@70..71 ">" [] []
+              1: HTML_ELEMENT_LIST@71..85
+                0: HTML_SINGLE_TEXT_EXPRESSION@71..85
+                  0: L_CURLY@71..72 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@72..84
+                    0: HTML_LITERAL@72..84 "anotherValue" [] []
+                  2: R_CURLY@84..85 "}" [] []
+              2: HTML_CLOSING_ELEMENT@85..89
+                0: L_ANGLE@85..86 "<" [] []
+                1: SLASH@86..87 "/" [] []
+                2: HTML_TAG_NAME@87..88
+                  0: HTML_LITERAL@87..88 "p" [] []
+                3: R_ANGLE@88..89 ">" [] []
+      2: SVELTE_AWAIT_CLOSING_BLOCK@89..98
+        0: SV_CURLY_SLASH@89..92 "{/" [Newline("\n")] []
+        1: AWAIT_KW@92..97 "await" [] []
+        2: R_CURLY@97..98 "}" [] []
+  4: EOF@98..99 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+await_invalid_shorthand_with_clause.svelte:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {:then} cannot appear more than once within a block.
+  
+    3 │ {:then anotherValue}
+    4 │   <p>{anotherValue}</p>
+  > 5 │ {/await}
+      │ ^^
+    6 │ 
+  
+  i This is where the block started.
+  
+  > 1 │ {#await promise then value}
+      │                 ^^^^^^^^^^
+    2 │   <p>{value}</p>
+    3 │ {:then anotherValue}
+  
+```

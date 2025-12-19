@@ -90,6 +90,8 @@ pub(crate) enum RestrictedExpressionStopAt {
     OpeningParenOrComma,
     /// Stops at `)`
     ClosingParen,
+    /// Stops at `then` or `catch` keywords
+    ThenOrCatch,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

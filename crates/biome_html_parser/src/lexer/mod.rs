@@ -5,9 +5,9 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::{
-    AS_KW, ATTACH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW, ELSE_KW, EOF, ERROR_TOKEN,
-    HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW, NEWLINE, RENDER_KW,
-    TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    AS_KW, ATTACH_KW, AWAIT_KW, CATCH_KW, COMMENT, CONST_KW, DEBUG_KW, DOCTYPE_KW, EACH_KW,
+    ELSE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, IDENT, IF_KW, KEY_KW,
+    NEWLINE, RENDER_KW, SNIPPET_KW, THEN_KW, TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -345,7 +345,6 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
-
         while let Some(current) = self.current_byte() {
             match current {
                 b'}' => {
@@ -368,6 +367,7 @@ impl<'src> HtmlLexer<'src> {
                             current == b'(' || current == b','
                         }
                         RestrictedExpressionStopAt::ClosingParen => current == b')',
+                        RestrictedExpressionStopAt::ThenOrCatch => false,
                     };
                     if should_stop {
                         break;
@@ -377,10 +377,17 @@ impl<'src> HtmlLexer<'src> {
                 _ if brackets_stack == 0 && is_at_start_identifier(current) => {
                     // Check if we're at a stop keyword
                     let checkpoint_pos = self.position;
+                    let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
                         // Check if this keyword is in our stop list
                         let should_stop = match kind {
-                            RestrictedExpressionStopAt::AsOrComma => keyword_kind == AS_KW,
+                            RestrictedExpressionStopAt::AsOrComma => {
+                                keyword_kind == AS_KW && prev_byte == Some(b' ')
+                            }
+                            RestrictedExpressionStopAt::ThenOrCatch => {
+                                (keyword_kind == THEN_KW || keyword_kind == CATCH_KW)
+                                    && prev_byte == Some(b' ')
+                            }
                             RestrictedExpressionStopAt::OpeningParenOrComma => false,
                             RestrictedExpressionStopAt::ClosingParen => false,
                         };
@@ -559,6 +566,10 @@ impl<'src> HtmlLexer<'src> {
             b"else" => ELSE_KW,
             b"each" => EACH_KW,
             b"as" => AS_KW,
+            b"await" => AWAIT_KW,
+            b"then" => THEN_KW,
+            b"catch" => CATCH_KW,
+            b"snippet" => SNIPPET_KW,
             _ => {
                 self.position = starting_position;
                 return None;

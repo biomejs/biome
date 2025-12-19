@@ -8,6 +8,7 @@ impl FormatRule<AnySvelteBlock> for FormatAnySvelteBlock {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnySvelteBlock, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnySvelteBlock::SvelteAwaitBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteBogusBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteConstBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteDebugBlock(node) => node.format().fmt(f),
@@ -16,6 +17,7 @@ impl FormatRule<AnySvelteBlock> for FormatAnySvelteBlock {
             AnySvelteBlock::SvelteIfBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteKeyBlock(node) => node.format().fmt(f),
             AnySvelteBlock::SvelteRenderBlock(node) => node.format().fmt(f),
+            AnySvelteBlock::SvelteSnippetBlock(node) => node.format().fmt(f),
         }
     }
 }
