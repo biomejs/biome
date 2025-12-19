@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsExport, JsFileSource, JsForStatement,
     JsFunctionExpression, JsIdentifierExpression, JsImport, JsModule, JsModuleItemList,
     JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule,
-    TsInferType, TsInterfaceDeclaration, TsModuleDeclaration,
+    TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -413,6 +413,20 @@ impl Rule for NoUnusedVariables {
 /// Returns `true` if the file is considered a script
 /// and is an interface or namespace
 fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
+    // Verify this binding is from an interface or namespace
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+
+    let is_interface_or_namespace = matches!(
+        decl,
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+            | AnyJsBindingDeclaration::TsModuleDeclaration(_)
+    );
+    if !is_interface_or_namespace {
+        return false;
+    }
+
     binding
         .syntax()
         .ancestors()
@@ -420,26 +434,14 @@ fn is_script_declaration(binding: &AnyJsIdentifierBinding) -> bool {
         .is_some_and(|module_list| {
             // Only check top-level declarations
             let is_top_level = module_list.parent::<JsModule>().is_some();
-
             if !is_top_level {
                 return false;
             }
 
-            // Presence of imports/exports means its a module
-            let has_import_or_export = (&module_list).into_iter().any(|item| {
+            // If there are imports/exports, it's a module, not a script
+            !module_list.into_iter().any(|item| {
                 let kind = item.syntax().kind();
                 JsImport::can_cast(kind) || JsExport::can_cast(kind)
-            });
-
-            if has_import_or_export {
-                return false;
-            }
-
-            // We can't determine if an interface/namespace augments a global just from syntax
-            // so all of them are treated the same
-            module_list.into_iter().any(|item| {
-                let kind = item.syntax().kind();
-                TsInterfaceDeclaration::can_cast(kind) || TsModuleDeclaration::can_cast(kind)
             })
         })
 }
