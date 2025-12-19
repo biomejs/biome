@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Improved that diagnostics of the rules `useSortedClasses` and `noUnnecessararyConditions`. Now the diagnostics provide a message that these rules are a work in progress, with a link to the relative GitHub issue.
+Improved the diagnostics of the rules `useSortedClasses` and `noUnnecessaryConditions`. The diagnostics now state that these rules are a work in progress and link to the relevant GitHub issue.

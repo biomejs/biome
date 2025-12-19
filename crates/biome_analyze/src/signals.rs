@@ -376,11 +376,12 @@ where
 
         R::diagnostic(&ctx, &self.state).map(|mut diagnostic| {
             diagnostic.severity = ctx.metadata().severity;
+
             if let Some(issue_number) = ctx.metadata().issue_number {
                 let url = format!("https://github.com/biomejs/biome/issues/{}", issue_number);
-                diagnostic = diagnostic.note(markup!{
-                   "This rule is still being actively worked on, so it might misses features that still need. Head to the issue "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or file possible bugs."
-                });
+                diagnostic = diagnostic.note(markup! {
+                         "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
+                     });
             }
             AnalyzerDiagnostic::from(diagnostic)
         })

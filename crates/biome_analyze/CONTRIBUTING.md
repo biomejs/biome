@@ -225,14 +225,14 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 Sometimes nursery rules aren't completed yet – missing use cases, code actions, etc. – and you might want to communicate that to your users.
 
 You can add `issue_number` to the rule macro, and Biome will:
-- Add a footnote to the diagnostic of the rule with a link to the issue e.g. `https://github.com/biomejs/biome/1111`
+- Add a footnote to the diagnostic of the rule with a link to the issue, e.g. `https://github.com/biomejs/biome/issues/1111`
 - Add a note on the website, with a link to the issue.
 
 ```rust
 declare_lint_rule! {
     /// Docs
     pub(crate) NoVar {
-        version: "1.0.0",
+        version: "next",
         name: "noVar",
         language: "js",
         issue_number: Some("1111"),
