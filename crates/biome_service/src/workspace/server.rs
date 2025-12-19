@@ -888,7 +888,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match update_kind {
-                UpdateKind::AddedOrChanged(_, root) => {
+                UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout.insert_serialized_turbo_json(
                         package_path,
                         root,
