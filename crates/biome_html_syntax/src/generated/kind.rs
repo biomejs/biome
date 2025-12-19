@@ -111,6 +111,7 @@ pub enum HtmlSyntaxKind {
     SVELTE_AWAIT_BLOCK,
     SVELTE_AWAIT_OPENING_BLOCK,
     SVELTE_AWAIT_THEN_BLOCK,
+    SVELTE_AWAIT_CLAUSES_LIST,
     SVELTE_AWAIT_CATCH_BLOCK,
     SVELTE_AWAIT_CLOSING_BLOCK,
     SVELTE_AWAIT_THEN_CLAUSE,
@@ -181,6 +182,7 @@ impl HtmlSyntaxKind {
                 | HTML_ATTRIBUTE_LIST
                 | SVELTE_BINDING_LIST
                 | SVELTE_ELSE_IF_CLAUSE_LIST
+                | SVELTE_AWAIT_CLAUSES_LIST
                 | VUE_MODIFIER_LIST
         )
     }

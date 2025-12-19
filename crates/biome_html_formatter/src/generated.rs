@@ -2214,6 +2214,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElementList {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteAwaitClausesList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteAwaitClausesList,
+        crate::svelte::lists::await_clauses_list::FormatSvelteAwaitClausesList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::lists::await_clauses_list::FormatSvelteAwaitClausesList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteAwaitClausesList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteAwaitClausesList,
+        crate::svelte::lists::await_clauses_list::FormatSvelteAwaitClausesList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::lists::await_clauses_list::FormatSvelteAwaitClausesList::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -2728,6 +2753,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTextExpression 
         FormatOwnedWithRule::new(
             self,
             crate::html::any::text_expression::FormatAnyHtmlTextExpression::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteAwaitClauses {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnySvelteAwaitClauses,
+        crate::svelte::any::await_clauses::FormatAnySvelteAwaitClauses,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::any::await_clauses::FormatAnySvelteAwaitClauses::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteAwaitClauses {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnySvelteAwaitClauses,
+        crate::svelte::any::await_clauses::FormatAnySvelteAwaitClauses,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::any::await_clauses::FormatAnySvelteAwaitClauses::default(),
         )
     }
 }

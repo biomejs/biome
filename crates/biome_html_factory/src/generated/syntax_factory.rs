@@ -658,7 +658,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             SVELTE_AWAIT_BLOCK => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && SvelteAwaitOpeningBlock::can_cast(element.kind())
@@ -668,14 +668,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && SvelteAwaitThenBlock::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && SvelteAwaitCatchBlock::can_cast(element.kind())
+                    && SvelteAwaitClausesList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -2041,6 +2034,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             HTML_ELEMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlElement::can_cast)
+            }
+            SVELTE_AWAIT_CLAUSES_LIST => {
+                Self::make_node_list_syntax(kind, children, AnySvelteAwaitClauses::can_cast)
             }
             SVELTE_BINDING_LIST => Self::make_separated_list_syntax(
                 kind,

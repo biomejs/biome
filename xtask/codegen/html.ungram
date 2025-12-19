@@ -375,8 +375,7 @@ SvelteEachClosingBlock =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SvelteAwaitBlock =
 	opening_block: SvelteAwaitOpeningBlock
-	then_block: SvelteAwaitThenBlock?
-	catch_block: SvelteAwaitCatchBlock?
+	clauses: SvelteAwaitClausesList
 	closing_block: SvelteAwaitClosingBlock
 
 
@@ -390,6 +389,13 @@ SvelteAwaitOpeningBlock =
 	catch_clause: SvelteAwaitCatchClause?
 	'}'
 	children: HtmlElementList
+
+SvelteAwaitClausesList = AnySvelteAwaitClauses*
+
+AnySvelteAwaitClauses =
+	SvelteAwaitThenBlock
+	| SvelteAwaitCatchBlock
+	| SvelteBogusBlock
 
 // {#await ... then value}
 //             ^^^^^^^^^^

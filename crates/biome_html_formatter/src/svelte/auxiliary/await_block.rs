@@ -8,16 +8,14 @@ impl FormatNodeRule<SvelteAwaitBlock> for FormatSvelteAwaitBlock {
         let SvelteAwaitBlockFields {
             opening_block,
             closing_block,
-            catch_block,
-            then_block,
+            clauses,
         } = node.as_fields();
 
         write!(
             f,
             [
                 opening_block.format(),
-                then_block.format(),
-                catch_block.format(),
+                clauses.format(),
                 closing_block.format(),
             ]
         )

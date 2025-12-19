@@ -365,43 +365,17 @@ pub fn svelte_attach_attribute(
 }
 pub fn svelte_await_block(
     opening_block: SvelteAwaitOpeningBlock,
+    clauses: SvelteAwaitClausesList,
     closing_block: SvelteAwaitClosingBlock,
-) -> SvelteAwaitBlockBuilder {
-    SvelteAwaitBlockBuilder {
-        opening_block,
-        closing_block,
-        then_block: None,
-        catch_block: None,
-    }
-}
-pub struct SvelteAwaitBlockBuilder {
-    opening_block: SvelteAwaitOpeningBlock,
-    closing_block: SvelteAwaitClosingBlock,
-    then_block: Option<SvelteAwaitThenBlock>,
-    catch_block: Option<SvelteAwaitCatchBlock>,
-}
-impl SvelteAwaitBlockBuilder {
-    pub fn with_then_block(mut self, then_block: SvelteAwaitThenBlock) -> Self {
-        self.then_block = Some(then_block);
-        self
-    }
-    pub fn with_catch_block(mut self, catch_block: SvelteAwaitCatchBlock) -> Self {
-        self.catch_block = Some(catch_block);
-        self
-    }
-    pub fn build(self) -> SvelteAwaitBlock {
-        SvelteAwaitBlock::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::SVELTE_AWAIT_BLOCK,
-            [
-                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
-                self.then_block
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.catch_block
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.closing_block.into_syntax())),
-            ],
-        ))
-    }
+) -> SvelteAwaitBlock {
+    SvelteAwaitBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_BLOCK,
+        [
+            Some(SyntaxElement::Node(opening_block.into_syntax())),
+            Some(SyntaxElement::Node(clauses.into_syntax())),
+            Some(SyntaxElement::Node(closing_block.into_syntax())),
+        ],
+    ))
 }
 pub fn svelte_await_catch_block(
     sv_curly_colon_token: SyntaxToken,
@@ -1165,6 +1139,18 @@ where
 {
     HtmlElementList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ELEMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_await_clauses_list<I>(items: I) -> SvelteAwaitClausesList
+where
+    I: IntoIterator<Item = AnySvelteAwaitClauses>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteAwaitClausesList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_AWAIT_CLAUSES_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

@@ -61,35 +61,39 @@ HtmlRoot {
                 },
                 HtmlBogus {
                     items: [
-                        SV_CURLY_COLON@36..39 "{:" [Newline("\n")] [],
-                        THEN_KW@39..43 "then" [] [],
-                        HTML_LITERAL@43..43 "" [] [],
-                        R_CURLY@43..44 "}" [] [],
-                        HtmlElementList [
-                            HtmlElement {
-                                opening_element: HtmlOpeningElement {
-                                    l_angle_token: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@48..49 "p" [] [],
-                                    },
-                                    attributes: HtmlAttributeList [],
-                                    r_angle_token: R_ANGLE@49..50 ">" [] [],
-                                },
-                                children: HtmlElementList [
-                                    HtmlContent {
-                                        value_token: HTML_LITERAL@50..55 "Done!" [] [],
+                        HtmlBogus {
+                            items: [
+                                SV_CURLY_COLON@36..39 "{:" [Newline("\n")] [],
+                                THEN_KW@39..43 "then" [] [],
+                                HTML_LITERAL@43..43 "" [] [],
+                                R_CURLY@43..44 "}" [] [],
+                                HtmlElementList [
+                                    HtmlElement {
+                                        opening_element: HtmlOpeningElement {
+                                            l_angle_token: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] [],
+                                            name: HtmlTagName {
+                                                value_token: HTML_LITERAL@48..49 "p" [] [],
+                                            },
+                                            attributes: HtmlAttributeList [],
+                                            r_angle_token: R_ANGLE@49..50 ">" [] [],
+                                        },
+                                        children: HtmlElementList [
+                                            HtmlContent {
+                                                value_token: HTML_LITERAL@50..55 "Done!" [] [],
+                                            },
+                                        ],
+                                        closing_element: HtmlClosingElement {
+                                            l_angle_token: L_ANGLE@55..56 "<" [] [],
+                                            slash_token: SLASH@56..57 "/" [] [],
+                                            name: HtmlTagName {
+                                                value_token: HTML_LITERAL@57..58 "p" [] [],
+                                            },
+                                            r_angle_token: R_ANGLE@58..59 ">" [] [],
+                                        },
                                     },
                                 ],
-                                closing_element: HtmlClosingElement {
-                                    l_angle_token: L_ANGLE@55..56 "<" [] [],
-                                    slash_token: SLASH@56..57 "/" [] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@57..58 "p" [] [],
-                                    },
-                                    r_angle_token: R_ANGLE@58..59 ">" [] [],
-                                },
-                            },
-                        ],
+                            ],
+                        },
                     ],
                 },
                 SvelteAwaitClosingBlock {
@@ -139,27 +143,28 @@ HtmlRoot {
                 0: HTML_LITERAL@34..35 "p" [] []
               3: R_ANGLE@35..36 ">" [] []
       1: HTML_BOGUS@36..59
-        0: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] []
-        1: THEN_KW@39..43 "then" [] []
-        2: HTML_LITERAL@43..43 "" [] []
-        3: R_CURLY@43..44 "}" [] []
-        4: HTML_ELEMENT_LIST@44..59
-          0: HTML_ELEMENT@44..59
-            0: HTML_OPENING_ELEMENT@44..50
-              0: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] []
-              1: HTML_TAG_NAME@48..49
-                0: HTML_LITERAL@48..49 "p" [] []
-              2: HTML_ATTRIBUTE_LIST@49..49
-              3: R_ANGLE@49..50 ">" [] []
-            1: HTML_ELEMENT_LIST@50..55
-              0: HTML_CONTENT@50..55
-                0: HTML_LITERAL@50..55 "Done!" [] []
-            2: HTML_CLOSING_ELEMENT@55..59
-              0: L_ANGLE@55..56 "<" [] []
-              1: SLASH@56..57 "/" [] []
-              2: HTML_TAG_NAME@57..58
-                0: HTML_LITERAL@57..58 "p" [] []
-              3: R_ANGLE@58..59 ">" [] []
+        0: HTML_BOGUS@36..59
+          0: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] []
+          1: THEN_KW@39..43 "then" [] []
+          2: HTML_LITERAL@43..43 "" [] []
+          3: R_CURLY@43..44 "}" [] []
+          4: HTML_ELEMENT_LIST@44..59
+            0: HTML_ELEMENT@44..59
+              0: HTML_OPENING_ELEMENT@44..50
+                0: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@48..49
+                  0: HTML_LITERAL@48..49 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@49..49
+                3: R_ANGLE@49..50 ">" [] []
+              1: HTML_ELEMENT_LIST@50..55
+                0: HTML_CONTENT@50..55
+                  0: HTML_LITERAL@50..55 "Done!" [] []
+              2: HTML_CLOSING_ELEMENT@55..59
+                0: L_ANGLE@55..56 "<" [] []
+                1: SLASH@56..57 "/" [] []
+                2: HTML_TAG_NAME@57..58
+                  0: HTML_LITERAL@57..58 "p" [] []
+                3: R_ANGLE@58..59 ">" [] []
       2: SVELTE_AWAIT_CLOSING_BLOCK@59..68
         0: SV_CURLY_SLASH@59..62 "{/" [Newline("\n")] []
         1: AWAIT_KW@62..67 "await" [] []

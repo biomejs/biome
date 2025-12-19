@@ -56,8 +56,7 @@ HtmlRoot {
                     },
                 ],
             },
-            then_block: missing (optional),
-            catch_block: missing (optional),
+            clauses: SvelteAwaitClausesList [],
             closing_block: SvelteAwaitClosingBlock {
                 sv_curly_slash_token: SV_CURLY_SLASH@36..39 "{/" [Newline("\n")] [],
                 await_token: AWAIT_KW@39..44 "await" [] [],
@@ -103,9 +102,8 @@ HtmlRoot {
               2: HTML_TAG_NAME@34..35
                 0: HTML_LITERAL@34..35 "p" [] []
               3: R_ANGLE@35..36 ">" [] []
-      1: (empty)
-      2: (empty)
-      3: SVELTE_AWAIT_CLOSING_BLOCK@36..45
+      1: SVELTE_AWAIT_CLAUSES_LIST@36..36
+      2: SVELTE_AWAIT_CLOSING_BLOCK@36..45
         0: SV_CURLY_SLASH@36..39 "{/" [Newline("\n")] []
         1: AWAIT_KW@39..44 "await" [] []
         2: R_CURLY@44..45 "}" [] []
