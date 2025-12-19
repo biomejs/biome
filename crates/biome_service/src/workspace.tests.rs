@@ -382,7 +382,11 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                 module_graph
                     .data
                     .get("/project/a.ts")
-                    .map(|module_info| module_info.static_import_paths.clone()),
+                    .map(|module_info| module_info
+                        .as_js_module_info()
+                        .unwrap()
+                        .static_import_paths
+                        .clone()),
                 Some(BTreeMap::from([(
                     "./b.ts".to_string(),
                     "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),

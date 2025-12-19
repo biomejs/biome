@@ -7956,8 +7956,11 @@ export interface GetSemanticModelParams {
 }
 export type GetModuleGraphParams = {};
 export interface GetModuleGraphResult {
-	data: Record<string, SerializedJsModuleInfo>;
+	data: Record<string, SerializedModuleInfo>;
 }
+export type SerializedModuleInfo =
+	| { js: SerializedJsModuleInfo }
+	| { css: SerializedCssModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -7990,6 +7993,14 @@ specifier itself.
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	staticImports: Record<string, string>;
+}
+export interface SerializedCssModuleInfo {
+	/**
+	* Map of all static imports found in the module.
+
+Maps from the local imported name to the absolute path it resolves to. 
+	 */
+	imports: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
