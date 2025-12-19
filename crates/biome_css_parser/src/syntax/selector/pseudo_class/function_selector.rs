@@ -18,9 +18,7 @@ use biome_parser::{Parser, SyntaxFeature};
 
 /// Checks if the current parser position is at a pseudo-class function selector for CSS Modules and SFC Vue.
 ///
-/// This function determines if the parser is currently positioned at the start of a
-/// `:local`, `:global`, `:slotted` or `:deep`
-/// pseudo-class function selector, which is part of the CSS Modules syntax.
+/// This function determines if the parser is currently positioned at the start of a `:local` or `:global`.
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
     p.at_ts(CSS_MODULES_SCOPE_SET) && p.nth_at(1, T!['('])
