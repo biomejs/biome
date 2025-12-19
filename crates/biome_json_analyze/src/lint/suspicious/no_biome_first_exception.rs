@@ -87,6 +87,7 @@ impl Rule for NoBiomeFirstException {
         let file_path = ctx.file_path();
 
         // we check if and extended package starts with `**`
+        #[cfg(feature = "configuration")]
         let extends_starts_with_catch_all = ctx.extends().is_some_and(|mut extends| {
             extends.any(|c| {
                 c.files
@@ -95,6 +96,8 @@ impl Rule for NoBiomeFirstException {
                     .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
             })
         });
+        #[cfg(not(feature = "configuration"))]
+        let extends_starts_with_catch_all = false;
         // we use ends_with so it works only during testing
         if !file_path
             .file_name()

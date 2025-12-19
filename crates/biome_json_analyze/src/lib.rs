@@ -16,7 +16,10 @@ use biome_analyze::{
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     to_analyzer_suppressions,
 };
+#[cfg(feature = "configuration")]
 use biome_configuration::ConfigurationSource;
+#[cfg(not(feature = "configuration"))]
+pub struct ConfigurationSource;
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
