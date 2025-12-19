@@ -6,6 +6,6 @@ use serde::{Deserialize, Serialize};
 pub struct UseLiteralKeysOptions {
     /// When `true`, properties accessed via index signatures must use bracket notation.
     /// This mirrors TypeScript's `noPropertyAccessFromIndexSignature` compiler option.
-    #[serde(default)]
-    pub no_property_access_from_index_signature: bool,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub no_property_access_from_index_signature: Option<bool>,
 }
