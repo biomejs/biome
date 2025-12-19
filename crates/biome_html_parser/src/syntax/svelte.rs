@@ -412,15 +412,15 @@ fn parse_await_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Parse
         p.error(p.err_builder("Expected an expression after 'await'", p.cur_range()));
     }
 
-    if p.at(T![then]) {
-        if let Present(m) = parse_await_then_clause(p) {
-            has_then_clause = Some(m.range(p));
-        }
+    if p.at(T![then])
+        && let Present(m) = parse_await_then_clause(p)
+    {
+        has_then_clause = Some(m.range(p));
     }
-    if p.at(T![catch]) {
-        if let Present(m) = parse_await_catch_clause(p) {
-            has_catch_clause = Some(m.range(p));
-        }
+    if p.at(T![catch])
+        && let Present(m) = parse_await_catch_clause(p)
+    {
+        has_catch_clause = Some(m.range(p));
     }
 
     p.expect(T!['}']);
