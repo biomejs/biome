@@ -105,11 +105,11 @@ impl Rule for UseLiteralKeys {
                 if is_computed_member_name && value == "__proto__" {
                     return None;
                 }
-                // For computed member expressions (obj["prop"]), check if we should
+                // For computed member expressions `obj["prop"]`, check if we should
                 // skip suggesting dot notation because the property is from an index signature.
                 if let Some(computed_member) = computed_member
                     && no_property_access_from_index_signature
-                    && is_property_access_from_index_signature(ctx, computed_member)
+                    && is_property_access_from_index_signature(ctx, computed_member, &value)
                 {
                     return None;
                 }
@@ -249,6 +249,7 @@ fn has_unescaped_new_line(text: &str) -> bool {
 fn is_property_access_from_index_signature(
     ctx: &RuleContext<UseLiteralKeys>,
     computed_member: &AnyJsComputedMember,
+    property_name: &str,
 ) -> bool {
     let Some(object) = computed_member.object().ok() else {
         return false;
@@ -263,5 +264,10 @@ fn is_property_access_from_index_signature(
     };
 
     let ty = resolver.resolved_type_of_expression(&object);
+
+    if ty.is_interface_with_member(|m| m.has_name(property_name)) {
+        return false;
+    }
+
     ty.is_interface_with_member(|m| m.is_index_signature_with_ty(|_| true))
 }
