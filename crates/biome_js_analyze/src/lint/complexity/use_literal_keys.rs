@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -10,6 +13,7 @@ use biome_js_syntax::{
     AnyTsEnumMemberName, JsComputedMemberName, JsSyntaxKind, JsSyntaxToken, T, inner_string_text,
     static_value::StaticValue,
 };
+use biome_module_graph::ModuleResolver;
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::use_literal_keys::UseLiteralKeysOptions;
 use biome_unicode_table::is_js_ident;
@@ -70,14 +74,20 @@ impl Rule for UseLiteralKeys {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let options = ctx.options();
         let mut is_computed_member_name = false;
-        let inner_expression = match node {
-            AnyJsMember::AnyJsComputedMember(computed_member) => computed_member.member().ok()?,
+        let (inner_expression, computed_member) = match node {
+            AnyJsMember::AnyJsComputedMember(computed_member) => {
+                (computed_member.member().ok()?, Some(computed_member))
+            }
             AnyJsMember::JsComputedMemberName(member) => {
                 is_computed_member_name = true;
-                member.expression().ok()?
+                (member.expression().ok()?, None)
             }
         };
+        let no_property_access_from_index_signature = options
+            .no_property_access_from_index_signature
+            .unwrap_or(false); // default to false for backward compatibility
         let value = inner_expression.as_static_value()?;
         match value {
             StaticValue::Number(token) => {
@@ -93,6 +103,14 @@ impl Rule for UseLiteralKeys {
                 // The second is a special property that changes the object prototype.
                 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
                 if is_computed_member_name && value == "__proto__" {
+                    return None;
+                }
+                // For computed member expressions (obj["prop"]), check if we should
+                // skip suggesting dot notation because the property is from an index signature.
+                if let Some(computed_member) = computed_member
+                    && no_property_access_from_index_signature
+                    && is_property_access_from_index_signature(ctx, computed_member)
+                {
                     return None;
                 }
                 // A computed property `["something"]` can always be simplified to a string literal "something",
@@ -226,4 +244,24 @@ fn has_unescaped_new_line(text: &str) -> bool {
         }
     }
     false
+}
+
+fn is_property_access_from_index_signature(
+    ctx: &RuleContext<UseLiteralKeys>,
+    computed_member: &AnyJsComputedMember,
+) -> bool {
+    let Some(object) = computed_member.object().ok() else {
+        return false;
+    };
+
+    // same pattern as TypedService
+    let Some(resolver) = ctx.get_service::<Option<Arc<ModuleResolver>>>() else {
+        return false;
+    };
+    let Some(resolver) = resolver.as_ref() else {
+        return false;
+    };
+
+    let ty = resolver.resolved_type_of_expression(&object);
+    ty.is_interface_with_member(|m| m.is_index_signature_with_ty(|_| true))
 }
