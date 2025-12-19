@@ -12154,6 +12154,12 @@
 		},
 		"UseLiteralKeysOptions": {
 			"type": "object",
+			"properties": {
+				"noPropertyAccessFromIndexSignature": {
+					"description": "When `true`, properties accessed via index signatures must use bracket notation.\nThis mirrors TypeScript's `noPropertyAccessFromIndexSignature` compiler option.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseMaxParamsConfiguration": {
