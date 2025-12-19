@@ -395,13 +395,9 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.into_node(TW_STATIC_VARIANT, children)
             }
-            TW_CANDIDATE_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                AnyTwFullCandidate::can_cast,
-                T![' '],
-                true,
-            ),
+            TW_CANDIDATE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyTwFullCandidate::can_cast)
+            }
             TW_VARIANT_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

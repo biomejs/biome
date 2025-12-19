@@ -4,7 +4,7 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"text-sm"#;
+    let code = r#"-top-4      -mb-2"#;
 
     let root = parse_tailwind(code);
     let syntax = root.syntax();

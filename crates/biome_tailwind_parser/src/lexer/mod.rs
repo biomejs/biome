@@ -13,22 +13,14 @@ use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 pub(crate) struct TailwindLexer<'src> {
     /// Source text
     source: &'src str,
-
     /// The start byte position in the source text of the next token.
     position: usize,
-
     current_kind: TailwindSyntaxKind,
-
     current_start: TextSize,
-
     diagnostics: Vec<ParseDiagnostic>,
-
     current_flags: TokenFlags,
-
     preceding_line_break: bool,
-
     after_newline: bool,
-
     unicode_bom_length: usize,
 }
 

@@ -32,14 +32,14 @@ TwRoot {
                 base_token: TW_BASE@14..18 "text" [] [],
                 minus_token: DASH@18..19 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@19..27 "red-500" [] [Newline("\n")],
+                    value_token: TW_VALUE@19..26 "red-500" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@27..27 "" [] [],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
 }
 ```
 
@@ -48,8 +48,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..27
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..27
-    0: TW_FULL_CANDIDATE@0..27
+  1: TW_CANDIDATE_LIST@0..26
+    0: TW_FULL_CANDIDATE@0..26
       0: TW_VARIANT_LIST@0..14
         0: TW_FUNCTIONAL_VARIANT@0..13
           0: TW_BASE@0..4 "aria" [] []
@@ -58,13 +58,13 @@ TwRoot {
             0: TW_VALUE@5..13 "disabled" [] []
         1: COLON@13..14 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@14..27
+      2: TW_FUNCTIONAL_CANDIDATE@14..26
         0: TW_BASE@14..18 "text" [] []
         1: DASH@18..19 "-" [] []
-        2: TW_NAMED_VALUE@19..27
-          0: TW_VALUE@19..27 "red-500" [] [Newline("\n")]
+        2: TW_NAMED_VALUE@19..26
+          0: TW_VALUE@19..26 "red-500" [] []
         3: (empty)
       3: (empty)
-  2: EOF@27..27 "" [] []
+  2: EOF@26..27 "" [Newline("\n")] []
 
 ```

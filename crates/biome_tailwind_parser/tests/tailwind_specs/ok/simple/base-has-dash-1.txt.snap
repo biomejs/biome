@@ -25,14 +25,14 @@ TwRoot {
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@12..13 "[" [] [],
                     value_token: TW_VALUE@13..20 "#000000" [] [],
-                    r_brack_token: R_BRACKET@20..22 "]" [] [Newline("\n")],
+                    r_brack_token: R_BRACKET@20..21 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@22..22 "" [] [],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
 }
 ```
 
@@ -41,19 +41,19 @@ TwRoot {
 ```
 0: TW_ROOT@0..22
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..22
-    0: TW_FULL_CANDIDATE@0..22
+  1: TW_CANDIDATE_LIST@0..21
+    0: TW_FULL_CANDIDATE@0..21
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..22
+      2: TW_FUNCTIONAL_CANDIDATE@0..21
         0: TW_BASE@0..11 "drop-shadow" [] []
         1: DASH@11..12 "-" [] []
-        2: TW_ARBITRARY_VALUE@12..22
+        2: TW_ARBITRARY_VALUE@12..21
           0: L_BRACKET@12..13 "[" [] []
           1: TW_VALUE@13..20 "#000000" [] []
-          2: R_BRACKET@20..22 "]" [] [Newline("\n")]
+          2: R_BRACKET@20..21 "]" [] []
         3: (empty)
       3: (empty)
-  2: EOF@22..22 "" [] []
+  2: EOF@21..22 "" [Newline("\n")] []
 
 ```

@@ -5,7 +5,7 @@ expression: snapshot
 ## Input
 
 ```text
-border focus:outline-none
+border -top-2
 
 ```
 
@@ -25,53 +25,45 @@ TwRoot {
             excl_token: missing (optional),
         },
         TwFullCandidate {
-            variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@7..12 "focus" [] [],
-                },
-                COLON@12..13 ":" [] [],
-            ],
-            negative_token: missing (optional),
+            variants: TwVariantList [],
+            negative_token: DASH@7..8 "-" [] [],
             candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@13..20 "outline" [] [],
-                minus_token: DASH@20..21 "-" [] [],
+                base_token: TW_BASE@8..11 "top" [] [],
+                minus_token: DASH@11..12 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@21..25 "none" [] [],
+                    value_token: TW_VALUE@12..13 "2" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@25..26 "" [Newline("\n")] [],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: TW_ROOT@0..26
+0: TW_ROOT@0..14
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..25
+  1: TW_CANDIDATE_LIST@0..13
     0: TW_FULL_CANDIDATE@0..7
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: TW_STATIC_CANDIDATE@0..7
         0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
       3: (empty)
-    1: TW_FULL_CANDIDATE@7..25
-      0: TW_VARIANT_LIST@7..13
-        0: TW_STATIC_VARIANT@7..12
-          0: TW_BASE@7..12 "focus" [] []
-        1: COLON@12..13 ":" [] []
-      1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@13..25
-        0: TW_BASE@13..20 "outline" [] []
-        1: DASH@20..21 "-" [] []
-        2: TW_NAMED_VALUE@21..25
-          0: TW_VALUE@21..25 "none" [] []
+    1: TW_FULL_CANDIDATE@7..13
+      0: TW_VARIANT_LIST@7..7
+      1: DASH@7..8 "-" [] []
+      2: TW_FUNCTIONAL_CANDIDATE@8..13
+        0: TW_BASE@8..11 "top" [] []
+        1: DASH@11..12 "-" [] []
+        2: TW_NAMED_VALUE@12..13
+          0: TW_VALUE@12..13 "2" [] []
         3: (empty)
       3: (empty)
-  2: EOF@25..26 "" [Newline("\n")] []
+  2: EOF@13..14 "" [Newline("\n")] []
 
 ```

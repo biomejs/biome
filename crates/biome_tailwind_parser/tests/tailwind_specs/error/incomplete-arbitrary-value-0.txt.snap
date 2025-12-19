@@ -24,7 +24,7 @@ TwRoot {
                 minus_token: DASH@4..5 "-" [] [],
                 value: TwBogusValue {
                     items: [
-                        L_BRACKET@5..7 "[" [] [Newline("\n")],
+                        L_BRACKET@5..6 "[" [] [],
                     ],
                 },
                 modifier: missing (optional),
@@ -32,7 +32,7 @@ TwRoot {
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@7..7 "" [] [],
+    eof_token: EOF@6..7 "" [Newline("\n")] [],
 }
 ```
 
@@ -41,18 +41,18 @@ TwRoot {
 ```
 0: TW_ROOT@0..7
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..7
-    0: TW_FULL_CANDIDATE@0..7
+  1: TW_CANDIDATE_LIST@0..6
+    0: TW_FULL_CANDIDATE@0..6
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..7
+      2: TW_FUNCTIONAL_CANDIDATE@0..6
         0: TW_BASE@0..4 "text" [] []
         1: DASH@4..5 "-" [] []
-        2: TW_BOGUS_VALUE@5..7
-          0: L_BRACKET@5..7 "[" [] [Newline("\n")]
+        2: TW_BOGUS_VALUE@5..6
+          0: L_BRACKET@5..6 "[" [] []
         3: (empty)
       3: (empty)
-  2: EOF@7..7 "" [] []
+  2: EOF@6..7 "" [Newline("\n")] []
 
 ```
 

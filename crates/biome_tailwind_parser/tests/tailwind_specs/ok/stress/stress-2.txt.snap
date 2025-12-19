@@ -23,13 +23,12 @@ TwRoot {
                 base_token: TW_BASE@0..6 "border" [] [],
                 minus_token: DASH@6..7 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@7..17 "foreground" [] [],
+                    value_token: TW_VALUE@7..18 "foreground" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@17..18 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -37,13 +36,12 @@ TwRoot {
                 base_token: TW_BASE@18..22 "text" [] [],
                 minus_token: DASH@22..23 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@23..33 "foreground" [] [],
+                    value_token: TW_VALUE@23..34 "foreground" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@33..34 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -51,13 +49,12 @@ TwRoot {
                 base_token: TW_BASE@34..45 "ring-offset" [] [],
                 minus_token: DASH@45..46 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@46..56 "background" [] [],
+                    value_token: TW_VALUE@46..57 "background" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@56..57 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwFunctionalVariant {
@@ -74,13 +71,12 @@ TwRoot {
                 base_token: TW_BASE@71..75 "ring" [] [],
                 minus_token: DASH@75..76 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@76..80 "ring" [] [],
+                    value_token: TW_VALUE@76..81 "ring" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@80..81 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -88,13 +84,12 @@ TwRoot {
                 base_token: TW_BASE@81..87 "aspect" [] [],
                 minus_token: DASH@87..88 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@88..94 "square" [] [],
+                    value_token: TW_VALUE@88..95 "square" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@94..95 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -102,13 +97,12 @@ TwRoot {
                 base_token: TW_BASE@95..99 "size" [] [],
                 minus_token: DASH@99..100 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@100..101 "4" [] [],
+                    value_token: TW_VALUE@100..102 "4" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@101..102 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
@@ -116,22 +110,20 @@ TwRoot {
                 base_token: TW_BASE@102..109 "rounded" [] [],
                 minus_token: DASH@109..110 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@110..114 "full" [] [],
+                    value_token: TW_VALUE@110..115 "full" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@114..115 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@115..121 "border" [] [],
+                base_token: TW_BASE@115..122 "border" [] [Whitespace(" ")],
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@121..122 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwStaticVariant {
@@ -144,13 +136,12 @@ TwRoot {
                 base_token: TW_BASE@128..135 "outline" [] [],
                 minus_token: DASH@135..136 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@136..140 "none" [] [],
+                    value_token: TW_VALUE@136..141 "none" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@140..141 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwFunctionalVariant {
@@ -167,13 +158,12 @@ TwRoot {
                 base_token: TW_BASE@155..159 "ring" [] [],
                 minus_token: DASH@159..160 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@160..161 "2" [] [],
+                    value_token: TW_VALUE@160..162 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@161..162 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwFunctionalVariant {
@@ -190,13 +180,12 @@ TwRoot {
                 base_token: TW_BASE@176..187 "ring-offset" [] [],
                 minus_token: DASH@187..188 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@188..189 "2" [] [],
+                    value_token: TW_VALUE@188..190 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@189..190 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwStaticVariant {
@@ -209,13 +198,12 @@ TwRoot {
                 base_token: TW_BASE@199..205 "cursor" [] [],
                 minus_token: DASH@205..206 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@206..217 "not-allowed" [] [],
+                    value_token: TW_VALUE@206..218 "not-allowed" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
-        WHITESPACE@217..218 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwStaticVariant {
@@ -228,14 +216,14 @@ TwRoot {
                 base_token: TW_BASE@227..234 "opacity" [] [],
                 minus_token: DASH@234..235 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@235..238 "50" [] [Newline("\n")],
+                    value_token: TW_VALUE@235..237 "50" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
     ],
-    eof_token: EOF@238..238 "" [] [],
+    eof_token: EOF@237..238 "" [Newline("\n")] [],
 }
 ```
 
@@ -244,41 +232,38 @@ TwRoot {
 ```
 0: TW_ROOT@0..238
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..238
-    0: TW_FULL_CANDIDATE@0..17
+  1: TW_CANDIDATE_LIST@0..237
+    0: TW_FULL_CANDIDATE@0..18
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..17
+      2: TW_FUNCTIONAL_CANDIDATE@0..18
         0: TW_BASE@0..6 "border" [] []
         1: DASH@6..7 "-" [] []
-        2: TW_NAMED_VALUE@7..17
-          0: TW_VALUE@7..17 "foreground" [] []
+        2: TW_NAMED_VALUE@7..18
+          0: TW_VALUE@7..18 "foreground" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    1: WHITESPACE@17..18 " " [] []
-    2: TW_FULL_CANDIDATE@18..33
+    1: TW_FULL_CANDIDATE@18..34
       0: TW_VARIANT_LIST@18..18
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@18..33
+      2: TW_FUNCTIONAL_CANDIDATE@18..34
         0: TW_BASE@18..22 "text" [] []
         1: DASH@22..23 "-" [] []
-        2: TW_NAMED_VALUE@23..33
-          0: TW_VALUE@23..33 "foreground" [] []
+        2: TW_NAMED_VALUE@23..34
+          0: TW_VALUE@23..34 "foreground" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    3: WHITESPACE@33..34 " " [] []
-    4: TW_FULL_CANDIDATE@34..56
+    2: TW_FULL_CANDIDATE@34..57
       0: TW_VARIANT_LIST@34..34
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@34..56
+      2: TW_FUNCTIONAL_CANDIDATE@34..57
         0: TW_BASE@34..45 "ring-offset" [] []
         1: DASH@45..46 "-" [] []
-        2: TW_NAMED_VALUE@46..56
-          0: TW_VALUE@46..56 "background" [] []
+        2: TW_NAMED_VALUE@46..57
+          0: TW_VALUE@46..57 "background" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    5: WHITESPACE@56..57 " " [] []
-    6: TW_FULL_CANDIDATE@57..80
+    3: TW_FULL_CANDIDATE@57..81
       0: TW_VARIANT_LIST@57..71
         0: TW_FUNCTIONAL_VARIANT@57..70
           0: TW_BASE@57..62 "focus" [] []
@@ -287,69 +272,63 @@ TwRoot {
             0: TW_VALUE@63..70 "visible" [] []
         1: COLON@70..71 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@71..80
+      2: TW_FUNCTIONAL_CANDIDATE@71..81
         0: TW_BASE@71..75 "ring" [] []
         1: DASH@75..76 "-" [] []
-        2: TW_NAMED_VALUE@76..80
-          0: TW_VALUE@76..80 "ring" [] []
+        2: TW_NAMED_VALUE@76..81
+          0: TW_VALUE@76..81 "ring" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    7: WHITESPACE@80..81 " " [] []
-    8: TW_FULL_CANDIDATE@81..94
+    4: TW_FULL_CANDIDATE@81..95
       0: TW_VARIANT_LIST@81..81
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@81..94
+      2: TW_FUNCTIONAL_CANDIDATE@81..95
         0: TW_BASE@81..87 "aspect" [] []
         1: DASH@87..88 "-" [] []
-        2: TW_NAMED_VALUE@88..94
-          0: TW_VALUE@88..94 "square" [] []
+        2: TW_NAMED_VALUE@88..95
+          0: TW_VALUE@88..95 "square" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    9: WHITESPACE@94..95 " " [] []
-    10: TW_FULL_CANDIDATE@95..101
+    5: TW_FULL_CANDIDATE@95..102
       0: TW_VARIANT_LIST@95..95
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@95..101
+      2: TW_FUNCTIONAL_CANDIDATE@95..102
         0: TW_BASE@95..99 "size" [] []
         1: DASH@99..100 "-" [] []
-        2: TW_NAMED_VALUE@100..101
-          0: TW_VALUE@100..101 "4" [] []
+        2: TW_NAMED_VALUE@100..102
+          0: TW_VALUE@100..102 "4" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    11: WHITESPACE@101..102 " " [] []
-    12: TW_FULL_CANDIDATE@102..114
+    6: TW_FULL_CANDIDATE@102..115
       0: TW_VARIANT_LIST@102..102
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@102..114
+      2: TW_FUNCTIONAL_CANDIDATE@102..115
         0: TW_BASE@102..109 "rounded" [] []
         1: DASH@109..110 "-" [] []
-        2: TW_NAMED_VALUE@110..114
-          0: TW_VALUE@110..114 "full" [] []
+        2: TW_NAMED_VALUE@110..115
+          0: TW_VALUE@110..115 "full" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    13: WHITESPACE@114..115 " " [] []
-    14: TW_FULL_CANDIDATE@115..121
+    7: TW_FULL_CANDIDATE@115..122
       0: TW_VARIANT_LIST@115..115
       1: (empty)
-      2: TW_STATIC_CANDIDATE@115..121
-        0: TW_BASE@115..121 "border" [] []
+      2: TW_STATIC_CANDIDATE@115..122
+        0: TW_BASE@115..122 "border" [] [Whitespace(" ")]
       3: (empty)
-    15: WHITESPACE@121..122 " " [] []
-    16: TW_FULL_CANDIDATE@122..140
+    8: TW_FULL_CANDIDATE@122..141
       0: TW_VARIANT_LIST@122..128
         0: TW_STATIC_VARIANT@122..127
           0: TW_BASE@122..127 "focus" [] []
         1: COLON@127..128 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@128..140
+      2: TW_FUNCTIONAL_CANDIDATE@128..141
         0: TW_BASE@128..135 "outline" [] []
         1: DASH@135..136 "-" [] []
-        2: TW_NAMED_VALUE@136..140
-          0: TW_VALUE@136..140 "none" [] []
+        2: TW_NAMED_VALUE@136..141
+          0: TW_VALUE@136..141 "none" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    17: WHITESPACE@140..141 " " [] []
-    18: TW_FULL_CANDIDATE@141..161
+    9: TW_FULL_CANDIDATE@141..162
       0: TW_VARIANT_LIST@141..155
         0: TW_FUNCTIONAL_VARIANT@141..154
           0: TW_BASE@141..146 "focus" [] []
@@ -358,15 +337,14 @@ TwRoot {
             0: TW_VALUE@147..154 "visible" [] []
         1: COLON@154..155 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@155..161
+      2: TW_FUNCTIONAL_CANDIDATE@155..162
         0: TW_BASE@155..159 "ring" [] []
         1: DASH@159..160 "-" [] []
-        2: TW_NAMED_VALUE@160..161
-          0: TW_VALUE@160..161 "2" [] []
+        2: TW_NAMED_VALUE@160..162
+          0: TW_VALUE@160..162 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    19: WHITESPACE@161..162 " " [] []
-    20: TW_FULL_CANDIDATE@162..189
+    10: TW_FULL_CANDIDATE@162..190
       0: TW_VARIANT_LIST@162..176
         0: TW_FUNCTIONAL_VARIANT@162..175
           0: TW_BASE@162..167 "focus" [] []
@@ -375,41 +353,39 @@ TwRoot {
             0: TW_VALUE@168..175 "visible" [] []
         1: COLON@175..176 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@176..189
+      2: TW_FUNCTIONAL_CANDIDATE@176..190
         0: TW_BASE@176..187 "ring-offset" [] []
         1: DASH@187..188 "-" [] []
-        2: TW_NAMED_VALUE@188..189
-          0: TW_VALUE@188..189 "2" [] []
+        2: TW_NAMED_VALUE@188..190
+          0: TW_VALUE@188..190 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    21: WHITESPACE@189..190 " " [] []
-    22: TW_FULL_CANDIDATE@190..217
+    11: TW_FULL_CANDIDATE@190..218
       0: TW_VARIANT_LIST@190..199
         0: TW_STATIC_VARIANT@190..198
           0: TW_BASE@190..198 "disabled" [] []
         1: COLON@198..199 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@199..217
+      2: TW_FUNCTIONAL_CANDIDATE@199..218
         0: TW_BASE@199..205 "cursor" [] []
         1: DASH@205..206 "-" [] []
-        2: TW_NAMED_VALUE@206..217
-          0: TW_VALUE@206..217 "not-allowed" [] []
+        2: TW_NAMED_VALUE@206..218
+          0: TW_VALUE@206..218 "not-allowed" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
-    23: WHITESPACE@217..218 " " [] []
-    24: TW_FULL_CANDIDATE@218..238
+    12: TW_FULL_CANDIDATE@218..237
       0: TW_VARIANT_LIST@218..227
         0: TW_STATIC_VARIANT@218..226
           0: TW_BASE@218..226 "disabled" [] []
         1: COLON@226..227 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@227..238
+      2: TW_FUNCTIONAL_CANDIDATE@227..237
         0: TW_BASE@227..234 "opacity" [] []
         1: DASH@234..235 "-" [] []
-        2: TW_NAMED_VALUE@235..238
-          0: TW_VALUE@235..238 "50" [] [Newline("\n")]
+        2: TW_NAMED_VALUE@235..237
+          0: TW_VALUE@235..237 "50" [] []
         3: (empty)
       3: (empty)
-  2: EOF@238..238 "" [] []
+  2: EOF@237..238 "" [Newline("\n")] []
 
 ```

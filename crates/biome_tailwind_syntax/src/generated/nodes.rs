@@ -2133,7 +2133,7 @@ impl Serialize for TwCandidateList {
         seq.end()
     }
 }
-impl AstSeparatedList for TwCandidateList {
+impl AstNodeList for TwCandidateList {
     type Language = Language;
     type Node = AnyTwFullCandidate;
     fn syntax_list(&self) -> &SyntaxList {
@@ -2146,19 +2146,19 @@ impl AstSeparatedList for TwCandidateList {
 impl Debug for TwCandidateList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("TwCandidateList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for TwCandidateList {
-    type Item = SyntaxResult<AnyTwFullCandidate>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for &TwCandidateList {
+    type Item = AnyTwFullCandidate;
+    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &TwCandidateList {
-    type Item = SyntaxResult<AnyTwFullCandidate>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for TwCandidateList {
+    type Item = AnyTwFullCandidate;
+    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
