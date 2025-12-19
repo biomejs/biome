@@ -181,9 +181,10 @@ pub enum BiomeCommand {
         /// Also, if you have overrides configured and/or nested configurations,
         /// the path may determine the settings being applied.
         ///
-        /// If the path doesn't exist on disk (virtual path), `files.includes`
-        /// won't block stdin processing. If the path exists, `files.includes`
-        /// applies as usual.
+        /// The provided path may also affect whether the input is treated as
+        /// ignored. If the path doesn't exist on disk (virtual path), Biome
+        /// won't require it to be part of the project file set, but ignore rules
+        /// may still apply (e.g. VCS ignore files).
         ///
         /// Example:
         /// ```shell
@@ -291,9 +292,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to lint the code.
         ///
-        /// If the path doesn't exist on disk (virtual path), `files.includes`
-        /// won't block stdin processing. If the path exists, `files.includes`
-        /// applies as usual.
+        /// The provided path may also affect whether the input is treated as
+        /// ignored. If the path doesn't exist on disk (virtual path), Biome
+        /// won't require it to be part of the project file set, but ignore rules
+        /// may still apply (e.g. VCS ignore files).
         ///
         /// Example:
         /// ```shell
@@ -353,9 +355,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
         ///
-        /// If the path doesn't exist on disk (virtual path), `files.includes`
-        /// won't block stdin processing. If the path exists, `files.includes`
-        /// applies as usual.
+        /// The provided path may also affect whether the input is treated as
+        /// ignored. If the path doesn't exist on disk (virtual path), Biome
+        /// won't require it to be part of the project file set, but ignore rules
+        /// may still apply (e.g. VCS ignore files).
         ///
         /// Example:
         /// ```shell
