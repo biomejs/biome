@@ -2221,8 +2221,6 @@ fn resolves_css_imports_correctly() {
         .expect("package.json must parse")
     });
 
-
-
     let added_paths = [
         BiomePath::new(format!("{fixtures_path}/css/index.css")),
         BiomePath::new(format!("{fixtures_path}/css/foo.css")),
