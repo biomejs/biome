@@ -566,12 +566,12 @@ fn parse_await_then_or_catch_block(
 
     if p.at(T![then]) {
         (
-            parse_await_then_bock(p, m, seen_then_clause),
+            parse_await_then_block(p, m, seen_then_clause),
             BlockParsed::Then,
         )
     } else if p.at(T![catch]) {
         (
-            parse_await_catch_bock(p, m, seen_catch_clause),
+            parse_await_catch_block(p, m, seen_catch_clause),
             BlockParsed::Catch,
         )
     } else {
@@ -580,7 +580,7 @@ fn parse_await_then_or_catch_block(
     }
 }
 
-fn parse_await_then_bock(
+fn parse_await_then_block(
     p: &mut HtmlParser,
     m: Marker,
     has_then_clause: Option<TextRange>,
@@ -618,7 +618,7 @@ fn parse_await_then_bock(
     Present(m.complete(p, SVELTE_AWAIT_THEN_BLOCK))
 }
 
-fn parse_await_catch_bock(
+fn parse_await_catch_block(
     p: &mut HtmlParser,
     m: Marker,
     has_catch_clause: Option<TextRange>,
@@ -667,11 +667,6 @@ fn parse_snippet_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSynta
     let result = parse_snippet_opening_block(p, parent_marker);
     let m = result.precede(p);
 
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'snippet'", p.cur_range()));
-    }
-
     parse_closing_block(p, T![snippet], SVELTE_SNIPPET_CLOSING_BLOCK).or_add_diagnostic(
         p,
         |p, range| {
@@ -693,6 +688,12 @@ fn parse_snippet_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Par
     parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
         expected_expression(p, range.sub_start(parent_marker.start()))
     });
+
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        p.error(p.err_builder("Expected an expression after 'snippet'", p.cur_range()));
+    }
+
     p.expect(T!['}']);
 
     SvelteElementList::new()
