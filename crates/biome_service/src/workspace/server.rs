@@ -446,9 +446,21 @@ impl WorkspaceServer {
             Default::default()
         };
 
-        let is_indexed = if reason.is_index() {
-            // If the request is for indexing, we don't insert any document,
-            // we only care about updating the module graph.
+        let is_indexed = if
+        // Dependency files can be skipped altoghether
+        (biome_path.is_dependency() && !biome_path.is_manifest())
+            || (
+                // If the request is for indexing, we don't insert any document
+                // unless the document isn't ignored.
+                // That's usually the case when we want to index a manifest file that belongs to the project.
+                reason.is_index()
+                    && self.is_path_ignored(PathIsIgnoredParams {
+                        project_key,
+                        path: biome_path.clone(),
+                        features: FeaturesBuilder::new().with_all().build(),
+                        ignore_kind: IgnoreKind::Ancestors,
+                    })?
+            ) {
             true
         } else {
             self.documents.pin().update_or_insert_with(
@@ -498,7 +510,9 @@ impl WorkspaceServer {
                 },
             );
 
-            self.is_indexed(&path)
+            // We check both reason or if the path is indexed.
+            // This is required due to the check at line 441
+            reason.is_index() || self.is_indexed(&path)
         };
 
         // Manifest files need to update the module graph
@@ -1531,6 +1545,7 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint

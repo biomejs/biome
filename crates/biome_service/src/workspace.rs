@@ -792,6 +792,15 @@ pub enum FileContent {
     FromServer,
 }
 
+impl Display for FileContent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FromClient { .. } => f.write_str("FromClient"),
+            Self::FromServer => f.write_str("FromServer"),
+        }
+    }
+}
+
 impl FileContent {
     pub fn from_client(content: impl Into<String>) -> Self {
         Self::FromClient {
@@ -1619,10 +1628,11 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
-    pub fn open(workspace: &'app W, params: OpenFileParams) -> Result<Self, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.clone();
-        workspace.open_file(params)?;
+    pub fn new(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
         Ok(Self {
             workspace,
             project_key,
